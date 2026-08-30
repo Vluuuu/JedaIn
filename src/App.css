@@ -1,0 +1,32 @@
+.page {
+  display: grid;
+  min-height: 100svh;
+  place-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.page > * {
+  margin: 0;
+}
+
+.eyebrow {
+  color: #52796f;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page h1 {
+  color: #1f2937;
+  font-size: clamp(2rem, 8vw, 4rem);
+  line-height: 1.1;
+}
+
+.page a {
+  color: #315f56;
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}

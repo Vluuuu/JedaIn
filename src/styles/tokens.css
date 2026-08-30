@@ -1,0 +1,148 @@
+:root {
+  color-scheme: light;
+
+  /* Color primitives */
+  --color-forest-50: #f1f8f3;
+  --color-forest-100: #dcefe1;
+  --color-forest-200: #b9dfc4;
+  --color-forest-300: #8bc79c;
+  --color-forest-400: #5dae76;
+  --color-forest-500: #3a915b;
+  --color-forest-600: #2e7549;
+  --color-forest-700: #285e3d;
+  --color-forest-800: #234b34;
+  --color-forest-900: #1e3d2c;
+  --color-forest-950: #0f2117;
+
+  --color-sand-50: #fbf8f0;
+  --color-sand-100: #f5eedc;
+  --color-sand-200: #eaddbb;
+  --color-sand-300: #dcc58c;
+  --color-sand-400: #cbaa5f;
+  --color-sand-500: #b98f3e;
+  --color-sand-600: #9e7330;
+  --color-sand-700: #805826;
+  --color-sand-800: #684721;
+  --color-sand-900: #563b1e;
+
+  --color-stone-0: #ffffff;
+  --color-stone-25: #fcfcfa;
+  --color-stone-50: #f8f8f5;
+  --color-stone-100: #f0f0eb;
+  --color-stone-200: #e3e3dc;
+  --color-stone-300: #cecec5;
+  --color-stone-400: #a5a59b;
+  --color-stone-500: #77776f;
+  --color-stone-600: #5b5b55;
+  --color-stone-700: #41413d;
+  --color-stone-800: #2b2b28;
+  --color-stone-900: #1d1d1b;
+  --color-stone-950: #111110;
+
+  /* Color semantics */
+  --color-bg-page: var(--color-stone-25);
+  --color-bg-surface: var(--color-stone-0);
+  --color-bg-surface-subtle: var(--color-stone-50);
+  --color-border-default: var(--color-stone-200);
+  --color-border-strong: var(--color-stone-300);
+  --color-text-primary: var(--color-stone-900);
+  --color-text-secondary: var(--color-stone-600);
+  --color-text-muted: var(--color-stone-500);
+  --color-text-inverse: var(--color-stone-0);
+  --color-control-disabled-bg: var(--color-stone-100);
+  --color-control-disabled-border: var(--color-stone-200);
+  --color-control-disabled-text: var(--color-stone-500);
+  --color-skeleton-base: var(--color-stone-100);
+  --color-skeleton-highlight: var(--color-stone-200);
+  --color-brand-primary: var(--color-forest-700);
+  --color-brand-primary-hover: var(--color-forest-800);
+  --color-brand-primary-active: var(--color-forest-900);
+  --color-brand-primary-soft: var(--color-forest-50);
+
+  --color-success-bg: #eef8f1;
+  --color-success-border: #b7e2c1;
+  --color-success-text: #24613a;
+  --color-success-solid: #347a49;
+  --color-warning-bg: #fff8e7;
+  --color-warning-border: #f0d795;
+  --color-warning-text: #775712;
+  --color-warning-solid: #b98717;
+  --color-danger-bg: #fff1f0;
+  --color-danger-border: #f2b8b5;
+  --color-danger-text: #8b2d28;
+  --color-danger-solid: #b43c35;
+  --color-info-bg: #eff6ff;
+  --color-info-border: #b9d5f6;
+  --color-info-text: #285c91;
+  --color-info-solid: #3e78b2;
+  --color-overlay: rgb(17 17 16 / 45%);
+
+  /* Typography */
+  --font-family-sans:
+    Inter, Geist, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --font-size-display-lg: 3rem;
+  --line-height-display-lg: 3.5rem;
+  --font-weight-display-lg: 700;
+  --font-size-heading-xl: 2.25rem;
+  --line-height-heading-xl: 2.75rem;
+  --font-weight-heading-xl: 700;
+  --font-size-heading-lg: 1.875rem;
+  --line-height-heading-lg: 2.375rem;
+  --font-weight-heading-lg: 700;
+  --font-size-heading-md: 1.5rem;
+  --line-height-heading-md: 2rem;
+  --font-weight-heading-md: 650;
+  --font-size-heading-sm: 1.25rem;
+  --line-height-heading-sm: 1.75rem;
+  --font-weight-heading-sm: 650;
+  --font-size-body-lg: 1.125rem;
+  --line-height-body-lg: 1.75rem;
+  --font-size-body-md: 1rem;
+  --line-height-body-md: 1.5rem;
+  --font-size-body-sm: 0.875rem;
+  --line-height-body-sm: 1.25rem;
+  --font-size-label-md: 0.875rem;
+  --line-height-label-md: 1.25rem;
+  --font-size-label-sm: 0.75rem;
+  --line-height-label-sm: 1rem;
+  --font-size-caption: 0.75rem;
+  --line-height-caption: 1rem;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Shape and elevation */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 999px;
+  --shadow-xs: 0 1px 2px rgb(17 17 16 / 5%);
+  --shadow-sm: 0 2px 8px rgb(17 17 16 / 7%);
+  --shadow-md: 0 8px 24px rgb(17 17 16 / 10%);
+
+  /* Interaction */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color: var(--color-forest-500);
+  --motion-fast: 120ms;
+  --motion-normal: 180ms;
+  --motion-slow: 280ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+}

@@ -9,6 +9,7 @@ import {
   partnerDestinationNavigation,
   partnerEoNavigation,
 } from "./components/shells";
+import { TravelerLoginScreen } from "./features/auth";
 import "./App.css";
 
 const travelerRoutes = [
@@ -26,7 +27,6 @@ const travelerRoutes = [
 ] as const;
 
 const distractionFreeRoutes = [
-  ["login", "Masuk / Daftar"],
   ["onboarding/consent", "Consent"],
   ["onboarding/quiz", "Quiz"],
   ["onboarding/result", "Recommendation result"],
@@ -81,6 +81,7 @@ export function App() {
       </Route>
 
       <Route element={<DistractionFreeShell />}>
+        <Route path="login" element={<TravelerLoginScreen />} />
         {distractionFreeRoutes.map(([path, title]) => (
           <Route
             key={path}

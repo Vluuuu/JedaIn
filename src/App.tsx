@@ -10,6 +10,7 @@ import {
   partnerEoNavigation,
 } from "./components/shells";
 import { TravelerLoginScreen } from "./features/auth";
+import { HomeScreen } from "./features/home";
 import {
   OnboardingRouteGuard,
   TravelerConsentScreen,
@@ -19,7 +20,6 @@ import { RecommendationResultScreen } from "./features/recommendation";
 import "./App.css";
 
 const travelerRoutes = [
-  ["home", "Home"],
   ["explore", "Explore"],
   ["packages/:packageId", "Package detail"],
   ["packages/:packageId/sessions", "Choose session"],
@@ -129,6 +129,7 @@ export function App() {
           </OnboardingRouteGuard>
         }
       >
+        <Route path="home" element={<HomeScreen />} />
         {travelerRoutes.map(([path, title]) => (
           <Route
             key={path}

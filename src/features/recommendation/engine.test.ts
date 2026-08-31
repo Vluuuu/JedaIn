@@ -33,7 +33,6 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
       },
     ];
     const result = evaluateRecommendations(baseQuiz, draftPackages);
-    // Non-LIVE packages cannot be returned as recommendations
     expect(result.topRecommendation).toBeUndefined();
   });
 
@@ -47,7 +46,7 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
       ...baseQuiz,
       preferred_activities: ["CREATIVE_WORKSHOP"],
     };
-    const pkg = MOCK_RECOMMENDATION_PACKAGES[0]; // only has NATURE_SCENERY, MINDFULNESS, LIGHT_EXPLORATION
+    const pkg = MOCK_RECOMMENDATION_PACKAGES[0];
     expect(calculateActivityOverlap(quizNoOverlap, pkg)).toBe(0);
     expect(isSufficientMatch(quizNoOverlap, pkg)).toBe(false);
   });
@@ -80,9 +79,7 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
   });
 
   it("6. treats cheaper package as budget feasible (spending comfort ceiling)", () => {
-    // Traveler budget 300-500k, package price 190k
     expect(checkBudgetFeasibility("AROUND_300_500K", 190000)).toBe(true);
-    // Traveler budget ABOVE_500K, package price 275k
     expect(checkBudgetFeasibility("ABOVE_500K", 275000)).toBe(true);
   });
 
@@ -217,7 +214,7 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
     expect(res.topRecommendation?.package.id).toBe("pkg_solo");
   });
 
-  it("11. uses rating and popularity as final deterministic tie-breakers", () => {
+  it("11. uses rating priority and popularity as final deterministic tie-breakers", () => {
     const quiz: QuizDraft = {
       currentStep: 6,
       current_intent: "NATURE",
@@ -226,6 +223,7 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
       duration_preference: "FULL_DAY",
     };
 
+    // A. Higher rating wins
     const pkgHighRating: PackageRecommendationSource = {
       ...MOCK_RECOMMENDATION_PACKAGES[0],
       id: "pkg_high_rating",
@@ -240,13 +238,31 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
       popularityRank: 99,
     };
 
-    const res = evaluateRecommendations(quiz, [pkgLowRating, pkgHighRating]);
-    expect(res.topRecommendation?.package.id).toBe("pkg_high_rating");
+    const resRating = evaluateRecommendations(quiz, [pkgLowRating, pkgHighRating]);
+    expect(resRating.topRecommendation?.package.id).toBe("pkg_high_rating");
+
+    // B. Same rating -> Higher popularityRank wins
+    const pkgPopular: PackageRecommendationSource = {
+      ...MOCK_RECOMMENDATION_PACKAGES[0],
+      id: "pkg_popular",
+      rating: 4.8,
+      popularityRank: 95,
+    };
+
+    const pkgLessPopular: PackageRecommendationSource = {
+      ...MOCK_RECOMMENDATION_PACKAGES[0],
+      id: "pkg_less_popular",
+      rating: 4.8,
+      popularityRank: 70,
+    };
+
+    const resPopularity = evaluateRecommendations(quiz, [pkgLessPopular, pkgPopular]);
+    expect(resPopularity.topRecommendation?.package.id).toBe("pkg_popular");
   });
 });
 
-describe("Recommendation Fallback & Logging Rules", () => {
-  it("12. returns state FALLBACK when no package satisfies sufficient match", () => {
+describe("Recommendation Fallback & Ordering Rules", () => {
+  it("12 & 13. returns state FALLBACK and respects deterministic fallback hierarchy (intent > activity/budget)", () => {
     const quizMismatched: QuizDraft = {
       currentStep: 6,
       current_intent: "ACTIVE",
@@ -259,12 +275,30 @@ describe("Recommendation Fallback & Logging Rules", () => {
       group_size_band: "ONE",
     };
 
-    const res = evaluateRecommendations(
-      quizMismatched,
-      MOCK_RECOMMENDATION_PACKAGES,
-    );
+    // Candidate A has Intent match (ACTIVE), but budget is higher
+    const pkgA: PackageRecommendationSource = {
+      ...MOCK_RECOMMENDATION_PACKAGES[0],
+      id: "fallback_intent_match",
+      experienceIntents: ["ACTIVE"],
+      activityTags: ["LIGHT_EXPLORATION"],
+      pricePerPerson: 350000, // over budget
+      durationType: "FULL_DAY",
+    };
+
+    // Candidate B has no Intent match, but has activity and budget match
+    const pkgB: PackageRecommendationSource = {
+      ...MOCK_RECOMMENDATION_PACKAGES[0],
+      id: "fallback_no_intent",
+      experienceIntents: ["RECHARGE"],
+      activityTags: ["OUTDOOR_ACTIVE"],
+      pricePerPerson: 180000,
+      durationType: "HALF_DAY",
+    };
+
+    const res = evaluateRecommendations(quizMismatched, [pkgB, pkgA]);
     expect(res.state).toBe("FALLBACK");
-    expect(res.topRecommendation).toBeDefined();
+    // In fallback priority: intentMatch (priority 1) beats activity/budget (priority 2/3)
+    expect(res.topRecommendation?.package.id).toBe("fallback_intent_match");
     expect(res.alternatives.length).toBeLessThanOrEqual(2);
   });
 });

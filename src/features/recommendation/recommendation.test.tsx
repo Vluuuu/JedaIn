@@ -2,8 +2,9 @@
 
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { App } from "../../App";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { QuizDraft } from "../quiz/types";
 import { MockRecommendationAdapter } from "./mockAdapter";
@@ -32,6 +33,7 @@ const matchedQuiz: QuizDraft = {
   departure_area_label: "Malang",
   group_type: "FRIENDS",
   group_size_band: "THREE_TO_FOUR",
+  updatedAt: "2026-08-31T10:00:00.000Z",
 };
 
 const fallbackQuiz: QuizDraft = {
@@ -44,6 +46,7 @@ const fallbackQuiz: QuizDraft = {
   departure_area_label: "Kediri",
   group_type: "SOLO",
   group_size_band: "ONE",
+  updatedAt: "2026-08-31T11:00:00.000Z",
 };
 
 async function renderScreen(
@@ -93,7 +96,7 @@ describe("RecommendationResultScreen UI States and Interactions", () => {
     expect(altCards.length).toBeLessThanOrEqual(2);
   });
 
-  it("23. renders fallback state with locked copy and logs unmatched demand once", async () => {
+  it("23. renders fallback state with locked copy and neutral 'Kenapa ini mendekati?' heading", async () => {
     sessionStore.setQuizDraft(fallbackQuiz);
     const onLogged = vi.fn();
     const adapter = new MockRecommendationAdapter({
@@ -106,6 +109,7 @@ describe("RecommendationResultScreen UI States and Interactions", () => {
       "Belum ada yang pas banget, tapi ini pilihan yang paling mendekati preferensimu.",
     );
     expect(view.textContent).toContain("Pilihan terdekat");
+    expect(view.textContent).toContain("Kenapa ini mendekati?");
     expect(view.textContent).not.toContain("Pilihan utama");
 
     expect(onLogged).toHaveBeenCalledOnce();
@@ -140,5 +144,124 @@ describe("RecommendationResultScreen UI States and Interactions", () => {
       "Ini jeda yang paling cocok buat kamu sekarang.",
     );
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
+  });
+
+  it("fails and does NOT fabricate recommendation results if QuizDraft is missing", async () => {
+    sessionStore.reset(); // quizDraft = null
+    const adapter = new MockRecommendationAdapter();
+
+    const view = await renderScreen({ adapter });
+
+    expect(view.textContent).toContain("Rekomendasi belum bisa dimuat.");
+    expect(view.textContent).not.toContain("Sehari Pelan di Lereng Hijau");
+    expect(view.textContent).not.toContain("Pilihan utama");
+  });
+});
+
+describe("Unmatched Demand Idempotency & React StrictMode Simulation", () => {
+  it("logs unmatched demand at most ONCE for identical quiz draft snapshot (idempotent)", async () => {
+    const onLogged = vi.fn();
+    const adapter = new MockRecommendationAdapter({
+      onUnmatchedDemandLogged: onLogged,
+    });
+
+    // Call 1
+    await adapter.getRecommendations(fallbackQuiz);
+    expect(onLogged).toHaveBeenCalledTimes(1);
+
+    // Call 2 with identical draft snapshot (simulating React StrictMode double effect execution)
+    await adapter.getRecommendations(fallbackQuiz);
+    expect(onLogged).toHaveBeenCalledTimes(1); // STILL 1, NOT duplicated!
+  });
+
+  it("allows a new unmatched demand log when quiz answers/updatedAt are updated (retake)", async () => {
+    const onLogged = vi.fn();
+    const adapter = new MockRecommendationAdapter({
+      onUnmatchedDemandLogged: onLogged,
+    });
+
+    // Initial fallback quiz completion
+    await adapter.getRecommendations(fallbackQuiz);
+    expect(onLogged).toHaveBeenCalledTimes(1);
+
+    // User retakes quiz and updates preference
+    const updatedFallbackQuiz: QuizDraft = {
+      ...fallbackQuiz,
+      current_intent: "REFLECTION",
+      updatedAt: "2026-08-31T12:00:00.000Z",
+    };
+
+    await adapter.getRecommendations(updatedFallbackQuiz);
+    expect(onLogged).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("Recommendation Result Router-Level Navigation", () => {
+  it("navigates to /packages/:packageId when primary CTA 'Lihat Experience' is clicked", async () => {
+    sessionStore.setUser({
+      id: "usr_nav_test",
+      onboardingStatus: "COMPLETED",
+    });
+    sessionStore.setQuizDraft(matchedQuiz);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(() =>
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/onboarding/result"] },
+          createElement(App),
+        ),
+      ),
+    );
+
+    const ctaBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lihat Experience"),
+    )!;
+
+    await act(() => {
+      ctaBtn.click();
+    });
+
+    // Successfully routed to /packages/slow_green_day placeholder
+    expect(container.textContent).toContain("Package detail");
+    expect(container.textContent).not.toContain("Ini jeda yang paling cocok");
+  });
+
+  it("navigates to /home when secondary CTA 'Lanjut ke Home' is clicked", async () => {
+    sessionStore.setUser({
+      id: "usr_nav_test_2",
+      onboardingStatus: "COMPLETED",
+    });
+    sessionStore.setQuizDraft(matchedQuiz);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(() =>
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/onboarding/result"] },
+          createElement(App),
+        ),
+      ),
+    );
+
+    const homeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut ke Home"),
+    )!;
+
+    await act(() => {
+      homeBtn.click();
+    });
+
+    // Successfully routed to /home
+    expect(container.textContent).toContain("Home");
+    expect(container.querySelector(".traveler-app-shell")).not.toBeNull();
   });
 });

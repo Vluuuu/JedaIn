@@ -172,10 +172,10 @@ export function RecommendationResultScreen({
             {topRecommendation.reasons.length > 0 && (
               <div
                 className="recommendation-why-box"
-                aria-label="Kenapa ini cocok"
+                aria-label={isFallback ? "Kenapa ini mendekati" : "Kenapa ini cocok"}
               >
                 <span className="recommendation-why-title">
-                  Kenapa ini cocok?
+                  {isFallback ? "Kenapa ini mendekati?" : "Kenapa ini cocok?"}
                 </span>
                 <div className="recommendation-chips">
                   {topRecommendation.reasons.map((reason, idx) => (

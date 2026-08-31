@@ -15,6 +15,7 @@ import {
   TravelerConsentScreen,
 } from "./features/onboarding";
 import { TravelerQuizScreen } from "./features/quiz";
+import { RecommendationResultScreen } from "./features/recommendation";
 import "./App.css";
 
 const travelerRoutes = [
@@ -32,7 +33,6 @@ const travelerRoutes = [
 ] as const;
 
 const distractionFreeRoutes = [
-  ["onboarding/result", "Recommendation result"],
   ["payment/:bookingId", "Payment"],
   ["payment/:bookingId/result", "Payment result"],
 ] as const;
@@ -98,6 +98,14 @@ export function App() {
           element={
             <OnboardingRouteGuard>
               <TravelerQuizScreen />
+            </OnboardingRouteGuard>
+          }
+        />
+        <Route
+          path="onboarding/result"
+          element={
+            <OnboardingRouteGuard>
+              <RecommendationResultScreen />
             </OnboardingRouteGuard>
           }
         />

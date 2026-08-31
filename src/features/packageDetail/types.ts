@@ -13,8 +13,6 @@ export interface PackageOrganizerProfile {
 }
 
 export interface PackageDestinationDetail {
-  destinationName: string;
-  locationLabel: string;
   overviewDescription: string;
 }
 
@@ -37,6 +35,8 @@ export interface PackageSessionPreview {
 }
 
 export interface PackageReviewExcerpt {
+  bookingId: string;
+  bookingStatus: "COMPLETED";
   authorName: string;
   rating: number;
   comment: string;
@@ -56,25 +56,31 @@ export interface PackageDetailSource {
   destinationDetail: PackageDestinationDetail;
   upcomingSessionPreviews: PackageSessionPreview[];
   reviewPreview?: {
-    rating: number;
     excerpts: PackageReviewExcerpt[];
   };
 }
 
 export type PackageDetailState = "LOADING" | "READY" | "NOT_FOUND" | "ERROR";
 
+export type PersonalizedReasonMode = "MATCHED" | "FALLBACK";
+
+export interface PersonalizedContext {
+  reasons: string[];
+  mode: PersonalizedReasonMode;
+}
+
 export interface PackageDetailViewModel {
   state: PackageDetailState;
   package?: PackageRecommendationSource;
   detail?: PackageDetailSource;
   hasOpenSession: boolean;
-  personalizedReasons?: string[];
+  personalizedContext?: PersonalizedContext;
   errorMessage?: string;
 }
 
 export interface PackageDetailAdapter {
   getPackageDetail(
     packageId: string,
-    options?: { personalizedReasons?: string[] },
+    options?: { personalizedContext?: PersonalizedContext },
   ): Promise<PackageDetailViewModel>;
 }

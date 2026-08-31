@@ -69,8 +69,6 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         "Merancang pengalaman perjalanan berbasis kesadaran penuh dan kearifan alam lokal di Jawa Timur.",
     },
     destinationDetail: {
-      destinationName: "Lereng Hijau Batu",
-      locationLabel: "Batu / Malang Raya",
       overviewDescription:
         "Kawasan perkebunan dan lereng bukit berkabut yang tenang, terkelola secara lestari bersama warga lokal.",
     },
@@ -95,9 +93,10 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     reviewPreview: {
-      rating: 4.85,
       excerpts: [
         {
+          bookingId: "bk_sgd_comp_1",
+          bookingStatus: "COMPLETED",
           authorName: "Sarah M.",
           rating: 5,
           comment:
@@ -166,8 +165,6 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         "Menjembatani wisatawan dengan kearifan tangan perajin lokal di desa-desa Jawa Timur.",
     },
     destinationDetail: {
-      destinationName: "Desa Wisata Budaya",
-      locationLabel: "Malang Raya",
       overviewDescription:
         "Sentra desa budaya dengan komunitas pengrajin gerabah dan bambu tradisional yang masih terjaga.",
     },
@@ -183,9 +180,10 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     reviewPreview: {
-      rating: 4.75,
       excerpts: [
         {
+          bookingId: "bk_cvh_comp_1",
+          bookingStatus: "COMPLETED",
           authorName: "Dion K.",
           rating: 5,
           comment:
@@ -211,7 +209,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         order: 1,
         title: "Pagi Awal - Meditasi Mata Air",
         description:
-          "Sesi hening di dek kayu tepi mata air alami, dipandu latihan pernapasan untuk menenangkan saraf.",
+          "Sesi hening di dek kayu tepi mata air alami, dipandu latihan pernapasan ringan untuk membantu menciptakan suasana yang lebih tenang.",
         timeOfDayLabel: "Pagi",
         durationLabel: "1 jam",
       },
@@ -253,8 +251,6 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         "Menghadirkan ruang jeda dan latihan mindfulness yang ramah pemula di alam terbuka.",
     },
     destinationDetail: {
-      destinationName: "Oase Hening Trawas",
-      locationLabel: "Mojokerto Raya",
       overviewDescription:
         "Mata air alami dan kawasan hutan pinus sejuk di kaki pegunungan Mojokerto.",
     },
@@ -270,9 +266,10 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     reviewPreview: {
-      rating: 4.9,
       excerpts: [
         {
+          bookingId: "bk_mm_comp_1",
+          bookingStatus: "COMPLETED",
           authorName: "Anindya R.",
           rating: 5,
           comment:
@@ -345,8 +342,6 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         "Fokus mendampingi petualangan alam ringan yang aman dan ramah bagi pemula.",
     },
     destinationDetail: {
-      destinationName: "Taman Alam Prigen",
-      locationLabel: "Pasuruan Raya",
       overviewDescription:
         "Kawasan perbukitan dan jalur alam terbuka dengan panorama lereng pegunungan Pasuruan.",
     },
@@ -362,9 +357,10 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     reviewPreview: {
-      rating: 4.8,
       excerpts: [
         {
+          bookingId: "bk_lme_comp_1",
+          bookingStatus: "COMPLETED",
           authorName: "Budi P.",
           rating: 5,
           comment:
@@ -436,8 +432,6 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         "Menyediakan ruang peristirahatan akhir pekan yang hangat, tenang, dan dekat dengan alam.",
     },
     destinationDetail: {
-      destinationName: "Lembah Alam Pacet",
-      locationLabel: "Mojokerto Raya",
       overviewDescription:
         "Lembah asri di kawasan pegunungan Pacet yang menawarkan ketenangan dan udara bersih.",
     },
@@ -453,9 +447,10 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     reviewPreview: {
-      rating: 4.88,
       excerpts: [
         {
+          bookingId: "bk_wnr_comp_1",
+          bookingStatus: "COMPLETED",
           authorName: "Maya T.",
           rating: 5,
           comment:

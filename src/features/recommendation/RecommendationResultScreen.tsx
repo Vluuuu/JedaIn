@@ -201,7 +201,16 @@ export function RecommendationResultScreen({
               variant="primary"
               size="lg"
               className="recommendation-cta-btn"
-              onClick={() => navigate(`/packages/${topPkg.id}`)}
+              onClick={() =>
+                navigate(`/packages/${topPkg.id}`, {
+                  state: {
+                    personalizedContext: {
+                      reasons: topRecommendation.reasons,
+                      mode: isFallback ? "FALLBACK" : "MATCHED",
+                    },
+                  },
+                })
+              }
             >
               Lihat Experience
             </Button>

@@ -10,12 +10,13 @@ export function PackageHero({ packageData }: PackageHeroProps) {
   const visual = getPackageVisual(packageData.id);
 
   return (
-    <header
-      className="package-detail-hero"
-      style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
-      role="img"
-      aria-label={`Ilustrasi suasana ${packageData.title}`}
-    >
+    <header className="package-detail-hero">
+      <div
+        className="package-detail-hero__visual"
+        style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
+        role="img"
+        aria-label={`Ilustrasi suasana ${packageData.title}`}
+      />
       <div className="package-detail-hero__badges">
         <Badge tone="neutral">
           {packageData.verificationLevel === "PLUS"

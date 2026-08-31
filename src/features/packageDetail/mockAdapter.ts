@@ -6,6 +6,7 @@ import type {
   PackageDetailSource,
   PackageDetailViewModel,
   PackageSessionPreview,
+  PersonalizedContext,
 } from "./types";
 
 export interface MockPackageDetailAdapterOptions {
@@ -37,7 +38,7 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
 
   async getPackageDetail(
     packageId: string,
-    options?: { personalizedReasons?: string[] },
+    options?: { personalizedContext?: PersonalizedContext },
   ): Promise<PackageDetailViewModel> {
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
@@ -65,14 +66,17 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
     }
 
     // Sessions may be overridden in tests
-    const sessions =
+    const allSessions =
       this.sessionOverrides[packageId] ?? detail.upcomingSessionPreviews ?? [];
 
+    // Filter out CANCELLED sessions (must not appear in upcoming preview)
+    const validSessions = allSessions.filter((s) => s.status !== "CANCELLED");
+
     // Check if at least one upcoming session is OPEN
-    const hasOpenSession = sessions.some((s) => s.status === "OPEN");
+    const hasOpenSession = validSessions.some((s) => s.status === "OPEN");
 
     // Sort upcoming sessions chronologically
-    const sortedSessions = [...sessions].sort(
+    const sortedSessions = [...validSessions].sort(
       (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
     );
 
@@ -84,7 +88,7 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
         upcomingSessionPreviews: sortedSessions,
       },
       hasOpenSession,
-      personalizedReasons: options?.personalizedReasons,
+      personalizedContext: options?.personalizedContext,
     };
   }
 }

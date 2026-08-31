@@ -133,6 +133,10 @@
   --space-20: 5rem;
   --space-24: 6rem;
 
+  /* Layout & Navigation heights */
+  --nav-bottom-height: 4.5rem;
+  --sticky-cta-height: 4.5rem;
+
   /* Shape and elevation */
   --radius-xs: 0.375rem;
   --radius-sm: 0.5rem;

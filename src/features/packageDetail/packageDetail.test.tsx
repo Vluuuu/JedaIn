@@ -28,12 +28,14 @@ async function renderPackageDetail(
   packageId = "slow_green_day",
   props: { adapter?: MockPackageDetailAdapter } = {},
   initialEntries: string[] = [`/packages/${packageId}`],
-  state?: { personalizedReasons?: string[] },
+  state?: {
+    personalizedContext?: { reasons: string[]; mode: "MATCHED" | "FALLBACK" };
+  },
 ) {
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  await act(() =>
+  await act(async () => {
     root.render(
       createElement(
         MemoryRouter,
@@ -52,22 +54,23 @@ async function renderPackageDetail(
           }),
         ),
       ),
-    ),
-  );
+    );
+  });
   return container;
 }
 
 describe("PackageDetailScreen Data & Contract Tests", () => {
-  it("1. known LIVE package resolves to READY detail", async () => {
+  it("1. known LIVE package resolves to READY detail in locked contract order", async () => {
     const view = await renderPackageDetail("slow_green_day");
 
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
     expect(view.textContent).toContain("Mulai dari");
     expect(view.textContent).toContain("Rp275.000");
+    expect(view.textContent).toContain("Destinasi");
+    expect(view.textContent).toContain("Penyelenggara & Pemandu");
     expect(view.textContent).toContain("Highlight Pengalaman");
     expect(view.textContent).toContain("Rencana Perjalanan");
     expect(view.textContent).toContain("Fasilitas & Ketentuan");
-    expect(view.textContent).toContain("Destinasi & Penyelenggara");
     expect(view.textContent).toContain("Jadwal Terdekat");
     expect(view.textContent).toContain("Pilih Jadwal");
   });
@@ -142,7 +145,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
   it("9. trust copy does not present government or external certification claims", async () => {
     const view = await renderPackageDetail("slow_green_day");
     expect(view.textContent).toContain(
-      "Status verifikasi mitra destinasi terdaftar dan teruji di platform JedaIn.",
+      "Status mitra destinasi berdasarkan proses verifikasi internal JedaIn.",
     );
     expect(view.textContent).not.toContain("kementerian");
     expect(view.textContent).not.toContain("pemerintah");
@@ -386,20 +389,124 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     expect(labels).toEqual(["Home", "Explore", "My Trips", "Profile"]);
   });
 
-  it("32 & 33. explicit recommendation reasons passed through navigation state render without score/percentage", async () => {
+  it("32 & 33. explicit recommendation context passed through navigation state renders MATCHED vs FALLBACK wording without score/percentage", async () => {
     const reasons = ["Dekat dengan alam", "Eksplorasi ringan", "1 hari"];
-    const view = await renderPackageDetail(
+
+    // MATCHED mode
+    const matchedView = await renderPackageDetail(
       "slow_green_day",
       {},
       ["/packages/slow_green_day"],
-      { personalizedReasons: reasons },
+      { personalizedContext: { reasons, mode: "MATCHED" } },
     );
+    expect(matchedView.textContent).toContain("Kenapa cocok untukmu?");
+    expect(matchedView.textContent).toContain("Dekat dengan alam");
+    expect(matchedView.textContent).toContain("Eksplorasi ringan");
+    expect(matchedView.textContent).toContain("1 hari");
+    expect(matchedView.textContent).not.toContain("%");
+    expect(matchedView.textContent).not.toContain("AI");
 
-    expect(view.textContent).toContain("Kenapa cocok untukmu?");
-    expect(view.textContent).toContain("Dekat dengan alam");
-    expect(view.textContent).toContain("Eksplorasi ringan");
-    expect(view.textContent).toContain("1 hari");
-    expect(view.textContent).not.toContain("%");
-    expect(view.textContent).not.toContain("AI");
+    // FALLBACK mode
+    const fallbackView = await renderPackageDetail(
+      "slow_green_day",
+      {},
+      ["/packages/slow_green_day"],
+      { personalizedContext: { reasons, mode: "FALLBACK" } },
+    );
+    expect(fallbackView.textContent).toContain(
+      "Kenapa pilihan ini mendekati preferensimu?",
+    );
+    expect(fallbackView.textContent).not.toContain("Kenapa cocok untukmu?");
+  });
+
+  it("A. verifies PLUS verification label", async () => {
+    const adapter = new MockPackageDetailAdapter({
+      packages: [
+        {
+          ...MOCK_PACKAGE_DETAILS.slow_green_day,
+          id: "slow_green_day",
+          title: "Sehari Pelan di Lereng Hijau",
+          shortSummary: "Summary",
+          destinationName: "Lereng Hijau Batu",
+          locationLabel: "Batu",
+          visualAsset: "asset.jpg",
+          status: "LIVE",
+          verificationLevel: "PLUS",
+          pricePerPerson: 275000,
+          durationType: "FULL_DAY",
+          departureAreas: ["MALANG"],
+          experienceIntents: ["NATURE"],
+          activityTags: ["NATURE_SCENERY"],
+          suitableGroupTypes: ["SOLO"],
+          suitableGroupSizeBands: ["ONE"],
+          rating: 4.85,
+          popularityRank: 95,
+        },
+      ],
+    });
+
+    const view = await renderPackageDetail("slow_green_day", { adapter });
+    expect(view.textContent).toContain("Terverifikasi Plus");
+  });
+
+  it("C & D. CANCELLED session is not rendered and remainingSlots undefined hides slot label", async () => {
+    const adapter = new MockPackageDetailAdapter({
+      sessionOverrides: {
+        slow_green_day: [
+          {
+            sessionId: "ses_cancelled",
+            packageId: "slow_green_day",
+            startAt: "2026-09-12T08:00:00.000Z",
+            endAt: "2026-09-12T14:00:00.000Z",
+            status: "CANCELLED",
+          },
+          {
+            sessionId: "ses_closed_noslot",
+            packageId: "slow_green_day",
+            startAt: "2026-09-19T08:00:00.000Z",
+            endAt: "2026-09-19T14:00:00.000Z",
+            status: "CLOSED",
+          },
+        ],
+      },
+    });
+
+    const view = await renderPackageDetail("slow_green_day", { adapter });
+    // Cancelled is not rendered
+    expect(view.textContent).not.toContain("CANCELLED");
+    expect(view.textContent).not.toContain("12 September 2026");
+
+    // Closed is rendered with status Ditutup and NO remaining slots label
+    expect(view.textContent).toContain("Ditutup");
+    expect(view.textContent).toContain("19 September 2026");
+    expect(view.textContent).not.toContain("Sisa");
+
+    // Because only CLOSED exists, CTA is disabled
+    const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Pilih Jadwal"),
+    )!;
+    expect(ctaBtn.disabled).toBe(true);
+    expect(view.textContent).toContain("Belum ada jadwal tersedia");
+  });
+
+  it("J. formats date and time deterministically in Asia/Jakarta (WIB)", async () => {
+    const adapter = new MockPackageDetailAdapter({
+      sessionOverrides: {
+        slow_green_day: [
+          {
+            sessionId: "ses_tz_test",
+            packageId: "slow_green_day",
+            startAt: "2026-09-12T01:00:00.000Z", // 08:00 WIB (UTC+7)
+            endAt: "2026-09-12T07:00:00.000Z", // 14:00 WIB
+            status: "OPEN",
+          },
+        ],
+      },
+    });
+
+    const view = await renderPackageDetail("slow_green_day", { adapter });
+    // 01:00 UTC = 08:00 WIB, 07:00 UTC = 14:00 WIB
+    expect(view.textContent).toContain("Sabtu, 12 September 2026");
+    expect(view.textContent).toContain("08.00 - 14.00 WIB");
   });
 });

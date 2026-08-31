@@ -112,7 +112,7 @@
 }
 
 .traveler-app-shell {
-  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(var(--nav-bottom-height) + env(safe-area-inset-bottom));
 }
 
 .traveler-app-header {

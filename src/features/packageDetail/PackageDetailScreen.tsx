@@ -4,7 +4,11 @@ import { Button, Skeleton } from "../../components/ui";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
 import { defaultPackageDetailAdapter } from "./mockAdapter";
 import { PackageHero } from "./PackageHero";
-import type { PackageDetailAdapter, PackageDetailViewModel } from "./types";
+import type {
+  PackageDetailAdapter,
+  PackageDetailViewModel,
+  PersonalizedContext,
+} from "./types";
 import "./packageDetail.css";
 
 export interface PackageDetailScreenProps {
@@ -23,15 +27,15 @@ export function PackageDetailScreen({
     null,
   );
 
-  // Extract optional real recommendation reasons passed through navigation state
+  // Extract optional real recommendation context passed through navigation state
   const navState = location.state as
-    { personalizedReasons?: string[] } | undefined;
-  const personalizedReasons = navState?.personalizedReasons;
+    { personalizedContext?: PersonalizedContext } | undefined;
+  const personalizedContext = navState?.personalizedContext;
 
   const loadDetail = async (id: string) => {
     setIsLoading(true);
     try {
-      const res = await adapter.getPackageDetail(id, { personalizedReasons });
+      const res = await adapter.getPackageDetail(id, { personalizedContext });
       setViewModel(res);
       setIsLoading(false);
     } catch (err: unknown) {
@@ -54,7 +58,7 @@ export function PackageDetailScreen({
     }
 
     adapter
-      .getPackageDetail(packageId, { personalizedReasons })
+      .getPackageDetail(packageId, { personalizedContext })
       .then((res) => {
         if (!isMounted) return;
         setViewModel(res);
@@ -76,7 +80,7 @@ export function PackageDetailScreen({
     return () => {
       isMounted = false;
     };
-  }, [packageId, adapter, personalizedReasons]);
+  }, [packageId, adapter, personalizedContext]);
 
   if (isLoading) {
     return (
@@ -153,9 +157,9 @@ export function PackageDetailScreen({
       {/* 1. Hero Media */}
       <PackageHero packageData={pkg} />
 
-      {/* Main Content Sections */}
+      {/* Main Content Sections in locked contract order */}
       <div className="package-detail-main">
-        {/* 2. Header, Title & Price */}
+        {/* 2. Title, Value Proposition & Starting Price */}
         <section
           className="package-detail-header-card"
           aria-labelledby="package-title"
@@ -184,16 +188,22 @@ export function PackageDetailScreen({
         </section>
 
         {/* 3. Optional Personalized Match Explanation */}
-        {personalizedReasons && personalizedReasons.length > 0 && (
+        {personalizedContext && personalizedContext.reasons.length > 0 && (
           <section
             className="package-detail-personalized-box"
-            aria-label="Alasan kecocokan"
+            aria-label={
+              personalizedContext.mode === "MATCHED"
+                ? "Alasan kecocokan"
+                : "Alasan rekomendasi terdekat"
+            }
           >
             <h2 className="package-detail-personalized-title">
-              Kenapa cocok untukmu?
+              {personalizedContext.mode === "MATCHED"
+                ? "Kenapa cocok untukmu?"
+                : "Kenapa pilihan ini mendekati preferensimu?"}
             </h2>
             <div className="package-detail-personalized-chips">
-              {personalizedReasons.slice(0, 3).map((reason, idx) => (
+              {personalizedContext.reasons.slice(0, 3).map((reason, idx) => (
                 <span key={idx} className="package-detail-personalized-chip">
                   {reason}
                 </span>
@@ -202,7 +212,78 @@ export function PackageDetailScreen({
           </section>
         )}
 
-        {/* 4. Experience Highlights */}
+        {/* 4. Destination & Location Trust Section */}
+        <section
+          className="package-detail-section"
+          aria-labelledby="dest-trust-heading"
+        >
+          <h2 id="dest-trust-heading" className="package-detail-section__title">
+            Destinasi
+          </h2>
+          <div className="package-detail-trust-card">
+            <div className="package-detail-trust-header">
+              <div>
+                <h3 className="package-detail-trust-title">
+                  {pkg.destinationName}
+                </h3>
+                <p className="package-detail-trust-subtitle">
+                  {pkg.locationLabel}
+                </p>
+              </div>
+              <span className="package-detail-trust-badge">
+                {pkg.verificationLevel === "PLUS"
+                  ? "Terverifikasi Plus"
+                  : "Terverifikasi Dasar"}
+              </span>
+            </div>
+            <p className="package-detail-trust-body">
+              {detail.destinationDetail.overviewDescription}
+            </p>
+            <p className="package-detail-trust-notice">
+              Status mitra destinasi berdasarkan proses verifikasi internal
+              JedaIn.
+            </p>
+          </div>
+        </section>
+
+        {/* 5. EO / Guide Identity & Status */}
+        <section
+          className="package-detail-section"
+          aria-labelledby="organizer-heading"
+        >
+          <h2 id="organizer-heading" className="package-detail-section__title">
+            Penyelenggara & Pemandu
+          </h2>
+          <div className="package-detail-trust-card">
+            <div className="package-detail-trust-header">
+              <div>
+                <h3 className="package-detail-trust-title">
+                  {detail.organizer.displayName}
+                </h3>
+                {detail.organizer.roleDescription && (
+                  <p className="package-detail-trust-subtitle">
+                    {detail.organizer.roleDescription}
+                  </p>
+                )}
+              </div>
+              <span className="package-detail-trust-badge">
+                {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
+                  ? "Status Guide: Certified Guide"
+                  : "Status Guide: Concept Organizer"}
+              </span>
+            </div>
+            {detail.organizer.bioSummary && (
+              <p className="package-detail-trust-body">
+                {detail.organizer.bioSummary}
+              </p>
+            )}
+            <p className="package-detail-trust-notice">
+              Penyelenggara terdaftar di JedaIn Partner Portal.
+            </p>
+          </div>
+        </section>
+
+        {/* 6. Experience Highlights */}
         {detail.highlights.length > 0 && (
           <section
             className="package-detail-section"
@@ -230,7 +311,7 @@ export function PackageDetailScreen({
           </section>
         )}
 
-        {/* 5. Itinerary */}
+        {/* 7. Itinerary */}
         {detail.itinerary.length > 0 && (
           <section
             className="package-detail-section"
@@ -275,7 +356,7 @@ export function PackageDetailScreen({
           </section>
         )}
 
-        {/* 6. What's Included / Excluded */}
+        {/* 8. What's Included / Excluded */}
         <section
           className="package-detail-section"
           aria-labelledby="in-out-heading"
@@ -310,73 +391,7 @@ export function PackageDetailScreen({
           </div>
         </section>
 
-        {/* 7. Destination Trust & Organizer Profile */}
-        <section
-          className="package-detail-section"
-          aria-labelledby="trust-heading"
-        >
-          <h2 id="trust-heading" className="package-detail-section__title">
-            Destinasi & Penyelenggara
-          </h2>
-          <div className="package-detail-trust-grid">
-            {/* Destination Card */}
-            <div className="package-detail-trust-card">
-              <div className="package-detail-trust-header">
-                <div>
-                  <h3 className="package-detail-trust-title">
-                    {detail.destinationDetail.destinationName}
-                  </h3>
-                  <p className="package-detail-trust-subtitle">
-                    {detail.destinationDetail.locationLabel}
-                  </p>
-                </div>
-                <span className="package-detail-trust-badge">
-                  {pkg.verificationLevel === "PLUS"
-                    ? "Terverifikasi Plus"
-                    : "Terverifikasi Dasar"}
-                </span>
-              </div>
-              <p className="package-detail-trust-body">
-                {detail.destinationDetail.overviewDescription}
-              </p>
-              <p className="package-detail-trust-notice">
-                Status verifikasi mitra destinasi terdaftar dan teruji di
-                platform JedaIn.
-              </p>
-            </div>
-
-            {/* Organizer Card */}
-            <div className="package-detail-trust-card">
-              <div className="package-detail-trust-header">
-                <div>
-                  <h3 className="package-detail-trust-title">
-                    {detail.organizer.displayName}
-                  </h3>
-                  {detail.organizer.roleDescription && (
-                    <p className="package-detail-trust-subtitle">
-                      {detail.organizer.roleDescription}
-                    </p>
-                  )}
-                </div>
-                <span className="package-detail-trust-badge">
-                  {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
-                    ? "Certified Guide"
-                    : "Concept Organizer"}
-                </span>
-              </div>
-              {detail.organizer.bioSummary && (
-                <p className="package-detail-trust-body">
-                  {detail.organizer.bioSummary}
-                </p>
-              )}
-              <p className="package-detail-trust-notice">
-                Penyelenggara terdaftar di JedaIn Partner Portal.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 8. Safety & Basic Notes */}
+        {/* 9. Safety & Basic Notes */}
         {detail.safetyNotes.length > 0 && (
           <section
             className="package-detail-section"
@@ -393,7 +408,7 @@ export function PackageDetailScreen({
           </section>
         )}
 
-        {/* 9. Cancellation & Refund Policy Summary */}
+        {/* 10. Cancellation & Refund Policy Summary */}
         <section
           className="package-detail-section"
           aria-labelledby="policy-heading"
@@ -406,7 +421,7 @@ export function PackageDetailScreen({
           </div>
         </section>
 
-        {/* 10. Upcoming Sessions Preview */}
+        {/* 11. Upcoming Sessions Preview */}
         <section
           className="package-detail-section"
           aria-labelledby="sessions-preview-heading"
@@ -421,15 +436,23 @@ export function PackageDetailScreen({
             <div className="package-detail-sessions-list">
               {detail.upcomingSessionPreviews.map((session) => {
                 const startDate = new Date(session.startAt);
+                const endDate = new Date(session.endAt);
                 const dateLabel = startDate.toLocaleDateString("id-ID", {
                   weekday: "long",
                   day: "numeric",
                   month: "long",
                   year: "numeric",
+                  timeZone: "Asia/Jakarta",
                 });
-                const timeLabel = startDate.toLocaleTimeString("id-ID", {
+                const startTimeLabel = startDate.toLocaleTimeString("id-ID", {
                   hour: "2-digit",
                   minute: "2-digit",
+                  timeZone: "Asia/Jakarta",
+                });
+                const endTimeLabel = endDate.toLocaleTimeString("id-ID", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  timeZone: "Asia/Jakarta",
                 });
 
                 return (
@@ -440,7 +463,7 @@ export function PackageDetailScreen({
                     <div className="package-detail-session-card__header">
                       <div>
                         <span className="package-detail-session-card__date">
-                          {dateLabel} • {timeLabel} WIB
+                          {dateLabel} • {startTimeLabel} - {endTimeLabel} WIB
                         </span>
                       </div>
                       <span className="package-detail-session-card__status">
@@ -467,7 +490,7 @@ export function PackageDetailScreen({
           )}
         </section>
 
-        {/* 11. Reviews Preview */}
+        {/* 12. Reviews Preview */}
         <section
           className="package-detail-section"
           aria-labelledby="reviews-heading"
@@ -481,8 +504,8 @@ export function PackageDetailScreen({
           {detail.reviewPreview?.excerpts &&
           detail.reviewPreview.excerpts.length > 0 ? (
             <div className="package-detail-review-excerpt">
-              {detail.reviewPreview.excerpts.map((rev, idx) => (
-                <div key={idx}>
+              {detail.reviewPreview.excerpts.map((rev) => (
+                <div key={rev.bookingId}>
                   <span className="package-detail-review-excerpt__author">
                     {rev.authorName} • {rev.tripDateLabel}
                   </span>
@@ -500,7 +523,7 @@ export function PackageDetailScreen({
         </section>
       </div>
 
-      {/* 12. Sticky Progression CTA */}
+      {/* 13. Sticky Progression CTA */}
       <div className="package-detail-sticky-bar">
         <div className="package-detail-sticky-bar__container">
           <div className="package-detail-sticky-bar__price-wrap">

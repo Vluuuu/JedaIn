@@ -60,7 +60,10 @@ describe("Integration Onboarding Route Guard Real Navigation", () => {
     sessionStore.setOnboardingStatus("IN_PROGRESS");
     const view = await renderAppAt("/home");
 
-    expect(view.textContent).toContain("Quiz");
+    expect(view.textContent).toContain("Langkah 1 dari 6");
+    expect(view.textContent).toContain(
+      "Jeda seperti apa yang paling kamu butuhkan sekarang?",
+    );
     expect(view.textContent).not.toContain(
       "Persetujuan Penggunaan Data Preferensi",
     );
@@ -70,7 +73,7 @@ describe("Integration Onboarding Route Guard Real Navigation", () => {
     sessionStore.setOnboardingStatus("IN_PROGRESS");
     const view = await renderAppAt("/onboarding/result");
 
-    expect(view.textContent).toContain("Quiz");
+    expect(view.textContent).toContain("Langkah 1 dari 6");
     expect(view.textContent).not.toContain("Recommendation result");
   });
 

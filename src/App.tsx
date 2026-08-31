@@ -10,7 +10,10 @@ import {
   partnerEoNavigation,
 } from "./components/shells";
 import { TravelerLoginScreen } from "./features/auth";
-import { TravelerConsentScreen } from "./features/onboarding";
+import {
+  OnboardingRouteGuard,
+  TravelerConsentScreen,
+} from "./features/onboarding";
 import "./App.css";
 
 const travelerRoutes = [
@@ -82,17 +85,34 @@ export function App() {
 
       <Route element={<DistractionFreeShell />}>
         <Route path="login" element={<TravelerLoginScreen />} />
-        <Route path="onboarding/consent" element={<TravelerConsentScreen />} />
+        <Route
+          path="onboarding/consent"
+          element={
+            <OnboardingRouteGuard>
+              <TravelerConsentScreen />
+            </OnboardingRouteGuard>
+          }
+        />
         {distractionFreeRoutes.map(([path, title]) => (
           <Route
             key={path}
             path={path}
-            element={<PlaceholderPage eyebrow="Traveler flow" title={title} />}
+            element={
+              <OnboardingRouteGuard>
+                <PlaceholderPage eyebrow="Traveler flow" title={title} />
+              </OnboardingRouteGuard>
+            }
           />
         ))}
       </Route>
 
-      <Route element={<TravelerAppShell />}>
+      <Route
+        element={
+          <OnboardingRouteGuard>
+            <TravelerAppShell />
+          </OnboardingRouteGuard>
+        }
+      >
         {travelerRoutes.map(([path, title]) => (
           <Route
             key={path}

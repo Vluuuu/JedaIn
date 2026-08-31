@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button, Dialog } from "../../components/ui";
 import { env } from "../../lib/config/env";
+import { sessionStore } from "../onboarding/sessionStore";
 import { AuthMethodDivider } from "./AuthMethodDivider";
 import { EmailAuthForm } from "./EmailAuthForm";
 import { GoogleIcon } from "./GoogleIcon";
@@ -53,6 +54,7 @@ export function TravelerLoginScreen({
   const isAnyLoading = activeMethod !== null;
 
   const handleAuthSuccess = (user: AuthUser) => {
+    sessionStore.setUser(user);
     setActiveMethod(null);
     const redirectPath = getAuthRedirectPath({
       isNewUser: user.isNewUser,

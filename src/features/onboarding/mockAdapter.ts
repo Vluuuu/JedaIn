@@ -1,3 +1,4 @@
+import { sessionStore } from "./sessionStore";
 import type {
   ConsentSubmissionResult,
   OnboardingAdapter,
@@ -50,6 +51,8 @@ export class MockOnboardingAdapter implements OnboardingAdapter {
       hasConsent: true,
       updatedAt: new Date().toISOString(),
     };
+
+    sessionStore.setOnboardingStatus("IN_PROGRESS");
 
     return {
       status: "IN_PROGRESS",

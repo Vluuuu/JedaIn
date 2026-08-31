@@ -1,13 +1,14 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { App } from "./App";
 import {
   adminNavigation,
   partnerDestinationNavigation,
   partnerEoNavigation,
 } from "./components/shells";
+import { sessionStore } from "./features/onboarding";
 
 function renderRoute(path: string) {
   return renderToStaticMarkup(
@@ -16,9 +17,12 @@ function renderRoute(path: string) {
 }
 
 describe("App shell routing", () => {
+  afterEach(() => {
+    sessionStore.reset();
+  });
+
   it.each([
     ["/", "traveler-public-shell", "Temukan jeda"],
-    ["/home", "traveler-app-shell", "Home"],
     ["/partner/eo", "workspace-shell--partner", "Overview"],
     ["/partner/destination", "workspace-shell--partner", "Overview"],
     ["/admin", "workspace-shell--admin", "Overview"],
@@ -30,7 +34,8 @@ describe("App shell routing", () => {
     expect(markup).toContain(text);
   });
 
-  it("renders exactly four traveler navigation tabs", () => {
+  it("renders exactly four traveler navigation tabs for authenticated completed user on /home", () => {
+    sessionStore.setOnboardingStatus("COMPLETED");
     const markup = renderRoute("/home");
     const tabLabels = ["Home", "Explore", "My Trips", "Profile"];
 

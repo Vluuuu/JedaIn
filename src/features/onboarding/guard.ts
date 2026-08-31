@@ -5,9 +5,9 @@ import type { OnboardingStatus } from "../auth/types";
  * can access a specific target route, or returns the canonical redirect route.
  *
  * Canonical Rules:
- * - NOT_STARTED -> must go to /onboarding/consent (blocked from /home, /explore, /trips, /profile, /onboarding/quiz)
- * - IN_PROGRESS -> must resume at /onboarding/quiz (blocked from /home, etc.)
- * - COMPLETED -> can access /home, /explore, etc. (accessing /onboarding/consent can redirect to /home or allow review)
+ * - NOT_STARTED -> must complete consent first (redirects to /onboarding/consent if trying to access /home, /onboarding/quiz, etc.)
+ * - IN_PROGRESS -> must resume at /onboarding/quiz (redirects to /onboarding/quiz if trying to access /home or /onboarding/consent)
+ * - COMPLETED -> can access /home, /explore, etc. (redirects to /home if trying to access /onboarding/consent)
  */
 export function getOnboardingGuardRedirect(params: {
   status: OnboardingStatus;
@@ -16,18 +16,30 @@ export function getOnboardingGuardRedirect(params: {
   const { status, currentPath } = params;
 
   if (status === "COMPLETED") {
+    if (currentPath === "/onboarding/consent") {
+      return "/home";
+    }
     return null;
   }
 
   if (status === "NOT_STARTED") {
-    if (currentPath === "/onboarding/consent") {
+    if (
+      currentPath === "/onboarding/consent" ||
+      currentPath === "/login" ||
+      currentPath === "/"
+    ) {
       return null;
     }
     return "/onboarding/consent";
   }
 
   if (status === "IN_PROGRESS") {
-    if (currentPath === "/onboarding/quiz") {
+    if (
+      currentPath === "/onboarding/quiz" ||
+      currentPath === "/onboarding/result" ||
+      currentPath === "/login" ||
+      currentPath === "/"
+    ) {
       return null;
     }
     return "/onboarding/quiz";

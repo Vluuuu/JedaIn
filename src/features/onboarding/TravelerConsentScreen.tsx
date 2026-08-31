@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
-import { Badge, Button, Checkbox, Dialog } from "../../components/ui";
+import { Button, Checkbox, Dialog } from "../../components/ui";
 import {
   ArrowLeftIcon,
   CompassTargetIcon,
@@ -54,120 +54,120 @@ export function TravelerConsentScreen({
     }
   };
 
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      navigate(-1);
-    }
-  };
-
   return (
     <div className="consent-container">
-      <div className="consent-card">
-        <div className="consent-topbar">
-          <button
-            type="button"
-            className="consent-back-button"
-            onClick={handleBack}
-            aria-label="Kembali"
-          >
-            <ArrowLeftIcon />
-            <span>Kembali</span>
-          </button>
-          <Badge tone="info">Langkah 1 dari 2</Badge>
-        </div>
-
-        <header className="consent-header">
-          <h1>Persetujuan Penggunaan Data Preferensi</h1>
-          <p>
-            Sebelum kami membantu merancang jeda terbaikmu, pahami bagaimana
-            jawaban dan preferensimu akan digunakan oleh JedaIn.
-          </p>
-        </header>
-
-        {errorMessage && (
-          <div className="consent-error-banner" role="alert">
-            <p>{errorMessage}</p>
-          </div>
-        )}
-
-        <div className="consent-purposes">
-          <div className="consent-purpose-row">
-            <div className="consent-purpose-row__icon">
-              <CompassTargetIcon />
-            </div>
-            <div className="consent-purpose-row__content">
-              <strong>Rekomendasi Personal</strong>
-              <p>
-                Mencocokkan gaya jeda, durasi, budget, dan minat aktivitasmu
-                dengan paket wellness yang paling relevan.
-              </p>
-            </div>
-          </div>
-
-          <div className="consent-purpose-row">
-            <div className="consent-purpose-row__icon">
-              <DemandInsightIcon />
-            </div>
-            <div className="consent-purpose-row__content">
-              <strong>Wawasan Kebutuhan Agregat</strong>
-              <p>
-                Membantu mitra pengelola destinasi dan organizer memahami tren
-                kebutuhan jeda secara anonim dan agregat.
-              </p>
-            </div>
-          </div>
-
-          <div className="consent-purpose-row">
-            <div className="consent-purpose-row__icon">
-              <SparklesProductIcon />
-            </div>
-            <div className="consent-purpose-row__content">
-              <strong>Penyempurnaan Layanan</strong>
-              <p>
-                Meningkatkan akurasi kurasi destinasi serta menghadirkan variasi
-                jeda yang semakin tepat sasaran.
-              </p>
-            </div>
+      <div className="consent-layout">
+        <div className="consent-visual-panel">
+          <div>
+            <span className="consent-visual-tag">Onboarding Traveler</span>
+            <h1 className="consent-visual-headline">
+              Persetujuan Penggunaan Data Preferensi
+            </h1>
+            <p className="consent-visual-desc">
+              Sebelum mulai mengisi kuis preferensi, pahami bagaimana data
+              pilihanmu digunakan untuk menyusun pengalaman jeda yang tepat.
+            </p>
           </div>
         </div>
 
-        <form className="consent-form" onSubmit={handleSubmit} noValidate>
-          <div className="consent-checkbox-wrapper">
-            <Checkbox
-              id="traveler-consent-checkbox"
-              label="Saya menyetujui data preferensi saya digunakan untuk rekomendasi personal, wawasan permintaan agregat, dan penyempurnaan layanan JedaIn."
-              checked={hasAgreed}
-              onChange={(e) => {
-                setHasAgreed(e.target.checked);
-                if (errorMessage) setErrorMessage(undefined);
-              }}
-              disabled={isSubmitting}
-            />
-            <div className="consent-privacy-action">
+        <div className="consent-card">
+          {onBack && (
+            <div className="consent-topbar">
               <button
                 type="button"
-                className="consent-privacy-link"
-                onClick={() => setShowPrivacyDialog(true)}
+                className="consent-back-button"
+                onClick={onBack}
+                aria-label="Kembali"
               >
-                Pelajari rincian penggunaan data &rarr;
+                <ArrowLeftIcon />
+                <span>Kembali</span>
               </button>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="consent-error-banner" role="alert">
+              <p>{errorMessage}</p>
+            </div>
+          )}
+
+          <div className="consent-purposes">
+            <div className="consent-purpose-row">
+              <div className="consent-purpose-row__icon">
+                <CompassTargetIcon />
+              </div>
+              <div className="consent-purpose-row__content">
+                <strong>Rekomendasi Personal</strong>
+                <p>
+                  Preferensimu membantu JedaIn menampilkan pengalaman yang lebih
+                  relevan.
+                </p>
+              </div>
+            </div>
+
+            <div className="consent-purpose-row">
+              <div className="consent-purpose-row__icon">
+                <DemandInsightIcon />
+              </div>
+              <div className="consent-purpose-row__content">
+                <strong>Wawasan Kebutuhan Agregat</strong>
+                <p>
+                  Jawaban traveler membantu membentuk gambaran kebutuhan secara
+                  agregat.
+                </p>
+              </div>
+            </div>
+
+            <div className="consent-purpose-row">
+              <div className="consent-purpose-row__icon">
+                <SparklesProductIcon />
+              </div>
+              <div className="consent-purpose-row__content">
+                <strong>Penyempurnaan Layanan</strong>
+                <p>
+                  Masukan preferensi membantu JedaIn meningkatkan pengalaman
+                  produk.
+                </p>
+              </div>
             </div>
           </div>
 
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            disabled={!hasAgreed || isSubmitting}
-            loading={isSubmitting}
-            loadingLabel="Menyimpan persetujuan..."
-            className="consent-submit-button"
-          >
-            Setuju & Lanjut
-          </Button>
-        </form>
+          <form className="consent-form" onSubmit={handleSubmit} noValidate>
+            <div className="consent-checkbox-wrapper">
+              <Checkbox
+                id="traveler-consent-checkbox"
+                label="Saya menyetujui data preferensi saya digunakan untuk rekomendasi personal, wawasan kebutuhan agregat, dan penyempurnaan layanan JedaIn."
+                checked={hasAgreed}
+                onChange={(e) => {
+                  setHasAgreed(e.target.checked);
+                  if (errorMessage) setErrorMessage(undefined);
+                }}
+                disabled={isSubmitting}
+              />
+              <div className="consent-privacy-action">
+                <button
+                  type="button"
+                  className="consent-privacy-link"
+                  onClick={() => setShowPrivacyDialog(true)}
+                >
+                  Pelajari rincian penggunaan data &rarr;
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              disabled={!hasAgreed || isSubmitting}
+              loading={isSubmitting}
+              loadingLabel="Menyimpan persetujuan..."
+              className="consent-submit-button"
+            >
+              Setuju & Lanjut
+            </Button>
+          </form>
+        </div>
       </div>
 
       <Dialog
@@ -191,16 +191,15 @@ export function TravelerConsentScreen({
         <ul className="consent-dialog-list">
           <li>
             <strong>Rekomendasi personal:</strong> menyajikan paket trip yang
-            sesuai dengan preferensi budget, waktu, dan aktivitas jeda Anda.
+            sesuai dengan preferensi Anda.
           </li>
           <li>
-            <strong>Wawasan permintaan agregat:</strong> diolah secara kolektif
-            tanpa mengidentifikasi profil individu guna membantu perancangan
-            rute oleh mitra.
+            <strong>Wawasan kebutuhan agregat:</strong> gambaran kebutuhan
+            traveler secara agregat.
           </li>
           <li>
-            <strong>Penyempurnaan produk:</strong> mengoptimalkan pengalaman
-            aplikasi JedaIn.
+            <strong>Penyempurnaan layanan:</strong> meningkatkan pengalaman
+            produk JedaIn.
           </li>
         </ul>
         <p className="consent-dialog-text">

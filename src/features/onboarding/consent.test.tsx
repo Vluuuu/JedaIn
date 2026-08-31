@@ -143,8 +143,8 @@ describe("TravelerConsentScreen UI & State Transitions", () => {
 
     expect(view.textContent).toContain("Penggunaan Data Preferensi");
     expect(view.textContent).toContain("Rekomendasi personal:");
-    expect(view.textContent).toContain("Wawasan permintaan agregat:");
-    expect(view.textContent).toContain("Penyempurnaan produk:");
+    expect(view.textContent).toContain("Wawasan kebutuhan agregat:");
+    expect(view.textContent).toContain("Penyempurnaan layanan:");
 
     const closeBtn = Array.from(view.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Mengerti"),

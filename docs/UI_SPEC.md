@@ -89,6 +89,7 @@ Recommended route contract:
 /partner/eo/packages/new
 /partner/eo/packages/:packageId
 /partner/eo/packages/:packageId/sessions
+/partner/eo/sessions
 /partner/eo/bookings
 /partner/eo/destinations
 /partner/eo/reviews

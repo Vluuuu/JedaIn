@@ -58,6 +58,7 @@
   --color-brand-primary-hover: var(--color-forest-800);
   --color-brand-primary-active: var(--color-forest-900);
   --color-brand-primary-soft: var(--color-forest-50);
+  --color-forest-glow: rgb(93 174 118 / 20%);
 
   --color-success-bg: #eef8f1;
   --color-success-border: #b7e2c1;

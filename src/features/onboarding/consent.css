@@ -1,0 +1,197 @@
+.consent-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100svh - 8rem);
+  padding: var(--space-4) var(--space-2);
+}
+
+.consent-card {
+  width: 100%;
+  max-width: 32rem;
+  padding: var(--space-6);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.consent-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.consent-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.75rem;
+  padding: 0 var(--space-2);
+  background: transparent;
+  border: 0;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+.consent-back-button:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface-subtle);
+}
+
+.consent-header {
+  margin-bottom: var(--space-6);
+  text-align: left;
+}
+
+.consent-header h1 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-heading-md);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading-md);
+  letter-spacing: -0.02em;
+}
+
+.consent-header p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+}
+
+.consent-purposes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.consent-purpose-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--motion-fast) var(--ease-standard);
+}
+
+.consent-purpose-row__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  background: var(--color-forest-100);
+  color: var(--color-forest-700);
+  border-radius: var(--radius-md);
+}
+
+.consent-purpose-row__content {
+  flex: 1;
+}
+
+.consent-purpose-row__content strong {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.consent-purpose-row__content p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-body-sm);
+}
+
+.consent-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.consent-checkbox-wrapper {
+  padding: var(--space-3) var(--space-2);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.consent-privacy-action {
+  margin-top: var(--space-1);
+}
+
+.consent-privacy-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--color-brand-primary);
+  font: inherit;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.consent-privacy-link:hover {
+  color: var(--color-brand-primary-hover);
+}
+
+.consent-submit-button {
+  width: 100%;
+}
+
+.consent-error-banner {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-md);
+  color: var(--color-danger-text);
+  font-size: var(--font-size-body-sm);
+}
+
+.consent-error-banner p {
+  margin: 0;
+}
+
+.consent-dialog-text {
+  margin: var(--space-2) 0 var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+}
+
+.consent-dialog-list {
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+}
+
+.consent-dialog-list li {
+  margin-bottom: var(--space-2);
+}
+
+@media (min-width: 48rem) {
+  .consent-card {
+    padding: var(--space-8);
+  }
+}

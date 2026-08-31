@@ -77,6 +77,7 @@ describe("App shell routing", () => {
   });
 
   it.each([
+    "/onboarding/consent",
     "/onboarding/quiz",
     "/payment/booking-1",
     "/partner/login",

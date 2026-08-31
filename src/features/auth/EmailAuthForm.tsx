@@ -6,7 +6,8 @@ export interface EmailAuthFormProps {
   email: string;
   onEmailChange: (val: string) => void;
   onRequestEmailLink: (email: string) => Promise<void>;
-  isLoading: boolean;
+  isSubmitting: boolean;
+  isDisabled: boolean;
   isSent: boolean;
   error?: string;
 }
@@ -15,7 +16,8 @@ export function EmailAuthForm({
   email,
   onEmailChange,
   onRequestEmailLink,
-  isLoading,
+  isSubmitting,
+  isDisabled,
   isSent,
   error,
 }: EmailAuthFormProps) {
@@ -23,7 +25,7 @@ export function EmailAuthForm({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || isLoading) return;
+    if (!email.trim() || isDisabled) return;
     setSubmitted(true);
     await onRequestEmailLink(email);
   };
@@ -55,7 +57,7 @@ export function EmailAuthForm({
         helperText="Tautan masuk sekali pakai akan dikirim ke email."
         value={email}
         onChange={(e) => onEmailChange(e.target.value)}
-        disabled={isLoading}
+        disabled={isDisabled}
         error={submitted ? error : undefined}
         required
       />
@@ -64,8 +66,9 @@ export function EmailAuthForm({
         type="submit"
         variant="secondary"
         size="lg"
-        loading={isLoading}
+        loading={isSubmitting}
         loadingLabel="Mengirim tautan..."
+        disabled={isDisabled}
         className="auth-submit-button"
       >
         Kirim Tautan Masuk

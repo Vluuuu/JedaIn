@@ -9,7 +9,8 @@ export interface PhoneOtpFormProps {
   onVerifyOtp: (code: string) => Promise<void>;
   onResetToPhone: () => void;
   isOtpSent: boolean;
-  isLoading: boolean;
+  isSubmitting: boolean;
+  isDisabled: boolean;
   error?: string;
 }
 
@@ -20,7 +21,8 @@ export function PhoneOtpForm({
   onVerifyOtp,
   onResetToPhone,
   isOtpSent,
-  isLoading,
+  isSubmitting,
+  isDisabled,
   error,
 }: PhoneOtpFormProps) {
   const [otpCode, setOtpCode] = useState("");
@@ -29,7 +31,7 @@ export function PhoneOtpForm({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const formPhone = (formData.get("phone") as string) || phone;
-    if (!formPhone.trim() || isLoading) return;
+    if (!formPhone.trim() || isDisabled) return;
     await onRequestOtp(formPhone);
   };
 
@@ -37,7 +39,7 @@ export function PhoneOtpForm({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const formOtp = (formData.get("otp") as string) || otpCode;
-    if (!formOtp.trim() || isLoading) return;
+    if (!formOtp.trim() || isDisabled) return;
     await onVerifyOtp(formOtp);
   };
 
@@ -55,12 +57,12 @@ export function PhoneOtpForm({
           </p>
           <button
             type="button"
-            className="auth-link-button"
+            className="auth-change-phone-button"
             onClick={() => {
               setOtpCode("");
               onResetToPhone();
             }}
-            disabled={isLoading}
+            disabled={isDisabled}
           >
             Ubah nomor
           </button>
@@ -73,11 +75,10 @@ export function PhoneOtpForm({
           type="text"
           inputMode="numeric"
           autoComplete="one-time-code"
-          maxLength={6}
-          placeholder="Contoh: 123456"
+          placeholder="Masukkan kode OTP"
           value={otpCode}
           onChange={(e) => setOtpCode(e.target.value)}
-          disabled={isLoading}
+          disabled={isDisabled}
           error={error}
           required
         />
@@ -86,8 +87,9 @@ export function PhoneOtpForm({
           type="submit"
           variant="primary"
           size="lg"
-          loading={isLoading}
+          loading={isSubmitting}
           loadingLabel="Memverifikasi..."
+          disabled={isDisabled}
           className="auth-submit-button"
         >
           Verifikasi & Masuk
@@ -106,7 +108,7 @@ export function PhoneOtpForm({
       <TextField
         id="phone-number-input"
         name="phone"
-        label="Nomor WhatsApp / HP"
+        label="Nomor HP"
         type="tel"
         inputMode="tel"
         autoComplete="tel"
@@ -114,7 +116,7 @@ export function PhoneOtpForm({
         helperText="Kami akan mengirimkan kode verifikasi OTP."
         value={phone}
         onChange={(e) => onPhoneChange(e.target.value)}
-        disabled={isLoading}
+        disabled={isDisabled}
         error={error}
         required
       />
@@ -123,8 +125,9 @@ export function PhoneOtpForm({
         type="submit"
         variant="secondary"
         size="lg"
-        loading={isLoading}
+        loading={isSubmitting}
         loadingLabel="Mengirim kode..."
+        disabled={isDisabled}
         className="auth-submit-button"
       >
         Kirim Kode OTP

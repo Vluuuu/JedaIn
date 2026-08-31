@@ -92,6 +92,22 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     );
   });
 
+  it("handles OAuth cancellation gracefully without rendering catastrophic error banner", async () => {
+    const adapter = new MockAuthAdapter({
+      shouldCancelGoogle: true,
+    });
+
+    const view = await renderScreen({ adapter });
+    const googleBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut dengan Google"),
+    )!;
+
+    await act(() => googleBtn.click());
+
+    expect(view.querySelector('[role="alert"]')).toBeNull();
+    expect(view.textContent).not.toContain("Gagal masuk dengan Google");
+  });
+
   it("handles recoverable error without clearing phone input", async () => {
     const adapter = new MockAuthAdapter({
       shouldFailPhoneRequest: true,
@@ -120,6 +136,89 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
       "Jaringan bermasalah, silakan coba lagi.",
     );
     expect(phoneInput.value).toBe("081299887766");
+  });
+
+  it("isolates errors between phone OTP and email methods", async () => {
+    const adapter = new MockAuthAdapter({
+      shouldFailPhoneRequest: true,
+      errorMessage: "Error khusus nomor HP.",
+      shouldFailEmail: true,
+    });
+
+    const view = await renderScreen({ adapter, enableEmailAuth: true });
+    const phoneInput =
+      view.querySelector<HTMLInputElement>('input[type="tel"]')!;
+
+    await act(() => {
+      phoneInput.value = "0812345678";
+      phoneInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    const phoneForm = view.querySelector<HTMLFormElement>(
+      'form[aria-label="Masuk dengan nomor HP"]',
+    )!;
+    await act(() => {
+      phoneForm.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+    });
+
+    const phoneField = view.querySelector(".ui-field:has(input[type='tel'])");
+    const emailField = view.querySelector(".ui-field:has(input[type='email'])");
+
+    expect(phoneField?.textContent).toContain("Error khusus nomor HP.");
+    expect(emailField?.textContent).not.toContain("Error khusus nomor HP.");
+  });
+
+  it("maintains method-specific loading without showing Google loading label during phone OTP request", async () => {
+    let resolvePhone: () => void;
+    const adapter = new MockAuthAdapter();
+    adapter.requestPhoneOtp = () =>
+      new Promise((resolve) => {
+        resolvePhone = () =>
+          resolve({ phone: "08123456789", verificationId: "v1" });
+      });
+
+    const view = await renderScreen({ adapter });
+    const phoneInput =
+      view.querySelector<HTMLInputElement>('input[type="tel"]')!;
+
+    await act(() => {
+      phoneInput.value = "08123456789";
+      phoneInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    const phoneForm = view.querySelector<HTMLFormElement>(
+      'form[aria-label="Masuk dengan nomor HP"]',
+    )!;
+
+    // Trigger submit without awaiting immediately
+    let submitPromise: Promise<void>;
+    act(() => {
+      submitPromise = new Promise((resolve) => {
+        phoneForm.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
+        resolve();
+      });
+    });
+
+    const googleBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+      b.className.includes("auth-google-button"),
+    )!;
+    const phoneBtn = Array.from(phoneForm.querySelectorAll("button")).find(
+      (b) => b.type === "submit",
+    )!;
+
+    expect(googleBtn.disabled).toBe(true);
+    expect(googleBtn.textContent).toContain("Lanjut dengan Google");
+    expect(googleBtn.textContent).not.toContain("Menghubungkan Google");
+    expect(phoneBtn.textContent).toContain("Mengirim kode...");
+
+    await act(async () => {
+      resolvePhone!();
+      await submitPromise!;
+    });
   });
 
   it("executes full Phone OTP flow: request -> enter OTP -> verify -> redirect", async () => {

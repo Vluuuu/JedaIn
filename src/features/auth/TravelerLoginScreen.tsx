@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { Badge, Button, Dialog } from "../../components/ui";
 import { env } from "../../lib/config/env";
 import { AuthMethodDivider } from "./AuthMethodDivider";
 import { EmailAuthForm } from "./EmailAuthForm";
@@ -8,11 +8,13 @@ import { GoogleIcon } from "./GoogleIcon";
 import { defaultAuthAdapter } from "./mockAdapter";
 import { PhoneOtpForm } from "./PhoneOtpForm";
 import { getAuthRedirectPath } from "./routing";
-import type {
-  AuthAdapter,
-  AuthState,
-  AuthUser,
-  PhoneOtpSession,
+import {
+  AuthError,
+  type AuthAdapter,
+  type AuthMethod,
+  type AuthState,
+  type AuthUser,
+  type PhoneOtpSession,
 } from "./types";
 import "./auth.css";
 
@@ -30,8 +32,12 @@ export function TravelerLoginScreen({
   const navigate = useNavigate();
 
   const [authState, setAuthState] = useState<AuthState>("IDLE");
-  const [globalError, setGlobalError] = useState<string | undefined>();
-  const [fieldError, setFieldError] = useState<string | undefined>();
+  const [activeMethod, setActiveMethod] = useState<AuthMethod>(null);
+
+  // Method-scoped errors
+  const [googleError, setGoogleError] = useState<string | undefined>();
+  const [phoneError, setPhoneError] = useState<string | undefined>();
+  const [emailError, setEmailError] = useState<string | undefined>();
 
   // Form states preserved across recoverable errors
   const [phone, setPhone] = useState("");
@@ -39,10 +45,15 @@ export function TravelerLoginScreen({
   const [otpSession, setOtpSession] = useState<PhoneOtpSession | null>(null);
   const [emailSent, setEmailSent] = useState(false);
 
-  const isLoading =
-    authState === "AUTHENTICATING" || authState === "OTP_VERIFYING";
+  // Legal dialog modal states
+  const [legalModal, setLegalModal] = useState<"terms" | "privacy" | null>(
+    null,
+  );
+
+  const isAnyLoading = activeMethod !== null;
 
   const handleAuthSuccess = (user: AuthUser) => {
+    setActiveMethod(null);
     const redirectPath = getAuthRedirectPath({
       isNewUser: user.isNewUser,
       onboardingStatus: user.onboardingStatus,
@@ -56,44 +67,55 @@ export function TravelerLoginScreen({
   };
 
   const handleGoogleLogin = async () => {
-    if (isLoading) return;
-    setGlobalError(undefined);
-    setFieldError(undefined);
+    if (isAnyLoading) return;
+    setGoogleError(undefined);
+    setActiveMethod("GOOGLE");
     setAuthState("AUTHENTICATING");
 
     try {
       const user = await adapter.loginWithGoogle();
+      setActiveMethod(null);
       setAuthState("IDLE");
       handleAuthSuccess(user);
     } catch (err: unknown) {
-      setAuthState("ERROR");
-      setGlobalError(
-        err instanceof Error ? err.message : "Gagal masuk dengan Google.",
-      );
+      setActiveMethod(null);
+      if (err instanceof AuthError && err.code === "CANCELLED") {
+        // OAuth cancellation is not a catastrophic error; gracefully return to IDLE
+        setAuthState("IDLE");
+      } else {
+        setAuthState("ERROR");
+        setGoogleError(
+          err instanceof Error ? err.message : "Gagal masuk dengan Google.",
+        );
+      }
     }
   };
 
   const handleRequestPhoneOtp = async (inputPhone: string) => {
-    if (isLoading) return;
-    setGlobalError(undefined);
-    setFieldError(undefined);
+    if (isAnyLoading) return;
+    setPhoneError(undefined);
     setPhone(inputPhone);
+    setActiveMethod("PHONE_REQUEST");
     setAuthState("AUTHENTICATING");
 
     try {
       const session = await adapter.requestPhoneOtp(inputPhone);
       setOtpSession(session);
+      setActiveMethod(null);
       setAuthState("OTP_SENT");
     } catch (err: unknown) {
+      setActiveMethod(null);
       setAuthState("ERROR");
-      setFieldError(err instanceof Error ? err.message : "Gagal mengirim OTP.");
+      setPhoneError(
+        err instanceof Error ? err.message : "Gagal mengirim kode OTP.",
+      );
     }
   };
 
   const handleVerifyPhoneOtp = async (code: string) => {
-    if (isLoading || !otpSession) return;
-    setGlobalError(undefined);
-    setFieldError(undefined);
+    if (isAnyLoading || !otpSession) return;
+    setPhoneError(undefined);
+    setActiveMethod("PHONE_VERIFY");
     setAuthState("OTP_VERIFYING");
 
     try {
@@ -102,11 +124,13 @@ export function TravelerLoginScreen({
         verificationId: otpSession.verificationId,
         code,
       });
+      setActiveMethod(null);
       setAuthState("IDLE");
       handleAuthSuccess(user);
     } catch (err: unknown) {
+      setActiveMethod(null);
       setAuthState("ERROR");
-      setFieldError(
+      setPhoneError(
         err instanceof Error ? err.message : "Kode OTP tidak valid.",
       );
     }
@@ -114,24 +138,28 @@ export function TravelerLoginScreen({
 
   const handleResetToPhone = () => {
     setOtpSession(null);
-    setFieldError(undefined);
-    setGlobalError(undefined);
-    setAuthState("IDLE");
+    setPhoneError(undefined);
+    if (authState === "OTP_SENT" || authState === "OTP_VERIFYING") {
+      setAuthState("IDLE");
+    }
   };
 
   const handleRequestEmailLink = async (inputEmail: string) => {
-    if (isLoading || !adapter.requestEmailLink) return;
-    setGlobalError(undefined);
-    setFieldError(undefined);
+    if (isAnyLoading || !adapter.requestEmailLink) return;
+    setEmailError(undefined);
+    setEmail(inputEmail);
+    setActiveMethod("EMAIL");
     setAuthState("AUTHENTICATING");
 
     try {
       await adapter.requestEmailLink(inputEmail);
       setEmailSent(true);
+      setActiveMethod(null);
       setAuthState("IDLE");
     } catch (err: unknown) {
+      setActiveMethod(null);
       setAuthState("ERROR");
-      setFieldError(
+      setEmailError(
         err instanceof Error ? err.message : "Gagal mengirim email.",
       );
     }
@@ -151,9 +179,9 @@ export function TravelerLoginScreen({
           </p>
         </header>
 
-        {globalError && (
+        {googleError && (
           <div className="auth-error-banner" role="alert">
-            <p>{globalError}</p>
+            <p>{googleError}</p>
           </div>
         )}
 
@@ -165,9 +193,9 @@ export function TravelerLoginScreen({
             size="lg"
             className="auth-google-button"
             onClick={handleGoogleLogin}
-            loading={authState === "AUTHENTICATING" && !otpSession}
+            loading={activeMethod === "GOOGLE"}
             loadingLabel="Menghubungkan Google..."
-            disabled={isLoading}
+            disabled={isAnyLoading}
           >
             <GoogleIcon />
             <span>Lanjut dengan Google</span>
@@ -178,7 +206,10 @@ export function TravelerLoginScreen({
           {/* Alternative 1: Phone OTP */}
           <PhoneOtpForm
             phone={phone}
-            onPhoneChange={setPhone}
+            onPhoneChange={(val) => {
+              setPhone(val);
+              if (phoneError) setPhoneError(undefined);
+            }}
             onRequestOtp={handleRequestPhoneOtp}
             onVerifyOtp={handleVerifyPhoneOtp}
             onResetToPhone={handleResetToPhone}
@@ -187,8 +218,12 @@ export function TravelerLoginScreen({
               authState === "OTP_SENT" ||
               authState === "OTP_VERIFYING"
             }
-            isLoading={isLoading}
-            error={fieldError}
+            isSubmitting={
+              activeMethod === "PHONE_REQUEST" ||
+              activeMethod === "PHONE_VERIFY"
+            }
+            isDisabled={isAnyLoading}
+            error={phoneError}
           />
 
           {/* Alternative 2: Email Magic Link (Configurable) */}
@@ -197,11 +232,15 @@ export function TravelerLoginScreen({
               <AuthMethodDivider label="atau dengan email" />
               <EmailAuthForm
                 email={email}
-                onEmailChange={setEmail}
+                onEmailChange={(val) => {
+                  setEmail(val);
+                  if (emailError) setEmailError(undefined);
+                }}
                 onRequestEmailLink={handleRequestEmailLink}
-                isLoading={isLoading}
+                isSubmitting={activeMethod === "EMAIL"}
+                isDisabled={isAnyLoading}
                 isSent={emailSent}
-                error={fieldError}
+                error={emailError}
               />
             </>
           )}
@@ -210,13 +249,21 @@ export function TravelerLoginScreen({
         <footer className="auth-footer">
           <p>
             Dengan masuk atau mendaftar, kamu menyetujui{" "}
-            <a href="#terms" onClick={(e) => e.preventDefault()}>
+            <button
+              type="button"
+              className="auth-legal-link"
+              onClick={() => setLegalModal("terms")}
+            >
               Syarat & Ketentuan
-            </a>{" "}
+            </button>{" "}
             serta{" "}
-            <a href="#privacy" onClick={(e) => e.preventDefault()}>
+            <button
+              type="button"
+              className="auth-legal-link"
+              onClick={() => setLegalModal("privacy")}
+            >
               Kebijakan Privasi
-            </a>{" "}
+            </button>{" "}
             JedaIn.
           </p>
           <Link to="/partner" className="auth-partner-link">
@@ -224,6 +271,50 @@ export function TravelerLoginScreen({
           </Link>
         </footer>
       </div>
+
+      <Dialog
+        open={legalModal === "terms"}
+        title="Syarat & Ketentuan"
+        description="Ringkasan ketentuan penggunaan layanan JedaIn untuk traveler."
+        onClose={() => setLegalModal(null)}
+        actions={
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setLegalModal(null)}
+          >
+            Tutup
+          </Button>
+        }
+      >
+        <p className="auth-legal-modal-text">
+          JedaIn memfasilitasi penemuan dan pemesanan aktivitas jeda wellness
+          terverifikasi. Informasi akun traveler digunakan untuk memproses
+          rekomendasi dan reservasi trip.
+        </p>
+      </Dialog>
+
+      <Dialog
+        open={legalModal === "privacy"}
+        title="Kebijakan Privasi"
+        description="Informasi pengelolaan data pribadi traveler."
+        onClose={() => setLegalModal(null)}
+        actions={
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setLegalModal(null)}
+          >
+            Tutup
+          </Button>
+        }
+      >
+        <p className="auth-legal-modal-text">
+          Data preferensi dan kontak Anda disimpan secara aman untuk kebutuhan
+          rekomendasi personal serta koordinasi operasional trip yang
+          terkonfirmasi.
+        </p>
+      </Dialog>
     </div>
   );
 }

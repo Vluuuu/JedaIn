@@ -1,7 +1,13 @@
-import type { AuthAdapter, AuthUser, PhoneOtpSession } from "./types";
+import {
+  AuthError,
+  type AuthAdapter,
+  type AuthUser,
+  type PhoneOtpSession,
+} from "./types";
 
 export interface MockAuthAdapterOptions {
   mockUser?: Partial<AuthUser>;
+  shouldCancelGoogle?: boolean;
   shouldFailGoogle?: boolean;
   shouldFailPhoneRequest?: boolean;
   shouldFailPhoneVerify?: boolean;
@@ -26,10 +32,14 @@ export class MockAuthAdapter implements AuthAdapter {
 
   async loginWithGoogle(): Promise<AuthUser> {
     await this.delay();
+    if (this.options.shouldCancelGoogle) {
+      throw new AuthError("Proses masuk Google dibatalkan.", "CANCELLED");
+    }
+
     if (this.options.shouldFailGoogle) {
-      throw new Error(
-        this.options.errorMessage ??
-          "Autentikasi Google dibatalkan atau gagal.",
+      throw new AuthError(
+        this.options.errorMessage ?? "Gagal terhubung dengan layanan Google.",
+        "NETWORK",
       );
     }
 
@@ -47,14 +57,15 @@ export class MockAuthAdapter implements AuthAdapter {
   async requestPhoneOtp(phone: string): Promise<PhoneOtpSession> {
     await this.delay();
     const cleanPhone = phone.trim();
-    if (!cleanPhone || cleanPhone.length < 8) {
-      throw new Error("Nomor HP tidak valid. Masukkan nomor yang benar.");
+    if (!cleanPhone) {
+      throw new AuthError("Nomor HP wajib diisi.", "INVALID_INPUT");
     }
 
     if (this.options.shouldFailPhoneRequest) {
-      throw new Error(
+      throw new AuthError(
         this.options.errorMessage ??
           "Gagal mengirim kode OTP. Silakan coba lagi.",
+        "NETWORK",
       );
     }
 
@@ -71,14 +82,15 @@ export class MockAuthAdapter implements AuthAdapter {
   }): Promise<AuthUser> {
     await this.delay();
     const cleanCode = params.code.trim();
-    if (!cleanCode || cleanCode.length < 4) {
-      throw new Error("Kode OTP harus terdiri dari 4-6 digit.");
+    if (!cleanCode) {
+      throw new AuthError("Kode verifikasi OTP wajib diisi.", "INVALID_INPUT");
     }
 
     if (this.options.shouldFailPhoneVerify || cleanCode === "0000") {
-      throw new Error(
+      throw new AuthError(
         this.options.errorMessage ??
           "Kode OTP salah atau telah kadaluarsa. Silakan periksa kembali.",
+        "PROVIDER_ERROR",
       );
     }
 
@@ -96,13 +108,14 @@ export class MockAuthAdapter implements AuthAdapter {
     await this.delay();
     const cleanEmail = email.trim();
     if (!cleanEmail || !cleanEmail.includes("@")) {
-      throw new Error("Format email tidak valid.");
+      throw new AuthError("Format email tidak valid.", "INVALID_INPUT");
     }
 
     if (this.options.shouldFailEmail) {
-      throw new Error(
+      throw new AuthError(
         this.options.errorMessage ??
           "Gagal mengirim tautan masuk. Silakan coba lagi.",
+        "NETWORK",
       );
     }
 

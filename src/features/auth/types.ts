@@ -12,6 +12,22 @@ export interface AuthUser {
 export type AuthState =
   "IDLE" | "AUTHENTICATING" | "OTP_SENT" | "OTP_VERIFYING" | "ERROR";
 
+export type AuthMethod =
+  "GOOGLE" | "PHONE_REQUEST" | "PHONE_VERIFY" | "EMAIL" | null;
+
+export type AuthErrorCode =
+  "CANCELLED" | "NETWORK" | "PROVIDER_ERROR" | "INVALID_INPUT";
+
+export class AuthError extends Error {
+  readonly code: AuthErrorCode;
+
+  constructor(message: string, code: AuthErrorCode = "PROVIDER_ERROR") {
+    super(message);
+    this.name = "AuthError";
+    this.code = code;
+  }
+}
+
 export interface PhoneOtpSession {
   phone: string;
   verificationId: string;

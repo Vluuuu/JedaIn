@@ -106,11 +106,19 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
           (o) => o.value === quizDraft?.departure_area_id,
         )?.label;
 
-  const recPkg = personalizedRecommendation?.package;
+  const recMode = personalizedRecommendation?.mode;
+  const recItem = personalizedRecommendation?.item;
+  const recPkg = recItem?.package;
   const recDuration = recPkg
     ? (QUIZ_DURATION_OPTIONS.find((d) => d.value === recPkg.durationType)
         ?.label ?? recPkg.durationType)
     : "";
+
+  const recommendationHeading = recPkg
+    ? recMode === "FALLBACK"
+      ? "Pilihan terdekat untukmu"
+      : "Pilihan untukmu"
+    : "Rekomendasi Personal";
 
   return (
     <div className="home-container">
@@ -147,7 +155,7 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
       >
         <div className="home-section-header">
           <h2 id="rec-section-title" className="home-section-title">
-            {recPkg ? "Pilihan untukmu" : "Rekomendasi Personal"}
+            {recommendationHeading}
           </h2>
         </div>
 
@@ -158,10 +166,13 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
               Coba lagi
             </Button>
           </div>
-        ) : recPkg ? (
+        ) : recPkg && recItem ? (
           <div className="home-hero-card">
             <div className="home-hero-card__visual">
-              <Badge tone="success">
+              <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>
+                {recMode === "FALLBACK" ? "Pilihan terdekat" : "Pilihan utama"}
+              </Badge>
+              <Badge tone="neutral">
                 {recPkg.verificationLevel === "PLUS"
                   ? "Terverifikasi Plus"
                   : "Terverifikasi Dasar"}
@@ -182,15 +193,13 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
                 / orang
               </div>
 
-              {personalizedRecommendation.reasons.length > 0 && (
+              {recItem.reasons.length > 0 && (
                 <div className="home-hero-card__why">
-                  {personalizedRecommendation.reasons
-                    .slice(0, 3)
-                    .map((r, i) => (
-                      <span key={i} className="home-hero-card__chip">
-                        {r}
-                      </span>
-                    ))}
+                  {recItem.reasons.slice(0, 3).map((r, i) => (
+                    <span key={i} className="home-hero-card__chip">
+                      {r}
+                    </span>
+                  ))}
                 </div>
               )}
 

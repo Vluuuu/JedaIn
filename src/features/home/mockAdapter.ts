@@ -8,6 +8,7 @@ import type {
   HomeState,
   HomeViewModel,
   PendingPaymentSummary,
+  PersonalizedRecommendationSummary,
   UpcomingTripSummary,
 } from "./types";
 
@@ -15,6 +16,7 @@ export interface MockHomeAdapterOptions {
   pendingPayment?: PendingPaymentSummary | null;
   upcomingTrip?: UpcomingTripSummary | null;
   shouldFailRecommendation?: boolean;
+  failRecommendationCount?: number;
   shouldFailPopular?: boolean;
   shouldFailDeparture?: boolean;
   shouldFailDestinations?: boolean;
@@ -26,6 +28,7 @@ let sharedHomeAdapterOptions: MockHomeAdapterOptions = {};
 
 export class MockHomeAdapter implements HomeAdapter {
   private options: MockHomeAdapterOptions;
+  private failedRecommendationAttempts = 0;
 
   constructor(options: MockHomeAdapterOptions = {}) {
     this.options = options;
@@ -73,9 +76,16 @@ export class MockHomeAdapter implements HomeAdapter {
     const upcomingTrip: UpcomingTripSummary | null | undefined =
       opts.upcomingTrip;
 
-    // 3. Recommendation (Reuses Issue #8 Engine strictly)
-    let personalizedRecommendation = null;
+    // 3. Recommendation (Reuses Issue #8 Engine strictly and preserves mode)
+    let personalizedRecommendation: PersonalizedRecommendationSummary | null =
+      null;
     if (opts.shouldFailRecommendation) {
+      moduleErrors.recommendation = "Gagal memuat rekomendasi personal.";
+    } else if (
+      opts.failRecommendationCount !== undefined &&
+      this.failedRecommendationAttempts < opts.failRecommendationCount
+    ) {
+      this.failedRecommendationAttempts++;
       moduleErrors.recommendation = "Gagal memuat rekomendasi personal.";
     } else if (isCompletedQuizDraft(quizDraft)) {
       const recResult = evaluateRecommendations(
@@ -83,7 +93,10 @@ export class MockHomeAdapter implements HomeAdapter {
         MOCK_RECOMMENDATION_PACKAGES,
       );
       if (recResult.topRecommendation) {
-        personalizedRecommendation = recResult.topRecommendation;
+        personalizedRecommendation = {
+          mode: recResult.state,
+          item: recResult.topRecommendation,
+        };
       }
     }
 

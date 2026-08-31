@@ -44,13 +44,18 @@ export interface MoodPresetItem {
   label: string;
 }
 
+export interface PersonalizedRecommendationSummary {
+  mode: "MATCHED" | "FALLBACK";
+  item: RecommendationItem;
+}
+
 export interface HomeViewModel {
   state: HomeState;
   traveler: AuthUser | null;
   quizDraft: QuizDraft | null;
   pendingPayment?: PendingPaymentSummary | null;
   upcomingTrip?: UpcomingTripSummary | null;
-  personalizedRecommendation?: RecommendationItem | null;
+  personalizedRecommendation?: PersonalizedRecommendationSummary | null;
   popularPackages: PackageRecommendationSource[];
   departureAreaPackages: PackageRecommendationSource[];
   departureAreaName?: string;

@@ -78,10 +78,23 @@ describe("Integration Onboarding Route Guard Real Navigation", () => {
   });
 
   it("allows COMPLETED traveler to directly access /onboarding/result", async () => {
-    sessionStore.setOnboardingStatus("COMPLETED");
+    sessionStore.setUser({
+      id: "usr_completed",
+      onboardingStatus: "COMPLETED",
+    });
+    sessionStore.setQuizDraft({
+      currentStep: 6,
+      current_intent: "NATURE",
+      preferred_activities: ["NATURE_SCENERY"],
+      budget_band: "AROUND_200_300K",
+      duration_preference: "FULL_DAY",
+      departure_area_id: "MALANG",
+      group_type: "SOLO",
+      group_size_band: "ONE",
+    });
     const view = await renderAppAt("/onboarding/result");
 
-    expect(view.textContent).toContain("Recommendation result");
+    expect(view.textContent).toContain("jeda yang paling cocok");
   });
 
   it("redirects COMPLETED traveler trying to access /onboarding/consent to /home", async () => {

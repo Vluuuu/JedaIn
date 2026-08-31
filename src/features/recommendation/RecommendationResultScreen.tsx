@@ -30,15 +30,32 @@ export function RecommendationResultScreen({
     } catch (err: unknown) {
       setIsLoading(false);
       setErrorMessage(
-        err instanceof Error
-          ? err.message
-          : "Rekomendasi belum bisa dimuat.",
+        err instanceof Error ? err.message : "Rekomendasi belum bisa dimuat.",
       );
     }
   };
 
   useEffect(() => {
-    fetchRecommendations();
+    let isMounted = true;
+
+    adapter
+      .getRecommendations()
+      .then((res) => {
+        if (!isMounted) return;
+        setResult(res);
+        setIsLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return;
+        setIsLoading(false);
+        setErrorMessage(
+          err instanceof Error ? err.message : "Rekomendasi belum bisa dimuat.",
+        );
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [adapter]);
 
   if (isLoading) {
@@ -63,7 +80,7 @@ export function RecommendationResultScreen({
     );
   }
 
-  if (errorMessage || !result) {
+  if (errorMessage || !result || !result.topRecommendation) {
     return (
       <div className="recommendation-container">
         <div className="recommendation-error-box" role="alert">
@@ -95,8 +112,8 @@ export function RecommendationResultScreen({
           {isFallback ? (
             <>
               <h1>
-                Belum ada yang pas banget, tapi ini pilihan yang paling mendekati
-                preferensimu.
+                Belum ada yang pas banget, tapi ini pilihan yang paling
+                mendekati preferensimu.
               </h1>
               <p>
                 Kamu tetap bisa melihat experience yang paling dekat dengan
@@ -157,7 +174,9 @@ export function RecommendationResultScreen({
                 className="recommendation-why-box"
                 aria-label="Kenapa ini cocok"
               >
-                <span className="recommendation-why-title">Kenapa ini cocok?</span>
+                <span className="recommendation-why-title">
+                  Kenapa ini cocok?
+                </span>
                 <div className="recommendation-chips">
                   {topRecommendation.reasons.map((reason, idx) => (
                     <span key={idx} className="recommendation-chip">

@@ -3,9 +3,6 @@ import type { QuizDraft } from "../quiz/types";
 import {
   calculateActivityOverlap,
   checkBudgetFeasibility,
-  checkDepartureMatch,
-  checkGroupCompatibility,
-  checkIntentMatch,
   evaluateDurationRelation,
   evaluateRecommendations,
   generateMatchReasons,
@@ -61,7 +58,9 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
       budget_band: "UP_TO_200K", // <= 200000
     };
     const pkg = MOCK_RECOMMENDATION_PACKAGES[0]; // price 275000
-    expect(checkBudgetFeasibility(quizTightBudget.budget_band, pkg.pricePerPerson)).toBe(false);
+    expect(
+      checkBudgetFeasibility(quizTightBudget.budget_band, pkg.pricePerPerson),
+    ).toBe(false);
     expect(isSufficientMatch(quizTightBudget, pkg)).toBe(false);
   });
 
@@ -71,7 +70,12 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
       duration_preference: "HALF_DAY",
     };
     const pkg = MOCK_RECOMMENDATION_PACKAGES[0]; // FULL_DAY -> TOO_LONG for HALF_DAY
-    expect(evaluateDurationRelation(quizHalfDay.duration_preference, pkg.durationType)).toBe("TOO_LONG");
+    expect(
+      evaluateDurationRelation(
+        quizHalfDay.duration_preference,
+        pkg.durationType,
+      ),
+    ).toBe("TOO_LONG");
     expect(isSufficientMatch(quizHalfDay, pkg)).toBe(false);
   });
 
@@ -118,7 +122,7 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
 
     const res = evaluateRecommendations(quiz, [pkgShorter, pkgExact]);
     expect(res.state).toBe("MATCHED");
-    expect(res.topRecommendation.package.id).toBe("exact_dur");
+    expect(res.topRecommendation?.package.id).toBe("exact_dur");
   });
 
   it("8. ranks activity overlap 2 over overlap 1 when duration and intent tie", () => {
@@ -147,7 +151,7 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
     };
 
     const res = evaluateRecommendations(quiz, [pkgOverlap1, pkgOverlap2]);
-    expect(res.topRecommendation.package.id).toBe("overlap_2");
+    expect(res.topRecommendation?.package.id).toBe("overlap_2");
   });
 
   it("9. uses departure match as tie-breaker", () => {
@@ -177,7 +181,7 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
     };
 
     const res = evaluateRecommendations(quiz, [pkgSurabaya, pkgMalang]);
-    expect(res.topRecommendation.package.id).toBe("pkg_malang");
+    expect(res.topRecommendation?.package.id).toBe("pkg_malang");
   });
 
   it("10. uses group compatibility as tie-breaker", () => {
@@ -210,7 +214,7 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
     };
 
     const res = evaluateRecommendations(quiz, [pkgFamilyOnly, pkgSolo]);
-    expect(res.topRecommendation.package.id).toBe("pkg_solo");
+    expect(res.topRecommendation?.package.id).toBe("pkg_solo");
   });
 
   it("11. uses rating and popularity as final deterministic tie-breakers", () => {
@@ -237,7 +241,7 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
     };
 
     const res = evaluateRecommendations(quiz, [pkgLowRating, pkgHighRating]);
-    expect(res.topRecommendation.package.id).toBe("pkg_high_rating");
+    expect(res.topRecommendation?.package.id).toBe("pkg_high_rating");
   });
 });
 
@@ -255,7 +259,10 @@ describe("Recommendation Fallback & Logging Rules", () => {
       group_size_band: "ONE",
     };
 
-    const res = evaluateRecommendations(quizMismatched, MOCK_RECOMMENDATION_PACKAGES);
+    const res = evaluateRecommendations(
+      quizMismatched,
+      MOCK_RECOMMENDATION_PACKAGES,
+    );
     expect(res.state).toBe("FALLBACK");
     expect(res.topRecommendation).toBeDefined();
     expect(res.alternatives.length).toBeLessThanOrEqual(2);

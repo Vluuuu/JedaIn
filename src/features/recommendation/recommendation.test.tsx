@@ -46,9 +46,11 @@ const fallbackQuiz: QuizDraft = {
   group_size_band: "ONE",
 };
 
-async function renderScreen(props: {
-  adapter?: MockRecommendationAdapter;
-} = {}) {
+async function renderScreen(
+  props: {
+    adapter?: MockRecommendationAdapter;
+  } = {},
+) {
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
@@ -77,7 +79,9 @@ describe("RecommendationResultScreen UI States and Interactions", () => {
     const adapter = new MockRecommendationAdapter();
     const view = await renderScreen({ adapter });
 
-    expect(view.textContent).toContain("Ini jeda yang paling cocok buat kamu sekarang.");
+    expect(view.textContent).toContain(
+      "Ini jeda yang paling cocok buat kamu sekarang.",
+    );
     expect(view.textContent).toContain("Pilihan utama");
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
     expect(view.textContent).toContain("Kenapa ini cocok?");
@@ -132,7 +136,9 @@ describe("RecommendationResultScreen UI States and Interactions", () => {
     });
 
     // Successfully displays result after retry
-    expect(view.textContent).toContain("Ini jeda yang paling cocok buat kamu sekarang.");
+    expect(view.textContent).toContain(
+      "Ini jeda yang paling cocok buat kamu sekarang.",
+    );
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
   });
 });

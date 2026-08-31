@@ -8,7 +8,8 @@ import type {
   PreferredActivity,
 } from "../quiz/types";
 
-export type PackageStatus = "DRAFT" | "SUBMITTED" | "APPROVED" | "LIVE" | "REJECTED";
+export type PackageStatus =
+  "DRAFT" | "SUBMITTED" | "APPROVED" | "LIVE" | "REJECTED";
 
 export type VerificationLevel = "BASIC" | "PLUS";
 

@@ -8,7 +8,8 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
   {
     id: "slow_green_day",
     title: "Sehari Pelan di Lereng Hijau",
-    shortSummary: "Aktivitas santai menikmati panorama perkebunan teh dan lereng asri Batu.",
+    shortSummary:
+      "Aktivitas santai menikmati panorama perkebunan teh dan lereng asri Batu.",
     destinationName: "Lereng Hijau Batu",
     locationLabel: "Batu / Malang Raya",
     visualAsset: "/assets/packages/slow_green_day.jpg",
@@ -18,7 +19,11 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
     durationType: "FULL_DAY",
     departureAreas: ["MALANG"],
     experienceIntents: ["RECHARGE", "NATURE", "REFLECTION"],
-    activityTags: ["NATURE_SCENERY", "MINDFULNESS_RELAXATION", "LIGHT_EXPLORATION"],
+    activityTags: [
+      "NATURE_SCENERY",
+      "MINDFULNESS_RELAXATION",
+      "LIGHT_EXPLORATION",
+    ],
     suitableGroupTypes: ["SOLO", "PARTNER", "FRIENDS"],
     suitableGroupSizeBands: ["ONE", "TWO", "THREE_TO_FOUR"],
     rating: 4.85,
@@ -27,7 +32,8 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
   {
     id: "creative_village_halfday",
     title: "Ruang Kreatif Desa",
-    shortSummary: "Belajar kerajinan tangan lokal dan mengenal kehidupan desa yang tenang.",
+    shortSummary:
+      "Belajar kerajinan tangan lokal dan mengenal kehidupan desa yang tenang.",
     destinationName: "Desa Wisata Budaya",
     locationLabel: "Malang Raya",
     visualAsset: "/assets/packages/creative_village.jpg",
@@ -46,7 +52,8 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
   {
     id: "mindful_morning",
     title: "Pagi Hening & Mindful Reset",
-    shortSummary: "Sesi relaksasi pagi hari di tengah keheningan alam pegunungan sejuk.",
+    shortSummary:
+      "Sesi relaksasi pagi hari di tengah keheningan alam pegunungan sejuk.",
     destinationName: "Oase Hening Trawas",
     locationLabel: "Mojokerto Raya",
     visualAsset: "/assets/packages/mindful_morning.jpg",
@@ -65,7 +72,8 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
   {
     id: "light_mountain_explore",
     title: "Jelajah Santai Pegunungan",
-    shortSummary: "Jalan santai outdoor menyusuri jalur pegunungan yang menyegarkan tubuh.",
+    shortSummary:
+      "Jalan santai outdoor menyusuri jalur pegunungan yang menyegarkan tubuh.",
     destinationName: "Taman Alam Prigen",
     locationLabel: "Pasuruan Raya",
     visualAsset: "/assets/packages/mountain_explore.jpg",
@@ -84,7 +92,8 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
   {
     id: "weekend_nature_reset",
     title: "Weekend Nature Reset",
-    shortSummary: "Recharge akhir pekan dengan bermalam di alam terbuka yang tenang.",
+    shortSummary:
+      "Recharge akhir pekan dengan bermalam di alam terbuka yang tenang.",
     destinationName: "Lembah Alam Pacet",
     locationLabel: "Mojokerto Raya",
     visualAsset: "/assets/packages/weekend_reset.jpg",
@@ -94,7 +103,11 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
     durationType: "TWO_D_ONE_N",
     departureAreas: ["SURABAYA"],
     experienceIntents: ["RECHARGE", "NATURE", "SOCIAL"],
-    activityTags: ["NATURE_SCENERY", "MINDFULNESS_RELAXATION", "LIGHT_EXPLORATION"],
+    activityTags: [
+      "NATURE_SCENERY",
+      "MINDFULNESS_RELAXATION",
+      "LIGHT_EXPLORATION",
+    ],
     suitableGroupTypes: ["PARTNER", "FRIENDS", "FAMILY"],
     suitableGroupSizeBands: ["TWO", "THREE_TO_FOUR", "FIVE_PLUS"],
     rating: 4.88,

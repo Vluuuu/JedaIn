@@ -62,8 +62,7 @@ export class MockRecommendationAdapter implements RecommendationAdapter {
       );
     }
 
-    const quiz =
-      quizOverride ??
+    const quiz = quizOverride ??
       sessionStore.getQuizDraft() ?? {
         currentStep: 6,
         current_intent: "RECHARGE",

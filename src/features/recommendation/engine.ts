@@ -1,8 +1,4 @@
-import type {
-  BudgetBand,
-  DurationPreference,
-  QuizDraft,
-} from "../quiz/types";
+import type { BudgetBand, DurationPreference, QuizDraft } from "../quiz/types";
 import {
   QUIZ_ACTIVITY_OPTIONS,
   QUIZ_DURATION_OPTIONS,
@@ -141,8 +137,13 @@ export function generateMatchReasons(
   const reasons: string[] = [];
 
   // 1. Current intent
-  if (quiz.current_intent && pkg.experienceIntents?.includes(quiz.current_intent)) {
-    const opt = QUIZ_INTENT_OPTIONS.find((o) => o.value === quiz.current_intent);
+  if (
+    quiz.current_intent &&
+    pkg.experienceIntents?.includes(quiz.current_intent)
+  ) {
+    const opt = QUIZ_INTENT_OPTIONS.find(
+      (o) => o.value === quiz.current_intent,
+    );
     if (opt) reasons.push(opt.label);
   }
 
@@ -152,7 +153,9 @@ export function generateMatchReasons(
       pkg.activityTags.includes(a),
     );
     if (matchedActivity) {
-      const opt = QUIZ_ACTIVITY_OPTIONS.find((o) => o.value === matchedActivity);
+      const opt = QUIZ_ACTIVITY_OPTIONS.find(
+        (o) => o.value === matchedActivity,
+      );
       if (opt) reasons.push(opt.label);
     }
   }
@@ -161,7 +164,8 @@ export function generateMatchReasons(
   if (
     quiz.duration_preference &&
     pkg.durationType &&
-    evaluateDurationRelation(quiz.duration_preference, pkg.durationType) === "EXACT"
+    evaluateDurationRelation(quiz.duration_preference, pkg.durationType) ===
+      "EXACT"
   ) {
     const opt = QUIZ_DURATION_OPTIONS.find(
       (o) => o.value === quiz.duration_preference,
@@ -208,8 +212,14 @@ export function evaluateRecommendations(
     // Rank sufficient matches
     const sorted = [...sufficient].sort((a, b) => {
       // 1. Duration EXACT > SHORTER_BUT_FEASIBLE
-      const durA = evaluateDurationRelation(quiz.duration_preference, a.durationType);
-      const durB = evaluateDurationRelation(quiz.duration_preference, b.durationType);
+      const durA = evaluateDurationRelation(
+        quiz.duration_preference,
+        a.durationType,
+      );
+      const durB = evaluateDurationRelation(
+        quiz.duration_preference,
+        b.durationType,
+      );
       if (durA === "EXACT" && durB !== "EXACT") return -1;
       if (durB === "EXACT" && durA !== "EXACT") return 1;
 
@@ -241,10 +251,12 @@ export function evaluateRecommendations(
       reasons: generateMatchReasons(quiz, topPkg),
     };
 
-    const alternatives: RecommendationItem[] = sorted.slice(1, 3).map((pkg) => ({
-      package: pkg,
-      reasons: generateMatchReasons(quiz, pkg),
-    }));
+    const alternatives: RecommendationItem[] = sorted
+      .slice(1, 3)
+      .map((pkg) => ({
+        package: pkg,
+        reasons: generateMatchReasons(quiz, pkg),
+      }));
 
     return {
       state: "MATCHED",
@@ -266,13 +278,20 @@ export function evaluateRecommendations(
     if (actA !== actB) return actB - actA;
 
     // 3. Budget feasible
-    const budA = checkBudgetFeasibility(quiz.budget_band, a.pricePerPerson) ? 1 : 0;
-    const budB = checkBudgetFeasibility(quiz.budget_band, b.pricePerPerson) ? 1 : 0;
+    const budA = checkBudgetFeasibility(quiz.budget_band, a.pricePerPerson)
+      ? 1
+      : 0;
+    const budB = checkBudgetFeasibility(quiz.budget_band, b.pricePerPerson)
+      ? 1
+      : 0;
     if (budA !== budB) return budB - budA;
 
     // 4. Duration relation: EXACT > SHORTER_BUT_FEASIBLE > TOO_LONG
     const durRank = (p: PackageRecommendationSource) => {
-      const rel = evaluateDurationRelation(quiz.duration_preference, p.durationType);
+      const rel = evaluateDurationRelation(
+        quiz.duration_preference,
+        p.durationType,
+      );
       if (rel === "EXACT") return 3;
       if (rel === "SHORTER_BUT_FEASIBLE") return 2;
       return 1;
@@ -313,7 +332,7 @@ export function evaluateRecommendations(
 
   return {
     state: "FALLBACK",
-    topRecommendation: topItem as any,
+    topRecommendation: topItem,
     alternatives,
   };
 }

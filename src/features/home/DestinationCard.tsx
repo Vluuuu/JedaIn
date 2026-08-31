@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Badge } from "../../components/ui";
+import { getDestinationVisual } from "../../lib/assets/packageImages";
 import type { VerifiedDestinationItem } from "./types";
 
 export interface DestinationCardProps {
@@ -7,12 +8,19 @@ export interface DestinationCardProps {
 }
 
 export function DestinationCard({ destination }: DestinationCardProps) {
+  const visual = getDestinationVisual(destination.destinationName);
+
   return (
     <Link
       to={`/explore?destination=${encodeURIComponent(destination.destinationName)}`}
       className="home-destination-card"
     >
-      <div className="home-destination-card__visual">
+      <div
+        className="home-destination-card__visual"
+        style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
+        role="img"
+        aria-label={`Destinasi ${destination.destinationName}`}
+      >
         <span className="home-destination-card__badge">
           <Badge tone="success">
             {destination.verificationLevel === "PLUS"

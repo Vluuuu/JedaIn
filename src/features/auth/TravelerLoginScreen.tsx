@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button, Dialog } from "../../components/ui";
+import { LOGIN_ATMOSPHERE_VISUAL } from "../../lib/assets/packageImages";
 import { env } from "../../lib/config/env";
 import { sessionStore } from "../onboarding/sessionStore";
 import { AuthMethodDivider } from "./AuthMethodDivider";
@@ -169,109 +170,133 @@ export function TravelerLoginScreen({
 
   return (
     <div className="auth-container">
-      <div className="auth-card">
-        <header className="auth-header">
-          <div className="auth-header__badge">
-            <Badge tone="info">Traveler Portal</Badge>
+      <div className="auth-layout">
+        {/* Desktop Visual Hero Story */}
+        <div
+          className="auth-visual-hero"
+          style={{
+            backgroundImage: `url("${LOGIN_ATMOSPHERE_VISUAL.svgDataUri}")`,
+          }}
+          aria-hidden="true"
+        >
+          <div className="auth-visual-hero__overlay">
+            <span className="auth-visual-hero__tag">
+              Wisata Wellness Terkurasi
+            </span>
+            <h2 className="auth-visual-hero__title">
+              Jeda sejenak di alam dan budaya lokal Jawa Timur.
+            </h2>
+            <p className="auth-visual-hero__desc">
+              Pengalaman wellness terverifikasi, dirancang khusus berdasarkan
+              kebutuhanmu.
+            </p>
           </div>
-          <h1>Masuk atau mulai perjalananmu</h1>
-          <p>
-            Temukan jeda yang terkurasi dan personal dengan pengalaman lokal
-            terpercaya.
-          </p>
-        </header>
-
-        {googleError && (
-          <div className="auth-error-banner" role="alert">
-            <p>{googleError}</p>
-          </div>
-        )}
-
-        <div className="auth-actions">
-          {/* Primary Action: Google OAuth */}
-          <Button
-            type="button"
-            variant="secondary"
-            size="lg"
-            className="auth-google-button"
-            onClick={handleGoogleLogin}
-            loading={activeMethod === "GOOGLE"}
-            loadingLabel="Menghubungkan Google..."
-            disabled={isAnyLoading}
-          >
-            <GoogleIcon />
-            <span>Lanjut dengan Google</span>
-          </Button>
-
-          <AuthMethodDivider />
-
-          {/* Alternative 1: Phone OTP */}
-          <PhoneOtpForm
-            phone={phone}
-            onPhoneChange={(val) => {
-              setPhone(val);
-              if (phoneError) setPhoneError(undefined);
-            }}
-            onRequestOtp={handleRequestPhoneOtp}
-            onVerifyOtp={handleVerifyPhoneOtp}
-            onResetToPhone={handleResetToPhone}
-            isOtpSent={
-              Boolean(otpSession) ||
-              authState === "OTP_SENT" ||
-              authState === "OTP_VERIFYING"
-            }
-            isSubmitting={
-              activeMethod === "PHONE_REQUEST" ||
-              activeMethod === "PHONE_VERIFY"
-            }
-            isDisabled={isAnyLoading}
-            error={phoneError}
-          />
-
-          {/* Alternative 2: Email Magic Link (Configurable) */}
-          {enableEmailAuth && (
-            <>
-              <AuthMethodDivider label="atau dengan email" />
-              <EmailAuthForm
-                email={email}
-                onEmailChange={(val) => {
-                  setEmail(val);
-                  if (emailError) setEmailError(undefined);
-                }}
-                onRequestEmailLink={handleRequestEmailLink}
-                isSubmitting={activeMethod === "EMAIL"}
-                isDisabled={isAnyLoading}
-                isSent={emailSent}
-                error={emailError}
-              />
-            </>
-          )}
         </div>
 
-        <footer className="auth-footer">
-          <p>
-            Dengan masuk atau mendaftar, kamu menyetujui{" "}
-            <button
+        <div className="auth-card">
+          <header className="auth-header">
+            <div className="auth-header__badge">
+              <Badge tone="info">Traveler Portal</Badge>
+            </div>
+            <h1>Masuk atau mulai perjalananmu</h1>
+            <p>
+              Temukan jeda yang terkurasi dan personal dengan pengalaman lokal
+              terpercaya.
+            </p>
+          </header>
+
+          {googleError && (
+            <div className="auth-error-banner" role="alert">
+              <p>{googleError}</p>
+            </div>
+          )}
+
+          <div className="auth-actions">
+            {/* Primary Action: Google OAuth */}
+            <Button
               type="button"
-              className="auth-legal-link"
-              onClick={() => setLegalModal("terms")}
+              variant="secondary"
+              size="lg"
+              className="auth-google-button"
+              onClick={handleGoogleLogin}
+              loading={activeMethod === "GOOGLE"}
+              loadingLabel="Menghubungkan Google..."
+              disabled={isAnyLoading}
             >
-              Syarat & Ketentuan
-            </button>{" "}
-            serta{" "}
-            <button
-              type="button"
-              className="auth-legal-link"
-              onClick={() => setLegalModal("privacy")}
-            >
-              Kebijakan Privasi
-            </button>{" "}
-            JedaIn.
-          </p>
-          <Link to="/partner" className="auth-partner-link">
-            Masuk sebagai Partner Event Organizer / Destinasi &rarr;
-          </Link>
-        </footer>
+              <GoogleIcon />
+              <span>Lanjut dengan Google</span>
+            </Button>
+
+            <AuthMethodDivider />
+
+            {/* Alternative 1: Phone OTP */}
+            <PhoneOtpForm
+              phone={phone}
+              onPhoneChange={(val) => {
+                setPhone(val);
+                if (phoneError) setPhoneError(undefined);
+              }}
+              onRequestOtp={handleRequestPhoneOtp}
+              onVerifyOtp={handleVerifyPhoneOtp}
+              onResetToPhone={handleResetToPhone}
+              isOtpSent={
+                Boolean(otpSession) ||
+                authState === "OTP_SENT" ||
+                authState === "OTP_VERIFYING"
+              }
+              isSubmitting={
+                activeMethod === "PHONE_REQUEST" ||
+                activeMethod === "PHONE_VERIFY"
+              }
+              isDisabled={isAnyLoading}
+              error={phoneError}
+            />
+
+            {/* Alternative 2: Email Magic Link (Configurable) */}
+            {enableEmailAuth && (
+              <>
+                <AuthMethodDivider label="atau dengan email" />
+                <EmailAuthForm
+                  email={email}
+                  onEmailChange={(val) => {
+                    setEmail(val);
+                    if (emailError) setEmailError(undefined);
+                  }}
+                  onRequestEmailLink={handleRequestEmailLink}
+                  isSubmitting={activeMethod === "EMAIL"}
+                  isDisabled={isAnyLoading}
+                  isSent={emailSent}
+                  error={emailError}
+                />
+              </>
+            )}
+          </div>
+
+          <footer className="auth-footer">
+            <p>
+              Dengan masuk atau mendaftar, kamu menyetujui{" "}
+              <button
+                type="button"
+                className="auth-legal-link"
+                onClick={() => setLegalModal("terms")}
+              >
+                Syarat & Ketentuan
+              </button>{" "}
+              serta{" "}
+              <button
+                type="button"
+                className="auth-legal-link"
+                onClick={() => setLegalModal("privacy")}
+              >
+                Kebijakan Privasi
+              </button>{" "}
+              JedaIn.
+            </p>
+            <Link to="/partner" className="auth-partner-link">
+              Masuk sebagai Partner Event Organizer / Destinasi &rarr;
+            </Link>
+          </footer>
+        </div>
       </div>
 
       <Dialog

@@ -22,18 +22,21 @@ export interface MockRecommendationAdapterOptions {
 /**
  * Validates that a QuizDraft contains all required answers for recommendation generation.
  */
-export function isCompletedQuizDraft(draft: QuizDraft | null): draft is QuizDraft {
+export function isCompletedQuizDraft(
+  draft: QuizDraft | null,
+): draft is QuizDraft {
   if (!draft) return false;
   return Boolean(
     draft.current_intent &&
-      draft.preferred_activities &&
-      draft.preferred_activities.length >= 1 &&
-      draft.preferred_activities.length <= 2 &&
-      draft.budget_band &&
-      draft.duration_preference &&
-      draft.departure_area_id &&
-      (draft.departure_area_id !== "OTHER" || draft.departure_area_label?.trim()) &&
-      isValidGroupContext(draft.group_type, draft.group_size_band),
+    draft.preferred_activities &&
+    draft.preferred_activities.length >= 1 &&
+    draft.preferred_activities.length <= 2 &&
+    draft.budget_band &&
+    draft.duration_preference &&
+    draft.departure_area_id &&
+    (draft.departure_area_id !== "OTHER" ||
+      draft.departure_area_label?.trim()) &&
+    isValidGroupContext(draft.group_type, draft.group_size_band),
   );
 }
 

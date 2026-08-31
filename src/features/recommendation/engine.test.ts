@@ -238,7 +238,10 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
       popularityRank: 99,
     };
 
-    const resRating = evaluateRecommendations(quiz, [pkgLowRating, pkgHighRating]);
+    const resRating = evaluateRecommendations(quiz, [
+      pkgLowRating,
+      pkgHighRating,
+    ]);
     expect(resRating.topRecommendation?.package.id).toBe("pkg_high_rating");
 
     // B. Same rating -> Higher popularityRank wins
@@ -256,7 +259,10 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
       popularityRank: 70,
     };
 
-    const resPopularity = evaluateRecommendations(quiz, [pkgLessPopular, pkgPopular]);
+    const resPopularity = evaluateRecommendations(quiz, [
+      pkgLessPopular,
+      pkgPopular,
+    ]);
     expect(resPopularity.topRecommendation?.package.id).toBe("pkg_popular");
   });
 });

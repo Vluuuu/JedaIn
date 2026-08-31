@@ -31,6 +31,15 @@ export function CheckCircleIcon(props: IconProps) {
   );
 }
 
+export function CompassTargetIcon(props: IconProps) {
+  return (
+    <svg {...iconBaseProps} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <polygon points="12 8 15 12 12 16 9 12 12 8" />
+    </svg>
+  );
+}
+
 export function MapPinIcon(props: IconProps) {
   return (
     <svg {...iconBaseProps} {...props}>

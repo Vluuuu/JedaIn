@@ -43,14 +43,21 @@ export const sessionStore = {
       currentSession = { ...defaultSession };
       return;
     }
+
+    const isSameUser = currentSession.user?.id === user.id;
+
     currentSession = {
-      ...currentSession,
       user: { ...user },
       onboarding: {
         status: user.onboardingStatus,
         hasConsent: user.onboardingStatus !== "NOT_STARTED",
         updatedAt: new Date().toISOString(),
       },
+      // Prevent cross-user draft leakage: only preserve draft if the authenticated user id matches
+      quizDraft:
+        isSameUser && currentSession.quizDraft
+          ? { ...currentSession.quizDraft }
+          : null,
     };
   },
 

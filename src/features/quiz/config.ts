@@ -11,41 +11,32 @@ import type {
 export interface OptionItem<T> {
   value: T;
   label: string;
-  sublabel?: string;
-  iconName?: string;
 }
 
 export const QUIZ_INTENT_OPTIONS: OptionItem<CurrentIntent>[] = [
   {
     value: "RECHARGE",
     label: "Tenang & recharge",
-    sublabel: "Istirahat santai melepas penat dan mengisi ulang energi.",
   },
   {
     value: "NATURE",
     label: "Dekat dengan alam",
-    sublabel: "Menikmati lanskap hijau, udara segar, dan ketenangan alam.",
   },
   {
     value: "NOVELTY",
     label: "Eksplorasi & suasana baru",
-    sublabel: "Melihat sudut baru dan merasakan atmosfer segar.",
   },
   {
     value: "REFLECTION",
     label: "Refleksi & me-time",
-    sublabel: "Ruang tenang untuk menjernihkan pikiran secara personal.",
   },
   {
     value: "ACTIVE",
     label: "Bergerak & lebih aktif",
-    sublabel: "Penyegaran melalui jalan santai atau aktivitas luar ruangan.",
   },
   {
     value: "SOCIAL",
     label: "Quality time bareng orang dekat",
-    sublabel:
-      "Momen hangat dan bermakna bersama pasangan, teman, atau keluarga.",
   },
 ];
 
@@ -53,32 +44,26 @@ export const QUIZ_ACTIVITY_OPTIONS: OptionItem<PreferredActivity>[] = [
   {
     value: "NATURE_SCENERY",
     label: "Alam & pemandangan",
-    sublabel: "Panorama alam, perkebunan, dan bukit asri.",
   },
   {
     value: "MINDFULNESS_RELAXATION",
     label: "Relaksasi & mindfulness",
-    sublabel: "Sesi relaksasi, napas tenang, dan suasana damai.",
   },
   {
     value: "LOCAL_CULTURE",
     label: "Budaya & pengalaman lokal",
-    sublabel: "Kehidupan desa, tradisi, dan kearifan lokal.",
   },
   {
     value: "CREATIVE_WORKSHOP",
     label: "Kreatif & workshop",
-    sublabel: "Aktivitas kerajinan, seni, atau berkebun ringan.",
   },
   {
     value: "LIGHT_EXPLORATION",
     label: "Eksplorasi ringan",
-    sublabel: "Jalan santai menyusuri spot menarik tanpa terburu-buru.",
   },
   {
     value: "OUTDOOR_ACTIVE",
     label: "Outdoor & aktif",
-    sublabel: "Aktivitas luar ruangan yang menyegarkan fisik.",
   },
 ];
 
@@ -139,22 +124,18 @@ export const QUIZ_GROUP_TYPE_OPTIONS: OptionItem<GroupType>[] = [
   {
     value: "SOLO",
     label: "Sendiri",
-    sublabel: "Perjalanan me-time dan ketenangan solo.",
   },
   {
     value: "PARTNER",
     label: "Pasangan",
-    sublabel: "Jeda berdua dengan pasangan.",
   },
   {
     value: "FRIENDS",
     label: "Teman",
-    sublabel: "Aktivitas seru bareng sahabat.",
   },
   {
     value: "FAMILY",
     label: "Keluarga",
-    sublabel: "Momen hangat bersama keluarga.",
   },
 ];
 

@@ -11,7 +11,16 @@ import {
   QUIZ_INTENT_OPTIONS,
   TOTAL_QUIZ_STEPS,
 } from "./config";
-import { ArrowLeftIcon, CheckCircleIcon } from "./icons";
+import {
+  ArrowLeftIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  CompassTargetIcon,
+  MapPinIcon,
+  SparklesIcon,
+  UsersIcon,
+  WalletIcon,
+} from "./icons";
 import { defaultQuizAdapter } from "./mockAdapter";
 import type {
   BudgetBand,
@@ -24,6 +33,7 @@ import type {
   QuizAdapter,
   QuizDraft,
 } from "./types";
+import { isValidGroupContext } from "./validation";
 import "./quiz.css";
 
 export interface TravelerQuizScreenProps {
@@ -92,8 +102,14 @@ export function TravelerQuizScreen({
           resumeStep = 2;
         else if (!draft.budget_band) resumeStep = 3;
         else if (!draft.duration_preference) resumeStep = 4;
-        else if (!draft.departure_area_id) resumeStep = 5;
-        else if (!draft.group_type || !draft.group_size_band) resumeStep = 6;
+        else if (
+          !draft.departure_area_id ||
+          (draft.departure_area_id === "OTHER" &&
+            !draft.departure_area_label?.trim())
+        )
+          resumeStep = 5;
+        else if (!isValidGroupContext(draft.group_type, draft.group_size_band))
+          resumeStep = 6;
 
         setCurrentStep(resumeStep);
         setIsLoading(false);
@@ -127,7 +143,7 @@ export function TravelerQuizScreen({
         }
         return true;
       case 6:
-        return Boolean(groupType && groupSizeBand);
+        return isValidGroupContext(groupType, groupSizeBand);
       default:
         return false;
     }
@@ -309,22 +325,23 @@ export function TravelerQuizScreen({
                       }}
                       disabled={isSubmitting}
                     >
+                      <div
+                        className="quiz-option-card__icon-badge"
+                        aria-hidden="true"
+                      >
+                        <CompassTargetIcon />
+                      </div>
+                      <div className="quiz-option-card__content">
+                        <strong className="quiz-option-card__title">
+                          {opt.label}
+                        </strong>
+                      </div>
                       <span
                         className="quiz-option-card__indicator"
                         aria-hidden="true"
                       >
                         <CheckCircleIcon />
                       </span>
-                      <div className="quiz-option-card__content">
-                        <strong className="quiz-option-card__title">
-                          {opt.label}
-                        </strong>
-                        {opt.sublabel && (
-                          <span className="quiz-option-card__desc">
-                            {opt.sublabel}
-                          </span>
-                        )}
-                      </div>
                     </button>
                   );
                 })}
@@ -364,22 +381,23 @@ export function TravelerQuizScreen({
                       onClick={() => toggleActivity(opt.value)}
                       disabled={isSubmitting || (isMaxReached && !isSelected)}
                     >
+                      <div
+                        className="quiz-option-card__icon-badge"
+                        aria-hidden="true"
+                      >
+                        <SparklesIcon />
+                      </div>
+                      <div className="quiz-option-card__content">
+                        <strong className="quiz-option-card__title">
+                          {opt.label}
+                        </strong>
+                      </div>
                       <span
                         className="quiz-option-card__indicator"
                         aria-hidden="true"
                       >
                         <CheckCircleIcon />
                       </span>
-                      <div className="quiz-option-card__content">
-                        <strong className="quiz-option-card__title">
-                          {opt.label}
-                        </strong>
-                        {opt.sublabel && (
-                          <span className="quiz-option-card__desc">
-                            {opt.sublabel}
-                          </span>
-                        )}
-                      </div>
                     </button>
                   );
                 })}
@@ -417,17 +435,23 @@ export function TravelerQuizScreen({
                       }}
                       disabled={isSubmitting}
                     >
+                      <div
+                        className="quiz-option-card__icon-badge"
+                        aria-hidden="true"
+                      >
+                        <WalletIcon />
+                      </div>
+                      <div className="quiz-option-card__content">
+                        <strong className="quiz-option-card__title">
+                          {opt.label}
+                        </strong>
+                      </div>
                       <span
                         className="quiz-option-card__indicator"
                         aria-hidden="true"
                       >
                         <CheckCircleIcon />
                       </span>
-                      <div className="quiz-option-card__content">
-                        <strong className="quiz-option-card__title">
-                          {opt.label}
-                        </strong>
-                      </div>
                     </button>
                   );
                 })}
@@ -469,17 +493,23 @@ export function TravelerQuizScreen({
                       }}
                       disabled={isSubmitting}
                     >
+                      <div
+                        className="quiz-option-card__icon-badge"
+                        aria-hidden="true"
+                      >
+                        <ClockIcon />
+                      </div>
+                      <div className="quiz-option-card__content">
+                        <strong className="quiz-option-card__title">
+                          {opt.label}
+                        </strong>
+                      </div>
                       <span
                         className="quiz-option-card__indicator"
                         aria-hidden="true"
                       >
                         <CheckCircleIcon />
                       </span>
-                      <div className="quiz-option-card__content">
-                        <strong className="quiz-option-card__title">
-                          {opt.label}
-                        </strong>
-                      </div>
                     </button>
                   );
                 })}
@@ -520,17 +550,23 @@ export function TravelerQuizScreen({
                       }}
                       disabled={isSubmitting}
                     >
+                      <div
+                        className="quiz-option-card__icon-badge"
+                        aria-hidden="true"
+                      >
+                        <MapPinIcon />
+                      </div>
+                      <div className="quiz-option-card__content">
+                        <strong className="quiz-option-card__title">
+                          {opt.label}
+                        </strong>
+                      </div>
                       <span
                         className="quiz-option-card__indicator"
                         aria-hidden="true"
                       >
                         <CheckCircleIcon />
                       </span>
-                      <div className="quiz-option-card__content">
-                        <strong className="quiz-option-card__title">
-                          {opt.label}
-                        </strong>
-                      </div>
                     </button>
                   );
                 })}
@@ -582,22 +618,23 @@ export function TravelerQuizScreen({
                       onClick={() => handleGroupTypeSelect(opt.value)}
                       disabled={isSubmitting}
                     >
+                      <div
+                        className="quiz-option-card__icon-badge"
+                        aria-hidden="true"
+                      >
+                        <UsersIcon />
+                      </div>
+                      <div className="quiz-option-card__content">
+                        <strong className="quiz-option-card__title">
+                          {opt.label}
+                        </strong>
+                      </div>
                       <span
                         className="quiz-option-card__indicator"
                         aria-hidden="true"
                       >
                         <CheckCircleIcon />
                       </span>
-                      <div className="quiz-option-card__content">
-                        <strong className="quiz-option-card__title">
-                          {opt.label}
-                        </strong>
-                        {opt.sublabel && (
-                          <span className="quiz-option-card__desc">
-                            {opt.sublabel}
-                          </span>
-                        )}
-                      </div>
                     </button>
                   );
                 })}
@@ -629,17 +666,23 @@ export function TravelerQuizScreen({
                           }}
                           disabled={isSubmitting}
                         >
+                          <div
+                            className="quiz-option-card__icon-badge"
+                            aria-hidden="true"
+                          >
+                            <UsersIcon />
+                          </div>
+                          <div className="quiz-option-card__content">
+                            <strong className="quiz-option-card__title">
+                              {opt.label}
+                            </strong>
+                          </div>
                           <span
                             className="quiz-option-card__indicator"
                             aria-hidden="true"
                           >
                             <CheckCircleIcon />
                           </span>
-                          <div className="quiz-option-card__content">
-                            <strong className="quiz-option-card__title">
-                              {opt.label}
-                            </strong>
-                          </div>
                         </button>
                       );
                     })}

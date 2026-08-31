@@ -8,6 +8,7 @@ import { sessionStore } from "../onboarding/sessionStore";
 import { MockQuizAdapter } from "./mockAdapter";
 import { TravelerQuizScreen } from "./TravelerQuizScreen";
 import type { QuizDraft } from "./types";
+import { isValidGroupContext } from "./validation";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -42,6 +43,65 @@ async function renderQuiz(
   );
   return container;
 }
+
+describe("Q6 Canonical Semantic Validator", () => {
+  it("validates SOLO allows only ONE", () => {
+    expect(isValidGroupContext("SOLO", "ONE")).toBe(true);
+    expect(isValidGroupContext("SOLO", "TWO")).toBe(false);
+    expect(isValidGroupContext("SOLO", "FIVE_PLUS")).toBe(false);
+  });
+
+  it("validates PARTNER allows only TWO", () => {
+    expect(isValidGroupContext("PARTNER", "TWO")).toBe(true);
+    expect(isValidGroupContext("PARTNER", "ONE")).toBe(false);
+    expect(isValidGroupContext("PARTNER", "THREE_TO_FOUR")).toBe(false);
+  });
+
+  it("validates FRIENDS requires TWO, THREE_TO_FOUR, or FIVE_PLUS", () => {
+    expect(isValidGroupContext("FRIENDS", "ONE")).toBe(false);
+    expect(isValidGroupContext("FRIENDS", "TWO")).toBe(true);
+    expect(isValidGroupContext("FRIENDS", "THREE_TO_FOUR")).toBe(true);
+    expect(isValidGroupContext("FRIENDS", "FIVE_PLUS")).toBe(true);
+  });
+
+  it("validates FAMILY requires TWO, THREE_TO_FOUR, or FIVE_PLUS", () => {
+    expect(isValidGroupContext("FAMILY", "ONE")).toBe(false);
+    expect(isValidGroupContext("FAMILY", "TWO")).toBe(true);
+    expect(isValidGroupContext("FAMILY", "THREE_TO_FOUR")).toBe(true);
+    expect(isValidGroupContext("FAMILY", "FIVE_PLUS")).toBe(true);
+  });
+});
+
+describe("Cross-User SessionStore QuizDraft Isolation", () => {
+  it("clears quizDraft when setUser is called with a different user ID, but keeps for same user", () => {
+    sessionStore.setUser({
+      id: "usr_A",
+      onboardingStatus: "IN_PROGRESS",
+    });
+    sessionStore.setQuizDraft({
+      currentStep: 3,
+      current_intent: "RECHARGE",
+      preferred_activities: ["NATURE_SCENERY"],
+    });
+
+    expect(sessionStore.getQuizDraft()?.current_intent).toBe("RECHARGE");
+
+    // Same user updates status or profile -> draft preserved
+    sessionStore.setUser({
+      id: "usr_A",
+      onboardingStatus: "IN_PROGRESS",
+      name: "User A Updated",
+    });
+    expect(sessionStore.getQuizDraft()?.current_intent).toBe("RECHARGE");
+
+    // User B logs in -> draft MUST be cleared to prevent data leakage
+    sessionStore.setUser({
+      id: "usr_B",
+      onboardingStatus: "NOT_STARTED",
+    });
+    expect(sessionStore.getQuizDraft()).toBeNull();
+  });
+});
 
 describe("TravelerQuizScreen Full Six-Step Flow & Rules", () => {
   it("starts on Step 1, disables Next when unselected, and enables on choice", async () => {
@@ -123,6 +183,23 @@ describe("TravelerQuizScreen Full Six-Step Flow & Rules", () => {
       opt3.click();
     });
     expect(view.textContent).toContain("Terpilih: 2 dari maksimal 2");
+  });
+
+  it("resumes to the actual latest incomplete step", async () => {
+    // Draft has completed Q1, Q2, Q3 but Q4 duration is missing
+    const adapter = new MockQuizAdapter({
+      initialDraft: {
+        currentStep: 6, // previous currentStep was 6 but data was cleared/incomplete
+        current_intent: "RECHARGE",
+        preferred_activities: ["NATURE_SCENERY"],
+        budget_band: "UP_TO_200K",
+        // duration_preference missing
+      },
+    });
+
+    const view = await renderQuiz({ adapter });
+    expect(view.textContent).toContain("Langkah 4 dari 6");
+    expect(view.textContent).toContain("Berapa lama waktu yang realistis");
   });
 
   it("handles Q5 OTHER selection by requiring non-empty departure area label", async () => {
@@ -247,9 +324,10 @@ describe("TravelerQuizScreen Full Six-Step Flow & Rules", () => {
     expect(recheckedNature.getAttribute("aria-checked")).toBe("true");
   });
 
-  it("handles step save failure by displaying error without losing local state", async () => {
+  it("handles step save failure and allows successful retry on subsequent submit", async () => {
+    // Fails once, then succeeds on retry
     const adapter = new MockQuizAdapter({
-      shouldFailSave: true,
+      failSaveCount: 1,
       errorMessage: "Gagal menyimpan ke server simulasi.",
     });
 
@@ -263,11 +341,21 @@ describe("TravelerQuizScreen Full Six-Step Flow & Rules", () => {
     const nextBtn = view.querySelector<HTMLButtonElement>(
       ".quiz-submit-button",
     )!;
+
+    // 1st attempt -> fails
     await act(() => nextBtn.click());
 
     expect(view.textContent).toContain("Gagal menyimpan ke server simulasi.");
     expect(view.textContent).toContain("Langkah 1 dari 6");
     expect(opt.getAttribute("aria-checked")).toBe("true");
+
+    // 2nd attempt -> retry succeeds and advances to Step 2
+    await act(() => nextBtn.click());
+
+    expect(view.textContent).not.toContain(
+      "Gagal menyimpan ke server simulasi.",
+    );
+    expect(view.textContent).toContain("Langkah 2 dari 6");
   });
 
   it("completes full quiz on step 6 and transitions onboarding state to COMPLETED", async () => {

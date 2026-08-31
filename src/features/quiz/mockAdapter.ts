@@ -1,9 +1,11 @@
 import { sessionStore } from "../onboarding/sessionStore";
 import type { QuizAdapter, QuizCompletionResult, QuizDraft } from "./types";
+import { isValidGroupContext } from "./validation";
 
 export interface MockQuizAdapterOptions {
   initialDraft?: Partial<QuizDraft>;
   shouldFailSave?: boolean;
+  failSaveCount?: number;
   shouldFailComplete?: boolean;
   errorMessage?: string;
   delayMs?: number;
@@ -12,6 +14,7 @@ export interface MockQuizAdapterOptions {
 export class MockQuizAdapter implements QuizAdapter {
   private draft: QuizDraft;
   private options: MockQuizAdapterOptions;
+  private failedSaveAttempts = 0;
 
   constructor(options: MockQuizAdapterOptions = {}) {
     this.options = options;
@@ -72,6 +75,17 @@ export class MockQuizAdapter implements QuizAdapter {
       );
     }
 
+    if (
+      this.options.failSaveCount !== undefined &&
+      this.failedSaveAttempts < this.options.failSaveCount
+    ) {
+      this.failedSaveAttempts++;
+      throw new Error(
+        this.options.errorMessage ??
+          "Gagal menyimpan jawaban langkah ini. Silakan coba lagi.",
+      );
+    }
+
     this.draft = {
       ...this.draft,
       ...stepData,
@@ -102,10 +116,11 @@ export class MockQuizAdapter implements QuizAdapter {
       !finalDraft.departure_area_id ||
       (finalDraft.departure_area_id === "OTHER" &&
         !finalDraft.departure_area_label?.trim()) ||
-      !finalDraft.group_type ||
-      !finalDraft.group_size_band
+      !isValidGroupContext(finalDraft.group_type, finalDraft.group_size_band)
     ) {
-      throw new Error("Semua 6 pertanyaan kuis wajib diisi sebelum selesai.");
+      throw new Error(
+        "Semua 6 pertanyaan kuis wajib diisi dengan valid sebelum selesai.",
+      );
     }
 
     this.draft = {

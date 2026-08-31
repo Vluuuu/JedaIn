@@ -437,6 +437,7 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
       firstCard.click();
     });
 
-    expect(container.textContent).toContain("Package detail");
+    expect(container.textContent).toContain("Sehari Pelan di Lereng Hijau");
+    expect(container.textContent).toContain("Mulai dari");
   });
 });

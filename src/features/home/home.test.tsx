@@ -370,7 +370,8 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
       b.textContent?.includes("Lihat Experience"),
     )!;
     await act(() => recBtn.click());
-    expect(container.textContent).toContain("Package detail");
+    expect(container.textContent).toContain("Sehari Pelan di Lereng Hijau");
+    expect(container.textContent).toContain("Mulai dari");
   });
 
   it("B. routes 'Ubah preferensi' to /profile/preferences", async () => {

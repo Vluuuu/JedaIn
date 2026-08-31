@@ -66,6 +66,21 @@ describe("Integration Onboarding Route Guard Real Navigation", () => {
     );
   });
 
+  it("redirects IN_PROGRESS traveler trying to access /onboarding/result to /onboarding/quiz", async () => {
+    sessionStore.setOnboardingStatus("IN_PROGRESS");
+    const view = await renderAppAt("/onboarding/result");
+
+    expect(view.textContent).toContain("Quiz");
+    expect(view.textContent).not.toContain("Recommendation result");
+  });
+
+  it("allows COMPLETED traveler to directly access /onboarding/result", async () => {
+    sessionStore.setOnboardingStatus("COMPLETED");
+    const view = await renderAppAt("/onboarding/result");
+
+    expect(view.textContent).toContain("Recommendation result");
+  });
+
   it("redirects COMPLETED traveler trying to access /onboarding/consent to /home", async () => {
     sessionStore.setOnboardingStatus("COMPLETED");
     const view = await renderAppAt("/onboarding/consent");

@@ -23,6 +23,13 @@ describe("getOnboardingGuardRedirect", () => {
         currentPath: "/onboarding/quiz",
       }),
     ).toBe("/onboarding/consent");
+
+    expect(
+      getOnboardingGuardRedirect({
+        status: "NOT_STARTED",
+        currentPath: "/onboarding/result",
+      }),
+    ).toBe("/onboarding/consent");
   });
 
   it("allows NOT_STARTED user on /onboarding/consent without redirection", () => {
@@ -48,6 +55,13 @@ describe("getOnboardingGuardRedirect", () => {
         currentPath: "/onboarding/consent",
       }),
     ).toBe("/onboarding/quiz");
+
+    expect(
+      getOnboardingGuardRedirect({
+        status: "IN_PROGRESS",
+        currentPath: "/onboarding/result",
+      }),
+    ).toBe("/onboarding/quiz");
   });
 
   it("allows IN_PROGRESS user on /onboarding/quiz without redirection", () => {
@@ -71,6 +85,13 @@ describe("getOnboardingGuardRedirect", () => {
       getOnboardingGuardRedirect({
         status: "COMPLETED",
         currentPath: "/explore",
+      }),
+    ).toBeNull();
+
+    expect(
+      getOnboardingGuardRedirect({
+        status: "COMPLETED",
+        currentPath: "/onboarding/result",
       }),
     ).toBeNull();
   });

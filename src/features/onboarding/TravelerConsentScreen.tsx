@@ -186,12 +186,12 @@ export function TravelerConsentScreen({
         }
       >
         <p className="consent-dialog-text">
-          Data preferensi yang Anda isi saat onboarding digunakan khusus untuk:
+          Preferensi yang kamu isi saat onboarding membantu JedaIn untuk:
         </p>
         <ul className="consent-dialog-list">
           <li>
             <strong>Rekomendasi personal:</strong> menyajikan paket trip yang
-            sesuai dengan preferensi Anda.
+            sesuai dengan preferensi kamu.
           </li>
           <li>
             <strong>Wawasan kebutuhan agregat:</strong> gambaran kebutuhan

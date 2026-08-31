@@ -36,7 +36,6 @@ export function getOnboardingGuardRedirect(params: {
   if (status === "IN_PROGRESS") {
     if (
       currentPath === "/onboarding/quiz" ||
-      currentPath === "/onboarding/result" ||
       currentPath === "/login" ||
       currentPath === "/"
     ) {

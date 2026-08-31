@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import "./ui.css";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
@@ -12,27 +12,33 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
-export function Button({
-  variant = "primary",
-  size = "md",
-  loading = false,
-  loadingLabel = "Memproses",
-  disabled,
-  children,
-  className = "",
-  ...props
-}: ButtonProps) {
-  const isDisabled = disabled || loading;
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  function Button(
+    {
+      variant = "primary",
+      size = "md",
+      loading = false,
+      loadingLabel = "Memproses",
+      disabled,
+      children,
+      className = "",
+      ...props
+    },
+    ref,
+  ) {
+    const isDisabled = disabled || loading;
 
-  return (
-    <button
-      className={`ui-button ui-button--${variant} ui-button--${size} ${className}`.trim()}
-      disabled={isDisabled}
-      aria-busy={loading || undefined}
-      {...props}
-    >
-      {loading && <span className="ui-spinner" aria-hidden="true" />}
-      <span>{loading ? loadingLabel : children}</span>
-    </button>
-  );
-}
+    return (
+      <button
+        ref={ref}
+        className={`ui-button ui-button--${variant} ui-button--${size} ${className}`.trim()}
+        disabled={isDisabled}
+        aria-busy={loading || undefined}
+        {...props}
+      >
+        {loading && <span className="ui-spinner" aria-hidden="true" />}
+        <span>{loading ? loadingLabel : children}</span>
+      </button>
+    );
+  },
+);

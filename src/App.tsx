@@ -6,7 +6,8 @@ import {
   TravelerPublicShell,
   WorkspaceShell,
   adminNavigation,
-  partnerNavigation,
+  partnerDestinationNavigation,
+  partnerEoNavigation,
 } from "./components/shells";
 import "./App.css";
 
@@ -33,38 +34,43 @@ const distractionFreeRoutes = [
   ["payment/:bookingId/result", "Payment result"],
 ] as const;
 
-const partnerRoutes = [
+const partnerEoRoutes = [
   ["eo", "Overview"],
   ["eo/insights", "Insights"],
   ["eo/packages", "Packages"],
   ["eo/packages/new", "New package"],
   ["eo/packages/:packageId", "Package detail"],
   ["eo/packages/:packageId/sessions", "Package sessions"],
+  ["eo/sessions", "Sessions"],
   ["eo/bookings", "Bookings"],
   ["eo/destinations", "Destinations"],
   ["eo/reviews", "Reviews"],
   ["eo/profile", "Profile"],
-  ["destination", "Destination overview"],
-  ["destination/profile", "Destination profile"],
+] as const;
+
+const partnerDestinationRoutes = [
+  ["destination", "Overview"],
+  ["destination/profile", "Destination Profile"],
   ["destination/verification", "Verification"],
   ["destination/schedule", "Schedule"],
   ["destination/capacity", "Capacity"],
   ["destination/reviews", "Reviews"],
+  ["destination/profile-settings", "Profile"],
 ] as const;
 
 const adminRoutes = [
   ["", "Overview"],
-  ["eo-approvals", "EO approvals"],
+  ["eo-approvals", "EO Approvals"],
   ["eo-approvals/:applicationId", "EO approval detail"],
-  ["destination-verifications", "Destination verifications"],
+  ["destination-verifications", "Destination Verification"],
   ["destination-verifications/:applicationId", "Verification detail"],
-  ["package-approvals", "Package approvals"],
+  ["package-approvals", "Package Approvals"],
   ["package-approvals/:submissionId", "Package approval detail"],
-  ["bookings", "Bookings"],
+  ["bookings", "Bookings / Payments"],
   ["complaints", "Complaints"],
   ["complaints/:complaintId", "Complaint detail"],
-  ["trust", "Trust"],
-  ["audit", "Audit"],
+  ["trust", "Trust & Status"],
+  ["audit", "Audit / Activity"],
 ] as const;
 
 export function App() {
@@ -100,13 +106,44 @@ export function App() {
           element={<PlaceholderPage eyebrow="Partner" title="Partner login" />}
         />
       </Route>
+
+      <Route
+        path="partner/destination"
+        element={
+          <WorkspaceShell
+            surface="partner"
+            title="Destination partner workspace"
+            navigation={partnerDestinationNavigation}
+          />
+        }
+      >
+        <Route
+          index
+          element={
+            <PlaceholderPage eyebrow="Destination Partner" title="Overview" />
+          }
+        />
+        {partnerDestinationRoutes.slice(1).map(([path, title]) => {
+          const subPath = path.replace(/^destination\//, "");
+          return (
+            <Route
+              key={path}
+              path={subPath}
+              element={
+                <PlaceholderPage eyebrow="Destination Partner" title={title} />
+              }
+            />
+          );
+        })}
+      </Route>
+
       <Route
         path="partner"
         element={
           <WorkspaceShell
             surface="partner"
             title="Partner workspace"
-            navigation={partnerNavigation}
+            navigation={partnerEoNavigation}
           />
         }
       >
@@ -133,11 +170,11 @@ export function App() {
             <PlaceholderPage eyebrow="Partner" title="Application status" />
           }
         />
-        {partnerRoutes.map(([path, title]) => (
+        {partnerEoRoutes.map(([path, title]) => (
           <Route
             key={path}
             path={path}
-            element={<PlaceholderPage eyebrow="Partner" title={title} />}
+            element={<PlaceholderPage eyebrow="EO Partner" title={title} />}
           />
         ))}
       </Route>

@@ -5,7 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { WorkspaceShell } from "./WorkspaceShell";
-import { partnerNavigation } from "./navigation";
+import { partnerEoNavigation } from "./navigation";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -31,7 +31,7 @@ async function renderWorkspace() {
         createElement(WorkspaceShell, {
           surface: "partner",
           title: "Partner workspace",
-          navigation: partnerNavigation,
+          navigation: partnerEoNavigation,
           children: createElement("p", undefined, "Content"),
         }),
       ),
@@ -67,6 +67,27 @@ describe("responsive workspace navigation semantics", () => {
     );
 
     expect(openButton.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(openButton);
+  });
+
+  it("closes the drawer on scrim click and restores menu focus", async () => {
+    const view = await renderWorkspace();
+    const openButton = view.querySelector<HTMLButtonElement>(
+      '.workspace-topbar__menu[aria-label="Buka navigasi"]',
+    )!;
+    await act(() => openButton.click());
+
+    const scrim = view.querySelector<HTMLButtonElement>(
+      '.workspace-shell__scrim[aria-label="Tutup navigasi"]',
+    )!;
+    expect(scrim.hasAttribute("data-open")).toBe(true);
+
+    await act(() => scrim.click());
+
+    expect(openButton.getAttribute("aria-expanded")).toBe("false");
+    expect(
+      view.querySelector(".workspace-sidebar")?.hasAttribute("data-open"),
+    ).toBe(false);
     expect(document.activeElement).toBe(openButton);
   });
 });

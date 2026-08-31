@@ -9,4 +9,9 @@ export {
   type TravelerPublicShellProps,
 } from "./TravelerPublicShell";
 export { WorkspaceShell, type WorkspaceShellProps } from "./WorkspaceShell";
-export { adminNavigation, partnerNavigation } from "./navigation";
+export {
+  adminNavigation,
+  partnerDestinationNavigation,
+  partnerEoNavigation,
+  partnerNavigation,
+} from "./navigation";

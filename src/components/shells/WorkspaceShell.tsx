@@ -46,7 +46,10 @@ export function WorkspaceShell({
         className="workspace-shell__scrim"
         data-open={drawerOpen || undefined}
         aria-label="Tutup navigasi"
-        onClick={() => setDrawerOpen(false)}
+        onClick={() => {
+          setDrawerOpen(false);
+          menuButtonRef.current?.focus();
+        }}
       />
       <aside
         id={drawerId}

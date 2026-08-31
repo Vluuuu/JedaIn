@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
-import { act, createElement } from "react";
+import { act, createElement, useEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { MemoryRouter, Route, Routes } from "react-router";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { App } from "../../App";
 import { sessionStore } from "../onboarding/sessionStore";
@@ -30,6 +30,19 @@ afterEach(async () => {
   sessionStore.reset();
 });
 
+let lastLocation: { pathname: string; search: string } = {
+  pathname: "",
+  search: "",
+};
+
+function LocationObserver() {
+  const location = useLocation();
+  useEffect(() => {
+    lastLocation = { pathname: location.pathname, search: location.search };
+  }, [location]);
+  return null;
+}
+
 async function renderExplore(
   props: { adapter?: MockExploreAdapter } = {},
   initialEntries: string[] = ["/explore"],
@@ -42,6 +55,7 @@ async function renderExplore(
       createElement(
         MemoryRouter,
         { initialEntries },
+        createElement(LocationObserver),
         createElement(
           Routes,
           undefined,
@@ -101,7 +115,7 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
     expect(view.textContent).toContain("Ruang Kreatif Desa");
   });
 
-  it("removes active filter chip and updates results accordingly", async () => {
+  it("removes active filter chip and updates results and URL accordingly", async () => {
     const view = await renderExplore({}, [
       "/explore?departure=malang&duration=half_day",
     ]);
@@ -110,6 +124,8 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
     expect(view.textContent).toContain("Durasi: Setengah hari");
     expect(view.textContent).toContain("1 experience ditemukan");
     expect(view.textContent).toContain("Ruang Kreatif Desa");
+    expect(lastLocation.search).toContain("departure=malang");
+    expect(lastLocation.search).toContain("duration=half_day");
 
     // Remove duration chip
     const durChip = Array.from(
@@ -119,20 +135,25 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
       ".explore-active-chip__remove",
     )!;
 
-    await act(() => removeBtn.click());
+    await act(async () => {
+      removeBtn.click();
+    });
 
-    // Duration is removed, so both Malang packages appear
+    // Duration is removed, so both Malang packages appear and duration param is GONE from actual location search
     expect(view.textContent).toContain("2 experience ditemukan");
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
     expect(view.textContent).toContain("Ruang Kreatif Desa");
+    expect(lastLocation.search).toContain("departure=malang");
+    expect(lastLocation.search).not.toContain("duration");
   });
 
-  it("resets all active filters via 'Reset semua' button", async () => {
+  it("resets all active filters via 'Reset semua' button and clears search URL string", async () => {
     const view = await renderExplore({}, [
       "/explore?query=lereng&departure=malang",
     ]);
 
     expect(view.textContent).toContain("1 experience ditemukan");
+    expect(lastLocation.search).toContain("query=lereng");
 
     const resetLink = view.querySelector<HTMLButtonElement>(
       ".explore-reset-link",
@@ -142,6 +163,7 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
     });
 
     expect(view.textContent).toContain("5 experience ditemukan");
+    expect(lastLocation.search).toBe("");
   });
 
   it("renders empty state and allows recovery via 'Reset filter' button", async () => {
@@ -311,7 +333,7 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
     expect(view.textContent).not.toContain("Durasi: Setengah hari");
   });
 
-  it("E. ignores unknown destination in URL safely without forcing empty state", async () => {
+  it("E. ignores unknown destination in URL safely without forcing empty state, without active chip, and with 0 active filter count", async () => {
     const view = await renderExplore({}, [
       "/explore?destination=DestinasiTidakAda",
     ]);
@@ -319,6 +341,11 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
     // Unknown destination is safely ignored, so all 5 LIVE packages render
     expect(view.textContent).toContain("5 experience ditemukan");
     expect(view.textContent).not.toContain("Destinasi: DestinasiTidakAda");
+
+    // Filter count badge should not be present (active count = 0)
+    expect(view.querySelector(".explore-filter-count-badge")).toBeNull();
+    // And invalid destination is canonicalized from URL
+    expect(lastLocation.search).not.toContain("destination");
   });
 
   it("F. renders exactly four bottom navigation tabs via App shell with Explore active", async () => {
@@ -379,6 +406,7 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
 
     expect(view.textContent).toContain("1 experience ditemukan");
     expect(view.textContent).toContain('Kata kunci: "batu"');
+    expect(lastLocation.search).toBe("?query=batu");
   });
 
   it("navigates package card tap to /packages/:packageId via App router", async () => {

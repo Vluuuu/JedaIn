@@ -89,6 +89,20 @@ export function ExploreScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, adapter]);
 
+  // Canonicalize unknown destination param from URL once available destinations are known
+  useEffect(() => {
+    if (result && currentFilters.destination) {
+      const isKnown = result.availableDestinations.some(
+        (d) => d.toLowerCase() === currentFilters.destination?.toLowerCase(),
+      );
+      if (!isKnown) {
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete("destination");
+        setSearchParams(nextParams, { replace: true });
+      }
+    }
+  }, [result, currentFilters.destination, searchParams, setSearchParams]);
+
   const updateFilters = (newFilters: Partial<ExploreFilters>) => {
     const merged: ExploreFilters = {
       ...currentFilters,
@@ -120,11 +134,18 @@ export function ExploreScreen({
     setSearchParams(new URLSearchParams());
   };
 
+  const isDestinationKnown = Boolean(
+    currentFilters.destination &&
+    result?.availableDestinations.some(
+      (d) => d.toLowerCase() === currentFilters.destination?.toLowerCase(),
+    ),
+  );
+
   const activeFilterCount = [
     currentFilters.budget,
     currentFilters.duration,
     currentFilters.departure,
-    currentFilters.destination,
+    isDestinationKnown ? currentFilters.destination : undefined,
   ].filter(Boolean).length;
 
   const hasAnyActiveFilters =

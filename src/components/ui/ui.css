@@ -373,6 +373,13 @@
   margin-top: var(--space-6);
 }
 
+@media (pointer: coarse) {
+  .ui-button--sm {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}
+
 @keyframes ui-spin {
   to {
     transform: rotate(360deg);

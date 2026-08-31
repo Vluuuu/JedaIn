@@ -22,7 +22,7 @@ export function PackageCard({ packageData }: PackageCardProps) {
         className="home-package-card__visual"
         style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
         role="img"
-        aria-label={`Foto suasana ${packageData.title}`}
+        aria-label={`Ilustrasi suasana ${packageData.title}`}
       >
         <div className="home-package-card__badges">
           <Badge tone="neutral">

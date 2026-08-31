@@ -288,7 +288,7 @@ describe("TravelerQuizScreen Full Six-Step Flow & Rules", () => {
     // Pick size 3-4 orang
     const sizeOpt = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".quiz-option-card"),
-    ).find((el) => el.textContent?.includes("3-4 orang"))!;
+    ).find((el) => el.textContent?.includes("3–4 orang"))!;
 
     await act(() => {
       sizeOpt.click();

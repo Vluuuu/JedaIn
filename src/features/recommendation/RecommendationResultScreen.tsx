@@ -142,7 +142,7 @@ export function RecommendationResultScreen({
             className="recommendation-hero-visual"
             style={{ backgroundImage: `url("${topVisual.svgDataUri}")` }}
             role="img"
-            aria-label={`Foto suasana ${topPkg.title}`}
+            aria-label={`Ilustrasi suasana ${topPkg.title}`}
           >
             <div className="recommendation-hero-visual__overlay">
               <Badge tone={isFallback ? "neutral" : "success"}>

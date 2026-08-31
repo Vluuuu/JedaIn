@@ -19,7 +19,7 @@ export function DestinationCard({ destination }: DestinationCardProps) {
         className="home-destination-card__visual"
         style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
         role="img"
-        aria-label={`Destinasi ${destination.destinationName}`}
+        aria-label={`Ilustrasi destinasi ${destination.destinationName}`}
       >
         <span className="home-destination-card__badge">
           <Badge tone="success">

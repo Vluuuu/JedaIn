@@ -327,7 +327,7 @@
   border-radius: var(--radius-md);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  box-shadow: 0 1px 3px rgb(40 94 61 / 20%);
+  box-shadow: var(--shadow-brand-sm);
   transition:
     background-color var(--motion-fast) var(--ease-standard),
     box-shadow var(--motion-fast) var(--ease-standard);
@@ -335,7 +335,7 @@
 
 .home-search-bar__submit:hover {
   background: var(--color-brand-primary-hover);
-  box-shadow: 0 3px 8px rgb(40 94 61 / 30%);
+  box-shadow: var(--shadow-brand-md);
 }
 
 /* 5. Mood Chips */

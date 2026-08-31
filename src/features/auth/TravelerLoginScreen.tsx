@@ -180,15 +180,13 @@ export function TravelerLoginScreen({
           aria-hidden="true"
         >
           <div className="auth-visual-hero__overlay">
-            <span className="auth-visual-hero__tag">
-              Wisata Wellness Terkurasi
-            </span>
+            <span className="auth-visual-hero__tag">Kurasi Wellness Lokal</span>
             <h2 className="auth-visual-hero__title">
-              Jeda sejenak di alam dan budaya lokal Jawa Timur.
+              Temukan jeda yang benar-benar kamu butuhkan.
             </h2>
             <p className="auth-visual-hero__desc">
-              Pengalaman wellness terverifikasi, dirancang khusus berdasarkan
-              kebutuhanmu.
+              Experience wellness terkurasi bersama destinasi lokal
+              terverifikasi.
             </p>
           </div>
         </div>

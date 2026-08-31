@@ -50,12 +50,12 @@
 .ui-button--primary {
   color: var(--color-text-inverse);
   background: var(--color-brand-primary);
-  box-shadow: 0 1px 3px rgb(40 94 61 / 20%);
+  box-shadow: var(--shadow-brand-sm);
 }
 
 .ui-button--primary:hover:not(:disabled) {
   background: var(--color-brand-primary-hover);
-  box-shadow: 0 3px 8px rgb(40 94 61 / 30%);
+  box-shadow: var(--shadow-brand-md);
 }
 
 .ui-button--primary:active:not(:disabled) {
@@ -176,7 +176,7 @@
 }
 
 .ui-input--error:focus-visible {
-  box-shadow: 0 0 0 3px rgb(180 60 53 / 20%);
+  box-shadow: 0 0 0 3px var(--color-danger-focus-glow);
 }
 
 .ui-field__error {

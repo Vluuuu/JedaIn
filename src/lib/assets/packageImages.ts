@@ -1,6 +1,6 @@
 /**
  * Prototype-safe visual assets for JedaIn Traveler MVP.
- * Provides curated, authentic, lightweight SVG-based photography and illustrations
+ * Provides curated, authentic, lightweight prototype-safe SVG illustrations
  * depicting Indonesian nature, local craft workshops, and wellness retreats.
  */
 

@@ -175,7 +175,7 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
                 backgroundImage: `url("${getPackageVisual(recPkg.id).svgDataUri}")`,
               }}
               role="img"
-              aria-label={`Foto suasana ${recPkg.title}`}
+              aria-label={`Ilustrasi suasana ${recPkg.title}`}
             >
               <div className="home-hero-card__visual-badges">
                 <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>

@@ -74,11 +74,11 @@ export const QUIZ_BUDGET_OPTIONS: OptionItem<BudgetBand>[] = [
   },
   {
     value: "AROUND_200_300K",
-    label: "Sekitar Rp200-300 ribu",
+    label: "Sekitar Rp200–300 ribu",
   },
   {
     value: "AROUND_300_500K",
-    label: "Sekitar Rp300-500 ribu",
+    label: "Sekitar Rp300–500 ribu",
   },
   {
     value: "ABOVE_500K",
@@ -146,7 +146,7 @@ export const QUIZ_GROUP_SIZE_OPTIONS: OptionItem<GroupSizeBand>[] = [
   },
   {
     value: "THREE_TO_FOUR",
-    label: "3-4 orang",
+    label: "3–4 orang",
   },
   {
     value: "FIVE_PLUS",

@@ -31,8 +31,8 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgb(15 33 23 / 30%) 0%,
-    rgb(15 33 23 / 85%) 100%
+    var(--color-overlay-soft) 0%,
+    var(--color-overlay-dark) 100%
   );
   padding: var(--space-8);
   display: flex;
@@ -53,7 +53,7 @@
 
 .auth-visual-hero__title {
   margin: 0 0 var(--space-2);
-  color: #ffffff;
+  color: var(--color-text-inverse);
   font-size: var(--font-size-heading-lg);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-heading-lg);

@@ -24,7 +24,9 @@ export const sessionStore = {
     return {
       user: currentSession.user ? { ...currentSession.user } : null,
       onboarding: { ...currentSession.onboarding },
-      quizDraft: currentSession.quizDraft ? { ...currentSession.quizDraft } : null,
+      quizDraft: currentSession.quizDraft
+        ? { ...currentSession.quizDraft }
+        : null,
     };
   },
 

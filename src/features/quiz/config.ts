@@ -44,7 +44,8 @@ export const QUIZ_INTENT_OPTIONS: OptionItem<CurrentIntent>[] = [
   {
     value: "SOCIAL",
     label: "Quality time bareng orang dekat",
-    sublabel: "Momen hangat dan bermakna bersama pasangan, teman, atau keluarga.",
+    sublabel:
+      "Momen hangat dan bermakna bersama pasangan, teman, atau keluarga.",
   },
 ];
 

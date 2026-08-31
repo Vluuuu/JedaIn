@@ -1,10 +1,5 @@
 export type CurrentIntent =
-  | "RECHARGE"
-  | "NATURE"
-  | "NOVELTY"
-  | "REFLECTION"
-  | "ACTIVE"
-  | "SOCIAL";
+  "RECHARGE" | "NATURE" | "NOVELTY" | "REFLECTION" | "ACTIVE" | "SOCIAL";
 
 export type PreferredActivity =
   | "NATURE_SCENERY"
@@ -15,16 +10,10 @@ export type PreferredActivity =
   | "OUTDOOR_ACTIVE";
 
 export type BudgetBand =
-  | "UP_TO_200K"
-  | "AROUND_200_300K"
-  | "AROUND_300_500K"
-  | "ABOVE_500K";
+  "UP_TO_200K" | "AROUND_200_300K" | "AROUND_300_500K" | "ABOVE_500K";
 
 export type DurationPreference =
-  | "HALF_DAY"
-  | "FULL_DAY"
-  | "TWO_D_ONE_N"
-  | "THREE_D_TWO_N_PLUS";
+  "HALF_DAY" | "FULL_DAY" | "TWO_D_ONE_N" | "THREE_D_TWO_N_PLUS";
 
 export type DepartureAreaId = "MALANG" | "SURABAYA" | "OTHER";
 

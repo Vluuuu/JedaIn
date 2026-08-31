@@ -43,14 +43,24 @@ export function TravelerQuizScreen({
 
   // Quiz state fields
   const [currentStep, setCurrentStep] = useState(1);
-  const [currentIntent, setCurrentIntent] = useState<CurrentIntent | undefined>();
-  const [preferredActivities, setPreferredActivities] = useState<PreferredActivity[]>([]);
+  const [currentIntent, setCurrentIntent] = useState<
+    CurrentIntent | undefined
+  >();
+  const [preferredActivities, setPreferredActivities] = useState<
+    PreferredActivity[]
+  >([]);
   const [budgetBand, setBudgetBand] = useState<BudgetBand | undefined>();
-  const [durationPreference, setDurationPreference] = useState<DurationPreference | undefined>();
-  const [departureAreaId, setDepartureAreaId] = useState<DepartureAreaId | undefined>();
+  const [durationPreference, setDurationPreference] = useState<
+    DurationPreference | undefined
+  >();
+  const [departureAreaId, setDepartureAreaId] = useState<
+    DepartureAreaId | undefined
+  >();
   const [departureAreaLabel, setDepartureAreaLabel] = useState<string>("");
   const [groupType, setGroupType] = useState<GroupType | undefined>();
-  const [groupSizeBand, setGroupSizeBand] = useState<GroupSizeBand | undefined>();
+  const [groupSizeBand, setGroupSizeBand] = useState<
+    GroupSizeBand | undefined
+  >();
 
   // Load existing draft for resume capability
   useEffect(() => {
@@ -60,18 +70,26 @@ export function TravelerQuizScreen({
       .then((draft) => {
         if (!isMounted) return;
         if (draft.current_intent) setCurrentIntent(draft.current_intent);
-        if (draft.preferred_activities) setPreferredActivities(draft.preferred_activities);
+        if (draft.preferred_activities)
+          setPreferredActivities(draft.preferred_activities);
         if (draft.budget_band) setBudgetBand(draft.budget_band);
-        if (draft.duration_preference) setDurationPreference(draft.duration_preference);
-        if (draft.departure_area_id) setDepartureAreaId(draft.departure_area_id);
-        if (draft.departure_area_label) setDepartureAreaLabel(draft.departure_area_label);
+        if (draft.duration_preference)
+          setDurationPreference(draft.duration_preference);
+        if (draft.departure_area_id)
+          setDepartureAreaId(draft.departure_area_id);
+        if (draft.departure_area_label)
+          setDepartureAreaLabel(draft.departure_area_label);
         if (draft.group_type) setGroupType(draft.group_type);
         if (draft.group_size_band) setGroupSizeBand(draft.group_size_band);
 
         // Resume at latest incomplete step
         let resumeStep = draft.currentStep || 1;
         if (!draft.current_intent) resumeStep = 1;
-        else if (!draft.preferred_activities || draft.preferred_activities.length === 0) resumeStep = 2;
+        else if (
+          !draft.preferred_activities ||
+          draft.preferred_activities.length === 0
+        )
+          resumeStep = 2;
         else if (!draft.budget_band) resumeStep = 3;
         else if (!draft.duration_preference) resumeStep = 4;
         else if (!draft.departure_area_id) resumeStep = 5;
@@ -95,7 +113,9 @@ export function TravelerQuizScreen({
       case 1:
         return Boolean(currentIntent);
       case 2:
-        return preferredActivities.length >= 1 && preferredActivities.length <= 2;
+        return (
+          preferredActivities.length >= 1 && preferredActivities.length <= 2
+        );
       case 3:
         return Boolean(budgetBand);
       case 4:
@@ -140,7 +160,9 @@ export function TravelerQuizScreen({
 
     try {
       const nextStep = currentStep + 1;
-      const snapshot = getSnapshotDraft(nextStep <= TOTAL_QUIZ_STEPS ? nextStep : TOTAL_QUIZ_STEPS);
+      const snapshot = getSnapshotDraft(
+        nextStep <= TOTAL_QUIZ_STEPS ? nextStep : TOTAL_QUIZ_STEPS,
+      );
 
       if (currentStep < TOTAL_QUIZ_STEPS) {
         await adapter.saveQuizStep(snapshot);
@@ -287,7 +309,10 @@ export function TravelerQuizScreen({
                       }}
                       disabled={isSubmitting}
                     >
-                      <span className="quiz-option-card__indicator" aria-hidden="true">
+                      <span
+                        className="quiz-option-card__indicator"
+                        aria-hidden="true"
+                      >
                         <CheckCircleIcon />
                       </span>
                       <div className="quiz-option-card__content">
@@ -339,7 +364,10 @@ export function TravelerQuizScreen({
                       onClick={() => toggleActivity(opt.value)}
                       disabled={isSubmitting || (isMaxReached && !isSelected)}
                     >
-                      <span className="quiz-option-card__indicator" aria-hidden="true">
+                      <span
+                        className="quiz-option-card__indicator"
+                        aria-hidden="true"
+                      >
                         <CheckCircleIcon />
                       </span>
                       <div className="quiz-option-card__content">
@@ -389,7 +417,10 @@ export function TravelerQuizScreen({
                       }}
                       disabled={isSubmitting}
                     >
-                      <span className="quiz-option-card__indicator" aria-hidden="true">
+                      <span
+                        className="quiz-option-card__indicator"
+                        aria-hidden="true"
+                      >
                         <CheckCircleIcon />
                       </span>
                       <div className="quiz-option-card__content">
@@ -409,7 +440,8 @@ export function TravelerQuizScreen({
             <section aria-labelledby="q4-title">
               <div className="quiz-question-header">
                 <h1 id="q4-title">
-                  Berapa lama waktu yang realistis kamu punya untuk jeda kali ini?
+                  Berapa lama waktu yang realistis kamu punya untuk jeda kali
+                  ini?
                 </h1>
                 <p>
                   Biar rekomendasinya cocok dengan waktu yang benar-benar kamu
@@ -437,7 +469,10 @@ export function TravelerQuizScreen({
                       }}
                       disabled={isSubmitting}
                     >
-                      <span className="quiz-option-card__indicator" aria-hidden="true">
+                      <span
+                        className="quiz-option-card__indicator"
+                        aria-hidden="true"
+                      >
                         <CheckCircleIcon />
                       </span>
                       <div className="quiz-option-card__content">
@@ -485,7 +520,10 @@ export function TravelerQuizScreen({
                       }}
                       disabled={isSubmitting}
                     >
-                      <span className="quiz-option-card__indicator" aria-hidden="true">
+                      <span
+                        className="quiz-option-card__indicator"
+                        aria-hidden="true"
+                      >
                         <CheckCircleIcon />
                       </span>
                       <div className="quiz-option-card__content">
@@ -544,7 +582,10 @@ export function TravelerQuizScreen({
                       onClick={() => handleGroupTypeSelect(opt.value)}
                       disabled={isSubmitting}
                     >
-                      <span className="quiz-option-card__indicator" aria-hidden="true">
+                      <span
+                        className="quiz-option-card__indicator"
+                        aria-hidden="true"
+                      >
                         <CheckCircleIcon />
                       </span>
                       <div className="quiz-option-card__content">
@@ -588,7 +629,10 @@ export function TravelerQuizScreen({
                           }}
                           disabled={isSubmitting}
                         >
-                          <span className="quiz-option-card__indicator" aria-hidden="true">
+                          <span
+                            className="quiz-option-card__indicator"
+                            aria-hidden="true"
+                          >
                             <CheckCircleIcon />
                           </span>
                           <div className="quiz-option-card__content">

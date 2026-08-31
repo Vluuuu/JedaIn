@@ -22,10 +22,12 @@ afterEach(async () => {
   sessionStore.reset();
 });
 
-async function renderQuiz(props: {
-  adapter?: MockQuizAdapter;
-  onComplete?: (finalDraft: QuizDraft) => void;
-} = {}) {
+async function renderQuiz(
+  props: {
+    adapter?: MockQuizAdapter;
+    onComplete?: (finalDraft: QuizDraft) => void;
+  } = {},
+) {
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
@@ -235,9 +237,7 @@ describe("TravelerQuizScreen Full Six-Step Flow & Rules", () => {
     expect(view.textContent).toContain("Langkah 2 dari 6");
 
     // Click Back
-    const backBtn = view.querySelector<HTMLButtonElement>(
-      ".quiz-back-button",
-    )!;
+    const backBtn = view.querySelector<HTMLButtonElement>(".quiz-back-button")!;
     await act(() => backBtn.click());
 
     expect(view.textContent).toContain("Langkah 1 dari 6");

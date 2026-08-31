@@ -1,9 +1,5 @@
 import { sessionStore } from "../onboarding/sessionStore";
-import type {
-  QuizAdapter,
-  QuizCompletionResult,
-  QuizDraft,
-} from "./types";
+import type { QuizAdapter, QuizCompletionResult, QuizDraft } from "./types";
 
 export interface MockQuizAdapterOptions {
   initialDraft?: Partial<QuizDraft>;
@@ -22,23 +18,32 @@ export class MockQuizAdapter implements QuizAdapter {
     const sessionDraft = sessionStore.getQuizDraft();
 
     this.draft = {
-      currentStep: options.initialDraft?.currentStep ?? sessionDraft?.currentStep ?? 1,
-      current_intent: options.initialDraft?.current_intent ?? sessionDraft?.current_intent,
+      currentStep:
+        options.initialDraft?.currentStep ?? sessionDraft?.currentStep ?? 1,
+      current_intent:
+        options.initialDraft?.current_intent ?? sessionDraft?.current_intent,
       preferred_activities:
         options.initialDraft?.preferred_activities ??
         sessionDraft?.preferred_activities ??
         [],
-      budget_band: options.initialDraft?.budget_band ?? sessionDraft?.budget_band,
+      budget_band:
+        options.initialDraft?.budget_band ?? sessionDraft?.budget_band,
       duration_preference:
-        options.initialDraft?.duration_preference ?? sessionDraft?.duration_preference,
+        options.initialDraft?.duration_preference ??
+        sessionDraft?.duration_preference,
       departure_area_id:
-        options.initialDraft?.departure_area_id ?? sessionDraft?.departure_area_id,
+        options.initialDraft?.departure_area_id ??
+        sessionDraft?.departure_area_id,
       departure_area_label:
-        options.initialDraft?.departure_area_label ?? sessionDraft?.departure_area_label,
+        options.initialDraft?.departure_area_label ??
+        sessionDraft?.departure_area_label,
       group_type: options.initialDraft?.group_type ?? sessionDraft?.group_type,
       group_size_band:
         options.initialDraft?.group_size_band ?? sessionDraft?.group_size_band,
-      updatedAt: options.initialDraft?.updatedAt ?? sessionDraft?.updatedAt ?? new Date().toISOString(),
+      updatedAt:
+        options.initialDraft?.updatedAt ??
+        sessionDraft?.updatedAt ??
+        new Date().toISOString(),
     };
   }
 
@@ -62,7 +67,8 @@ export class MockQuizAdapter implements QuizAdapter {
     await this.delay();
     if (this.options.shouldFailSave) {
       throw new Error(
-        this.options.errorMessage ?? "Gagal menyimpan jawaban langkah ini. Silakan coba lagi.",
+        this.options.errorMessage ??
+          "Gagal menyimpan jawaban langkah ini. Silakan coba lagi.",
       );
     }
 
@@ -80,7 +86,8 @@ export class MockQuizAdapter implements QuizAdapter {
     await this.delay();
     if (this.options.shouldFailComplete) {
       throw new Error(
-        this.options.errorMessage ?? "Gagal menyelesaikan kuis. Silakan coba lagi.",
+        this.options.errorMessage ??
+          "Gagal menyelesaikan kuis. Silakan coba lagi.",
       );
     }
 
@@ -93,7 +100,8 @@ export class MockQuizAdapter implements QuizAdapter {
       !finalDraft.budget_band ||
       !finalDraft.duration_preference ||
       !finalDraft.departure_area_id ||
-      (finalDraft.departure_area_id === "OTHER" && !finalDraft.departure_area_label?.trim()) ||
+      (finalDraft.departure_area_id === "OTHER" &&
+        !finalDraft.departure_area_label?.trim()) ||
       !finalDraft.group_type ||
       !finalDraft.group_size_band
     ) {

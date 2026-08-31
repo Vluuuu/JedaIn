@@ -275,7 +275,7 @@ export function TravelerLoginScreen({
       <Dialog
         open={legalModal === "terms"}
         title="Syarat & Ketentuan"
-        description="Ringkasan ketentuan penggunaan layanan JedaIn untuk traveler."
+        description="Informasi ketentuan penggunaan layanan."
         onClose={() => setLegalModal(null)}
         actions={
           <Button
@@ -288,16 +288,16 @@ export function TravelerLoginScreen({
         }
       >
         <p className="auth-legal-modal-text">
-          JedaIn memfasilitasi penemuan dan pemesanan aktivitas jeda wellness
-          terverifikasi. Informasi akun traveler digunakan untuk memproses
-          rekomendasi dan reservasi trip.
+          Dokumen Syarat & Ketentuan lengkap belum disertakan dalam prototype
+          MVP JedaIn. Konten legal final akan difinalkan sebelum penggunaan
+          produksi.
         </p>
       </Dialog>
 
       <Dialog
         open={legalModal === "privacy"}
         title="Kebijakan Privasi"
-        description="Informasi pengelolaan data pribadi traveler."
+        description="Informasi pengelolaan data pribadi."
         onClose={() => setLegalModal(null)}
         actions={
           <Button
@@ -310,9 +310,9 @@ export function TravelerLoginScreen({
         }
       >
         <p className="auth-legal-modal-text">
-          Data preferensi dan kontak Anda disimpan secara aman untuk kebutuhan
-          rekomendasi personal serta koordinasi operasional trip yang
-          terkonfirmasi.
+          Dokumen Kebijakan Privasi lengkap belum disertakan dalam prototype MVP
+          JedaIn. Ketentuan pengelolaan data final akan difinalkan sebelum
+          penggunaan produksi.
         </p>
       </Dialog>
     </div>

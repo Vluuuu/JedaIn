@@ -72,11 +72,16 @@
   --color-danger-border: #f2b8b5;
   --color-danger-text: #8b2d28;
   --color-danger-solid: #b43c35;
+  --color-danger-focus-glow: rgb(180 60 53 / 20%);
   --color-info-bg: #eff6ff;
   --color-info-border: #b9d5f6;
   --color-info-text: #285c91;
   --color-info-solid: #3e78b2;
   --color-overlay: rgb(17 17 16 / 45%);
+  --color-overlay-dark: rgb(15 33 23 / 85%);
+  --color-overlay-soft: rgb(15 33 23 / 30%);
+  --color-surface-glass: rgb(255 255 255 / 90%);
+  --color-surface-glass-strong: rgb(255 255 255 / 95%);
 
   /* Typography */
   --font-family-sans:
@@ -129,15 +134,28 @@
   --space-24: 6rem;
 
   /* Shape and elevation */
+  --radius-xs: 0.375rem;
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
   --radius-pill: 999px;
-  --shadow-xs: 0 1px 2px rgb(17 17 16 / 5%);
-  --shadow-sm: 0 2px 8px rgb(17 17 16 / 7%);
-  --shadow-sm-top: 0 -2px 8px rgb(17 17 16 / 7%);
-  --shadow-md: 0 8px 24px rgb(17 17 16 / 10%);
+  --shadow-xs: 0 1px 3px rgb(29 29 27 / 4%), 0 1px 2px rgb(29 29 27 / 2%);
+  --shadow-sm: 0 2px 8px rgb(29 29 27 / 6%), 0 1px 2px rgb(29 29 27 / 3%);
+  --shadow-sm-top: 0 -2px 10px rgb(29 29 27 / 5%);
+  --shadow-md: 0 8px 24px rgb(29 29 27 / 8%), 0 2px 6px rgb(29 29 27 / 4%);
+  --shadow-lg: 0 16px 40px rgb(29 29 27 / 10%), 0 4px 12px rgb(29 29 27 / 5%);
+  --shadow-brand-sm: 0 1px 3px rgb(40 94 61 / 20%);
+  --shadow-brand-md: 0 3px 8px rgb(40 94 61 / 30%);
+  --shadow-card-hover:
+    0 12px 28px rgb(40 94 61 / 10%), 0 2px 8px rgb(29 29 27 / 4%);
+
+  /* Letter spacing */
+  --letter-spacing-normal: 0;
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-tighter: -0.035em;
+  --letter-spacing-caps: 0.06em;
 
   /* Interaction */
   --focus-ring-width: 2px;

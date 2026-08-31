@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Badge } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
 import type { PackageRecommendationSource } from "../recommendation/types";
 
@@ -12,11 +13,17 @@ export function PackageCard({ packageData }: PackageCardProps) {
     QUIZ_DURATION_OPTIONS.find((d) => d.value === packageData.durationType)
       ?.label ?? packageData.durationType;
 
+  const visual = getPackageVisual(packageData.id);
   const formattedPrice = `Rp${packageData.pricePerPerson.toLocaleString("id-ID")}`;
 
   return (
     <Link to={`/packages/${packageData.id}`} className="home-package-card">
-      <div className="home-package-card__visual">
+      <div
+        className="home-package-card__visual"
+        style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
+        role="img"
+        aria-label={`Ilustrasi suasana ${packageData.title}`}
+      >
         <div className="home-package-card__badges">
           <Badge tone="neutral">
             {packageData.verificationLevel === "PLUS"

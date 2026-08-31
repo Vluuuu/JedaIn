@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button, Skeleton } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import {
   QUIZ_DEPARTURE_OPTIONS,
   QUIZ_DURATION_OPTIONS,
@@ -168,15 +169,26 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
           </div>
         ) : recPkg && recItem ? (
           <div className="home-hero-card">
-            <div className="home-hero-card__visual">
-              <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>
-                {recMode === "FALLBACK" ? "Pilihan terdekat" : "Pilihan utama"}
-              </Badge>
-              <Badge tone="neutral">
-                {recPkg.verificationLevel === "PLUS"
-                  ? "Terverifikasi Plus"
-                  : "Terverifikasi Dasar"}
-              </Badge>
+            <div
+              className="home-hero-card__visual"
+              style={{
+                backgroundImage: `url("${getPackageVisual(recPkg.id).svgDataUri}")`,
+              }}
+              role="img"
+              aria-label={`Ilustrasi suasana ${recPkg.title}`}
+            >
+              <div className="home-hero-card__visual-badges">
+                <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>
+                  {recMode === "FALLBACK"
+                    ? "Pilihan terdekat"
+                    : "Pilihan utama"}
+                </Badge>
+                <Badge tone="neutral">
+                  {recPkg.verificationLevel === "PLUS"
+                    ? "Terverifikasi Plus"
+                    : "Terverifikasi Dasar"}
+                </Badge>
+              </div>
             </div>
             <div className="home-hero-card__body">
               <div className="home-hero-card__meta">

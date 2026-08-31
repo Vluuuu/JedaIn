@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button, Skeleton } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
 import { defaultRecommendationAdapter } from "./mockAdapter";
 import type { RecommendationAdapter, RecommendationResult } from "./types";
@@ -99,6 +100,7 @@ export function RecommendationResultScreen({
   const { state, topRecommendation, alternatives } = result;
   const isFallback = state === "FALLBACK";
   const topPkg = topRecommendation.package;
+  const topVisual = getPackageVisual(topPkg.id);
   const durationLabel =
     QUIZ_DURATION_OPTIONS.find((d) => d.value === topPkg.durationType)?.label ??
     topPkg.durationType;
@@ -136,7 +138,12 @@ export function RecommendationResultScreen({
           className="recommendation-hero-card"
           aria-labelledby="top-package-title"
         >
-          <div className="recommendation-hero-visual">
+          <div
+            className="recommendation-hero-visual"
+            style={{ backgroundImage: `url("${topVisual.svgDataUri}")` }}
+            role="img"
+            aria-label={`Ilustrasi suasana ${topPkg.title}`}
+          >
             <div className="recommendation-hero-visual__overlay">
               <Badge tone={isFallback ? "neutral" : "success"}>
                 {isFallback ? "Pilihan terdekat" : "Pilihan utama"}
@@ -216,6 +223,7 @@ export function RecommendationResultScreen({
             <div className="recommendation-alternatives-grid">
               {alternatives.map((item) => {
                 const altPkg = item.package;
+                const altVisual = getPackageVisual(altPkg.id);
                 const altDuration =
                   QUIZ_DURATION_OPTIONS.find(
                     (d) => d.value === altPkg.durationType,
@@ -227,21 +235,30 @@ export function RecommendationResultScreen({
                     to={`/packages/${altPkg.id}`}
                     className="recommendation-alt-card"
                   >
-                    <div className="recommendation-alt-content">
-                      <div className="recommendation-alt-meta">
-                        <span>{altPkg.locationLabel}</span> •{" "}
-                        <span>{altDuration}</span>
+                    <div
+                      className="recommendation-alt-thumb"
+                      style={{
+                        backgroundImage: `url("${altVisual.svgDataUri}")`,
+                      }}
+                      aria-hidden="true"
+                    />
+                    <div className="recommendation-alt-body">
+                      <div className="recommendation-alt-content">
+                        <div className="recommendation-alt-meta">
+                          <span>{altPkg.locationLabel}</span> •{" "}
+                          <span>{altDuration}</span>
+                        </div>
+                        <span className="recommendation-alt-title">
+                          {altPkg.title}
+                        </span>
                       </div>
-                      <span className="recommendation-alt-title">
-                        {altPkg.title}
-                      </span>
-                    </div>
 
-                    <div className="recommendation-alt-footer">
-                      <span className="recommendation-price-amount">
-                        Rp{altPkg.pricePerPerson.toLocaleString("id-ID")}
-                      </span>
-                      <Badge tone="neutral">Lihat</Badge>
+                      <div className="recommendation-alt-footer">
+                        <span className="recommendation-price-amount">
+                          Rp{altPkg.pricePerPerson.toLocaleString("id-ID")}
+                        </span>
+                        <Badge tone="neutral">Lihat</Badge>
+                      </div>
                     </div>
                   </Link>
                 );

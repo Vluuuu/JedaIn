@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 48rem;
+  max-width: 52rem;
   gap: var(--space-6);
 }
 
@@ -23,10 +23,10 @@
 .recommendation-header h1 {
   margin: 0 0 var(--space-2);
   color: var(--color-text-primary);
-  font-size: var(--font-size-heading-md);
+  font-size: var(--font-size-heading-lg);
   font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-heading-md);
-  letter-spacing: -0.02em;
+  line-height: var(--line-height-heading-lg);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .recommendation-header p {
@@ -40,21 +40,26 @@
   display: flex;
   flex-direction: column;
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-brand-primary-soft);
+  border: 1.5px solid var(--color-border-default);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
+  transition:
+    box-shadow var(--motion-normal) var(--ease-standard),
+    border-color var(--motion-normal) var(--ease-standard);
+}
+
+.recommendation-hero-card:hover {
+  border-color: var(--color-brand-primary-soft);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .recommendation-hero-visual {
   position: relative;
   width: 100%;
-  height: 12rem;
-  background: linear-gradient(
-    135deg,
-    var(--color-forest-700) 0%,
-    var(--color-forest-900) 100%
-  );
+  min-height: 14rem;
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: flex-end;
   padding: var(--space-4);
@@ -62,8 +67,11 @@
 
 .recommendation-hero-visual__overlay {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  position: relative;
+  z-index: 2;
 }
 
 .recommendation-hero-content {
@@ -71,6 +79,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  background: var(--color-bg-surface);
 }
 
 .recommendation-meta-row {
@@ -80,14 +89,16 @@
   gap: var(--space-2);
   color: var(--color-text-secondary);
   font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
 }
 
 .recommendation-title {
   margin: 0;
   color: var(--color-text-primary);
-  font-size: var(--font-size-heading-sm);
+  font-size: var(--font-size-heading-md);
   font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-heading-sm);
+  line-height: var(--line-height-heading-md);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .recommendation-summary {
@@ -104,9 +115,10 @@
 }
 
 .recommendation-price-amount {
-  font-size: var(--font-size-heading-sm);
+  font-size: var(--font-size-heading-md);
   font-weight: var(--font-weight-bold);
   color: var(--color-brand-primary);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .recommendation-price-unit {
@@ -119,8 +131,8 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  background: var(--color-bg-surface-subtle);
-  border: 1px solid var(--color-border-default);
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
   border-radius: var(--radius-lg);
 }
 
@@ -128,9 +140,9 @@
   margin: 0;
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
-  color: var(--color-forest-700);
+  color: var(--color-forest-900);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--letter-spacing-caps);
 }
 
 .recommendation-chips {
@@ -142,13 +154,14 @@
 .recommendation-chip {
   display: inline-flex;
   align-items: center;
-  padding: var(--space-1) var(--space-2);
-  background: var(--color-forest-50);
-  color: var(--color-forest-800);
-  border: 1px solid var(--color-forest-200);
+  padding: 0.25rem 0.625rem;
+  background: var(--color-bg-surface);
+  color: var(--color-forest-900);
+  border: 1px solid var(--color-forest-300);
   border-radius: var(--radius-pill);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-xs);
 }
 
 .recommendation-cta-btn {
@@ -159,6 +172,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 .recommendation-alternatives-heading {
@@ -177,21 +191,36 @@
 .recommendation-alt-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: var(--space-4);
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
-  gap: var(--space-3);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
   text-decoration: none;
   transition:
     border-color var(--motion-fast) var(--ease-standard),
-    box-shadow var(--motion-fast) var(--ease-standard);
+    box-shadow var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
 }
 
 .recommendation-alt-card:hover {
   border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.recommendation-alt-thumb {
+  width: 100%;
+  height: 7.5rem;
+  background-size: cover;
+  background-position: center;
+}
+
+.recommendation-alt-body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
 }
 
 .recommendation-alt-content {
@@ -204,6 +233,7 @@
   color: var(--color-text-primary);
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-body-sm);
 }
 
 .recommendation-alt-meta {
@@ -241,12 +271,14 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-4);
+  box-shadow: var(--shadow-sm);
 }
 
 .recommendation-error-box h1 {
   margin: 0;
   color: var(--color-danger-text);
   font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
 }
 
 .recommendation-error-box p {
@@ -258,15 +290,25 @@
 @media (min-width: 48rem) {
   .recommendation-hero-card {
     display: grid;
-    grid-template-columns: 16rem 1fr;
+    grid-template-columns: 20rem 1fr;
   }
 
   .recommendation-hero-visual {
     height: auto;
-    min-height: 16rem;
+    min-height: 18rem;
   }
 
   .recommendation-alternatives-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .recommendation-alt-card {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 64rem) {
+  .recommendation-hero-visual {
+    min-height: 22rem;
   }
 }

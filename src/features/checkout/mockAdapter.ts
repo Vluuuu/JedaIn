@@ -1,4 +1,5 @@
 import type { AuthUser } from "../auth/types";
+import { mockContactVerificationStore } from "../contactVerification/mockContactVerificationStore";
 import { sessionStore } from "../onboarding/sessionStore";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import type {
@@ -143,9 +144,14 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
         ? this.travelerOverride
         : sessionStore.get().user;
 
-    // Phone presence != verified. Default is false unless explicitly in store or override.
+    // Check shared contact verification store if no explicit test override exists
     const isPhoneVerified = traveler?.id
-      ? Boolean(this.verifiedPhoneStore[traveler.id])
+      ? this.verifiedPhoneStore[traveler.id] !== undefined
+        ? Boolean(this.verifiedPhoneStore[traveler.id])
+        : mockContactVerificationStore.isPhoneVerified(
+            traveler.id,
+            traveler.phone,
+          )
       : false;
 
     const contactRequirement: CheckoutContactRequirement = this
@@ -245,7 +251,12 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
 
     // 4. Contact verification check
     const isPhoneVerified = traveler.id
-      ? Boolean(this.verifiedPhoneStore[traveler.id])
+      ? this.verifiedPhoneStore[traveler.id] !== undefined
+        ? Boolean(this.verifiedPhoneStore[traveler.id])
+        : mockContactVerificationStore.isPhoneVerified(
+            traveler.id,
+            traveler.phone,
+          )
       : false;
 
     const contactReq = this.contactRequirementOverride ?? {

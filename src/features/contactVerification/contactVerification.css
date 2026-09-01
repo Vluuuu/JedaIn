@@ -1,0 +1,178 @@
+.contact-verification-container {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.contact-verification-topbar {
+  margin-bottom: 1.5rem;
+}
+
+.contact-verification-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-slate-600, #475569);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.contact-verification-back-btn:hover {
+  color: var(--color-teal-700, #0f766e);
+}
+
+.contact-verification-header {
+  margin-bottom: 1.5rem;
+}
+
+.contact-verification-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-slate-900, #0f172a);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.01em;
+}
+
+.contact-verification-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-slate-600, #475569);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.contact-verification-explanation {
+  font-size: 0.875rem;
+  color: var(--color-slate-600, #475569);
+  margin: 0 0 1.25rem 0;
+  line-height: 1.5;
+  background-color: var(--color-teal-50, #f0fdf4);
+  border: 1px solid var(--color-teal-200, #bbf7d0);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.contact-verification-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background-color: #ffffff;
+  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.contact-verification-info-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background-color: var(--color-slate-50, #f8fafc);
+  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-slate-700, #334155);
+}
+
+.contact-verification-info-box p {
+  margin: 0;
+}
+
+.contact-verification-change-phone-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-teal-600, #0d9488);
+  cursor: pointer;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.contact-verification-change-phone-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contact-verification-resend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.contact-verification-resend-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-teal-600, #0d9488);
+  cursor: pointer;
+}
+
+.contact-verification-resend-btn:disabled {
+  color: var(--color-slate-400, #94a3b8);
+  cursor: not-allowed;
+}
+
+.contact-verification-countdown {
+  color: var(--color-slate-500, #64748b);
+  font-size: 0.8125rem;
+}
+
+.contact-verification-submit-btn {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.contact-verification-alert {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin-bottom: 1.25rem;
+}
+
+.contact-verification-alert--error {
+  background-color: var(--color-rose-50, #fff1f2);
+  border: 1px solid var(--color-rose-200, #fecdd3);
+  color: var(--color-rose-800, #9f1239);
+}
+
+.contact-verification-state-box {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background-color: #ffffff;
+  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border-radius: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.contact-verification-state-box h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-slate-900, #0f172a);
+  margin: 0 0 0.5rem 0;
+}
+
+.contact-verification-state-box p {
+  font-size: 0.875rem;
+  color: var(--color-slate-600, #475569);
+  margin: 0 0 1.25rem 0;
+}
+
+@media (max-width: 640px) {
+  .contact-verification-container {
+    padding: 1rem 1rem 2rem 1rem;
+  }
+
+  .contact-verification-form {
+    padding: 1.25rem;
+  }
+}

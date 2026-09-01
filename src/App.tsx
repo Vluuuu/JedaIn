@@ -11,6 +11,7 @@ import {
 } from "./components/shells";
 import { TravelerLoginScreen } from "./features/auth";
 import { CheckoutScreen } from "./features/checkout";
+import { ContactVerificationScreen } from "./features/contactVerification";
 import { ExploreScreen } from "./features/explore";
 import { HomeScreen } from "./features/home";
 import {
@@ -132,12 +133,7 @@ export function App() {
         <Route path="checkout/:sessionId" element={<CheckoutScreen />} />
         <Route
           path="checkout/:sessionId/contact"
-          element={
-            <PlaceholderPage
-              eyebrow="Traveler flow"
-              title="Contact Verification"
-            />
-          }
+          element={<ContactVerificationScreen />}
         />
         <Route
           path="checkout/:sessionId/pending-payment"

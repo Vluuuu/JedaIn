@@ -9,6 +9,7 @@ import {
   partnerEoNavigation,
 } from "./components/shells";
 import { adminSessionStore } from "./features/admin";
+import { partnerSessionStore } from "./features/eo";
 import { sessionStore } from "./features/onboarding";
 
 function renderRoute(path: string) {
@@ -26,13 +27,20 @@ describe("App shell routing", () => {
   it.each([
     ["/", "traveler-public-shell", "Temukan jeda"],
     ["/partner/eo", "workspace-shell--partner", "Overview"],
-    ["/partner/destination", "workspace-shell--partner", "Overview"],
     ["/belum-ada", "page", "Halaman tidak ditemukan."],
   ])("selects the expected shell for %s", (path, shellClass, text) => {
     const markup = renderRoute(path);
 
     expect(markup).toContain(shellClass);
     expect(markup).toContain(text);
+  });
+
+  it("selects the expected shell for authenticated /partner/destination", () => {
+    partnerSessionStore.loginAsDemoDestination();
+    const markup = renderRoute("/partner/destination");
+
+    expect(markup).toContain("workspace-shell--partner");
+    expect(markup).toContain("Lereng Hijau Batu");
   });
 
   it("selects the expected shell for authenticated /admin", () => {
@@ -55,6 +63,7 @@ describe("App shell routing", () => {
   });
 
   it("renders exact EO partner navigation labels and links", () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
     const markup = renderRoute("/partner/eo");
     for (const item of partnerEoNavigation) {
       expect(markup).toContain(`href="${item.to}"`);
@@ -65,6 +74,7 @@ describe("App shell routing", () => {
   });
 
   it("renders exact Destination partner navigation labels and links without EO items", () => {
+    partnerSessionStore.loginAsDemoDestination();
     const markup = renderRoute("/partner/destination");
     for (const item of partnerDestinationNavigation) {
       expect(markup).toContain(`href="${item.to}"`);

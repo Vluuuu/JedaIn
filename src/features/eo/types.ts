@@ -9,8 +9,9 @@ export interface PartnerUser {
   name: string;
   role: "EO" | "DESTINATION" | "ADMIN";
   businessName: string;
-  guideStatus: EoGuideStatus;
+  guideStatus?: EoGuideStatus;
   organizerReviewRef?: string;
+  destinationIdentityId?: string;
 }
 
 export interface EoApplicationRecord {

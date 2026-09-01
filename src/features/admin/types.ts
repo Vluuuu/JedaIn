@@ -41,6 +41,7 @@ export type DestinationVerificationStatus =
 
 export interface DestinationVerificationRecord {
   applicationId: string;
+  partnerIdentityId: string;
   destinationIdentityId: string;
   name: string;
   locationLabel: string;

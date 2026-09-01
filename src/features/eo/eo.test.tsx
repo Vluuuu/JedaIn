@@ -582,14 +582,14 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
   });
 
   describe("8. Partner Routing & Bookings Sessions (AH–AK)", () => {
-    it("AH. /partner/apply/destination renders safe placeholder", async () => {
+    it("AH. /partner/apply/destination renders destination application form", async () => {
       const view = await renderComponent(createElement(App), [
         "/partner/apply/destination",
       ]);
 
-      expect(view.textContent).toContain("Mitra Destinasi");
+      expect(view.textContent).toContain("Pengajuan Mitra Destinasi");
       expect(view.textContent).toContain(
-        "prototype flow dilanjutkan pada sprint berikutnya",
+        "Identitas Pengelola & Dokumen Legalitas",
       );
     });
 

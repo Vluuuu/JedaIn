@@ -127,7 +127,7 @@ export function WorkspaceShell({
               </strong>
               <small>
                 {partner?.name
-                  ? `${partner.name} (${partner.guideStatus})`
+                  ? `${partner.name}${partner.guideStatus ? ` (${partner.guideStatus})` : ""}`
                   : "Terhubung"}
               </small>
             </div>

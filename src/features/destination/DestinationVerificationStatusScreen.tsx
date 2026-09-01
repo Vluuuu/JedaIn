@@ -1,74 +1,37 @@
 import { Link, useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
-import { mockApplicationStore } from "./mockApplicationStore";
-import { partnerSessionStore } from "./partnerSessionStore";
-import "./eo.css";
+import { partnerSessionStore } from "../eo/partnerSessionStore";
+import "./destination.css";
 
-export function EoApplicationStatusScreen() {
+export function DestinationVerificationStatusScreen() {
   const navigate = useNavigate();
   const partner = partnerSessionStore.get();
-  const isDestination = partner?.role === "DESTINATION";
+  const app = partner
+    ? mockDestinationVerificationStore.getByPartnerId(partner.id)
+    : mockDestinationVerificationStore.getAll()[0];
 
-  // If partner is Destination, route context to mockDestinationVerificationStore
-  const destApp =
-    isDestination && partner
-      ? mockDestinationVerificationStore.getByPartnerId(partner.id)
-      : undefined;
-
-  const eoApp =
-    !isDestination && partner
-      ? mockApplicationStore.getBySellerId(partner.id)
-      : mockApplicationStore.getAll()[0];
-
-  const status = isDestination
-    ? (destApp?.status ?? "PENDING_REVIEW")
-    : (eoApp?.status ?? "PENDING_REVIEW");
-
-  const businessName = isDestination
-    ? (destApp?.name ?? partner?.businessName ?? "Destinasi Mitra")
-    : (eoApp?.businessName ?? partner?.businessName ?? "EO Partner");
-
-  const rejectionReason = isDestination
-    ? (destApp?.rejectionReason ??
-      "Akses evakuasi darurat dan fasilitas keselamatan belum memenuhi standar kurasi.")
-    : (eoApp?.rejectionReason ??
-      "Dokumen SOP penanganan darurat belum lengkap dan portofolio kegiatan wellness belum mencukupi standar kurasi JedaIn.");
-
-  const submittedAt = isDestination ? destApp?.submittedAt : eoApp?.submittedAt;
+  const status = app?.status ?? "PENDING_REVIEW";
 
   const handleOpenDashboard = () => {
-    if (isDestination) {
-      navigate("/partner/destination");
-    } else {
-      navigate("/partner/eo");
-    }
+    navigate("/partner/destination");
   };
 
   const handleSwitchToApprovedDemo = () => {
-    if (isDestination) {
-      partnerSessionStore.loginAsDemoDestination();
-      navigate("/partner/destination");
-    } else {
-      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-      navigate("/partner/eo");
-    }
+    partnerSessionStore.loginAsDemoDestination();
+    navigate("/partner/destination");
   };
 
   const handleReapply = () => {
-    if (isDestination) {
-      navigate("/partner/apply/destination");
-    } else {
-      navigate("/partner/apply/eo");
-    }
+    navigate("/partner/apply/destination");
   };
 
   return (
     <div
-      className="eo-container"
+      className="dest-container"
       style={{ padding: "var(--space-8) var(--space-4)", maxWidth: "680px" }}
     >
-      <header className="eo-page-header">
+      <header className="dest-page-header">
         <div>
           <Badge
             tone={
@@ -80,54 +43,64 @@ export function EoApplicationStatusScreen() {
             }
           >
             {status === "APPROVED"
-              ? "Kemitraan Disetujui"
+              ? "Destinasi Terverifikasi"
               : status === "REJECTED"
                 ? "Perlu Perbaikan"
-                : "Sedang Ditinjau"}
+                : "Menunggu Verifikasi Admin"}
           </Badge>
-          <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Status{" "}
-            {isDestination ? "Verifikasi Destinasi" : "Pengajuan Mitra EO"}
+          <h1
+            className="dest-page-title"
+            style={{ marginTop: "var(--space-2)" }}
+          >
+            Status Verifikasi Destinasi
           </h1>
-          <p className="eo-page-subtitle">
-            Entitas: <strong>{businessName}</strong>
+          <p className="dest-page-subtitle">
+            Kawasan: <strong>{app?.name ?? "Destinasi Alam"}</strong> (
+            {app?.locationLabel ?? "Jawa Timur"})
           </p>
         </div>
       </header>
 
       {/* APPROVED STATE */}
       {status === "APPROVED" && (
-        <section className="eo-section" style={{ gap: "var(--space-5)" }}>
-          <div className="eo-alert eo-alert--success">
+        <section className="eo-section" style={{ gap: "var(--space-4)" }}>
+          <div className="admin-alert admin-alert--success">
             <h2
               style={{
                 fontSize: "var(--font-size-heading-sm)",
                 margin: "0 0 var(--space-1)",
               }}
             >
-              Selamat! Akun Kemitraan telah Disetujui
+              Selamat! Destinasi Anda Telah Terverifikasi JedaIn
             </h2>
-            <p style={{ margin: 0 }}>
-              Tim Kurasi JedaIn telah memverifikasi profil dan standar
-              lokasi/pemandu Anda. Anda sekarang dapat mengakses dashboard
-              operasional.
+            <p style={{ margin: "0 0 var(--space-2)" }}>
+              Lokasi Anda telah disetujui sebagai destinasi terkurasi dengan
+              status:
             </p>
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--space-2)",
+                flexWrap: "wrap",
+              }}
+            >
+              <Badge tone="success">
+                Level: {app?.approvedLevel ?? "BASIC"}
+              </Badge>
+              <Badge tone={app?.approvedGuideReady ? "success" : "neutral"}>
+                {app?.approvedGuideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
+              </Badge>
+            </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "var(--space-3)",
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
               type="button"
               variant="primary"
               size="lg"
               onClick={handleOpenDashboard}
             >
-              Buka Operational Dashboard &rarr;
+              Buka Dashboard Destinasi &rarr;
             </Button>
           </div>
         </section>
@@ -135,18 +108,18 @@ export function EoApplicationStatusScreen() {
 
       {/* REJECTED STATE */}
       {status === "REJECTED" && (
-        <section className="eo-section" style={{ gap: "var(--space-5)" }}>
-          <div className="eo-alert eo-alert--error" role="alert">
+        <section className="eo-section" style={{ gap: "var(--space-4)" }}>
+          <div className="admin-alert admin-alert--error" role="alert">
             <h2
               style={{
                 fontSize: "var(--font-size-heading-sm)",
                 margin: "0 0 var(--space-1)",
               }}
             >
-              Pengajuan Memerlukan Perbaikan
+              Verifikasi Memerlukan Perbaikan Data / Fasilitas
             </h2>
             <p style={{ margin: "0 0 var(--space-2)" }}>
-              Alasan kurator Admin JedaIn:
+              Catatan dari Tim Kurasi Admin:
             </p>
             <blockquote
               style={{
@@ -159,20 +132,10 @@ export function EoApplicationStatusScreen() {
                 color: "var(--color-text-primary)",
               }}
             >
-              {rejectionReason}
+              {app?.rejectionReason ??
+                "Akses evakuasi darurat belum memadai untuk standar keselamatan JedaIn."}
             </blockquote>
           </div>
-
-          <p
-            style={{
-              fontSize: "var(--font-size-body-sm)",
-              color: "var(--color-text-secondary)",
-              margin: 0,
-            }}
-          >
-            Anda dapat memperbarui informasi formulir dengan identitas yang sama
-            tanpa perlu mendaftar dari awal.
-          </p>
 
           <div
             style={{
@@ -197,7 +160,7 @@ export function EoApplicationStatusScreen() {
               size="md"
               onClick={handleReapply}
             >
-              Perbaiki Pengajuan
+              Perbaiki & Ajukan Ulang
             </Button>
           </div>
         </section>
@@ -205,33 +168,29 @@ export function EoApplicationStatusScreen() {
 
       {/* PENDING REVIEW STATE */}
       {status === "PENDING_REVIEW" && (
-        <section className="eo-section" style={{ gap: "var(--space-5)" }}>
-          <div className="eo-alert eo-alert--warning">
+        <section className="eo-section" style={{ gap: "var(--space-4)" }}>
+          <div className="admin-alert admin-alert--warning">
             <h2
               style={{
                 fontSize: "var(--font-size-heading-sm)",
                 margin: "0 0 var(--space-1)",
               }}
             >
-              Pengajuan Sedang Dalam Proses Kurasi
+              Pengajuan Verifikasi Sedang Ditinjau Admin
             </h2>
             <p style={{ margin: 0 }}>
-              Formulir kemitraan Anda telah diterima oleh Tim Kurasi JedaIn pada{" "}
+              Formulir verifikasi lokasi diajukan pada{" "}
               <strong>
-                {submittedAt
-                  ? new Date(submittedAt).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })
+                {app?.submittedAt
+                  ? new Date(app.submittedAt).toLocaleDateString("id-ID")
                   : "hari ini"}
               </strong>
-              . Kami memastikan standar keselamatan dan filosofi mindful travel
-              sebelum mengaktifkan akses dashboard.
+              . Tim Kurator Admin JedaIn sedang meninjau kelayakan standar
+              ketenangan dan kesiapan operasional destinasi.
             </p>
           </div>
 
-          {/* Demonstration Quick Switcher for Juror */}
+          {/* Quick Demo Switcher for Juror */}
           <div
             style={{
               padding: "var(--space-4)",
@@ -254,7 +213,8 @@ export function EoApplicationStatusScreen() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Gunakan identitas demo terpisah yang sudah berstatus APPROVED.
+                Masuk sebagai akun destinasi demo terpisah yang sudah
+                terverifikasi (Lereng Hijau Batu).
               </p>
             </div>
             <Button
@@ -263,9 +223,7 @@ export function EoApplicationStatusScreen() {
               size="sm"
               onClick={handleSwitchToApprovedDemo}
             >
-              {isDestination
-                ? "Lihat Workspace Destinasi Demo (Approved)"
-                : "Lihat Workspace EO Demo (Approved)"}
+              Lihat Workspace Destinasi Demo
             </Button>
           </div>
 

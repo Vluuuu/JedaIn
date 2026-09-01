@@ -28,6 +28,17 @@ import { TravelerLoginScreen } from "./features/auth";
 import { CheckoutScreen } from "./features/checkout";
 import { ContactVerificationScreen } from "./features/contactVerification";
 import {
+  DestinationApplicationScreen,
+  DestinationCapacityScreen,
+  DestinationOverviewScreen,
+  DestinationProfileScreen,
+  DestinationReviewsScreen,
+  DestinationRouteGuard,
+  DestinationScheduleScreen,
+  DestinationSettingsScreen,
+  DestinationVerificationBadgeScreen,
+} from "./features/destination";
+import {
   EoApplicationScreen,
   EoApplicationStatusScreen,
   EoBookingsScreen,
@@ -64,16 +75,6 @@ const placeholderTravelerRoutes = [
   ["profile", "Profile"],
   ["profile/preferences", "Preferences"],
   ["complaints/new", "New complaint"],
-] as const;
-
-const partnerDestinationRoutes = [
-  ["destination", "Overview"],
-  ["destination/profile", "Destination Profile"],
-  ["destination/verification", "Verification"],
-  ["destination/schedule", "Schedule"],
-  ["destination/capacity", "Capacity"],
-  ["destination/reviews", "Reviews"],
-  ["destination/profile-settings", "Profile"],
 ] as const;
 
 export function App() {
@@ -185,49 +186,38 @@ export function App() {
         path="partner/apply/destination"
         element={<DistractionFreeShell />}
       >
-        <Route
-          index
-          element={
-            <PlaceholderPage
-              eyebrow="Mitra Destinasi"
-              title="Pengajuan Mitra Destinasi — prototype flow dilanjutkan pada sprint berikutnya."
-            />
-          }
-        />
+        <Route index element={<DestinationApplicationScreen />} />
       </Route>
       <Route path="partner/application" element={<DistractionFreeShell />}>
         <Route index element={<EoApplicationStatusScreen />} />
       </Route>
 
-      {/* Destination Partner Placeholder Routes */}
+      {/* Destination Partner Protected Operational Workspace */}
       <Route
         path="partner/destination"
         element={
-          <WorkspaceShell
-            surface="partner"
-            title="Destination partner workspace"
-            navigation={partnerDestinationNavigation}
-          />
+          <DestinationRouteGuard>
+            <WorkspaceShell
+              surface="partner"
+              title="Destination Partner Workspace"
+              navigation={partnerDestinationNavigation}
+            />
+          </DestinationRouteGuard>
         }
       >
+        <Route index element={<DestinationOverviewScreen />} />
+        <Route path="profile" element={<DestinationProfileScreen />} />
         <Route
-          index
-          element={
-            <PlaceholderPage eyebrow="Destination Partner" title="Overview" />
-          }
+          path="verification"
+          element={<DestinationVerificationBadgeScreen />}
         />
-        {partnerDestinationRoutes.slice(1).map(([path, title]) => {
-          const subPath = path.replace(/^destination\//, "");
-          return (
-            <Route
-              key={path}
-              path={subPath}
-              element={
-                <PlaceholderPage eyebrow="Destination Partner" title={title} />
-              }
-            />
-          );
-        })}
+        <Route path="schedule" element={<DestinationScheduleScreen />} />
+        <Route path="capacity" element={<DestinationCapacityScreen />} />
+        <Route path="reviews" element={<DestinationReviewsScreen />} />
+        <Route
+          path="profile-settings"
+          element={<DestinationSettingsScreen />}
+        />
       </Route>
 
       {/* Operational EO Partner Workspace (Protected by PartnerRouteGuard) */}

@@ -12,6 +12,23 @@ import {
 import { TravelerLoginScreen } from "./features/auth";
 import { CheckoutScreen } from "./features/checkout";
 import { ContactVerificationScreen } from "./features/contactVerification";
+import {
+  EoApplicationScreen,
+  EoApplicationStatusScreen,
+  EoBookingsScreen,
+  EoDestinationsScreen,
+  EoInsightsScreen,
+  EoOverviewScreen,
+  EoPackageBuilderScreen,
+  EoPackageDetailScreen,
+  EoPackagesScreen,
+  EoProfileScreen,
+  EoReviewsScreen,
+  EoSessionsScreen,
+  PartnerLoginScreen,
+  PartnerPortalLandingScreen,
+  PartnerRouteGuard,
+} from "./features/eo";
 import { ExploreScreen } from "./features/explore";
 import { HomeScreen } from "./features/home";
 import {
@@ -32,20 +49,6 @@ const placeholderTravelerRoutes = [
   ["profile", "Profile"],
   ["profile/preferences", "Preferences"],
   ["complaints/new", "New complaint"],
-] as const;
-
-const partnerEoRoutes = [
-  ["eo", "Overview"],
-  ["eo/insights", "Insights"],
-  ["eo/packages", "Packages"],
-  ["eo/packages/new", "New package"],
-  ["eo/packages/:packageId", "Package detail"],
-  ["eo/packages/:packageId/sessions", "Package sessions"],
-  ["eo/sessions", "Sessions"],
-  ["eo/bookings", "Bookings"],
-  ["eo/destinations", "Destinations"],
-  ["eo/reviews", "Reviews"],
-  ["eo/profile", "Profile"],
 ] as const;
 
 const partnerDestinationRoutes = [
@@ -168,13 +171,21 @@ export function App() {
         ))}
       </Route>
 
+      {/* Partner Entry & Application Routes */}
+      <Route path="partner" element={<TravelerPublicShell />}>
+        <Route index element={<PartnerPortalLandingScreen />} />
+      </Route>
       <Route path="partner/login" element={<DistractionFreeShell />}>
-        <Route
-          index
-          element={<PlaceholderPage eyebrow="Partner" title="Partner login" />}
-        />
+        <Route index element={<PartnerLoginScreen />} />
+      </Route>
+      <Route path="partner/apply/eo" element={<DistractionFreeShell />}>
+        <Route index element={<EoApplicationScreen />} />
+      </Route>
+      <Route path="partner/application" element={<DistractionFreeShell />}>
+        <Route index element={<EoApplicationStatusScreen />} />
       </Route>
 
+      {/* Destination Partner Placeholder Routes */}
       <Route
         path="partner/destination"
         element={
@@ -205,48 +216,36 @@ export function App() {
         })}
       </Route>
 
+      {/* Operational EO Partner Workspace (Protected by PartnerRouteGuard) */}
       <Route
-        path="partner"
+        path="partner/eo"
         element={
-          <WorkspaceShell
-            surface="partner"
-            title="Partner workspace"
-            navigation={partnerEoNavigation}
-          />
+          <PartnerRouteGuard>
+            <WorkspaceShell
+              surface="partner"
+              title="EO Partner Workspace"
+              navigation={partnerEoNavigation}
+            />
+          </PartnerRouteGuard>
         }
       >
+        <Route index element={<EoOverviewScreen />} />
+        <Route path="insights" element={<EoInsightsScreen />} />
+        <Route path="packages" element={<EoPackagesScreen />} />
+        <Route path="packages/new" element={<EoPackageBuilderScreen />} />
+        <Route path="packages/:packageId" element={<EoPackageDetailScreen />} />
         <Route
-          index
-          element={<PlaceholderPage eyebrow="Partner" title="Partner portal" />}
+          path="packages/:packageId/sessions"
+          element={<EoSessionsScreen />}
         />
-        <Route
-          path="apply/eo"
-          element={<PlaceholderPage eyebrow="Partner" title="EO application" />}
-        />
-        <Route
-          path="apply/destination"
-          element={
-            <PlaceholderPage
-              eyebrow="Partner"
-              title="Destination application"
-            />
-          }
-        />
-        <Route
-          path="application"
-          element={
-            <PlaceholderPage eyebrow="Partner" title="Application status" />
-          }
-        />
-        {partnerEoRoutes.map(([path, title]) => (
-          <Route
-            key={path}
-            path={path}
-            element={<PlaceholderPage eyebrow="EO Partner" title={title} />}
-          />
-        ))}
+        <Route path="sessions" element={<EoSessionsScreen />} />
+        <Route path="bookings" element={<EoBookingsScreen />} />
+        <Route path="destinations" element={<EoDestinationsScreen />} />
+        <Route path="reviews" element={<EoReviewsScreen />} />
+        <Route path="profile" element={<EoProfileScreen />} />
       </Route>
 
+      {/* Admin Operations Placeholder */}
       <Route path="admin/login" element={<DistractionFreeShell />}>
         <Route
           index

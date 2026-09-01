@@ -9,9 +9,7 @@ export function DestinationVerificationStatusScreen() {
   const partner = partnerSessionStore.get();
   const app = partner
     ? mockDestinationVerificationStore.getByPartnerId(partner.id)
-    : mockDestinationVerificationStore.getAll()[0];
-
-  const status = app?.status ?? "PENDING_REVIEW";
+    : undefined;
 
   const handleOpenDashboard = () => {
     navigate("/partner/destination");
@@ -25,6 +23,79 @@ export function DestinationVerificationStatusScreen() {
   const handleReapply = () => {
     navigate("/partner/apply/destination");
   };
+
+  // Case 0: No application submitted yet for this authenticated Destination partner
+  if (!app) {
+    return (
+      <div
+        className="dest-container"
+        style={{ padding: "var(--space-8) var(--space-4)", maxWidth: "680px" }}
+      >
+        <header className="dest-page-header">
+          <div>
+            <Badge tone="neutral">Belum Ada Pengajuan</Badge>
+            <h1
+              className="dest-page-title"
+              style={{ marginTop: "var(--space-2)" }}
+            >
+              Status Verifikasi Destinasi
+            </h1>
+            <p className="dest-page-subtitle">
+              Akun Mitra:{" "}
+              <strong>{partner?.businessName ?? "Destinasi Baru"}</strong>
+            </p>
+          </div>
+        </header>
+
+        <section className="eo-section" style={{ gap: "var(--space-4)" }}>
+          <div className="admin-alert admin-alert--info">
+            <h2
+              style={{
+                fontSize: "var(--font-size-heading-sm)",
+                margin: "0 0 var(--space-1)",
+              }}
+            >
+              Belum Ada Formulir Pengajuan Verifikasi
+            </h2>
+            <p style={{ margin: 0 }}>
+              Anda belum mengirimkan formulir verifikasi kawasan destinasi.
+              Silakan isi formulir kurasi agar lokasi Anda dapat diverifikasi
+              oleh Tim Admin JedaIn.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Link
+              to="/partner"
+              style={{
+                color: "var(--color-text-secondary)",
+                fontSize: "var(--font-size-body-sm)",
+              }}
+            >
+              &larr; Kembali ke Portal Partner
+            </Link>
+
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={() => navigate("/partner/apply/destination")}
+            >
+              Mulai Pengajuan Verifikasi &rarr;
+            </Button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  const status = app.status;
 
   return (
     <div
@@ -55,8 +126,7 @@ export function DestinationVerificationStatusScreen() {
             Status Verifikasi Destinasi
           </h1>
           <p className="dest-page-subtitle">
-            Kawasan: <strong>{app?.name ?? "Destinasi Alam"}</strong> (
-            {app?.locationLabel ?? "Jawa Timur"})
+            Kawasan: <strong>{app.name}</strong> ({app.locationLabel})
           </p>
         </div>
       </header>
@@ -84,11 +154,9 @@ export function DestinationVerificationStatusScreen() {
                 flexWrap: "wrap",
               }}
             >
-              <Badge tone="success">
-                Level: {app?.approvedLevel ?? "BASIC"}
-              </Badge>
-              <Badge tone={app?.approvedGuideReady ? "success" : "neutral"}>
-                {app?.approvedGuideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
+              <Badge tone="success">Level: {app.approvedLevel ?? "—"}</Badge>
+              <Badge tone={app.approvedGuideReady ? "success" : "neutral"}>
+                {app.approvedGuideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
               </Badge>
             </div>
           </div>
@@ -132,7 +200,7 @@ export function DestinationVerificationStatusScreen() {
                 color: "var(--color-text-primary)",
               }}
             >
-              {app?.rejectionReason ?? "Alasan verifikasi belum tersedia."}
+              {app.rejectionReason ?? "Alasan verifikasi belum tersedia."}
             </blockquote>
           </div>
 
@@ -180,7 +248,7 @@ export function DestinationVerificationStatusScreen() {
             <p style={{ margin: 0 }}>
               Formulir verifikasi lokasi diajukan pada{" "}
               <strong>
-                {app?.submittedAt
+                {app.submittedAt
                   ? new Date(app.submittedAt).toLocaleDateString("id-ID")
                   : "hari ini"}
               </strong>

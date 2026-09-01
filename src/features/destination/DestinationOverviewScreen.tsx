@@ -11,10 +11,22 @@ import "./destination.css";
 
 export function DestinationOverviewScreen() {
   const context = resolveAuthenticatedDestinationContext();
-  const destination = context?.destination;
-  const partner = context?.partner;
-  const destinationIdentityId =
-    destination?.destinationId ?? "dest_lereng_hijau";
+  if (!context) {
+    return (
+      <div className="dest-container" style={{ padding: "var(--space-8)" }}>
+        <div className="admin-alert admin-alert--warning">
+          <h2>Data Destinasi Tidak Tersedia</h2>
+          <p>
+            Data operasional destinasi tidak tersedia untuk akun ini atau belum
+            disetujui.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { destination, partner } = context;
+  const destinationIdentityId = destination.destinationId;
 
   // Find all packages using this destination
   const allPackages = mockEoPackageStore.getAllPackages();
@@ -43,9 +55,7 @@ export function DestinationOverviewScreen() {
   );
 
   // Reviews for this destination using centralized resolver
-  const reviewTarget = destination
-    ? getDestinationReviewTargetRef(destination)
-    : "";
+  const reviewTarget = getDestinationReviewTargetRef(destination);
   const venueReviews = reviewTarget
     ? mockReviewStore.getReviewsForDestination(reviewTarget)
     : [];
@@ -59,15 +69,13 @@ export function DestinationOverviewScreen() {
 
   // Profile completeness calculation (6 core fields)
   const checklist = [
-    Boolean(destination?.name),
-    Boolean(destination?.locationLabel),
-    Boolean(destination?.description),
-    Boolean(destination?.highlights && destination.highlights.length > 0),
+    Boolean(destination.name),
+    Boolean(destination.locationLabel),
+    Boolean(destination.description),
+    Boolean(destination.highlights && destination.highlights.length > 0),
+    Boolean(destination.baseCostPerPerson && destination.baseCostPerPerson > 0),
     Boolean(
-      destination?.baseCostPerPerson && destination.baseCostPerPerson > 0,
-    ),
-    Boolean(
-      destination?.capacityPerSession && destination.capacityPerSession > 0,
+      destination.capacityPerSession && destination.capacityPerSession > 0,
     ),
   ];
   const completedItems = checklist.filter(Boolean).length;
@@ -86,19 +94,16 @@ export function DestinationOverviewScreen() {
             }}
           >
             <Badge tone="success">
-              Mitra Destinasi Terverifikasi (
-              {destination?.verificationLevel ?? "BASIC"})
+              Mitra Destinasi Terverifikasi ({destination.verificationLevel})
             </Badge>
-            <Badge tone={destination?.guideReady ? "success" : "neutral"}>
-              {destination?.guideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
+            <Badge tone={destination.guideReady ? "success" : "neutral"}>
+              {destination.guideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
             </Badge>
           </div>
-          <h1 className="dest-page-title">
-            {destination?.name ?? "Kawasan Destinasi"}
-          </h1>
+          <h1 className="dest-page-title">{destination.name}</h1>
           <p className="dest-page-subtitle">
-            {destination?.locationLabel} • Pengelola:{" "}
-            <strong>{partner?.businessName ?? "Pengelola Kawasan"}</strong>
+            {destination.locationLabel} • Pengelola:{" "}
+            <strong>{partner.businessName ?? "Pengelola Kawasan"}</strong>
           </p>
         </div>
       </header>
@@ -117,13 +122,13 @@ export function DestinationOverviewScreen() {
         <div className="dest-stat-card">
           <span className="dest-stat-label">Peserta Terkonfirmasi</span>
           <strong className="dest-stat-value">{confirmedParticipants}</strong>
-          <span className="dest-stat-desc">Total traveler berkunjung</span>
+          <span className="dest-stat-desc">Total peserta terkonfirmasi</span>
         </div>
 
         <div className="dest-stat-card">
           <span className="dest-stat-label">Kapasitas Maksimal Venue</span>
           <strong className="dest-stat-value">
-            {destination?.capacityPerSession ?? 20}
+            {destination.capacityPerSession}
           </strong>
           <span className="dest-stat-desc">Batas orang / sesi tenang</span>
         </div>

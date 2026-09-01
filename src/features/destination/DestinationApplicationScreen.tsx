@@ -69,7 +69,7 @@ export function DestinationApplicationScreen() {
   );
 
   const [guideReady, setGuideReady] = useState<boolean>(
-    existingApp?.guideReadinessEvidence ? true : false,
+    existingApp?.declaredGuideReady ?? false,
   );
   const [guideReadinessEvidence, setGuideReadinessEvidence] = useState(
     existingApp?.guideReadinessEvidence ?? "",

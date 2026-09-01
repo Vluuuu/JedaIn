@@ -4,10 +4,23 @@ import "./destination.css";
 
 export function DestinationVerificationBadgeScreen() {
   const context = resolveAuthenticatedDestinationContext();
-  const destination = context?.destination;
+  if (!context) {
+    return (
+      <div className="dest-container" style={{ padding: "var(--space-8)" }}>
+        <div className="admin-alert admin-alert--warning">
+          <h2>Data Lencana Tidak Tersedia</h2>
+          <p>
+            Informasi status verifikasi dan lencana tidak tersedia untuk akun
+            ini.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  const verificationLevel = destination?.verificationLevel ?? "BASIC";
-  const guideReady = destination?.guideReady ?? true;
+  const { destination } = context;
+  const verificationLevel = destination.verificationLevel;
+  const guideReady = destination.guideReady;
 
   return (
     <div className="dest-container" style={{ maxWidth: "960px" }}>

@@ -60,6 +60,7 @@ export interface DestinationVerificationRecord {
   description: string;
   highlights: string[];
   capacityPerSession: number;
+  declaredGuideReady: boolean;
   guideReadinessEvidence: string;
   submittedAt: string;
   status: DestinationVerificationStatus;

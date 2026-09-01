@@ -4,8 +4,18 @@ import "./destination.css";
 
 export function DestinationSettingsScreen() {
   const context = resolveAuthenticatedDestinationContext();
-  const destination = context?.destination;
-  const partner = context?.partner;
+  if (!context) {
+    return (
+      <div className="dest-container" style={{ padding: "var(--space-8)" }}>
+        <div className="admin-alert admin-alert--warning">
+          <h2>Pengaturan Tidak Tersedia</h2>
+          <p>Informasi pengaturan akun destinasi tidak dapat dimuat.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { destination, partner } = context;
 
   return (
     <div className="dest-container" style={{ maxWidth: "800px" }}>
@@ -43,7 +53,7 @@ export function DestinationSettingsScreen() {
               Nama Entitas Pengelola:
             </small>
             <strong style={{ fontSize: "var(--font-size-body-md)" }}>
-              {partner?.businessName ?? "Pengelola Kawasan"}
+              {partner.businessName ?? "Pengelola Kawasan"}
             </strong>
           </div>
 
@@ -54,7 +64,7 @@ export function DestinationSettingsScreen() {
               Penanggung Jawab:
             </small>
             <strong style={{ fontSize: "var(--font-size-body-md)" }}>
-              {partner?.name ?? "Hadi Purnomo"}
+              {partner.name}
             </strong>
           </div>
 
@@ -65,7 +75,7 @@ export function DestinationSettingsScreen() {
               Email Operasional:
             </small>
             <strong style={{ fontSize: "var(--font-size-body-md)" }}>
-              {partner?.email ?? "destinasi@lerenghijau.id"}
+              {partner.email}
             </strong>
           </div>
 
@@ -76,8 +86,7 @@ export function DestinationSettingsScreen() {
               Kawasan Destinasi Terkait:
             </small>
             <Badge tone="success">
-              {destination?.name ?? "Lereng Hijau Batu"} (
-              {destination?.verificationLevel ?? "BASIC"})
+              {destination.name} ({destination.verificationLevel})
             </Badge>
           </div>
         </div>

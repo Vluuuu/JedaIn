@@ -22,17 +22,16 @@ export function PartnerLoginScreen() {
           (a) =>
             a.partnerIdentityId === cleanEmail ||
             a.applicationId === cleanEmail ||
-            cleanEmail.includes("lerenghijau") ||
-            cleanEmail.includes("destinasi"),
+            a.contactEmail === cleanEmail,
         );
 
       if (destApp) {
         partnerSessionStore.setPartner({
           id: destApp.partnerIdentityId,
-          email: cleanEmail,
+          email: destApp.contactEmail ?? cleanEmail,
           name: destApp.name,
           role: "DESTINATION",
-          businessName: `Pengelola ${destApp.name}`,
+          businessName: destApp.managementName ?? `Pengelola ${destApp.name}`,
           destinationIdentityId: destApp.destinationIdentityId,
         });
 
@@ -44,34 +43,14 @@ export function PartnerLoginScreen() {
         return;
       }
 
-      // Check if email matches pending or rejected demo
-      if (cleanEmail.includes("coban") || cleanEmail.includes("pending")) {
-        partnerSessionStore.setPartner({
-          id: "dest_partner_coban_rondo",
-          email: "partner@cobanrondo.id",
-          name: "Pengelola Hutan Pinus Coban Rondo",
-          role: "DESTINATION",
-          businessName: "Pengelola Coban Rondo",
-          destinationIdentityId: "dest_coban_rondo",
-        });
-        navigate("/partner/application");
-        return;
-      }
-
-      if (cleanEmail.includes("rejected") || cleanEmail.includes("curah")) {
-        partnerSessionStore.setPartner({
-          id: "dest_partner_rejected",
-          email: "partner@curahrawan.id",
-          name: "Pengelola Curah Rawan",
-          role: "DESTINATION",
-          businessName: "Pengelola Lembah Curah Rawan",
-          destinationIdentityId: "dest_curah_rawan",
-        });
-        navigate("/partner/application");
-        return;
-      }
-
-      // If new destination identity
+      // If new/unknown destination identity: establish prototype DESTINATION session first
+      partnerSessionStore.setPartner({
+        id: `dest_partner_${cleanEmail.toLowerCase().replace(/[^a-z0-9]/g, "_")}`,
+        email: cleanEmail,
+        name: "Mitra Destinasi Baru",
+        role: "DESTINATION",
+        businessName: "Pengelola Kawasan Destinasi",
+      });
       navigate("/partner/apply/destination");
       return;
     }

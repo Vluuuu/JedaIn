@@ -30,6 +30,7 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
         "Saung santai dan fasilitas air bersih",
       ],
       capacityPerSession: 20,
+      declaredGuideReady: true,
       guideReadinessEvidence:
         "Tersedia 4 pemandu lokal terlatih dari kelompok tani binaan kawasan.",
       submittedAt: "2026-08-01T08:00:00Z",
@@ -64,6 +65,7 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
         "Pemandu lokal standby di gerbang utama",
       ],
       capacityPerSession: 25,
+      declaredGuideReady: true,
       guideReadinessEvidence:
         "Memiliki 3 pemandu lokal binaan perhutani yang bersertifikasi kepemanduan dasar.",
       submittedAt: "2026-08-26T10:00:00Z",
@@ -77,10 +79,15 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
       locationLabel: "Mojokerto / Pasuruan",
       province: "Jawa Timur",
       city: "Pasuruan",
+      managementName: "Pokdarwis Bambu Trawas",
+      contactPerson: "Agus Santoso",
+      contactPhone: "081255667788",
+      contactEmail: "partner@trawas.id",
       baseCostPerPerson: 95000,
       description: "Kawasan hutan bambu hening untuk kontemplasi mandiri.",
       highlights: ["Spot meditasi", "Suasana sangat hening"],
       capacityPerSession: 12,
+      declaredGuideReady: false,
       guideReadinessEvidence: "Belum memiliki pemandu lokal resmi di lokasi.",
       submittedAt: "2026-08-15T09:00:00Z",
       status: "APPROVED",
@@ -104,6 +111,7 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
       description: "Kawasan tebing dan sungai deras.",
       highlights: ["Tebing curam"],
       capacityPerSession: 10,
+      declaredGuideReady: false,
       guideReadinessEvidence: "Belum ada pemandu lokal.",
       submittedAt: "2026-08-18T09:00:00Z",
       status: "REJECTED",
@@ -123,6 +131,34 @@ function cloneVerificationApp(
       ? { ...app.legalEntityDocument }
       : undefined,
   };
+}
+
+function generateUniqueDestinationIdentityId(name: string): string {
+  const baseSlug = `dest_${name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "_")
+    .replace(/_+/g, "_")
+    .slice(0, 24)}`;
+
+  const existingAppIds = new Set(
+    verificationApps.map((a) => a.destinationIdentityId),
+  );
+  const existingCanonicalIds = new Set(
+    mockDestinationStore.getAll().map((d) => d.destinationId),
+  );
+
+  const isTaken = (id: string) =>
+    existingAppIds.has(id) || existingCanonicalIds.has(id);
+
+  if (!isTaken(baseSlug)) {
+    return baseSlug;
+  }
+
+  let counter = 1;
+  while (isTaken(`${baseSlug}_${counter}`)) {
+    counter++;
+  }
+  return `${baseSlug}_${counter}`;
 }
 
 let verificationApps: DestinationVerificationRecord[] =
@@ -191,12 +227,19 @@ export const mockDestinationVerificationStore = {
     if (
       !input.name.trim() ||
       !input.locationLabel.trim() ||
-      !input.description.trim()
+      !input.province.trim() ||
+      !input.city.trim() ||
+      !input.managementName?.trim() ||
+      !input.contactPerson?.trim() ||
+      !input.phone?.trim() ||
+      !input.email?.trim() ||
+      !input.description.trim() ||
+      !input.guideReadinessEvidence.trim()
     ) {
       return {
         success: false,
         message:
-          "Informasi nama destinasi, lokasi, dan deskripsi wajib diisi lengkap.",
+          "Semua informasi wajib (nama, lokasi, provinsi, kota, pengelola, penanggung jawab, kontak, deskripsi, bukti pemandu) harus diisi lengkap.",
       };
     }
 
@@ -241,10 +284,7 @@ export const mockDestinationVerificationStore = {
     const destId =
       existingIndex >= 0
         ? verificationApps[existingIndex].destinationIdentityId
-        : `dest_${input.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, "_")
-            .slice(0, 20)}_${Date.now().toString(36).slice(-4)}`;
+        : generateUniqueDestinationIdentityId(input.name.trim());
 
     const application: DestinationVerificationRecord = {
       applicationId:
@@ -255,12 +295,12 @@ export const mockDestinationVerificationStore = {
       destinationIdentityId: destId,
       name: input.name.trim(),
       locationLabel: input.locationLabel.trim(),
-      province: input.province.trim() || "Jawa Timur",
-      city: input.city.trim() || "Batu",
-      managementName: input.managementName?.trim() || undefined,
-      contactPerson: input.contactPerson?.trim() || undefined,
-      contactPhone: input.phone?.trim() || undefined,
-      contactEmail: input.email?.trim() || undefined,
+      province: input.province.trim(),
+      city: input.city.trim(),
+      managementName: input.managementName.trim(),
+      contactPerson: input.contactPerson.trim(),
+      contactPhone: input.phone.trim(),
+      contactEmail: input.email.trim(),
       legalEntityDocument: input.legalEntityDoc
         ? {
             name: input.legalEntityDoc.name,
@@ -272,6 +312,7 @@ export const mockDestinationVerificationStore = {
       description: input.description.trim(),
       highlights: [...input.highlights],
       capacityPerSession: input.capacityPerSession,
+      declaredGuideReady: Boolean(input.guideReady),
       guideReadinessEvidence: input.guideReadinessEvidence.trim(),
       submittedAt: nowIso,
       status: "PENDING_REVIEW",
@@ -284,13 +325,6 @@ export const mockDestinationVerificationStore = {
     }
 
     return { success: true, application: cloneVerificationApp(application) };
-  },
-
-  setRejectionReason(applicationId: string, reason?: string): boolean {
-    const app = verificationApps.find((a) => a.applicationId === applicationId);
-    if (!app) return false;
-    app.rejectionReason = reason;
-    return true;
   },
 
   approveApplication(

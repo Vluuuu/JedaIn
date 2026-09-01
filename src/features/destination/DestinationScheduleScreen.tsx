@@ -6,9 +6,21 @@ import "./destination.css";
 
 export function DestinationScheduleScreen() {
   const context = resolveAuthenticatedDestinationContext();
-  const destination = context?.destination;
-  const destinationIdentityId =
-    destination?.destinationId ?? "dest_lereng_hijau";
+  if (!context) {
+    return (
+      <div className="dest-container" style={{ padding: "var(--space-8)" }}>
+        <div className="admin-alert admin-alert--warning">
+          <h2>Data Jadwal Tidak Tersedia</h2>
+          <p>
+            Informasi jadwal operasional sesi tidak tersedia untuk akun ini.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { destination } = context;
+  const destinationIdentityId = destination.destinationId;
 
   // Filter only packages designed at this venue
   const allPackages = mockEoPackageStore.getAllPackages();

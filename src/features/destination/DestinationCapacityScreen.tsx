@@ -6,11 +6,22 @@ import "./destination.css";
 
 export function DestinationCapacityScreen() {
   const context = resolveAuthenticatedDestinationContext();
-  const destination = context?.destination;
-  const destinationIdentityId =
-    destination?.destinationId ?? "dest_lereng_hijau";
+  if (!context) {
+    return (
+      <div className="dest-container" style={{ padding: "var(--space-8)" }}>
+        <div className="admin-alert admin-alert--warning">
+          <h2>Data Kapasitas Tidak Tersedia</h2>
+          <p>
+            Informasi pengawasan kapasitas venue tidak tersedia untuk akun ini.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  const baseVenueCapacity = destination?.capacityPerSession ?? 20;
+  const { destination } = context;
+  const destinationIdentityId = destination.destinationId;
+  const baseVenueCapacity = destination.capacityPerSession;
 
   // Filter packages and sessions for this destination
   const allPackages = mockEoPackageStore.getAllPackages();

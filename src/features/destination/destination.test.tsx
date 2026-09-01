@@ -23,6 +23,7 @@ import { DestinationReviewsScreen } from "./DestinationReviewsScreen";
 import { DestinationSettingsScreen } from "./DestinationSettingsScreen";
 import { DestinationApplicationScreen } from "./DestinationApplicationScreen";
 import { DestinationVerificationStatusScreen } from "./DestinationVerificationStatusScreen";
+import { PartnerLoginScreen } from "../eo/PartnerLoginScreen";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -58,6 +59,56 @@ async function renderComponent(
 
 describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
   describe("1. Access Control & Authority Chain (A–F)", () => {
+    it("A. unknown destination email must NOT login as approved Lereng Hijau partner", async () => {
+      const view = await renderComponent(createElement(PartnerLoginScreen));
+      const emailInput =
+        view.querySelector<HTMLInputElement>("#partner-email")!;
+      await act(async () => {
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeInputValueSetter?.call(emailInput, "randomdestinasi@example.com");
+        emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const submitBtn = view.querySelector<HTMLButtonElement>(
+        "button[type='submit']",
+      )!;
+      await act(async () => {
+        submitBtn.click();
+      });
+
+      // Must establish a separate new identity, not dest_partner_lereng_hijau
+      expect(partnerSessionStore.get()?.id).not.toBe(
+        "dest_partner_lereng_hijau",
+      );
+      expect(partnerSessionStore.get()?.role).toBe("DESTINATION");
+    });
+
+    it("B. exact registered destination email logs in as the matching application partner", async () => {
+      const view = await renderComponent(createElement(PartnerLoginScreen));
+      const emailInput =
+        view.querySelector<HTMLInputElement>("#partner-email")!;
+      await act(async () => {
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeInputValueSetter?.call(emailInput, "destinasi@lerenghijau.id");
+        emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const submitBtn = view.querySelector<HTMLButtonElement>(
+        "button[type='submit']",
+      )!;
+      await act(async () => {
+        submitBtn.click();
+      });
+
+      expect(partnerSessionStore.get()?.id).toBe("dest_partner_lereng_hijau");
+    });
+
     it("A & B. forged session destinationIdentityId is ignored, screens resolve Lereng Hijau from application ownership", async () => {
       partnerSessionStore.setPartner({
         id: "dest_partner_lereng_hijau",
@@ -108,6 +159,201 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         createElement(DestinationReviewsScreen),
       );
       expect(revView.textContent).toContain("Ulasan & Rating Destinasi");
+    });
+
+    it("C. blank province, city, management, contact, or guide evidence fails submission with zero mutation", () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_blank_test",
+        email: "blank@test.id",
+        name: "Blank Test",
+        role: "DESTINATION",
+        businessName: "Blank Test Entity",
+      });
+
+      // Blank province
+      const res1 = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_blank_test",
+        name: "Kawasan Valid",
+        locationLabel: "Batu",
+        province: "", // Blank!
+        city: "Batu",
+        managementName: "Pokdarwis",
+        contactPerson: "Budi",
+        phone: "0812",
+        email: "budi@test.id",
+        description: "Desc",
+        highlights: ["H"],
+        capacityPerSession: 15,
+        baseCostPerPerson: 100000,
+        guideReady: true,
+        guideReadinessEvidence: "Evidence",
+        agreedToSop: true,
+      });
+      expect(res1.success).toBe(false);
+
+      // Blank city
+      const res2 = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_blank_test",
+        name: "Kawasan Valid",
+        locationLabel: "Batu",
+        province: "Jawa Timur",
+        city: "", // Blank!
+        managementName: "Pokdarwis",
+        contactPerson: "Budi",
+        phone: "0812",
+        email: "budi@test.id",
+        description: "Desc",
+        highlights: ["H"],
+        capacityPerSession: 15,
+        baseCostPerPerson: 100000,
+        guideReady: true,
+        guideReadinessEvidence: "Evidence",
+        agreedToSop: true,
+      });
+      expect(res2.success).toBe(false);
+
+      // Blank management or contact
+      const res3 = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_blank_test",
+        name: "Kawasan Valid",
+        locationLabel: "Batu",
+        province: "Jawa Timur",
+        city: "Batu",
+        managementName: "", // Blank!
+        contactPerson: "Budi",
+        phone: "0812",
+        email: "budi@test.id",
+        description: "Desc",
+        highlights: ["H"],
+        capacityPerSession: 15,
+        baseCostPerPerson: 100000,
+        guideReady: true,
+        guideReadinessEvidence: "Evidence",
+        agreedToSop: true,
+      });
+      expect(res3.success).toBe(false);
+
+      // Blank guide evidence
+      const res4 = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_blank_test",
+        name: "Kawasan Valid",
+        locationLabel: "Batu",
+        province: "Jawa Timur",
+        city: "Batu",
+        managementName: "Pokdarwis",
+        contactPerson: "Budi",
+        phone: "0812",
+        email: "budi@test.id",
+        description: "Desc",
+        highlights: ["H"],
+        capacityPerSession: 15,
+        baseCostPerPerson: 100000,
+        guideReady: true,
+        guideReadinessEvidence: "", // Blank!
+        agreedToSop: true,
+      });
+      expect(res4.success).toBe(false);
+    });
+
+    it("C2. declaredGuideReady=false with non-empty evidence persists false and is preserved on reapply", () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_guide_decl",
+        email: "decl@test.id",
+        name: "Decl Partner",
+        role: "DESTINATION",
+        businessName: "Decl Entity",
+      });
+
+      const res = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_guide_decl",
+        name: "Kawasan Non Guide",
+        locationLabel: "Pasuruan",
+        province: "Jawa Timur",
+        city: "Pasuruan",
+        managementName: "Pokdarwis Pasuruan",
+        contactPerson: "Agus",
+        phone: "0812",
+        email: "decl@test.id",
+        description: "Kawasan hening",
+        highlights: ["Bambu"],
+        capacityPerSession: 12,
+        baseCostPerPerson: 90000,
+        guideReady: false, // Declared false!
+        guideReadinessEvidence: "Belum memiliki pemandu lokal resmi.",
+        agreedToSop: true,
+      });
+
+      expect(res.success).toBe(true);
+      const app = mockDestinationVerificationStore.getByPartnerId(
+        "dest_partner_guide_decl",
+      );
+      expect(app?.declaredGuideReady).toBe(false);
+    });
+
+    it("C3. two new destinations with same name get unique destinationIdentityIds and never collide with canonical", () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_dup_1",
+        email: "dup1@test.id",
+        name: "Dup 1",
+        role: "DESTINATION",
+        businessName: "Dup 1 Entity",
+      });
+
+      const res1 = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_dup_1",
+        name: "Lereng Hijau Batu", // Same name as existing canonical!
+        locationLabel: "Batu Baru",
+        province: "Jawa Timur",
+        city: "Batu",
+        managementName: "Pokdarwis Baru 1",
+        contactPerson: "Budi",
+        phone: "0812",
+        email: "dup1@test.id",
+        description: "Kawasan baru",
+        highlights: ["Kebun"],
+        capacityPerSession: 15,
+        baseCostPerPerson: 100000,
+        guideReady: true,
+        guideReadinessEvidence: "Pemandu ada",
+        agreedToSop: true,
+      });
+
+      expect(res1.success).toBe(true);
+      const app1 =
+        mockDestinationVerificationStore.getByPartnerId("dest_partner_dup_1");
+      expect(app1?.destinationIdentityId).not.toBe("dest_lereng_hijau");
+
+      partnerSessionStore.setPartner({
+        id: "dest_partner_dup_2",
+        email: "dup2@test.id",
+        name: "Dup 2",
+        role: "DESTINATION",
+        businessName: "Dup 2 Entity",
+      });
+
+      const res2 = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_dup_2",
+        name: "Lereng Hijau Batu",
+        locationLabel: "Batu Baru 2",
+        province: "Jawa Timur",
+        city: "Batu",
+        managementName: "Pokdarwis Baru 2",
+        contactPerson: "Budi 2",
+        phone: "0813",
+        email: "dup2@test.id",
+        description: "Kawasan baru 2",
+        highlights: ["Kebun 2"],
+        capacityPerSession: 15,
+        baseCostPerPerson: 100000,
+        guideReady: true,
+        guideReadinessEvidence: "Pemandu ada",
+        agreedToSop: true,
+      });
+
+      expect(res2.success).toBe(true);
+      const app2 =
+        mockDestinationVerificationStore.getByPartnerId("dest_partner_dup_2");
+      expect(app2?.destinationIdentityId).not.toBe(app1?.destinationIdentityId);
     });
 
     it("C. new applicant supplying forged destinationIdentityId has it ignored/generated internally", () => {
@@ -415,26 +661,23 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       );
     });
 
-    it("R. missing rejection reason does not fabricate an invented cause", async () => {
-      // Modify store's internal rejection reason to undefined for test isolation
-      mockDestinationVerificationStore.setRejectionReason(
-        "dest_app_rejected_demo",
-        undefined,
-      );
-
+    it("R. missing application in status screen shows 'Belum Ada Formulir Pengajuan' without claiming PENDING_REVIEW", async () => {
       partnerSessionStore.setPartner({
-        id: "dest_partner_rejected",
-        email: "partner@curahrawan.id",
-        name: "Pengelola Curah Rawan",
+        id: "dest_partner_no_app",
+        email: "noapp@dest.id",
+        name: "Partner No App",
         role: "DESTINATION",
-        businessName: "Pengelola Curah Rawan",
-        destinationIdentityId: "dest_curah_rawan",
+        businessName: "Pengelola Baru No App",
       });
 
       const view = await renderComponent(
         createElement(DestinationVerificationStatusScreen),
       );
-      expect(view.textContent).toContain("Alasan verifikasi belum tersedia.");
+      expect(view.textContent).toContain("Belum Ada Pengajuan");
+      expect(view.textContent).toContain(
+        "Belum Ada Formulir Pengajuan Verifikasi",
+      );
+      expect(view.textContent).not.toContain("Menunggu Verifikasi Admin");
     });
 
     it("S. UI reapply pre-populates existing application data", async () => {
@@ -606,6 +849,48 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(settingsView.textContent).toContain(
         "Perjanjian Kemitraan Destinasi Aktif",
       );
+    });
+
+    it("operational screens with invalid/unapproved context render safe unavailable state without falling back to Lereng Hijau", async () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_rejected",
+        email: "partner@curahrawan.id",
+        name: "Pengelola Curah Rawan",
+        role: "DESTINATION",
+        businessName: "Pengelola Curah Rawan",
+      });
+
+      const ovView = await renderComponent(
+        createElement(DestinationOverviewScreen),
+      );
+      expect(ovView.textContent).toContain("Data Destinasi Tidak Tersedia");
+      expect(ovView.textContent).not.toContain("Lereng Hijau Batu");
+
+      const profView = await renderComponent(
+        createElement(DestinationProfileScreen),
+      );
+      expect(profView.textContent).toContain("Data Profil Tidak Tersedia");
+      expect(profView.textContent).not.toContain("Lereng Hijau Batu");
+
+      const badgeView = await renderComponent(
+        createElement(DestinationVerificationBadgeScreen),
+      );
+      expect(badgeView.textContent).toContain("Data Lencana Tidak Tersedia");
+
+      const schedView = await renderComponent(
+        createElement(DestinationScheduleScreen),
+      );
+      expect(schedView.textContent).toContain("Data Jadwal Tidak Tersedia");
+
+      const capView = await renderComponent(
+        createElement(DestinationCapacityScreen),
+      );
+      expect(capView.textContent).toContain("Data Kapasitas Tidak Tersedia");
+
+      const revView = await renderComponent(
+        createElement(DestinationReviewsScreen),
+      );
+      expect(revView.textContent).toContain("Data Ulasan Tidak Tersedia");
     });
   });
 });

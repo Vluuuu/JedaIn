@@ -4,7 +4,20 @@ import "./destination.css";
 
 export function DestinationProfileScreen() {
   const context = resolveAuthenticatedDestinationContext();
-  const destination = context?.destination;
+  if (!context) {
+    return (
+      <div className="dest-container" style={{ padding: "var(--space-8)" }}>
+        <div className="admin-alert admin-alert--warning">
+          <h2>Data Profil Tidak Tersedia</h2>
+          <p>
+            Informasi profil destinasi tidak dapat dimuat untuk sesi saat ini.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { destination } = context;
 
   return (
     <div className="dest-container" style={{ maxWidth: "900px" }}>
@@ -19,10 +32,10 @@ export function DestinationProfileScreen() {
             }}
           >
             <Badge tone="success">
-              Terverifikasi {destination?.verificationLevel}
+              Terverifikasi {destination.verificationLevel}
             </Badge>
-            <Badge tone={destination?.guideReady ? "success" : "neutral"}>
-              {destination?.guideReady ? "Guide Ready ✓" : "Tanpa Guide Lokal"}
+            <Badge tone={destination.guideReady ? "success" : "neutral"}>
+              {destination.guideReady ? "Guide Ready ✓" : "Tanpa Guide Lokal"}
             </Badge>
           </div>
           <h1 className="dest-page-title">Profil Kawasan Destinasi</h1>
@@ -61,7 +74,7 @@ export function DestinationProfileScreen() {
               Nama Destinasi:
             </small>
             <strong style={{ fontSize: "var(--font-size-body-md)" }}>
-              {destination?.name ?? "—"}
+              {destination.name}
             </strong>
           </div>
 
@@ -72,7 +85,7 @@ export function DestinationProfileScreen() {
               Wilayah & Lokasi:
             </small>
             <strong style={{ fontSize: "var(--font-size-body-md)" }}>
-              {destination?.locationLabel ?? "—"}
+              {destination.locationLabel}
             </strong>
           </div>
 
@@ -88,7 +101,7 @@ export function DestinationProfileScreen() {
                 color: "var(--color-brand-primary)",
               }}
             >
-              Rp{destination?.baseCostPerPerson.toLocaleString("id-ID")}
+              Rp{destination.baseCostPerPerson.toLocaleString("id-ID")}
             </strong>
           </div>
 
@@ -99,7 +112,7 @@ export function DestinationProfileScreen() {
               Batas Kapasitas per Sesi:
             </small>
             <strong style={{ fontSize: "var(--font-size-body-md)" }}>
-              {destination?.capacityPerSession} Orang / sesi
+              {destination.capacityPerSession} Orang / sesi
             </strong>
           </div>
         </div>
@@ -120,11 +133,11 @@ export function DestinationProfileScreen() {
               color: "var(--color-text-primary)",
             }}
           >
-            {destination?.description}
+            {destination.description}
           </p>
         </div>
 
-        {destination?.highlights && destination.highlights.length > 0 && (
+        {destination.highlights && destination.highlights.length > 0 && (
           <div
             style={{
               borderTop: "1px solid var(--color-border-default)",

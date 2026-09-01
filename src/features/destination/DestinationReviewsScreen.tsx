@@ -8,12 +8,24 @@ import "./destination.css";
 
 export function DestinationReviewsScreen() {
   const context = resolveAuthenticatedDestinationContext();
-  const destination = context?.destination;
+  if (!context) {
+    return (
+      <div className="dest-container" style={{ padding: "var(--space-8)" }}>
+        <div className="admin-alert admin-alert--warning">
+          <h2>Data Ulasan Tidak Tersedia</h2>
+          <p>
+            Informasi evaluasi dan ulasan destinasi tidak tersedia untuk akun
+            ini.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { destination } = context;
 
   // Filter ONLY DESTINATION reviews for this venue using centralized target resolver (Exclude EO_GUIDE)
-  const reviewTarget = destination
-    ? getDestinationReviewTargetRef(destination)
-    : "";
+  const reviewTarget = getDestinationReviewTargetRef(destination);
   const venueReviews = reviewTarget
     ? mockReviewStore.getReviewsForDestination(reviewTarget)
     : [];

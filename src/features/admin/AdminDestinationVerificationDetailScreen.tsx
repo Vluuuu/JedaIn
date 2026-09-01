@@ -202,6 +202,19 @@ export function AdminDestinationVerificationDetailScreen() {
                 ? `${destApp.managementName ?? "Pengelola"} (${destApp.contactPerson ?? "PJ"})`
                 : "Pengelola Destinasi"}
             </strong>
+            {(destApp.contactPhone || destApp.contactEmail) && (
+              <small
+                style={{
+                  display: "block",
+                  color: "var(--color-text-secondary)",
+                  marginTop: "var(--space-1)",
+                }}
+              >
+                {[destApp.contactPhone, destApp.contactEmail]
+                  .filter(Boolean)
+                  .join(" • ")}
+              </small>
+            )}
           </div>
 
           <div>
@@ -222,7 +235,7 @@ export function AdminDestinationVerificationDetailScreen() {
             <strong>
               {destApp.legalEntityDocument
                 ? `📄 ${destApp.legalEntityDocument.name} (${destApp.legalEntityDocument.status})`
-                : "Tersertifikasi"}
+                : "Belum ada metadata dokumen"}
             </strong>
           </div>
 
@@ -230,8 +243,15 @@ export function AdminDestinationVerificationDetailScreen() {
             <small
               style={{ color: "var(--color-text-muted)", display: "block" }}
             >
-              Bukti Kesiapan Pemandu Lokal (Guide Ready):
+              Deklarasi & Bukti Kesiapan Pemandu Lokal:
             </small>
+            <div style={{ marginTop: "var(--space-1)" }}>
+              <Badge tone={destApp.declaredGuideReady ? "success" : "neutral"}>
+                {destApp.declaredGuideReady
+                  ? "Deklarasi: Guide Ready"
+                  : "Deklarasi: Belum Guide Ready"}
+              </Badge>
+            </div>
             <p
               style={{
                 margin: "0.25rem 0 0",

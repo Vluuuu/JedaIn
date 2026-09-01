@@ -222,7 +222,7 @@ describe("Recommendation Result Router-Level Navigation", () => {
       b.textContent?.includes("Lihat Experience"),
     )!;
 
-    await act(() => {
+    await act(async () => {
       ctaBtn.click();
     });
 

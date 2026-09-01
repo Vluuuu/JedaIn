@@ -369,7 +369,9 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
     const recBtn = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Lihat Experience"),
     )!;
-    await act(() => recBtn.click());
+    await act(async () => {
+      recBtn.click();
+    });
     expect(container.textContent).toContain("Sehari Pelan di Lereng Hijau");
     expect(container.textContent).toContain("Mulai dari");
   });

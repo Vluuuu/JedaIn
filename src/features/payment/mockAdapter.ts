@@ -1,0 +1,212 @@
+import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import { sessionStore } from "../onboarding/sessionStore";
+import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
+import type { PackageDetailSource } from "../packageDetail/types";
+import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
+import type { PackageRecommendationSource } from "../recommendation/types";
+import type {
+  PaymentAdapter,
+  PaymentCancelResult,
+  PaymentExecuteResult,
+  PaymentResultViewModel,
+  PaymentViewModel,
+} from "./types";
+
+export interface MockPaymentAdapterOptions {
+  packages?: PackageRecommendationSource[];
+  details?: Record<string, PackageDetailSource>;
+  delayMs?: number;
+  failExecuteCount?: number;
+  simulateFailureCount?: number;
+  now?: () => Date;
+}
+
+export class MockPaymentAdapter implements PaymentAdapter {
+  private packages: PackageRecommendationSource[];
+  private details: Record<string, PackageDetailSource>;
+  private delayMs: number;
+  private failExecuteCount: number;
+  private simulateFailureCount: number;
+  private now: () => Date;
+
+  constructor(options: MockPaymentAdapterOptions = {}) {
+    this.packages = options.packages ?? MOCK_RECOMMENDATION_PACKAGES;
+    this.details = options.details ?? MOCK_PACKAGE_DETAILS;
+    this.delayMs = options.delayMs ?? 0;
+    this.failExecuteCount = options.failExecuteCount ?? 0;
+    this.simulateFailureCount = options.simulateFailureCount ?? 0;
+    this.now = options.now ?? (() => new Date());
+  }
+
+  async getPayment(bookingId: string): Promise<PaymentViewModel> {
+    if (this.delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, this.delayMs));
+    }
+
+    const traveler = sessionStore.get().user;
+    if (!traveler) {
+      return {
+        state: "NOT_FOUND",
+        errorMessage: "Pengguna belum terautentikasi.",
+      };
+    }
+
+    const nowMs = this.now().getTime();
+    mockTransactionStore.reconcileExpiredPendingPayments(nowMs);
+
+    const booking = mockTransactionStore.getBookingById(bookingId);
+    if (!booking || booking.travelerId !== traveler.id) {
+      return { state: "NOT_FOUND" };
+    }
+
+    if (booking.status === "EXPIRED") {
+      return { state: "EXPIRED", booking };
+    }
+
+    if (booking.status === "CANCELLED" || booking.status === "PAID") {
+      return { state: "NOT_FOUND", booking };
+    }
+
+    const attempt = mockTransactionStore.getPaymentAttemptForBooking(bookingId);
+    const pkg = this.packages.find((p) => p.id === booking.packageId);
+    const detail = this.details[booking.packageId];
+    const session = detail?.upcomingSessionPreviews?.find(
+      (s) => s.sessionId === booking.sessionId,
+    );
+
+    return {
+      state: "ACTIVE",
+      booking,
+      paymentAttempt: attempt,
+      package: pkg,
+      session,
+      serverNow: new Date(nowMs).toISOString(),
+      expiresAt: booking.paymentExpiresAt,
+    };
+  }
+
+  async executePayment(bookingId: string): Promise<PaymentExecuteResult> {
+    if (this.delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, this.delayMs));
+    }
+
+    if (this.failExecuteCount > 0) {
+      this.failExecuteCount--;
+      throw new Error("Koneksi pembayaran terputus. Coba lagi.");
+    }
+
+    const nowMs = this.now().getTime();
+
+    // Check injectable failure
+    if (this.simulateFailureCount > 0) {
+      this.simulateFailureCount--;
+      mockTransactionStore.executePaymentFailure({ bookingId, nowMs });
+      return {
+        success: false,
+        status: "FAILED",
+        message: "Pembayaran tidak dapat diselesaikan.",
+      };
+    }
+
+    const res = mockTransactionStore.executePaymentSuccess({
+      bookingId,
+      nowMs,
+    });
+
+    if (!res.success) {
+      if (res.reason === "EXPIRED") {
+        return {
+          success: false,
+          status: "EXPIRED",
+          message: "Waktu pembayaran telah habis.",
+        };
+      }
+      return {
+        success: false,
+        status: "FAILED",
+        message: "Pesanan tidak ditemukan.",
+      };
+    }
+
+    return {
+      success: true,
+      status: "SUCCEEDED",
+    };
+  }
+
+  async cancelPayment(bookingId: string): Promise<PaymentCancelResult> {
+    if (this.delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, this.delayMs));
+    }
+
+    const traveler = sessionStore.get().user;
+    if (!traveler) {
+      return { success: false, status: "NOT_FOUND" };
+    }
+
+    const nowMs = this.now().getTime();
+    const res = mockTransactionStore.cancelPendingBooking({
+      travelerId: traveler.id,
+      bookingId,
+      nowMs,
+    });
+
+    if (!res.success) {
+      if (res.reason === "EXPIRED") {
+        return { success: false, status: "EXPIRED" };
+      }
+      return { success: false, status: "NOT_FOUND" };
+    }
+
+    return { success: true, status: "CANCELLED" };
+  }
+
+  async getPaymentResult(bookingId: string): Promise<PaymentResultViewModel> {
+    if (this.delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, this.delayMs));
+    }
+
+    const traveler = sessionStore.get().user;
+    if (!traveler) {
+      return {
+        status: "NOT_FOUND",
+        errorMessage: "Pengguna belum terautentikasi.",
+      };
+    }
+
+    const nowMs = this.now().getTime();
+    mockTransactionStore.reconcileExpiredPendingPayments(nowMs);
+
+    const booking = mockTransactionStore.getBookingById(bookingId);
+    if (!booking || booking.travelerId !== traveler.id) {
+      return { status: "NOT_FOUND" };
+    }
+
+    const attempt = mockTransactionStore.getPaymentAttemptForBooking(bookingId);
+    const pkg = this.packages.find((p) => p.id === booking.packageId);
+    const detail = this.details[booking.packageId];
+    const session = detail?.upcomingSessionPreviews?.find(
+      (s) => s.sessionId === booking.sessionId,
+    );
+
+    if (booking.status === "PAID" && attempt?.status === "SUCCEEDED") {
+      return { status: "SUCCESS", booking, package: pkg, session };
+    }
+
+    if (booking.status === "EXPIRED" || attempt?.status === "EXPIRED") {
+      return { status: "EXPIRED", booking, package: pkg, session };
+    }
+
+    if (booking.status === "CANCELLED" || attempt?.status === "CANCELLED") {
+      return { status: "CANCELLED", booking, package: pkg, session };
+    }
+
+    if (attempt?.status === "FAILED") {
+      return { status: "FAILED", booking, package: pkg, session };
+    }
+
+    return { status: "FAILED", booking, package: pkg, session };
+  }
+}
+
+export const defaultPaymentAdapter = new MockPaymentAdapter();

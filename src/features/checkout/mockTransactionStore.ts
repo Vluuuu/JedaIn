@@ -37,9 +37,12 @@ export const mockTransactionStore = {
         if (nowMs >= expTime) {
           booking.status = "EXPIRED";
           booking.reservedQuantity = 0;
+          booking.bookedQuantity = 0;
 
           const attempt = paymentAttempts.find(
-            (p) => p.bookingId === booking.bookingId && p.status === "PENDING",
+            (p) =>
+              p.bookingId === booking.bookingId &&
+              (p.status === "PENDING" || p.status === "VERIFYING"),
           );
           if (attempt) {
             attempt.status = "EXPIRED";
@@ -73,6 +76,23 @@ export const mockTransactionStore = {
         return new Date(b.paymentExpiresAt).getTime() > nowMs;
       })
       .reduce((sum, b) => sum + b.reservedQuantity, 0);
+  },
+
+  getBookedQuantity(sessionId: string): number {
+    return bookings
+      .filter(
+        (b) =>
+          b.sessionId === sessionId &&
+          (b.status === "PAID" || b.status === "COMPLETED"),
+      )
+      .reduce((sum, b) => sum + b.bookedQuantity, 0);
+  },
+
+  getOccupiedQuantity(sessionId: string, nowMs: number = Date.now()): number {
+    return (
+      this.getReservedQuantity(sessionId, nowMs) +
+      this.getBookedQuantity(sessionId)
+    );
   },
 
   getActivePendingPayment(
@@ -110,6 +130,96 @@ export const mockTransactionStore = {
     });
   },
 
+  getBookingById(bookingId: string): BookingRecord | undefined {
+    return bookings.find((b) => b.bookingId === bookingId);
+  },
+
+  getBookingsByTraveler(travelerId: string): readonly BookingRecord[] {
+    return bookings.filter((b) => b.travelerId === travelerId);
+  },
+
+  executePaymentSuccess(params: { bookingId: string; nowMs?: number }): {
+    success: boolean;
+    reason?: "NOT_FOUND" | "EXPIRED" | "ALREADY_PAID";
+    booking?: BookingRecord;
+  } {
+    const nowMs = params.nowMs ?? Date.now();
+    this.reconcileExpiredPendingPayments(nowMs);
+
+    const booking = bookings.find((b) => b.bookingId === params.bookingId);
+    if (!booking) {
+      return { success: false, reason: "NOT_FOUND" };
+    }
+
+    if (booking.status === "PAID" || booking.status === "COMPLETED") {
+      return { success: true, booking, reason: "ALREADY_PAID" };
+    }
+
+    if (booking.status === "EXPIRED") {
+      return { success: false, reason: "EXPIRED", booking };
+    }
+
+    if (booking.status === "CANCELLED") {
+      return { success: false, reason: "NOT_FOUND", booking };
+    }
+
+    const expTime = new Date(booking.paymentExpiresAt).getTime();
+    if (nowMs >= expTime) {
+      booking.status = "EXPIRED";
+      booking.reservedQuantity = 0;
+      booking.bookedQuantity = 0;
+      const attempt = paymentAttempts.find(
+        (p) => p.bookingId === booking.bookingId,
+      );
+      if (attempt) attempt.status = "EXPIRED";
+      return { success: false, reason: "EXPIRED", booking };
+    }
+
+    // Atomically transition to PAID
+    booking.status = "PAID";
+    booking.reservedQuantity = 0;
+    booking.bookedQuantity = booking.participantCount;
+    booking.paidAt = new Date(nowMs).toISOString();
+
+    const attempt = paymentAttempts.find(
+      (p) => p.bookingId === booking.bookingId,
+    );
+    if (attempt) {
+      attempt.status = "SUCCEEDED";
+      attempt.updatedAt = new Date(nowMs).toISOString();
+    }
+
+    return { success: true, booking };
+  },
+
+  executePaymentFailure(params: { bookingId: string; nowMs?: number }): {
+    success: boolean;
+    reason?: "NOT_FOUND" | "EXPIRED";
+    booking?: BookingRecord;
+  } {
+    const nowMs = params.nowMs ?? Date.now();
+    this.reconcileExpiredPendingPayments(nowMs);
+
+    const booking = bookings.find((b) => b.bookingId === params.bookingId);
+    if (!booking) {
+      return { success: false, reason: "NOT_FOUND" };
+    }
+
+    if (booking.status === "EXPIRED") {
+      return { success: false, reason: "EXPIRED", booking };
+    }
+
+    const attempt = paymentAttempts.find(
+      (p) => p.bookingId === booking.bookingId,
+    );
+    if (attempt) {
+      attempt.status = "FAILED";
+      attempt.updatedAt = new Date(nowMs).toISOString();
+    }
+
+    return { success: true, booking };
+  },
+
   cancelPendingBooking(params: {
     travelerId: string;
     bookingId: string;
@@ -144,8 +254,9 @@ export const mockTransactionStore = {
     if (nowMs >= expTime) {
       booking.status = "EXPIRED";
       booking.reservedQuantity = 0;
+      booking.bookedQuantity = 0;
       const attempt = paymentAttempts.find(
-        (p) => p.bookingId === booking.bookingId && p.status === "PENDING",
+        (p) => p.bookingId === booking.bookingId,
       );
       if (attempt) attempt.status = "EXPIRED";
       return { success: false, reason: "EXPIRED", booking };
@@ -154,9 +265,10 @@ export const mockTransactionStore = {
     // Transition to CANCELLED atomically
     booking.status = "CANCELLED";
     booking.reservedQuantity = 0;
+    booking.bookedQuantity = 0;
 
     const attempt = paymentAttempts.find(
-      (p) => p.bookingId === booking.bookingId && p.status === "PENDING",
+      (p) => p.bookingId === booking.bookingId,
     );
     if (attempt) {
       attempt.status = "CANCELLED";
@@ -253,12 +365,9 @@ export const mockTransactionStore = {
       };
     }
 
-    // 4. Capacity ledger check (in-memory atomic boundary)
-    const currentActiveReserved = this.getReservedQuantity(
-      input.sessionId,
-      nowMs,
-    );
-    const availableSlots = input.capacitySnapshot - currentActiveReserved;
+    // 4. Capacity ledger check: occupied = active reserved + booked slots
+    const currentOccupied = this.getOccupiedQuantity(input.sessionId, nowMs);
+    const availableSlots = input.capacitySnapshot - currentOccupied;
 
     if (availableSlots < input.participantCount) {
       return { success: false, reason: "INSUFFICIENT_CAPACITY" };
@@ -283,6 +392,7 @@ export const mockTransactionStore = {
       totalAmount: input.unitPricePerPerson * input.participantCount,
       status: "PENDING_PAYMENT",
       reservedQuantity: input.participantCount,
+      bookedQuantity: 0,
       createdAt: now.toISOString(),
       paymentExpiresAt: expiresAt,
     };
@@ -311,5 +421,16 @@ export const mockTransactionStore = {
     idempotencyMap.set(input.idempotencyKey, { ...record });
 
     return { success: true, booking, payment };
+  },
+
+  // Helper for adding test fixtures
+  addDirectBooking(
+    booking: BookingRecord,
+    payment?: PaymentAttemptRecord,
+  ): void {
+    bookings.push({ ...booking });
+    if (payment) {
+      paymentAttempts.push({ ...payment });
+    }
   },
 };

@@ -371,15 +371,43 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     expect(container.textContent).toContain("Checkout");
   });
 
-  it("A. revalidation with missing/undefined remainingSlots returns CAPACITY_UNKNOWN error and keeps selection for retry", async () => {
+  it("1. REAL CAPACITY_UNKNOWN: OPEN session with remainingSlots === undefined fails revalidation with CAPACITY_UNKNOWN without navigating", async () => {
+    const sessionsWithUndefinedCap: PackageSessionPreview[] = [
+      {
+        sessionId: "ses_no_cap",
+        packageId: "slow_green_day",
+        startAt: "2026-09-12T08:00:00+07:00",
+        endAt: "2026-09-12T14:00:00+07:00",
+        status: "OPEN",
+        pricePerPerson: 275000,
+        // remainingSlots is undefined
+      },
+    ];
+
     const adapter = new MockSessionSelectionAdapter({
+      sessionOverrides: {
+        slow_green_day: sessionsWithUndefinedCap,
+      },
+    });
+
+    // Adapter-level direct check
+    const directResult = await adapter.validateSessionSelection(
+      "slow_green_day",
+      "ses_no_cap",
+    );
+    expect(directResult.valid).toBe(false);
+    expect(directResult.reason).toBe("CAPACITY_UNKNOWN");
+
+    // UI-level check with selection override to test screen feedback
+    const uiAdapter = new MockSessionSelectionAdapter({
       validationFailureOverride: {
         ses_sgd_1: "CAPACITY_UNKNOWN",
       },
     });
 
-    const view = await renderSessionSelection("slow_green_day", { adapter });
-
+    const view = await renderSessionSelection("slow_green_day", {
+      adapter: uiAdapter,
+    });
     const firstRadio = view.querySelector<HTMLInputElement>(
       'input[type="radio"]',
     )!;
@@ -390,7 +418,6 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Lanjut Checkout"),
     )!;
-
     await act(async () => {
       ctaBtn.click();
     });
@@ -398,41 +425,42 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     expect(view.textContent).toContain(
       "Ketersediaan jadwal belum bisa dipastikan. Coba lagi.",
     );
-    // Selection is preserved so user can retry
     expect(firstRadio.checked).toBe(true);
   });
 
-  it("C. revalidation with same-package mismatch returns PACKAGE_MISMATCH and prevents navigation", async () => {
+  it("2. REAL PACKAGE_MISMATCH & filtering: session with mismatched packageId is filtered from list and fails validation", async () => {
+    const malformedSessions: PackageSessionPreview[] = [
+      {
+        sessionId: "ses_mismatched_1",
+        packageId: "mindful_morning", // Mismatched!
+        startAt: "2026-09-12T08:00:00+07:00",
+        endAt: "2026-09-12T14:00:00+07:00",
+        status: "OPEN",
+        remainingSlots: 5,
+      },
+    ];
+
     const adapter = new MockSessionSelectionAdapter({
-      validationFailureOverride: {
-        ses_sgd_1: "PACKAGE_MISMATCH",
+      sessionOverrides: {
+        slow_green_day: malformedSessions,
       },
     });
 
-    const view = await renderSessionSelection("slow_green_day", { adapter });
+    // A. getPackageSessions filters out mismatched packageId session
+    const vm = await adapter.getPackageSessions("slow_green_day");
+    expect(vm.sessions.length).toBe(0);
 
-    const firstRadio = view.querySelector<HTMLInputElement>(
-      'input[type="radio"]',
-    )!;
-    await act(async () => {
-      firstRadio.click();
-    });
-
-    const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Lanjut Checkout"),
-    )!;
-
-    await act(async () => {
-      ctaBtn.click();
-    });
-
-    expect(view.textContent).toContain(
-      "Jadwal ini tidak sesuai dengan paket yang dipilih. Pilih jadwal lain.",
+    // B. direct validateSessionSelection returns PACKAGE_MISMATCH
+    const validation = await adapter.validateSessionSelection(
+      "slow_green_day",
+      "ses_mismatched_1",
     );
-    expect(firstRadio.checked).toBe(false);
+    expect(validation.valid).toBe(false);
+    expect(validation.reason).toBe("PACKAGE_MISMATCH");
+    expect(validation.message).toContain("tidak sesuai dengan paket");
   });
 
-  it("D, E & F. stale session revalidation updates session card to latest state (FULL/CLOSED/CANCELLED)", async () => {
+  it("3 & 7. REAL OPEN -> FULL stale revalidation clears selection, updates card to Penuh disabled, and shows warning notice", async () => {
     const adapter = new MockSessionSelectionAdapter({
       validationFailureOverride: {
         ses_sgd_1: "FULL",
@@ -460,13 +488,17 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     );
     // Selection cleared
     expect(firstRadio.checked).toBe(false);
-    // Card now displays Penuh state
-    expect(view.textContent).toContain("Penuh");
+    // Card now displays Penuh state and is disabled
+    const firstCard = view.querySelectorAll(".session-card")[0];
+    expect(firstCard.textContent).toContain("Penuh");
+    expect(firstCard.classList.contains("session-card--disabled")).toBe(true);
   });
 
-  it("G. REQUEST_ERROR on 1st attempt preserves selection, 2nd attempt succeeds to Checkout", async () => {
+  it("4. REAL OPEN -> CLOSED stale revalidation clears selection, updates card to Ditutup disabled, and shows warning notice", async () => {
     const adapter = new MockSessionSelectionAdapter({
-      failValidationCount: 1,
+      validationFailureOverride: {
+        ses_sgd_1: "CLOSED",
+      },
     });
 
     const view = await renderSessionSelection("slow_green_day", { adapter });
@@ -480,23 +512,184 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Lanjut Checkout"),
     )!;
-
-    // 1st attempt -> fail
     await act(async () => {
       ctaBtn.click();
     });
+
+    // Warning is visible
+    expect(view.textContent).toContain(
+      "Jadwal ini baru saja tidak tersedia. Pilih jadwal lain.",
+    );
+    // Selection cleared
+    expect(firstRadio.checked).toBe(false);
+    // Card now displays Ditutup state and is disabled
+    const firstCard = view.querySelectorAll(".session-card")[0];
+    expect(firstCard.textContent).toContain("Ditutup");
+    expect(firstCard.classList.contains("session-card--disabled")).toBe(true);
+  });
+
+  it("5. REAL OPEN -> CANCELLED stale revalidation clears selection, removes session from list, and shows warning notice", async () => {
+    const adapter = new MockSessionSelectionAdapter({
+      validationFailureOverride: {
+        ses_sgd_1: "CANCELLED",
+      },
+    });
+
+    const view = await renderSessionSelection("slow_green_day", { adapter });
+    const firstRadio = view.querySelector<HTMLInputElement>(
+      'input[type="radio"]',
+    )!;
+    await act(async () => {
+      firstRadio.click();
+    });
+
+    const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut Checkout"),
+    )!;
+    await act(async () => {
+      ctaBtn.click();
+    });
+
+    // Warning is visible
+    expect(view.textContent).toContain(
+      "Jadwal ini baru saja tidak tersedia. Pilih jadwal lain.",
+    );
+    // Cancelled session is removed from schedule list (only 1 session remains)
+    const cards = view.querySelectorAll(".session-card");
+    expect(cards.length).toBe(1);
+    expect(view.textContent).not.toContain("ses_sgd_1");
+  });
+
+  it("5b. OPEN + remainingSlots === 0 direct adapter revalidation returns valid = false and reason = FULL", async () => {
+    const zeroCapSessions: PackageSessionPreview[] = [
+      {
+        sessionId: "ses_zero_cap",
+        packageId: "slow_green_day",
+        startAt: "2026-09-12T08:00:00+07:00",
+        endAt: "2026-09-12T14:00:00+07:00",
+        status: "OPEN",
+        remainingSlots: 0,
+      },
+    ];
+
+    const adapter = new MockSessionSelectionAdapter({
+      sessionOverrides: {
+        slow_green_day: zeroCapSessions,
+      },
+    });
+
+    const validation = await adapter.validateSessionSelection(
+      "slow_green_day",
+      "ses_zero_cap",
+    );
+    expect(validation.valid).toBe(false);
+    expect(validation.reason).toBe("FULL");
+  });
+
+  it("6. REQUEST_ERROR 1st attempt preserves selection; 2nd attempt revalidates and navigates to actual /checkout/:sessionId", async () => {
+    sessionStore.setUser({
+      id: "usr_retry_nav",
+      onboardingStatus: "COMPLETED",
+    });
+
+    const adapter = new MockSessionSelectionAdapter({
+      failValidationCount: 1,
+    });
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/packages/slow_green_day/sessions"] },
+          createElement(App),
+        ),
+      );
+    });
+
+    // We pass adapter via props to custom render, let's use renderSessionSelection with App router context
+    const view = await renderSessionSelection("slow_green_day", { adapter });
+    const firstRadio = view.querySelector<HTMLInputElement>(
+      'input[type="radio"]',
+    )!;
+    await act(async () => {
+      firstRadio.click();
+    });
+
+    const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut Checkout"),
+    )!;
+
+    // 1st attempt -> REQUEST_ERROR
+    await act(async () => {
+      ctaBtn.click();
+    });
+
     expect(view.textContent).toContain(
       "Jadwal belum bisa diverifikasi. Coba lagi.",
     );
     expect(firstRadio.checked).toBe(true);
 
-    // 2nd attempt -> success
-    await act(async () => {
-      ctaBtn.click();
+    // Now test with App router to verify actual navigation on 2nd attempt
+    const navContainer = document.createElement("div");
+    document.body.append(navContainer);
+    const navRoot = createRoot(navContainer);
+
+    const appAdapter = new MockSessionSelectionAdapter({
+      failValidationCount: 1,
     });
-    expect(view.textContent).not.toContain(
+
+    await act(async () => {
+      navRoot.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/packages/slow_green_day/sessions"] },
+          createElement(Routes, undefined, [
+            createElement(Route, {
+              path: "/packages/:packageId/sessions",
+              element: createElement(SessionSelectionScreen, {
+                adapter: appAdapter,
+              }),
+            }),
+            createElement(Route, {
+              path: "/checkout/:sessionId",
+              element: createElement("div", undefined, "Checkout Page Target"),
+            }),
+          ]),
+        ),
+      );
+    });
+
+    const radio = navContainer.querySelector<HTMLInputElement>(
+      'input[type="radio"]',
+    )!;
+    await act(async () => {
+      radio.click();
+    });
+
+    const btn = Array.from(navContainer.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut Checkout"),
+    )!;
+
+    // Attempt 1 -> error banner shown
+    await act(async () => {
+      btn.click();
+    });
+    expect(navContainer.textContent).toContain(
       "Jadwal belum bisa diverifikasi. Coba lagi.",
     );
+
+    // Attempt 2 -> succeeds and navigates to Checkout Page Target
+    await act(async () => {
+      btn.click();
+    });
+    expect(navContainer.textContent).toContain("Checkout Page Target");
+
+    await act(async () => navRoot.unmount());
+    navContainer.remove();
   });
 
   it("H. cross-date 2D1N session renders both dates correctly without fabricating 2D1N label", async () => {

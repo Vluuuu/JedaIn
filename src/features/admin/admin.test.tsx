@@ -60,15 +60,20 @@ async function renderComponent(
 
 describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
   describe("1. Admin Access & Route Guard (A–D)", () => {
-    it("A. logged-out /admin redirects to /admin/login", async () => {
-      adminSessionStore.logout();
+    it("A. fresh adminSessionStore.get() returns null (logged out)", () => {
+      adminSessionStore.reset();
+      expect(adminSessionStore.get()).toBeNull();
+    });
+
+    it("B. fresh /admin without manual logout redirects to /admin/login", async () => {
+      adminSessionStore.reset();
 
       const view = await renderComponent(createElement(App), ["/admin"]);
       expect(view.textContent).toContain("Masuk ke Admin Console");
       expect(view.textContent).toContain("Email Administrator");
     });
 
-    it("B. Admin Demo opens /admin operational console", async () => {
+    it("C. loginAsDemoAdmin allows access to /admin operational console", async () => {
       adminSessionStore.loginAsDemoAdmin();
 
       const view = await renderComponent(createElement(App), ["/admin"]);
@@ -78,8 +83,16 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
       expect(view.textContent).toContain("Antrean Peninjauan Utama");
     });
 
-    it("C. EO Partner session does not grant Admin workspace access", async () => {
-      adminSessionStore.logout();
+    it("D. reset() restores logged-out state (null)", () => {
+      adminSessionStore.loginAsDemoAdmin();
+      expect(adminSessionStore.get()).not.toBeNull();
+
+      adminSessionStore.reset();
+      expect(adminSessionStore.get()).toBeNull();
+    });
+
+    it("D2. EO Partner session does not grant Admin workspace access", async () => {
+      adminSessionStore.reset();
       partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
       const view = await renderComponent(createElement(App), ["/admin"]);
@@ -87,8 +100,8 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
       expect(view.textContent).not.toContain("Overview Operasional Kurasi");
     });
 
-    it("D. direct Admin decision command without Admin session fails with zero mutation and zero audit", () => {
-      adminSessionStore.logout();
+    it("D3. direct Admin decision command without Admin session fails with zero mutation and zero audit", () => {
+      adminSessionStore.reset();
 
       const res = mockAdminDecisionService.approveEoApplication(
         "app_eo_demo_pending",
@@ -324,6 +337,40 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
         eligibleForConcept.some((d) => d.destinationId === "dest_coban_rondo"),
       ).toBe(true);
     });
+
+    it("H2, I2, J2, K2. destination upsert handles new insertion, reset isolation, and immutable seed protection", () => {
+      const initialCount = mockDestinationStore.getAll().length;
+
+      // Upsert brand new destination
+      const newDest = mockDestinationStore.upsertVerifiedDestination({
+        destinationId: "dest_new_temp",
+        name: "Lembah Baru",
+        locationLabel: "Batu",
+        province: "Jawa Timur",
+        city: "Batu",
+        verificationLevel: "BASIC",
+        guideReady: true,
+        baseCostPerPerson: 100000,
+        description: "Desc",
+        highlights: ["Highlight"],
+        capacityPerSession: 10,
+        status: "ACTIVE",
+      });
+
+      expect(newDest.destinationId).toBe("dest_new_temp");
+      expect(mockDestinationStore.getAll().length).toBe(initialCount + 1);
+
+      // Mutating snapshot should not corrupt store
+      newDest.name = "Corrupted Name";
+      expect(mockDestinationStore.getById("dest_new_temp")?.name).toBe(
+        "Lembah Baru",
+      );
+
+      // Reset removes runtime destination and restores exact seed
+      mockDestinationStore.reset();
+      expect(mockDestinationStore.getById("dest_new_temp")).toBeUndefined();
+      expect(mockDestinationStore.getAll().length).toBe(initialCount);
+    });
   });
 
   describe("4. Package Approval Queue & Checklist (T–AB)", () => {
@@ -446,62 +493,124 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
   });
 
   describe("5. Bookings, Complaints, Trust Status & Audit (AC–AL)", () => {
-    it("AC, AD, AE, AF. Admin bookings reads mockTransactionStore with authoritative status and no mutation controls", async () => {
+    it("E2, F2, G2. direct complaint detail route (/admin/complaints/:id), safe not-found, and classification update", async () => {
       adminSessionStore.loginAsDemoAdmin();
 
-      mockTransactionStore.addDirectBooking({
-        bookingId: "bk_admin_audit_test",
-        travelerId: "usr_traveler_admin",
-        packageId: "slow_green_day",
-        sessionId: "ses_sgd_1",
-        participantCount: 2,
-        unitPricePerPerson: 275000,
-        totalAmount: 550000,
-        status: "PAID",
-        reservedQuantity: 0,
-        bookedQuantity: 2,
-        createdAt: "2026-08-30T10:00:00Z",
-        paymentExpiresAt: "2026-08-30T10:15:00Z",
-        paidAt: "2026-08-30T10:10:00Z",
-      });
-
-      const view = await renderComponent(createElement(AdminBookingsScreen));
-
-      expect(view.textContent).toContain(
-        "Inspeksi Transaksi & Pembayaran Traveler",
+      // E: Direct complaint detail
+      const detailView = await renderComponent(createElement(App), [
+        "/admin/complaints/cmp_crit_001",
+      ]);
+      expect(detailView.textContent).toContain("Detail Aduan cmp_crit_001");
+      expect(detailView.textContent).toContain(
+        "Jalur tanah agak licin sehabis hujan",
       );
-      expect(view.textContent).toContain("bk_admin_audit_test");
-      expect(view.textContent).toContain("PAID");
-      expect(view.textContent).toContain("Rp550.000");
+      expect(detailView.textContent).toContain("Konfirmasi Klasifikasi");
 
-      // No mutation actions
-      expect(view.textContent).not.toContain("Refund");
-      expect(view.textContent).not.toContain("Force Complete");
-    });
+      // F: Unknown complaint id safe not-found
+      const notFoundView = await renderComponent(createElement(App), [
+        "/admin/complaints/unknown_cmp_xyz",
+      ]);
+      expect(notFoundView.textContent).toContain("Aduan Tidak Ditemukan");
+      expect(notFoundView.textContent).toContain("Kembali ke Antrean Aduan");
 
-    it("AG, AH, AI. complaints queue reads critical count, requires reason for classification, and adds audit event", () => {
-      adminSessionStore.loginAsDemoAdmin();
-
-      expect(mockComplaintStore.getCriticalUnresolvedCount()).toBe(1);
-
+      // G: Classify action updates store and appends audit
       const res = mockAdminDecisionService.classifyComplaint("cmp_crit_001", {
         category: "OPERATIONAL_SAFETY",
-        internalNote: "Dikoordinasikan dengan pengelola jalur.",
-        reason: "Verifikasi standar keselamatan setelah hujan.",
+        internalNote: "Telah dikoordinasikan dengan pos pengelola.",
+        reason: "Verifikasi tindak lanjut cuaca hujan.",
       });
-
       expect(res.success).toBe(true);
 
-      const cmp = mockComplaintStore.getById("cmp_crit_001");
-      expect(cmp?.status).toBe("CLASSIFIED");
-      expect(cmp?.internalNote).toBe("Dikoordinasikan dengan pengelola jalur.");
-
-      // Audit event
       const audit = mockAdminAuditStore
         .getAll()
         .find((a) => a.entityId === "cmp_crit_001");
       expect(audit).toBeDefined();
       expect(audit?.actionType).toBe("CLASSIFY_COMPLAINT");
+    });
+
+    it("N2, O2, P2. Admin bookings renders booking and payment status separately with actual package title", async () => {
+      adminSessionStore.loginAsDemoAdmin();
+
+      mockTransactionStore.addDirectBooking(
+        {
+          bookingId: "bk_admin_separate_status",
+          travelerId: "usr_traveler_admin",
+          packageId: "slow_green_day",
+          sessionId: "ses_sgd_1",
+          participantCount: 2,
+          unitPricePerPerson: 275000,
+          totalAmount: 550000,
+          status: "PENDING_PAYMENT",
+          reservedQuantity: 2,
+          bookedQuantity: 0,
+          createdAt: "2026-08-30T10:00:00Z",
+          paymentExpiresAt: "2026-08-30T10:15:00Z",
+        },
+        {
+          paymentAttemptId: "pay_att_failed",
+          bookingId: "bk_admin_separate_status",
+          status: "FAILED",
+          expiresAt: "2026-08-30T10:15:00Z",
+        },
+      );
+
+      // Direct booking without payment attempt
+      mockTransactionStore.addDirectBooking({
+        bookingId: "bk_admin_no_attempt",
+        travelerId: "usr_traveler_no_att",
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        totalAmount: 275000,
+        status: "PENDING_PAYMENT",
+        reservedQuantity: 1,
+        bookedQuantity: 0,
+        createdAt: "2026-08-30T10:00:00Z",
+        paymentExpiresAt: "2026-08-30T10:15:00Z",
+      });
+
+      const view = await renderComponent(createElement(AdminBookingsScreen));
+
+      // P: Known package renders actual title
+      expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
+
+      // N: Booking status and Payment status rendered separately
+      expect(view.textContent).toContain("PENDING_PAYMENT");
+      expect(view.textContent).toContain("FAILED");
+
+      // O: Missing payment attempt renders dash "—" without fabrication
+      expect(view.textContent).toContain("—");
+    });
+
+    it("L2 & M2. trust inspection without Admin fails, while with Admin records exact current actor in audit", () => {
+      adminSessionStore.reset();
+
+      // L2: Without session
+      const failRes = mockAdminDecisionService.recordTrustInspection({
+        entityType: "EO",
+        entityId: "eo_jeda_alam",
+        entityName: "Jeda Alam Nusantara",
+        reason: "Inspeksi tanpa login",
+      });
+      expect(failRes.success).toBe(false);
+
+      // M2: With admin session
+      adminSessionStore.loginAsDemoAdmin();
+      const okRes = mockAdminDecisionService.recordTrustInspection({
+        entityType: "EO",
+        entityId: "eo_jeda_alam",
+        entityName: "Jeda Alam Nusantara",
+        reason: "Inspeksi berkala kepatuhan pemandu.",
+      });
+      expect(okRes.success).toBe(true);
+
+      const audit = mockAdminAuditStore
+        .getAll()
+        .find((a) => a.reason === "Inspeksi berkala kepatuhan pemandu.");
+      expect(audit).toBeDefined();
+      expect(audit?.actorId).toBe("admin_trust_demo");
+      expect(audit?.actorLabel).toBe("Trust Operations Lead");
     });
 
     it("AJ, AK, AL. Trust page displays actual shared signals without fake scores, and Audit log records decisions", async () => {

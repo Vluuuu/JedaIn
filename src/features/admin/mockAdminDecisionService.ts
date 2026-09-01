@@ -371,4 +371,43 @@ export const mockAdminDecisionService = {
 
     return { success: true };
   },
+
+  // 5. Trust Status Manual Inspection
+  recordTrustInspection(params: {
+    entityType: "EO" | "DESTINATION";
+    entityId: string;
+    entityName: string;
+    reason: string;
+  }): { success: boolean; message?: string } {
+    const admin = adminSessionStore.get();
+    if (!admin || admin.role !== "ADMIN") {
+      return {
+        success: false,
+        message:
+          "Akses ditolak: Hanya Admin yang dapat mencatat inspeksi tata kelola.",
+      };
+    }
+
+    if (!params.reason || !params.reason.trim()) {
+      return {
+        success: false,
+        message: "Catatan inspeksi tata kelola wajib diisi.",
+      };
+    }
+
+    mockAdminAuditStore.recordEvent({
+      actorId: admin.adminId,
+      actorLabel: admin.name,
+      actionType: "MANUAL_TRUST_ACTION",
+      entityType: "TRUST_STATUS",
+      entityId: params.entityId,
+      reason: params.reason.trim(),
+      metadata: {
+        entityName: params.entityName,
+        entityType: params.entityType,
+      },
+    });
+
+    return { success: true };
+  },
 };

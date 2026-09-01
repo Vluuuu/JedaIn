@@ -1,14 +1,15 @@
 import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { mockAdminDecisionService } from "./mockAdminDecisionService";
 import { mockComplaintStore } from "./mockComplaintStore";
-import type { ComplaintRecord } from "./types";
 import "./admin.css";
 
 export function AdminComplaintsScreen() {
+  const { complaintId } = useParams<{ complaintId?: string }>();
+  const navigate = useNavigate();
+
   const [refreshVersion, setRefreshVersion] = useState(0);
-  const [selectedComplaint, setSelectedComplaint] =
-    useState<ComplaintRecord | null>(null);
   const [category, setCategory] = useState<string>("OPERATIONAL_SAFETY");
   const [internalNote, setInternalNote] = useState<string>("");
   const [auditReason, setAuditReason] = useState<string>("");
@@ -16,44 +17,277 @@ export function AdminComplaintsScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const complaints = mockComplaintStore.getAll();
+  const directComplaint = complaintId
+    ? mockComplaintStore.getById(complaintId)
+    : undefined;
 
-  const handleOpenClassify = (c: ComplaintRecord) => {
-    setSelectedComplaint(c);
-    setCategory(c.category);
-    setInternalNote(c.internalNote ?? "");
-    setAuditReason("");
-    setErrorMessage(undefined);
-  };
-
-  const handleConfirmClassification = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedComplaint) return;
-    setErrorMessage(undefined);
-
-    if (!auditReason.trim()) {
-      setErrorMessage("Catatan audit klasifikasi wajib diisi.");
-      return;
+  // Single Direct Complaint Detail View if route is /admin/complaints/:complaintId
+  if (complaintId) {
+    if (!directComplaint) {
+      return (
+        <div className="admin-container">
+          <div
+            className="admin-section"
+            style={{ textAlign: "center", padding: "var(--space-8)" }}
+          >
+            <h2>Aduan Tidak Ditemukan</h2>
+            <p style={{ color: "var(--color-text-secondary)" }}>
+              Aduan ID "{complaintId}" tidak valid atau tidak tersedia.
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={() => navigate("/admin/complaints")}
+            >
+              Kembali ke Antrean Aduan
+            </Button>
+          </div>
+        </div>
+      );
     }
 
-    setIsProcessing(true);
-    const res = mockAdminDecisionService.classifyComplaint(
-      selectedComplaint.complaintId,
-      {
-        category,
-        internalNote,
-        reason: auditReason,
-      },
+    const handleDirectClassify = (e: React.FormEvent) => {
+      e.preventDefault();
+      setErrorMessage(undefined);
+
+      if (!auditReason.trim()) {
+        setErrorMessage("Catatan audit klasifikasi wajib diisi.");
+        return;
+      }
+
+      setIsProcessing(true);
+      const res = mockAdminDecisionService.classifyComplaint(
+        directComplaint.complaintId,
+        {
+          category,
+          internalNote,
+          reason: auditReason,
+        },
+      );
+      setIsProcessing(false);
+
+      if (res.success) {
+        setRefreshVersion((v) => v + 1);
+        navigate("/admin/complaints");
+      } else {
+        setErrorMessage(res.message ?? "Gagal mengklasifikasikan aduan.");
+      }
+    };
+
+    return (
+      <div className="admin-container" style={{ maxWidth: "800px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Link
+            to="/admin/complaints"
+            style={{
+              color: "var(--color-text-secondary)",
+              fontSize: "var(--font-size-body-sm)",
+            }}
+          >
+            &larr; Kembali ke Antrean Aduan
+          </Link>
+          <Badge
+            tone={
+              directComplaint.priority === "CRITICAL"
+                ? "danger"
+                : directComplaint.priority === "HIGH"
+                  ? "warning"
+                  : "neutral"
+            }
+          >
+            Prioritas: {directComplaint.priority}
+          </Badge>
+        </div>
+
+        <header className="admin-page-header">
+          <div>
+            <h1 className="admin-page-title">
+              Detail Aduan {directComplaint.complaintId}
+            </h1>
+            <p className="admin-page-subtitle">
+              Diterima pada:{" "}
+              {new Date(directComplaint.createdAt).toLocaleString("id-ID")} WIB
+            </p>
+          </div>
+        </header>
+
+        {errorMessage && (
+          <div className="admin-alert admin-alert--error" role="alert">
+            <strong>Perhatian:</strong>
+            <p>{errorMessage}</p>
+          </div>
+        )}
+
+        {/* Complaint Details Card */}
+        <section className="admin-section" aria-label="Rincian aduan">
+          <h2 className="admin-section-title">Ringkasan Laporan Traveler</h2>
+          <p
+            style={{
+              fontSize: "var(--font-size-body-md)",
+              color: "var(--color-text-primary)",
+              margin: 0,
+            }}
+          >
+            "{directComplaint.summary}"
+          </p>
+
+          <div
+            style={{
+              borderTop: "1px solid var(--color-border-default)",
+              paddingTop: "var(--space-3)",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "var(--space-4)",
+              fontSize: "var(--font-size-body-sm)",
+            }}
+          >
+            <div>
+              <small
+                style={{ color: "var(--color-text-muted)", display: "block" }}
+              >
+                Target Entitas / Paket:
+              </small>
+              <strong>
+                {directComplaint.targetType
+                  ? `${directComplaint.targetType} (${directComplaint.targetRef})`
+                  : (directComplaint.packageId ?? "—")}
+              </strong>
+            </div>
+
+            <div>
+              <small
+                style={{ color: "var(--color-text-muted)", display: "block" }}
+              >
+                Nomor Booking Terkait:
+              </small>
+              <strong>{directComplaint.bookingId ?? "—"}</strong>
+            </div>
+          </div>
+        </section>
+
+        {/* Classification Form Panel */}
+        <section
+          className="admin-decision-panel"
+          aria-label="Formulir klasifikasi aduan"
+        >
+          <h2
+            style={{
+              margin: 0,
+              fontSize: "var(--font-size-heading-sm)",
+              color: "var(--color-text-primary)",
+            }}
+          >
+            Klasifikasi & Tindak Lanjut Administrator
+          </h2>
+
+          <form
+            onSubmit={handleDirectClassify}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--space-3)",
+            }}
+          >
+            <div className="eo-form-group">
+              <label
+                htmlFor="direct-complaint-category"
+                className="eo-form-label"
+              >
+                Kategori Masalah:
+              </label>
+              <select
+                id="direct-complaint-category"
+                className="eo-form-select"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="OPERATIONAL_SAFETY">
+                  Operasional & Keselamatan Jalur
+                </option>
+                <option value="PUNCTUALITY">
+                  Ketepatan Waktu Penjemputan / Sesi
+                </option>
+                <option value="MINDFUL_QUALITY">
+                  Kualitas Ketenangan & Pemandu
+                </option>
+                <option value="FACILITY">Fasilitas & Konsumsi Lokal</option>
+              </select>
+            </div>
+
+            <div className="eo-form-group">
+              <label
+                htmlFor="direct-complaint-internal-note"
+                className="eo-form-label"
+              >
+                Catatan Tindak Lanjut Internal:
+              </label>
+              <textarea
+                id="direct-complaint-internal-note"
+                rows={2}
+                className="eo-form-textarea"
+                value={internalNote}
+                onChange={(e) => setInternalNote(e.target.value)}
+                placeholder="Catatan koordinasi dengan EO / Destinasi..."
+              />
+            </div>
+
+            <div className="eo-form-group">
+              <label
+                htmlFor="direct-complaint-audit-reason"
+                className="eo-form-label"
+              >
+                Alasan Audit Administrator *:
+              </label>
+              <input
+                id="direct-complaint-audit-reason"
+                type="text"
+                required
+                className="eo-form-input"
+                value={auditReason}
+                onChange={(e) => setAuditReason(e.target.value)}
+                placeholder="Justifikasi klasifikasi aduan..."
+              />
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "var(--space-2)",
+                marginTop: "var(--space-3)",
+              }}
+            >
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={() => navigate("/admin/complaints")}
+              >
+                Kembali
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                loading={isProcessing}
+              >
+                Konfirmasi Klasifikasi
+              </Button>
+            </div>
+          </form>
+        </section>
+      </div>
     );
-    setIsProcessing(false);
+  }
 
-    if (res.success) {
-      setSelectedComplaint(null);
-      setRefreshVersion((v) => v + 1);
-    } else {
-      setErrorMessage(res.message ?? "Gagal mengklasifikasikan aduan.");
-    }
-  };
-
+  // Queue List View
   return (
     <div className="admin-container" data-version={refreshVersion}>
       <header className="admin-page-header">
@@ -161,11 +395,13 @@ export function AdminComplaintsScreen() {
                           c.status === "UNRESOLVED" ? "primary" : "secondary"
                         }
                         size="sm"
-                        onClick={() => handleOpenClassify(c)}
+                        onClick={() =>
+                          navigate(`/admin/complaints/${c.complaintId}`)
+                        }
                       >
                         {c.status === "UNRESOLVED"
                           ? "Klasifikasi"
-                          : "Edit Catatan"}
+                          : "Lihat Detail"}
                       </Button>
                     </td>
                   </tr>
@@ -175,130 +411,6 @@ export function AdminComplaintsScreen() {
           </div>
         )}
       </section>
-
-      {/* Classify Modal */}
-      {selectedComplaint && (
-        <div
-          className="payment-modal-backdrop"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-classify-title"
-        >
-          <div className="payment-modal" style={{ maxWidth: "520px" }}>
-            <h2
-              id="modal-classify-title"
-              style={{
-                margin: "0 0 var(--space-3)",
-                fontSize: "var(--font-size-heading-md)",
-              }}
-            >
-              Klasifikasi Aduan {selectedComplaint.complaintId}
-            </h2>
-
-            {errorMessage && (
-              <div
-                className="admin-alert admin-alert--error"
-                style={{ marginBottom: "var(--space-3)" }}
-              >
-                {errorMessage}
-              </div>
-            )}
-
-            <form
-              onSubmit={handleConfirmClassification}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-3)",
-              }}
-            >
-              <div className="eo-form-group">
-                <label htmlFor="complaint-category" className="eo-form-label">
-                  Kategori Masalah:
-                </label>
-                <select
-                  id="complaint-category"
-                  className="eo-form-select"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                >
-                  <option value="OPERATIONAL_SAFETY">
-                    Operasional & Keselamatan Jalur
-                  </option>
-                  <option value="PUNCTUALITY">
-                    Ketepatan Waktu Penjemputan / Sesi
-                  </option>
-                  <option value="MINDFUL_QUALITY">
-                    Kualitas Ketenangan & Pemandu
-                  </option>
-                  <option value="FACILITY">Fasilitas & Konsumsi Lokal</option>
-                </select>
-              </div>
-
-              <div className="eo-form-group">
-                <label
-                  htmlFor="complaint-internal-note"
-                  className="eo-form-label"
-                >
-                  Catatan Tindak Lanjut Internal:
-                </label>
-                <textarea
-                  id="complaint-internal-note"
-                  rows={2}
-                  className="eo-form-textarea"
-                  value={internalNote}
-                  onChange={(e) => setInternalNote(e.target.value)}
-                  placeholder="Catatan koordinasi dengan EO / Destinasi..."
-                />
-              </div>
-
-              <div className="eo-form-group">
-                <label
-                  htmlFor="complaint-audit-reason"
-                  className="eo-form-label"
-                >
-                  Alasan Audit Administrator *:
-                </label>
-                <input
-                  id="complaint-audit-reason"
-                  type="text"
-                  required
-                  className="eo-form-input"
-                  value={auditReason}
-                  onChange={(e) => setAuditReason(e.target.value)}
-                  placeholder="Justifikasi klasifikasi aduan..."
-                />
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "var(--space-2)",
-                  marginTop: "var(--space-3)",
-                }}
-              >
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="md"
-                  onClick={() => setSelectedComplaint(null)}
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="md"
-                  loading={isProcessing}
-                >
-                  Simpan Klasifikasi
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

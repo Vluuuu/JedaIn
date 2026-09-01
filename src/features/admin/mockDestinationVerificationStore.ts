@@ -45,30 +45,32 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
     },
   ];
 
+function cloneVerificationApp(
+  app: DestinationVerificationRecord,
+): DestinationVerificationRecord {
+  return {
+    ...app,
+    highlights: [...app.highlights],
+  };
+}
+
 let verificationApps: DestinationVerificationRecord[] =
-  INITIAL_DESTINATION_APPLICATIONS.map((a) => ({
-    ...a,
-    highlights: [...a.highlights],
-  }));
+  INITIAL_DESTINATION_APPLICATIONS.map((a) => cloneVerificationApp(a));
 
 export const mockDestinationVerificationStore = {
   reset(): void {
-    verificationApps = INITIAL_DESTINATION_APPLICATIONS.map((a) => ({
-      ...a,
-      highlights: [...a.highlights],
-    }));
+    verificationApps = INITIAL_DESTINATION_APPLICATIONS.map((a) =>
+      cloneVerificationApp(a),
+    );
   },
 
   getAll(): readonly DestinationVerificationRecord[] {
-    return verificationApps.map((a) => ({
-      ...a,
-      highlights: [...a.highlights],
-    }));
+    return verificationApps.map((a) => cloneVerificationApp(a));
   },
 
   getById(applicationId: string): DestinationVerificationRecord | undefined {
     const app = verificationApps.find((a) => a.applicationId === applicationId);
-    return app ? { ...app, highlights: [...app.highlights] } : undefined;
+    return app ? cloneVerificationApp(app) : undefined;
   },
 
   approveApplication(
@@ -88,7 +90,7 @@ export const mockDestinationVerificationStore = {
     app.approvedGuideReady = guideReady;
     app.reviewedAt = new Date().toISOString();
 
-    // Canonical bridge: Add or update in mockDestinationStore
+    // Canonical bridge: Explicit domain upsert in mockDestinationStore
     const canonicalDest: DestinationRecord = {
       destinationId: app.destinationIdentityId,
       name: app.name,
@@ -104,20 +106,9 @@ export const mockDestinationVerificationStore = {
       status: "ACTIVE",
     };
 
-    // Update canonical destination in store
-    const existingCanonical = mockDestinationStore.getById(
-      app.destinationIdentityId,
-    );
-    if (!existingCanonical) {
-      // Direct push to mockDestinationStore array safely via store reset/add pattern or internal array
-      (mockDestinationStore.getAll() as DestinationRecord[]).push(
-        canonicalDest,
-      );
-    } else {
-      Object.assign(existingCanonical, canonicalDest);
-    }
+    const saved = mockDestinationStore.upsertVerifiedDestination(canonicalDest);
 
-    return { success: true, destination: canonicalDest };
+    return { success: true, destination: saved };
   },
 
   rejectApplication(

@@ -63,31 +63,55 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
   },
 ];
 
-let destinations = [...MOCK_DESTINATION_DIRECTORY];
+function cloneDestination(dest: DestinationRecord): DestinationRecord {
+  return {
+    ...dest,
+    highlights: [...dest.highlights],
+  };
+}
+
+let destinations = MOCK_DESTINATION_DIRECTORY.map((d) => cloneDestination(d));
 
 export const mockDestinationStore = {
   reset(): void {
-    destinations = [...MOCK_DESTINATION_DIRECTORY];
+    destinations = MOCK_DESTINATION_DIRECTORY.map((d) => cloneDestination(d));
   },
 
   getAll(): readonly DestinationRecord[] {
-    return destinations;
+    return destinations.map((d) => cloneDestination(d));
   },
 
   getById(destinationId: string): DestinationRecord | undefined {
-    return destinations.find((d) => d.destinationId === destinationId);
+    const dest = destinations.find((d) => d.destinationId === destinationId);
+    return dest ? cloneDestination(dest) : undefined;
+  },
+
+  upsertVerifiedDestination(record: DestinationRecord): DestinationRecord {
+    const existingIndex = destinations.findIndex(
+      (d) => d.destinationId === record.destinationId,
+    );
+
+    const cloned = cloneDestination(record);
+    if (existingIndex >= 0) {
+      destinations[existingIndex] = cloned;
+    } else {
+      destinations.push(cloned);
+    }
+    return cloneDestination(cloned);
   },
 
   getEligibleForEo(
     guideStatus: "CONCEPT_ONLY" | "CERTIFIED_GUIDE",
   ): readonly DestinationRecord[] {
-    return destinations.filter((d) => {
-      if (d.status !== "ACTIVE") return false;
-      if (guideStatus === "CONCEPT_ONLY") {
-        return d.guideReady === true;
-      }
-      // CERTIFIED_GUIDE can access all active BASIC/PLUS destinations
-      return true;
-    });
+    return destinations
+      .filter((d) => {
+        if (d.status !== "ACTIVE") return false;
+        if (guideStatus === "CONCEPT_ONLY") {
+          return d.guideReady === true;
+        }
+        // CERTIFIED_GUIDE can access all active BASIC/PLUS destinations
+        return true;
+      })
+      .map((d) => cloneDestination(d));
   },
 };

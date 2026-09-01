@@ -1,11 +1,14 @@
 import { Badge } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import { mockEoPackageStore } from "../eo/mockEoPackageStore";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
+import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import "./admin.css";
 
 export function AdminBookingsScreen() {
   // Read directly from shared transaction store
   const allBookings = mockTransactionStore.getBookings();
+  const eoPackages = mockEoPackageStore.getAllPackages();
 
   return (
     <div className="admin-container">
@@ -46,13 +49,26 @@ export function AdminBookingsScreen() {
                   <th>Sesi Jadwal</th>
                   <th>Jumlah Peserta</th>
                   <th>Total Terbayar</th>
-                  <th>Status Transaksi</th>
+                  <th>Status Booking</th>
+                  <th>Status Pembayaran</th>
                   <th>Waktu Booking</th>
                 </tr>
               </thead>
               <tbody>
                 {allBookings.map((b) => {
                   const pkgDetail = MOCK_PACKAGE_DETAILS[b.packageId];
+                  const recPkg = MOCK_RECOMMENDATION_PACKAGES.find(
+                    (p) => p.id === b.packageId,
+                  );
+                  const eoPkg = eoPackages.find(
+                    (p) => p.packageId === b.packageId,
+                  );
+
+                  const packageTitle =
+                    recPkg?.title ??
+                    eoPkg?.title ??
+                    (pkgDetail ? b.packageId : b.packageId);
+
                   const session = pkgDetail?.upcomingSessionPreviews?.find(
                     (s) => s.sessionId === b.sessionId,
                   );
@@ -66,20 +82,25 @@ export function AdminBookingsScreen() {
                       })
                     : b.sessionId;
 
+                  const attempt =
+                    mockTransactionStore.getPaymentAttemptForBooking(
+                      b.bookingId,
+                    );
+
                   return (
                     <tr key={b.bookingId}>
                       <td>
                         <strong>{b.bookingId}</strong>
                       </td>
                       <td>
-                        {pkgDetail ? b.packageId : b.packageId}
+                        <strong>{packageTitle}</strong>
                         <div
                           style={{
                             fontSize: "var(--font-size-caption)",
                             color: "var(--color-text-secondary)",
                           }}
                         >
-                          Traveler: {b.travelerId}
+                          ID: {b.packageId}
                         </div>
                       </td>
                       <td>{sessionLabel}</td>
@@ -99,6 +120,31 @@ export function AdminBookingsScreen() {
                         >
                           {b.status}
                         </Badge>
+                      </td>
+                      <td>
+                        {attempt ? (
+                          <Badge
+                            tone={
+                              attempt.status === "SUCCEEDED"
+                                ? "success"
+                                : attempt.status === "PENDING" ||
+                                    attempt.status === "VERIFYING"
+                                  ? "warning"
+                                  : "danger"
+                            }
+                          >
+                            {attempt.status}
+                          </Badge>
+                        ) : (
+                          <span
+                            style={{
+                              color: "var(--color-text-muted)",
+                              fontSize: "var(--font-size-caption)",
+                            }}
+                          >
+                            —
+                          </span>
+                        )}
                       </td>
                       <td>
                         {new Date(b.createdAt).toLocaleDateString("id-ID")}

@@ -7,7 +7,7 @@ export const DEMO_ADMIN_USER: AdminUser = {
   role: "ADMIN",
 };
 
-let currentAdmin: AdminUser | null = DEMO_ADMIN_USER;
+let currentAdmin: AdminUser | null = null;
 
 export const adminSessionStore = {
   get(): AdminUser | null {
@@ -28,6 +28,6 @@ export const adminSessionStore = {
   },
 
   reset(): void {
-    currentAdmin = { ...DEMO_ADMIN_USER };
+    currentAdmin = null;
   },
 };

@@ -3,7 +3,7 @@ import { Badge, Button } from "../../components/ui";
 import { mockApplicationStore } from "../eo/mockApplicationStore";
 import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { mockReviewStore } from "../reviews/mockReviewStore";
-import { mockAdminAuditStore } from "./mockAdminAuditStore";
+import { mockAdminDecisionService } from "./mockAdminDecisionService";
 import { mockComplaintStore } from "./mockComplaintStore";
 import type { TrustEntitySummary } from "./types";
 import "./admin.css";
@@ -93,16 +93,15 @@ export function AdminTrustStatusScreen() {
     );
 
     if (reason && reason.trim()) {
-      mockAdminAuditStore.recordEvent({
-        actorId: "admin_trust_demo",
-        actorLabel: "Trust Operations Lead",
-        actionType: "MANUAL_TRUST_ACTION",
-        entityType: "TRUST_STATUS",
+      const res = mockAdminDecisionService.recordTrustInspection({
+        entityType: entity.entityType,
         entityId: entity.entityId,
+        entityName: entity.name,
         reason: reason.trim(),
-        metadata: { entityName: entity.name, entityType: entity.entityType },
       });
-      setRefreshVersion((v) => v + 1);
+      if (res.success) {
+        setRefreshVersion((v) => v + 1);
+      }
     }
   };
 

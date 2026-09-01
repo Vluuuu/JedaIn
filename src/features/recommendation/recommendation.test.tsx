@@ -222,12 +222,13 @@ describe("Recommendation Result Router-Level Navigation", () => {
       b.textContent?.includes("Lihat Experience"),
     )!;
 
-    await act(() => {
+    await act(async () => {
       ctaBtn.click();
     });
 
-    // Successfully routed to /packages/slow_green_day placeholder
-    expect(container.textContent).toContain("Package detail");
+    // Successfully routed to /packages/slow_green_day
+    expect(container.textContent).toContain("Sehari Pelan di Lereng Hijau");
+    expect(container.textContent).toContain("Mulai dari");
     expect(container.textContent).not.toContain("Ini jeda yang paling cocok");
   });
 

@@ -16,12 +16,12 @@ import {
   OnboardingRouteGuard,
   TravelerConsentScreen,
 } from "./features/onboarding";
+import { PackageDetailScreen } from "./features/packageDetail";
 import { TravelerQuizScreen } from "./features/quiz";
 import { RecommendationResultScreen } from "./features/recommendation";
 import "./App.css";
 
 const travelerRoutes = [
-  ["packages/:packageId", "Package detail"],
   ["packages/:packageId/sessions", "Choose session"],
   ["checkout/:sessionId", "Checkout"],
   ["trips", "My Trips"],
@@ -131,6 +131,7 @@ export function App() {
       >
         <Route path="home" element={<HomeScreen />} />
         <Route path="explore" element={<ExploreScreen />} />
+        <Route path="packages/:packageId" element={<PackageDetailScreen />} />
         {travelerRoutes.map(([path, title]) => (
           <Route
             key={path}

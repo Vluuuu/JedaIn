@@ -5,6 +5,8 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { App } from "../../App";
+import type { BookingRecord } from "../checkout/types";
+import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { QuizDraft } from "../quiz/types";
 import { HomeScreen } from "./HomeScreen";
@@ -22,6 +24,7 @@ afterEach(async () => {
   await act(() => root?.unmount());
   container?.remove();
   sessionStore.reset();
+  mockTransactionStore.reset();
   MockHomeAdapter.resetSharedOptions();
   vi.useRealTimers();
 });
@@ -527,11 +530,33 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
   });
 
   it("routes payment CTA correctly", async () => {
+    const travelerId = "usr_routes_pay";
     sessionStore.setUser({
-      id: "usr_routes_pay",
+      id: travelerId,
       onboardingStatus: "COMPLETED",
     });
     sessionStore.setQuizDraft(sampleQuiz);
+
+    const booking: BookingRecord = {
+      bookingId: "bk_pending_123",
+      travelerId,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      totalAmount: 275000,
+      status: "PENDING_PAYMENT",
+      reservedQuantity: 1,
+      bookedQuantity: 0,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    };
+    mockTransactionStore.addDirectBooking(booking, {
+      paymentAttemptId: "pay_123",
+      bookingId: booking.bookingId,
+      status: "PENDING",
+      expiresAt: booking.paymentExpiresAt,
+    });
 
     MockHomeAdapter.setSharedOptions({
       pendingPayment: samplePendingPayment,
@@ -554,16 +579,41 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
     const payBtn = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Lanjutkan Pembayaran"),
     )!;
-    await act(() => payBtn.click());
-    expect(container.textContent).toContain("Payment");
+    await act(async () => {
+      payBtn.click();
+    });
+    expect(container.textContent).toContain("Konfirmasi Pembayaran");
   });
 
   it("routes upcoming trip CTA correctly", async () => {
+    const travelerId = "usr_routes_trip";
     sessionStore.setUser({
-      id: "usr_routes_trip",
+      id: travelerId,
       onboardingStatus: "COMPLETED",
     });
     sessionStore.setQuizDraft(sampleQuiz);
+
+    const booking: BookingRecord = {
+      bookingId: "bk_paid_456",
+      travelerId,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      totalAmount: 275000,
+      status: "PAID",
+      reservedQuantity: 0,
+      bookedQuantity: 1,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+      paidAt: new Date().toISOString(),
+    };
+    mockTransactionStore.addDirectBooking(booking, {
+      paymentAttemptId: "pay_456",
+      bookingId: booking.bookingId,
+      status: "SUCCEEDED",
+      expiresAt: booking.paymentExpiresAt,
+    });
 
     MockHomeAdapter.setSharedOptions({
       upcomingTrip: sampleUpcomingTrip,
@@ -586,7 +636,9 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
     const tripBtn = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Lihat Trip"),
     )!;
-    await act(() => tripBtn.click());
-    expect(container.textContent).toContain("Trip detail");
+    await act(async () => {
+      tripBtn.click();
+    });
+    expect(container.textContent).toContain("Trip Terkonfirmasi");
   });
 });

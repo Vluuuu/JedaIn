@@ -823,4 +823,56 @@ describe("PendingPaymentResolutionScreen (T12) Unit & Integration Tests", () => 
     // Dialog closed
     expect(container.querySelector(".pending-payment-modal")).toBeNull();
   });
+
+  it("G. FAILED unexpired payment attempt is considered continuable and routes to /payment/:bookingId", async () => {
+    const traveler: AuthUser = {
+      id: "usr_failed_retry_t12",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_fail_retry",
+    });
+
+    const bId = mockTransactionStore.getBookings()[0].bookingId;
+    // Simulate payment failure
+    mockTransactionStore.executePaymentFailure({ bookingId: bId });
+
+    const initialBookingsCount = mockTransactionStore.getBookings().length;
+    const initialAttemptsCount =
+      mockTransactionStore.getPaymentAttempts().length;
+
+    const { container, getPath } =
+      await renderPendingPaymentResolution("ses_sgd_2");
+
+    expect(container.textContent).toContain(
+      "Kamu masih punya pembayaran yang belum selesai.",
+    );
+
+    const continueBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Lanjutkan Pembayaran"),
+    )!;
+
+    await act(async () => {
+      continueBtn.click();
+    });
+
+    expect(getPath()).toBe(`/payment/${bId}`);
+
+    // Continuation does not create new Booking or PaymentAttempt
+    expect(mockTransactionStore.getBookings().length).toBe(
+      initialBookingsCount,
+    );
+    expect(mockTransactionStore.getPaymentAttempts().length).toBe(
+      initialAttemptsCount,
+    );
+    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(2);
+  });
 });

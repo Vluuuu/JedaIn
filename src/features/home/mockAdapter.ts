@@ -1,7 +1,10 @@
+import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { sessionStore } from "../onboarding/sessionStore";
+import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
+import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import { evaluateRecommendations } from "../recommendation/engine";
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import { isCompletedQuizDraft } from "../recommendation/mockAdapter";
+import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import { getDerivedVerifiedDestinations, HOME_MOOD_PRESETS } from "./config";
 import type {
   HomeAdapter,
@@ -64,17 +67,59 @@ export class MockHomeAdapter implements HomeAdapter {
 
     const moduleErrors: HomeViewModel["moduleErrors"] = {};
 
-    // 1. Pending payment
+    // 1. Pending payment (Sync with shared mockTransactionStore if not overridden)
     let pendingPayment: PendingPaymentSummary | null | undefined =
       opts.pendingPayment;
     if (opts.shouldFailPendingPayment) {
       moduleErrors.pendingPayment = "Gagal memuat status pembayaran.";
       pendingPayment = null;
+    } else if (pendingPayment === undefined && traveler) {
+      const activePending = mockTransactionStore.getActivePendingPayment(
+        traveler.id,
+      );
+      if (activePending) {
+        const pkg = MOCK_RECOMMENDATION_PACKAGES.find(
+          (p) => p.id === activePending.packageId,
+        );
+        pendingPayment = {
+          bookingId: activePending.bookingId,
+          packageName: pkg?.title ?? activePending.packageId,
+          amount: activePending.amount,
+          expiresAt: activePending.expiresAt,
+          authoritativeStatus: "PENDING_PAYMENT",
+        };
+      }
     }
 
-    // 2. Upcoming trip
-    const upcomingTrip: UpcomingTripSummary | null | undefined =
+    // 2. Upcoming trip (Sync with shared mockTransactionStore if not overridden)
+    let upcomingTrip: UpcomingTripSummary | null | undefined =
       opts.upcomingTrip;
+    if (upcomingTrip === undefined && traveler) {
+      const paidBookings = mockTransactionStore
+        .getBookingsByTraveler(traveler.id)
+        .filter((b) => b.status === "PAID");
+      if (paidBookings.length > 0) {
+        const latestPaid = paidBookings[0];
+        const pkg = MOCK_RECOMMENDATION_PACKAGES.find(
+          (p) => p.id === latestPaid.packageId,
+        );
+        const detail = MOCK_PACKAGE_DETAILS[latestPaid.packageId];
+        const sess = detail?.upcomingSessionPreviews?.find(
+          (s) => s.sessionId === latestPaid.sessionId,
+        );
+        const dateLabel =
+          sess?.startAt && sess?.endAt
+            ? formatSessionDateTimeRange(sess.startAt, sess.endAt).dateLabel
+            : "Jadwal Mendatang";
+
+        upcomingTrip = {
+          bookingId: latestPaid.bookingId,
+          packageName: pkg?.title ?? latestPaid.packageId,
+          tripDate: dateLabel,
+          destinationLabel: pkg?.destinationName ?? "Destinasi Pilihan",
+        };
+      }
+    }
 
     // 3. Recommendation (Reuses Issue #8 Engine strictly and preserves mode)
     let personalizedRecommendation: PersonalizedRecommendationSummary | null =

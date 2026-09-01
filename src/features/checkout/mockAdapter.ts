@@ -107,13 +107,13 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    // BLOCKER 1: GETCHECKOUT MUST REFLECT ACTIVE RESERVATIONS
+    // BLOCKER 1 & 5: GETCHECKOUT MUST REFLECT ACTIVE RESERVATIONS & BOOKED CAPACITY
     // Calculate effective remaining slots without mutating canonical details
-    const activeReservedQuantity = mockTransactionStore.getReservedQuantity(
+    const occupiedQuantity = mockTransactionStore.getOccupiedQuantity(
       foundSession.sessionId,
     );
     const rawSlots = foundSession.remainingSlots ?? 0;
-    const effectiveRemaining = Math.max(0, rawSlots - activeReservedQuantity);
+    const effectiveRemaining = Math.max(0, rawSlots - occupiedQuantity);
 
     // Create a cloned session snapshot reflecting latest effective capacity
     const effectiveSessionSnapshot: PackageSessionPreview = {
@@ -354,11 +354,11 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    // Effective capacity check with store active reservations
-    const currentReserved = mockTransactionStore.getReservedQuantity(
+    // Effective capacity check with store occupied (reserved + booked) slots
+    const currentOccupied = mockTransactionStore.getOccupiedQuantity(
       foundSession.sessionId,
     );
-    const effectiveRemaining = foundSession.remainingSlots - currentReserved;
+    const effectiveRemaining = foundSession.remainingSlots - currentOccupied;
 
     if (effectiveRemaining < input.participantCount) {
       return {

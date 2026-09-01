@@ -69,7 +69,8 @@ export interface CheckoutSubmitResult {
   latestRemainingSlots?: number;
 }
 
-export type BookingStatus = "PENDING_PAYMENT" | "CANCELLED" | "EXPIRED";
+export type BookingStatus =
+  "PENDING_PAYMENT" | "PAID" | "COMPLETED" | "CANCELLED" | "EXPIRED";
 
 export interface BookingRecord {
   bookingId: string;
@@ -81,17 +82,22 @@ export interface BookingRecord {
   totalAmount: number;
   status: BookingStatus;
   reservedQuantity: number;
+  bookedQuantity: number;
   createdAt: string;
   paymentExpiresAt: string;
+  paidAt?: string;
+  completedAt?: string;
 }
 
-export type PaymentAttemptStatus = "PENDING" | "CANCELLED" | "EXPIRED";
+export type PaymentAttemptStatus =
+  "PENDING" | "VERIFYING" | "SUCCEEDED" | "FAILED" | "CANCELLED" | "EXPIRED";
 
 export interface PaymentAttemptRecord {
   paymentAttemptId: string;
   bookingId: string;
   status: PaymentAttemptStatus;
   expiresAt: string;
+  updatedAt?: string;
 }
 
 export interface CheckoutAdapter {

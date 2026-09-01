@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { App } from "../../App";
+import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { PackageSessionPreview } from "../packageDetail/types";
 import { MockSessionSelectionAdapter } from "./mockAdapter";
@@ -21,6 +22,7 @@ afterEach(async () => {
   await act(() => root?.unmount());
   container?.remove();
   sessionStore.reset();
+  mockTransactionStore.reset();
 });
 
 async function renderSessionSelection(
@@ -757,5 +759,61 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     expect(navItems.length).toBe(4);
     const labels = Array.from(navItems).map((el) => el.textContent?.trim());
     expect(labels).toEqual(["Home", "Explore", "My Trips", "Profile"]);
+  });
+
+  it("I. raw 6, PAID occupancy 4 → T09 displays effective remaining = 2", async () => {
+    mockTransactionStore.createTransaction({
+      travelerId: "usr_t09_occ",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 4,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_t09_occ_4",
+    });
+    const bId = mockTransactionStore.getBookings()[0].bookingId;
+    mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+    const adapter = new MockSessionSelectionAdapter();
+    const vm = await adapter.getPackageSessions("slow_green_day");
+    const ses1 = vm.sessions.find((s) => s.sessionId === "ses_sgd_1");
+
+    expect(ses1?.remainingSlots).toBe(2);
+    expect(ses1?.status).toBe("OPEN");
+
+    const view = await renderSessionSelection("slow_green_day", { adapter });
+    expect(view.textContent).toContain("Sisa 2 slot");
+  });
+
+  it("J. occupied 6 → T09 marks session FULL/unavailable", async () => {
+    mockTransactionStore.createTransaction({
+      travelerId: "usr_t09_full",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 6,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_t09_full_6",
+    });
+    const bId = mockTransactionStore.getBookings()[0].bookingId;
+    mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+    const adapter = new MockSessionSelectionAdapter();
+    const vm = await adapter.getPackageSessions("slow_green_day");
+    const ses1 = vm.sessions.find((s) => s.sessionId === "ses_sgd_1");
+
+    expect(ses1?.remainingSlots).toBe(0);
+    expect(ses1?.status).toBe("FULL");
+
+    const validation = await adapter.validateSessionSelection(
+      "slow_green_day",
+      "ses_sgd_1",
+    );
+    expect(validation.valid).toBe(false);
+    expect(validation.reason).toBe("FULL");
+  });
+
+  it("K. T10 remains correct with ledger occupancy", () => {
+    expect(mockTransactionStore.getOccupiedQuantity("ses_sgd_1")).toBe(0);
   });
 });

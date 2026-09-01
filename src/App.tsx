@@ -19,24 +19,19 @@ import {
   TravelerConsentScreen,
 } from "./features/onboarding";
 import { PackageDetailScreen } from "./features/packageDetail";
+import { PaymentResultScreen, PaymentScreen } from "./features/payment";
 import { PendingPaymentResolutionScreen } from "./features/pendingPayment";
 import { TravelerQuizScreen } from "./features/quiz";
 import { RecommendationResultScreen } from "./features/recommendation";
+import { TripReviewScreen } from "./features/reviews";
 import { SessionSelectionScreen } from "./features/sessionSelection";
+import { MyTripsScreen, TripDetailScreen } from "./features/trips";
 import "./App.css";
 
-const travelerRoutes = [
-  ["trips", "My Trips"],
-  ["trips/:bookingId", "Trip detail"],
-  ["trips/:bookingId/review", "Trip review"],
+const placeholderTravelerRoutes = [
   ["profile", "Profile"],
   ["profile/preferences", "Preferences"],
   ["complaints/new", "New complaint"],
-] as const;
-
-const distractionFreeRoutes = [
-  ["payment/:bookingId", "Payment"],
-  ["payment/:bookingId/result", "Payment result"],
 ] as const;
 
 const partnerEoRoutes = [
@@ -111,17 +106,22 @@ export function App() {
             </OnboardingRouteGuard>
           }
         />
-        {distractionFreeRoutes.map(([path, title]) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              <OnboardingRouteGuard>
-                <PlaceholderPage eyebrow="Traveler flow" title={title} />
-              </OnboardingRouteGuard>
-            }
-          />
-        ))}
+        <Route
+          path="payment/:bookingId"
+          element={
+            <OnboardingRouteGuard>
+              <PaymentScreen />
+            </OnboardingRouteGuard>
+          }
+        />
+        <Route
+          path="payment/:bookingId/result"
+          element={
+            <OnboardingRouteGuard>
+              <PaymentResultScreen />
+            </OnboardingRouteGuard>
+          }
+        />
       </Route>
 
       <Route
@@ -156,7 +156,10 @@ export function App() {
           path="packages/:packageId/sessions"
           element={<SessionSelectionScreen />}
         />
-        {travelerRoutes.map(([path, title]) => (
+        <Route path="trips" element={<MyTripsScreen />} />
+        <Route path="trips/:bookingId" element={<TripDetailScreen />} />
+        <Route path="trips/:bookingId/review" element={<TripReviewScreen />} />
+        {placeholderTravelerRoutes.map(([path, title]) => (
           <Route
             key={path}
             path={path}

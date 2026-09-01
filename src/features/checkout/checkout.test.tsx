@@ -583,8 +583,8 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     );
   });
 
-  // CONTACT TEST — ACTUAL CONTINUE (BLOCKER 9)
-  it("14. verified phone user continues directly to /payment/:bookingId, unverified phone hands off to T11 with zero transaction", async () => {
+  // VERIFIED PHONE SUCCESS TEST (REGRESSION #3)
+  it("14. verified phone user continues directly to /payment/:bookingId with 1 booking & reserved quantity", async () => {
     const travelerVerified: AuthUser = {
       id: "usr_verified_flow",
       name: "Verified Traveler",
@@ -592,6 +592,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       phone: "08123456789",
       onboardingStatus: "COMPLETED",
     };
+    sessionStore.setUser(travelerVerified);
 
     const adapterVerified = new MockCheckoutAdapter({
       travelerOverride: travelerVerified,
@@ -629,6 +630,8 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       );
     });
 
+    expect(container.textContent).toContain("Terverifikasi");
+
     const policyCb = container.querySelector<HTMLInputElement>(
       "#cancellation-policy-ack",
     )!;
@@ -646,10 +649,185 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(container.textContent).toContain("Payment Screen");
     expect(currentPath).toMatch(/^\/payment\/bk_/);
     expect(mockTransactionStore.getBookings().length).toBe(1);
+    expect(mockTransactionStore.getPaymentAttempts().length).toBe(1);
+    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(1);
+  });
+
+  // REAL UNVERIFIED PHONE -> T11 TEST (REGRESSION #1)
+  it("15. unverified phone user (with phone present) hands off to /checkout/:sessionId/contact with ZERO transaction created", async () => {
+    const travelerUnverified: AuthUser = {
+      id: "usr_unverified_flow",
+      name: "Unverified Traveler",
+      email: "unverified@example.com",
+      phone: "081987654321", // Phone is present
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerUnverified);
+
+    // verifiedPhoneStore explicitly false for this traveler
+    const adapterUnverified = new MockCheckoutAdapter({
+      travelerOverride: travelerUnverified,
+      verifiedPhoneStore: { usr_unverified_flow: false },
+    });
+
+    let currentPath = "";
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/checkout/ses_sgd_1"] },
+          createElement(LocationObserver, {
+            onLocation: (p) => {
+              currentPath = p;
+            },
+          }),
+          createElement(Routes, undefined, [
+            createElement(Route, {
+              path: "/checkout/:sessionId",
+              element: createElement(CheckoutScreen, {
+                adapter: adapterUnverified,
+              }),
+            }),
+            createElement(Route, {
+              path: "/checkout/:sessionId/contact",
+              element: createElement(
+                "div",
+                undefined,
+                "T11 Contact Verification Screen",
+              ),
+            }),
+          ]),
+        ),
+      );
+    });
+
+    // 2. Verify UI shows "Belum Verifikasi"
+    expect(container.textContent).toContain("Belum Verifikasi");
+
+    // 3. Acknowledge policy
+    const policyCb = container.querySelector<HTMLInputElement>(
+      "#cancellation-policy-ack",
+    )!;
+    await act(async () => {
+      policyCb.click();
+    });
+
+    // 4. Click "Lanjut ke Pembayaran"
+    const ctaBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut ke Pembayaran"),
+    )!;
+    await act(async () => {
+      ctaBtn.click();
+    });
+
+    // Assert route becomes /checkout/ses_sgd_1/contact
+    expect(currentPath).toBe("/checkout/ses_sgd_1/contact");
+    expect(container.textContent).toContain("T11 Contact Verification Screen");
+
+    // Assert ZERO transaction created in mockTransactionStore
+    expect(mockTransactionStore.getBookings().length).toBe(0);
+    expect(mockTransactionStore.getPaymentAttempts().length).toBe(0);
+    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(0);
+  });
+
+  // REAL ACTIVE PENDING -> T12 TEST (REGRESSION #2)
+  it("16. traveler with active pending payment hands off to /checkout/:sessionId/pending-payment with ZERO NEW transaction created", async () => {
+    const travelerActive: AuthUser = {
+      id: "usr_active_flow",
+      name: "Active Pending Traveler",
+      email: "active@example.com",
+      phone: "081222333444",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerActive);
+
+    // 1. Create an existing active PENDING_PAYMENT transaction in store
+    mockTransactionStore.createTransaction({
+      travelerId: "usr_active_flow",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_existing_pending_123",
+    });
+
+    expect(mockTransactionStore.getBookings().length).toBe(1);
+    expect(mockTransactionStore.getPaymentAttempts().length).toBe(1);
+
+    const adapter = new MockCheckoutAdapter({
+      travelerOverride: travelerActive,
+      verifiedPhoneStore: { usr_active_flow: true }, // Explicitly verified phone
+    });
+
+    let currentPath = "";
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    // 2. Render normal Checkout for another submit intent
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/checkout/ses_sgd_1"] },
+          createElement(LocationObserver, {
+            onLocation: (p) => {
+              currentPath = p;
+            },
+          }),
+          createElement(Routes, undefined, [
+            createElement(Route, {
+              path: "/checkout/:sessionId",
+              element: createElement(CheckoutScreen, { adapter }),
+            }),
+            createElement(Route, {
+              path: "/checkout/:sessionId/pending-payment",
+              element: createElement(
+                "div",
+                undefined,
+                "T12 Pending Payment Resolution Screen",
+              ),
+            }),
+          ]),
+        ),
+      );
+    });
+
+    // 3. Acknowledge policy
+    const policyCb = container.querySelector<HTMLInputElement>(
+      "#cancellation-policy-ack",
+    )!;
+    await act(async () => {
+      policyCb.click();
+    });
+
+    // 4. Click "Lanjut ke Pembayaran"
+    const ctaBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut ke Pembayaran"),
+    )!;
+    await act(async () => {
+      ctaBtn.click();
+    });
+
+    // Assert route becomes /checkout/ses_sgd_1/pending-payment
+    expect(currentPath).toBe("/checkout/ses_sgd_1/pending-payment");
+    expect(container.textContent).toContain(
+      "T12 Pending Payment Resolution Screen",
+    );
+
+    // Prove ZERO NEW transaction mutation
+    expect(mockTransactionStore.getBookings().length).toBe(1);
+    expect(mockTransactionStore.getPaymentAttempts().length).toBe(1);
+    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(2);
   });
 
   // DRAFT VALIDATION & MANDATORY EXPECTED PRICE (BLOCKER 6 & 8)
-  it("15. submitCheckout validates draft & requires expectedUnitPricePerPerson integer", async () => {
+  it("17. submitCheckout validates draft & requires expectedUnitPricePerPerson integer", async () => {
     const adapter = new MockCheckoutAdapter();
     sessionStore.setUser({
       id: "usr_draft_test",
@@ -682,7 +860,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
   });
 
   // TRANSACTION STORE / LOAD CONSISTENCY TEST (BLOCKER 1 & 11)
-  it("16. getCheckout reflects active reservations dynamically: base 6 -> 4 reserved -> effective 2 -> +2 reserved -> SESSION_UNAVAILABLE", async () => {
+  it("18. getCheckout reflects active reservations dynamically: base 6 -> 4 reserved -> effective 2 -> +2 reserved -> SESSION_UNAVAILABLE", async () => {
     const adapter = new MockCheckoutAdapter();
 
     // Initial load: 6 slots
@@ -723,8 +901,8 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(vm3.session?.remainingSlots).toBe(0);
   });
 
-  // PENDING PAYMENT HANDOFF SEMANTICS (BLOCKER 10)
-  it("17. PendingPaymentHandoff contains packageId field rather than calling an ID packageName", async () => {
+  // PENDING PAYMENT HANDOFF SEMANTICS
+  it("19. PendingPaymentHandoff contains packageId field rather than calling an ID packageName", async () => {
     const traveler: AuthUser = {
       id: "usr_handoff_test",
       name: "Handoff User",
@@ -751,7 +929,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
   });
 
   // CROSS-TRAVELER & IDEMPOTENCY REGRESSIONS
-  it("18. cross-traveler capacity enforcement: Traveler A (4) succeeds, Traveler B (4) fails when max 6; Traveler A (4) + B (2) both succeed fill to 6", async () => {
+  it("20. cross-traveler capacity enforcement: Traveler A (4) succeeds, Traveler B (4) fails when max 6; Traveler A (4) + B (2) both succeed fill to 6", async () => {
     sessionStore.setUser({ id: "usr_A", onboardingStatus: "COMPLETED" });
     const adapterA = new MockCheckoutAdapter({
       verifiedPhoneStore: { usr_A: true, usr_B: true },
@@ -844,7 +1022,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(6);
   });
 
-  it("19. idempotent retry returns same booking; conflicting payload with same key is safely rejected", async () => {
+  it("21. idempotent retry returns same booking; conflicting payload with same key is safely rejected", async () => {
     sessionStore.setUser({ id: "usr_idemp", onboardingStatus: "COMPLETED" });
     const adapter = new MockCheckoutAdapter({
       verifiedPhoneStore: { usr_idemp: true },

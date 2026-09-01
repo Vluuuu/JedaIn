@@ -24,7 +24,6 @@ export interface CheckoutContactRequirement {
 export interface PendingPaymentHandoff {
   bookingId: string;
   packageId: string;
-  packageName?: string;
   amount: number;
   expiresAt: string;
 }

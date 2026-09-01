@@ -132,6 +132,65 @@ export function PaymentResultScreen({
     );
   }
 
+  if (result.status === "PENDING") {
+    return (
+      <div className="payment-container payment-result-container">
+        <div className="payment-result-header">
+          <Badge tone="warning">Menunggu Pembayaran</Badge>
+          <h1 className="payment-result-title">Pembayaran Belum Selesai</h1>
+          <p className="payment-result-subtitle">
+            Transaksi ini masih menunggu pembayaran atau proses verifikasi.
+          </p>
+        </div>
+
+        <div className="payment-actions">
+          <Button
+            type="button"
+            variant="primary"
+            size="lg"
+            onClick={() => navigate(`/payment/${booking.bookingId}`)}
+          >
+            Lanjutkan Pembayaran
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={() => navigate("/home")}
+          >
+            Kembali ke Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (result.status === "ERROR") {
+    return (
+      <div className="payment-container payment-result-container">
+        <div className="payment-result-header">
+          <Badge tone="neutral">Status Tidak Dikenal</Badge>
+          <h1 className="payment-result-title">Status Belum Diketahui</h1>
+          <p className="payment-result-subtitle">
+            Terjadi kendala saat memeriksa status transaksi. Silakan coba
+            kembali.
+          </p>
+        </div>
+
+        <div className="payment-actions">
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={() => navigate("/home")}
+          >
+            Kembali ke Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (result.status === "FAILED") {
     return (
       <div className="payment-container payment-result-container">

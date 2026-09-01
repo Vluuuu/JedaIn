@@ -191,16 +191,19 @@ export function MyTripsScreen({
                 </div>
 
                 <div className="trip-card__action">
-                  <Button
-                    type="button"
-                    variant={
-                      booking.status === "PAID" ? "primary" : "secondary"
-                    }
-                    size="sm"
-                    onClick={() => navigate(`/trips/${booking.bookingId}`)}
-                  >
-                    Lihat Trip
-                  </Button>
+                  {booking.status === "PAID" ||
+                  booking.status === "COMPLETED" ? (
+                    <Button
+                      type="button"
+                      variant={
+                        booking.status === "PAID" ? "primary" : "secondary"
+                      }
+                      size="sm"
+                      onClick={() => navigate(`/trips/${booking.bookingId}`)}
+                    >
+                      Lihat Trip
+                    </Button>
+                  ) : null}
                 </div>
               </article>
             );

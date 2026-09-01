@@ -5,7 +5,7 @@ import type { PackageDetailSource } from "../packageDetail/types";
 import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import type { PackageRecommendationSource } from "../recommendation/types";
 import { mockReviewStore } from "../reviews/mockReviewStore";
-import { DEMO_TRAVELER_HISTORY } from "./demoHistory";
+import { createDemoTravelerHistory } from "./demoHistory";
 import type {
   MyTripsViewModel,
   TripCardItem,
@@ -82,12 +82,13 @@ export class MockTripsAdapter implements TripsAdapter {
       }
     }
 
-    // Always append the deterministic demo completed trip for golden demo flow
+    // Append deterministic demo completed trip bound to current traveler
+    const demoBooking = createDemoTravelerHistory(traveler.id);
     const hasDemo = completedTrips.some(
-      (t) => t.booking.bookingId === DEMO_TRAVELER_HISTORY.bookingId,
+      (t) => t.booking.bookingId === demoBooking.bookingId,
     );
     if (!hasDemo) {
-      completedTrips.push(this.resolveCardItem(DEMO_TRAVELER_HISTORY));
+      completedTrips.push(this.resolveCardItem(demoBooking));
     }
 
     return {
@@ -107,11 +108,18 @@ export class MockTripsAdapter implements TripsAdapter {
     if (!traveler) return null;
 
     let booking = mockTransactionStore.getBookingById(bookingId);
-    if (!booking && bookingId === DEMO_TRAVELER_HISTORY.bookingId) {
-      booking = DEMO_TRAVELER_HISTORY;
+    const demoBooking = createDemoTravelerHistory(traveler.id);
+
+    if (!booking && bookingId === demoBooking.bookingId) {
+      booking = demoBooking;
     }
 
-    if (!booking) return null;
+    if (!booking || booking.travelerId !== traveler.id) return null;
+
+    // T17/T18 confirmed trip detail is only for PAID and COMPLETED
+    if (booking.status !== "PAID" && booking.status !== "COMPLETED") {
+      return null;
+    }
 
     const pkg = this.packages.find((p) => p.id === booking.packageId);
     const detail = this.details[booking.packageId];

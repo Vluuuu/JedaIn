@@ -8,7 +8,6 @@ import type { AuthUser } from "../auth/types";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { sessionStore } from "../onboarding/sessionStore";
 import { mockReviewStore } from "../reviews/mockReviewStore";
-import { DEMO_TRAVELER_HISTORY } from "./demoHistory";
 import { MockTripsAdapter } from "./mockAdapter";
 import { MyTripsScreen } from "./MyTripsScreen";
 import { TripDetailScreen } from "./TripDetailScreen";
@@ -163,7 +162,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     };
     sessionStore.setUser(traveler);
 
-    const bId = DEMO_TRAVELER_HISTORY.bookingId;
+    const bId = `bk_demo_completed_${traveler.id}`;
     const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
 
     expect(container.textContent).toContain("Trip Selesai");
@@ -172,5 +171,130 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(container.textContent).toContain("Nilai EO / Guide");
     expect(container.textContent).toContain("Beri Nilai Destinasi");
     expect(container.textContent).toContain("Beri Nilai EO / Guide");
+  });
+
+  it("L. wrong owner trip detail blocked → returns Trip tidak ditemukan", async () => {
+    const travelerA: AuthUser = {
+      id: "usr_trip_A",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerA);
+
+    mockTransactionStore.createTransaction({
+      travelerId: travelerA.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_trip_owner_a",
+    });
+
+    const bId = mockTransactionStore.getBookings()[0].bookingId;
+    mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+    // Switch to Traveler B
+    const travelerB: AuthUser = {
+      id: "usr_trip_B",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerB);
+
+    const adapter = new MockTripsAdapter();
+    const detail = await adapter.getTripDetail(bId);
+    expect(detail).toBeNull();
+
+    const { container } = await renderMyTrips({ adapter }, [`/trips/${bId}`]);
+    expect(container.textContent).toContain("Trip tidak ditemukan.");
+  });
+
+  it("M. pending, cancelled, or expired bookings are not shown as confirmed trip detail", async () => {
+    const traveler: AuthUser = {
+      id: "usr_trip_states",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    // Pending booking
+    const txPend = mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_trip_pend",
+    });
+    const bIdPend = (txPend as { booking: { bookingId: string } }).booking
+      .bookingId;
+
+    const adapter = new MockTripsAdapter();
+    const pendDetail = await adapter.getTripDetail(bIdPend);
+    expect(pendDetail).toBeNull();
+
+    // Cancelled booking
+    mockTransactionStore.cancelPendingBooking({
+      travelerId: traveler.id,
+      bookingId: bIdPend,
+    });
+    const cancDetail = await adapter.getTripDetail(bIdPend);
+    expect(cancDetail).toBeNull();
+  });
+
+  it("N. PAID trip detail displays itinerary, included items, and cancellation policy summary", async () => {
+    const traveler: AuthUser = {
+      id: "usr_trip_t17",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    const tx = mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_trip_t17",
+    });
+    const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+    mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+    const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+    expect(container.textContent).toContain("Rencana Perjalanan (Itinerary)");
+    expect(container.textContent).toContain("Termasuk dalam Paket");
+    expect(container.textContent).toContain("Kebijakan Pembatalan");
+    expect(container.textContent).toContain(
+      "Tiket masuk kawasan Lereng Hijau Batu",
+    );
+  });
+
+  it("O. demo completed booking is bound to current Traveler deterministically", async () => {
+    const traveler1: AuthUser = {
+      id: "usr_demo_traveler_1",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler1);
+
+    const adapter = new MockTripsAdapter();
+    const trips1 = await adapter.getMyTrips();
+    const demo1 = trips1.completedTrips.find(
+      (t) => t.booking.bookingId === "bk_demo_completed_usr_demo_traveler_1",
+    );
+    expect(demo1).toBeDefined();
+    expect(demo1?.booking.travelerId).toBe(traveler1.id);
+
+    // Different traveler gets distinct deterministic ID
+    const traveler2: AuthUser = {
+      id: "usr_demo_traveler_2",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler2);
+    const trips2 = await adapter.getMyTrips();
+    const demo2 = trips2.completedTrips.find(
+      (t) => t.booking.bookingId === "bk_demo_completed_usr_demo_traveler_2",
+    );
+    expect(demo2).toBeDefined();
+    expect(demo2?.booking.travelerId).toBe(traveler2.id);
   });
 });

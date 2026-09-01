@@ -324,4 +324,313 @@ describe("Payment & Result Feature (T13, T14, T15) Tests", () => {
 
     expect(getPath()).toBe(`/trips/${bId}`);
   });
+
+  it("A. wrong owner execute → rejected with zero mutation and unchanged occupancy", async () => {
+    const travelerA: AuthUser = {
+      id: "usr_traveler_A",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerA);
+
+    mockTransactionStore.createTransaction({
+      travelerId: travelerA.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_owner_a",
+    });
+
+    const bId = mockTransactionStore.getBookings()[0].bookingId;
+
+    // Switch to Traveler B
+    const travelerB: AuthUser = {
+      id: "usr_traveler_B",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerB);
+
+    const adapter = new MockPaymentAdapter();
+    const res = await adapter.executePayment(bId);
+
+    expect(res.success).toBe(false);
+
+    // Booking unchanged
+    const booking = mockTransactionStore.getBookingById(bId);
+    expect(booking?.status).toBe("PENDING_PAYMENT");
+    expect(booking?.reservedQuantity).toBe(2);
+    expect(booking?.bookedQuantity).toBe(0);
+
+    // PaymentAttempt unchanged
+    const attempt = mockTransactionStore.getPaymentAttemptForBooking(bId);
+    expect(attempt?.status).toBe("PENDING");
+
+    // Occupancy unchanged
+    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(2);
+    expect(mockTransactionStore.getBookedQuantity("ses_sgd_1")).toBe(0);
+  });
+
+  it("B. success with missing PaymentAttempt → rejected in store", async () => {
+    const booking = {
+      bookingId: "bk_missing_attempt",
+      travelerId: "usr_1",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      totalAmount: 275000,
+      status: "PENDING_PAYMENT" as const,
+      reservedQuantity: 1,
+      bookedQuantity: 0,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date(Date.now() + 100000).toISOString(),
+    };
+    mockTransactionStore.addDirectBooking(booking); // No payment attempt added
+
+    const res = mockTransactionStore.executePaymentSuccess({
+      bookingId: "bk_missing_attempt",
+    });
+    expect(res.success).toBe(false);
+    expect(res.reason).toBe("INVALID_STATE");
+
+    const saved = mockTransactionStore.getBookingById("bk_missing_attempt");
+    expect(saved?.status).toBe("PENDING_PAYMENT");
+  });
+
+  it("C. success from CANCELLED/EXPIRED → rejected", async () => {
+    const bookingCancelled = {
+      bookingId: "bk_canc_test",
+      travelerId: "usr_1",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      totalAmount: 275000,
+      status: "CANCELLED" as const,
+      reservedQuantity: 0,
+      bookedQuantity: 0,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date(Date.now() + 100000).toISOString(),
+    };
+    mockTransactionStore.addDirectBooking(bookingCancelled, {
+      paymentAttemptId: "pay_canc",
+      bookingId: "bk_canc_test",
+      status: "CANCELLED",
+      expiresAt: bookingCancelled.paymentExpiresAt,
+    });
+
+    const resCanc = mockTransactionStore.executePaymentSuccess({
+      bookingId: "bk_canc_test",
+    });
+    expect(resCanc.success).toBe(false);
+
+    const bookingExpired = {
+      bookingId: "bk_exp_test",
+      travelerId: "usr_1",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      totalAmount: 275000,
+      status: "EXPIRED" as const,
+      reservedQuantity: 0,
+      bookedQuantity: 0,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date(Date.now() - 100000).toISOString(),
+    };
+    mockTransactionStore.addDirectBooking(bookingExpired, {
+      paymentAttemptId: "pay_exp",
+      bookingId: "bk_exp_test",
+      status: "EXPIRED",
+      expiresAt: bookingExpired.paymentExpiresAt,
+    });
+
+    const resExp = mockTransactionStore.executePaymentSuccess({
+      bookingId: "bk_exp_test",
+    });
+    expect(resExp.success).toBe(false);
+  });
+
+  it("D. failure cannot mutate PAID", async () => {
+    const bookingPaid = {
+      bookingId: "bk_paid_immut",
+      travelerId: "usr_1",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      totalAmount: 275000,
+      status: "PAID" as const,
+      reservedQuantity: 0,
+      bookedQuantity: 1,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date(Date.now() + 100000).toISOString(),
+      paidAt: new Date().toISOString(),
+    };
+    mockTransactionStore.addDirectBooking(bookingPaid, {
+      paymentAttemptId: "pay_paid_immut",
+      bookingId: "bk_paid_immut",
+      status: "SUCCEEDED",
+      expiresAt: bookingPaid.paymentExpiresAt,
+    });
+
+    const res = mockTransactionStore.executePaymentFailure({
+      bookingId: "bk_paid_immut",
+    });
+    expect(res.success).toBe(false);
+    expect(mockTransactionStore.getBookingById("bk_paid_immut")?.status).toBe(
+      "PAID",
+    );
+  });
+
+  it("E. cancel cannot cancel PAID/COMPLETED", async () => {
+    const bookingPaid = {
+      bookingId: "bk_paid_no_cancel",
+      travelerId: "usr_1",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      totalAmount: 275000,
+      status: "PAID" as const,
+      reservedQuantity: 0,
+      bookedQuantity: 1,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date(Date.now() + 100000).toISOString(),
+      paidAt: new Date().toISOString(),
+    };
+    mockTransactionStore.addDirectBooking(bookingPaid, {
+      paymentAttemptId: "pay_no_canc",
+      bookingId: "bk_paid_no_cancel",
+      status: "SUCCEEDED",
+      expiresAt: bookingPaid.paymentExpiresAt,
+    });
+
+    const res = mockTransactionStore.cancelPendingBooking({
+      travelerId: "usr_1",
+      bookingId: "bk_paid_no_cancel",
+    });
+    expect(res.success).toBe(false);
+    expect(
+      mockTransactionStore.getBookingById("bk_paid_no_cancel")?.status,
+    ).toBe("PAID");
+  });
+
+  it("F. countdown zero + revalidation error → NOT EXPIRED, reservation still held", async () => {
+    vi.useFakeTimers();
+    const baseNow = new Date("2026-08-31T12:00:00.000Z").getTime();
+    vi.setSystemTime(baseNow);
+
+    const traveler: AuthUser = {
+      id: "usr_cd_err",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_cd_err",
+      nowMs: baseNow,
+    });
+
+    const bId = mockTransactionStore.getBookings()[0].bookingId;
+
+    // Create adapter that fails on subsequent getPayment calls
+    const adapter = new MockPaymentAdapter({ now: () => new Date(baseNow) });
+    const origGetPayment = adapter.getPayment.bind(adapter);
+    let callCount = 0;
+    adapter.getPayment = async (id: string) => {
+      callCount++;
+      if (callCount > 1) {
+        throw new Error("Network error");
+      }
+      return origGetPayment(id);
+    };
+
+    const { container } = await renderPayment(bId, { adapter });
+    expect(container.textContent).toContain("Konfirmasi Pembayaran");
+
+    // Advance client timer by 15 mins so countdown hits zero, but freeze system time for store check or check unexpired store record
+    await act(async () => {
+      vi.advanceTimersByTime(15 * 60 * 1000);
+    });
+
+    // Should show recoverable error notice without falsely stating expired
+    expect(container.textContent).toContain(
+      "Status pembayaran belum bisa diverifikasi. Coba lagi.",
+    );
+    expect(container.textContent).not.toContain(
+      "Waktu pembayaran telah habis.",
+    );
+    expect(container.textContent).toContain("Rp550.000");
+
+    // Reservation is still held in store
+    const booking = mockTransactionStore.getBookingById(bId);
+    expect(booking?.status).toBe("PENDING_PAYMENT");
+    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1", baseNow)).toBe(
+      2,
+    );
+  });
+
+  it("G. paid /payment direct reopen → result recovery, not 'Pembayaran tidak ditemukan'", async () => {
+    const traveler: AuthUser = {
+      id: "usr_reopen_paid",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_reopen",
+    });
+
+    const bId = mockTransactionStore.getBookings()[0].bookingId;
+    mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+    // Open /payment/:bookingId directly
+    const { container, getPath } = await renderPayment(bId);
+
+    expect(getPath()).toBe(`/payment/${bId}/result`);
+    expect(container.textContent).toContain("Pembayaran Berhasil");
+    expect(container.textContent).not.toContain("Pembayaran tidak ditemukan.");
+  });
+
+  it("H. pending result URL → not falsely FAILED", async () => {
+    const traveler: AuthUser = {
+      id: "usr_pending_res",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_pend_res",
+    });
+
+    const bId = mockTransactionStore.getBookings()[0].bookingId;
+
+    const { container } = await renderPayment(bId, {}, [
+      `/payment/${bId}/result`,
+    ]);
+
+    expect(container.textContent).toContain("Pembayaran Belum Selesai");
+    expect(container.textContent).not.toContain("Pembayaran Gagal");
+    expect(container.textContent).toContain("Lanjutkan Pembayaran");
+  });
 });

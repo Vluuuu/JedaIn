@@ -84,11 +84,19 @@ describe("Reviews Feature (T19 & T20) Tests", () => {
     };
     sessionStore.setUser(traveler);
 
-    const bId = DEMO_TRAVELER_HISTORY.bookingId;
+    const bId = `bk_demo_completed_${traveler.id}`;
     const { container, getPath } = await renderReview(bId, "destination");
 
     expect(container.textContent).toContain("Nilai Destinasi");
     expect(container.textContent).toContain("Kirim Penilaian Destinasi");
+
+    // Select star rating (e.g. 5)
+    const star5Btn = Array.from(
+      container.querySelectorAll(".review-star-btn"),
+    )[4] as HTMLButtonElement;
+    await act(async () => {
+      star5Btn.click();
+    });
 
     // Click submit
     const submitBtn = Array.from(container.querySelectorAll("button")).find(
@@ -118,11 +126,19 @@ describe("Reviews Feature (T19 & T20) Tests", () => {
     };
     sessionStore.setUser(traveler);
 
-    const bId = DEMO_TRAVELER_HISTORY.bookingId;
+    const bId = `bk_demo_completed_${traveler.id}`;
     const { container, getPath } = await renderReview(bId, "eo");
 
     expect(container.textContent).toContain("Nilai EO / Guide");
     expect(container.textContent).toContain("Kirim Penilaian EO");
+
+    // Select star rating (e.g. 4)
+    const star4Btn = Array.from(
+      container.querySelectorAll(".review-star-btn"),
+    )[3] as HTMLButtonElement;
+    await act(async () => {
+      star4Btn.click();
+    });
 
     const submitBtn = Array.from(container.querySelectorAll("button")).find(
       (b) => b.textContent?.includes("Kirim Penilaian EO"),
@@ -167,5 +183,171 @@ describe("Reviews Feature (T19 & T20) Tests", () => {
     expect(
       mockReviewStore.getReviewsForOrganizer("org_lereng_guide").length,
     ).toBe(1);
+  });
+
+  it("P. wrong owner review context is blocked (returns null)", async () => {
+    const travelerA: AuthUser = {
+      id: "usr_rev_owner_A",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerA);
+
+    const bId = `bk_demo_completed_${travelerA.id}`;
+    const adapter = new MockReviewAdapter();
+
+    // Context valid for Traveler A
+    const ctxA = await adapter.getReviewContext(bId, "DESTINATION");
+    expect(ctxA).not.toBeNull();
+
+    // Switch to Traveler B -> context blocked
+    const travelerB: AuthUser = {
+      id: "usr_rev_owner_B",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerB);
+
+    const ctxB = await adapter.getReviewContext(bId, "DESTINATION");
+    expect(ctxB).toBeNull();
+  });
+
+  it("Q. wrong owner submit creates zero reviews", async () => {
+    const travelerA: AuthUser = {
+      id: "usr_rev_owner_A",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerA);
+    const bId = `bk_demo_completed_${travelerA.id}`;
+
+    // Switch to Traveler B
+    const travelerB: AuthUser = {
+      id: "usr_rev_owner_B",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(travelerB);
+
+    const adapter = new MockReviewAdapter();
+    const res = await adapter.submitReview({
+      bookingId: bId,
+      targetType: "DESTINATION",
+      rating: 5,
+    });
+
+    expect(res.success).toBe(false);
+    expect(mockReviewStore.getAllReviews().length).toBe(0);
+  });
+
+  it("R, S, T. rating 0, 6, and non-integer 1.5 are rejected with zero review created", async () => {
+    const traveler: AuthUser = {
+      id: "usr_rating_val",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+    const bId = `bk_demo_completed_${traveler.id}`;
+    const adapter = new MockReviewAdapter();
+
+    // R: rating 0
+    const res0 = await adapter.submitReview({
+      bookingId: bId,
+      targetType: "DESTINATION",
+      rating: 0,
+    });
+    expect(res0.success).toBe(false);
+
+    // S: rating 6
+    const res6 = await adapter.submitReview({
+      bookingId: bId,
+      targetType: "DESTINATION",
+      rating: 6,
+    });
+    expect(res6.success).toBe(false);
+
+    // T: non-integer 1.5
+    const resFloat = await adapter.submitReview({
+      bookingId: bId,
+      targetType: "DESTINATION",
+      rating: 1.5,
+    });
+    expect(resFloat.success).toBe(false);
+
+    expect(mockReviewStore.getAllReviews().length).toBe(0);
+  });
+
+  it("U. valid integer ratings 1–5 succeed", async () => {
+    const traveler: AuthUser = {
+      id: "usr_valid_rating",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+    const bId = `bk_demo_completed_${traveler.id}`;
+    const adapter = new MockReviewAdapter();
+
+    const res = await adapter.submitReview({
+      bookingId: bId,
+      targetType: "DESTINATION",
+      rating: 4,
+      comment: "Bagus sekali",
+    });
+
+    expect(res.success).toBe(true);
+    expect(mockReviewStore.getReviewsForBooking(bId).length).toBe(1);
+    expect(mockReviewStore.getReviewsForBooking(bId)[0].rating).toBe(4);
+  });
+
+  it("V. duplicate same target submission is idempotent for same owner", async () => {
+    const traveler: AuthUser = {
+      id: "usr_idemp_rev",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+    const bId = `bk_demo_completed_${traveler.id}`;
+    const adapter = new MockReviewAdapter();
+
+    const res1 = await adapter.submitReview({
+      bookingId: bId,
+      targetType: "DESTINATION",
+      rating: 5,
+      comment: "First",
+    });
+    expect(res1.success).toBe(true);
+
+    const res2 = await adapter.submitReview({
+      bookingId: bId,
+      targetType: "DESTINATION",
+      rating: 5,
+      comment: "Retry",
+    });
+    expect(res2.success).toBe(true);
+
+    expect(mockReviewStore.getReviewsForBooking(bId).length).toBe(1);
+  });
+
+  it("W. destination and EO reviews remain separate records", async () => {
+    const traveler: AuthUser = {
+      id: "usr_sep_rev",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+    const bId = `bk_demo_completed_${traveler.id}`;
+    const adapter = new MockReviewAdapter();
+
+    await adapter.submitReview({
+      bookingId: bId,
+      targetType: "DESTINATION",
+      rating: 5,
+    });
+
+    await adapter.submitReview({
+      bookingId: bId,
+      targetType: "EO_GUIDE",
+      rating: 4,
+    });
+
+    expect(mockReviewStore.hasReviewForBookingTarget(bId, "DESTINATION")).toBe(
+      true,
+    );
+    expect(mockReviewStore.hasReviewForBookingTarget(bId, "EO_GUIDE")).toBe(
+      true,
+    );
+    expect(mockReviewStore.getReviewsForBooking(bId).length).toBe(2);
   });
 });

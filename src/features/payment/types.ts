@@ -18,6 +18,7 @@ export interface PaymentViewModel {
 
 export type PaymentResultStatus =
   | "SUCCESS"
+  | "PENDING"
   | "FAILED"
   | "EXPIRED"
   | "CANCELLED"

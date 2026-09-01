@@ -54,14 +54,34 @@ export const mockReviewStore = {
     targetRef: string;
     rating: number;
     comment?: string;
-  }): { success: boolean; review: ReviewRecord } {
+  }): { success: boolean; review?: ReviewRecord; message?: string } {
+    if (
+      typeof params.rating !== "number" ||
+      !Number.isInteger(params.rating) ||
+      params.rating < 1 ||
+      params.rating > 5
+    ) {
+      return {
+        success: false,
+        message: "Rating harus berupa angka bulat antara 1 dan 5.",
+      };
+    }
+
     const existing = reviews.find(
       (r) =>
         r.bookingId === params.bookingId && r.targetType === params.targetType,
     );
 
     if (existing) {
-      return { success: true, review: existing };
+      // If same traveler retries, return existing idempotent review
+      if (existing.travelerId === params.travelerId) {
+        return { success: true, review: existing };
+      }
+      // Different traveler attempting to overwrite/benefit from another traveler's review
+      return {
+        success: false,
+        message: "Review untuk booking ini sudah ada dari traveler lain.",
+      };
     }
 
     const review: ReviewRecord = {
@@ -70,7 +90,7 @@ export const mockReviewStore = {
       travelerId: params.travelerId,
       targetType: params.targetType,
       targetRef: params.targetRef,
-      rating: Math.max(1, Math.min(5, Math.floor(params.rating))),
+      rating: params.rating,
       comment: params.comment?.trim() || undefined,
       createdAt: new Date().toISOString(),
     };

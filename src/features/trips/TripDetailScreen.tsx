@@ -236,6 +236,109 @@ export function TripDetailScreen({
               </ul>
             </div>
           )}
+
+          {/* Itinerary */}
+          {detail.itinerary && detail.itinerary.length > 0 && (
+            <div style={{ marginTop: "1.25rem" }}>
+              <strong
+                style={{
+                  fontSize: "0.875rem",
+                  display: "block",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Rencana Perjalanan (Itinerary):
+              </strong>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                }}
+              >
+                {detail.itinerary.map((item) => (
+                  <div
+                    key={item.order}
+                    style={{
+                      fontSize: "0.875rem",
+                      padding: "0.5rem 0.75rem",
+                      backgroundColor: "var(--color-bg-subtle, #f9fafb)",
+                      borderRadius: "0.375rem",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        color: "var(--color-text-primary)",
+                      }}
+                    >
+                      {item.title}
+                    </div>
+                    <p
+                      style={{
+                        margin: "0.25rem 0 0",
+                        color: "var(--color-text-secondary)",
+                        fontSize: "0.8125rem",
+                      }}
+                    >
+                      {item.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Included Items */}
+          {detail.includedItems && detail.includedItems.length > 0 && (
+            <div style={{ marginTop: "1.25rem" }}>
+              <strong
+                style={{
+                  fontSize: "0.875rem",
+                  display: "block",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Termasuk dalam Paket:
+              </strong>
+              <ul
+                style={{
+                  paddingLeft: "1.25rem",
+                  margin: 0,
+                  fontSize: "0.875rem",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                {detail.includedItems.map((inc, i) => (
+                  <li key={i}>{inc}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Cancellation Policy Summary */}
+          {detail.cancellationPolicySummary && (
+            <div style={{ marginTop: "1.25rem" }}>
+              <strong
+                style={{
+                  fontSize: "0.875rem",
+                  display: "block",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Kebijakan Pembatalan:
+              </strong>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "0.875rem",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                {detail.cancellationPolicySummary}
+              </p>
+            </div>
+          )}
         </section>
       )}
     </div>

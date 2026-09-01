@@ -63,7 +63,11 @@ export class MockPaymentAdapter implements PaymentAdapter {
       return { state: "EXPIRED", booking };
     }
 
-    if (booking.status === "CANCELLED" || booking.status === "PAID") {
+    if (booking.status === "CANCELLED") {
+      return { state: "NOT_FOUND", booking };
+    }
+
+    if (booking.status === "PAID" || booking.status === "COMPLETED") {
       return { state: "NOT_FOUND", booking };
     }
 
@@ -88,6 +92,24 @@ export class MockPaymentAdapter implements PaymentAdapter {
   async executePayment(bookingId: string): Promise<PaymentExecuteResult> {
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
+    }
+
+    const traveler = sessionStore.get().user;
+    if (!traveler) {
+      return {
+        success: false,
+        status: "FAILED",
+        message: "Pengguna belum terautentikasi.",
+      };
+    }
+
+    const booking = mockTransactionStore.getBookingById(bookingId);
+    if (!booking || booking.travelerId !== traveler.id) {
+      return {
+        success: false,
+        status: "FAILED",
+        message: "Pesanan tidak ditemukan atau bukan milik pengguna.",
+      };
     }
 
     if (this.failExecuteCount > 0) {
@@ -124,7 +146,7 @@ export class MockPaymentAdapter implements PaymentAdapter {
       return {
         success: false,
         status: "FAILED",
-        message: "Pesanan tidak ditemukan.",
+        message: "Pesanan tidak dapat diproses.",
       };
     }
 
@@ -205,7 +227,14 @@ export class MockPaymentAdapter implements PaymentAdapter {
       return { status: "FAILED", booking, package: pkg, session };
     }
 
-    return { status: "FAILED", booking, package: pkg, session };
+    if (
+      booking.status === "PENDING_PAYMENT" &&
+      (attempt?.status === "PENDING" || attempt?.status === "VERIFYING")
+    ) {
+      return { status: "PENDING", booking, package: pkg, session };
+    }
+
+    return { status: "ERROR", booking, package: pkg, session };
   }
 }
 

@@ -26,7 +26,7 @@ export function TripReviewScreen({
 
   const [isLoading, setIsLoading] = useState(true);
   const [context, setContext] = useState<TripReviewViewModel | null>(null);
-  const [rating, setRating] = useState<number>(5);
+  const [rating, setRating] = useState<number | undefined>(undefined);
   const [comment, setComment] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -59,6 +59,16 @@ export function TripReviewScreen({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bookingId || isSubmitting) return;
+
+    if (
+      rating === undefined ||
+      !Number.isInteger(rating) ||
+      rating < 1 ||
+      rating > 5
+    ) {
+      setErrorMessage("Silakan pilih rating bintang terlebih dahulu.");
+      return;
+    }
 
     setIsSubmitting(true);
     setErrorMessage(undefined);
@@ -172,7 +182,7 @@ export function TripReviewScreen({
                 role="radio"
                 aria-checked={rating === val}
                 aria-label={`${val} bintang`}
-                className={`review-star-btn ${rating >= val ? "review-star-btn--filled" : ""}`}
+                className={`review-star-btn ${rating !== undefined && rating >= val ? "review-star-btn--filled" : ""}`}
                 onClick={() => setRating(val)}
                 disabled={context.alreadyReviewed}
               >
@@ -180,7 +190,11 @@ export function TripReviewScreen({
               </button>
             ))}
           </div>
-          <span className="review-rating-hint">{rating} dari 5 bintang</span>
+          <span className="review-rating-hint">
+            {rating !== undefined
+              ? `${rating} dari 5 bintang`
+              : "Belum ada bintang dipilih"}
+          </span>
         </div>
 
         {/* Comment Textarea */}

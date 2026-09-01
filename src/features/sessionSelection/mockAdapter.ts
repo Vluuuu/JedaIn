@@ -1,3 +1,4 @@
+import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import type {
   PackageDetailSource,
@@ -44,6 +45,29 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
     this.errorMessage = options.errorMessage ?? "Jadwal belum bisa dimuat.";
   }
 
+  private resolveEffectiveSessions(
+    packageId: string,
+    rawSessions: PackageSessionPreview[],
+  ): PackageSessionPreview[] {
+    const isOverridden = Boolean(this.sessionOverrides[packageId]);
+
+    return rawSessions.map((s) => {
+      // Clone snapshot
+      const clone = { ...s };
+      if (!isOverridden && clone.remainingSlots !== undefined) {
+        const occupied = mockTransactionStore.getOccupiedQuantity(
+          clone.sessionId,
+        );
+        const effective = Math.max(0, clone.remainingSlots - occupied);
+        clone.remainingSlots = effective;
+        if (effective === 0 && clone.status === "OPEN") {
+          clone.status = "FULL";
+        }
+      }
+      return clone;
+    });
+  }
+
   async getPackageSessions(
     packageId: string,
   ): Promise<SessionSelectionViewModel> {
@@ -77,8 +101,13 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
     const rawSessions =
       this.sessionOverrides[packageId] ?? detail.upcomingSessionPreviews ?? [];
 
+    const effectiveSessions = this.resolveEffectiveSessions(
+      packageId,
+      rawSessions,
+    );
+
     // Filter out sessions that do not match packageId OR are CANCELLED
-    const validSessions = rawSessions.filter(
+    const validSessions = effectiveSessions.filter(
       (s) => s.packageId === packageId && s.status !== "CANCELLED",
     );
 
@@ -122,10 +151,17 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
     }
 
     const detail = this.details[packageId];
-    const sessions =
+    const rawSessions =
       this.sessionOverrides[packageId] ?? detail?.upcomingSessionPreviews ?? [];
 
-    const targetSession = sessions.find((s) => s.sessionId === sessionId);
+    const effectiveSessions = this.resolveEffectiveSessions(
+      packageId,
+      rawSessions,
+    );
+
+    const targetSession = effectiveSessions.find(
+      (s) => s.sessionId === sessionId,
+    );
 
     if (!targetSession) {
       return {

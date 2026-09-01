@@ -2,7 +2,7 @@ import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { sessionStore } from "../onboarding/sessionStore";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
-import { DEMO_TRAVELER_HISTORY } from "../trips/demoHistory";
+import { createDemoTravelerHistory } from "../trips/demoHistory";
 import { mockReviewStore, type ReviewTargetType } from "./mockReviewStore";
 import type { ReviewAdapter, TripReviewViewModel } from "./types";
 
@@ -15,11 +15,16 @@ export class MockReviewAdapter implements ReviewAdapter {
     if (!traveler) return null;
 
     let booking = mockTransactionStore.getBookingById(bookingId);
-    if (!booking && bookingId === DEMO_TRAVELER_HISTORY.bookingId) {
-      booking = DEMO_TRAVELER_HISTORY;
+    const demoBooking = createDemoTravelerHistory(traveler.id);
+    if (!booking && bookingId === demoBooking.bookingId) {
+      booking = demoBooking;
     }
 
-    if (!booking || booking.status !== "COMPLETED") {
+    if (
+      !booking ||
+      booking.travelerId !== traveler.id ||
+      booking.status !== "COMPLETED"
+    ) {
       return null;
     }
 
@@ -65,12 +70,30 @@ export class MockReviewAdapter implements ReviewAdapter {
       return { success: false, message: "Pengguna belum terautentikasi." };
     }
 
-    let booking = mockTransactionStore.getBookingById(params.bookingId);
-    if (!booking && params.bookingId === DEMO_TRAVELER_HISTORY.bookingId) {
-      booking = DEMO_TRAVELER_HISTORY;
+    // Rating validation: must be an integer between 1 and 5
+    if (
+      typeof params.rating !== "number" ||
+      !Number.isInteger(params.rating) ||
+      params.rating < 1 ||
+      params.rating > 5
+    ) {
+      return {
+        success: false,
+        message: "Rating harus berupa angka bulat antara 1 dan 5.",
+      };
     }
 
-    if (!booking || booking.status !== "COMPLETED") {
+    let booking = mockTransactionStore.getBookingById(params.bookingId);
+    const demoBooking = createDemoTravelerHistory(traveler.id);
+    if (!booking && params.bookingId === demoBooking.bookingId) {
+      booking = demoBooking;
+    }
+
+    if (
+      !booking ||
+      booking.travelerId !== traveler.id ||
+      booking.status !== "COMPLETED"
+    ) {
       return {
         success: false,
         message: "Hanya trip yang telah selesai yang dapat dinilai.",
@@ -87,7 +110,7 @@ export class MockReviewAdapter implements ReviewAdapter {
         ? (pkg?.destinationName ?? booking.packageId)
         : (detail?.organizer.id ?? "org_default");
 
-    mockReviewStore.submitReview({
+    const result = mockReviewStore.submitReview({
       bookingId: params.bookingId,
       travelerId: traveler.id,
       targetType: params.targetType,
@@ -95,6 +118,13 @@ export class MockReviewAdapter implements ReviewAdapter {
       rating: params.rating,
       comment: params.comment,
     });
+
+    if (!result.success) {
+      return {
+        success: false,
+        message: result.message ?? "Penilaian tidak valid.",
+      };
+    }
 
     return { success: true };
   }

@@ -43,6 +43,10 @@ export function PaymentScreen({
       .then((res) => {
         if (!isMounted) return;
         setIsLoading(false);
+        if (res.booking && res.booking.status === "PAID") {
+          navigate(`/payment/${bookingId}/result`, { replace: true });
+          return;
+        }
         setState(res.state);
         setViewModel(res);
         if (res.expiresAt && res.serverNow) {
@@ -62,7 +66,7 @@ export function PaymentScreen({
     return () => {
       isMounted = false;
     };
-  }, [bookingId, adapter]);
+  }, [bookingId, adapter, navigate]);
 
   // Countdown timer effect
   useEffect(() => {
@@ -84,10 +88,16 @@ export function PaymentScreen({
             .then((res) => {
               if (res.state === "EXPIRED") {
                 setState("EXPIRED");
+              } else if (res.state === "ACTIVE") {
+                setState(res.state);
+                setViewModel(res);
               }
             })
             .catch(() => {
-              setState("EXPIRED");
+              // Network/revalidation error: do NOT claim expired or slot released
+              setErrorMessage(
+                "Status pembayaran belum bisa diverifikasi. Coba lagi.",
+              );
             });
         }
       }

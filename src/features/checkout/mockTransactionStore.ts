@@ -140,7 +140,7 @@ export const mockTransactionStore = {
 
   executePaymentSuccess(params: { bookingId: string; nowMs?: number }): {
     success: boolean;
-    reason?: "NOT_FOUND" | "EXPIRED" | "ALREADY_PAID";
+    reason?: "NOT_FOUND" | "EXPIRED" | "ALREADY_PAID" | "INVALID_STATE";
     booking?: BookingRecord;
   } {
     const nowMs = params.nowMs ?? Date.now();
@@ -163,15 +163,32 @@ export const mockTransactionStore = {
       return { success: false, reason: "NOT_FOUND", booking };
     }
 
+    if (booking.status !== "PENDING_PAYMENT") {
+      return { success: false, reason: "INVALID_STATE", booking };
+    }
+
+    const attempt = paymentAttempts.find(
+      (p) => p.bookingId === booking.bookingId,
+    );
+    if (!attempt) {
+      return { success: false, reason: "INVALID_STATE", booking };
+    }
+
+    // attempt must be in an active/retry state (PENDING, VERIFYING, or FAILED for retry)
+    if (
+      attempt.status !== "PENDING" &&
+      attempt.status !== "VERIFYING" &&
+      attempt.status !== "FAILED"
+    ) {
+      return { success: false, reason: "INVALID_STATE", booking };
+    }
+
     const expTime = new Date(booking.paymentExpiresAt).getTime();
     if (nowMs >= expTime) {
       booking.status = "EXPIRED";
       booking.reservedQuantity = 0;
       booking.bookedQuantity = 0;
-      const attempt = paymentAttempts.find(
-        (p) => p.bookingId === booking.bookingId,
-      );
-      if (attempt) attempt.status = "EXPIRED";
+      attempt.status = "EXPIRED";
       return { success: false, reason: "EXPIRED", booking };
     }
 
@@ -181,20 +198,15 @@ export const mockTransactionStore = {
     booking.bookedQuantity = booking.participantCount;
     booking.paidAt = new Date(nowMs).toISOString();
 
-    const attempt = paymentAttempts.find(
-      (p) => p.bookingId === booking.bookingId,
-    );
-    if (attempt) {
-      attempt.status = "SUCCEEDED";
-      attempt.updatedAt = new Date(nowMs).toISOString();
-    }
+    attempt.status = "SUCCEEDED";
+    attempt.updatedAt = new Date(nowMs).toISOString();
 
     return { success: true, booking };
   },
 
   executePaymentFailure(params: { bookingId: string; nowMs?: number }): {
     success: boolean;
-    reason?: "NOT_FOUND" | "EXPIRED";
+    reason?: "NOT_FOUND" | "EXPIRED" | "INVALID_STATE";
     booking?: BookingRecord;
   } {
     const nowMs = params.nowMs ?? Date.now();
@@ -205,17 +217,32 @@ export const mockTransactionStore = {
       return { success: false, reason: "NOT_FOUND" };
     }
 
-    if (booking.status === "EXPIRED") {
-      return { success: false, reason: "EXPIRED", booking };
+    // Must NOT mutate PAID, COMPLETED, CANCELLED, EXPIRED into FAILED
+    if (booking.status !== "PENDING_PAYMENT") {
+      if (booking.status === "EXPIRED") {
+        return { success: false, reason: "EXPIRED", booking };
+      }
+      return { success: false, reason: "INVALID_STATE", booking };
     }
 
     const attempt = paymentAttempts.find(
       (p) => p.bookingId === booking.bookingId,
     );
-    if (attempt) {
-      attempt.status = "FAILED";
-      attempt.updatedAt = new Date(nowMs).toISOString();
+    if (!attempt) {
+      return { success: false, reason: "INVALID_STATE", booking };
     }
+
+    const expTime = new Date(booking.paymentExpiresAt).getTime();
+    if (nowMs >= expTime) {
+      booking.status = "EXPIRED";
+      booking.reservedQuantity = 0;
+      booking.bookedQuantity = 0;
+      attempt.status = "EXPIRED";
+      return { success: false, reason: "EXPIRED", booking };
+    }
+
+    attempt.status = "FAILED";
+    attempt.updatedAt = new Date(nowMs).toISOString();
 
     return { success: true, booking };
   },
@@ -226,7 +253,12 @@ export const mockTransactionStore = {
     nowMs?: number;
   }): {
     success: boolean;
-    reason?: "NOT_FOUND" | "EXPIRED" | "ALREADY_RESOLVED" | "INVALID_OWNER";
+    reason?:
+      | "NOT_FOUND"
+      | "EXPIRED"
+      | "ALREADY_RESOLVED"
+      | "INVALID_OWNER"
+      | "INVALID_STATE";
     booking?: BookingRecord;
   } {
     const nowMs = params.nowMs ?? Date.now();
@@ -241,12 +273,20 @@ export const mockTransactionStore = {
       return { success: false, reason: "INVALID_OWNER" };
     }
 
+    if (booking.status === "PAID" || booking.status === "COMPLETED") {
+      return { success: false, reason: "INVALID_STATE", booking };
+    }
+
     if (booking.status === "CANCELLED") {
       return { success: true, booking, reason: "ALREADY_RESOLVED" };
     }
 
     if (booking.status === "EXPIRED") {
       return { success: false, reason: "EXPIRED", booking };
+    }
+
+    if (booking.status !== "PENDING_PAYMENT") {
+      return { success: false, reason: "INVALID_STATE", booking };
     }
 
     // Check expiry race

@@ -29,7 +29,6 @@ export function EoPackageBuilderScreen() {
 
   const partner = partnerSessionStore.get();
   const eoId = partner?.id ?? "eo_jeda_alam";
-  const eoDisplayName = partner?.businessName ?? "Jeda Alam Nusantara";
   const guideStatus = partner?.guideStatus ?? "CERTIFIED_GUIDE";
 
   // Ownership security check for editing drafts: must belong to current EO
@@ -149,8 +148,6 @@ export function EoPackageBuilderScreen() {
 
     const res = mockEoPackageStore.saveDraft({
       packageId,
-      eoId,
-      eoDisplayName,
       title,
       shortSummary,
       valueProposition: shortSummary,
@@ -158,14 +155,12 @@ export function EoPackageBuilderScreen() {
       insightId: selectedInsightId,
       durationLabel,
       itinerary,
-      safetyNotes:
-        splitSafety.length > 0 ? splitSafety : ["Gunakan sepatu yang nyaman."],
+      safetyNotes: splitSafety,
       pricing: {
         destinationBaseCost: baseCost,
         eoMargin,
         customerPrice,
       },
-      guideStatus,
     });
     if (res.success && res.package && !packageId) {
       setPackageId(res.package.packageId);
@@ -233,11 +228,7 @@ export function EoPackageBuilderScreen() {
       return;
     }
 
-    const res = mockEoPackageStore.submitForReview(
-      draft.packageId,
-      eoId,
-      guideStatus,
-    );
+    const res = mockEoPackageStore.submitForReview(draft.packageId);
 
     setIsSubmitting(false);
 

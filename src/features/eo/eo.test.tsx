@@ -138,6 +138,29 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "APPROVED",
       );
     });
+
+    it("D2. APPROVED application resubmit cannot become PENDING_REVIEW (prevents self-demotion)", () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const res = mockApplicationStore.submitApplication({
+        identityId: "eo_jeda_alam", // Already APPROVED
+        businessName: "Jeda Alam Nusantara",
+        contactPerson: "Budi Santoso",
+        phone: "081234567890",
+        email: "partner@jedaalam.id",
+        province: "Jawa Timur",
+        city: "Malang",
+        experienceDescription: "Resubmit attempt",
+        yearsOfOperation: 5,
+        guideStatus: "CERTIFIED_GUIDE",
+        agreedToSop: true,
+      });
+
+      expect(res.success).toBe(false);
+      expect(res.message).toContain("sudah disetujui");
+      expect(mockApplicationStore.getBySellerId("eo_jeda_alam")?.status).toBe(
+        "APPROVED",
+      );
+    });
   });
 
   describe("2. Package Ownership & Draft Hijack Protection (E–H)", () => {
@@ -166,11 +189,12 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("bukan milik akun EO Anda");
     });
 
-    it("G. EO B saveDraft cannot overwrite EO A package", () => {
+    it("G. authenticated EO B saveDraft on EO A package fails even if caller supplies forged eoId", () => {
+      // Authenticate as EO B
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+
       const res = mockEoPackageStore.saveDraft({
         packageId: "slow_green_day",
-        eoId: "eo_kreatif_desa", // Foreign EO
-        eoDisplayName: "Ruang Kreatif Wellness",
         title: "Hijacked Title",
       });
 
@@ -183,23 +207,57 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(original?.eoId).toBe("eo_jeda_alam");
     });
 
-    it("H. EO B cannot submit EO A package for review", () => {
-      const res = mockEoPackageStore.submitForReview(
-        "slow_green_day",
-        "eo_kreatif_desa", // Foreign EO
-        "CONCEPT_ONLY",
-      );
+    it("H. authenticated EO B cannot submit EO A package for review", () => {
+      // Authenticate as EO B
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+
+      const res = mockEoPackageStore.submitForReview("slow_green_day");
 
       expect(res.success).toBe(false);
       expect(res.validationResult.valid).toBe(false);
     });
+
+    it("H2. authenticated Concept-Only EO cannot bypass guideReady rule by forging CERTIFIED_GUIDE in caller state", () => {
+      // Authenticate as Concept-Only EO (eo_kreatif_desa)
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+
+      // Save draft with non-guide-ready destination (dest_hutan_trawas)
+      const saveRes = mockEoPackageStore.saveDraft({
+        title: "Retreat Hening Bambu",
+        shortSummary: "Sesi hening di hutan bambu.",
+        destinationId: "dest_hutan_trawas", // guideReady: false!
+        durationLabel: "1 hari",
+        itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+        safetyNotes: ["Patuhi pemandu."],
+        pricing: {
+          destinationBaseCost: 95000,
+          eoMargin: 100000,
+          customerPrice: 195000,
+        },
+      });
+      expect(saveRes.success).toBe(true);
+
+      // Submit for review - must resolve guideStatus from authoritative store (CONCEPT_ONLY) and fail
+      const submitRes = mockEoPackageStore.submitForReview(
+        saveRes.package!.packageId,
+      );
+      expect(submitRes.success).toBe(false);
+      expect(submitRes.package?.status).toBe("DRAFT");
+      expect(
+        submitRes.validationResult.errors.some((e) =>
+          e.message.includes("Guide Ready"),
+        ),
+      ).toBe(true);
+    });
   });
 
   describe("3. Session Ownership & Immediate UI Update (I–K)", () => {
-    it("I. EO B cannot create session on EO A package", () => {
+    it("I. authenticated EO B cannot create session on EO A package", () => {
+      // Authenticate as EO B
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+
       const res = mockEoPackageStore.createSession({
-        packageId: "slow_green_day",
-        eoId: "eo_kreatif_desa", // Foreign EO
+        packageId: "slow_green_day", // belongs to eo_jeda_alam
         startAt: "2026-10-01T08:00:00Z",
         endAt: "2026-10-01T14:00:00Z",
         capacity: 6,
@@ -210,10 +268,12 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(res.message).toContain("bukan milik EO terautentikasi");
     });
 
-    it("J. EO B cannot mutate EO A session status", () => {
+    it("J. authenticated EO B cannot mutate EO A session status", () => {
+      // Authenticate as EO B
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+
       const ok = mockEoPackageStore.updateSessionStatus(
         "ses_sgd_1", // belongs to eo_jeda_alam
-        "eo_kreatif_desa", // Foreign EO
         "CLOSED",
       );
 
@@ -244,30 +304,24 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
   describe("4. Package Lifecycle Transitions (L–Q)", () => {
     it("L & M. LIVE or APPROVED package cannot be submitted for review", () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
       // slow_green_day is LIVE
-      const resLive = mockEoPackageStore.submitForReview(
-        "slow_green_day",
-        "eo_jeda_alam",
-        "CERTIFIED_GUIDE",
-      );
+      const resLive = mockEoPackageStore.submitForReview("slow_green_day");
       expect(resLive.success).toBe(false);
 
       // Set to APPROVED
       const pkg = mockEoPackageStore.getPackageById("slow_green_day")!;
       pkg.status = "APPROVED";
 
-      const resApproved = mockEoPackageStore.submitForReview(
-        "slow_green_day",
-        "eo_jeda_alam",
-        "CERTIFIED_GUIDE",
-      );
+      const resApproved = mockEoPackageStore.submitForReview("slow_green_day");
       expect(resApproved.success).toBe(false);
     });
 
     it("N, O, P, Q. Admin transition guards enforce strict lifecycle rules", () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
       const saveRes = mockEoPackageStore.saveDraft({
-        eoId: "eo_jeda_alam",
-        eoDisplayName: "Jeda Alam Nusantara",
         title: "Paket Tes Kurasi",
         shortSummary: "Ringkasan kurasi paket.",
         destinationId: "dest_lereng_hijau",
@@ -287,11 +341,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(mockEoPackageStore.makePackageLive(pId)).toBe(false);
 
       // Submit -> PENDING_ADMIN_REVIEW
-      mockEoPackageStore.submitForReview(
-        pId,
-        "eo_jeda_alam",
-        "CERTIFIED_GUIDE",
-      );
+      mockEoPackageStore.submitForReview(pId);
 
       // O: PENDING_ADMIN_REVIEW -> REJECTED allowed
       expect(mockEoPackageStore.rejectPackage(pId, "Alasan revisi")).toBe(true);
@@ -300,8 +350,6 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // Revise & submit again
       mockEoPackageStore.saveDraft({
         packageId: pId,
-        eoId: "eo_jeda_alam",
-        eoDisplayName: "Jeda Alam Nusantara",
         title: "Paket Revisi",
         shortSummary: "Ringkasan kurasi paket.",
         destinationId: "dest_lereng_hijau",
@@ -314,11 +362,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           customerPrice: 275000,
         },
       });
-      mockEoPackageStore.submitForReview(
-        pId,
-        "eo_jeda_alam",
-        "CERTIFIED_GUIDE",
-      );
+      mockEoPackageStore.submitForReview(pId);
 
       // N: PENDING_ADMIN_REVIEW -> APPROVED allowed
       expect(mockEoPackageStore.approvePackage(pId)).toBe(true);
@@ -420,7 +464,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(res.errors.some((e) => e.field === "destinationId")).toBe(true);
     });
 
-    it("V. missing duration or safety notes rejected", () => {
+    it("V. missing duration or cleared safety notes reaches validation and fails", () => {
       const res = validateEoPackage(
         {
           title: "Paket Tanpa Safety",
@@ -428,7 +472,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           destinationId: "dest_lereng_hijau",
           durationLabel: "", // Missing duration
           itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
-          safetyNotes: [], // Missing safety
+          safetyNotes: [], // Explicitly empty/cleared safety notes
           pricing: {
             destinationBaseCost: 125000,
             eoMargin: 150000,

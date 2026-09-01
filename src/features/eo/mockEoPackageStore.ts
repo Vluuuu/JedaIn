@@ -1,4 +1,6 @@
+import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
+import { partnerSessionStore } from "./partnerSessionStore";
 import type {
   EoGuideStatus,
   EoPackageRecord,
@@ -288,18 +290,34 @@ export const mockEoPackageStore = {
     return pkg ? clonePackage(pkg) : undefined;
   },
 
-  saveDraft(
-    draft: Partial<EoPackageRecord> & { eoId: string; eoDisplayName: string },
-  ): { success: boolean; package?: EoPackageRecord; message?: string } {
+  saveDraft(draft: Partial<EoPackageRecord>): {
+    success: boolean;
+    package?: EoPackageRecord;
+    message?: string;
+  } {
+    const actor = partnerSessionStore.get();
+    if (!actor || !actor.id) {
+      return {
+        success: false,
+        message: "Pengguna belum terautentikasi sebagai EO.",
+      };
+    }
+
+    const actorEoId = actor.id;
+    const actorDisplayName = actor.businessName || "EO Partner";
+    const app = mockApplicationStore.getBySellerId(actorEoId);
+    const authorGuideStatus: EoGuideStatus =
+      app?.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
+
     const nowIso = new Date().toISOString();
     const existingIndex = draft.packageId
       ? packages.findIndex((p) => p.packageId === draft.packageId)
       : -1;
 
-    // Check ownership & hijack prevention
+    // Check ownership & hijack prevention using authenticated actor
     if (existingIndex >= 0) {
       const existing = packages[existingIndex];
-      if (existing.eoId !== draft.eoId) {
+      if (existing.eoId !== actorEoId) {
         return {
           success: false,
           message: "Akses ditolak: Anda bukan pemilik paket ini.",
@@ -330,8 +348,8 @@ export const mockEoPackageStore = {
 
     const record: EoPackageRecord = {
       packageId,
-      eoId: draft.eoId,
-      eoDisplayName: draft.eoDisplayName,
+      eoId: actorEoId,
+      eoDisplayName: actorDisplayName,
       title: draft.title || "",
       shortSummary: draft.shortSummary || "",
       valueProposition: draft.valueProposition || draft.shortSummary || "",
@@ -354,16 +372,19 @@ export const mockEoPackageStore = {
         "Transportasi ke titik kumpul",
         "Pengeluaran pribadi",
       ],
-      safetyNotes: draft.safetyNotes || [
-        "Kenakan alas kaki yang nyaman.",
-        "Patuhi arahan pemandu selama kegiatan.",
-      ],
+      safetyNotes:
+        draft.safetyNotes !== undefined
+          ? draft.safetyNotes
+          : [
+              "Kenakan alas kaki yang nyaman.",
+              "Patuhi arahan pemandu selama kegiatan.",
+            ],
       pricing: {
         destinationBaseCost: baseCost,
         eoMargin: margin,
         customerPrice,
       },
-      guideStatus: draft.guideStatus || "CERTIFIED_GUIDE",
+      guideStatus: authorGuideStatus,
       status: "DRAFT",
       createdAt:
         existingIndex >= 0 ? packages[existingIndex].createdAt : nowIso,
@@ -379,18 +400,36 @@ export const mockEoPackageStore = {
     return { success: true, package: clonePackage(record) };
   },
 
-  submitForReview(
-    packageId: string,
-    eoId: string,
-    eoGuideStatus: EoGuideStatus,
-  ): {
+  submitForReview(packageId: string): {
     success: boolean;
     package?: EoPackageRecord;
     validationResult: EoValidationResult;
     message?: string;
   } {
+    const actor = partnerSessionStore.get();
+    if (!actor || !actor.id) {
+      return {
+        success: false,
+        validationResult: {
+          valid: false,
+          errors: [
+            {
+              step: 1,
+              field: "auth",
+              message: "Pengguna belum terautentikasi sebagai EO.",
+            },
+          ],
+        },
+      };
+    }
+
+    const actorEoId = actor.id;
+    const app = mockApplicationStore.getBySellerId(actorEoId);
+    const authorGuideStatus: EoGuideStatus =
+      app?.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
+
     const pkg = packages.find((p) => p.packageId === packageId);
-    if (!pkg || pkg.eoId !== eoId) {
+    if (!pkg || pkg.eoId !== actorEoId) {
       return {
         success: false,
         validationResult: {
@@ -434,7 +473,7 @@ export const mockEoPackageStore = {
       };
     }
 
-    const validationResult = validateEoPackage(pkg, eoGuideStatus);
+    const validationResult = validateEoPackage(pkg, authorGuideStatus);
     pkg.validationResult = validationResult;
     pkg.updatedAt = new Date().toISOString();
 
@@ -496,14 +535,22 @@ export const mockEoPackageStore = {
 
   createSession(input: {
     packageId: string;
-    eoId: string;
     startAt: string;
     endAt: string;
     capacity: number;
     pricePerPerson: number;
   }): { success: boolean; session?: EoSessionRecord; message?: string } {
+    const actor = partnerSessionStore.get();
+    if (!actor || !actor.id) {
+      return {
+        success: false,
+        message: "Pengguna belum terautentikasi sebagai EO.",
+      };
+    }
+
+    const actorEoId = actor.id;
     const pkg = packages.find((p) => p.packageId === input.packageId);
-    if (!pkg || pkg.eoId !== input.eoId) {
+    if (!pkg || pkg.eoId !== actorEoId) {
       return {
         success: false,
         message: "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
@@ -542,11 +589,13 @@ export const mockEoPackageStore = {
 
   updateSessionStatus(
     sessionId: string,
-    eoId: string,
     status: "OPEN" | "FULL" | "CLOSED" | "CANCELLED",
   ): boolean {
+    const actor = partnerSessionStore.get();
+    if (!actor || !actor.id) return false;
+
     const s = sessions.find(
-      (item) => item.sessionId === sessionId && item.eoId === eoId,
+      (item) => item.sessionId === sessionId && item.eoId === actor.id,
     );
     if (!s) return false;
     s.status = status;

@@ -140,10 +140,30 @@ export const mockApplicationStore = {
       };
     }
 
-    // Check if application already exists for this identity (e.g. re-submitting after rejection)
+    // Check if application already exists for this identity
     const existingIndex = applications.findIndex(
       (a) => a.identityId === input.identityId,
     );
+
+    if (existingIndex >= 0) {
+      const existing = applications[existingIndex];
+      // Prevent self-demotion or duplicate submissions
+      if (existing.status === "APPROVED") {
+        return {
+          success: false,
+          message:
+            "Aplikasi kemitraan Anda sudah disetujui (APPROVED) dan tidak dapat diajukan ulang.",
+        };
+      }
+      if (existing.status === "PENDING_REVIEW") {
+        return {
+          success: false,
+          message:
+            "Aplikasi kemitraan Anda sedang dalam proses kurasi (PENDING_REVIEW).",
+        };
+      }
+    }
+
     const nowIso = new Date().toISOString();
 
     const application: EoApplicationRecord = {

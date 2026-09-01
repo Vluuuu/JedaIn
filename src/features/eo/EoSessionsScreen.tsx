@@ -80,7 +80,6 @@ export function EoSessionsScreen() {
 
     const res = mockEoPackageStore.createSession({
       packageId: selectedPackageId,
-      eoId,
       startAt: startIso,
       endAt: endIso,
       capacity,
@@ -99,11 +98,7 @@ export function EoSessionsScreen() {
     sessionId: string,
     newStatus: "OPEN" | "CLOSED",
   ) => {
-    const ok = mockEoPackageStore.updateSessionStatus(
-      sessionId,
-      eoId,
-      newStatus,
-    );
+    const ok = mockEoPackageStore.updateSessionStatus(sessionId, newStatus);
     if (ok) {
       setRefreshVersion((v) => v + 1);
     }

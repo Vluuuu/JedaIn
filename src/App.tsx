@@ -9,6 +9,21 @@ import {
   partnerDestinationNavigation,
   partnerEoNavigation,
 } from "./components/shells";
+import {
+  AdminAuditActivityScreen,
+  AdminBookingsScreen,
+  AdminComplaintsScreen,
+  AdminDestinationVerificationDetailScreen,
+  AdminDestinationVerificationsScreen,
+  AdminEoApplicationReviewScreen,
+  AdminEoApprovalsScreen,
+  AdminLoginScreen,
+  AdminOverviewScreen,
+  AdminPackageApprovalsScreen,
+  AdminPackageReviewChecklistScreen,
+  AdminRouteGuard,
+  AdminTrustStatusScreen,
+} from "./features/admin";
 import { TravelerLoginScreen } from "./features/auth";
 import { CheckoutScreen } from "./features/checkout";
 import { ContactVerificationScreen } from "./features/contactVerification";
@@ -59,21 +74,6 @@ const partnerDestinationRoutes = [
   ["destination/capacity", "Capacity"],
   ["destination/reviews", "Reviews"],
   ["destination/profile-settings", "Profile"],
-] as const;
-
-const adminRoutes = [
-  ["", "Overview"],
-  ["eo-approvals", "EO Approvals"],
-  ["eo-approvals/:applicationId", "EO approval detail"],
-  ["destination-verifications", "Destination Verification"],
-  ["destination-verifications/:applicationId", "Verification detail"],
-  ["package-approvals", "Package Approvals"],
-  ["package-approvals/:submissionId", "Package approval detail"],
-  ["bookings", "Bookings / Payments"],
-  ["complaints", "Complaints"],
-  ["complaints/:complaintId", "Complaint detail"],
-  ["trust", "Trust & Status"],
-  ["audit", "Audit / Activity"],
 ] as const;
 
 export function App() {
@@ -259,31 +259,52 @@ export function App() {
         <Route path="profile" element={<EoProfileScreen />} />
       </Route>
 
-      {/* Admin Operations Placeholder */}
+      {/* Admin Operations Protected Workspace */}
       <Route path="admin/login" element={<DistractionFreeShell />}>
-        <Route
-          index
-          element={<PlaceholderPage eyebrow="Admin" title="Admin login" />}
-        />
+        <Route index element={<AdminLoginScreen />} />
       </Route>
       <Route
         path="admin"
         element={
-          <WorkspaceShell
-            surface="admin"
-            title="Admin operations"
-            navigation={adminNavigation}
-          />
+          <AdminRouteGuard>
+            <WorkspaceShell
+              surface="admin"
+              title="Admin Trust & Governance"
+              navigation={adminNavigation}
+            />
+          </AdminRouteGuard>
         }
       >
-        {adminRoutes.map(([path, title]) => (
-          <Route
-            key={path || "index"}
-            index={!path || undefined}
-            path={path || undefined}
-            element={<PlaceholderPage eyebrow="Admin" title={title} />}
-          />
-        ))}
+        <Route index element={<AdminOverviewScreen />} />
+        <Route path="eo-approvals" element={<AdminEoApprovalsScreen />} />
+        <Route
+          path="eo-approvals/:applicationId"
+          element={<AdminEoApplicationReviewScreen />}
+        />
+        <Route
+          path="destination-verifications"
+          element={<AdminDestinationVerificationsScreen />}
+        />
+        <Route
+          path="destination-verifications/:applicationId"
+          element={<AdminDestinationVerificationDetailScreen />}
+        />
+        <Route
+          path="package-approvals"
+          element={<AdminPackageApprovalsScreen />}
+        />
+        <Route
+          path="package-approvals/:submissionId"
+          element={<AdminPackageReviewChecklistScreen />}
+        />
+        <Route path="bookings" element={<AdminBookingsScreen />} />
+        <Route path="complaints" element={<AdminComplaintsScreen />} />
+        <Route
+          path="complaints/:complaintId"
+          element={<AdminComplaintsScreen />}
+        />
+        <Route path="trust" element={<AdminTrustStatusScreen />} />
+        <Route path="audit" element={<AdminAuditActivityScreen />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

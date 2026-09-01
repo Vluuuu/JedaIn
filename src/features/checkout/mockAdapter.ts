@@ -23,6 +23,7 @@ export interface MockCheckoutAdapterOptions {
   sessionOverrides?: Record<string, PackageSessionPreview[]>;
   travelerOverride?: AuthUser | null;
   contactRequirementOverride?: CheckoutContactRequirement;
+  verifiedPhoneStore?: Record<string, boolean>; // travelerId -> verified boolean
   pendingPaymentOverride?: PendingPaymentHandoff;
   delayMs?: number;
   failLoadCount?: number;
@@ -36,6 +37,7 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
   private sessionOverrides: Record<string, PackageSessionPreview[]>;
   private travelerOverride?: AuthUser | null;
   private contactRequirementOverride?: CheckoutContactRequirement;
+  private verifiedPhoneStore: Record<string, boolean>;
   private pendingPaymentOverride?: PendingPaymentHandoff;
   private delayMs: number;
   private failLoadCount: number;
@@ -48,6 +50,7 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
     this.sessionOverrides = options.sessionOverrides ?? {};
     this.travelerOverride = options.travelerOverride;
     this.contactRequirementOverride = options.contactRequirementOverride;
+    this.verifiedPhoneStore = options.verifiedPhoneStore ?? {};
     this.pendingPaymentOverride = options.pendingPaymentOverride;
     this.delayMs = options.delayMs ?? 0;
     this.failLoadCount = options.failLoadCount ?? 0;
@@ -74,11 +77,17 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       const pkg = this.packages.find((p) => p.id === pkgId);
       if (!pkg) continue;
 
+      // Validate package mapping consistency
+      if (detail.packageId !== pkg.id) continue;
+
       const sessions =
         this.sessionOverrides[pkgId] ?? detail.upcomingSessionPreviews ?? [];
       const sess = sessions.find((s) => s.sessionId === sessionId);
 
       if (sess) {
+        // Enforce session.packageId === pkg.id
+        if (sess.packageId !== pkg.id) continue;
+
         foundPkg = pkg;
         foundDetail = detail;
         foundSession = sess;
@@ -110,10 +119,8 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    if (
-      foundSession.pricePerPerson === undefined &&
-      foundPkg.pricePerPerson === undefined
-    ) {
+    // BLOCKER 1: EXACT SESSION PRICE ONLY (session.pricePerPerson MUST exist)
+    if (foundSession.pricePerPerson === undefined) {
       return {
         state: "PRICE_UNAVAILABLE",
         package: foundPkg,
@@ -126,13 +133,18 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
         ? this.travelerOverride
         : sessionStore.get().user;
 
+    // BLOCKER 3: Phone presence != verified. Default is false unless explicitly in store or override.
+    const isPhoneVerified = traveler?.id
+      ? Boolean(this.verifiedPhoneStore[traveler.id])
+      : false;
+
     const contactRequirement: CheckoutContactRequirement = this
       .contactRequirementOverride ?? {
       name: traveler?.name,
       email: traveler?.email,
       phone: traveler?.phone,
       phoneRequired: true,
-      phoneVerified: Boolean(traveler?.phone),
+      phoneVerified: isPhoneVerified,
     };
 
     const activePendingPayment =
@@ -159,60 +171,19 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
 
-    if (this.failSubmitCount > 0) {
-      this.failSubmitCount--;
+    // 1. BLOCKER 6: VALIDATE LOCAL DRAFT INPUTS
+    if (
+      !Number.isInteger(input.participantCount) ||
+      input.participantCount < 1 ||
+      input.cancellationPolicyAcknowledged !== true
+    ) {
       return {
-        status: "SUBMIT_ERROR",
-        message: "Checkout belum bisa diproses. Coba lagi.",
+        status: "INVALID_DRAFT",
+        message: "Draft checkout tidak valid.",
       };
     }
 
-    // Check idempotency first (if already processed, return existing)
-    const existingTx = mockTransactionStore.getIdempotentTransaction(
-      input.idempotencyKey,
-    );
-    if (existingTx) {
-      return {
-        status: "SUCCESS",
-        bookingId: existingTx.booking.bookingId,
-      };
-    }
-
-    // 1. Re-check contact verification requirement
-    const traveler =
-      this.travelerOverride !== undefined
-        ? this.travelerOverride
-        : sessionStore.get().user;
-
-    const contactReq = this.contactRequirementOverride ?? {
-      phoneRequired: true,
-      phoneVerified: Boolean(traveler?.phone),
-    };
-
-    if (contactReq.phoneRequired && !contactReq.phoneVerified) {
-      return {
-        status: "CONTACT_VERIFICATION_REQUIRED",
-        message: "Verifikasi nomor HP diperlukan sebelum membuat pesanan.",
-      };
-    }
-
-    // 2. Re-check active pending payment guard
-    const activePending =
-      this.pendingPaymentOverride ??
-      (traveler
-        ? mockTransactionStore.getActivePendingPayment(traveler.id)
-        : undefined);
-
-    if (activePending) {
-      return {
-        status: "ACTIVE_PENDING_PAYMENT",
-        pendingPayment: activePending,
-        message:
-          "Kamu memiliki pembayaran aktif yang belum diselesaikan. Selesaikan atau batalkan pesanan tersebut lebih dahulu.",
-      };
-    }
-
-    // 3. Re-resolve and re-validate latest Session & Package
+    // 2. BLOCKER 7 & 8: Re-resolve and re-validate latest Session & Package
     let foundPkg: PackageRecommendationSource | undefined;
     let foundDetail: PackageDetailSource | undefined;
     let foundSession: PackageSessionPreview | undefined;
@@ -221,11 +192,16 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       const pkg = this.packages.find((p) => p.id === pkgId);
       if (!pkg) continue;
 
+      // BLOCKER 8: SAME PACKAGE / SESSION RELATION
+      if (detail.packageId !== pkg.id) continue;
+
       const sessions =
         this.sessionOverrides[pkgId] ?? detail.upcomingSessionPreviews ?? [];
       const sess = sessions.find((s) => s.sessionId === input.sessionId);
 
       if (sess) {
+        if (sess.packageId !== pkg.id) continue;
+
         foundPkg = pkg;
         foundDetail = detail;
         foundSession = sess;
@@ -252,11 +228,102 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    const unitPrice = foundSession.pricePerPerson ?? foundPkg.pricePerPerson;
+    // BLOCKER 1: EXACT SESSION PRICE ONLY
+    const unitPrice = foundSession.pricePerPerson;
     if (unitPrice === undefined) {
       return {
         status: "PRICE_UNAVAILABLE",
         message: "Harga experience belum tersedia.",
+      };
+    }
+
+    // 3. AUTHENTICATED TRAVELER IDENTITY CHECK
+    const traveler =
+      this.travelerOverride !== undefined
+        ? this.travelerOverride
+        : sessionStore.get().user;
+
+    if (!traveler || input.travelerId !== traveler.id) {
+      return {
+        status: "INVALID_DRAFT",
+        message: "Identitas pemesan tidak sesuai.",
+      };
+    }
+
+    if (this.failSubmitCount > 0) {
+      this.failSubmitCount--;
+      return {
+        status: "SUBMIT_ERROR",
+        message: "Checkout belum bisa diproses. Coba lagi.",
+      };
+    }
+
+    // 4. BLOCKER 12: Idempotency check with payload binding
+    const existingCheck = mockTransactionStore.getIdempotentTransaction(
+      input.idempotencyKey,
+      {
+        travelerId: input.travelerId,
+        sessionId: input.sessionId,
+        participantCount: input.participantCount,
+        unitPricePerPerson: input.expectedUnitPricePerPerson ?? unitPrice,
+      },
+    );
+
+    if (existingCheck) {
+      if (existingCheck.conflict) {
+        return {
+          status: "IDEMPOTENCY_CONFLICT",
+          message: "Konflik transaksi idempotensi.",
+        };
+      }
+      if (existingCheck.result) {
+        return {
+          status: "SUCCESS",
+          bookingId: existingCheck.result.booking.bookingId,
+        };
+      }
+    }
+
+    // 5. Re-check contact verification requirement
+    const isPhoneVerified = traveler.id
+      ? Boolean(this.verifiedPhoneStore[traveler.id])
+      : false;
+
+    const contactReq = this.contactRequirementOverride ?? {
+      phoneRequired: true,
+      phoneVerified: isPhoneVerified,
+    };
+
+    if (contactReq.phoneRequired && !contactReq.phoneVerified) {
+      return {
+        status: "CONTACT_VERIFICATION_REQUIRED",
+        message: "Verifikasi nomor HP diperlukan sebelum membuat pesanan.",
+      };
+    }
+
+    // 6. Re-check active pending payment guard
+    const activePending =
+      this.pendingPaymentOverride ??
+      mockTransactionStore.getActivePendingPayment(traveler.id);
+
+    if (activePending) {
+      return {
+        status: "ACTIVE_PENDING_PAYMENT",
+        pendingPayment: activePending,
+        message:
+          "Kamu memiliki pembayaran aktif yang belum diselesaikan. Selesaikan atau batalkan pesanan tersebut lebih dahulu.",
+      };
+    }
+
+    // 7. BLOCKER 9: PRICE-RACE / RECONFIRMATION
+    if (
+      input.expectedUnitPricePerPerson !== undefined &&
+      input.expectedUnitPricePerPerson !== unitPrice
+    ) {
+      return {
+        status: "PRICE_CHANGED",
+        latestUnitPricePerPerson: unitPrice,
+        message: "Harga jadwal berubah. Tinjau total terbaru lalu coba lagi.",
       };
     }
 
@@ -268,27 +335,50 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    if (foundSession.remainingSlots < input.participantCount) {
+    // Effective capacity check with store active reservations
+    const currentReserved = mockTransactionStore.getReservedQuantity(
+      foundSession.sessionId,
+    );
+    const effectiveRemaining = foundSession.remainingSlots - currentReserved;
+
+    if (effectiveRemaining < input.participantCount) {
       return {
         status: "INSUFFICIENT_CAPACITY",
+        latestRemainingSlots: Math.max(0, effectiveRemaining),
         message:
           "Slot yang tersedia berubah. Sesuaikan jumlah peserta lalu coba lagi.",
       };
     }
 
-    // 4. Atomic transaction creation: reserve slots, create PENDING_PAYMENT booking
-    const tx = mockTransactionStore.createTransaction({
+    // 8. BLOCKER 4: REAL ATOMIC CAPACITY RESERVATION
+    const txResult = mockTransactionStore.createTransaction({
       travelerId: input.travelerId,
       packageId: foundPkg.id,
       sessionId: foundSession.sessionId,
       participantCount: input.participantCount,
       unitPricePerPerson: unitPrice,
+      capacitySnapshot: foundSession.remainingSlots,
       idempotencyKey: input.idempotencyKey,
     });
 
+    if (!txResult.success) {
+      if (txResult.reason === "IDEMPOTENCY_CONFLICT") {
+        return {
+          status: "IDEMPOTENCY_CONFLICT",
+          message: "Konflik transaksi idempotensi.",
+        };
+      }
+      return {
+        status: "INSUFFICIENT_CAPACITY",
+        latestRemainingSlots: Math.max(0, effectiveRemaining),
+        message:
+          "Slot yang tersedia berubah. Sesuaikan jumlah peserta lalu coba lagi.",
+      };
+    }
+
     return {
       status: "SUCCESS",
-      bookingId: tx.booking.bookingId,
+      bookingId: txResult.booking.bookingId,
     };
   }
 }

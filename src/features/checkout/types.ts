@@ -43,6 +43,7 @@ export interface CheckoutSubmitInput {
   travelerId: string;
   sessionId: string;
   participantCount: number;
+  expectedUnitPricePerPerson?: number;
   cancellationPolicyAcknowledged: boolean;
   idempotencyKey: string;
 }
@@ -54,6 +55,9 @@ export type CheckoutSubmitStatus =
   | "SESSION_UNAVAILABLE"
   | "INSUFFICIENT_CAPACITY"
   | "PRICE_UNAVAILABLE"
+  | "PRICE_CHANGED"
+  | "INVALID_DRAFT"
+  | "IDEMPOTENCY_CONFLICT"
   | "SUBMIT_ERROR";
 
 export interface CheckoutSubmitResult {
@@ -61,6 +65,8 @@ export interface CheckoutSubmitResult {
   bookingId?: string;
   message?: string;
   pendingPayment?: PendingPaymentHandoff;
+  latestUnitPricePerPerson?: number;
+  latestRemainingSlots?: number;
 }
 
 export interface BookingRecord {

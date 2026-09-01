@@ -31,9 +31,11 @@ export function CheckoutScreen({
     string | undefined
   >();
 
-  const loadCheckout = async (sid: string) => {
+  const loadCheckout = async (sid: string, preserveNotice = false) => {
     setIsLoading(true);
-    setSubmitErrorNotice(undefined);
+    if (!preserveNotice) {
+      setSubmitErrorNotice(undefined);
+    }
     try {
       const res = await adapter.getCheckout(sid);
       setViewModel(res);
@@ -88,13 +90,15 @@ export function CheckoutScreen({
     }
 
     setIsSubmitting(true);
-    setSubmitErrorNotice(undefined);
 
     try {
+      const currentPrice = viewModel.session?.pricePerPerson;
+
       const res = await adapter.submitCheckout({
         travelerId: viewModel.traveler.id,
         sessionId,
         participantCount,
+        expectedUnitPricePerPerson: currentPrice,
         cancellationPolicyAcknowledged: policyAcknowledged,
         idempotencyKey,
       });
@@ -125,17 +129,31 @@ export function CheckoutScreen({
         return;
       }
 
+      if (res.status === "PRICE_CHANGED") {
+        setSubmitErrorNotice(
+          res.message ??
+            "Harga jadwal berubah. Tinjau total terbaru lalu coba lagi.",
+        );
+        // Refresh checkout data to show latest exact price snapshot
+        loadCheckout(sessionId, true);
+        return;
+      }
+
       if (res.status === "INSUFFICIENT_CAPACITY") {
         setSubmitErrorNotice(
           res.message ??
             "Slot yang tersedia berubah. Sesuaikan jumlah peserta lalu coba lagi.",
         );
-        // Refresh checkout data to show latest remainingSlots snapshot
-        loadCheckout(sessionId);
+        // BLOCKER 10: CAPACITY-RACE UI FIX — refresh while preserving warning notice & participant count
+        loadCheckout(sessionId, true);
         return;
       }
 
-      if (res.status === "SUBMIT_ERROR") {
+      if (
+        res.status === "SUBMIT_ERROR" ||
+        res.status === "INVALID_DRAFT" ||
+        res.status === "IDEMPOTENCY_CONFLICT"
+      ) {
         setSubmitErrorNotice(
           res.message ?? "Checkout belum bisa diproses. Coba lagi.",
         );
@@ -217,16 +235,18 @@ export function CheckoutScreen({
   } = viewModel;
 
   const maxSelectableParticipants = session.remainingSlots ?? 99;
-  const unitPrice = session.pricePerPerson ?? pkg.pricePerPerson;
+  const unitPrice = session.pricePerPerson; // BLOCKER 1: EXACT SESSION PRICE ONLY
   const totalAmount = unitPrice ? unitPrice * participantCount : 0;
   const formattedTotalPrice = unitPrice
     ? `Rp${totalAmount.toLocaleString("id-ID")}`
     : "Rp-";
 
+  // BLOCKER 10: CTA disabled while participantCount > latest selectable max or price is missing
   const isSubmitDisabled =
     isSubmitting ||
     !policyAcknowledged ||
     unitPrice === undefined ||
+    participantCount > maxSelectableParticipants ||
     viewModel.state === "SESSION_UNAVAILABLE" ||
     viewModel.state === "PRICE_UNAVAILABLE";
 
@@ -250,7 +270,7 @@ export function CheckoutScreen({
         </p>
       </header>
 
-      {/* Submit Error Notice */}
+      {/* Submit Error / Race Notice */}
       {submitErrorNotice && (
         <div className="checkout-alert checkout-alert--error" role="alert">
           <p>{submitErrorNotice}</p>

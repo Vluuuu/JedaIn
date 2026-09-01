@@ -4,25 +4,50 @@ import type {
   PendingPaymentHandoff,
 } from "./types";
 
-/**
- * Configurable prototype constants.
- */
 export const CHECKOUT_MVP_CONFIG = {
   paymentTimeoutMinutes: 15,
 };
 
+interface IdempotencyRecord {
+  input: {
+    travelerId: string;
+    sessionId: string;
+    participantCount: number;
+    unitPricePerPerson: number;
+  };
+  booking: BookingRecord;
+  payment: PaymentAttemptRecord;
+}
+
 let bookings: BookingRecord[] = [];
 let paymentAttempts: PaymentAttemptRecord[] = [];
-const idempotencyMap = new Map<
-  string,
-  { booking: BookingRecord; payment: PaymentAttemptRecord }
->();
+const idempotencyMap = new Map<string, IdempotencyRecord>();
 
 export const mockTransactionStore = {
   reset(): void {
     bookings = [];
     paymentAttempts = [];
     idempotencyMap.clear();
+  },
+
+  getBookings(): readonly BookingRecord[] {
+    return bookings;
+  },
+
+  getPaymentAttempts(): readonly PaymentAttemptRecord[] {
+    return paymentAttempts;
+  },
+
+  getReservedQuantity(sessionId: string): number {
+    const now = new Date().getTime();
+    return bookings
+      .filter((b) => {
+        if (b.sessionId !== sessionId || b.status !== "PENDING_PAYMENT") {
+          return false;
+        }
+        return new Date(b.paymentExpiresAt).getTime() > now;
+      })
+      .reduce((sum, b) => sum + b.reservedQuantity, 0);
   },
 
   getActivePendingPayment(
@@ -33,8 +58,7 @@ export const mockTransactionStore = {
       if (b.travelerId !== travelerId || b.status !== "PENDING_PAYMENT") {
         return false;
       }
-      const expTime = new Date(b.paymentExpiresAt).getTime();
-      return expTime > now;
+      return new Date(b.paymentExpiresAt).getTime() > now;
     });
 
     if (!active) return undefined;
@@ -49,8 +73,37 @@ export const mockTransactionStore = {
 
   getIdempotentTransaction(
     idempotencyKey: string,
-  ): { booking: BookingRecord; payment: PaymentAttemptRecord } | undefined {
-    return idempotencyMap.get(idempotencyKey);
+    input?: {
+      travelerId: string;
+      sessionId: string;
+      participantCount: number;
+      unitPricePerPerson: number;
+    },
+  ):
+    | {
+        result?: { booking: BookingRecord; payment: PaymentAttemptRecord };
+        conflict: boolean;
+      }
+    | undefined {
+    const record = idempotencyMap.get(idempotencyKey);
+    if (!record) return undefined;
+
+    if (input) {
+      const match =
+        record.input.travelerId === input.travelerId &&
+        record.input.sessionId === input.sessionId &&
+        record.input.participantCount === input.participantCount &&
+        record.input.unitPricePerPerson === input.unitPricePerPerson;
+
+      if (!match) {
+        return { conflict: true };
+      }
+    }
+
+    return {
+      result: { booking: record.booking, payment: record.payment },
+      conflict: false,
+    };
   },
 
   createTransaction(input: {
@@ -59,13 +112,42 @@ export const mockTransactionStore = {
     sessionId: string;
     participantCount: number;
     unitPricePerPerson: number;
+    capacitySnapshot: number;
     idempotencyKey: string;
-  }): { booking: BookingRecord; payment: PaymentAttemptRecord } {
+  }):
+    | { success: true; booking: BookingRecord; payment: PaymentAttemptRecord }
+    | {
+        success: false;
+        reason: "INSUFFICIENT_CAPACITY" | "IDEMPOTENCY_CONFLICT";
+      } {
+    // 1. Idempotency check
     const existing = idempotencyMap.get(input.idempotencyKey);
     if (existing) {
-      return existing;
+      const match =
+        existing.input.travelerId === input.travelerId &&
+        existing.input.sessionId === input.sessionId &&
+        existing.input.participantCount === input.participantCount &&
+        existing.input.unitPricePerPerson === input.unitPricePerPerson;
+
+      if (!match) {
+        return { success: false, reason: "IDEMPOTENCY_CONFLICT" };
+      }
+      return {
+        success: true,
+        booking: existing.booking,
+        payment: existing.payment,
+      };
     }
 
+    // 2. Capacity ledger check (in-memory atomic boundary)
+    const currentActiveReserved = this.getReservedQuantity(input.sessionId);
+    const availableSlots = input.capacitySnapshot - currentActiveReserved;
+
+    if (availableSlots < input.participantCount) {
+      return { success: false, reason: "INSUFFICIENT_CAPACITY" };
+    }
+
+    // 3. Atomically create booking & payment attempt
     const now = new Date();
     const expiresAt = new Date(
       now.getTime() + CHECKOUT_MVP_CONFIG.paymentTimeoutMinutes * 60 * 1000,
@@ -97,8 +179,20 @@ export const mockTransactionStore = {
 
     bookings.push(booking);
     paymentAttempts.push(payment);
-    idempotencyMap.set(input.idempotencyKey, { booking, payment });
 
-    return { booking, payment };
+    const record: IdempotencyRecord = {
+      input: {
+        travelerId: input.travelerId,
+        sessionId: input.sessionId,
+        participantCount: input.participantCount,
+        unitPricePerPerson: input.unitPricePerPerson,
+      },
+      booking,
+      payment,
+    };
+
+    idempotencyMap.set(input.idempotencyKey, { ...record });
+
+    return { success: true, booking, payment };
   },
 };

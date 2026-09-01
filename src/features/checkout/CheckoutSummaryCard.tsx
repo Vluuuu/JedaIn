@@ -16,7 +16,7 @@ export function CheckoutSummaryCard({
     sessionData.endAt,
   );
 
-  const unitPrice = sessionData.pricePerPerson ?? packageData.pricePerPerson;
+  const unitPrice = sessionData.pricePerPerson;
   const formattedUnitPrice = unitPrice
     ? `Rp${unitPrice.toLocaleString("id-ID")} / orang`
     : "Rp-";

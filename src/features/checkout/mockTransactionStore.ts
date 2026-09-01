@@ -42,7 +42,9 @@ export const mockTransactionStore = {
           const attempt = paymentAttempts.find(
             (p) =>
               p.bookingId === booking.bookingId &&
-              (p.status === "PENDING" || p.status === "VERIFYING"),
+              (p.status === "PENDING" ||
+                p.status === "VERIFYING" ||
+                p.status === "FAILED"),
           );
           if (attempt) {
             attempt.status = "EXPIRED";

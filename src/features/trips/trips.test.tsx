@@ -297,4 +297,53 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(demo2).toBeDefined();
     expect(demo2?.booking.travelerId).toBe(traveler2.id);
   });
+
+  it("P. direct My Trips after expiry → no pending banner, EXPIRED in History, reservation released", async () => {
+    const baseNow = new Date("2026-08-31T12:00:00.000Z").getTime();
+    const traveler: AuthUser = {
+      id: "usr_my_trips_exp",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_tr_exp",
+      nowMs: baseNow,
+    });
+
+    // Adapter evaluated after expiry
+    const expNowMs = baseNow + 16 * 60 * 1000;
+    const adapter = new MockTripsAdapter({
+      now: () => new Date(expNowMs),
+    });
+
+    const { container } = await renderMyTrips({ adapter });
+
+    expect(container.textContent).not.toContain("Menunggu Pembayaran");
+    expect(container.textContent).toContain("History (1)");
+    expect(
+      mockTransactionStore.getReservedQuantity("ses_sgd_1", expNowMs),
+    ).toBe(0);
+  });
+
+  it("Q. demo Completed Trip displays historical Aug session, not Sep 12 live session", async () => {
+    const traveler: AuthUser = {
+      id: "usr_demo_aug_check",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    const bId = `bk_demo_completed_${traveler.id}`;
+    const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+    expect(container.textContent).toContain("Trip Selesai");
+    expect(container.textContent).toContain("20 Agustus 2026");
+    expect(container.textContent).not.toContain("12 September 2026");
+  });
 });

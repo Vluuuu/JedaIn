@@ -17,27 +17,33 @@ export interface MockTripsAdapterOptions {
   packages?: PackageRecommendationSource[];
   details?: Record<string, PackageDetailSource>;
   delayMs?: number;
+  now?: () => Date;
 }
 
 export class MockTripsAdapter implements TripsAdapter {
   private packages: PackageRecommendationSource[];
   private details: Record<string, PackageDetailSource>;
   private delayMs: number;
+  private now: () => Date;
 
   constructor(options: MockTripsAdapterOptions = {}) {
     this.packages = options.packages ?? MOCK_RECOMMENDATION_PACKAGES;
     this.details = options.details ?? MOCK_PACKAGE_DETAILS;
     this.delayMs = options.delayMs ?? 0;
+    this.now = options.now ?? (() => new Date());
   }
 
   private resolveCardItem(
     booking: import("../checkout/types").BookingRecord,
+    overrideSession?: import("../packageDetail/types").PackageSessionPreview,
   ): TripCardItem {
     const pkg = this.packages.find((p) => p.id === booking.packageId);
     const detail = this.details[booking.packageId];
-    const session = detail?.upcomingSessionPreviews?.find(
-      (s) => s.sessionId === booking.sessionId,
-    );
+    const session =
+      overrideSession ??
+      detail?.upcomingSessionPreviews?.find(
+        (s) => s.sessionId === booking.sessionId,
+      );
     return {
       booking,
       package: pkg,
@@ -59,6 +65,9 @@ export class MockTripsAdapter implements TripsAdapter {
         historyTrips: [],
       };
     }
+
+    const nowMs = this.now().getTime();
+    mockTransactionStore.reconcileExpiredPendingPayments(nowMs);
 
     const travelerBookings = mockTransactionStore.getBookingsByTraveler(
       traveler.id,
@@ -83,12 +92,12 @@ export class MockTripsAdapter implements TripsAdapter {
     }
 
     // Append deterministic demo completed trip bound to current traveler
-    const demoBooking = createDemoTravelerHistory(traveler.id);
+    const demo = createDemoTravelerHistory(traveler.id);
     const hasDemo = completedTrips.some(
-      (t) => t.booking.bookingId === demoBooking.bookingId,
+      (t) => t.booking.bookingId === demo.booking.bookingId,
     );
     if (!hasDemo) {
-      completedTrips.push(this.resolveCardItem(demoBooking));
+      completedTrips.push(this.resolveCardItem(demo.booking, demo.session));
     }
 
     return {
@@ -108,10 +117,13 @@ export class MockTripsAdapter implements TripsAdapter {
     if (!traveler) return null;
 
     let booking = mockTransactionStore.getBookingById(bookingId);
-    const demoBooking = createDemoTravelerHistory(traveler.id);
+    const demo = createDemoTravelerHistory(traveler.id);
+    let sessionOverride:
+      import("../packageDetail/types").PackageSessionPreview | undefined;
 
-    if (!booking && bookingId === demoBooking.bookingId) {
-      booking = demoBooking;
+    if (!booking && bookingId === demo.booking.bookingId) {
+      booking = demo.booking;
+      sessionOverride = demo.session;
     }
 
     if (!booking || booking.travelerId !== traveler.id) return null;
@@ -123,9 +135,11 @@ export class MockTripsAdapter implements TripsAdapter {
 
     const pkg = this.packages.find((p) => p.id === booking.packageId);
     const detail = this.details[booking.packageId];
-    const session = detail?.upcomingSessionPreviews?.find(
-      (s) => s.sessionId === booking.sessionId,
-    );
+    const session =
+      sessionOverride ??
+      detail?.upcomingSessionPreviews?.find(
+        (s) => s.sessionId === booking.sessionId,
+      );
 
     const hasDestinationReview = mockReviewStore.hasReviewForBookingTarget(
       booking.bookingId,

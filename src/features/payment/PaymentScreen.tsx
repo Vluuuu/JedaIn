@@ -167,7 +167,7 @@ export function PaymentScreen({
     );
   }
 
-  if (state === "NOT_FOUND" || !viewModel?.booking) {
+  if (state === "NOT_FOUND" || state === "ERROR" || !viewModel?.booking) {
     return (
       <div className="payment-container">
         <div className="payment-state-box">

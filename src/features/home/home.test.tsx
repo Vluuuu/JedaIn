@@ -579,7 +579,9 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
     const payBtn = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Lanjutkan Pembayaran"),
     )!;
-    await act(() => payBtn.click());
+    await act(async () => {
+      payBtn.click();
+    });
     expect(container.textContent).toContain("Konfirmasi Pembayaran");
   });
 
@@ -634,7 +636,9 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
     const tripBtn = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Lihat Trip"),
     )!;
-    await act(() => tripBtn.click());
+    await act(async () => {
+      tripBtn.click();
+    });
     expect(container.textContent).toContain("Trip Terkonfirmasi");
   });
 });

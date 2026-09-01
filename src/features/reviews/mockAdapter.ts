@@ -15,9 +15,9 @@ export class MockReviewAdapter implements ReviewAdapter {
     if (!traveler) return null;
 
     let booking = mockTransactionStore.getBookingById(bookingId);
-    const demoBooking = createDemoTravelerHistory(traveler.id);
-    if (!booking && bookingId === demoBooking.bookingId) {
-      booking = demoBooking;
+    const demo = createDemoTravelerHistory(traveler.id);
+    if (!booking && bookingId === demo.booking.bookingId) {
+      booking = demo.booking;
     }
 
     if (
@@ -84,9 +84,9 @@ export class MockReviewAdapter implements ReviewAdapter {
     }
 
     let booking = mockTransactionStore.getBookingById(params.bookingId);
-    const demoBooking = createDemoTravelerHistory(traveler.id);
-    if (!booking && params.bookingId === demoBooking.bookingId) {
-      booking = demoBooking;
+    const demo = createDemoTravelerHistory(traveler.id);
+    if (!booking && params.bookingId === demo.booking.bookingId) {
+      booking = demo.booking;
     }
 
     if (

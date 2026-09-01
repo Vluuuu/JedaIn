@@ -37,7 +37,7 @@ function LocationObserver({
 }
 
 async function renderReview(
-  bookingId = DEMO_TRAVELER_HISTORY.bookingId,
+  bookingId = DEMO_TRAVELER_HISTORY.booking.bookingId,
   targetType: "destination" | "eo" = "destination",
   props: { adapter?: MockReviewAdapter } = {},
 ) {

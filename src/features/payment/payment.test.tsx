@@ -633,4 +633,76 @@ describe("Payment & Result Feature (T13, T14, T15) Tests", () => {
     expect(container.textContent).not.toContain("Pembayaran Gagal");
     expect(container.textContent).toContain("Lanjutkan Pembayaran");
   });
+
+  it("J. FAILED attempt + expiry → Booking EXPIRED, attempt EXPIRED, reservation released", () => {
+    const baseNow = new Date("2026-08-31T12:00:00.000Z").getTime();
+    mockTransactionStore.createTransaction({
+      travelerId: "usr_fail_exp",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_fail_exp",
+      nowMs: baseNow,
+    });
+
+    const bId = mockTransactionStore.getBookings()[0].bookingId;
+    mockTransactionStore.executePaymentFailure({
+      bookingId: bId,
+      nowMs: baseNow,
+    });
+
+    // Attempt is FAILED, booking is PENDING_PAYMENT
+    const attempt1 = mockTransactionStore.getPaymentAttemptForBooking(bId);
+    expect(attempt1?.status).toBe("FAILED");
+
+    // Advance time past expiry and reconcile
+    mockTransactionStore.reconcileExpiredPendingPayments(
+      baseNow + 16 * 60 * 1000,
+    );
+
+    const bookingExp = mockTransactionStore.getBookingById(bId);
+    const attemptExp = mockTransactionStore.getPaymentAttemptForBooking(bId);
+
+    expect(bookingExp?.status).toBe("EXPIRED");
+    expect(attemptExp?.status).toBe("EXPIRED");
+    expect(
+      mockTransactionStore.getReservedQuantity(
+        "ses_sgd_1",
+        baseNow + 16 * 60 * 1000,
+      ),
+    ).toBe(0);
+  });
+
+  it("K. missing or inconsistent PaymentAttempt → Payment page not actionable ACTIVE (renders ERROR/NOT_FOUND)", async () => {
+    const traveler: AuthUser = {
+      id: "usr_inconsist",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    const booking = {
+      bookingId: "bk_inconsistent",
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      totalAmount: 275000,
+      status: "PENDING_PAYMENT" as const,
+      reservedQuantity: 1,
+      bookedQuantity: 0,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date(Date.now() + 100000).toISOString(),
+    };
+    mockTransactionStore.addDirectBooking(booking); // No attempt added
+
+    const adapter = new MockPaymentAdapter();
+    const res = await adapter.getPayment("bk_inconsistent");
+    expect(res.state).toBe("ERROR");
+
+    const { container } = await renderPayment("bk_inconsistent", { adapter });
+    expect(container.textContent).not.toContain("Bayar Sekarang");
+  });
 });

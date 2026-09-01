@@ -71,7 +71,20 @@ export class MockPaymentAdapter implements PaymentAdapter {
       return { state: "NOT_FOUND", booking };
     }
 
+    if (booking.status !== "PENDING_PAYMENT") {
+      return { state: "ERROR", booking };
+    }
+
     const attempt = mockTransactionStore.getPaymentAttemptForBooking(bookingId);
+    if (!attempt) {
+      return { state: "ERROR", booking };
+    }
+
+    // Only expose actionable ACTIVE if PaymentAttempt is in a retry-valid state (PENDING or FAILED)
+    if (attempt.status !== "PENDING" && attempt.status !== "FAILED") {
+      return { state: "ERROR", booking, paymentAttempt: attempt };
+    }
+
     const pkg = this.packages.find((p) => p.id === booking.packageId);
     const detail = this.details[booking.packageId];
     const session = detail?.upcomingSessionPreviews?.find(

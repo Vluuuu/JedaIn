@@ -218,6 +218,70 @@ export const SEEDED_LIVE_PACKAGE: EoPackageRecord = {
   updatedAt: "2026-08-05T10:00:00Z",
 };
 
+export const SEEDED_PENDING_PACKAGE: EoPackageRecord = {
+  packageId: "pkg_pacet_mindful_retreat",
+  eoId: "eo_jeda_alam",
+  eoDisplayName: "Jeda Alam Nusantara",
+  title: "Pagi Hening Tepi Sungai Pacet",
+  shortSummary:
+    "Retreat setengah hari di tepi sungai Pacet yang jernih dengan terapi suara air alami dan sesi relaksasi napas.",
+  valueProposition:
+    "Jeda singkat memulihkan pikiran dari bising perkotaan di lembah hutan pinus berhawa sejuk.",
+  destinationId: "dest_lembah_pacet",
+  insightId: "ins_mindful_pacet_halfday",
+  durationLabel: "Setengah hari",
+  suitableGroupTypes: ["SOLO", "PARTNER", "FRIENDS"],
+  highlights: [
+    "Sesi meditasi suara sungai alami",
+    "Jeda hening pagi dan teh herbal lokal",
+    "Piknik ringan buah segar",
+  ],
+  itinerary: [
+    {
+      order: 1,
+      title: "Pagi - Berkumpul di Saung Lembah",
+      description: "Penyambutan dan persiapan sesi hening.",
+      timeOfDayLabel: "Pagi",
+      durationLabel: "45 menit",
+    },
+    {
+      order: 2,
+      title: "Sesi Hening & Terapi Suara Sungai",
+      description: "Relaksasi kesadaran penuh di bebatuan sungai yang tenang.",
+      timeOfDayLabel: "Pagi - Siang",
+      durationLabel: "2 jam",
+    },
+    {
+      order: 3,
+      title: "Teh Herbal & Penutupan",
+      description: "Menikmati teh hangat dan kudapan sehat.",
+      timeOfDayLabel: "Siang",
+      durationLabel: "1 jam",
+    },
+  ],
+  includedItems: [
+    "Tiket masuk Lembah Alam Pacet",
+    "Pemandu retreat bersertifikat",
+    "Teh herbal dan kudapan buah sehat",
+  ],
+  excludedItems: ["Transportasi pribadi", "Belanja pribadi"],
+  safetyNotes: [
+    "Kenakan pakaian santai yang nyaman.",
+    "Hati-hati saat melangkah di bebatuan tepi sungai.",
+  ],
+  pricing: {
+    destinationBaseCost: 160000,
+    eoMargin: 100000,
+    customerPrice: 260000,
+  },
+  guideStatus: "CERTIFIED_GUIDE",
+  status: "PENDING_ADMIN_REVIEW",
+  validationResult: { valid: true, errors: [] },
+  submittedAt: "2026-08-28T09:00:00Z",
+  createdAt: "2026-08-28T08:30:00Z",
+  updatedAt: "2026-08-28T09:00:00Z",
+};
+
 export const SEEDED_SESSIONS: EoSessionRecord[] = [
   {
     sessionId: "ses_sgd_1",
@@ -258,12 +322,18 @@ function clonePackage(pkg: EoPackageRecord): EoPackageRecord {
   };
 }
 
-let packages: EoPackageRecord[] = [clonePackage(SEEDED_LIVE_PACKAGE)];
+let packages: EoPackageRecord[] = [
+  clonePackage(SEEDED_LIVE_PACKAGE),
+  clonePackage(SEEDED_PENDING_PACKAGE),
+];
 let sessions: EoSessionRecord[] = SEEDED_SESSIONS.map((s) => ({ ...s }));
 
 export const mockEoPackageStore = {
   reset(): void {
-    packages = [clonePackage(SEEDED_LIVE_PACKAGE)];
+    packages = [
+      clonePackage(SEEDED_LIVE_PACKAGE),
+      clonePackage(SEEDED_PENDING_PACKAGE),
+    ];
     sessions = SEEDED_SESSIONS.map((s) => ({ ...s }));
   },
 

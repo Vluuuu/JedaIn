@@ -8,6 +8,7 @@ import {
   partnerDestinationNavigation,
   partnerEoNavigation,
 } from "./components/shells";
+import { adminSessionStore } from "./features/admin";
 import { sessionStore } from "./features/onboarding";
 
 function renderRoute(path: string) {
@@ -19,19 +20,27 @@ function renderRoute(path: string) {
 describe("App shell routing", () => {
   afterEach(() => {
     sessionStore.reset();
+    adminSessionStore.reset();
   });
 
   it.each([
     ["/", "traveler-public-shell", "Temukan jeda"],
     ["/partner/eo", "workspace-shell--partner", "Overview"],
     ["/partner/destination", "workspace-shell--partner", "Overview"],
-    ["/admin", "workspace-shell--admin", "Overview"],
     ["/belum-ada", "page", "Halaman tidak ditemukan."],
   ])("selects the expected shell for %s", (path, shellClass, text) => {
     const markup = renderRoute(path);
 
     expect(markup).toContain(shellClass);
     expect(markup).toContain(text);
+  });
+
+  it("selects the expected shell for authenticated /admin", () => {
+    adminSessionStore.loginAsDemoAdmin();
+    const markup = renderRoute("/admin");
+
+    expect(markup).toContain("workspace-shell--admin");
+    expect(markup).toContain("Overview Operasional Kurasi");
   });
 
   it("renders exactly four traveler navigation tabs for authenticated completed user on /home", () => {
@@ -67,6 +76,7 @@ describe("App shell routing", () => {
   });
 
   it("renders exact Admin navigation labels matching source-of-truth", () => {
+    adminSessionStore.loginAsDemoAdmin();
     const markup = renderRoute("/admin");
     for (const item of adminNavigation) {
       expect(markup).toContain(`href="${item.to}"`);

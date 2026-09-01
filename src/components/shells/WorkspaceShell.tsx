@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
+import { partnerSessionStore } from "../../features/eo/partnerSessionStore";
 import { Button } from "../ui";
 import { CloseIcon, MenuIcon, OverviewIcon } from "./icons";
 import "./shells.css";
@@ -25,6 +26,7 @@ export function WorkspaceShell({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const drawerId = useId();
+  const partner = surface === "partner" ? partnerSessionStore.get() : null;
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -109,12 +111,25 @@ export function WorkspaceShell({
           </div>
           <div
             className="workspace-identity"
-            aria-label="Identitas belum terhubung"
+            aria-label={
+              partner
+                ? `Identitas ${partner.businessName}`
+                : "Identitas belum terhubung"
+            }
           >
-            <span aria-hidden="true">J</span>
+            <span aria-hidden="true">{partner?.businessName?.[0] ?? "J"}</span>
             <div>
-              <strong>Identity placeholder</strong>
-              <small>Belum terhubung</small>
+              <strong>
+                {partner?.businessName ??
+                  (surface === "admin"
+                    ? "JedaIn Admin"
+                    : "Identity placeholder")}
+              </strong>
+              <small>
+                {partner?.name
+                  ? `${partner.name} (${partner.guideStatus})`
+                  : "Terhubung"}
+              </small>
             </div>
           </div>
         </header>

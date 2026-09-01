@@ -70,7 +70,11 @@ export interface CheckoutSubmitResult {
 }
 
 export type BookingStatus =
-  "PENDING_PAYMENT" | "PAID" | "COMPLETED" | "CANCELLED" | "EXPIRED";
+  | "PENDING_PAYMENT"
+  | "PAID"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "EXPIRED";
 
 export interface BookingRecord {
   bookingId: string;
@@ -90,7 +94,12 @@ export interface BookingRecord {
 }
 
 export type PaymentAttemptStatus =
-  "PENDING" | "VERIFYING" | "SUCCEEDED" | "FAILED" | "CANCELLED" | "EXPIRED";
+  | "PENDING"
+  | "VERIFYING"
+  | "SUCCEEDED"
+  | "FAILED"
+  | "CANCELLED"
+  | "EXPIRED";
 
 export interface PaymentAttemptRecord {
   paymentAttemptId: string;

@@ -19,7 +19,10 @@ import {
   TravelerConsentScreen,
 } from "./features/onboarding";
 import { PackageDetailScreen } from "./features/packageDetail";
+<<<<<<< HEAD
 import { PaymentResultScreen, PaymentScreen } from "./features/payment";
+=======
+>>>>>>> origin/main
 import { PendingPaymentResolutionScreen } from "./features/pendingPayment";
 import { TravelerQuizScreen } from "./features/quiz";
 import { RecommendationResultScreen } from "./features/recommendation";

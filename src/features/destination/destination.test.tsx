@@ -23,6 +23,7 @@ import { DestinationReviewsScreen } from "./DestinationReviewsScreen";
 import { DestinationSettingsScreen } from "./DestinationSettingsScreen";
 import { DestinationApplicationScreen } from "./DestinationApplicationScreen";
 import { DestinationVerificationStatusScreen } from "./DestinationVerificationStatusScreen";
+import { generateUniqueDestinationPartnerId } from "./destinationContext";
 import { PartnerLoginScreen } from "../eo/PartnerLoginScreen";
 
 let container: HTMLDivElement;
@@ -59,6 +60,95 @@ async function renderComponent(
 
 describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
   describe("1. Access Control & Authority Chain (A–F)", () => {
+    it("A. foo.bar@example.com and foo_bar@example.com get distinct partner IDs and cannot access each other's application", () => {
+      const idA = generateUniqueDestinationPartnerId("foo.bar@example.com");
+      const idB = generateUniqueDestinationPartnerId("foo_bar@example.com");
+      expect(idA).not.toBe(idB);
+
+      // Partner A submits an application
+      partnerSessionStore.setPartner({
+        id: idA,
+        email: "foo.bar@example.com",
+        name: "Partner A",
+        role: "DESTINATION",
+        businessName: "Kawasan A",
+      });
+
+      const resA = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: idA,
+        name: "Kawasan Hening A",
+        locationLabel: "Batu",
+        province: "Jawa Timur",
+        city: "Batu",
+        managementName: "Pokdarwis A",
+        contactPerson: "Person A",
+        phone: "08121111",
+        email: "foo.bar@example.com",
+        description: "Desc A",
+        highlights: ["Alam A"],
+        capacityPerSession: 15,
+        baseCostPerPerson: 100000,
+        guideReady: true,
+        guideReadinessEvidence: "Evidence A",
+        agreedToSop: true,
+      });
+      expect(resA.success).toBe(true);
+
+      // Partner B looks up application by partnerIdentityId
+      const appB = mockDestinationVerificationStore.getByPartnerId(idB);
+      expect(appB).toBeUndefined();
+    });
+
+    it("B. case normalization matches same prototype login identity after application exists", async () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_case_test",
+        email: "case.test@example.com",
+        name: "Case Partner",
+        role: "DESTINATION",
+        businessName: "Case Entity",
+      });
+
+      mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_case_test",
+        name: "Kawasan Case",
+        locationLabel: "Malang",
+        province: "Jawa Timur",
+        city: "Malang",
+        managementName: "Pokdarwis Case",
+        contactPerson: "Case Lead",
+        phone: "08129999",
+        email: "case.test@example.com",
+        description: "Desc",
+        highlights: ["H"],
+        capacityPerSession: 10,
+        baseCostPerPerson: 80000,
+        guideReady: true,
+        guideReadinessEvidence: "Ready",
+        agreedToSop: true,
+      });
+
+      const view = await renderComponent(createElement(PartnerLoginScreen));
+      const emailInput =
+        view.querySelector<HTMLInputElement>("#partner-email")!;
+      await act(async () => {
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeInputValueSetter?.call(emailInput, "Case.Test@Example.Com");
+        emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const submitBtn = view.querySelector<HTMLButtonElement>(
+        "button[type='submit']",
+      )!;
+      await act(async () => {
+        submitBtn.click();
+      });
+
+      expect(partnerSessionStore.get()?.id).toBe("dest_partner_case_test");
+    });
+
     it("A. unknown destination email must NOT login as approved Lereng Hijau partner", async () => {
       const view = await renderComponent(createElement(PartnerLoginScreen));
       const emailInput =

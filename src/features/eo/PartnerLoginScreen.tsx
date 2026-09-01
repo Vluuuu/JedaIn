@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
+import { generateUniqueDestinationPartnerId } from "../destination/destinationContext";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
@@ -14,15 +15,16 @@ export function PartnerLoginScreen() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanEmail = email.trim();
+    const normalizedEmail = cleanEmail.toLowerCase();
 
     if (role === "DESTINATION") {
       const destApp = mockDestinationVerificationStore
         .getAll()
         .find(
           (a) =>
-            a.partnerIdentityId === cleanEmail ||
-            a.applicationId === cleanEmail ||
-            a.contactEmail === cleanEmail,
+            a.partnerIdentityId.toLowerCase() === normalizedEmail ||
+            a.applicationId.toLowerCase() === normalizedEmail ||
+            a.contactEmail?.trim().toLowerCase() === normalizedEmail,
         );
 
       if (destApp) {
@@ -43,9 +45,10 @@ export function PartnerLoginScreen() {
         return;
       }
 
-      // If new/unknown destination identity: establish prototype DESTINATION session first
+      // If new/unknown destination identity: establish collision-safe prototype DESTINATION session first
+      const uniquePartnerId = generateUniqueDestinationPartnerId(cleanEmail);
       partnerSessionStore.setPartner({
-        id: `dest_partner_${cleanEmail.toLowerCase().replace(/[^a-z0-9]/g, "_")}`,
+        id: uniquePartnerId,
         email: cleanEmail,
         name: "Mitra Destinasi Baru",
         role: "DESTINATION",

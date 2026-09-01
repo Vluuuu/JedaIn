@@ -107,26 +107,9 @@ export function DestinationApplicationScreen() {
               type="button"
               variant="primary"
               size="md"
-              onClick={() => {
-                partnerSessionStore.setPartner({
-                  id: `dest_partner_${Date.now()}`,
-                  email: "mitra@destinasi.id",
-                  name: "Pengelola Destinasi Baru",
-                  role: "DESTINATION",
-                  businessName: "Entitas Destinasi",
-                });
-                navigate("/partner/apply/destination");
-              }}
-            >
-              Mulai Pendaftaran Destinasi
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
               onClick={() => navigate("/partner/login")}
             >
-              Masuk Akun
+              Daftar / Masuk Akun Destinasi
             </Button>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
+import { formatSessionDateTimeRange } from "./formatSessionDate";
 import { defaultPackageDetailAdapter } from "./mockAdapter";
 import { PackageHero } from "./PackageHero";
 import type {
@@ -435,25 +436,10 @@ export function PackageDetailScreen({
           {detail.upcomingSessionPreviews.length > 0 ? (
             <div className="package-detail-sessions-list">
               {detail.upcomingSessionPreviews.map((session) => {
-                const startDate = new Date(session.startAt);
-                const endDate = new Date(session.endAt);
-                const dateLabel = startDate.toLocaleDateString("id-ID", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  timeZone: "Asia/Jakarta",
-                });
-                const startTimeLabel = startDate.toLocaleTimeString("id-ID", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  timeZone: "Asia/Jakarta",
-                });
-                const endTimeLabel = endDate.toLocaleTimeString("id-ID", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  timeZone: "Asia/Jakarta",
-                });
+                const { dateLabel } = formatSessionDateTimeRange(
+                  session.startAt,
+                  session.endAt,
+                );
 
                 return (
                   <div
@@ -463,7 +449,7 @@ export function PackageDetailScreen({
                     <div className="package-detail-session-card__header">
                       <div>
                         <span className="package-detail-session-card__date">
-                          {dateLabel} • {startTimeLabel} - {endTimeLabel} WIB
+                          {dateLabel}
                         </span>
                       </div>
                       <span className="package-detail-session-card__status">

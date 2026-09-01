@@ -489,20 +489,23 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     expect(view.textContent).toContain("Belum ada jadwal tersedia");
   });
 
-  it("J. formats date and time deterministically in Asia/Jakarta (WIB) for real canonical fixtures", async () => {
-    // slow_green_day canonical fixture: 08:00 - 14:00 WIB
+  it("J. formats date and time deterministically in Asia/Jakarta (WIB) for real canonical fixtures (same-day and cross-date 2D1N)", async () => {
+    // slow_green_day canonical fixture: same-day 08:00 - 14:00 WIB
     const viewSgd = await renderPackageDetail("slow_green_day");
     expect(viewSgd.textContent).toContain("Sabtu, 12 September 2026");
     expect(viewSgd.textContent).toContain("08.00 - 14.00 WIB");
 
-    // mindful_morning canonical fixture: 06:30 - 10:00 WIB
+    // mindful_morning canonical fixture: same-day 06:30 - 10:00 WIB
     const viewMm = await renderPackageDetail("mindful_morning");
     expect(viewMm.textContent).toContain("Minggu, 13 September 2026");
     expect(viewMm.textContent).toContain("06.30 - 10.00 WIB");
 
-    // weekend_nature_reset canonical fixture: 2D1N local date/time
+    // weekend_nature_reset canonical fixture: cross-date 2D1N showing both local dates & times
     const viewWnr = await renderPackageDetail("weekend_nature_reset");
     expect(viewWnr.textContent).toContain("Sabtu, 26 September 2026");
-    expect(viewWnr.textContent).toContain("14.00 - 11.00 WIB");
+    expect(viewWnr.textContent).toContain("Minggu, 27 September 2026");
+    expect(viewWnr.textContent).toContain("14.00 WIB");
+    expect(viewWnr.textContent).toContain("11.00 WIB");
+    expect(viewWnr.textContent).not.toContain("14.00 - 11.00 WIB");
   });
 });

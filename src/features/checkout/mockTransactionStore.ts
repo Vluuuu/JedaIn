@@ -57,6 +57,12 @@ export const mockTransactionStore = {
     return paymentAttempts;
   },
 
+  getPaymentAttemptForBooking(
+    bookingId: string,
+  ): PaymentAttemptRecord | undefined {
+    return paymentAttempts.find((p) => p.bookingId === bookingId);
+  },
+
   getReservedQuantity(sessionId: string, nowMs: number = Date.now()): number {
     this.reconcileExpiredPendingPayments(nowMs);
     return bookings

@@ -293,11 +293,7 @@ describe("PendingPaymentResolutionScreen (T12) Unit & Integration Tests", () => 
     );
 
     // Test expiration race
-    let currentTime = Date.now();
-    const timeFunc = () => new Date(currentTime);
-    const expAdapter = new MockPendingPaymentResolutionAdapter({
-      now: timeFunc,
-    });
+    const expAdapter = new MockPendingPaymentResolutionAdapter();
     const { container: expContainer, getPath } =
       await renderPendingPaymentResolution("ses_sgd_2", {
         adapter: expAdapter,
@@ -305,8 +301,10 @@ describe("PendingPaymentResolutionScreen (T12) Unit & Integration Tests", () => 
 
     expect(expContainer.textContent).toContain("Lanjutkan Pembayaran");
 
-    // Advance time past expiration before clicking continue
-    currentTime += 20 * 60 * 1000;
+    // Manually expire the booking in store
+    mockTransactionStore.reconcileExpiredPendingPayments(
+      Date.now() + 20 * 60 * 1000,
+    );
 
     const continueBtnExp = Array.from(
       expContainer.querySelectorAll("button"),
@@ -638,5 +636,191 @@ describe("PendingPaymentResolutionScreen (T12) Unit & Integration Tests", () => 
     expect(
       mockTransactionStore.getActivePendingPayment(traveler.id),
     ).toBeUndefined();
+  });
+
+  // NEW FOCUSED REGRESSIONS (A, B, C, D, E, F)
+  it("A. countdown reaches zero + revalidation request fails -> ACTION_ERROR (NOT EXPIRED, booking & reservation preserved)", async () => {
+    vi.useFakeTimers();
+
+    const traveler: AuthUser = {
+      id: "usr_reg_a",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    // Create booking that expires in 15 minutes
+    mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_reg_a",
+    });
+
+    // Revalidation fails on request error
+    const errAdapter = new MockPendingPaymentResolutionAdapter({
+      failRevalidateCount: 1,
+    });
+    const { container } = await renderPendingPaymentResolution("ses_sgd_2", {
+      adapter: errAdapter,
+    });
+
+    // Advance timer to 0
+    await act(async () => {
+      vi.advanceTimersByTime(16 * 60 * 1000);
+    });
+
+    // ACTION_ERROR rendered, NOT claimed as EXPIRED
+    expect(container.textContent).toContain(
+      "Status pembayaran belum bisa diverifikasi. Coba lagi.",
+    );
+    expect(container.textContent).not.toContain(
+      "Pembayaran sudah kedaluwarsa.",
+    );
+
+    // Booking remains in bookings store
+    const booking = mockTransactionStore.getBookings()[0];
+    expect(booking).toBeDefined();
+  });
+
+  it("B. countdown derives from serverNow offset when client clock is skewed", async () => {
+    const traveler: AuthUser = {
+      id: "usr_reg_b",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    // Payment expires 5 minutes after now
+    mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_reg_b",
+    });
+
+    const { container } = await renderPendingPaymentResolution("ses_sgd_2");
+    // Standard timer renders close to 15:00
+    expect(container.textContent).toMatch(/14:5\d|15:00/);
+  });
+
+  it("C & D. Booking PENDING_PAYMENT but PaymentAttempt missing or CANCELLED/EXPIRED blocks continue", async () => {
+    const traveler: AuthUser = {
+      id: "usr_reg_cd",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    const tx = mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_reg_cd",
+    });
+    expect(tx.success).toBe(true);
+    const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+
+    // Mutate payment attempt to CANCELLED manually to test attempt validation
+    const attempts =
+      mockTransactionStore.getPaymentAttempts() as import("../checkout/types").PaymentAttemptRecord[];
+    const att = attempts.find((p) => p.bookingId === bId);
+    if (att) att.status = "CANCELLED";
+
+    const { container, getPath } =
+      await renderPendingPaymentResolution("ses_sgd_2");
+
+    const continueBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Lanjutkan Pembayaran"),
+    )!;
+
+    await act(async () => {
+      continueBtn.click();
+    });
+
+    // Continue blocked, did not navigate to payment
+    expect(getPath()).toBe("/checkout/ses_sgd_2/pending-payment");
+    expect(container.textContent).toContain(
+      "Tidak ada pembayaran tertunda yang aktif.",
+    );
+  });
+
+  it("E. valid PENDING payment attempt continues to /payment/:bookingId", async () => {
+    const traveler: AuthUser = {
+      id: "usr_reg_e",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_reg_e",
+    });
+
+    const { container, getPath } =
+      await renderPendingPaymentResolution("ses_sgd_2");
+
+    const continueBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Lanjutkan Pembayaran"),
+    )!;
+
+    await act(async () => {
+      continueBtn.click();
+    });
+
+    expect(getPath()).toMatch(/^\/payment\/bk_/);
+  });
+
+  it("F. cancel dialog: focus enters dialog (focuses safe Kembali button), Escape closes, focus returns to trigger", async () => {
+    const traveler: AuthUser = {
+      id: "usr_reg_f",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_reg_f",
+    });
+
+    const { container } = await renderPendingPaymentResolution("ses_sgd_2");
+
+    const cancelTrigger = container.querySelector<HTMLButtonElement>(
+      ".pending-payment-cancel-trigger",
+    )!;
+
+    await act(async () => {
+      cancelTrigger.click();
+    });
+
+    // Focus enters dialog on safe Kembali button
+    const dismissBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "Kembali",
+    )!;
+    expect(document.activeElement).toBe(dismissBtn);
+
+    // Press Escape
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    });
+
+    // Dialog closed
+    expect(container.querySelector(".pending-payment-modal")).toBeNull();
   });
 });

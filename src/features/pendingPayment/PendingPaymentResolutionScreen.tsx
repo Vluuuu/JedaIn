@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import { defaultPendingPaymentResolutionAdapter } from "./mockAdapter";
@@ -14,10 +14,13 @@ export interface PendingPaymentResolutionScreenProps {
   adapter?: PendingPaymentResolutionAdapter;
 }
 
-function calculateSecondsRemaining(expiresAtIso: string): number {
+function calculateSecondsRemaining(
+  expiresAtIso: string,
+  serverOffsetMs: number = 0,
+): number {
   const expiry = new Date(expiresAtIso).getTime();
-  const now = Date.now();
-  return Math.max(0, Math.ceil((expiry - now) / 1000));
+  const visualNow = Date.now() + serverOffsetMs;
+  return Math.max(0, Math.ceil((expiry - visualNow) / 1000));
 }
 
 export function PendingPaymentResolutionScreen({
@@ -34,6 +37,19 @@ export function PendingPaymentResolutionScreen({
   const [secondsRemaining, setSecondsRemaining] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverOffsetMs, setServerOffsetMs] = useState<number>(0);
+
+  // Focus management refs for Cancel Confirmation Dialog (Requirement 5)
+  const cancelTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const dismissBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  const handleDismissCancel = () => {
+    setStep("ACTIVE");
+    // Restore focus to cancel trigger button (Requirement 5)
+    setTimeout(() => {
+      cancelTriggerRef.current?.focus();
+    }, 0);
+  };
 
   const loadData = async (sid: string) => {
     setIsLoading(true);
@@ -44,7 +60,13 @@ export function PendingPaymentResolutionScreen({
       setStep(res.step);
       setSummary(res.summary);
       if (res.summary) {
-        setSecondsRemaining(calculateSecondsRemaining(res.summary.expiresAt));
+        const clientNow = Date.now();
+        const serverNowMs = Date.parse(res.summary.serverNow);
+        const offset = serverNowMs - clientNow;
+        setServerOffsetMs(offset);
+        setSecondsRemaining(
+          calculateSecondsRemaining(res.summary.expiresAt, offset),
+        );
       }
       if (res.errorMessage) {
         setErrorMessage(res.errorMessage);
@@ -72,7 +94,13 @@ export function PendingPaymentResolutionScreen({
         setStep(res.step);
         setSummary(res.summary);
         if (res.summary) {
-          setSecondsRemaining(calculateSecondsRemaining(res.summary.expiresAt));
+          const clientNow = Date.now();
+          const serverNowMs = Date.parse(res.summary.serverNow);
+          const offset = serverNowMs - clientNow;
+          setServerOffsetMs(offset);
+          setSecondsRemaining(
+            calculateSecondsRemaining(res.summary.expiresAt, offset),
+          );
         }
         if (res.errorMessage) {
           setErrorMessage(res.errorMessage);
@@ -94,34 +122,65 @@ export function PendingPaymentResolutionScreen({
     };
   }, [intendedSessionId, adapter]);
 
-  // Countdown timer effect
+  // Countdown timer effect using serverOffsetMs (Requirement 1 & 2)
   useEffect(() => {
-    if (!summary || step !== "ACTIVE") return;
+    if (!summary || (step !== "ACTIVE" && step !== "ACTION_ERROR")) return;
 
     const interval = setInterval(() => {
-      const remaining = calculateSecondsRemaining(summary.expiresAt);
+      const remaining = calculateSecondsRemaining(
+        summary.expiresAt,
+        serverOffsetMs,
+      );
       setSecondsRemaining(remaining);
 
       if (remaining <= 0) {
         clearInterval(interval);
-        // Revalidate through adapter rather than setting state directly from React
+        // Authoritative revalidation when visual countdown reaches zero
         if (summary.booking.bookingId) {
           adapter
             .revalidatePendingPayment(summary.booking.bookingId)
             .then((res) => {
               if (!res.stillActive) {
-                setStep("EXPIRED");
+                if (res.reason === "EXPIRED") {
+                  setStep("EXPIRED");
+                } else {
+                  setStep("NO_ACTIVE_PENDING");
+                }
               }
             })
             .catch(() => {
-              setStep("EXPIRED");
+              // Request error must NOT invent EXPIRED; remain in ACTION_ERROR (Requirement 1)
+              setStep("ACTION_ERROR");
+              setErrorMessage(
+                "Status pembayaran belum bisa diverifikasi. Coba lagi.",
+              );
             });
         }
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [summary, step, adapter]);
+  }, [summary, step, serverOffsetMs, adapter]);
+
+  // Focus management effect for modal (Requirement 5)
+  useEffect(() => {
+    if (step === "CANCEL_CONFIRM") {
+      // Focus safe "Kembali" action upon dialog open
+      dismissBtnRef.current?.focus();
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          handleDismissCancel();
+        }
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [step]);
 
   const handleContinuePayment = async () => {
     if (!summary || isSubmitting) return;
@@ -151,7 +210,7 @@ export function PendingPaymentResolutionScreen({
       setStep("NO_ACTIVE_PENDING");
     } catch (err: unknown) {
       setIsSubmitting(false);
-      setStep("ACTIVE");
+      setStep("ACTION_ERROR");
       setErrorMessage(
         err instanceof Error
           ? err.message
@@ -163,10 +222,6 @@ export function PendingPaymentResolutionScreen({
   const handleOpenCancelConfirm = () => {
     setErrorMessage(undefined);
     setStep("CANCEL_CONFIRM");
-  };
-
-  const handleDismissCancel = () => {
-    setStep("ACTIVE");
   };
 
   const handleConfirmCancel = async () => {
@@ -191,13 +246,13 @@ export function PendingPaymentResolutionScreen({
         return;
       }
 
-      setStep("ACTIVE");
+      setStep("ACTION_ERROR");
       setErrorMessage(
         res.message ?? "Pesanan belum bisa dibatalkan. Coba lagi.",
       );
     } catch (err: unknown) {
       setIsSubmitting(false);
-      setStep("ACTIVE");
+      setStep("ACTION_ERROR");
       setErrorMessage(
         err instanceof Error
           ? err.message
@@ -327,6 +382,7 @@ export function PendingPaymentResolutionScreen({
         </Button>
 
         <button
+          ref={cancelTriggerRef}
           type="button"
           className="pending-payment-cancel-trigger"
           disabled={isSubmitting}
@@ -356,15 +412,15 @@ export function PendingPaymentResolutionScreen({
               traveler lain.
             </p>
             <div className="pending-payment-modal__actions">
-              <Button
+              <button
+                ref={dismissBtnRef}
                 type="button"
-                variant="secondary"
-                size="md"
+                className="ui-button ui-button--secondary ui-button--md"
                 disabled={isSubmitting}
                 onClick={handleDismissCancel}
               >
                 Kembali
-              </Button>
+              </button>
               <Button
                 type="button"
                 variant="danger"

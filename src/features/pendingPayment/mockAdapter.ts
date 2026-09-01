@@ -144,6 +144,20 @@ export class MockPendingPaymentResolutionAdapter implements PendingPaymentResolu
       return { stillActive: false, reason: "EXPIRED", booking };
     }
 
+    // Validate associated PaymentAttempt (Requirement 3)
+    const attempt = mockTransactionStore.getPaymentAttemptForBooking(bookingId);
+    if (!attempt) {
+      return { stillActive: false, reason: "ALREADY_RESOLVED", booking };
+    }
+
+    if (attempt.status === "CANCELLED" || attempt.status === "EXPIRED") {
+      return { stillActive: false, reason: "ALREADY_RESOLVED", booking };
+    }
+
+    if (attempt.status !== "PENDING") {
+      return { stillActive: false, reason: "ALREADY_RESOLVED", booking };
+    }
+
     return { stillActive: true, booking };
   }
 

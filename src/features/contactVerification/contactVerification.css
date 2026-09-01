@@ -1,80 +1,89 @@
 .contact-verification-container {
   max-width: 32rem;
   margin: 0 auto;
-  padding: 1.5rem 1rem;
+  padding: var(--space-6) var(--space-4);
 }
 
 .contact-verification-topbar {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-6);
 }
 
 .contact-verification-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-slate-600, #475569);
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) 0;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color var(--motion-normal) var(--ease-standard);
+  border-radius: var(--radius-xs);
 }
 
 .contact-verification-back-btn:hover {
-  color: var(--color-teal-700, #0f766e);
+  color: var(--color-brand-primary);
+}
+
+.contact-verification-back-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .contact-verification-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-6);
 }
 
 .contact-verification-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-slate-900, #0f172a);
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.01em;
+  font-size: var(--font-size-heading-md);
+  line-height: var(--line-height-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .contact-verification-subtitle {
-  font-size: 0.875rem;
-  color: var(--color-slate-600, #475569);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+  color: var(--color-text-secondary);
   margin: 0;
-  line-height: 1.5;
 }
 
 .contact-verification-explanation {
-  font-size: 0.875rem;
-  color: var(--color-slate-600, #475569);
-  margin: 0 0 1.25rem 0;
-  line-height: 1.5;
-  background-color: var(--color-teal-50, #f0fdf4);
-  border: 1px solid var(--color-teal-200, #bbf7d0);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-5) 0;
+  background-color: var(--color-brand-primary-soft);
+  border: 1px solid var(--color-forest-200);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
 }
 
 .contact-verification-form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  background-color: #ffffff;
-  border: 1px solid var(--color-slate-200, #e2e8f0);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  gap: var(--space-5);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-xs);
 }
 
 .contact-verification-info-box {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  background-color: var(--color-slate-50, #f8fafc);
-  border: 1px solid var(--color-slate-200, #e2e8f0);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  color: var(--color-slate-700, #334155);
+  gap: var(--space-3);
+  background-color: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
 }
 
 .contact-verification-info-box p {
@@ -82,97 +91,145 @@
 }
 
 .contact-verification-change-phone-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
   background: none;
   border: none;
-  padding: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-teal-600, #0d9488);
+  padding: var(--space-2);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-brand-primary);
   cursor: pointer;
   text-decoration: underline;
   white-space: nowrap;
+  border-radius: var(--radius-xs);
+  transition: color var(--motion-normal) var(--ease-standard);
+}
+
+.contact-verification-change-phone-btn:hover {
+  color: var(--color-brand-primary-hover);
+}
+
+.contact-verification-change-phone-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .contact-verification-change-phone-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  text-decoration: none;
 }
 
 .contact-verification-resend-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.875rem;
+  gap: var(--space-3);
+  font-size: var(--font-size-body-sm);
 }
 
 .contact-verification-resend-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   background: none;
   border: none;
-  padding: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-teal-600, #0d9488);
+  padding: var(--space-2) var(--space-1);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-brand-primary);
   cursor: pointer;
+  border-radius: var(--radius-xs);
+  transition: color var(--motion-normal) var(--ease-standard);
+}
+
+.contact-verification-resend-btn:hover {
+  color: var(--color-brand-primary-hover);
+}
+
+.contact-verification-resend-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .contact-verification-resend-btn:disabled {
-  color: var(--color-slate-400, #94a3b8);
+  color: var(--color-control-disabled-text);
   cursor: not-allowed;
 }
 
 .contact-verification-countdown {
-  color: var(--color-slate-500, #64748b);
-  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label-sm);
+}
+
+.contact-verification-countdown-ready {
+  color: var(--color-success-text);
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
 }
 
 .contact-verification-submit-btn {
-  margin-top: 0.5rem;
+  margin-top: var(--space-2);
   width: 100%;
+  min-height: 44px;
 }
 
 .contact-verification-alert {
-  padding: 0.875rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.4;
-  margin-bottom: 1.25rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+  margin-bottom: var(--space-5);
 }
 
 .contact-verification-alert--error {
-  background-color: var(--color-rose-50, #fff1f2);
-  border: 1px solid var(--color-rose-200, #fecdd3);
-  color: var(--color-rose-800, #9f1239);
+  background-color: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
 }
 
 .contact-verification-state-box {
   text-align: center;
-  padding: 2.5rem 1.5rem;
-  background-color: #ffffff;
-  border: 1px solid var(--color-slate-200, #e2e8f0);
-  border-radius: 0.75rem;
-  margin-top: 1.5rem;
+  padding: var(--space-10) var(--space-6);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-6);
 }
 
 .contact-verification-state-box h2 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-slate-900, #0f172a);
-  margin: 0 0 0.5rem 0;
+  font-size: var(--font-size-heading-sm);
+  line-height: var(--line-height-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
 }
 
 .contact-verification-state-box p {
-  font-size: 0.875rem;
-  color: var(--color-slate-600, #475569);
-  margin: 0 0 1.25rem 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-5) 0;
 }
 
 @media (max-width: 640px) {
   .contact-verification-container {
-    padding: 1rem 1rem 2rem 1rem;
+    padding: var(--space-4) var(--space-4) var(--space-8) var(--space-4);
   }
 
   .contact-verification-form {
-    padding: 1.25rem;
+    padding: var(--space-5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-verification-back-btn,
+  .contact-verification-change-phone-btn,
+  .contact-verification-resend-btn {
+    transition: none;
   }
 }

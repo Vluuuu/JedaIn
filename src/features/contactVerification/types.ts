@@ -10,6 +10,16 @@ export interface OtpVerificationSession {
   phone: string;
   requestedAt: string;
   resendAvailableAt: string;
+  expiresAt: string;
+}
+
+export type OtpVerifyStatus =
+  "SUCCESS" | "INVALID_CODE" | "EXPIRED" | "STALE_SESSION" | "INVALID_IDENTITY";
+
+export interface OtpVerifyResult {
+  success: boolean;
+  status: OtpVerifyStatus;
+  message?: string;
 }
 
 export type ContactVerificationStep =
@@ -46,5 +56,6 @@ export interface ContactVerificationAdapter {
     phone: string;
     verificationId: string;
     code: string;
-  }): Promise<{ success: boolean }>;
+  }): Promise<OtpVerifyResult>;
+  invalidateOtpSession(travelerId: string): void;
 }

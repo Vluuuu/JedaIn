@@ -20,9 +20,7 @@ export function PhoneEntryForm({
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const formPhone = (formData.get("phone") as string) || phone;
-    const trimmed = formPhone.trim();
+    const trimmed = phone.trim();
     if (!trimmed || isDisabled || isSubmitting) return;
     await onRequestOtp(trimmed);
   };

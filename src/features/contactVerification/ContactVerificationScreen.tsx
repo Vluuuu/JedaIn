@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import { sessionStore } from "../onboarding/sessionStore";
 import { defaultContactVerificationAdapter } from "./mockAdapter";
-import { mockContactVerificationStore } from "./mockContactVerificationStore";
 import { OtpVerificationForm } from "./OtpVerificationForm";
 import { PhoneEntryForm } from "./PhoneEntryForm";
 import type {
@@ -73,6 +72,7 @@ export function ContactVerificationScreen({
     if (!user) return;
 
     setIsSubmitting(true);
+    setStep("REQUESTING_OTP");
     setErrorMessage(undefined);
 
     try {
@@ -100,13 +100,8 @@ export function ContactVerificationScreen({
     const user = sessionStore.get().user;
     if (!user || !activeSession) return;
 
-    // Session binding check: ensure travelerId & phone match activeSession
-    if (activeSession.travelerId !== user.id || activeSession.phone !== phone) {
-      setErrorMessage("Sesi verifikasi tidak valid. Minta kode baru.");
-      return;
-    }
-
     setIsSubmitting(true);
+    setStep("VERIFYING_OTP");
     setErrorMessage(undefined);
 
     try {
@@ -120,21 +115,17 @@ export function ContactVerificationScreen({
       setIsSubmitting(false);
 
       if (res.success) {
-        // 1. Mark verified in shared store
-        mockContactVerificationStore.markPhoneVerified(
-          user.id,
-          activeSession.phone,
-        );
-
-        // 2. Update current sessionStore.user.phone preserving all other identity & onboarding state
+        // Update current sessionStore.user.phone preserving all other identity & onboarding state
         sessionStore.updateUserContact(activeSession.phone);
 
-        // 3. Return to SAME Checkout context
+        // Return to SAME Checkout context
         navigate(`/checkout/${sessionId}`, { replace: true });
         return;
       }
 
-      setErrorMessage("Kode OTP tidak valid atau sudah kedaluwarsa.");
+      setErrorMessage(
+        res.message ?? "Kode OTP tidak valid atau sudah kedaluwarsa.",
+      );
       setStep("VERIFY_ERROR");
     } catch (err: unknown) {
       setIsSubmitting(false);
@@ -148,6 +139,10 @@ export function ContactVerificationScreen({
   };
 
   const handleChangePhone = () => {
+    const user = sessionStore.get().user;
+    if (user) {
+      adapter.invalidateOtpSession(user.id);
+    }
     setActiveSession(undefined);
     setErrorMessage(undefined);
     setStep("PHONE_ENTRY");
@@ -214,22 +209,25 @@ export function ContactVerificationScreen({
       )}
 
       {/* 2. Form States */}
-      {step === "PHONE_ENTRY" || step === "REQUEST_ERROR" ? (
+      {step === "PHONE_ENTRY" ||
+      step === "REQUESTING_OTP" ||
+      step === "REQUEST_ERROR" ? (
         <PhoneEntryForm
           initialPhone={phone}
           onRequestOtp={handleRequestOtp}
-          isSubmitting={isSubmitting}
-          isDisabled={isSubmitting}
+          isSubmitting={isSubmitting || step === "REQUESTING_OTP"}
+          isDisabled={isSubmitting || step === "REQUESTING_OTP"}
           error={step === "REQUEST_ERROR" ? errorMessage : undefined}
         />
       ) : activeSession ? (
         <OtpVerificationForm
+          key={activeSession.verificationId}
           session={activeSession}
           onVerifyOtp={handleVerifyOtp}
           onResendOtp={() => handleRequestOtp(activeSession.phone)}
           onChangePhone={handleChangePhone}
-          isSubmitting={isSubmitting}
-          isDisabled={isSubmitting}
+          isSubmitting={isSubmitting || step === "VERIFYING_OTP"}
+          isDisabled={isSubmitting || step === "VERIFYING_OTP"}
           error={step === "VERIFY_ERROR" ? errorMessage : undefined}
         />
       ) : null}

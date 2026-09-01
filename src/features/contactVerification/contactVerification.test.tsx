@@ -3,7 +3,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { App } from "../../App";
 import type { AuthUser } from "../auth/types";
 import { CheckoutScreen } from "../checkout/CheckoutScreen";
@@ -13,6 +13,7 @@ import { sessionStore } from "../onboarding/sessionStore";
 import { ContactVerificationScreen } from "./ContactVerificationScreen";
 import { MockContactVerificationAdapter } from "./mockAdapter";
 import { mockContactVerificationStore } from "./mockContactVerificationStore";
+import { mockOtpSessionStore } from "./mockOtpSessionStore";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -27,6 +28,8 @@ afterEach(async () => {
   sessionStore.reset();
   mockTransactionStore.reset();
   mockContactVerificationStore.reset();
+  mockOtpSessionStore.reset();
+  vi.useRealTimers();
 });
 
 function LocationObserver({
@@ -80,6 +83,7 @@ async function renderContactVerification(
 }
 
 describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
+  // ROUTE & CONTEXT TESTS
   it("1. valid Checkout session resolves T11 screen", async () => {
     sessionStore.setUser({
       id: "usr_val_1",
@@ -108,7 +112,108 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(container.textContent).toContain("Kembali ke Explore");
   });
 
-  it("3 & 4. protected shell reused, bottom nav hidden, single main landmark", async () => {
+  it("3. non-LIVE package session renders NOT_FOUND state", async () => {
+    sessionStore.setUser({ id: "usr_non_live", onboardingStatus: "COMPLETED" });
+    const adapter = new MockContactVerificationAdapter({
+      packages: [
+        {
+          id: "draft_pkg",
+          title: "Draft Pkg",
+          shortSummary: "Summary",
+          destinationName: "Dest",
+          locationLabel: "Loc",
+          visualAsset: "asset.jpg",
+          status: "DRAFT" as "LIVE",
+          verificationLevel: "BASIC",
+          pricePerPerson: 100000,
+          durationType: "HALF_DAY",
+          departureAreas: ["MALANG"],
+          experienceIntents: ["NATURE"],
+          activityTags: ["NATURE_SCENERY"],
+          suitableGroupTypes: ["SOLO"],
+          suitableGroupSizeBands: ["ONE"],
+          rating: 4.5,
+          popularityRank: 50,
+        },
+      ],
+      details: {
+        draft_pkg: {
+          packageId: "draft_pkg",
+          valueProposition: "Val prop",
+          highlights: [],
+          itinerary: [],
+          includedItems: [],
+          excludedItems: [],
+          safetyNotes: [],
+          cancellationPolicySummary: "Policy",
+          organizer: {
+            id: "org_1",
+            displayName: "Org",
+            guideStatus: "CONCEPT_ONLY",
+          },
+          destinationDetail: { overviewDescription: "Desc" },
+          upcomingSessionPreviews: [
+            {
+              sessionId: "ses_draft",
+              packageId: "draft_pkg",
+              startAt: "2026-09-12T08:00:00+07:00",
+              endAt: "2026-09-12T14:00:00+07:00",
+              status: "OPEN",
+              pricePerPerson: 100000,
+              remainingSlots: 5,
+            },
+          ],
+        },
+      },
+    });
+
+    const { container } = await renderContactVerification("ses_draft", {
+      adapter,
+    });
+    expect(container.textContent).toContain("Checkout tidak ditemukan.");
+  });
+
+  it("4. detail or session packageId mismatch renders NOT_FOUND state", async () => {
+    sessionStore.setUser({ id: "usr_mismatch", onboardingStatus: "COMPLETED" });
+    const adapter = new MockContactVerificationAdapter({
+      details: {
+        slow_green_day: {
+          packageId: "slow_green_day",
+          valueProposition: "Val prop",
+          highlights: [],
+          itinerary: [],
+          includedItems: [],
+          excludedItems: [],
+          safetyNotes: [],
+          cancellationPolicySummary: "Policy",
+          organizer: {
+            id: "org_1",
+            displayName: "Org",
+            guideStatus: "CONCEPT_ONLY",
+          },
+          destinationDetail: { overviewDescription: "Desc" },
+          upcomingSessionPreviews: [
+            {
+              sessionId: "ses_mismatched",
+              packageId: "other_package", // MISMATCH!
+              startAt: "2026-09-12T08:00:00+07:00",
+              endAt: "2026-09-12T14:00:00+07:00",
+              status: "OPEN",
+              pricePerPerson: 275000,
+              remainingSlots: 5,
+            },
+          ],
+        },
+      },
+    });
+
+    const { container } = await renderContactVerification("ses_mismatched", {
+      adapter,
+    });
+    expect(container.textContent).toContain("Checkout tidak ditemukan.");
+  });
+
+  it("5. protected shell reused, bottom nav hidden, single main landmark", async () => {
     sessionStore.setUser({
       id: "usr_shell",
       onboardingStatus: "COMPLETED",
@@ -133,7 +238,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(container.querySelectorAll("main").length).toBe(1);
   });
 
-  it("5. direct reload works from sessionId URL parameter", async () => {
+  it("6. direct reload works from sessionId URL parameter", async () => {
     sessionStore.setUser({
       id: "usr_reload_contact",
       phone: "081999000",
@@ -148,7 +253,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(input?.value).toBe("081999000");
   });
 
-  it("6. back button returns to same /checkout/:sessionId without verifying", async () => {
+  it("7. back button returns to same /checkout/:sessionId without verifying", async () => {
     sessionStore.setUser({
       id: "usr_back_test",
       phone: "081999000",
@@ -174,7 +279,8 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     ).toBe(false);
   });
 
-  it("7. existing AuthUser.phone pre-fills input field", async () => {
+  // PHONE STATE & VALIDATION TESTS
+  it("8. existing AuthUser.phone pre-fills input field", async () => {
     sessionStore.setUser({
       id: "usr_prefill",
       name: "Prefill User",
@@ -189,7 +295,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(phoneInput.value).toBe("08123456789");
   });
 
-  it("8. missing AuthUser.phone starts empty", async () => {
+  it("9. missing AuthUser.phone starts empty", async () => {
     sessionStore.setUser({
       id: "usr_empty_phone",
       name: "Empty Phone User",
@@ -204,7 +310,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(phoneInput.value).toBe("");
   });
 
-  it("9. empty phone submission is blocked", async () => {
+  it("10. empty phone submission is blocked", async () => {
     sessionStore.setUser({
       id: "usr_empty_block",
       phone: undefined,
@@ -218,7 +324,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(submitBtn.disabled).toBe(true);
   });
 
-  it("10. recoverable request error preserves phone input and allows retry", async () => {
+  it("11. recoverable request error preserves phone input and allows retry", async () => {
     sessionStore.setUser({
       id: "usr_req_err",
       phone: "08111222333",
@@ -251,7 +357,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(container.textContent).toContain("Kode verifikasi telah dikirim ke");
   });
 
-  it("11 & 14. change phone after OTP request resets active session and requires new OTP for new phone", async () => {
+  it("12. change phone button invalidates active OTP session and resets to phone entry", async () => {
     sessionStore.setUser({
       id: "usr_change_phone",
       phone: "0811111111",
@@ -269,6 +375,9 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     });
 
     expect(container.textContent).toContain("Kode verifikasi telah dikirim ke");
+    expect(
+      mockOtpSessionStore.getActiveSession("usr_change_phone"),
+    ).toBeDefined();
 
     // Click "Ubah nomor"
     const changeBtn = container.querySelector<HTMLButtonElement>(
@@ -280,9 +389,14 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
 
     expect(container.querySelector("#contact-phone-input")).not.toBeNull();
     expect(container.querySelector("#contact-otp-input")).toBeNull();
+    // Authoritative session invalidated!
+    expect(
+      mockOtpSessionStore.getActiveSession("usr_change_phone"),
+    ).toBeUndefined();
   });
 
-  it("12 & 13. phone presence alone is not verified & verification bound to exact Traveler + phone", () => {
+  // SHARED VERIFICATION STORE TESTS
+  it("13. phone presence alone is not verified & verification bound to exact Traveler + phone", () => {
     const travelerId = "usr_bound_test";
     const phone = "08123456789";
 
@@ -305,7 +419,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     ).toBe(false);
   });
 
-  it("15 & 17. already-verified exact phone direct entry immediately returns to Checkout", async () => {
+  it("14. already-verified exact phone direct entry immediately returns to Checkout", async () => {
     const traveler: AuthUser = {
       id: "usr_already_ver",
       phone: "08123456789",
@@ -323,7 +437,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(getPath()).toBe("/checkout/ses_sgd_1");
   });
 
-  it("16 & 18. successful verification updates shared store & current sessionStore.user.phone preserving onboarding state", async () => {
+  it("15. successful verification updates sessionStore.user.phone and returns to Checkout", async () => {
     const traveler: AuthUser = {
       id: "usr_success_update",
       name: "Update User",
@@ -351,7 +465,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
     await act(async () => {
       otpInput.value = "123456";
-      otpInput.dispatchEvent(new Event("input", { bubbles: true }));
+      otpInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
     const verifyBtn = container.querySelector<HTMLButtonElement>(
@@ -377,15 +491,17 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     ]);
   });
 
-  it("19, 21 & 22. resend countdown derives from timestamp and resend action enables after cooldown", async () => {
+  // RESEND & TIMER ACCESSIBILITY (WITH FAKE TIMERS)
+  it("16. resend countdown derives from timestamp without 1s warnings and resend enables after cooldown", async () => {
+    vi.useFakeTimers();
+
     sessionStore.setUser({
       id: "usr_resend_test",
       phone: "081222333444",
       onboardingStatus: "COMPLETED",
     });
 
-    // Short cooldown of 1 second for test
-    const adapter = new MockContactVerificationAdapter({ cooldownSeconds: 1 });
+    const adapter = new MockContactVerificationAdapter({ cooldownSeconds: 30 });
     const { container } = await renderContactVerification("ses_sgd_1", {
       adapter,
     });
@@ -401,25 +517,256 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       ".contact-verification-resend-btn",
     )!;
     expect(resendBtn.disabled).toBe(true);
+    expect(container.textContent).toContain("Sisa waktu: 30 dtk");
 
-    // Wait 1.1s for cooldown to elapse
-    await new Promise((resolve) => setTimeout(resolve, 1100));
-
+    // Advance 15 seconds
     await act(async () => {
-      // Trigger a re-render tick
+      vi.advanceTimersByTime(15000);
     });
+    expect(container.textContent).toContain("Sisa waktu: 15 dtk");
+    expect(resendBtn.disabled).toBe(true);
 
+    // Advance remaining 15 seconds
+    await act(async () => {
+      vi.advanceTimersByTime(15000);
+    });
     expect(resendBtn.disabled).toBe(false);
+    expect(container.textContent).toContain("Kirim ulang kode tersedia");
   });
 
-  it("25 & 26. valid OTP verifies, invalid OTP remains recoverable", async () => {
+  it("17. resend clears stale entered OTP and creates a new active verificationId", async () => {
+    vi.useFakeTimers();
+
     sessionStore.setUser({
-      id: "usr_otp_val",
+      id: "usr_resend_new_id",
+      phone: "081222333444",
+      onboardingStatus: "COMPLETED",
+    });
+
+    const adapter = new MockContactVerificationAdapter({ cooldownSeconds: 5 });
+    const { container } = await renderContactVerification("ses_sgd_1", {
+      adapter,
+    });
+
+    const submitBtn = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-submit-btn",
+    )!;
+    await act(async () => {
+      submitBtn.click();
+    });
+
+    const firstSession =
+      mockOtpSessionStore.getActiveSession("usr_resend_new_id");
+    expect(firstSession).toBeDefined();
+
+    const otpInput =
+      container.querySelector<HTMLInputElement>("#contact-otp-input")!;
+    await act(async () => {
+      otpInput.value = "111111";
+      otpInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(otpInput.value).toBe("111111");
+
+    // Advance cooldown timer to enable resend
+    await act(async () => {
+      vi.advanceTimersByTime(6000);
+    });
+
+    const resendBtn = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-resend-btn",
+    )!;
+    await act(async () => {
+      resendBtn.click();
+    });
+
+    const secondSession =
+      mockOtpSessionStore.getActiveSession("usr_resend_new_id");
+    expect(secondSession).toBeDefined();
+    expect(secondSession?.verificationId).not.toBe(
+      firstSession?.verificationId,
+    );
+
+    // Stale OTP cleared in UI
+    const refreshedOtpInput =
+      container.querySelector<HTMLInputElement>("#contact-otp-input")!;
+    expect(refreshedOtpInput.value).toBe("");
+  });
+
+  // REAL ADAPTER TESTS (BLOCKER 1, 6, 7 & 18)
+  it("18. direct adapter: random verificationId with correct OTP is rejected", async () => {
+    sessionStore.setUser({ id: "usr_ad_1", onboardingStatus: "COMPLETED" });
+    const adapter = new MockContactVerificationAdapter();
+
+    // Create session
+    await adapter.requestOtp({ travelerId: "usr_ad_1", phone: "08123456789" });
+
+    // Verify with random verificationId
+    const res = await adapter.verifyOtp({
+      travelerId: "usr_ad_1",
+      phone: "08123456789",
+      verificationId: "random_votp_fake_999",
+      code: "123456",
+    });
+
+    expect(res.success).toBe(false);
+    expect(res.status).toBe("STALE_SESSION");
+    expect(
+      mockContactVerificationStore.isPhoneVerified("usr_ad_1", "08123456789"),
+    ).toBe(false);
+  });
+
+  it("19. direct adapter: wrong travelerId or wrong phone is rejected", async () => {
+    sessionStore.setUser({ id: "usr_ad_2", onboardingStatus: "COMPLETED" });
+    const adapter = new MockContactVerificationAdapter();
+
+    const sess = await adapter.requestOtp({
+      travelerId: "usr_ad_2",
+      phone: "08123456789",
+    });
+
+    // Wrong phone
+    const resPhone = await adapter.verifyOtp({
+      travelerId: "usr_ad_2",
+      phone: "08999999999",
+      verificationId: sess.verificationId,
+      code: "123456",
+    });
+    expect(resPhone.success).toBe(false);
+    expect(resPhone.status).toBe("STALE_SESSION");
+
+    // Wrong traveler
+    const resTrav = await adapter.verifyOtp({
+      travelerId: "usr_different_attacker",
+      phone: "08123456789",
+      verificationId: sess.verificationId,
+      code: "123456",
+    });
+    expect(resTrav.success).toBe(false);
+    expect(resTrav.status).toBe("INVALID_IDENTITY");
+  });
+
+  it("20. direct adapter: resend invalidates old verificationId", async () => {
+    sessionStore.setUser({ id: "usr_ad_3", onboardingStatus: "COMPLETED" });
+    const adapter = new MockContactVerificationAdapter();
+
+    const firstSess = await adapter.requestOtp({
+      travelerId: "usr_ad_3",
+      phone: "08123456789",
+    });
+
+    // Resend
+    await adapter.requestOtp({
+      travelerId: "usr_ad_3",
+      phone: "08123456789",
+    });
+
+    // Try to verify using first verificationId
+    const res = await adapter.verifyOtp({
+      travelerId: "usr_ad_3",
+      phone: "08123456789",
+      verificationId: firstSess.verificationId,
+      code: "123456",
+    });
+
+    expect(res.success).toBe(false);
+    expect(res.status).toBe("STALE_SESSION");
+  });
+
+  it("21. direct adapter: invalidateOtpSession invalidates session immediately", async () => {
+    sessionStore.setUser({ id: "usr_ad_4", onboardingStatus: "COMPLETED" });
+    const adapter = new MockContactVerificationAdapter();
+
+    const sess = await adapter.requestOtp({
+      travelerId: "usr_ad_4",
+      phone: "08123456789",
+    });
+
+    adapter.invalidateOtpSession("usr_ad_4");
+
+    const res = await adapter.verifyOtp({
+      travelerId: "usr_ad_4",
+      phone: "08123456789",
+      verificationId: sess.verificationId,
+      code: "123456",
+    });
+
+    expect(res.success).toBe(false);
+    expect(res.status).toBe("STALE_SESSION");
+  });
+
+  it("22. direct adapter: expired session is rejected", async () => {
+    sessionStore.setUser({ id: "usr_ad_5", onboardingStatus: "COMPLETED" });
+    // Expire immediately (0s)
+    const adapter = new MockContactVerificationAdapter({ expirySeconds: -1 });
+
+    const sess = await adapter.requestOtp({
+      travelerId: "usr_ad_5",
+      phone: "08123456789",
+    });
+
+    const res = await adapter.verifyOtp({
+      travelerId: "usr_ad_5",
+      phone: "08123456789",
+      verificationId: sess.verificationId,
+      code: "123456",
+    });
+
+    expect(res.success).toBe(false);
+    expect(res.status).toBe("EXPIRED");
+  });
+
+  it("23. direct adapter: successful verify consumes session so it cannot verify twice", async () => {
+    sessionStore.setUser({ id: "usr_ad_6", onboardingStatus: "COMPLETED" });
+    const adapter = new MockContactVerificationAdapter();
+
+    const sess = await adapter.requestOtp({
+      travelerId: "usr_ad_6",
+      phone: "08123456789",
+    });
+
+    const res1 = await adapter.verifyOtp({
+      travelerId: "usr_ad_6",
+      phone: "08123456789",
+      verificationId: sess.verificationId,
+      code: "123456",
+    });
+    expect(res1.success).toBe(true);
+
+    // Second verify with same session ID fails
+    const res2 = await adapter.verifyOtp({
+      travelerId: "usr_ad_6",
+      phone: "08123456789",
+      verificationId: sess.verificationId,
+      code: "123456",
+    });
+    expect(res2.success).toBe(false);
+    expect(res2.status).toBe("STALE_SESSION");
+  });
+
+  it("24. direct adapter: arbitrary unauthenticated traveler cannot request OTP", async () => {
+    sessionStore.setUser(null); // No user
+    const adapter = new MockContactVerificationAdapter();
+
+    await expect(
+      adapter.requestOtp({ travelerId: "usr_attacker", phone: "08123456789" }),
+    ).rejects.toThrow("Identitas pengguna tidak valid");
+  });
+
+  // REQUEST / VERIFY ERROR & RETRY TESTS
+  it("25. verify request failure preserves active OTP session and allows retry", async () => {
+    sessionStore.setUser({
+      id: "usr_v_fail",
       phone: "08123456789",
       onboardingStatus: "COMPLETED",
     });
 
-    const { container } = await renderContactVerification("ses_sgd_1");
+    const adapter = new MockContactVerificationAdapter({ failVerifyCount: 1 });
+    const { container, getPath } = await renderContactVerification(
+      "ses_sgd_1",
+      {
+        adapter,
+      },
+    );
 
     const submitBtn = container.querySelector<HTMLButtonElement>(
       ".contact-verification-submit-btn",
@@ -430,11 +777,9 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
 
     const otpInput =
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
-
-    // Wrong OTP
     await act(async () => {
-      otpInput.value = "999999";
-      otpInput.dispatchEvent(new Event("input", { bubbles: true }));
+      otpInput.value = "123456";
+      otpInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
     const verifyBtn = container.querySelector<HTMLButtonElement>(
@@ -444,21 +789,20 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       verifyBtn.click();
     });
 
-    expect(container.textContent).toContain("Kode OTP tidak valid");
+    // First attempt fails with network error
+    expect(container.textContent).toContain("Verifikasi belum bisa diproses");
+    expect(mockOtpSessionStore.getActiveSession("usr_v_fail")).toBeDefined();
 
-    // Correct OTP
-    await act(async () => {
-      otpInput.value = "123456";
-      otpInput.dispatchEvent(new Event("input", { bubbles: true }));
-    });
+    // Second attempt succeeds
     await act(async () => {
       verifyBtn.click();
     });
 
-    expect(container.textContent).toContain("Checkout Screen Target");
+    expect(getPath()).toBe("/checkout/ses_sgd_1");
   });
 
-  it("30, 31, 32 & 33. ALL T11 actions create ZERO bookings, ZERO payment attempts, and ZERO reserved quantity", async () => {
+  // TRANSACTION SAFETY PROOF
+  it("26. ALL T11 actions create ZERO bookings, ZERO payment attempts, and ZERO reserved quantity", async () => {
     sessionStore.setUser({
       id: "usr_tx_safety",
       phone: "081999888777",
@@ -484,7 +828,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
     await act(async () => {
       otpInput.value = "123456";
-      otpInput.dispatchEvent(new Event("input", { bubbles: true }));
+      otpInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
     const verifyBtn = container.querySelector<HTMLButtonElement>(
@@ -499,7 +843,8 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(0);
   });
 
-  it("34, 35, 36 & 37. End-to-End T10 -> T11 -> verify -> T10 shows Terverifikasi", async () => {
+  // E2E T10 -> T11 -> T10 INTEGRATION
+  it("27. End-to-End T10 -> T11 -> verify -> T10 shows Terverifikasi", async () => {
     const traveler: AuthUser = {
       id: "usr_e2e_contact",
       name: "E2E Traveler",
@@ -578,7 +923,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
     await act(async () => {
       otpInput.value = "123456";
-      otpInput.dispatchEvent(new Event("input", { bubbles: true }));
+      otpInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
     const verifyOtpBtn = container.querySelector<HTMLButtonElement>(
@@ -594,7 +939,8 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(container.textContent).toContain("Terverifikasi");
   });
 
-  it("38, 39 & 40. accessible inputs, tel semantics, and one-time-code autocomplete", async () => {
+  // ACCESSIBILITY & SEMANTICS
+  it("28. accessible inputs, tel semantics, and one-time-code autocomplete", async () => {
     sessionStore.setUser({
       id: "usr_a11y",
       phone: "08123456789",

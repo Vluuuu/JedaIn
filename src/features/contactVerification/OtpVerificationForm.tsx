@@ -46,10 +46,12 @@ export function OtpVerificationForm({
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const formOtp = (formData.get("otp") as string) || otpCode;
+    const inputEl =
+      e.currentTarget.querySelector<HTMLInputElement>('input[name="otp"]');
+    const formOtp = inputEl && inputEl.value !== "" ? inputEl.value : otpCode;
     const trimmed = formOtp.trim();
-    if (!trimmed || isDisabled || isSubmitting) return;
+    if (!trimmed) return;
+    setOtpCode(trimmed);
     await onVerifyOtp(trimmed);
   };
 
@@ -86,7 +88,7 @@ export function OtpVerificationForm({
         placeholder="Masukkan 6 digit kode OTP"
         value={otpCode}
         onChange={(e) => setOtpCode(e.target.value)}
-        disabled={isDisabled || isSubmitting}
+        disabled={isSubmitting}
         error={error}
         required
       />
@@ -100,9 +102,16 @@ export function OtpVerificationForm({
         >
           Kirim ulang kode
         </button>
-        {secondsRemaining > 0 && (
-          <span className="contact-verification-countdown" aria-live="polite">
+        {secondsRemaining > 0 ? (
+          <span className="contact-verification-countdown" aria-live="off">
             Sisa waktu: <strong>{secondsRemaining} dtk</strong>
+          </span>
+        ) : (
+          <span
+            className="contact-verification-countdown-ready"
+            aria-live="polite"
+          >
+            Kirim ulang kode tersedia
           </span>
         )}
       </div>
@@ -113,7 +122,7 @@ export function OtpVerificationForm({
         size="lg"
         loading={isSubmitting}
         loadingLabel="Memverifikasi..."
-        disabled={isDisabled}
+        disabled={isSubmitting}
         className="contact-verification-submit-btn"
       >
         Verifikasi & Lanjut

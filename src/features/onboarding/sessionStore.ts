@@ -61,6 +61,17 @@ export const sessionStore = {
     };
   },
 
+  updateUserContact(phone: string): void {
+    if (!currentSession.user) return;
+    currentSession = {
+      ...currentSession,
+      user: {
+        ...currentSession.user,
+        phone,
+      },
+    };
+  },
+
   setOnboardingStatus(status: OnboardingStatus): void {
     currentSession = {
       ...currentSession,

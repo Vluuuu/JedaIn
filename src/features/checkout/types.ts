@@ -23,7 +23,8 @@ export interface CheckoutContactRequirement {
 
 export interface PendingPaymentHandoff {
   bookingId: string;
-  packageName: string;
+  packageId: string;
+  packageName?: string;
   amount: number;
   expiresAt: string;
 }
@@ -43,7 +44,7 @@ export interface CheckoutSubmitInput {
   travelerId: string;
   sessionId: string;
   participantCount: number;
-  expectedUnitPricePerPerson?: number;
+  expectedUnitPricePerPerson: number;
   cancellationPolicyAcknowledged: boolean;
   idempotencyKey: string;
 }

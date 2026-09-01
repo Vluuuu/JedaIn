@@ -65,7 +65,7 @@ export const mockTransactionStore = {
 
     return {
       bookingId: active.bookingId,
-      packageName: active.packageId,
+      packageId: active.packageId,
       amount: active.totalAmount,
       expiresAt: active.paymentExpiresAt,
     };

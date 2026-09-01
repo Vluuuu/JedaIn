@@ -89,11 +89,14 @@ export function CheckoutScreen({
       return;
     }
 
+    const currentPrice = viewModel.session?.pricePerPerson;
+    if (currentPrice === undefined) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const currentPrice = viewModel.session?.pricePerPerson;
-
       const res = await adapter.submitCheckout({
         travelerId: viewModel.traveler.id,
         sessionId,
@@ -144,7 +147,8 @@ export function CheckoutScreen({
           res.message ??
             "Slot yang tersedia berubah. Sesuaikan jumlah peserta lalu coba lagi.",
         );
-        // BLOCKER 10: CAPACITY-RACE UI FIX — refresh while preserving warning notice & participant count
+        // BLOCKER 2: CAPACITY RACE RESULT MUST UPDATE UI TRUTHFULLY
+        // Refresh checkout while preserving notice & participant count
         loadCheckout(sessionId, true);
         return;
       }
@@ -201,11 +205,58 @@ export function CheckoutScreen({
     );
   }
 
+  if (viewModel.state === "NOT_FOUND") {
+    return (
+      <div className="checkout-container">
+        <div className="checkout-state-box">
+          <h2>Jadwal checkout tidak ditemukan.</h2>
+          <p>
+            Experience atau jadwal ini mungkin sudah tidak tersedia atau
+            tautannya tidak valid.
+          </p>
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => navigate("/explore")}
+          >
+            Kembali ke Explore
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // BLOCKER 4: DIRECT SESSION_UNAVAILABLE UI
   if (
-    viewModel.state === "NOT_FOUND" ||
-    !viewModel.package ||
-    !viewModel.session
+    viewModel.state === "SESSION_UNAVAILABLE" ||
+    (viewModel.session &&
+      (viewModel.session.remainingSlots === undefined ||
+        viewModel.session.remainingSlots <= 0 ||
+        viewModel.session.status !== "OPEN"))
   ) {
+    const pkgId = viewModel.package?.id;
+    return (
+      <div className="checkout-container">
+        <div className="checkout-state-box">
+          <h2>Jadwal ini baru saja tidak tersedia.</h2>
+          <p>Pilih jadwal lain untuk melanjutkan pemesanan.</p>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() =>
+              pkgId
+                ? navigate(`/packages/${pkgId}/sessions`)
+                : navigate("/explore")
+            }
+          >
+            Pilih Jadwal Lain
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!viewModel.package || !viewModel.session) {
     return (
       <div className="checkout-container">
         <div className="checkout-state-box">
@@ -235,19 +286,18 @@ export function CheckoutScreen({
   } = viewModel;
 
   const maxSelectableParticipants = session.remainingSlots ?? 99;
-  const unitPrice = session.pricePerPerson; // BLOCKER 1: EXACT SESSION PRICE ONLY
+  const unitPrice = session.pricePerPerson; // EXACT SESSION PRICE ONLY
   const totalAmount = unitPrice ? unitPrice * participantCount : 0;
   const formattedTotalPrice = unitPrice
     ? `Rp${totalAmount.toLocaleString("id-ID")}`
     : "Rp-";
 
-  // BLOCKER 10: CTA disabled while participantCount > latest selectable max or price is missing
+  // CTA disabled while participantCount > latest selectable max or price is missing
   const isSubmitDisabled =
     isSubmitting ||
     !policyAcknowledged ||
     unitPrice === undefined ||
     participantCount > maxSelectableParticipants ||
-    viewModel.state === "SESSION_UNAVAILABLE" ||
     viewModel.state === "PRICE_UNAVAILABLE";
 
   return (

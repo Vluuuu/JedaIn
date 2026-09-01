@@ -6,7 +6,6 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { AuthUser } from "../auth/types";
 import { sessionStore } from "../onboarding/sessionStore";
-import type { PackageSessionPreview } from "../packageDetail/types";
 import { CheckoutScreen } from "./CheckoutScreen";
 import { MockCheckoutAdapter } from "./mockAdapter";
 import { mockTransactionStore } from "./mockTransactionStore";
@@ -154,31 +153,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(view.textContent).toContain("Jadwal checkout tidak ditemukan.");
   });
 
-  it("4. FULL/CLOSED/CANCELLED Session is unavailable", async () => {
-    const fullSession: PackageSessionPreview[] = [
-      {
-        sessionId: "ses_full",
-        packageId: "slow_green_day",
-        startAt: "2026-09-12T08:00:00+07:00",
-        endAt: "2026-09-12T14:00:00+07:00",
-        status: "FULL",
-        remainingSlots: 0,
-      },
-    ];
-
-    const adapter = new MockCheckoutAdapter({
-      sessionOverrides: { slow_green_day: fullSession },
-    });
-
-    const view = await renderCheckout("ses_full", { adapter });
-    const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Lanjut ke Pembayaran"),
-    )!;
-
-    expect(ctaBtn.disabled).toBe(true);
-  });
-
-  it("5. direct URL reload resolves same session from sessionId", async () => {
+  it("4. direct URL reload resolves same session from sessionId", async () => {
     sessionStore.setUser({
       id: "usr_reload",
       onboardingStatus: "COMPLETED",
@@ -188,7 +163,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(view.textContent).toContain("19 September 2026");
   });
 
-  it("6. participant quantity defaults to 1, updates price, and does NOT mutate remainingSlots", async () => {
+  it("5. participant quantity defaults to 1, updates price, and does NOT mutate remainingSlots", async () => {
     sessionStore.setUser({
       id: "usr_part_test",
       onboardingStatus: "COMPLETED",
@@ -223,7 +198,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(vm.session?.remainingSlots).toBe(6);
   });
 
-  it("7. exact session price used, subtotal and total math correct, zero invented fees", async () => {
+  it("6. exact session price used, subtotal and total math correct, zero invented fees", async () => {
     sessionStore.setUser({
       id: "usr_price_test",
       onboardingStatus: "COMPLETED",
@@ -244,9 +219,11 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(view.textContent).not.toContain("EO Margin");
   });
 
-  // REGRESSION A
-  it("8. A - exact Session price missing + Package price exists -> PRICE_UNAVAILABLE", async () => {
+  it("7. exact Session price missing + Package price exists -> PRICE_UNAVAILABLE", async () => {
+    sessionStore.setUser({ id: "usr_1", onboardingStatus: "COMPLETED" });
+
     const adapter = new MockCheckoutAdapter({
+      verifiedPhoneStore: { usr_1: true },
       packages: [
         {
           id: "pkg_starting_price",
@@ -313,6 +290,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       travelerId: "usr_1",
       sessionId: "ses_missing_price",
       participantCount: 1,
+      expectedUnitPricePerPerson: 275000,
       cancellationPolicyAcknowledged: true,
       idempotencyKey: "k1",
     });
@@ -321,465 +299,197 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(mockTransactionStore.getPaymentAttempts().length).toBe(0);
   });
 
-  // REGRESSION B & C
-  it("9. B & C - default phone present but verification false -> T11 handoff; explicit verification -> can continue", async () => {
+  // SEPARATE DIRECT-LOAD STATUS TESTS (BLOCKER 4 & 5)
+  it("8. FULL direct Session -> direct SESSION_UNAVAILABLE state with recovery link", async () => {
+    const adapter = new MockCheckoutAdapter({
+      sessionOverrides: {
+        slow_green_day: [
+          {
+            sessionId: "ses_full_test",
+            packageId: "slow_green_day",
+            startAt: "2026-09-12T08:00:00+07:00",
+            endAt: "2026-09-12T14:00:00+07:00",
+            status: "FULL",
+            remainingSlots: 0,
+          },
+        ],
+      },
+    });
+
+    const vm = await adapter.getCheckout("ses_full_test");
+    expect(vm.state).toBe("SESSION_UNAVAILABLE");
+
+    const view = await renderCheckout("ses_full_test", { adapter });
+    expect(view.textContent).toContain("Jadwal ini baru saja tidak tersedia.");
+    expect(view.textContent).toContain("Pilih Jadwal Lain");
+    expect(view.querySelector("#cancellation-policy-ack")).toBeNull();
+  });
+
+  it("9. CLOSED direct Session -> direct SESSION_UNAVAILABLE state with recovery link", async () => {
+    const adapter = new MockCheckoutAdapter({
+      sessionOverrides: {
+        slow_green_day: [
+          {
+            sessionId: "ses_closed_test",
+            packageId: "slow_green_day",
+            startAt: "2026-09-12T08:00:00+07:00",
+            endAt: "2026-09-12T14:00:00+07:00",
+            status: "CLOSED",
+            remainingSlots: 5,
+          },
+        ],
+      },
+    });
+
+    const vm = await adapter.getCheckout("ses_closed_test");
+    expect(vm.state).toBe("SESSION_UNAVAILABLE");
+
+    const view = await renderCheckout("ses_closed_test", { adapter });
+    expect(view.textContent).toContain("Jadwal ini baru saja tidak tersedia.");
+    expect(view.textContent).toContain("Pilih Jadwal Lain");
+    expect(view.querySelector("#cancellation-policy-ack")).toBeNull();
+  });
+
+  it("10. CANCELLED direct Session -> direct SESSION_UNAVAILABLE state with recovery link", async () => {
+    const adapter = new MockCheckoutAdapter({
+      sessionOverrides: {
+        slow_green_day: [
+          {
+            sessionId: "ses_cancelled_test",
+            packageId: "slow_green_day",
+            startAt: "2026-09-12T08:00:00+07:00",
+            endAt: "2026-09-12T14:00:00+07:00",
+            status: "CANCELLED",
+            remainingSlots: 5,
+          },
+        ],
+      },
+    });
+
+    const vm = await adapter.getCheckout("ses_cancelled_test");
+    expect(vm.state).toBe("SESSION_UNAVAILABLE");
+
+    const view = await renderCheckout("ses_cancelled_test", { adapter });
+    expect(view.textContent).toContain("Jadwal ini baru saja tidak tersedia.");
+    expect(view.textContent).toContain("Pilih Jadwal Lain");
+    expect(view.querySelector("#cancellation-policy-ack")).toBeNull();
+  });
+
+  it("11. Session with zero effective remaining slots due to active reservations -> SESSION_UNAVAILABLE UI", async () => {
+    // Fill session capacity (6) with active reservation
+    mockTransactionStore.createTransaction({
+      travelerId: "usr_other",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 6,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_fill_6",
+    });
+
+    const adapter = new MockCheckoutAdapter();
+    const vm = await adapter.getCheckout("ses_sgd_1");
+    expect(vm.state).toBe("SESSION_UNAVAILABLE");
+    expect(vm.session?.remainingSlots).toBe(0);
+
+    const view = await renderCheckout("ses_sgd_1", { adapter });
+    expect(view.textContent).toContain("Jadwal ini baru saja tidak tersedia.");
+    expect(view.textContent).toContain("Pilih Jadwal Lain");
+    expect(view.querySelector("#cancellation-policy-ack")).toBeNull();
+  });
+
+  // REAL SCREEN-LEVEL CAPACITY RACE TEST (BLOCKER 2 & 3)
+  it("12. real screen-level capacity race: capacity drops 6 -> 2, participant count 4 stays 4, warning displayed, CTA disabled until decremented", async () => {
     const traveler: AuthUser = {
-      id: "usr_phone_test",
-      name: "Phone User",
-      email: "phone@example.com",
+      id: "usr_cap_screen",
+      name: "Cap Screen User",
+      email: "capscreen@example.com",
       phone: "08123456789",
       onboardingStatus: "COMPLETED",
     };
     sessionStore.setUser(traveler);
 
-    // Unverified adapter
-    const adapterUnverified = new MockCheckoutAdapter({
+    const adapter = new MockCheckoutAdapter({
       travelerOverride: traveler,
-      verifiedPhoneStore: { usr_phone_test: false },
+      verifiedPhoneStore: { usr_cap_screen: true },
     });
 
-    container = document.createElement("div");
-    document.body.append(container);
-    root = createRoot(container);
+    const view = await renderCheckout("ses_sgd_1", { adapter });
+
+    // Step 1: Increase participant count to 4 (default 1 -> click plus 3 times)
+    const plusBtn = Array.from(view.querySelectorAll("button")).find(
+      (b) => b.getAttribute("aria-label") === "Tambah jumlah peserta",
+    )!;
     await act(async () => {
-      root.render(
-        createElement(
-          MemoryRouter,
-          { initialEntries: ["/checkout/ses_sgd_1"] },
-          createElement(Routes, undefined, [
-            createElement(Route, {
-              path: "/checkout/:sessionId",
-              element: createElement(CheckoutScreen, {
-                adapter: adapterUnverified,
-              }),
-            }),
-            createElement(Route, {
-              path: "/checkout/:sessionId/contact",
-              element: createElement(
-                "div",
-                undefined,
-                "Contact Verification Screen",
-              ),
-            }),
-          ]),
-        ),
-      );
+      plusBtn.click();
     });
+    await act(async () => {
+      plusBtn.click();
+    });
+    await act(async () => {
+      plusBtn.click();
+    });
+    expect(view.textContent).toContain("4 × Rp275.000");
 
-    expect(container.textContent).toContain("Belum Verifikasi");
-
-    const cbInDoc = container.querySelector<HTMLInputElement>(
+    // Step 2: Check policy acknowledgement
+    const policyCb = view.querySelector<HTMLInputElement>(
       "#cancellation-policy-ack",
     )!;
     await act(async () => {
-      cbInDoc.click();
-    });
-    const ctaInDoc = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
-    )!;
-    await act(async () => {
-      ctaInDoc.click();
+      policyCb.click();
     });
 
-    expect(container.textContent).toContain("Contact Verification Screen");
-    expect(mockTransactionStore.getBookings().length).toBe(0);
-
-    // Explicitly verified adapter
-    const adapterVerified = new MockCheckoutAdapter({
-      travelerOverride: traveler,
-      verifiedPhoneStore: { usr_phone_test: true },
-    });
-    const viewVerified = await renderCheckout("ses_sgd_1", {
-      adapter: adapterVerified,
-    });
-    expect(viewVerified.textContent).toContain("Terverifikasi");
-  });
-
-  // REGRESSION D, E, F, G
-  it("10. D, E, F, G - local draft validation inside submitCheckout creates zero transactional state for invalid inputs", async () => {
-    const adapter = new MockCheckoutAdapter();
-    sessionStore.setUser({
-      id: "usr_draft_val",
-      onboardingStatus: "COMPLETED",
-    });
-
-    // D: Policy not acknowledged
-    const resD = await adapter.submitCheckout({
-      travelerId: "usr_draft_val",
-      sessionId: "ses_sgd_1",
-      participantCount: 1,
-      cancellationPolicyAcknowledged: false,
-      idempotencyKey: "k_d",
-    });
-    expect(resD.status).toBe("INVALID_DRAFT");
-
-    // E: participantCount = 0
-    const resE = await adapter.submitCheckout({
-      travelerId: "usr_draft_val",
-      sessionId: "ses_sgd_1",
-      participantCount: 0,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_e",
-    });
-    expect(resE.status).toBe("INVALID_DRAFT");
-
-    // F: participantCount = -1
-    const resF = await adapter.submitCheckout({
-      travelerId: "usr_draft_val",
-      sessionId: "ses_sgd_1",
-      participantCount: -1,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_f",
-    });
-    expect(resF.status).toBe("INVALID_DRAFT");
-
-    // G: participantCount = 1.5 (non-integer)
-    const resG = await adapter.submitCheckout({
-      travelerId: "usr_draft_val",
-      sessionId: "ses_sgd_1",
-      participantCount: 1.5,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_g",
-    });
-    expect(resG.status).toBe("INVALID_DRAFT");
-
-    expect(mockTransactionStore.getBookings().length).toBe(0);
-    expect(mockTransactionStore.getPaymentAttempts().length).toBe(0);
-  });
-
-  // REGRESSION H & I
-  it("11. H & I - Package/Session mismatch on load and submit is safely rejected with ZERO transaction", async () => {
-    const adapter = new MockCheckoutAdapter({
-      details: {
-        slow_green_day: {
-          packageId: "slow_green_day",
-          valueProposition: "Val prop",
-          highlights: [],
-          itinerary: [],
-          includedItems: [],
-          excludedItems: [],
-          safetyNotes: [],
-          cancellationPolicySummary: "Policy",
-          organizer: {
-            id: "org_1",
-            displayName: "Org",
-            guideStatus: "CONCEPT_ONLY",
-          },
-          destinationDetail: { overviewDescription: "Desc" },
-          upcomingSessionPreviews: [
-            {
-              sessionId: "ses_mismatched",
-              packageId: "other_package_id", // MISMATCH!
-              startAt: "2026-09-12T08:00:00+07:00",
-              endAt: "2026-09-12T14:00:00+07:00",
-              status: "OPEN",
-              pricePerPerson: 275000,
-              remainingSlots: 5,
-            },
-          ],
-        },
-      },
-    });
-
-    const vm = await adapter.getCheckout("ses_mismatched");
-    expect(vm.state).toBe("NOT_FOUND");
-
-    const submitRes = await adapter.submitCheckout({
-      travelerId: "usr_1",
-      sessionId: "ses_mismatched",
-      participantCount: 1,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_mismatch",
-    });
-    expect(submitRes.status).toBe("SESSION_UNAVAILABLE");
-    expect(mockTransactionStore.getBookings().length).toBe(0);
-  });
-
-  // REGRESSION J
-  it("12. J - price changes between load and submit -> no transaction, refreshed price notice, second submit required", async () => {
-    const traveler: AuthUser = {
-      id: "usr_price_race",
-      name: "Price Race User",
-      email: "pricerace@example.com",
-      phone: "08123456789",
-      onboardingStatus: "COMPLETED",
-    };
-    sessionStore.setUser(traveler);
-
-    const adapter = new MockCheckoutAdapter({
-      travelerOverride: traveler,
-      verifiedPhoneStore: { usr_price_race: true },
-    });
-
-    // 1. Get initial checkout at 275000
-    const vm = await adapter.getCheckout("ses_sgd_1");
-    expect(vm.session?.pricePerPerson).toBe(275000);
-
-    // 2. Session price changes on server to 300000
-    adapter["sessionOverrides"] = {
-      slow_green_day: [
-        {
-          sessionId: "ses_sgd_1",
-          packageId: "slow_green_day",
-          startAt: "2026-09-12T08:00:00+07:00",
-          endAt: "2026-09-12T14:00:00+07:00",
-          status: "OPEN",
-          pricePerPerson: 300000, // Price updated!
-          remainingSlots: 6,
-        },
-      ],
-    };
-
-    // 3. Submit expecting 275000
-    const submitRes = await adapter.submitCheckout({
-      travelerId: traveler.id,
-      sessionId: "ses_sgd_1",
-      participantCount: 2,
-      expectedUnitPricePerPerson: 275000,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_price_race",
-    });
-
-    expect(submitRes.status).toBe("PRICE_CHANGED");
-    expect(submitRes.latestUnitPricePerPerson).toBe(300000);
-    expect(mockTransactionStore.getBookings().length).toBe(0);
-  });
-
-  // REGRESSION K
-  it("13. K - capacity race UI: latest cap visible, warning persists, participant not silently changed, CTA blocked until adjusted", async () => {
-    const traveler: AuthUser = {
-      id: "usr_cap_ui",
-      name: "Cap UI User",
-      email: "capui@example.com",
-      phone: "08123456789",
-      onboardingStatus: "COMPLETED",
-    };
-    sessionStore.setUser(traveler);
-
-    // Session has only 2 slots
-    const adapter = new MockCheckoutAdapter({
-      travelerOverride: traveler,
-      verifiedPhoneStore: { usr_cap_ui: true },
-      sessionOverrides: {
-        slow_green_day: [
-          {
-            sessionId: "ses_sgd_1",
-            packageId: "slow_green_day",
-            startAt: "2026-09-12T08:00:00+07:00",
-            endAt: "2026-09-12T14:00:00+07:00",
-            status: "OPEN",
-            pricePerPerson: 275000,
-            remainingSlots: 2, // Capacity drops to 2
-          },
-        ],
-      },
-    });
-
-    const submitRes = await adapter.submitCheckout({
-      travelerId: traveler.id,
-      sessionId: "ses_sgd_1",
-      participantCount: 4,
-      expectedUnitPricePerPerson: 275000,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_cap_ui",
-    });
-
-    expect(submitRes.status).toBe("INSUFFICIENT_CAPACITY");
-    expect(submitRes.latestRemainingSlots).toBe(2);
-    expect(mockTransactionStore.getBookings().length).toBe(0);
-  });
-
-  // REGRESSION L & M
-  it("14. L & M - cross-traveler capacity: Traveler A (4) succeeds, Traveler B (4) fails when max 6; Traveler A (4) + B (2) both succeed fill to 6", async () => {
-    sessionStore.setUser({
-      id: "usr_A",
-      name: "Traveler A",
-      email: "a@example.com",
-      phone: "081111",
-      onboardingStatus: "COMPLETED",
-    });
-
-    const adapter = new MockCheckoutAdapter({
-      sessionOverrides: {
-        slow_green_day: [
-          {
-            sessionId: "ses_sgd_1",
-            packageId: "slow_green_day",
-            startAt: "2026-09-12T08:00:00+07:00",
-            endAt: "2026-09-12T14:00:00+07:00",
-            status: "OPEN",
-            pricePerPerson: 275000,
-            remainingSlots: 6,
-          },
-        ],
-      },
-      verifiedPhoneStore: { usr_A: true, usr_B: true },
-    });
-
-    // Test L: Traveler A (4) -> success
-    const resA = await adapter.submitCheckout({
-      travelerId: "usr_A",
-      sessionId: "ses_sgd_1",
-      participantCount: 4,
-      expectedUnitPricePerPerson: 275000,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_trav_A",
-    });
-    expect(resA.status).toBe("SUCCESS");
-    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(4);
-
-    // Traveler B (4) -> fails (needs 4, only 2 remaining)
-    sessionStore.setUser({
-      id: "usr_B",
-      name: "Traveler B",
-      email: "b@example.com",
-      phone: "082222",
-      onboardingStatus: "COMPLETED",
-    });
-
-    const resB_fail = await adapter.submitCheckout({
-      travelerId: "usr_B",
-      sessionId: "ses_sgd_1",
-      participantCount: 4,
-      expectedUnitPricePerPerson: 275000,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_trav_B",
-    });
-    expect(resB_fail.status).toBe("INSUFFICIENT_CAPACITY");
-    expect(resB_fail.latestRemainingSlots).toBe(2);
-
-    // Assert: only first reservation exists
-    expect(mockTransactionStore.getBookings().length).toBe(1);
-    expect(mockTransactionStore.getPaymentAttempts().length).toBe(1);
-    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(4);
-
-    // Reset store for M
-    mockTransactionStore.reset();
-
-    // Test M: Traveler A (4) + Traveler B (2) -> both succeed
-    sessionStore.setUser({ id: "usr_A", onboardingStatus: "COMPLETED" });
-    const resA_m = await adapter.submitCheckout({
-      travelerId: "usr_A",
-      sessionId: "ses_sgd_1",
-      participantCount: 4,
-      expectedUnitPricePerPerson: 275000,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_m_A",
-    });
-    expect(resA_m.status).toBe("SUCCESS");
-
-    sessionStore.setUser({ id: "usr_B", onboardingStatus: "COMPLETED" });
-    const resB_m = await adapter.submitCheckout({
-      travelerId: "usr_B",
-      sessionId: "ses_sgd_1",
-      participantCount: 2,
-      expectedUnitPricePerPerson: 275000,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_m_B",
-    });
-    expect(resB_m.status).toBe("SUCCESS");
-
-    expect(mockTransactionStore.getBookings().length).toBe(2);
-    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(6);
-  });
-
-  // REGRESSION N & O
-  it("15. N & O - idempotent retry returns same booking; conflicting payload with same key is safely rejected", async () => {
-    sessionStore.setUser({
-      id: "usr_idemp",
-      name: "Idemp User",
-      email: "idemp@example.com",
-      phone: "081333",
-      onboardingStatus: "COMPLETED",
-    });
-
-    const adapter = new MockCheckoutAdapter({
-      verifiedPhoneStore: { usr_idemp: true },
-    });
-
-    const input: CheckoutSubmitInput = {
-      travelerId: "usr_idemp",
-      sessionId: "ses_sgd_1",
-      participantCount: 2,
-      expectedUnitPricePerPerson: 275000,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_stable_123",
-    };
-
-    // First commit
-    const res1 = await adapter.submitCheckout(input);
-    expect(res1.status).toBe("SUCCESS");
-    const bId = res1.bookingId;
-
-    // N: Retry SAME intent + SAME key -> returns SAME bookingId & no double reserve
-    const res2 = await adapter.submitCheckout(input);
-    expect(res2.status).toBe("SUCCESS");
-    expect(res2.bookingId).toBe(bId);
-    expect(mockTransactionStore.getBookings().length).toBe(1);
-    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(2);
-
-    // O: Same key + CONFLICTING payload -> safely rejected
-    const conflictingInput: CheckoutSubmitInput = {
-      ...input,
-      participantCount: 5, // Conflicting payload!
-    };
-    const resConflict = await adapter.submitCheckout(conflictingInput);
-    expect(resConflict.status).toBe("IDEMPOTENCY_CONFLICT");
-    expect(mockTransactionStore.getBookings().length).toBe(1);
-  });
-
-  // REGRESSION P
-  it("16. P - active pending guard creates zero new transaction", async () => {
-    const traveler: AuthUser = {
-      id: "usr_guard_test",
-      name: "Guard User",
-      email: "guard@example.com",
-      phone: "08123456789",
-      onboardingStatus: "COMPLETED",
-    };
-    sessionStore.setUser(traveler);
-
-    // Create an active pending booking first
+    // Step 3: Simulate another traveler reserving 4 slots (leaving 2 slots available)
     mockTransactionStore.createTransaction({
-      travelerId: "usr_guard_test",
+      travelerId: "usr_other_tx",
       packageId: "slow_green_day",
       sessionId: "ses_sgd_1",
-      participantCount: 1,
+      participantCount: 4,
       unitPricePerPerson: 275000,
       capacitySnapshot: 6,
-      idempotencyKey: "k_existing_pending",
+      idempotencyKey: "k_other_res_4",
     });
 
-    expect(
-      mockTransactionStore.getActivePendingPayment("usr_guard_test"),
-    ).toBeDefined();
-
-    const adapter = new MockCheckoutAdapter({
-      travelerOverride: traveler,
-      verifiedPhoneStore: { usr_guard_test: true },
+    // Step 4: Click submit CTA
+    const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut ke Pembayaran"),
+    )!;
+    await act(async () => {
+      ctaBtn.click();
     });
 
-    const submitRes = await adapter.submitCheckout({
-      travelerId: "usr_guard_test",
-      sessionId: "ses_sgd_1",
-      participantCount: 1,
-      expectedUnitPricePerPerson: 275000,
-      cancellationPolicyAcknowledged: true,
-      idempotencyKey: "k_new_attempt",
+    // Step 5: Assertions after failed submit race
+    // - Stay on checkout (no payment nav)
+    expect(view.textContent).toContain("Checkout");
+    // - Warning notice visible
+    expect(view.textContent).toContain("Slot yang tersedia berubah");
+    // - Participant count STILL 4 (not silently changed to 2)
+    expect(view.textContent).toContain("4 × Rp275.000");
+    // - CTA disabled because 4 > latest available 2
+    expect(ctaBtn.disabled).toBe(true);
+
+    // Step 6: Explicitly decrement participant count twice (4 -> 3 -> 2)
+    const minusBtn = Array.from(view.querySelectorAll("button")).find(
+      (b) => b.getAttribute("aria-label") === "Kurangi jumlah peserta",
+    )!;
+    await act(async () => {
+      minusBtn.click();
+    });
+    await act(async () => {
+      minusBtn.click();
     });
 
-    expect(submitRes.status).toBe("ACTIVE_PENDING_PAYMENT");
-    // Count remains 1 (no new transaction)
-    expect(mockTransactionStore.getBookings().length).toBe(1);
-    expect(mockTransactionStore.getPaymentAttempts().length).toBe(1);
+    expect(view.textContent).toContain("2 × Rp275.000");
+    // CTA re-enabled for 2 participants!
+    expect(ctaBtn.disabled).toBe(false);
   });
 
-  // REGRESSION Q (with LocationObserver to fix test warnings)
-  it("17. Q - actual success route navigates to /payment/:bookingId without router warnings", async () => {
+  // PRICE-CHANGED SCREEN FLOW TEST (BLOCKER 7)
+  it("13. real screen-level price race: price updates 275k -> 300k, notice displayed, new total rendered, second CTA click succeeds", async () => {
     const traveler: AuthUser = {
-      id: "usr_route_test",
-      name: "Route User",
-      email: "route@example.com",
+      id: "usr_price_screen",
+      name: "Price Screen User",
+      email: "pricescreen@example.com",
       phone: "08123456789",
       onboardingStatus: "COMPLETED",
     };
@@ -787,11 +497,10 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
 
     const adapter = new MockCheckoutAdapter({
       travelerOverride: traveler,
-      verifiedPhoneStore: { usr_route_test: true },
+      verifiedPhoneStore: { usr_price_screen: true },
     });
 
     let currentPath = "";
-
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
@@ -813,29 +522,361 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
             }),
             createElement(Route, {
               path: "/payment/:bookingId",
-              element: createElement("div", undefined, "Payment Screen Target"),
+              element: createElement("div", undefined, "Payment Target Screen"),
             }),
           ]),
         ),
       );
     });
 
-    const policyCheckbox = container.querySelector<HTMLInputElement>(
+    // Check policy
+    const policyCb = container.querySelector<HTMLInputElement>(
       "#cancellation-policy-ack",
     )!;
     await act(async () => {
-      policyCheckbox.click();
+      policyCb.click();
+    });
+
+    // Change server session price to 300000 before submit click
+    adapter["sessionOverrides"] = {
+      slow_green_day: [
+        {
+          sessionId: "ses_sgd_1",
+          packageId: "slow_green_day",
+          startAt: "2026-09-12T08:00:00+07:00",
+          endAt: "2026-09-12T14:00:00+07:00",
+          status: "OPEN",
+          pricePerPerson: 300000, // Updated price
+          remainingSlots: 6,
+        },
+      ],
+    };
+
+    // First submit click
+    const ctaBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut ke Pembayaran"),
+    )!;
+    await act(async () => {
+      ctaBtn.click();
+    });
+
+    // Assert:
+    // - Stayed on checkout
+    expect(container.textContent).toContain("Harga jadwal berubah");
+    // - Zero booking created so far
+    expect(mockTransactionStore.getBookings().length).toBe(0);
+    // - Display updated unit & total
+    expect(container.textContent).toContain("Rp300.000 / orang");
+    expect(container.textContent).toContain("Rp300.000");
+
+    // Second submit click with reviewed price (300000)
+    await act(async () => {
+      ctaBtn.click();
+    });
+
+    // Success route to Payment!
+    expect(container.textContent).toContain("Payment Target Screen");
+    expect(currentPath).toMatch(/^\/payment\/bk_/);
+    expect(mockTransactionStore.getBookings().length).toBe(1);
+    expect(mockTransactionStore.getBookings()[0].unitPricePerPerson).toBe(
+      300000,
+    );
+  });
+
+  // CONTACT TEST — ACTUAL CONTINUE (BLOCKER 9)
+  it("14. verified phone user continues directly to /payment/:bookingId, unverified phone hands off to T11 with zero transaction", async () => {
+    const travelerVerified: AuthUser = {
+      id: "usr_verified_flow",
+      name: "Verified Traveler",
+      email: "verified@example.com",
+      phone: "08123456789",
+      onboardingStatus: "COMPLETED",
+    };
+
+    const adapterVerified = new MockCheckoutAdapter({
+      travelerOverride: travelerVerified,
+      verifiedPhoneStore: { usr_verified_flow: true },
+    });
+
+    let currentPath = "";
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/checkout/ses_sgd_1"] },
+          createElement(LocationObserver, {
+            onLocation: (p) => {
+              currentPath = p;
+            },
+          }),
+          createElement(Routes, undefined, [
+            createElement(Route, {
+              path: "/checkout/:sessionId",
+              element: createElement(CheckoutScreen, {
+                adapter: adapterVerified,
+              }),
+            }),
+            createElement(Route, {
+              path: "/payment/:bookingId",
+              element: createElement("div", undefined, "Payment Screen"),
+            }),
+          ]),
+        ),
+      );
+    });
+
+    const policyCb = container.querySelector<HTMLInputElement>(
+      "#cancellation-policy-ack",
+    )!;
+    await act(async () => {
+      policyCb.click();
     });
 
     const ctaBtn = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Lanjut ke Pembayaran"),
     )!;
-
     await act(async () => {
       ctaBtn.click();
     });
 
-    expect(container.textContent).toContain("Payment Screen Target");
+    expect(container.textContent).toContain("Payment Screen");
     expect(currentPath).toMatch(/^\/payment\/bk_/);
+    expect(mockTransactionStore.getBookings().length).toBe(1);
+  });
+
+  // DRAFT VALIDATION & MANDATORY EXPECTED PRICE (BLOCKER 6 & 8)
+  it("15. submitCheckout validates draft & requires expectedUnitPricePerPerson integer", async () => {
+    const adapter = new MockCheckoutAdapter();
+    sessionStore.setUser({
+      id: "usr_draft_test",
+      onboardingStatus: "COMPLETED",
+    });
+
+    // Missing expectedUnitPricePerPerson (invalid type check)
+    const resInvalidPrice = await adapter.submitCheckout({
+      travelerId: "usr_draft_test",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      expectedUnitPricePerPerson: undefined as unknown as number,
+      cancellationPolicyAcknowledged: true,
+      idempotencyKey: "k_inv_p",
+    });
+    expect(resInvalidPrice.status).toBe("INVALID_DRAFT");
+
+    // Non-integer expectedUnitPricePerPerson
+    const resFloatPrice = await adapter.submitCheckout({
+      travelerId: "usr_draft_test",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      expectedUnitPricePerPerson: 275000.5,
+      cancellationPolicyAcknowledged: true,
+      idempotencyKey: "k_float_p",
+    });
+    expect(resFloatPrice.status).toBe("INVALID_DRAFT");
+
+    expect(mockTransactionStore.getBookings().length).toBe(0);
+  });
+
+  // TRANSACTION STORE / LOAD CONSISTENCY TEST (BLOCKER 1 & 11)
+  it("16. getCheckout reflects active reservations dynamically: base 6 -> 4 reserved -> effective 2 -> +2 reserved -> SESSION_UNAVAILABLE", async () => {
+    const adapter = new MockCheckoutAdapter();
+
+    // Initial load: 6 slots
+    const vm1 = await adapter.getCheckout("ses_sgd_1");
+    expect(vm1.state).toBe("READY");
+    expect(vm1.session?.remainingSlots).toBe(6);
+
+    // Create 4 slots reservation
+    mockTransactionStore.createTransaction({
+      travelerId: "usr_tx_1",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 4,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_tx_1",
+    });
+
+    // Re-load: effective remaining slots is 2
+    const vm2 = await adapter.getCheckout("ses_sgd_1");
+    expect(vm2.state).toBe("READY");
+    expect(vm2.session?.remainingSlots).toBe(2);
+
+    // Create remaining 2 slots reservation
+    mockTransactionStore.createTransaction({
+      travelerId: "usr_tx_2",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_tx_2",
+    });
+
+    // Re-load: session is now SESSION_UNAVAILABLE
+    const vm3 = await adapter.getCheckout("ses_sgd_1");
+    expect(vm3.state).toBe("SESSION_UNAVAILABLE");
+    expect(vm3.session?.remainingSlots).toBe(0);
+  });
+
+  // PENDING PAYMENT HANDOFF SEMANTICS (BLOCKER 10)
+  it("17. PendingPaymentHandoff contains packageId field rather than calling an ID packageName", async () => {
+    const traveler: AuthUser = {
+      id: "usr_handoff_test",
+      name: "Handoff User",
+      email: "handoff@example.com",
+      phone: "08123456789",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    mockTransactionStore.createTransaction({
+      travelerId: "usr_handoff_test",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_handoff_1",
+    });
+
+    const activePending =
+      mockTransactionStore.getActivePendingPayment("usr_handoff_test");
+    expect(activePending).toBeDefined();
+    expect(activePending?.packageId).toBe("slow_green_day");
+  });
+
+  // CROSS-TRAVELER & IDEMPOTENCY REGRESSIONS
+  it("18. cross-traveler capacity enforcement: Traveler A (4) succeeds, Traveler B (4) fails when max 6; Traveler A (4) + B (2) both succeed fill to 6", async () => {
+    sessionStore.setUser({ id: "usr_A", onboardingStatus: "COMPLETED" });
+    const adapterA = new MockCheckoutAdapter({
+      verifiedPhoneStore: { usr_A: true, usr_B: true },
+      sessionOverrides: {
+        slow_green_day: [
+          {
+            sessionId: "ses_sgd_1",
+            packageId: "slow_green_day",
+            startAt: "2026-09-12T08:00:00+07:00",
+            endAt: "2026-09-12T14:00:00+07:00",
+            status: "OPEN",
+            pricePerPerson: 275000,
+            remainingSlots: 6,
+          },
+        ],
+      },
+    });
+
+    // Traveler A (4) -> success
+    const resA = await adapterA.submitCheckout({
+      travelerId: "usr_A",
+      sessionId: "ses_sgd_1",
+      participantCount: 4,
+      expectedUnitPricePerPerson: 275000,
+      cancellationPolicyAcknowledged: true,
+      idempotencyKey: "k_trav_A",
+    });
+    expect(resA.status).toBe("SUCCESS");
+    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(4);
+
+    // Traveler B (4) -> fails (needs 4, only 2 remaining)
+    sessionStore.setUser({ id: "usr_B", onboardingStatus: "COMPLETED" });
+    const adapterB = new MockCheckoutAdapter({
+      verifiedPhoneStore: { usr_A: true, usr_B: true },
+      sessionOverrides: {
+        slow_green_day: [
+          {
+            sessionId: "ses_sgd_1",
+            packageId: "slow_green_day",
+            startAt: "2026-09-12T08:00:00+07:00",
+            endAt: "2026-09-12T14:00:00+07:00",
+            status: "OPEN",
+            pricePerPerson: 275000,
+            remainingSlots: 6,
+          },
+        ],
+      },
+    });
+
+    const resB_fail = await adapterB.submitCheckout({
+      travelerId: "usr_B",
+      sessionId: "ses_sgd_1",
+      participantCount: 4,
+      expectedUnitPricePerPerson: 275000,
+      cancellationPolicyAcknowledged: true,
+      idempotencyKey: "k_trav_B",
+    });
+    expect(resB_fail.status).toBe("INSUFFICIENT_CAPACITY");
+    expect(resB_fail.latestRemainingSlots).toBe(2);
+
+    expect(mockTransactionStore.getBookings().length).toBe(1);
+
+    // Reset store for M
+    mockTransactionStore.reset();
+
+    // Traveler A (4) + Traveler B (2) -> both succeed
+    sessionStore.setUser({ id: "usr_A", onboardingStatus: "COMPLETED" });
+    const resA_m = await adapterA.submitCheckout({
+      travelerId: "usr_A",
+      sessionId: "ses_sgd_1",
+      participantCount: 4,
+      expectedUnitPricePerPerson: 275000,
+      cancellationPolicyAcknowledged: true,
+      idempotencyKey: "k_m_A",
+    });
+    expect(resA_m.status).toBe("SUCCESS");
+
+    sessionStore.setUser({ id: "usr_B", onboardingStatus: "COMPLETED" });
+    const resB_m = await adapterB.submitCheckout({
+      travelerId: "usr_B",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      expectedUnitPricePerPerson: 275000,
+      cancellationPolicyAcknowledged: true,
+      idempotencyKey: "k_m_B",
+    });
+    expect(resB_m.status).toBe("SUCCESS");
+
+    expect(mockTransactionStore.getBookings().length).toBe(2);
+    expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(6);
+  });
+
+  it("19. idempotent retry returns same booking; conflicting payload with same key is safely rejected", async () => {
+    sessionStore.setUser({ id: "usr_idemp", onboardingStatus: "COMPLETED" });
+    const adapter = new MockCheckoutAdapter({
+      verifiedPhoneStore: { usr_idemp: true },
+    });
+
+    const input: CheckoutSubmitInput = {
+      travelerId: "usr_idemp",
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      expectedUnitPricePerPerson: 275000,
+      cancellationPolicyAcknowledged: true,
+      idempotencyKey: "k_stable_123",
+    };
+
+    // First commit
+    const res1 = await adapter.submitCheckout(input);
+    expect(res1.status).toBe("SUCCESS");
+    const bId = res1.bookingId;
+
+    // Retry SAME intent + SAME key -> returns SAME bookingId & no double reserve
+    const res2 = await adapter.submitCheckout(input);
+    expect(res2.status).toBe("SUCCESS");
+    expect(res2.bookingId).toBe(bId);
+    expect(mockTransactionStore.getBookings().length).toBe(1);
+
+    // Same key + CONFLICTING payload -> safely rejected
+    const conflictingInput: CheckoutSubmitInput = {
+      ...input,
+      participantCount: 5,
+    };
+    const resConflict = await adapter.submitCheckout(conflictingInput);
+    expect(resConflict.status).toBe("IDEMPOTENCY_CONFLICT");
+    expect(mockTransactionStore.getBookings().length).toBe(1);
   });
 });

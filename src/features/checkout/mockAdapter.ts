@@ -106,25 +106,35 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
+    // BLOCKER 1: GETCHECKOUT MUST REFLECT ACTIVE RESERVATIONS
+    // Calculate effective remaining slots without mutating canonical details
+    const activeReservedQuantity = mockTransactionStore.getReservedQuantity(
+      foundSession.sessionId,
+    );
+    const rawSlots = foundSession.remainingSlots ?? 0;
+    const effectiveRemaining = Math.max(0, rawSlots - activeReservedQuantity);
+
+    // Create a cloned session snapshot reflecting latest effective capacity
+    const effectiveSessionSnapshot: PackageSessionPreview = {
+      ...foundSession,
+      remainingSlots: effectiveRemaining,
+    };
+
     // Check session status eligibility
-    if (
-      foundSession.status !== "OPEN" ||
-      foundSession.remainingSlots === undefined ||
-      foundSession.remainingSlots <= 0
-    ) {
+    if (foundSession.status !== "OPEN" || effectiveRemaining <= 0) {
       return {
         state: "SESSION_UNAVAILABLE",
         package: foundPkg,
-        session: foundSession,
+        session: effectiveSessionSnapshot,
       };
     }
 
-    // BLOCKER 1: EXACT SESSION PRICE ONLY (session.pricePerPerson MUST exist)
+    // BLOCKER 1 (from previous patch): EXACT SESSION PRICE ONLY (session.pricePerPerson MUST exist)
     if (foundSession.pricePerPerson === undefined) {
       return {
         state: "PRICE_UNAVAILABLE",
         package: foundPkg,
-        session: foundSession,
+        session: effectiveSessionSnapshot,
       };
     }
 
@@ -133,7 +143,7 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
         ? this.travelerOverride
         : sessionStore.get().user;
 
-    // BLOCKER 3: Phone presence != verified. Default is false unless explicitly in store or override.
+    // Phone presence != verified. Default is false unless explicitly in store or override.
     const isPhoneVerified = traveler?.id
       ? Boolean(this.verifiedPhoneStore[traveler.id])
       : false;
@@ -157,7 +167,7 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       state: "READY",
       traveler: traveler ?? undefined,
       package: foundPkg,
-      session: foundSession,
+      session: effectiveSessionSnapshot,
       contactRequirement,
       cancellationPolicySummary: foundDetail.cancellationPolicySummary,
       activePendingPayment,
@@ -171,11 +181,14 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
 
-    // 1. BLOCKER 6: VALIDATE LOCAL DRAFT INPUTS
+    // BLOCKER 8: LOCKED NEW-SUBMIT ORDER
+    // 1. Validate local draft inputs
     if (
       !Number.isInteger(input.participantCount) ||
       input.participantCount < 1 ||
-      input.cancellationPolicyAcknowledged !== true
+      input.cancellationPolicyAcknowledged !== true ||
+      !Number.isInteger(input.expectedUnitPricePerPerson) ||
+      input.expectedUnitPricePerPerson < 0
     ) {
       return {
         status: "INVALID_DRAFT",
@@ -183,7 +196,85 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    // 2. BLOCKER 7 & 8: Re-resolve and re-validate latest Session & Package
+    // 2. Authenticated traveler identity & travelerId match check
+    const traveler =
+      this.travelerOverride !== undefined
+        ? this.travelerOverride
+        : sessionStore.get().user;
+
+    if (!traveler || input.travelerId !== traveler.id) {
+      return {
+        status: "INVALID_DRAFT",
+        message: "Identitas pemesan tidak sesuai.",
+      };
+    }
+
+    // 3. Early check for existing committed idempotency record (replay capability)
+    const existingCheck = mockTransactionStore.getIdempotentTransaction(
+      input.idempotencyKey,
+      {
+        travelerId: input.travelerId,
+        sessionId: input.sessionId,
+        participantCount: input.participantCount,
+        unitPricePerPerson: input.expectedUnitPricePerPerson,
+      },
+    );
+
+    if (existingCheck) {
+      if (existingCheck.conflict) {
+        return {
+          status: "IDEMPOTENCY_CONFLICT",
+          message: "Konflik transaksi idempotensi.",
+        };
+      }
+      if (existingCheck.result) {
+        return {
+          status: "SUCCESS",
+          bookingId: existingCheck.result.booking.bookingId,
+        };
+      }
+    }
+
+    if (this.failSubmitCount > 0) {
+      this.failSubmitCount--;
+      return {
+        status: "SUBMIT_ERROR",
+        message: "Checkout belum bisa diproses. Coba lagi.",
+      };
+    }
+
+    // 4. Contact verification check
+    const isPhoneVerified = traveler.id
+      ? Boolean(this.verifiedPhoneStore[traveler.id])
+      : false;
+
+    const contactReq = this.contactRequirementOverride ?? {
+      phoneRequired: true,
+      phoneVerified: isPhoneVerified,
+    };
+
+    if (contactReq.phoneRequired && !contactReq.phoneVerified) {
+      return {
+        status: "CONTACT_VERIFICATION_REQUIRED",
+        message: "Verifikasi nomor HP diperlukan sebelum membuat pesanan.",
+      };
+    }
+
+    // 5. Active PENDING_PAYMENT guard
+    const activePending =
+      this.pendingPaymentOverride ??
+      mockTransactionStore.getActivePendingPayment(traveler.id);
+
+    if (activePending) {
+      return {
+        status: "ACTIVE_PENDING_PAYMENT",
+        pendingPayment: activePending,
+        message:
+          "Kamu memiliki pembayaran aktif yang belum diselesaikan. Selesaikan atau batalkan pesanan tersebut lebih dahulu.",
+      };
+    }
+
+    // 6. Latest Session/package/status/exact-price/capacity revalidation
     let foundPkg: PackageRecommendationSource | undefined;
     let foundDetail: PackageDetailSource | undefined;
     let foundSession: PackageSessionPreview | undefined;
@@ -192,7 +283,6 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       const pkg = this.packages.find((p) => p.id === pkgId);
       if (!pkg) continue;
 
-      // BLOCKER 8: SAME PACKAGE / SESSION RELATION
       if (detail.packageId !== pkg.id) continue;
 
       const sessions =
@@ -228,7 +318,6 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    // BLOCKER 1: EXACT SESSION PRICE ONLY
     const unitPrice = foundSession.pricePerPerson;
     if (unitPrice === undefined) {
       return {
@@ -237,89 +326,8 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    // 3. AUTHENTICATED TRAVELER IDENTITY CHECK
-    const traveler =
-      this.travelerOverride !== undefined
-        ? this.travelerOverride
-        : sessionStore.get().user;
-
-    if (!traveler || input.travelerId !== traveler.id) {
-      return {
-        status: "INVALID_DRAFT",
-        message: "Identitas pemesan tidak sesuai.",
-      };
-    }
-
-    if (this.failSubmitCount > 0) {
-      this.failSubmitCount--;
-      return {
-        status: "SUBMIT_ERROR",
-        message: "Checkout belum bisa diproses. Coba lagi.",
-      };
-    }
-
-    // 4. BLOCKER 12: Idempotency check with payload binding
-    const existingCheck = mockTransactionStore.getIdempotentTransaction(
-      input.idempotencyKey,
-      {
-        travelerId: input.travelerId,
-        sessionId: input.sessionId,
-        participantCount: input.participantCount,
-        unitPricePerPerson: input.expectedUnitPricePerPerson ?? unitPrice,
-      },
-    );
-
-    if (existingCheck) {
-      if (existingCheck.conflict) {
-        return {
-          status: "IDEMPOTENCY_CONFLICT",
-          message: "Konflik transaksi idempotensi.",
-        };
-      }
-      if (existingCheck.result) {
-        return {
-          status: "SUCCESS",
-          bookingId: existingCheck.result.booking.bookingId,
-        };
-      }
-    }
-
-    // 5. Re-check contact verification requirement
-    const isPhoneVerified = traveler.id
-      ? Boolean(this.verifiedPhoneStore[traveler.id])
-      : false;
-
-    const contactReq = this.contactRequirementOverride ?? {
-      phoneRequired: true,
-      phoneVerified: isPhoneVerified,
-    };
-
-    if (contactReq.phoneRequired && !contactReq.phoneVerified) {
-      return {
-        status: "CONTACT_VERIFICATION_REQUIRED",
-        message: "Verifikasi nomor HP diperlukan sebelum membuat pesanan.",
-      };
-    }
-
-    // 6. Re-check active pending payment guard
-    const activePending =
-      this.pendingPaymentOverride ??
-      mockTransactionStore.getActivePendingPayment(traveler.id);
-
-    if (activePending) {
-      return {
-        status: "ACTIVE_PENDING_PAYMENT",
-        pendingPayment: activePending,
-        message:
-          "Kamu memiliki pembayaran aktif yang belum diselesaikan. Selesaikan atau batalkan pesanan tersebut lebih dahulu.",
-      };
-    }
-
-    // 7. BLOCKER 9: PRICE-RACE / RECONFIRMATION
-    if (
-      input.expectedUnitPricePerPerson !== undefined &&
-      input.expectedUnitPricePerPerson !== unitPrice
-    ) {
+    // BLOCKER 6: EXPECTED REVIEWED PRICE MUST BE REQUIRED & MATCHED
+    if (input.expectedUnitPricePerPerson !== unitPrice) {
       return {
         status: "PRICE_CHANGED",
         latestUnitPricePerPerson: unitPrice,
@@ -350,7 +358,7 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    // 8. BLOCKER 4: REAL ATOMIC CAPACITY RESERVATION
+    // 7. Atomic capacity reservation + booking + payment creation
     const txResult = mockTransactionStore.createTransaction({
       travelerId: input.travelerId,
       packageId: foundPkg.id,

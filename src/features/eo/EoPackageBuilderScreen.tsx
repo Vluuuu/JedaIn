@@ -32,16 +32,20 @@ export function EoPackageBuilderScreen() {
   const eoDisplayName = partner?.businessName ?? "Jeda Alam Nusantara";
   const guideStatus = partner?.guideStatus ?? "CERTIFIED_GUIDE";
 
+  // Ownership security check for editing drafts: must belong to current EO
   const initialDraft = draftId
-    ? mockEoPackageStore.getPackageById(draftId)
+    ? mockEoPackageStore.getPackageForEo(draftId, eoId)
     : undefined;
+
+  const isForeignDraft = Boolean(draftId && !initialDraft);
+
   const initialInsight = initialInsightId
     ? mockInsightStore.getInsightById(initialInsightId)
     : undefined;
 
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [packageId, setPackageId] = useState<string | undefined>(
-    initialDraft?.packageId ?? draftId ?? undefined,
+    initialDraft?.packageId ?? undefined,
   );
 
   // Form State
@@ -86,6 +90,10 @@ export function EoPackageBuilderScreen() {
           },
         ],
   );
+  const [safetyNotes, setSafetyNotes] = useState<string>(
+    initialDraft?.safetyNotes?.join("\n") ??
+      "Gunakan alas kaki yang nyaman dan tidak licin.\nPatuhi arahan pemandu selama kegiatan di lokasi.",
+  );
   const [eoMargin, setEoMargin] = useState<number>(
     initialDraft?.pricing?.eoMargin ?? 150000,
   );
@@ -94,9 +102,34 @@ export function EoPackageBuilderScreen() {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Available data
-  const allDestinations = mockDestinationStore.getAll();
+  // Available data - Step 1 uses eligible destinations
+  const eligibleDestinations =
+    mockDestinationStore.getEligibleForEo(guideStatus);
   const allInsights = mockInsightStore.getAllInsights();
+
+  if (isForeignDraft) {
+    return (
+      <div className="eo-container">
+        <div
+          className="eo-section"
+          style={{ textAlign: "center", padding: "var(--space-8)" }}
+        >
+          <h2>Akses Ditolak</h2>
+          <p style={{ color: "var(--color-text-secondary)" }}>
+            Draf paket ini tidak ditemukan atau bukan milik akun EO Anda.
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={() => navigate("/partner/eo/packages")}
+          >
+            Kembali ke Daftar Paket
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const selectedDestination: DestinationRecord | undefined =
     mockDestinationStore.getById(selectedDestinationId);
@@ -109,7 +142,12 @@ export function EoPackageBuilderScreen() {
 
   // Auto-save draft on moving
   const saveCurrentDraft = () => {
-    const record = mockEoPackageStore.saveDraft({
+    const splitSafety = safetyNotes
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const res = mockEoPackageStore.saveDraft({
       packageId,
       eoId,
       eoDisplayName,
@@ -120,6 +158,8 @@ export function EoPackageBuilderScreen() {
       insightId: selectedInsightId,
       durationLabel,
       itinerary,
+      safetyNotes:
+        splitSafety.length > 0 ? splitSafety : ["Gunakan sepatu yang nyaman."],
       pricing: {
         destinationBaseCost: baseCost,
         eoMargin,
@@ -127,10 +167,10 @@ export function EoPackageBuilderScreen() {
       },
       guideStatus,
     });
-    if (!packageId) {
-      setPackageId(record.packageId);
+    if (res.success && res.package && !packageId) {
+      setPackageId(res.package.packageId);
     }
-    return record;
+    return res.package;
   };
 
   const handleNext = () => {
@@ -188,8 +228,14 @@ export function EoPackageBuilderScreen() {
     setValidationErrors([]);
 
     const draft = saveCurrentDraft();
+    if (!draft) {
+      setIsSubmitting(false);
+      return;
+    }
+
     const res = mockEoPackageStore.submitForReview(
       draft.packageId,
+      eoId,
       guideStatus,
     );
 
@@ -283,44 +329,46 @@ export function EoPackageBuilderScreen() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Hanya destinasi berstatus BASIC atau PLUS yang dapat dipilih.
+                Menampilkan destinasi yang memenuhi syarat untuk kategori EO
+                Anda (
+                <strong>
+                  {guideStatus === "CERTIFIED_GUIDE"
+                    ? "Certified Guide"
+                    : "Concept-Only"}
+                </strong>
+                ).
                 {guideStatus === "CONCEPT_ONLY" && (
-                  <strong
+                  <span
                     style={{
                       color: "var(--color-warning-text)",
                       display: "block",
                       marginTop: "0.25rem",
                     }}
                   >
-                    Status EO Anda Concept-Only: Destinasi wajib memiliki Guide
-                    Ready (pemandu lokal terlatih).
-                  </strong>
+                    Status EO Anda Concept-Only: Hanya destinasi Guide Ready
+                    (memiliki pemandu lokal terlatih) yang dapat dipilih.
+                  </span>
                 )}
               </p>
             </div>
           </div>
 
           <div className="eo-destinations-grid">
-            {allDestinations.map((dest) => {
-              const isEligible =
-                guideStatus === "CERTIFIED_GUIDE" || dest.guideReady === true;
+            {eligibleDestinations.map((dest) => {
               const isSelected = selectedDestinationId === dest.destinationId;
 
               return (
                 <article
                   key={dest.destinationId}
-                  className={`eo-destination-card ${isSelected ? "eo-destination-card--selected" : ""} ${!isEligible ? "eo-destination-card--disabled" : ""}`}
+                  className={`eo-destination-card ${isSelected ? "eo-destination-card--selected" : ""}`}
                   onClick={() => {
-                    if (isEligible) {
-                      setSelectedDestinationId(dest.destinationId);
-                    }
+                    setSelectedDestinationId(dest.destinationId);
                   }}
                   role="radio"
                   aria-checked={isSelected}
-                  aria-disabled={!isEligible}
-                  tabIndex={isEligible ? 0 : -1}
+                  tabIndex={0}
                   onKeyDown={(e) => {
-                    if (isEligible && (e.key === "Enter" || e.key === " ")) {
+                    if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
                       setSelectedDestinationId(dest.destinationId);
                     }
@@ -407,13 +455,8 @@ export function EoPackageBuilderScreen() {
                       type="button"
                       variant={isSelected ? "primary" : "secondary"}
                       size="sm"
-                      disabled={!isEligible}
                     >
-                      {isSelected
-                        ? "Terpilih ✓"
-                        : isEligible
-                          ? "Pilih Destinasi"
-                          : "Tidak Memenuhi Syarat"}
+                      {isSelected ? "Terpilih ✓" : "Pilih Destinasi"}
                     </Button>
                   </div>
                 </article>
@@ -493,14 +536,14 @@ export function EoPackageBuilderScreen() {
                       <Badge tone={isInsSelected ? "info" : "neutral"}>
                         {ins.intentLabel}
                       </Badge>
-                      <h4
+                      <h3
                         style={{
                           margin: "var(--space-2) 0 var(--space-1)",
                           fontSize: "var(--font-size-body-md)",
                         }}
                       >
                         {ins.title}
-                      </h4>
+                      </h3>
                       <p
                         style={{
                           fontSize: "var(--font-size-caption)",
@@ -560,7 +603,7 @@ export function EoPackageBuilderScreen() {
 
           <div className="eo-form-group">
             <label htmlFor="package-duration" className="eo-form-label">
-              Estimasi Durasi
+              Estimasi Durasi *
             </label>
             <select
               id="package-duration"
@@ -609,7 +652,7 @@ export function EoPackageBuilderScreen() {
           <div className="eo-section-header">
             <div>
               <h2 className="eo-section-title">
-                Langkah 3: Rencana Perjalanan (Itinerary)
+                Langkah 3: Rencana Perjalanan (Itinerary) & Keselamatan
               </h2>
               <p
                 style={{
@@ -706,6 +749,25 @@ export function EoPackageBuilderScreen() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Safety and Operational Notes */}
+          <div
+            className="eo-form-group"
+            style={{ marginTop: "var(--space-4)" }}
+          >
+            <label htmlFor="eo-safety-notes" className="eo-form-label">
+              Catatan Operasional & Keselamatan *
+            </label>
+            <textarea
+              id="eo-safety-notes"
+              rows={3}
+              required
+              className="eo-form-textarea"
+              value={safetyNotes}
+              onChange={(e) => setSafetyNotes(e.target.value)}
+              placeholder="Pisahkan dengan baris baru (misal: alas kaki yang nyaman, pakaian hangat, dsb)..."
+            />
           </div>
 
           <div

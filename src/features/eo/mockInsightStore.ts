@@ -1,4 +1,8 @@
-import type { DemandInsightRecord, DemandSignalSummary } from "./types";
+import type {
+  DemandDistributionItem,
+  DemandInsightRecord,
+  DemandSignalSummary,
+} from "./types";
 
 export const MOCK_DEMAND_SIGNALS: DemandSignalSummary[] = [
   {
@@ -32,6 +36,86 @@ export const MOCK_DEMAND_SIGNALS: DemandSignalSummary[] = [
     travelerCount: 142,
     description:
       "Perjalanan solo atau privat dengan ruang waktu membaca, menulis, dan meditasi ringan.",
+  },
+];
+
+export const MOCK_BUDGET_DISTRIBUTION: DemandDistributionItem[] = [
+  {
+    id: "b_under_200k",
+    label: "Di bawah Rp200.000",
+    count: 224,
+    percentage: 22,
+    description: "Trip hemat setengah hari / jalan santai mandiri.",
+  },
+  {
+    id: "b_200_300k",
+    label: "Rp200.000 – Rp300.000",
+    count: 490,
+    percentage: 48,
+    description: "Kisaran paling diminati untuk trip 1 hari dengan konsumsi.",
+  },
+  {
+    id: "b_300_500k",
+    label: "Rp300.000 – Rp500.000",
+    count: 214,
+    percentage: 21,
+    description: "Paket lengkap dengan workshop atau pemandu khusus.",
+  },
+  {
+    id: "b_above_500k",
+    label: "Di atas Rp500.000",
+    count: 92,
+    percentage: 9,
+    description: "Retreat privat menginap (2D1N).",
+  },
+];
+
+export const MOCK_DURATION_DISTRIBUTION: DemandDistributionItem[] = [
+  {
+    id: "d_halfday",
+    label: "Setengah Hari (4–5 Jam)",
+    count: 357,
+    percentage: 35,
+    description: "Sesi hening pagi atau jeda sore tanpa menginap.",
+  },
+  {
+    id: "d_fullday",
+    label: "1 Hari Penuh (6–8 Jam)",
+    count: 530,
+    percentage: 52,
+    description:
+      "Format terfavorit: berangkat pagi, santap siang, pulang sore.",
+  },
+  {
+    id: "d_2d1n",
+    label: "2 Hari 1 Malam (Menginap)",
+    count: 133,
+    percentage: 13,
+    description: "Retreat akhir pekan di kabin atau camping alam.",
+  },
+];
+
+export const MOCK_DEPARTURE_DISTRIBUTION: DemandDistributionItem[] = [
+  {
+    id: "dep_malang",
+    label: "Malang & Batu",
+    count: 459,
+    percentage: 45,
+    description: "Mencari lokasi lereng pegunungan dekat dan tenang.",
+  },
+  {
+    id: "dep_surabaya",
+    label: "Surabaya & Sidoarjo",
+    count: 408,
+    percentage: 40,
+    description: "Jeda akhir pekan ke arah Batu, Pacet, atau Trawas.",
+  },
+  {
+    id: "dep_other",
+    label: "Area Lain di Jawa Timur",
+    count: 153,
+    percentage: 15,
+    description: "Kediri, Pasuruan, Blitar, dan sekitarnya.",
   },
 ];
 
@@ -107,6 +191,18 @@ export const MOCK_DEMAND_INSIGHTS: DemandInsightRecord[] = [
 export const mockInsightStore = {
   getSignals(): readonly DemandSignalSummary[] {
     return MOCK_DEMAND_SIGNALS;
+  },
+
+  getBudgetDistribution(): readonly DemandDistributionItem[] {
+    return MOCK_BUDGET_DISTRIBUTION;
+  },
+
+  getDurationDistribution(): readonly DemandDistributionItem[] {
+    return MOCK_DURATION_DISTRIBUTION;
+  },
+
+  getDepartureDistribution(): readonly DemandDistributionItem[] {
+    return MOCK_DEPARTURE_DISTRIBUTION;
   },
 
   getAllInsights(): readonly DemandInsightRecord[] {

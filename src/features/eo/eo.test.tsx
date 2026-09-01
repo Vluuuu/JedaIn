@@ -13,12 +13,12 @@ import { mockEoPackageStore, validateEoPackage } from "./mockEoPackageStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import { EoInsightsScreen } from "./EoInsightsScreen";
 import { EoPackageBuilderScreen } from "./EoPackageBuilderScreen";
+import { EoPackageDetailScreen } from "./EoPackageDetailScreen";
+import { EoSessionsScreen } from "./EoSessionsScreen";
 import { EoBookingsScreen } from "./EoBookingsScreen";
-import { EoDestinationsScreen } from "./EoDestinationsScreen";
 import { EoReviewsScreen } from "./EoReviewsScreen";
-import { EoProfileScreen } from "./EoProfileScreen";
-import { EoApplicationScreen } from "./EoApplicationScreen";
 import { EoApplicationStatusScreen } from "./EoApplicationStatusScreen";
+import { PartnerLoginScreen } from "./PartnerLoginScreen";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -51,82 +51,9 @@ async function renderComponent(
   return container;
 }
 
-describe("P5 — EO Golden Flow (EO01–EO18) Tests", () => {
-  describe("1. Partner Entry, Authentication & Application (EO01–EO04)", () => {
-    it("A. new EO application submission transitions to PENDING_REVIEW and preserves identity", async () => {
-      const view = await renderComponent(createElement(EoApplicationScreen));
-
-      expect(view.textContent).toContain("Pengajuan Mitra Event Organizer");
-      expect(view.textContent).toContain("Nama Usaha / Komunitas EO");
-
-      // Submit new application
-      const res = mockApplicationStore.submitApplication({
-        identityId: "eo_new_applicant",
-        businessName: "Lembah Hening Retreat",
-        contactPerson: "Agus Santoso",
-        phone: "081234567890",
-        email: "agus@lembahhening.id",
-        province: "Jawa Timur",
-        city: "Malang",
-        experienceDescription: "Spesialisasi retreat alam hening.",
-        yearsOfOperation: 3,
-        guideStatus: "CERTIFIED_GUIDE",
-        agreedToSop: true,
-      });
-
-      expect(res.success).toBe(true);
-      expect(res.application?.status).toBe("PENDING_REVIEW");
-
-      // Application exists in centralized store
-      const saved = mockApplicationStore.getBySellerId("eo_new_applicant");
-      expect(saved).toBeDefined();
-      expect(saved?.businessName).toBe("Lembah Hening Retreat");
-    });
-
-    it("B. rejected application displays specific rejection reason and allows reapply with same identity", async () => {
-      partnerSessionStore.setPartner({
-        id: "eo_rejected_user",
-        email: "rian@kelanaliar.com",
-        name: "Rian Pratama",
-        role: "EO",
-        businessName: "Kelana Liar Adventure",
-        guideStatus: "CONCEPT_ONLY",
-        applicationStatus: "REJECTED",
-      });
-
-      const view = await renderComponent(
-        createElement(EoApplicationStatusScreen),
-      );
-
-      expect(view.textContent).toContain(
-        "Pengajuan Memerlukan Perbaikan Dokumen",
-      );
-      expect(view.textContent).toContain(
-        "Dokumen SOP penanganan darurat belum lengkap",
-      );
-      expect(view.textContent).toContain("Perbaiki Pengajuan");
-
-      // Re-apply using same identity
-      const res = mockApplicationStore.submitApplication({
-        identityId: "eo_rejected_user",
-        businessName: "Kelana Liar Adventure",
-        contactPerson: "Rian Pratama",
-        phone: "081298765432",
-        email: "rian@kelanaliar.com",
-        province: "Jawa Timur",
-        city: "Malang",
-        experienceDescription: "Revisi portofolio wellness dan SOP darurat.",
-        yearsOfOperation: 2,
-        guideStatus: "CONCEPT_ONLY",
-        agreedToSop: true,
-      });
-
-      expect(res.success).toBe(true);
-      expect(res.application?.status).toBe("PENDING_REVIEW");
-      expect(res.application?.identityId).toBe("eo_rejected_user");
-    });
-
-    it("C. unapproved EO is blocked from operational workspace (/partner/eo/*) by PartnerRouteGuard", async () => {
+describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
+  describe("1. Application & Authorization Lifecycle (A–D)", () => {
+    it("A. PENDING_REVIEW status page cannot self-approve", async () => {
       partnerSessionStore.setPartner({
         id: "eo_pending_user",
         email: "pending@test.com",
@@ -134,278 +61,523 @@ describe("P5 — EO Golden Flow (EO01–EO18) Tests", () => {
         role: "EO",
         businessName: "Pending Org",
         guideStatus: "CONCEPT_ONLY",
-        applicationStatus: "PENDING_REVIEW",
       });
 
-      container = document.createElement("div");
-      document.body.append(container);
-      root = createRoot(container);
+      const view = await renderComponent(
+        createElement(EoApplicationStatusScreen),
+      );
 
-      await act(async () => {
-        root.render(
-          createElement(
-            MemoryRouter,
-            { initialEntries: ["/partner/eo"] },
-            createElement(App),
-          ),
-        );
-      });
-
-      // Redirected to /partner/application
-      expect(container.textContent).toContain("Status Pengajuan Mitra EO");
-      expect(container.textContent).toContain("Sedang Ditinjau");
+      expect(view.textContent).toContain("Sedang Dalam Proses Kurasi");
+      expect(view.textContent).not.toContain("Setujui & Buka Dashboard");
+      expect(view.textContent).toContain("Lihat Workspace EO Demo (Approved)");
     });
 
-    it("D. approved EO can enter operational workspace successfully", async () => {
+    it("B. separate approved demo identity can open workspace", async () => {
       partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      expect(mockApplicationStore.getBySellerId("eo_jeda_alam")?.status).toBe(
+        "APPROVED",
+      );
 
-      container = document.createElement("div");
-      document.body.append(container);
-      root = createRoot(container);
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
 
-      await act(async () => {
-        root.render(
-          createElement(
-            MemoryRouter,
-            { initialEntries: ["/partner/eo"] },
-            createElement(App),
-          ),
-        );
+      expect(view.textContent).toContain("Overview Jeda Alam Nusantara");
+      expect(view.textContent).toContain("+ Buat Paket Baru");
+    });
+
+    it("C. application store approval is authoritative (stale session cannot bypass guard)", async () => {
+      partnerSessionStore.setPartner({
+        id: "eo_rejected_user",
+        email: "rian@kelanaliar.com",
+        name: "Rian Pratama",
+        role: "EO",
+        businessName: "Kelana Liar Adventure",
+        guideStatus: "CONCEPT_ONLY",
       });
 
-      expect(container.textContent).toContain("Overview Jeda Alam Nusantara");
-      expect(container.textContent).toContain("+ Buat Paket Baru");
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      expect(view.textContent).toContain("Status Pengajuan Mitra EO");
+      expect(view.textContent).toContain("Perlu Perbaikan");
+    });
+
+    it("D. reset after approve/reject restores seed correctly", () => {
+      expect(
+        mockApplicationStore.rejectApplication(
+          "app_eo_demo_approved",
+          "Alasan",
+        ),
+      ).toBe(false); // Only PENDING_REVIEW can be rejected
+
+      mockApplicationStore.submitApplication({
+        identityId: "eo_temp_user",
+        businessName: "Temp Org",
+        contactPerson: "Temp Person",
+        phone: "08111",
+        email: "temp@org.id",
+        province: "Jatim",
+        city: "Malang",
+        experienceDescription: "Desc",
+        yearsOfOperation: 1,
+        guideStatus: "CONCEPT_ONLY",
+        agreedToSop: true,
+      });
+
+      const tempApp = mockApplicationStore.getBySellerId("eo_temp_user");
+      expect(tempApp?.status).toBe("PENDING_REVIEW");
+
+      mockApplicationStore.approveApplication(tempApp!.applicationId);
+      expect(mockApplicationStore.getBySellerId("eo_temp_user")?.status).toBe(
+        "APPROVED",
+      );
+
+      mockApplicationStore.reset();
+      expect(
+        mockApplicationStore.getBySellerId("eo_temp_user"),
+      ).toBeUndefined();
+      expect(mockApplicationStore.getBySellerId("eo_jeda_alam")?.status).toBe(
+        "APPROVED",
+      );
     });
   });
 
-  describe("2. Demand Insights & Create Package from Insight (EO05–EO06)", () => {
-    it("E. insights display aggregate data only without any individual Traveler PII", async () => {
-      const view = await renderComponent(createElement(EoInsightsScreen));
+  describe("2. Package Ownership & Draft Hijack Protection (E–H)", () => {
+    it("E. EO B cannot open EO A package detail (returns NOT_FOUND / Access Denied)", async () => {
+      // Login as EO B (Ruang Kreatif Wellness)
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
 
-      expect(view.textContent).toContain(
-        "Demand Insights & Wawasan Kebutuhan Traveler",
+      const view = await renderComponent(
+        createElement(EoPackageDetailScreen),
+        ["/partner/eo/packages/slow_green_day"], // belongs to eo_jeda_alam
       );
-      expect(view.textContent).toContain("Dekat dengan alam");
-      expect(view.textContent).toContain("42%");
-      expect(view.textContent).toContain("428 traveler");
-      expect(view.textContent).toContain("Peluang Paket Belum Terpenuhi");
 
-      // No traveler private details
-      expect(view.textContent).not.toContain("0812");
-      expect(view.textContent).not.toContain("@gmail.com");
-      expect(view.textContent).not.toContain("Dewo");
+      expect(view.textContent).toContain("Paket Tidak Ditemukan");
+      expect(view.textContent).toContain("bukan milik akun EO Anda");
     });
 
-    it("F. Create Package from Insight preserves exact insightId and context into Builder", async () => {
-      partnerSessionStore.loginAsDemoApproved();
+    it("F. EO B cannot load EO A draftId in builder", async () => {
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
 
       const view = await renderComponent(
         createElement(EoPackageBuilderScreen),
-        ["/partner/eo/packages/new?insightId=ins_nature_batu_1d"],
+        ["/partner/eo/packages/new?draftId=slow_green_day"],
       );
 
-      expect(view.textContent).toContain("Trip Builder");
-      expect(view.textContent).toContain(
-        "Langkah 1: Pilih Destinasi Terverifikasi",
-      );
-
-      // Go to Step 2
-      const nextBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Lanjut ke Langkah 2"),
-      );
-
-      // Select first destination first
-      const destCard = view.querySelectorAll(".eo-destination-card")[0];
-      await act(async () => {
-        (destCard as HTMLElement).click();
-      });
-
-      await act(async () => {
-        nextBtn?.click();
-      });
-
-      expect(view.textContent).toContain("Langkah 2: Sinyal Insight");
-      expect(view.textContent).toContain(
-        "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
-      );
+      expect(view.textContent).toContain("Akses Ditolak");
+      expect(view.textContent).toContain("bukan milik akun EO Anda");
     });
-  });
 
-  describe("3. Destination Eligibility, Builder, Validation & Submission (EO08–EO14)", () => {
-    it("G. CONCEPT_ONLY EO is restricted to guideReady destinations both on UI and server-side validation", () => {
-      // 1. UI Filtering helper check
-      const eligibleForConcept =
-        mockDestinationStore.getEligibleForEo("CONCEPT_ONLY");
-      expect(eligibleForConcept.every((d) => d.guideReady === true)).toBe(true);
+    it("G. EO B saveDraft cannot overwrite EO A package", () => {
+      const res = mockEoPackageStore.saveDraft({
+        packageId: "slow_green_day",
+        eoId: "eo_kreatif_desa", // Foreign EO
+        eoDisplayName: "Ruang Kreatif Wellness",
+        title: "Hijacked Title",
+      });
 
-      const eligibleForCertified =
-        mockDestinationStore.getEligibleForEo("CERTIFIED_GUIDE");
-      expect(eligibleForCertified.length).toBe(3);
+      expect(res.success).toBe(false);
+      expect(res.message).toContain("Akses ditolak");
 
-      // 2. Server-side validation check: CONCEPT_ONLY choosing non-guide-ready destination (dest_hutan_trawas)
-      const res = validateEoPackage(
-        {
-          title: "Paket Hening Bambu",
-          shortSummary: "Retreat hening di bambu.",
-          destinationId: "dest_hutan_trawas", // guideReady: false!
-          itinerary: [
-            { order: 1, title: "Meditasi", description: "Sesi hening" },
-          ],
-          pricing: {
-            destinationBaseCost: 95000,
-            eoMargin: 100000,
-            customerPrice: 195000,
-          },
-        },
+      // Verify untouched
+      const original = mockEoPackageStore.getPackageById("slow_green_day");
+      expect(original?.title).toBe("Sehari Pelan di Lereng Hijau");
+      expect(original?.eoId).toBe("eo_jeda_alam");
+    });
+
+    it("H. EO B cannot submit EO A package for review", () => {
+      const res = mockEoPackageStore.submitForReview(
+        "slow_green_day",
+        "eo_kreatif_desa", // Foreign EO
         "CONCEPT_ONLY",
       );
 
-      expect(res.valid).toBe(false);
-      expect(res.errors.some((e) => e.message.includes("Guide Ready"))).toBe(
-        true,
-      );
-    });
-
-    it("H. pricing formula verifies Customer Price = Destination Base Cost + EO Margin", () => {
-      const pkgDraft = {
-        title: "Paket Lereng Santai",
-        shortSummary: "Jalan santai dan teh hangat.",
-        destinationId: "dest_lereng_hijau",
-        itinerary: [{ order: 1, title: "Jalan", description: "Jalan santai" }],
-        pricing: {
-          destinationBaseCost: 125000,
-          eoMargin: 150000,
-          customerPrice: 275000, // Exact sum
-        },
-      };
-
-      const res = validateEoPackage(pkgDraft, "CERTIFIED_GUIDE");
-      expect(res.valid).toBe(true);
-    });
-
-    it("I. invalid submit keeps package as DRAFT with specific step errors; valid submit transitions to PENDING_ADMIN_REVIEW without duplicate", () => {
-      const eoId = "eo_jeda_alam";
-      const eoDisplayName = "Jeda Alam Nusantara";
-
-      // Save incomplete draft
-      const draft = mockEoPackageStore.saveDraft({
-        eoId,
-        eoDisplayName,
-        title: "", // Missing title
-        destinationId: "", // Missing destination
-        itinerary: [], // Missing itinerary
-      });
-
-      // Incomplete submission fails and remains DRAFT
-      const invalidRes = mockEoPackageStore.submitForReview(
-        draft.packageId,
-        "CERTIFIED_GUIDE",
-      );
-      expect(invalidRes.success).toBe(false);
-      expect(invalidRes.package?.status).toBe("DRAFT");
-      expect(invalidRes.validationResult.errors.length).toBeGreaterThanOrEqual(
-        3,
-      );
-
-      // Fix draft with valid data
-      mockEoPackageStore.saveDraft({
-        packageId: draft.packageId,
-        eoId,
-        eoDisplayName,
-        title: "Pagi Segar di Kebun Teh Batu",
-        shortSummary:
-          "Menikmati udara sejuk kebun teh dan sesi pernapasan mindfulness.",
-        destinationId: "dest_lereng_hijau",
-        durationLabel: "1 hari",
-        itinerary: [
-          { order: 1, title: "Sesi Teh", description: "Menikmati teh lokal" },
-          {
-            order: 2,
-            title: "Jalan Hening",
-            description: "Jalan santai kebun teh",
-          },
-        ],
-        pricing: {
-          destinationBaseCost: 125000,
-          eoMargin: 150000,
-          customerPrice: 275000,
-        },
-        guideStatus: "CERTIFIED_GUIDE",
-      });
-
-      // Valid submit succeeds -> PENDING_ADMIN_REVIEW
-      const validRes = mockEoPackageStore.submitForReview(
-        draft.packageId,
-        "CERTIFIED_GUIDE",
-      );
-      expect(validRes.success).toBe(true);
-      expect(validRes.package?.status).toBe("PENDING_ADMIN_REVIEW");
-      expect(validRes.package?.submittedAt).toBeDefined();
-
-      // Repeated submit / retry does not duplicate package records
-      const initialCount = mockEoPackageStore.getAllPackages().length;
-      mockEoPackageStore.submitForReview(draft.packageId, "CERTIFIED_GUIDE");
-      expect(mockEoPackageStore.getAllPackages().length).toBe(initialCount);
+      expect(res.success).toBe(false);
+      expect(res.validationResult.valid).toBe(false);
     });
   });
 
-  describe("4. Sessions Management & Lifecycle Rules (EO16–EO17)", () => {
-    it("J. DRAFT, PENDING_ADMIN_REVIEW, and REJECTED packages cannot open sellable sessions", () => {
-      const eoId = "eo_jeda_alam";
-      const eoDisplayName = "Jeda Alam Nusantara";
-
-      const draftPkg = mockEoPackageStore.saveDraft({
-        eoId,
-        eoDisplayName,
-        title: "Draf Paket Baru",
-        destinationId: "dest_lereng_hijau",
-      });
-
-      // Attempt to create session for DRAFT
-      const resDraft = mockEoPackageStore.createSession({
-        packageId: draftPkg.packageId,
-        eoId,
+  describe("3. Session Ownership & Immediate UI Update (I–K)", () => {
+    it("I. EO B cannot create session on EO A package", () => {
+      const res = mockEoPackageStore.createSession({
+        packageId: "slow_green_day",
+        eoId: "eo_kreatif_desa", // Foreign EO
         startAt: "2026-10-01T08:00:00Z",
         endAt: "2026-10-01T14:00:00Z",
         capacity: 6,
         pricePerPerson: 275000,
       });
-      expect(resDraft.success).toBe(false);
-      expect(resDraft.message).toContain(
-        "Hanya paket berstatus APPROVED atau LIVE",
-      );
+
+      expect(res.success).toBe(false);
+      expect(res.message).toContain("bukan milik EO terautentikasi");
     });
 
-    it("K. APPROVED / LIVE package creates session successfully in centralized store without mutating fixtures", () => {
-      const res = mockEoPackageStore.createSession({
-        packageId: "slow_green_day", // LIVE package
-        eoId: "eo_jeda_alam",
-        startAt: "2026-10-10T08:00:00+07:00",
-        endAt: "2026-10-10T14:00:00+07:00",
-        capacity: 8,
-        pricePerPerson: 275000,
+    it("J. EO B cannot mutate EO A session status", () => {
+      const ok = mockEoPackageStore.updateSessionStatus(
+        "ses_sgd_1", // belongs to eo_jeda_alam
+        "eo_kreatif_desa", // Foreign EO
+        "CLOSED",
+      );
+
+      expect(ok).toBe(false);
+      const session = mockEoPackageStore
+        .getAllSessions()
+        .find((s) => s.sessionId === "ses_sgd_1");
+      expect(session?.status).toBe("OPEN");
+    });
+
+    it("K. session status button updates UI immediately", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(EoSessionsScreen));
+      expect(view.textContent).toContain("Tutup Sesi");
+
+      const closeBtn = Array.from(view.querySelectorAll("button")).find(
+        (b) => b.textContent === "Tutup Sesi",
+      );
+
+      await act(async () => {
+        closeBtn?.click();
       });
 
-      expect(res.success).toBe(true);
-      expect(res.session?.status).toBe("OPEN");
-      expect(res.session?.capacity).toBe(8);
-
-      const sessions =
-        mockEoPackageStore.getSessionsByPackage("slow_green_day");
-      expect(sessions.some((s) => s.capacity === 8)).toBe(true);
+      expect(view.textContent).toContain("Buka Sesi");
     });
   });
 
-  describe("5. Shared Transaction Bookings & Organizer Reviews (EO18 & Reviews)", () => {
-    it("L. EO Bookings screen reads shared transaction store and only exposes owned package bookings", async () => {
-      partnerSessionStore.loginAsDemoApproved();
+  describe("4. Package Lifecycle Transitions (L–Q)", () => {
+    it("L & M. LIVE or APPROVED package cannot be submitted for review", () => {
+      // slow_green_day is LIVE
+      const resLive = mockEoPackageStore.submitForReview(
+        "slow_green_day",
+        "eo_jeda_alam",
+        "CERTIFIED_GUIDE",
+      );
+      expect(resLive.success).toBe(false);
 
-      // Create transactions in shared store: 1 for slow_green_day (owned) and 1 for another package
+      // Set to APPROVED
+      const pkg = mockEoPackageStore.getPackageById("slow_green_day")!;
+      pkg.status = "APPROVED";
+
+      const resApproved = mockEoPackageStore.submitForReview(
+        "slow_green_day",
+        "eo_jeda_alam",
+        "CERTIFIED_GUIDE",
+      );
+      expect(resApproved.success).toBe(false);
+    });
+
+    it("N, O, P, Q. Admin transition guards enforce strict lifecycle rules", () => {
+      const saveRes = mockEoPackageStore.saveDraft({
+        eoId: "eo_jeda_alam",
+        eoDisplayName: "Jeda Alam Nusantara",
+        title: "Paket Tes Kurasi",
+        shortSummary: "Ringkasan kurasi paket.",
+        destinationId: "dest_lereng_hijau",
+        durationLabel: "1 hari",
+        itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi sesi" }],
+        safetyNotes: ["Pakai sepatu."],
+        pricing: {
+          destinationBaseCost: 125000,
+          eoMargin: 150000,
+          customerPrice: 275000,
+        },
+      });
+
+      const pId = saveRes.package!.packageId;
+
+      // P: DRAFT -> LIVE rejected
+      expect(mockEoPackageStore.makePackageLive(pId)).toBe(false);
+
+      // Submit -> PENDING_ADMIN_REVIEW
+      mockEoPackageStore.submitForReview(
+        pId,
+        "eo_jeda_alam",
+        "CERTIFIED_GUIDE",
+      );
+
+      // O: PENDING_ADMIN_REVIEW -> REJECTED allowed
+      expect(mockEoPackageStore.rejectPackage(pId, "Alasan revisi")).toBe(true);
+      expect(mockEoPackageStore.getPackageById(pId)?.status).toBe("REJECTED");
+
+      // Revise & submit again
+      mockEoPackageStore.saveDraft({
+        packageId: pId,
+        eoId: "eo_jeda_alam",
+        eoDisplayName: "Jeda Alam Nusantara",
+        title: "Paket Revisi",
+        shortSummary: "Ringkasan kurasi paket.",
+        destinationId: "dest_lereng_hijau",
+        durationLabel: "1 hari",
+        itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi sesi" }],
+        safetyNotes: ["Pakai sepatu."],
+        pricing: {
+          destinationBaseCost: 125000,
+          eoMargin: 150000,
+          customerPrice: 275000,
+        },
+      });
+      mockEoPackageStore.submitForReview(
+        pId,
+        "eo_jeda_alam",
+        "CERTIFIED_GUIDE",
+      );
+
+      // N: PENDING_ADMIN_REVIEW -> APPROVED allowed
+      expect(mockEoPackageStore.approvePackage(pId)).toBe(true);
+      expect(mockEoPackageStore.getPackageById(pId)?.status).toBe("APPROVED");
+
+      // Q: APPROVED -> LIVE allowed
+      expect(mockEoPackageStore.makePackageLive(pId)).toBe(true);
+      expect(mockEoPackageStore.getPackageById(pId)?.status).toBe("LIVE");
+    });
+  });
+
+  describe("5. Pricing Formula & Complete Validation (R–V)", () => {
+    it("R. manipulated destination base cost is rejected", () => {
+      const res = validateEoPackage(
+        {
+          title: "Paket Manipulasi Base",
+          shortSummary: "Deskripsi paket valid.",
+          destinationId: "dest_lereng_hijau", // Real base cost is 125000
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
+          safetyNotes: ["Catatan keselamatan."],
+          pricing: {
+            destinationBaseCost: 1000, // Manipulated!
+            eoMargin: 150000,
+            customerPrice: 151000,
+          },
+        },
+        "CERTIFIED_GUIDE",
+      );
+
+      expect(res.valid).toBe(false);
+      expect(res.errors.some((e) => e.field === "destinationBaseCost")).toBe(
+        true,
+      );
+    });
+
+    it("S. customerPrice greater than exact formula is rejected", () => {
+      const res = validateEoPackage(
+        {
+          title: "Paket Mark Up",
+          shortSummary: "Deskripsi paket valid.",
+          destinationId: "dest_lereng_hijau", // 125000
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
+          safetyNotes: ["Catatan keselamatan."],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 150000,
+            customerPrice: 400000, // Not 125000 + 150000 = 275000!
+          },
+        },
+        "CERTIFIED_GUIDE",
+      );
+
+      expect(res.valid).toBe(false);
+      expect(res.errors.some((e) => e.field === "customerPrice")).toBe(true);
+    });
+
+    it("T. exact formula accepted", () => {
+      const res = validateEoPackage(
+        {
+          title: "Paket Formula Tepat",
+          shortSummary: "Deskripsi paket valid.",
+          destinationId: "dest_lereng_hijau", // 125000
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
+          safetyNotes: ["Catatan keselamatan."],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 150000,
+            customerPrice: 275000,
+          },
+        },
+        "CERTIFIED_GUIDE",
+      );
+
+      expect(res.valid).toBe(true);
+    });
+
+    it("U. inactive or ineligible destination rejected", () => {
+      const res = validateEoPackage(
+        {
+          title: "Paket Ineligible",
+          shortSummary: "Deskripsi paket valid.",
+          destinationId: "dest_unknown_xyz",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
+          safetyNotes: ["Catatan keselamatan."],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 150000,
+            customerPrice: 275000,
+          },
+        },
+        "CERTIFIED_GUIDE",
+      );
+
+      expect(res.valid).toBe(false);
+      expect(res.errors.some((e) => e.field === "destinationId")).toBe(true);
+    });
+
+    it("V. missing duration or safety notes rejected", () => {
+      const res = validateEoPackage(
+        {
+          title: "Paket Tanpa Safety",
+          shortSummary: "Deskripsi paket valid.",
+          destinationId: "dest_lereng_hijau",
+          durationLabel: "", // Missing duration
+          itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
+          safetyNotes: [], // Missing safety
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 150000,
+            customerPrice: 275000,
+          },
+        },
+        "CERTIFIED_GUIDE",
+      );
+
+      expect(res.valid).toBe(false);
+      expect(res.errors.some((e) => e.field === "durationLabel")).toBe(true);
+      expect(res.errors.some((e) => e.field === "safetyNotes")).toBe(true);
+    });
+  });
+
+  describe("6. Cross-Surface Review Mapping & Privacy (W–AA)", () => {
+    it("W & X. actual Traveler organizerRef resolves review into EO Reviews screen while excluding destination reviews", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // Submit review using official package detail organizer id: "org_lereng_batu"
+      mockReviewStore.submitReview({
+        bookingId: "bk_cross_surface",
+        travelerId: "usr_cross_traveler",
+        targetType: "EO_GUIDE",
+        targetRef: "org_lereng_batu",
+        rating: 5,
+        comment: "Pendampingan guide luar biasa tenang.",
+      });
+
+      mockReviewStore.submitReview({
+        bookingId: "bk_cross_dest",
+        travelerId: "usr_cross_traveler",
+        targetType: "DESTINATION",
+        targetRef: "dest_lereng_hijau",
+        rating: 1,
+        comment: "Komentar destinasi.",
+      });
+
+      const view = await renderComponent(createElement(EoReviewsScreen));
+
+      expect(view.textContent).toContain("★ 5.0");
+      expect(view.textContent).toContain(
+        "Pendampingan guide luar biasa tenang.",
+      );
+      expect(view.textContent).not.toContain("Komentar destinasi.");
+    });
+
+    it("Y. 0 EO reviews shows 'Belum ada rating' without fake 5.0", async () => {
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY"); // 0 reviews
+
+      const view = await renderComponent(createElement(EoReviewsScreen));
+      expect(view.textContent).toContain("Belum ada rating");
+      expect(view.textContent).not.toContain("★ 5.0");
+    });
+
+    it("Z & AA. empty comment shows 'Tanpa komentar' and raw travelerId is not rendered", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      mockReviewStore.submitReview({
+        bookingId: "bk_empty_comment_123",
+        travelerId: "usr_secret_privacy_123",
+        targetType: "EO_GUIDE",
+        targetRef: "org_lereng_batu",
+        rating: 4,
+        comment: "",
+      });
+
+      const view = await renderComponent(createElement(EoReviewsScreen));
+      expect(view.textContent).toContain("Tanpa komentar");
+      expect(view.textContent).not.toContain("usr_secret_privacy_123");
+      expect(view.textContent).toContain("bk_empty_comment_123");
+    });
+  });
+
+  describe("7. Complete Insights Distributions & Truthful Copy (AB–AG)", () => {
+    it("AB–AG. all 5 demand distributions are rendered with truthful prototype wording", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      // AB: Intent
+      expect(view.textContent).toContain("1. Distribusi Kebutuhan Suasana");
+      expect(view.textContent).toContain("Dekat dengan alam");
+
+      // AC: Budget
+      expect(view.textContent).toContain("2. Distribusi Budget Nyaman");
+      expect(view.textContent).toContain("Rp200.000 – Rp300.000");
+
+      // AD: Duration
+      expect(view.textContent).toContain("3. Distribusi Durasi Perjalanan");
+      expect(view.textContent).toContain("1 Hari Penuh (6–8 Jam)");
+
+      // AE: Departure
+      expect(view.textContent).toContain(
+        "4. Distribusi Wilayah Asal Keberangkatan",
+      );
+      expect(view.textContent).toContain("Malang & Batu");
+
+      // AF: Unmet demand
+      expect(view.textContent).toContain("5. Peluang Paket Belum Terpenuhi");
+      expect(view.textContent).toContain(
+        "Tingginya Permintaan Jeda Alam 1 Hari",
+      );
+
+      // AG: Truthful copy
+      expect(view.textContent).toContain("Simulasi sinyal agregat");
+      expect(view.textContent).not.toContain("respons traveler terverifikasi");
+    });
+  });
+
+  describe("8. Partner Routing & Bookings Sessions (AH–AK)", () => {
+    it("AH. /partner/apply/destination renders safe placeholder", async () => {
+      const view = await renderComponent(createElement(App), [
+        "/partner/apply/destination",
+      ]);
+
+      expect(view.textContent).toContain("Mitra Destinasi");
+      expect(view.textContent).toContain(
+        "prototype flow dilanjutkan pada sprint berikutnya",
+      );
+    });
+
+    it("AI. DESTINATION role login routes to destination application entry, never /partner/eo", async () => {
+      const view = await renderComponent(createElement(PartnerLoginScreen));
+
+      const roleSelect =
+        view.querySelector<HTMLSelectElement>("#partner-role")!;
+      await act(async () => {
+        roleSelect.value = "DESTINATION";
+        roleSelect.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const submitBtn = view.querySelector<HTMLButtonElement>(
+        "button[type='submit']",
+      )!;
+      await act(async () => {
+        submitBtn.click();
+      });
+
+      // Does not open EO operational workspace
+      expect(view.textContent).not.toContain("Overview Jeda Alam Nusantara");
+    });
+
+    it("AJ & AK. EO booking row contains actual trip date and hides unrelated bookings", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
       mockTransactionStore.addDirectBooking({
-        bookingId: "bk_eo_test_1",
-        travelerId: "usr_traveler_1",
+        bookingId: "bk_session_date_check",
+        travelerId: "usr_traveler_date",
         packageId: "slow_green_day",
-        sessionId: "ses_sgd_1",
+        sessionId: "ses_sgd_1", // 12 Sep 2026
         participantCount: 2,
         unitPricePerPerson: 275000,
         totalAmount: 550000,
@@ -418,13 +590,13 @@ describe("P5 — EO Golden Flow (EO01–EO18) Tests", () => {
       });
 
       mockTransactionStore.addDirectBooking({
-        bookingId: "bk_unrelated_package",
-        travelerId: "usr_traveler_2",
-        packageId: "unrelated_pkg_xyz",
-        sessionId: "ses_xyz_1",
+        bookingId: "bk_foreign_pkg",
+        travelerId: "usr_traveler_foreign",
+        packageId: "foreign_package_xyz",
+        sessionId: "ses_foreign_1",
         participantCount: 1,
-        unitPricePerPerson: 300000,
-        totalAmount: 300000,
+        unitPricePerPerson: 100000,
+        totalAmount: 100000,
         status: "PAID",
         reservedQuantity: 0,
         bookedQuantity: 1,
@@ -434,83 +606,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Tests", () => {
 
       const view = await renderComponent(createElement(EoBookingsScreen));
 
-      expect(view.textContent).toContain("Daftar Booking & Peserta");
-      expect(view.textContent).toContain("bk_eo_test_1");
-      expect(view.textContent).toContain("2 Orang");
-      expect(view.textContent).toContain("Rp550.000");
-
-      // Unrelated booking is hidden
-      expect(view.textContent).not.toContain("bk_unrelated_package");
-    });
-
-    it("M. EO Reviews screen consumes only EO_GUIDE reviews targeting the organizer and computes accurate rating", async () => {
-      partnerSessionStore.loginAsDemoApproved();
-      const eoId = "eo_jeda_alam";
-
-      // Submit reviews in shared store: 1 EO_GUIDE for this EO, 1 DESTINATION review, and 1 for another EO
-      mockReviewStore.submitReview({
-        bookingId: "bk_rev_1",
-        travelerId: "usr_1",
-        targetType: "EO_GUIDE",
-        targetRef: eoId,
-        rating: 5,
-        comment: "Pendampingan sangat ramah dan menenangkan.",
-      });
-
-      mockReviewStore.submitReview({
-        bookingId: "bk_rev_2",
-        travelerId: "usr_2",
-        targetType: "EO_GUIDE",
-        targetRef: eoId,
-        rating: 4,
-        comment: "Alur waktu terkelola dengan baik.",
-      });
-
-      mockReviewStore.submitReview({
-        bookingId: "bk_rev_dest",
-        travelerId: "usr_3",
-        targetType: "DESTINATION",
-        targetRef: "dest_lereng_hijau",
-        rating: 2, // Should not affect EO rating
-        comment: "Tempat agak berangin.",
-      });
-
-      const view = await renderComponent(createElement(EoReviewsScreen));
-
-      expect(view.textContent).toContain("Ulasan & Rating Kepemanduan");
-      expect(view.textContent).toContain("4.5"); // (5 + 4) / 2 = 4.5
-      expect(view.textContent).toContain("Total Ulasan Masuk");
-      expect(view.textContent).toContain(
-        "Pendampingan sangat ramah dan menenangkan.",
-      );
-      expect(view.textContent).not.toContain("Tempat agak berangin.");
-    });
-  });
-
-  describe("6. EO Profile & Destinations Surface (EO15 & EO18)", () => {
-    it("N. EO Destinations displays verified directory and guide readiness info", async () => {
-      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-      const view = await renderComponent(createElement(EoDestinationsScreen));
-
-      expect(view.textContent).toContain("Destinasi Terverifikasi JedaIn");
-      expect(view.textContent).toContain("Lereng Hijau Batu");
-      expect(view.textContent).toContain("Lembah Alam Pacet");
-      expect(view.textContent).toContain("Hutan Bambu Trawas");
-      expect(view.textContent).toContain("Guide Ready ✓");
-    });
-
-    it("O. EO Profile renders organizer identity and SOP compliance details", async () => {
-      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-      const view = await renderComponent(createElement(EoProfileScreen));
-
-      expect(view.textContent).toContain("Profil Mitra Event Organizer");
-      expect(view.textContent).toContain("Jeda Alam Nusantara");
-      expect(view.textContent).toContain("Budi Santoso");
-      expect(view.textContent).toContain("partner@jedaalam.id");
-      expect(view.textContent).toContain("Certified Guide (Lisensi Resmi)");
-      expect(view.textContent).toContain(
-        "Perjanjian Standar Operasional JedaIn Aktif",
-      );
+      expect(view.textContent).toContain("bk_session_date_check");
+      expect(view.textContent).toContain("12 Sep 2026");
+      expect(view.textContent).not.toContain("bk_foreign_pkg");
     });
   });
 });

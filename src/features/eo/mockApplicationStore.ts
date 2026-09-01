@@ -31,6 +31,24 @@ export const INITIAL_EO_APPLICATIONS: EoApplicationRecord[] = [
     reviewedAt: "2026-08-02T14:00:00Z",
   },
   {
+    applicationId: "app_eo_demo_concept_approved",
+    identityId: "eo_kreatif_desa",
+    businessName: "Ruang Kreatif Wellness",
+    contactPerson: "Dewi Lestari",
+    phone: "081211223344",
+    email: "partner@kreatifdesa.id",
+    province: "Jawa Timur",
+    city: "Malang",
+    experienceDescription:
+      "Spesialisasi workshop kesenian dan mindful crafting lokal.",
+    yearsOfOperation: 3,
+    guideStatus: "CONCEPT_ONLY",
+    agreedToSop: true,
+    status: "APPROVED",
+    submittedAt: "2026-08-05T09:00:00Z",
+    reviewedAt: "2026-08-06T11:00:00Z",
+  },
+  {
     applicationId: "app_eo_demo_rejected",
     identityId: "eo_rejected_user",
     businessName: "Kelana Liar Adventure",
@@ -51,23 +69,37 @@ export const INITIAL_EO_APPLICATIONS: EoApplicationRecord[] = [
   },
 ];
 
-let applications: EoApplicationRecord[] = [...INITIAL_EO_APPLICATIONS];
+let applications: EoApplicationRecord[] = INITIAL_EO_APPLICATIONS.map((a) => ({
+  ...a,
+  guideCertificateDoc: a.guideCertificateDoc
+    ? { ...a.guideCertificateDoc }
+    : undefined,
+  insuranceDoc: a.insuranceDoc ? { ...a.insuranceDoc } : undefined,
+}));
 
 export const mockApplicationStore = {
   reset(): void {
-    applications = [...INITIAL_EO_APPLICATIONS];
+    applications = INITIAL_EO_APPLICATIONS.map((a) => ({
+      ...a,
+      guideCertificateDoc: a.guideCertificateDoc
+        ? { ...a.guideCertificateDoc }
+        : undefined,
+      insuranceDoc: a.insuranceDoc ? { ...a.insuranceDoc } : undefined,
+    }));
   },
 
   getAll(): readonly EoApplicationRecord[] {
-    return applications;
+    return applications.map((a) => ({ ...a }));
   },
 
   getById(applicationId: string): EoApplicationRecord | undefined {
-    return applications.find((a) => a.applicationId === applicationId);
+    const app = applications.find((a) => a.applicationId === applicationId);
+    return app ? { ...app } : undefined;
   },
 
   getBySellerId(identityId: string): EoApplicationRecord | undefined {
-    return applications.find((a) => a.identityId === identityId);
+    const app = applications.find((a) => a.identityId === identityId);
+    return app ? { ...app } : undefined;
   },
 
   submitApplication(input: {
@@ -155,13 +187,13 @@ export const mockApplicationStore = {
       applications.push(application);
     }
 
-    return { success: true, application };
+    return { success: true, application: { ...application } };
   },
 
-  // Admin decision helpers
+  // Admin decision helpers (Strict transition: only PENDING_REVIEW -> APPROVED / REJECTED)
   approveApplication(applicationId: string): boolean {
     const app = applications.find((a) => a.applicationId === applicationId);
-    if (!app) return false;
+    if (!app || app.status !== "PENDING_REVIEW") return false;
     app.status = "APPROVED";
     app.reviewedAt = new Date().toISOString();
     return true;
@@ -169,9 +201,9 @@ export const mockApplicationStore = {
 
   rejectApplication(applicationId: string, reason: string): boolean {
     const app = applications.find((a) => a.applicationId === applicationId);
-    if (!app) return false;
+    if (!app || app.status !== "PENDING_REVIEW" || !reason.trim()) return false;
     app.status = "REJECTED";
-    app.rejectionReason = reason;
+    app.rejectionReason = reason.trim();
     app.reviewedAt = new Date().toISOString();
     return true;
   },

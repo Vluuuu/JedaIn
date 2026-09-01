@@ -1,5 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
+import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 
 export interface PartnerRouteGuardProps {
@@ -10,7 +11,7 @@ export function PartnerRouteGuard({ children }: PartnerRouteGuardProps) {
   const location = useLocation();
   const partner = partnerSessionStore.get();
 
-  // If visiting operational EO workspace (/partner/eo/*), partner must be logged in and APPROVED
+  // If visiting operational EO workspace (/partner/eo/*), partner must be logged in and authoritative status must be APPROVED
   const isOperationalEo = location.pathname.startsWith("/partner/eo");
 
   if (isOperationalEo) {
@@ -22,7 +23,10 @@ export function PartnerRouteGuard({ children }: PartnerRouteGuardProps) {
       });
     }
 
-    if (partner.applicationStatus !== "APPROVED") {
+    const app = mockApplicationStore.getBySellerId(partner.id);
+    const authoritativeStatus = app ? app.status : undefined;
+
+    if (authoritativeStatus !== "APPROVED") {
       return createElement(Navigate, {
         to: "/partner/application",
         replace: true,

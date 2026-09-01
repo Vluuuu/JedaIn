@@ -11,18 +11,14 @@ export function EoApplicationStatusScreen() {
     ? mockApplicationStore.getBySellerId(partner.id)
     : mockApplicationStore.getAll()[0];
 
-  const status =
-    partner?.applicationStatus ?? application?.status ?? "PENDING_REVIEW";
+  const status = application?.status ?? "PENDING_REVIEW";
 
   const handleOpenDashboard = () => {
-    if (partner) {
-      partnerSessionStore.setPartner({
-        ...partner,
-        applicationStatus: "APPROVED",
-      });
-    } else {
-      partnerSessionStore.loginAsDemoApproved();
-    }
+    navigate("/partner/eo");
+  };
+
+  const handleSwitchToApprovedDemo = () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
     navigate("/partner/eo");
   };
 
@@ -206,7 +202,7 @@ export function EoApplicationStatusScreen() {
             </p>
           </div>
 
-          {/* Demonstration Quick Override for Juror */}
+          {/* Demonstration Quick Switcher for Juror */}
           <div
             style={{
               padding: "var(--space-4)",
@@ -229,16 +225,16 @@ export function EoApplicationStatusScreen() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Ingin langsung melihat dashboard operasional EO?
+                Gunakan identitas demo terpisah yang sudah berstatus APPROVED.
               </p>
             </div>
             <Button
               type="button"
               variant="secondary"
               size="sm"
-              onClick={handleOpenDashboard}
+              onClick={handleSwitchToApprovedDemo}
             >
-              Setujui & Buka Dashboard
+              Lihat Workspace EO Demo (Approved)
             </Button>
           </div>
 

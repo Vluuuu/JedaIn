@@ -93,7 +93,6 @@ export function EoApplicationScreen() {
         role: "EO",
         businessName: res.application.businessName,
         guideStatus: res.application.guideStatus,
-        applicationStatus: res.application.status,
       });
       navigate("/partner/application");
     } else {

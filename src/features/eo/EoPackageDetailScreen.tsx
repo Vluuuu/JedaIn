@@ -3,13 +3,18 @@ import { Badge, Button } from "../../components/ui";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
+import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
 
 export function EoPackageDetailScreen() {
   const { packageId } = useParams<{ packageId: string }>();
   const navigate = useNavigate();
+  const partner = partnerSessionStore.get();
+  const eoId = partner?.id ?? "eo_jeda_alam";
+
+  // Ownership verification
   const pkg = packageId
-    ? mockEoPackageStore.getPackageById(packageId)
+    ? mockEoPackageStore.getPackageForEo(packageId, eoId)
     : undefined;
 
   if (!pkg) {
@@ -21,7 +26,7 @@ export function EoPackageDetailScreen() {
         >
           <h2>Paket Tidak Ditemukan</h2>
           <p style={{ color: "var(--color-text-secondary)" }}>
-            Rancangan paket ini tidak tersedia atau tautan tidak valid.
+            Rancangan paket ini tidak tersedia atau bukan milik akun EO Anda.
           </p>
           <Button
             type="button"

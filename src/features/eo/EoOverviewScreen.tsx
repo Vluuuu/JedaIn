@@ -11,6 +11,7 @@ export function EoOverviewScreen() {
   const navigate = useNavigate();
   const partner = partnerSessionStore.get();
   const eoId = partner?.id ?? "eo_jeda_alam";
+  const organizerReviewRef = partner?.organizerReviewRef ?? "org_lereng_batu";
 
   const packages = mockEoPackageStore.getPackagesByEo(eoId);
   const pendingApprovalCount = packages.filter(
@@ -28,14 +29,14 @@ export function EoOverviewScreen() {
     (b) => b.status === "PAID" || b.status === "COMPLETED",
   );
 
-  // Reviews for organizer from shared review store
-  const eoReviews = mockReviewStore.getReviewsForOrganizer(eoId);
+  // Reviews for organizer from shared review store using organizerReviewRef
+  const eoReviews = mockReviewStore.getReviewsForOrganizer(organizerReviewRef);
   const avgRating =
     eoReviews.length > 0
       ? (
           eoReviews.reduce((sum, r) => sum + r.rating, 0) / eoReviews.length
         ).toFixed(1)
-      : "5.0";
+      : undefined;
 
   const topInsight = mockInsightStore.getAllInsights()[0];
 
@@ -94,10 +95,12 @@ export function EoOverviewScreen() {
             className="eo-stat-value"
             style={{ color: "var(--color-sand-700)" }}
           >
-            ★ {avgRating}
+            {avgRating ? `★ ${avgRating}` : "Belum ada rating"}
           </strong>
           <span className="eo-stat-desc">
-            Berdasarkan {eoReviews.length} ulasan traveler
+            {eoReviews.length > 0
+              ? `Berdasarkan ${eoReviews.length} ulasan traveler`
+              : "Belum ada ulasan masuk"}
           </span>
         </div>
       </section>

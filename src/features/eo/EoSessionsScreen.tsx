@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { partnerSessionStore } from "./partnerSessionStore";
@@ -15,14 +15,48 @@ export function EoSessionsScreen() {
     (p) => p.status === "APPROVED" || p.status === "LIVE",
   );
 
+  // Security check: if packageId param is passed, ensure it belongs to current EO
+  const isForeignPackage = Boolean(
+    packageId && !allEoPackages.some((p) => p.packageId === packageId),
+  );
+
   const [selectedPackageId, setSelectedPackageId] = useState<string>(
-    packageId ?? eligiblePackages[0]?.packageId ?? "",
+    packageId && !isForeignPackage
+      ? packageId
+      : (eligiblePackages[0]?.packageId ?? ""),
   );
   const [startDate, setStartDate] = useState<string>("2026-09-26T08:00");
   const [endDate, setEndDate] = useState<string>("2026-09-26T14:00");
   const [capacity, setCapacity] = useState<number>(6);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | undefined>();
+  const [refreshVersion, setRefreshVersion] = useState<number>(0);
+
+  if (isForeignPackage) {
+    return (
+      <div className="eo-container">
+        <div
+          className="eo-section"
+          style={{ textAlign: "center", padding: "var(--space-8)" }}
+        >
+          <h2>Akses Ditolak</h2>
+          <p style={{ color: "var(--color-text-secondary)" }}>
+            Paket ini tidak ditemukan atau bukan milik akun EO Anda.
+          </p>
+          <Link
+            to="/partner/eo/packages"
+            style={{
+              color: "var(--color-brand-primary)",
+              fontWeight: 600,
+              fontSize: "var(--font-size-body-sm)",
+            }}
+          >
+            &larr; Kembali ke Daftar Paket
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const sessions = selectedPackageId
     ? mockEoPackageStore.getSessionsByPackage(selectedPackageId)
@@ -55,13 +89,28 @@ export function EoSessionsScreen() {
 
     if (res.success) {
       setShowAddModal(false);
+      setRefreshVersion((v) => v + 1);
     } else {
       setFormError(res.message ?? "Gagal membuka sesi.");
     }
   };
 
+  const handleToggleStatus = (
+    sessionId: string,
+    newStatus: "OPEN" | "CLOSED",
+  ) => {
+    const ok = mockEoPackageStore.updateSessionStatus(
+      sessionId,
+      eoId,
+      newStatus,
+    );
+    if (ok) {
+      setRefreshVersion((v) => v + 1);
+    }
+  };
+
   return (
-    <div className="eo-container">
+    <div className="eo-container" data-version={refreshVersion}>
       <header className="eo-page-header">
         <div>
           <Badge tone="info">Manajemen Jadwal Keberangkatan</Badge>
@@ -208,13 +257,9 @@ export function EoSessionsScreen() {
                               type="button"
                               variant="secondary"
                               size="sm"
-                              onClick={() => {
-                                mockEoPackageStore.updateSessionStatus(
-                                  s.sessionId,
-                                  "CLOSED",
-                                );
-                                setSelectedPackageId((prev) => prev); // force re-render
-                              }}
+                              onClick={() =>
+                                handleToggleStatus(s.sessionId, "CLOSED")
+                              }
                             >
                               Tutup Sesi
                             </Button>
@@ -224,13 +269,9 @@ export function EoSessionsScreen() {
                               type="button"
                               variant="secondary"
                               size="sm"
-                              onClick={() => {
-                                mockEoPackageStore.updateSessionStatus(
-                                  s.sessionId,
-                                  "OPEN",
-                                );
-                                setSelectedPackageId((prev) => prev);
-                              }}
+                              onClick={() =>
+                                handleToggleStatus(s.sessionId, "OPEN")
+                              }
                             >
                               Buka Sesi
                             </Button>

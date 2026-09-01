@@ -181,6 +181,20 @@ export function App() {
       <Route path="partner/apply/eo" element={<DistractionFreeShell />}>
         <Route index element={<EoApplicationScreen />} />
       </Route>
+      <Route
+        path="partner/apply/destination"
+        element={<DistractionFreeShell />}
+      >
+        <Route
+          index
+          element={
+            <PlaceholderPage
+              eyebrow="Mitra Destinasi"
+              title="Pengajuan Mitra Destinasi — prototype flow dilanjutkan pada sprint berikutnya."
+            />
+          }
+        />
+      </Route>
       <Route path="partner/application" element={<DistractionFreeShell />}>
         <Route index element={<EoApplicationStatusScreen />} />
       </Route>

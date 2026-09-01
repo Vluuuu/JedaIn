@@ -5,17 +5,17 @@ import "./eo.css";
 
 export function EoReviewsScreen() {
   const partner = partnerSessionStore.get();
-  const eoId = partner?.id ?? "eo_jeda_alam";
+  const organizerReviewRef = partner?.organizerReviewRef ?? "org_lereng_batu";
 
-  // Filter only EO_GUIDE reviews for this organizer from the shared review store
-  const eoReviews = mockReviewStore.getReviewsForOrganizer(eoId);
+  // Filter only EO_GUIDE reviews for this organizer using organizerReviewRef
+  const eoReviews = mockReviewStore.getReviewsForOrganizer(organizerReviewRef);
 
   const avgRating =
     eoReviews.length > 0
       ? (
           eoReviews.reduce((sum, r) => sum + r.rating, 0) / eoReviews.length
         ).toFixed(1)
-      : "5.0";
+      : undefined;
 
   return (
     <div className="eo-container">
@@ -41,9 +41,11 @@ export function EoReviewsScreen() {
             className="eo-stat-value"
             style={{ color: "var(--color-sand-700)" }}
           >
-            ★ {avgRating}
+            {avgRating ? `★ ${avgRating}` : "Belum ada rating"}
           </strong>
-          <span className="eo-stat-desc">Skala 1.0 – 5.0 bintang</span>
+          <span className="eo-stat-desc">
+            {avgRating ? "Skala 1.0 – 5.0 bintang" : "Belum ada ulasan"}
+          </span>
         </div>
 
         <div className="eo-stat-card">
@@ -122,28 +124,39 @@ export function EoReviewsScreen() {
                   </small>
                 </div>
 
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "var(--font-size-body-md)",
-                    color: "var(--color-text-primary)",
-                    fontStyle: "italic",
-                  }}
-                >
-                  "
-                  {rev.comment ||
-                    "Pemandu sangat ramah, alur perjalanan tenang dan menyenangkan."}
-                  "
-                </p>
+                {rev.comment && rev.comment.trim() ? (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "var(--font-size-body-md)",
+                      color: "var(--color-text-primary)",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    "{rev.comment}"
+                  </p>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: "var(--font-size-body-sm)",
+                      color: "var(--color-text-muted)",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Tanpa komentar
+                  </span>
+                )}
 
                 <div
                   style={{
                     fontSize: "var(--font-size-caption)",
                     color: "var(--color-text-secondary)",
+                    borderTop: "1px solid var(--color-border-default)",
+                    paddingTop: "var(--space-2)",
+                    marginTop: "var(--space-1)",
                   }}
                 >
-                  Nomor Booking: <strong>{rev.bookingId}</strong> • Traveler:{" "}
-                  <strong>{rev.travelerId}</strong>
+                  Nomor Booking: <strong>{rev.bookingId}</strong>
                 </div>
               </article>
             ))}

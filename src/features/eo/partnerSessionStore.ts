@@ -7,7 +7,7 @@ export const DEMO_EO_USER: PartnerUser = {
   role: "EO",
   businessName: "Jeda Alam Nusantara",
   guideStatus: "CERTIFIED_GUIDE",
-  applicationStatus: "APPROVED",
+  organizerReviewRef: "org_lereng_batu",
 };
 
 export const DEMO_CONCEPT_EO_USER: PartnerUser = {
@@ -17,7 +17,7 @@ export const DEMO_CONCEPT_EO_USER: PartnerUser = {
   role: "EO",
   businessName: "Ruang Kreatif Wellness",
   guideStatus: "CONCEPT_ONLY",
-  applicationStatus: "APPROVED",
+  organizerReviewRef: "org_kreatif_desa",
 };
 
 let currentPartner: PartnerUser | null = DEMO_EO_USER;

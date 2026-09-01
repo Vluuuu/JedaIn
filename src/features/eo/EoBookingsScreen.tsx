@@ -1,5 +1,6 @@
 import { Badge } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
@@ -14,6 +15,7 @@ export function EoBookingsScreen() {
   // Filter bookings from shared transaction store that belong to this EO's packages
   const allBookings = mockTransactionStore.getBookings();
   const eoBookings = allBookings.filter((b) => eoPackageIds.has(b.packageId));
+  const allSessions = mockEoPackageStore.getAllSessions();
 
   return (
     <div className="eo-container">
@@ -24,8 +26,8 @@ export function EoBookingsScreen() {
             Daftar Booking & Peserta
           </h1>
           <p className="eo-page-subtitle">
-            Pantau status transaksi traveler, jumlah peserta terkonfirmasi, dan
-            kesiapan operasional keberangkatan.
+            Pantau status transaksi traveler, jadwal sesi keberangkatan, dan
+            kesiapan operasional peserta.
           </p>
         </div>
       </header>
@@ -51,6 +53,7 @@ export function EoBookingsScreen() {
                 <tr>
                   <th>No. Pesanan</th>
                   <th>Paket Experience</th>
+                  <th>Jadwal Sesi Trip</th>
                   <th>Jumlah Peserta</th>
                   <th>Total Pembayaran</th>
                   <th>Status Transaksi</th>
@@ -63,12 +66,44 @@ export function EoBookingsScreen() {
                   const isPaid =
                     b.status === "PAID" || b.status === "COMPLETED";
 
+                  // Resolve session date from centralized session source or package details
+                  const foundSession =
+                    allSessions.find((s) => s.sessionId === b.sessionId) ??
+                    MOCK_PACKAGE_DETAILS[
+                      b.packageId
+                    ]?.upcomingSessionPreviews?.find(
+                      (s) => s.sessionId === b.sessionId,
+                    );
+
+                  const sessionDateLabel = foundSession?.startAt
+                    ? new Date(foundSession.startAt).toLocaleDateString(
+                        "id-ID",
+                        {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )
+                    : b.sessionId;
+
                   return (
                     <tr key={b.bookingId}>
                       <td>
                         <strong>{b.bookingId}</strong>
                       </td>
                       <td>{pkg?.title ?? b.packageId}</td>
+                      <td>
+                        <strong>{sessionDateLabel}</strong>
+                        <div
+                          style={{
+                            fontSize: "var(--font-size-caption)",
+                            color: "var(--color-text-muted)",
+                          }}
+                        >
+                          Sesi: {b.sessionId}
+                        </div>
+                      </td>
                       <td>
                         <strong>{b.participantCount}</strong> Orang
                       </td>

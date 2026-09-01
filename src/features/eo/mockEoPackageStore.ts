@@ -24,13 +24,14 @@ export function validateEoPackage(
     const dest = mockDestinationStore.getById(pkg.destinationId);
     if (
       !dest ||
+      dest.status !== "ACTIVE" ||
       (dest.verificationLevel !== "BASIC" && dest.verificationLevel !== "PLUS")
     ) {
       errors.push({
         step: 1,
         field: "destinationId",
         message:
-          "Destinasi yang dipilih tidak terdaftar atau belum terverifikasi.",
+          "Destinasi yang dipilih tidak terdaftar atau belum terverifikasi aktif.",
       });
     } else if (eoGuideStatus === "CONCEPT_ONLY" && !dest.guideReady) {
       errors.push({
@@ -42,7 +43,7 @@ export function validateEoPackage(
     }
   }
 
-  // Step 2 & General info: Title & Value Proposition
+  // Step 2 & General info: Title, Summary & Duration
   if (!pkg.title || pkg.title.trim().length < 5) {
     errors.push({
       step: 2,
@@ -59,7 +60,15 @@ export function validateEoPackage(
     });
   }
 
-  // Step 3: Itinerary
+  if (!pkg.durationLabel || !pkg.durationLabel.trim()) {
+    errors.push({
+      step: 2,
+      field: "durationLabel",
+      message: "Durasi paket wajib ditentukan.",
+    });
+  }
+
+  // Step 3: Itinerary & Safety
   if (!pkg.itinerary || pkg.itinerary.length === 0) {
     errors.push({
       step: 3,
@@ -79,7 +88,24 @@ export function validateEoPackage(
     });
   }
 
-  // Step 4: Pricing
+  if (
+    !pkg.safetyNotes ||
+    pkg.safetyNotes.length === 0 ||
+    !pkg.safetyNotes.some((s) => s && s.trim().length > 0)
+  ) {
+    errors.push({
+      step: 3,
+      field: "safetyNotes",
+      message: "Minimal cantumkan 1 catatan operasional atau keselamatan.",
+    });
+  }
+
+  // Step 4: Pricing (Authoritative Base Cost and Exact Formula)
+  const dest = pkg.destinationId
+    ? mockDestinationStore.getById(pkg.destinationId)
+    : undefined;
+  const authoritativeBaseCost = dest?.baseCostPerPerson ?? 100000;
+
   if (!pkg.pricing) {
     errors.push({
       step: 4,
@@ -87,6 +113,15 @@ export function validateEoPackage(
       message: "Rincian harga wajib diisi.",
     });
   } else {
+    if (pkg.pricing.destinationBaseCost !== authoritativeBaseCost) {
+      errors.push({
+        step: 4,
+        field: "destinationBaseCost",
+        message:
+          "Modal dasar destinasi tidak sesuai dengan data resmi destinasi.",
+      });
+    }
+
     if (pkg.pricing.eoMargin < 0) {
       errors.push({
         step: 4,
@@ -94,14 +129,13 @@ export function validateEoPackage(
         message: "Margin EO tidak boleh bernilai negatif.",
       });
     }
-    const expectedCustomerPrice =
-      pkg.pricing.destinationBaseCost + pkg.pricing.eoMargin;
-    if (pkg.pricing.customerPrice < expectedCustomerPrice) {
+
+    const exactCustomerPrice = authoritativeBaseCost + pkg.pricing.eoMargin;
+    if (pkg.pricing.customerPrice !== exactCustomerPrice) {
       errors.push({
         step: 4,
         field: "customerPrice",
-        message:
-          "Harga jual ke traveler tidak boleh lebih kecil dari modal destinasi + margin EO.",
+        message: `Harga jual ke traveler harus sama persis dengan modal destinasi + margin EO (Rp${exactCustomerPrice.toLocaleString("id-ID")}).`,
       });
     }
   }
@@ -209,34 +243,77 @@ export const SEEDED_SESSIONS: EoSessionRecord[] = [
   },
 ];
 
-let packages: EoPackageRecord[] = [{ ...SEEDED_LIVE_PACKAGE }];
+function clonePackage(pkg: EoPackageRecord): EoPackageRecord {
+  return {
+    ...pkg,
+    suitableGroupTypes: [...pkg.suitableGroupTypes],
+    highlights: [...pkg.highlights],
+    itinerary: pkg.itinerary.map((it) => ({ ...it })),
+    includedItems: [...pkg.includedItems],
+    excludedItems: [...pkg.excludedItems],
+    safetyNotes: [...pkg.safetyNotes],
+    pricing: { ...pkg.pricing },
+  };
+}
+
+let packages: EoPackageRecord[] = [clonePackage(SEEDED_LIVE_PACKAGE)];
 let sessions: EoSessionRecord[] = SEEDED_SESSIONS.map((s) => ({ ...s }));
 
 export const mockEoPackageStore = {
   reset(): void {
-    packages = [{ ...SEEDED_LIVE_PACKAGE }];
+    packages = [clonePackage(SEEDED_LIVE_PACKAGE)];
     sessions = SEEDED_SESSIONS.map((s) => ({ ...s }));
   },
 
   getAllPackages(): readonly EoPackageRecord[] {
-    return packages;
+    return packages.map((p) => clonePackage(p));
   },
 
   getPackagesByEo(eoId: string): readonly EoPackageRecord[] {
-    return packages.filter((p) => p.eoId === eoId);
+    return packages.filter((p) => p.eoId === eoId).map((p) => clonePackage(p));
   },
 
   getPackageById(packageId: string): EoPackageRecord | undefined {
-    return packages.find((p) => p.packageId === packageId);
+    const pkg = packages.find((p) => p.packageId === packageId);
+    return pkg ? clonePackage(pkg) : undefined;
+  },
+
+  getPackageForEo(
+    packageId: string,
+    eoId: string,
+  ): EoPackageRecord | undefined {
+    const pkg = packages.find(
+      (p) => p.packageId === packageId && p.eoId === eoId,
+    );
+    return pkg ? clonePackage(pkg) : undefined;
   },
 
   saveDraft(
     draft: Partial<EoPackageRecord> & { eoId: string; eoDisplayName: string },
-  ): EoPackageRecord {
+  ): { success: boolean; package?: EoPackageRecord; message?: string } {
     const nowIso = new Date().toISOString();
     const existingIndex = draft.packageId
       ? packages.findIndex((p) => p.packageId === draft.packageId)
       : -1;
+
+    // Check ownership & hijack prevention
+    if (existingIndex >= 0) {
+      const existing = packages[existingIndex];
+      if (existing.eoId !== draft.eoId) {
+        return {
+          success: false,
+          message: "Akses ditolak: Anda bukan pemilik paket ini.",
+        };
+      }
+
+      if (existing.status !== "DRAFT" && existing.status !== "REJECTED") {
+        return {
+          success: false,
+          message:
+            "Paket yang sedang ditinjau atau sudah disetujui tidak dapat diedit langsung.",
+        };
+      }
+    }
 
     const packageId =
       existingIndex >= 0
@@ -249,7 +326,7 @@ export const mockEoPackageStore = {
       : undefined;
     const baseCost = dest?.baseCostPerPerson ?? 100000;
     const margin = draft.pricing?.eoMargin ?? 150000;
-    const customerPrice = draft.pricing?.customerPrice ?? baseCost + margin;
+    const customerPrice = baseCost + margin;
 
     const record: EoPackageRecord = {
       packageId,
@@ -299,25 +376,59 @@ export const mockEoPackageStore = {
       packages.push(record);
     }
 
-    return record;
+    return { success: true, package: clonePackage(record) };
   },
 
   submitForReview(
     packageId: string,
+    eoId: string,
     eoGuideStatus: EoGuideStatus,
   ): {
     success: boolean;
     package?: EoPackageRecord;
     validationResult: EoValidationResult;
+    message?: string;
   } {
     const pkg = packages.find((p) => p.packageId === packageId);
-    if (!pkg) {
+    if (!pkg || pkg.eoId !== eoId) {
       return {
         success: false,
         validationResult: {
           valid: false,
           errors: [
-            { step: 1, field: "packageId", message: "Paket tidak ditemukan." },
+            {
+              step: 1,
+              field: "packageId",
+              message:
+                "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
+            },
+          ],
+        },
+      };
+    }
+
+    // Idempotency: already submitted
+    if (pkg.status === "PENDING_ADMIN_REVIEW") {
+      return {
+        success: true,
+        package: clonePackage(pkg),
+        validationResult: { valid: true, errors: [] },
+        message: "ALREADY_SUBMITTED",
+      };
+    }
+
+    if (pkg.status !== "DRAFT" && pkg.status !== "REJECTED") {
+      return {
+        success: false,
+        validationResult: {
+          valid: false,
+          errors: [
+            {
+              step: 1,
+              field: "status",
+              message:
+                "Hanya draf atau revisi paket yang dapat diajukan untuk review.",
+            },
           ],
         },
       };
@@ -330,20 +441,20 @@ export const mockEoPackageStore = {
     if (!validationResult.valid) {
       // Failed validation: remains DRAFT
       pkg.status = "DRAFT";
-      return { success: false, package: pkg, validationResult };
+      return { success: false, package: clonePackage(pkg), validationResult };
     }
 
-    // Success: transition DRAFT -> PENDING_ADMIN_REVIEW
+    // Success: transition to PENDING_ADMIN_REVIEW
     pkg.status = "PENDING_ADMIN_REVIEW";
     pkg.submittedAt = new Date().toISOString();
 
-    return { success: true, package: pkg, validationResult };
+    return { success: true, package: clonePackage(pkg), validationResult };
   },
 
-  // Admin decision helpers (for later Admin sprint / test harness)
+  // Admin decision helpers (Strict transition guards)
   approvePackage(packageId: string): boolean {
     const pkg = packages.find((p) => p.packageId === packageId);
-    if (!pkg) return false;
+    if (!pkg || pkg.status !== "PENDING_ADMIN_REVIEW") return false;
     pkg.status = "APPROVED";
     pkg.reviewedAt = new Date().toISOString();
     return true;
@@ -351,7 +462,7 @@ export const mockEoPackageStore = {
 
   makePackageLive(packageId: string): boolean {
     const pkg = packages.find((p) => p.packageId === packageId);
-    if (!pkg) return false;
+    if (!pkg || pkg.status !== "APPROVED") return false;
     pkg.status = "LIVE";
     pkg.reviewedAt = new Date().toISOString();
     return true;
@@ -359,24 +470,28 @@ export const mockEoPackageStore = {
 
   rejectPackage(packageId: string, reason: string): boolean {
     const pkg = packages.find((p) => p.packageId === packageId);
-    if (!pkg) return false;
+    if (!pkg || pkg.status !== "PENDING_ADMIN_REVIEW" || !reason.trim()) {
+      return false;
+    }
     pkg.status = "REJECTED";
-    pkg.rejectionReason = reason;
+    pkg.rejectionReason = reason.trim();
     pkg.reviewedAt = new Date().toISOString();
     return true;
   },
 
   // Sessions management
   getAllSessions(): readonly EoSessionRecord[] {
-    return sessions;
+    return sessions.map((s) => ({ ...s }));
   },
 
   getSessionsByEo(eoId: string): readonly EoSessionRecord[] {
-    return sessions.filter((s) => s.eoId === eoId);
+    return sessions.filter((s) => s.eoId === eoId).map((s) => ({ ...s }));
   },
 
   getSessionsByPackage(packageId: string): readonly EoSessionRecord[] {
-    return sessions.filter((s) => s.packageId === packageId);
+    return sessions
+      .filter((s) => s.packageId === packageId)
+      .map((s) => ({ ...s }));
   },
 
   createSession(input: {
@@ -388,8 +503,11 @@ export const mockEoPackageStore = {
     pricePerPerson: number;
   }): { success: boolean; session?: EoSessionRecord; message?: string } {
     const pkg = packages.find((p) => p.packageId === input.packageId);
-    if (!pkg) {
-      return { success: false, message: "Paket tidak ditemukan." };
+    if (!pkg || pkg.eoId !== input.eoId) {
+      return {
+        success: false,
+        message: "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
+      };
     }
 
     if (pkg.status !== "APPROVED" && pkg.status !== "LIVE") {
@@ -408,7 +526,7 @@ export const mockEoPackageStore = {
     const session: EoSessionRecord = {
       sessionId,
       packageId: input.packageId,
-      eoId: input.eoId,
+      eoId: pkg.eoId,
       startAt: input.startAt,
       endAt: input.endAt,
       capacity: input.capacity,
@@ -419,14 +537,17 @@ export const mockEoPackageStore = {
     };
 
     sessions.push(session);
-    return { success: true, session };
+    return { success: true, session: { ...session } };
   },
 
   updateSessionStatus(
     sessionId: string,
+    eoId: string,
     status: "OPEN" | "FULL" | "CLOSED" | "CANCELLED",
   ): boolean {
-    const s = sessions.find((item) => item.sessionId === sessionId);
+    const s = sessions.find(
+      (item) => item.sessionId === sessionId && item.eoId === eoId,
+    );
     if (!s) return false;
     s.status = status;
     return true;

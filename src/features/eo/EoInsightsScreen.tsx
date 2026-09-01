@@ -6,6 +6,9 @@ import "./eo.css";
 export function EoInsightsScreen() {
   const navigate = useNavigate();
   const signals = mockInsightStore.getSignals();
+  const budgets = mockInsightStore.getBudgetDistribution();
+  const durations = mockInsightStore.getDurationDistribution();
+  const departures = mockInsightStore.getDepartureDistribution();
   const insights = mockInsightStore.getAllInsights();
 
   const handleCreateFromInsight = (insightId: string) => {
@@ -21,13 +24,13 @@ export function EoInsightsScreen() {
             Demand Insights & Wawasan Kebutuhan Traveler
           </h1>
           <p className="eo-page-subtitle">
-            Data agregat teranonimkan dari preferensi kuis traveler untuk
-            memandu EO menyusun paket wellness yang tepat sasaran.
+            Simulasi sinyal agregat dari 1.020 respons preferensi kuis traveler
+            untuk memandu EO menyusun paket wellness yang tepat sasaran.
           </p>
         </div>
       </header>
 
-      {/* Aggregate Demand Signal Distribution Bar */}
+      {/* 1. Suasana / Intent Distribution */}
       <section
         className="eo-section"
         aria-label="Distribusi preferensi suasana traveler"
@@ -35,7 +38,7 @@ export function EoInsightsScreen() {
         <div className="eo-section-header">
           <div>
             <h2 className="eo-section-title">
-              Distribusi Kebutuhan Suasana (Intent Signal)
+              1. Distribusi Kebutuhan Suasana (Intent Signal)
             </h2>
             <p
               style={{
@@ -44,8 +47,7 @@ export function EoInsightsScreen() {
                 color: "var(--color-text-secondary)",
               }}
             >
-              Berdasarkan 1.020+ respons traveler terverifikasi di wilayah Jawa
-              Timur.
+              Data agregat preferensi suasana perjalanan traveler.
             </p>
           </div>
         </div>
@@ -77,7 +79,201 @@ export function EoInsightsScreen() {
         </div>
       </section>
 
-      {/* Unmet Demand Opportunities / Opportunity Cards */}
+      {/* 2 & 3. Budget & Duration Distribution Grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "var(--space-6)",
+        }}
+      >
+        {/* 2. Budget Distribution */}
+        <section
+          className="eo-section"
+          aria-label="Distribusi budget nyaman traveler"
+        >
+          <div className="eo-section-header">
+            <div>
+              <h2 className="eo-section-title">2. Distribusi Budget Nyaman</h2>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                Rentang budget per orang yang paling realistis bagi traveler.
+              </p>
+            </div>
+          </div>
+
+          <div className="eo-signal-bar-list">
+            {budgets.map((b) => (
+              <div key={b.id} className="eo-signal-bar-row">
+                <div className="eo-signal-bar-labels">
+                  <span>
+                    <strong>{b.label}</strong>
+                  </span>
+                  <span>
+                    <strong>{b.percentage}%</strong> ({b.count})
+                  </span>
+                </div>
+                <div className="eo-signal-bar-track">
+                  <div
+                    className="eo-signal-bar-fill"
+                    style={{
+                      width: `${b.percentage}%`,
+                      background: "var(--color-sand-600)",
+                    }}
+                    aria-valuenow={b.percentage}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    role="progressbar"
+                  />
+                </div>
+                {b.description && (
+                  <span
+                    style={{
+                      fontSize: "var(--font-size-caption)",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    {b.description}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 3. Duration Distribution */}
+        <section
+          className="eo-section"
+          aria-label="Distribusi durasi waktu traveler"
+        >
+          <div className="eo-section-header">
+            <div>
+              <h2 className="eo-section-title">
+                3. Distribusi Durasi Perjalanan
+              </h2>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                Waktu realistis yang dimiliki traveler untuk jeda perjalanan.
+              </p>
+            </div>
+          </div>
+
+          <div className="eo-signal-bar-list">
+            {durations.map((d) => (
+              <div key={d.id} className="eo-signal-bar-row">
+                <div className="eo-signal-bar-labels">
+                  <span>
+                    <strong>{d.label}</strong>
+                  </span>
+                  <span>
+                    <strong>{d.percentage}%</strong> ({d.count})
+                  </span>
+                </div>
+                <div className="eo-signal-bar-track">
+                  <div
+                    className="eo-signal-bar-fill"
+                    style={{
+                      width: `${d.percentage}%`,
+                      background: "var(--color-forest-600)",
+                    }}
+                    aria-valuenow={d.percentage}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    role="progressbar"
+                  />
+                </div>
+                {d.description && (
+                  <span
+                    style={{
+                      fontSize: "var(--font-size-caption)",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    {d.description}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* 4. Departure Area Distribution */}
+      <section
+        className="eo-section"
+        aria-label="Distribusi wilayah asal keberangkatan"
+      >
+        <div className="eo-section-header">
+          <div>
+            <h2 className="eo-section-title">
+              4. Distribusi Wilayah Asal Keberangkatan
+            </h2>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "var(--font-size-caption)",
+                color: "var(--color-text-secondary)",
+              }}
+            >
+              Titik awal keberangkatan traveler di Jawa Timur.
+            </p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: "var(--space-4)",
+          }}
+        >
+          {departures.map((dep) => (
+            <div
+              key={dep.id}
+              style={{
+                padding: "var(--space-4)",
+                background: "var(--color-bg-surface-subtle)",
+                borderRadius: "var(--radius-lg)",
+                border: "1px solid var(--color-border-default)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <strong style={{ fontSize: "var(--font-size-body-md)" }}>
+                  {dep.label}
+                </strong>
+                <Badge tone="info">{dep.percentage}%</Badge>
+              </div>
+              <p
+                style={{
+                  margin: "var(--space-2) 0 0",
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                {dep.description} ({dep.count} traveler)
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 5. Unmet Demand Opportunities / Opportunity Cards */}
       <section
         className="eo-section"
         aria-label="Peluang paket yang belum terpenuhi"
@@ -85,7 +281,7 @@ export function EoInsightsScreen() {
         <div className="eo-section-header">
           <div>
             <h2 className="eo-section-title">
-              Peluang Paket Belum Terpenuhi (Unmet Demand)
+              5. Peluang Paket Belum Terpenuhi (Unmet Demand)
             </h2>
             <p
               style={{

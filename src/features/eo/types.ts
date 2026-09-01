@@ -10,7 +10,7 @@ export interface PartnerUser {
   role: "EO" | "DESTINATION" | "ADMIN";
   businessName: string;
   guideStatus: EoGuideStatus;
-  applicationStatus: EoApplicationStatus;
+  organizerReviewRef?: string;
 }
 
 export interface EoApplicationRecord {
@@ -70,6 +70,14 @@ export interface DemandSignalSummary {
   percentage: number;
   travelerCount: number;
   description: string;
+}
+
+export interface DemandDistributionItem {
+  id: string;
+  label: string;
+  count: number;
+  percentage: number;
+  description?: string;
 }
 
 export interface DemandInsightRecord {

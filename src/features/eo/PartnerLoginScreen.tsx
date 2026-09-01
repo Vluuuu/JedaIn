@@ -14,6 +14,11 @@ export function PartnerLoginScreen() {
     e.preventDefault();
     const cleanEmail = email.trim();
 
+    if (role === "DESTINATION") {
+      navigate("/partner/apply/destination");
+      return;
+    }
+
     // Check if there is an existing application or user
     const app = mockApplicationStore
       .getAll()
@@ -27,7 +32,8 @@ export function PartnerLoginScreen() {
         role: "EO",
         businessName: app.businessName,
         guideStatus: app.guideStatus,
-        applicationStatus: app.status,
+        organizerReviewRef:
+          app.identityId === "eo_jeda_alam" ? "org_lereng_batu" : undefined,
       });
 
       if (app.status === "APPROVED") {
@@ -58,7 +64,6 @@ export function PartnerLoginScreen() {
       role: "EO",
       businessName: "Kelana Liar Adventure",
       guideStatus: "CONCEPT_ONLY",
-      applicationStatus: "REJECTED",
     });
     navigate("/partner/application");
   };
@@ -71,7 +76,6 @@ export function PartnerLoginScreen() {
       role: "EO",
       businessName: "Lestari Wellness Journey",
       guideStatus: "CERTIFIED_GUIDE",
-      applicationStatus: "PENDING_REVIEW",
     });
     navigate("/partner/application");
   };

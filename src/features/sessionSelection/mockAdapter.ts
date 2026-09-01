@@ -77,8 +77,10 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
     const rawSessions =
       this.sessionOverrides[packageId] ?? detail.upcomingSessionPreviews ?? [];
 
-    // Filter out CANCELLED sessions (hidden from traveler schedule list)
-    const validSessions = rawSessions.filter((s) => s.status !== "CANCELLED");
+    // Filter out sessions that do not match packageId OR are CANCELLED
+    const validSessions = rawSessions.filter(
+      (s) => s.packageId === packageId && s.status !== "CANCELLED",
+    );
 
     // Chronological sort
     const sortedSessions = [...validSessions].sort(
@@ -119,29 +121,65 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
       };
     }
 
-    if (this.validationFailureOverride[sessionId]) {
-      const reason = this.validationFailureOverride[sessionId];
-      let message = "Jadwal ini baru saja tidak tersedia. Pilih jadwal lain.";
-      if (reason === "REQUEST_ERROR") {
-        message = "Jadwal belum bisa diverifikasi. Coba lagi.";
-      }
-      return {
-        valid: false,
-        reason,
-        message,
-      };
-    }
-
     const detail = this.details[packageId];
     const sessions =
       this.sessionOverrides[packageId] ?? detail?.upcomingSessionPreviews ?? [];
 
     const targetSession = sessions.find((s) => s.sessionId === sessionId);
+
     if (!targetSession) {
       return {
         valid: false,
         reason: "NOT_FOUND",
         message: "Jadwal ini baru saja tidak tersedia. Pilih jadwal lain.",
+      };
+    }
+
+    // Enforce same package validation
+    if (targetSession.packageId !== packageId) {
+      return {
+        valid: false,
+        reason: "PACKAGE_MISMATCH",
+        message:
+          "Jadwal ini tidak sesuai dengan paket yang dipilih. Pilih jadwal lain.",
+      };
+    }
+
+    // Handle test/simulation validation overrides and update session status in sessionOverrides
+    if (this.validationFailureOverride[sessionId]) {
+      const reason = this.validationFailureOverride[sessionId];
+
+      // Update session override state for FULL, CLOSED, CANCELLED so subsequent getPackageSessions reflects stale state
+      if (reason === "FULL" || reason === "CLOSED" || reason === "CANCELLED") {
+        if (!this.sessionOverrides[packageId]) {
+          this.sessionOverrides[packageId] = (
+            detail?.upcomingSessionPreviews ?? []
+          ).map((s) => ({ ...s }));
+        }
+        const sOverride = this.sessionOverrides[packageId].find(
+          (s) => s.sessionId === sessionId,
+        );
+        if (sOverride) {
+          sOverride.status = reason;
+          if (reason === "FULL") {
+            sOverride.remainingSlots = 0;
+          }
+        }
+      }
+
+      let message = "Jadwal ini baru saja tidak tersedia. Pilih jadwal lain.";
+      if (reason === "CAPACITY_UNKNOWN") {
+        message = "Ketersediaan jadwal belum bisa dipastikan. Coba lagi.";
+      } else if (reason === "REQUEST_ERROR") {
+        message = "Jadwal belum bisa diverifikasi. Coba lagi.";
+      } else if (reason === "PACKAGE_MISMATCH") {
+        message =
+          "Jadwal ini tidak sesuai dengan paket yang dipilih. Pilih jadwal lain.";
+      }
+      return {
+        valid: false,
+        reason,
+        message,
       };
     }
 
@@ -169,10 +207,16 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
       };
     }
 
-    if (
-      targetSession.remainingSlots !== undefined &&
-      targetSession.remainingSlots <= 0
-    ) {
+    // Revalidation requires reliable positive capacity snapshot
+    if (targetSession.remainingSlots === undefined) {
+      return {
+        valid: false,
+        reason: "CAPACITY_UNKNOWN",
+        message: "Ketersediaan jadwal belum bisa dipastikan. Coba lagi.",
+      };
+    }
+
+    if (targetSession.remainingSlots <= 0) {
       return {
         valid: false,
         reason: "FULL",

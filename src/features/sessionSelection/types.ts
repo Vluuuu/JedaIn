@@ -8,7 +8,13 @@ export type SessionSelectionState =
   "LOADING" | "READY" | "REVALIDATING" | "NOT_FOUND" | "ERROR";
 
 export type ValidationFailureReason =
-  "FULL" | "CLOSED" | "CANCELLED" | "NOT_FOUND" | "REQUEST_ERROR";
+  | "FULL"
+  | "CLOSED"
+  | "CANCELLED"
+  | "NOT_FOUND"
+  | "PACKAGE_MISMATCH"
+  | "CAPACITY_UNKNOWN"
+  | "REQUEST_ERROR";
 
 export interface SessionValidationResult {
   valid: boolean;

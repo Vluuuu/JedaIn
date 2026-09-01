@@ -15,7 +15,7 @@ export function SessionCard({
   onSelect,
   disabled = false,
 }: SessionCardProps) {
-  const { dateLabel, isCrossDay } = formatSessionDateTimeRange(
+  const { dateLabel } = formatSessionDateTimeRange(
     session.startAt,
     session.endAt,
   );
@@ -76,9 +76,6 @@ export function SessionCard({
           className="session-card__label"
         >
           <span className="session-card__date-text">{dateLabel}</span>
-          {isCrossDay && (
-            <span className="session-card__duration-tag">2 Hari 1 Malam</span>
-          )}
         </label>
 
         <div

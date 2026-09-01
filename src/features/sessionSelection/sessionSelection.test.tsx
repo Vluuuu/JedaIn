@@ -371,10 +371,10 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     expect(container.textContent).toContain("Checkout");
   });
 
-  it("26 & 27. revalidation failure (session becomes FULL) clears selection, stays on T09, and displays warning notice", async () => {
+  it("A. revalidation with missing/undefined remainingSlots returns CAPACITY_UNKNOWN error and keeps selection for retry", async () => {
     const adapter = new MockSessionSelectionAdapter({
       validationFailureOverride: {
-        ses_sgd_1: "FULL",
+        ses_sgd_1: "CAPACITY_UNKNOWN",
       },
     });
 
@@ -396,19 +396,17 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     });
 
     expect(view.textContent).toContain(
-      "Jadwal ini baru saja tidak tersedia. Pilih jadwal lain.",
+      "Ketersediaan jadwal belum bisa dipastikan. Coba lagi.",
     );
-    // Selection was cleared
-    const radios = view.querySelectorAll<HTMLInputElement>(
-      'input[type="radio"]',
-    );
-    expect(radios[0].checked).toBe(false);
-    expect(ctaBtn.disabled).toBe(true);
+    // Selection is preserved so user can retry
+    expect(firstRadio.checked).toBe(true);
   });
 
-  it("29. revalidation failure due to REQUEST_ERROR keeps selection and allows retry", async () => {
+  it("C. revalidation with same-package mismatch returns PACKAGE_MISMATCH and prevents navigation", async () => {
     const adapter = new MockSessionSelectionAdapter({
-      failValidationCount: 1,
+      validationFailureOverride: {
+        ses_sgd_1: "PACKAGE_MISMATCH",
+      },
     });
 
     const view = await renderSessionSelection("slow_green_day", { adapter });
@@ -424,23 +422,89 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
       b.textContent?.includes("Lanjut Checkout"),
     )!;
 
-    // 1st attempt -> request error
     await act(async () => {
       ctaBtn.click();
     });
 
     expect(view.textContent).toContain(
-      "Jadwal belum bisa diverifikasi. Coba lagi.",
+      "Jadwal ini tidak sesuai dengan paket yang dipilih. Pilih jadwal lain.",
     );
-    // Selected radio is still preserved
-    expect(firstRadio.checked).toBe(true);
+    expect(firstRadio.checked).toBe(false);
   });
 
-  it("31 & 32. formats same-day and cross-date sessions in Asia/Jakarta WIB", async () => {
+  it("D, E & F. stale session revalidation updates session card to latest state (FULL/CLOSED/CANCELLED)", async () => {
+    const adapter = new MockSessionSelectionAdapter({
+      validationFailureOverride: {
+        ses_sgd_1: "FULL",
+      },
+    });
+
+    const view = await renderSessionSelection("slow_green_day", { adapter });
+    const firstRadio = view.querySelector<HTMLInputElement>(
+      'input[type="radio"]',
+    )!;
+    await act(async () => {
+      firstRadio.click();
+    });
+
+    const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut Checkout"),
+    )!;
+    await act(async () => {
+      ctaBtn.click();
+    });
+
+    // Warning is visible
+    expect(view.textContent).toContain(
+      "Jadwal ini baru saja tidak tersedia. Pilih jadwal lain.",
+    );
+    // Selection cleared
+    expect(firstRadio.checked).toBe(false);
+    // Card now displays Penuh state
+    expect(view.textContent).toContain("Penuh");
+  });
+
+  it("G. REQUEST_ERROR on 1st attempt preserves selection, 2nd attempt succeeds to Checkout", async () => {
+    const adapter = new MockSessionSelectionAdapter({
+      failValidationCount: 1,
+    });
+
+    const view = await renderSessionSelection("slow_green_day", { adapter });
+    const firstRadio = view.querySelector<HTMLInputElement>(
+      'input[type="radio"]',
+    )!;
+    await act(async () => {
+      firstRadio.click();
+    });
+
+    const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut Checkout"),
+    )!;
+
+    // 1st attempt -> fail
+    await act(async () => {
+      ctaBtn.click();
+    });
+    expect(view.textContent).toContain(
+      "Jadwal belum bisa diverifikasi. Coba lagi.",
+    );
+    expect(firstRadio.checked).toBe(true);
+
+    // 2nd attempt -> success
+    await act(async () => {
+      ctaBtn.click();
+    });
+    expect(view.textContent).not.toContain(
+      "Jadwal belum bisa diverifikasi. Coba lagi.",
+    );
+  });
+
+  it("H. cross-date 2D1N session renders both dates correctly without fabricating 2D1N label", async () => {
     const view = await renderSessionSelection("weekend_nature_reset");
-    expect(view.textContent).toContain("Sabtu, 26 September 2026 • 14.00 WIB");
-    expect(view.textContent).toContain("Minggu, 27 September 2026 • 11.00 WIB");
-    expect(view.textContent).toContain("2 Hari 1 Malam");
+    expect(view.textContent).toContain(
+      "Sabtu, 26 September 2026 • 14.00 WIB → Minggu, 27 September 2026 • 11.00 WIB",
+    );
+    expect(view.textContent).not.toContain("2 Hari 1 Malam");
   });
 
   it("38. Package Detail 'Pilih Jadwal' CTA routes into T09 Session Selection", async () => {

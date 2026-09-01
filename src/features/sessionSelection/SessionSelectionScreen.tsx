@@ -108,8 +108,11 @@ export function SessionSelectionScreen({
       // Revalidation failed
       setIsRevalidating(false);
 
-      if (validation.reason === "REQUEST_ERROR") {
-        // Request error: keep selected session and allow retry
+      if (
+        validation.reason === "REQUEST_ERROR" ||
+        validation.reason === "CAPACITY_UNKNOWN"
+      ) {
+        // Request or capacity error: keep selected session and allow retry
         setValidationNotice({
           type: "error",
           message:

@@ -230,7 +230,8 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
       ctaBtn.click();
     });
 
-    expect(container.textContent).toContain("Choose session");
+    expect(container.textContent).toContain("Pilih Jadwal");
+    expect(container.textContent).toContain("Jadwal Keberangkatan");
   });
 
   it("17, 18, 19, 20 & 21. NO_OPEN_SESSION (e.g. FULL or CLOSED only) disables CTA and shows 'Belum ada jadwal tersedia'", async () => {

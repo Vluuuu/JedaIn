@@ -19,10 +19,10 @@ import {
 import { PackageDetailScreen } from "./features/packageDetail";
 import { TravelerQuizScreen } from "./features/quiz";
 import { RecommendationResultScreen } from "./features/recommendation";
+import { SessionSelectionScreen } from "./features/sessionSelection";
 import "./App.css";
 
 const travelerRoutes = [
-  ["packages/:packageId/sessions", "Choose session"],
   ["checkout/:sessionId", "Checkout"],
   ["trips", "My Trips"],
   ["trips/:bookingId", "Trip detail"],
@@ -132,6 +132,10 @@ export function App() {
         <Route path="home" element={<HomeScreen />} />
         <Route path="explore" element={<ExploreScreen />} />
         <Route path="packages/:packageId" element={<PackageDetailScreen />} />
+        <Route
+          path="packages/:packageId/sessions"
+          element={<SessionSelectionScreen />}
+        />
         {travelerRoutes.map(([path, title]) => (
           <Route
             key={path}

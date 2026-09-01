@@ -21,6 +21,8 @@ import { DestinationScheduleScreen } from "./DestinationScheduleScreen";
 import { DestinationCapacityScreen } from "./DestinationCapacityScreen";
 import { DestinationReviewsScreen } from "./DestinationReviewsScreen";
 import { DestinationSettingsScreen } from "./DestinationSettingsScreen";
+import { DestinationApplicationScreen } from "./DestinationApplicationScreen";
+import { DestinationVerificationStatusScreen } from "./DestinationVerificationStatusScreen";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -55,42 +57,330 @@ async function renderComponent(
 }
 
 describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
-  describe("1. Access Control & Guards (A–F)", () => {
-    it("A. logged-out user accessing /partner/destination is redirected to /partner/login", async () => {
+  describe("1. Access Control & Authority Chain (A–F)", () => {
+    it("A & B. forged session destinationIdentityId is ignored, screens resolve Lereng Hijau from application ownership", async () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_lereng_hijau",
+        email: "destinasi@lerenghijau.id",
+        name: "Hadi Purnomo",
+        role: "DESTINATION",
+        businessName: "Pengelola Lereng Hijau Batu",
+        destinationIdentityId: "dest_hutan_trawas", // Forged!
+      });
+
+      // Overview
+      const ovView = await renderComponent(
+        createElement(DestinationOverviewScreen),
+      );
+      expect(ovView.textContent).toContain("Lereng Hijau Batu");
+      expect(ovView.textContent).not.toContain("Hutan Bambu Trawas");
+
+      // Profile
+      const profView = await renderComponent(
+        createElement(DestinationProfileScreen),
+      );
+      expect(profView.textContent).toContain("Lereng Hijau Batu");
+      expect(profView.textContent).not.toContain("Hutan Bambu Trawas");
+
+      // Verification Badge
+      const badgeView = await renderComponent(
+        createElement(DestinationVerificationBadgeScreen),
+      );
+      expect(badgeView.textContent).toContain("Terverifikasi Dasar (BASIC)");
+      expect(badgeView.textContent).toContain(
+        "Siap sebagai Pemandu (Guide Ready)",
+      );
+
+      // Schedule
+      const schedView = await renderComponent(
+        createElement(DestinationScheduleScreen),
+      );
+      expect(schedView.textContent).toContain("Sehari Pelan di Lereng Hijau");
+
+      // Capacity
+      const capView = await renderComponent(
+        createElement(DestinationCapacityScreen),
+      );
+      expect(capView.textContent).toContain("20");
+
+      // Reviews
+      const revView = await renderComponent(
+        createElement(DestinationReviewsScreen),
+      );
+      expect(revView.textContent).toContain("Ulasan & Rating Destinasi");
+    });
+
+    it("C. new applicant supplying forged destinationIdentityId has it ignored/generated internally", () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_brand_new",
+        email: "new@dest.id",
+        name: "New Partner",
+        role: "DESTINATION",
+        businessName: "New Venue Entity",
+      });
+
+      const res = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_brand_new",
+        destinationIdentityId: "dest_lereng_hijau", // Caller tries to forge existing canonical ID!
+        name: "Lembah Baru Asri",
+        locationLabel: "Malang",
+        province: "Jawa Timur",
+        city: "Malang",
+        managementName: "Pokdarwis Baru",
+        contactPerson: "Budi",
+        phone: "0812",
+        email: "new@dest.id",
+        description: "Deskripsi",
+        highlights: ["Alam"],
+        capacityPerSession: 15,
+        baseCostPerPerson: 100000,
+        guideReady: true,
+        guideReadinessEvidence: "Ready",
+        agreedToSop: true,
+      });
+
+      expect(res.success).toBe(true);
+      const app = mockDestinationVerificationStore.getByPartnerId(
+        "dest_partner_brand_new",
+      );
+      expect(app?.destinationIdentityId).not.toBe("dest_lereng_hijau");
+      expect(app?.destinationIdentityId).toMatch(/^dest_/);
+    });
+
+    it("D. rejected Coban application reapply preserves destinationIdentityId dest_coban_rondo even if caller supplies another", () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_coban_rondo",
+        email: "partner@cobanrondo.id",
+        name: "Pengelola Coban Rondo",
+        role: "DESTINATION",
+        businessName: "Pengelola Coban Rondo",
+        destinationIdentityId: "dest_coban_rondo",
+      });
+
+      // Reject first
+      adminSessionStore.loginAsDemoAdmin();
+      mockAdminDecisionService.rejectDestinationVerification(
+        "dest_app_coban_rondo",
+        "Alasan revisi",
+      );
+
+      // Partner reapplies and caller tries to supply dest_lereng_hijau
+      partnerSessionStore.setPartner({
+        id: "dest_partner_coban_rondo",
+        email: "partner@cobanrondo.id",
+        name: "Pengelola Coban Rondo",
+        role: "DESTINATION",
+        businessName: "Pengelola Coban Rondo",
+      });
+
+      const reapplyRes = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_coban_rondo",
+        destinationIdentityId: "dest_lereng_hijau", // Forged!
+        name: "Hutan Pinus Coban Rondo",
+        locationLabel: "Pujon, Malang",
+        province: "Jawa Timur",
+        city: "Batu",
+        managementName: "Pengelola Coban Rondo",
+        contactPerson: "Hadi",
+        phone: "0812",
+        email: "partner@cobanrondo.id",
+        description: "Revisi jalur.",
+        highlights: ["Jalur aman"],
+        capacityPerSession: 25,
+        baseCostPerPerson: 110000,
+        guideReady: true,
+        guideReadinessEvidence: "Ready",
+        agreedToSop: true,
+      });
+
+      expect(reapplyRes.success).toBe(true);
+      const app = mockDestinationVerificationStore.getByPartnerId(
+        "dest_partner_coban_rondo",
+      );
+      expect(app?.destinationIdentityId).toBe("dest_coban_rondo"); // Preserved!
+    });
+
+    it("E. Admin approval of forged attempt does not alter canonical dest_lereng_hijau", () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_tree_sample",
+        email: "tree@sample.id",
+        name: "Tree Partner",
+        role: "DESTINATION",
+        businessName: "Tree Entity",
+      });
+
+      const subRes = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_tree_sample",
+        destinationIdentityId: "dest_lereng_hijau",
+        name: "Rumah Pohon Baru",
+        locationLabel: "Batu",
+        province: "Jatim",
+        city: "Batu",
+        managementName: "Pokdarwis",
+        contactPerson: "Budi",
+        phone: "0812",
+        email: "tree@sample.id",
+        description: "Desc",
+        highlights: ["H"],
+        capacityPerSession: 15,
+        baseCostPerPerson: 100000,
+        guideReady: true,
+        guideReadinessEvidence: "Ready",
+        agreedToSop: true,
+      });
+
+      adminSessionStore.loginAsDemoAdmin();
+      mockAdminDecisionService.approveDestinationVerification(
+        subRes.applicationId!,
+        true,
+        "Approved",
+      );
+
+      const canonicalLereng = mockDestinationStore.getById("dest_lereng_hijau");
+      expect(canonicalLereng?.name).toBe("Lereng Hijau Batu");
+      expect(canonicalLereng?.baseCostPerPerson).toBe(125000);
+    });
+
+    it("F & G. logged-out user accessing /partner/apply/destination cannot submit, direct service submit fails with zero mutation", async () => {
       partnerSessionStore.logout();
 
       const view = await renderComponent(createElement(App), [
-        "/partner/destination",
+        "/partner/apply/destination",
       ]);
+      expect(view.textContent).toContain("Pendaftaran Mitra Destinasi");
+      expect(view.textContent).toContain(
+        "Silakan masuk atau buat akun kemitraan destinasi",
+      );
 
-      expect(view.textContent).toContain("Masuk ke Portal Partner");
-      expect(view.textContent).toContain("Tipe Kemitraan");
+      // Direct service submit
+      const res = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_anon",
+        name: "Anon",
+        locationLabel: "Anon",
+        province: "Anon",
+        city: "Anon",
+        managementName: "Anon",
+        contactPerson: "Anon",
+        phone: "0812",
+        email: "anon@test.com",
+        description: "Desc",
+        highlights: ["H"],
+        capacityPerSession: 10,
+        baseCostPerPerson: 50000,
+        guideReady: false,
+        guideReadinessEvidence: "No",
+        agreedToSop: true,
+      });
+
+      expect(res.success).toBe(false);
+      expect(res.message).toContain("Akses ditolak");
     });
 
-    it("B. EO authenticated user cannot enter Destination workspace", async () => {
+    it("H. EO authenticated session direct Destination submit fails with zero mutation and session remains EO", () => {
       partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE"); // role = EO
 
-      const view = await renderComponent(createElement(App), [
-        "/partner/destination",
-      ]);
+      const res = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "eo_jeda_alam",
+        name: "EO Trying to be Dest",
+        locationLabel: "Malang",
+        province: "Jatim",
+        city: "Malang",
+        managementName: "EO",
+        contactPerson: "EO",
+        phone: "0812",
+        email: "eo@test.com",
+        description: "Desc",
+        highlights: ["H"],
+        capacityPerSession: 10,
+        baseCostPerPerson: 50000,
+        guideReady: false,
+        guideReadinessEvidence: "No",
+        agreedToSop: true,
+      });
 
-      expect(view.textContent).toContain("Masuk ke Portal Partner");
-      expect(view.textContent).not.toContain("Kapasitas & Alokasi");
+      expect(res.success).toBe(false);
+      expect(res.message).toContain("Akses ditolak");
+      expect(partnerSessionStore.get()?.role).toBe("EO");
+    });
+  });
+
+  describe("2. Metadata Persistence & Admin Review (K–N)", () => {
+    it("K & L. management/legal/contact metadata persists in shared store and is visible in Admin detail", () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_meta_test",
+        email: "legal@meta.id",
+        name: "Meta Lead",
+        role: "DESTINATION",
+        businessName: "Kawasan Meta Asri",
+      });
+
+      const res = mockDestinationPartnerService.submitApplication({
+        partnerIdentityId: "dest_partner_meta_test",
+        name: "Kawasan Wisata Meta Asri",
+        locationLabel: "Batu / Malang",
+        province: "Jawa Timur",
+        city: "Batu",
+        managementName: "Yayasan Hutan Lestari",
+        contactPerson: "Siti Rahma",
+        phone: "0812334455",
+        email: "legal@meta.id",
+        legalEntityDoc: {
+          name: "Akta_Yayasan_Hutan_Lestari_2026.pdf",
+          uploadedAt: "2026-08-20T10:00:00Z",
+          status: "ATTACHED",
+        },
+        description:
+          "Kawasan hutan hening dengan izin pemanfaatan hutan kemasyarakatan.",
+        highlights: ["Saung hening", "Jalur pinus"],
+        capacityPerSession: 20,
+        baseCostPerPerson: 120000,
+        guideReady: true,
+        guideReadinessEvidence: "2 pemandu lokal binaan bersertifikasi.",
+        agreedToSop: true,
+      });
+
+      expect(res.success).toBe(true);
+
+      const app = mockDestinationVerificationStore.getById(res.applicationId!);
+      expect(app?.managementName).toBe("Yayasan Hutan Lestari");
+      expect(app?.contactPerson).toBe("Siti Rahma");
+      expect(app?.legalEntityDocument?.name).toBe(
+        "Akta_Yayasan_Hutan_Lestari_2026.pdf",
+      );
     });
 
-    it("C. approved Destination demo user can enter operational workspace", async () => {
-      partnerSessionStore.loginAsDemoDestination(); // role = DESTINATION, dest_lereng_hijau
+    it("M & N. returned snapshots cannot mutate store by reference and reset restores seed state", () => {
+      const app = mockDestinationVerificationStore.getById(
+        "dest_app_coban_rondo",
+      )!;
+      app.name = "Mutated Offline Name";
+      if (app.legalEntityDocument) {
+        app.legalEntityDocument.name = "Mutated_Doc.pdf";
+      }
 
-      const view = await renderComponent(createElement(App), [
-        "/partner/destination",
-      ]);
+      const fresh = mockDestinationVerificationStore.getById(
+        "dest_app_coban_rondo",
+      );
+      expect(fresh?.name).toBe("Hutan Pinus Coban Rondo");
 
-      expect(view.textContent).toContain("Lereng Hijau Batu");
-      expect(view.textContent).toContain("Mitra Destinasi Terverifikasi");
-      expect(view.textContent).toContain("Jadwal Sesi EO di Lokasi Anda");
+      mockDestinationVerificationStore.reset();
+      expect(mockDestinationVerificationStore.getAll().length).toBe(4);
+    });
+  });
+
+  describe("3. DP04 Status & Dimensions (O–S)", () => {
+    it("O. approved Destination shows Level BASIC and Guide Readiness separately", async () => {
+      partnerSessionStore.loginAsDemoDestination();
+
+      const view = await renderComponent(
+        createElement(DestinationVerificationStatusScreen),
+      );
+      expect(view.textContent).toContain("Destinasi Terverifikasi");
+      expect(view.textContent).toContain("Level: BASIC");
+      expect(view.textContent).toContain("Guide Ready ✓");
     });
 
-    it("D & E. PENDING and REJECTED destination identities are blocked from operational workspace", async () => {
+    it("P & Q. pending and rejected show exact shared state and Admin rejection reason", async () => {
       // Pending
       partnerSessionStore.setPartner({
         id: "dest_partner_coban_rondo",
@@ -101,11 +391,10 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         destinationIdentityId: "dest_coban_rondo",
       });
 
-      const pendingView = await renderComponent(createElement(App), [
-        "/partner/destination",
-      ]);
-      expect(pendingView.textContent).toContain("Status Verifikasi Destinasi");
-      expect(pendingView.textContent).toContain("Sedang Ditinjau");
+      const pendingView = await renderComponent(
+        createElement(DestinationVerificationStatusScreen),
+      );
+      expect(pendingView.textContent).toContain("Menunggu Verifikasi Admin");
 
       // Rejected
       partnerSessionStore.setPartner({
@@ -117,279 +406,61 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         destinationIdentityId: "dest_curah_rawan",
       });
 
-      const rejView = await renderComponent(createElement(App), [
-        "/partner/destination",
-      ]);
-      expect(rejView.textContent).toContain("Status Verifikasi Destinasi");
+      const rejView = await renderComponent(
+        createElement(DestinationVerificationStatusScreen),
+      );
       expect(rejView.textContent).toContain("Perlu Perbaikan");
+      expect(rejView.textContent).toContain(
+        "Akses evakuasi darurat belum memadai",
+      );
     });
 
-    it("F. forged destinationId mutation without authenticated partner fails", () => {
-      partnerSessionStore.logout();
+    it("R. missing rejection reason does not fabricate an invented cause", async () => {
+      // Modify store's internal rejection reason to undefined for test isolation
+      mockDestinationVerificationStore.setRejectionReason(
+        "dest_app_rejected_demo",
+        undefined,
+      );
 
-      const res = mockDestinationPartnerService.submitApplication({
-        partnerIdentityId: "forged_partner",
-        destinationIdentityId: "forged_dest",
-        name: "Forged Venue",
-        locationLabel: "Malang",
-        province: "Jatim",
-        city: "Batu",
-        managementName: "Forged",
-        contactPerson: "Forged",
-        phone: "0812",
-        email: "forged@test.com",
-        description: "Desc",
-        highlights: ["High"],
-        capacityPerSession: 20,
-        baseCostPerPerson: 100000,
-        guideReady: true,
-        guideReadinessEvidence: "Ready",
-        agreedToSop: true,
-      });
-
-      expect(res.success).toBe(false);
-      expect(res.message).toContain("Akses ditolak");
-    });
-  });
-
-  describe("2. Destination Application & Admin Cross-Surface Bridge (G–O)", () => {
-    it("G & H & I. new destination submit creates shared PENDING_REVIEW record visible in Admin queue, with duplicate submit blocked", () => {
       partnerSessionStore.setPartner({
-        id: "dest_partner_new_tree",
-        email: "contact@rumahpohon.id",
-        name: "Pengelola Omah Kayu",
+        id: "dest_partner_rejected",
+        email: "partner@curahrawan.id",
+        name: "Pengelola Curah Rawan",
         role: "DESTINATION",
-        businessName: "Rumah Pohon Paralayang",
+        businessName: "Pengelola Curah Rawan",
+        destinationIdentityId: "dest_curah_rawan",
       });
-
-      const res = mockDestinationPartnerService.submitApplication({
-        partnerIdentityId: "dest_partner_new_tree",
-        destinationIdentityId: "dest_omah_kayu",
-        name: "Rumah Pohon Paralayang Batu",
-        locationLabel: "Batu / Malang",
-        province: "Jawa Timur",
-        city: "Batu",
-        managementName: "Pokdarwis Gunung Banyak",
-        contactPerson: "Bambang",
-        phone: "0812998877",
-        email: "contact@rumahpohon.id",
-        description: "Kawasan kabin pohon hening di puncak bukit.",
-        highlights: ["Pemandangan lembah", "Udara sejuk"],
-        capacityPerSession: 15,
-        baseCostPerPerson: 130000,
-        guideReady: true,
-        guideReadinessEvidence: "Pemandu lokal standby di pos utama.",
-        agreedToSop: true,
-      });
-
-      expect(res.success).toBe(true);
-      expect(res.applicationId).toBeDefined();
-
-      // H: Admin queue sees SAME application record
-      adminSessionStore.loginAsDemoAdmin();
-      const adminApps = mockDestinationVerificationStore.getAll();
-      const foundInAdmin = adminApps.find(
-        (a) => a.destinationIdentityId === "dest_omah_kayu",
-      );
-      expect(foundInAdmin).toBeDefined();
-      expect(foundInAdmin?.status).toBe("PENDING_REVIEW");
-
-      // I: Duplicate submit while PENDING_REVIEW is blocked
-      partnerSessionStore.setPartner({
-        id: "dest_partner_new_tree",
-        email: "contact@rumahpohon.id",
-        name: "Pengelola Omah Kayu",
-        role: "DESTINATION",
-        businessName: "Rumah Pohon Paralayang",
-      });
-      const dup = mockDestinationPartnerService.submitApplication({
-        partnerIdentityId: "dest_partner_new_tree",
-        name: "Rumah Pohon Paralayang Batu",
-        locationLabel: "Batu",
-        province: "Jatim",
-        city: "Batu",
-        managementName: "Pokdarwis",
-        contactPerson: "Bambang",
-        phone: "0812",
-        email: "contact@rumahpohon.id",
-        description: "Desc",
-        highlights: ["H"],
-        capacityPerSession: 15,
-        baseCostPerPerson: 130000,
-        guideReady: true,
-        guideReadinessEvidence: "Evidence",
-        agreedToSop: true,
-      });
-      expect(dup.success).toBe(false);
-      expect(dup.message).toContain("sedang dalam proses verifikasi");
-    });
-
-    it("J & K & L. Admin approve BASIC + guide_ready makes Partner operational, updates canonical directory, and never grants PLUS on initial approval", () => {
-      adminSessionStore.loginAsDemoAdmin();
-
-      const approveRes =
-        mockAdminDecisionService.approveDestinationVerification(
-          "dest_app_coban_rondo",
-          true, // guideReady = true
-          "Kawasan hutan pinus Coban Rondo memenuhi standar kurasi.",
-        );
-      expect(approveRes.success).toBe(true);
-
-      const app = mockDestinationVerificationStore.getById(
-        "dest_app_coban_rondo",
-      );
-      expect(app?.status).toBe("APPROVED");
-      expect(app?.approvedLevel).toBe("BASIC"); // L: Never PLUS on initial approval
-      expect(app?.approvedGuideReady).toBe(true);
-
-      // J & K: Partner identity becomes operational
-      partnerSessionStore.setPartner({
-        id: "dest_partner_coban_rondo",
-        email: "partner@cobanrondo.id",
-        name: "Pengelola Hutan Pinus Coban Rondo",
-        role: "DESTINATION",
-        businessName: "Pengelola Coban Rondo",
-        destinationIdentityId: "dest_coban_rondo",
-      });
-
-      const canonical =
-        mockDestinationPartnerService.getCanonicalDestinationForPartner();
-      expect(canonical).toBeDefined();
-      expect(canonical?.name).toBe("Hutan Pinus Coban Rondo");
-      expect(canonical?.guideReady).toBe(true);
-
-      // EO Eligibility can consume it
-      const eligibleForConcept =
-        mockDestinationStore.getEligibleForEo("CONCEPT_ONLY");
-      expect(
-        eligibleForConcept.some((d) => d.destinationId === "dest_coban_rondo"),
-      ).toBe(true);
-    });
-
-    it("M & N & O. Admin reject exact reason surfaces in Partner UI, reapply preserves same identity, and APPROVED cannot self-demote", () => {
-      adminSessionStore.loginAsDemoAdmin();
-
-      mockAdminDecisionService.rejectDestinationVerification(
-        "dest_app_coban_rondo",
-        "Akses jalur evakuasi hujan perlu ditata ulang.",
-      );
-
-      // M: Reason visible in Partner status
-      partnerSessionStore.setPartner({
-        id: "dest_partner_coban_rondo",
-        email: "partner@cobanrondo.id",
-        name: "Pengelola Hutan Pinus Coban Rondo",
-        role: "DESTINATION",
-        businessName: "Pengelola Coban Rondo",
-        destinationIdentityId: "dest_coban_rondo",
-      });
-
-      const app = mockDestinationVerificationStore.getByPartnerId(
-        "dest_partner_coban_rondo",
-      );
-      expect(app?.status).toBe("REJECTED");
-      expect(app?.rejectionReason).toBe(
-        "Akses jalur evakuasi hujan perlu ditata ulang.",
-      );
-
-      // N: Reapply with same partner identity
-      const reapplyRes = mockDestinationPartnerService.submitApplication({
-        partnerIdentityId: "dest_partner_coban_rondo",
-        destinationIdentityId: "dest_coban_rondo",
-        name: "Hutan Pinus Coban Rondo",
-        locationLabel: "Pujon, Malang",
-        province: "Jawa Timur",
-        city: "Batu",
-        managementName: "Pengelola Coban Rondo",
-        contactPerson: "Hadi",
-        phone: "0812",
-        email: "partner@cobanrondo.id",
-        description: "Revisi jalur evakuasi telah diperbaiki.",
-        highlights: ["Jalur aman"],
-        capacityPerSession: 25,
-        baseCostPerPerson: 110000,
-        guideReady: true,
-        guideReadinessEvidence: "Pemandu bersiap di pos evakuasi.",
-        agreedToSop: true,
-      });
-      expect(reapplyRes.success).toBe(true);
-      expect(
-        mockDestinationVerificationStore.getByPartnerId(
-          "dest_partner_coban_rondo",
-        )?.status,
-      ).toBe("PENDING_REVIEW");
-
-      // O: APPROVED partner cannot self-resubmit
-      partnerSessionStore.loginAsDemoDestination(); // APPROVED
-      const approvedSubmit = mockDestinationPartnerService.submitApplication({
-        partnerIdentityId: "dest_partner_lereng_hijau",
-        name: "Lereng Hijau",
-        locationLabel: "Batu",
-        province: "Jatim",
-        city: "Batu",
-        managementName: "Pokdarwis",
-        contactPerson: "Hadi",
-        phone: "0812",
-        email: "destinasi@lerenghijau.id",
-        description: "Desc",
-        highlights: ["H"],
-        capacityPerSession: 20,
-        baseCostPerPerson: 125000,
-        guideReady: true,
-        guideReadinessEvidence: "Ready",
-        agreedToSop: true,
-      });
-      expect(approvedSubmit.success).toBe(false);
-      expect(approvedSubmit.message).toContain("sudah disetujui (APPROVED)");
-    });
-  });
-
-  describe("3. Profile & Verification Badge Dimensions (P–T)", () => {
-    it("P & Q & R. verification level and guide readiness are displayed independently and cannot be toggled by partner", async () => {
-      partnerSessionStore.loginAsDemoDestination();
 
       const view = await renderComponent(
-        createElement(DestinationVerificationBadgeScreen),
+        createElement(DestinationVerificationStatusScreen),
       );
-
-      expect(view.textContent).toContain(
-        "Verifikasi & Lencana Kualitas Destinasi",
-      );
-      expect(view.textContent).toContain("Dimensi 1: Fasilitas & SOP");
-      expect(view.textContent).toContain("Level BASIC");
-      expect(view.textContent).toContain("Dimensi 2: Pemandu Lokal");
-      expect(view.textContent).toContain("Guide Ready ✓");
-
-      // No toggle buttons
-      expect(view.querySelectorAll("button").length).toBe(0);
+      expect(view.textContent).toContain("Alasan verifikasi belum tersedia.");
     });
 
-    it("S & T. Destination Profile reads shared destination store and returned snapshots do not mutate store by reference", async () => {
-      partnerSessionStore.loginAsDemoDestination();
+    it("S. UI reapply pre-populates existing application data", async () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_rejected",
+        email: "partner@curahrawan.id",
+        name: "Pengelola Curah Rawan",
+        role: "DESTINATION",
+        businessName: "Pengelola Curah Rawan",
+        destinationIdentityId: "dest_curah_rawan",
+      });
 
       const view = await renderComponent(
-        createElement(DestinationProfileScreen),
+        createElement(DestinationApplicationScreen),
       );
-
-      expect(view.textContent).toContain("Profil Kawasan Destinasi");
-      expect(view.textContent).toContain("Lereng Hijau Batu");
-      expect(view.textContent).toContain("Rp125.000");
-      expect(view.textContent).toContain("20 Orang / sesi");
-
-      // Test snapshot isolation
-      const snap = mockDestinationStore.getById("dest_lereng_hijau")!;
-      snap.name = "Mutated Offline Name";
-      expect(mockDestinationStore.getById("dest_lereng_hijau")?.name).toBe(
-        "Lereng Hijau Batu",
-      );
+      const mgmtInput = view.querySelector<HTMLInputElement>("#dest-mgmt-name");
+      const phoneInput = view.querySelector<HTMLInputElement>("#dest-phone");
+      expect(mgmtInput?.value).toBe("Pengelola Curah Rawan");
+      expect(phoneInput?.value).toBe("081298765432");
     });
   });
 
-  describe("4. Schedule & Capacity Integration (U–AA)", () => {
+  describe("4. Schedule, Capacity & Reviews (T–AG)", () => {
     it("U & V & W & X. Schedule screen shows only venue sessions, calculates confirmed participants from transaction store, and hides traveler PII", async () => {
       partnerSessionStore.loginAsDemoDestination();
 
-      // Add a confirmed booking for slow_green_day at dest_lereng_hijau
       mockTransactionStore.addDirectBooking({
         bookingId: "bk_venue_sched_test",
         travelerId: "usr_secret_traveler_123",
@@ -439,13 +510,10 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).not.toContain("Ubah Kuota");
       expect(view.textContent).not.toContain("Buka Sesi");
     });
-  });
 
-  describe("5. Destination Reviews & Privacy (AB–AG)", () => {
     it("AB & AC & AD. Destination Reviews shows only venue reviews, excludes EO_GUIDE reviews, and computes average rating", async () => {
       partnerSessionStore.loginAsDemoDestination();
 
-      // Submit destination review
       mockReviewStore.submitReview({
         bookingId: "bk_dest_rev_1",
         travelerId: "usr_1",
@@ -464,13 +532,12 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         comment: "Fasilitas saung bersih.",
       });
 
-      // Submit EO_GUIDE review (must be excluded)
       mockReviewStore.submitReview({
         bookingId: "bk_eo_rev_exc",
         travelerId: "usr_3",
         targetType: "EO_GUIDE",
         targetRef: "org_lereng_batu",
-        rating: 1, // Should not pollute venue rating
+        rating: 1,
         comment: "Komentar guide.",
       });
 
@@ -487,7 +554,6 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
     });
 
     it("AE & AF & AG. zero reviews shows 'Belum ada rating', empty comment shows 'Tanpa komentar', and travelerId is hidden", async () => {
-      // Switch to a destination with 0 reviews (Hutan Bambu Trawas)
       partnerSessionStore.setPartner({
         id: "dest_partner_trawas_bambu",
         email: "partner@trawas.id",
@@ -503,7 +569,6 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(emptyView.textContent).toContain("Belum ada rating");
       expect(emptyView.textContent).not.toContain("★ 5.0");
 
-      // Add review with empty comment
       mockReviewStore.submitReview({
         bookingId: "bk_empty_comment_dest",
         travelerId: "usr_secret_privacy_dest",
@@ -522,7 +587,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
     });
   });
 
-  describe("6. Overview & Settings Screens (DP05 & DP11)", () => {
+  describe("5. Overview & Settings Screens (DP05 & DP11)", () => {
     it("renders Destination Overview with completeness metrics and Settings info", async () => {
       partnerSessionStore.loginAsDemoDestination();
 

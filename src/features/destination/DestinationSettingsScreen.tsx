@@ -1,13 +1,11 @@
 import { Badge } from "../../components/ui";
-import { mockDestinationStore } from "../eo/mockDestinationStore";
-import { partnerSessionStore } from "../eo/partnerSessionStore";
+import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
 export function DestinationSettingsScreen() {
-  const partner = partnerSessionStore.get();
-  const destinationIdentityId =
-    partner?.destinationIdentityId ?? "dest_lereng_hijau";
-  const destination = mockDestinationStore.getById(destinationIdentityId);
+  const context = resolveAuthenticatedDestinationContext();
+  const destination = context?.destination;
+  const partner = context?.partner;
 
   return (
     <div className="dest-container" style={{ maxWidth: "800px" }}>
@@ -78,8 +76,8 @@ export function DestinationSettingsScreen() {
               Kawasan Destinasi Terkait:
             </small>
             <Badge tone="success">
-              {destination?.name ?? destinationIdentityId} (
-              {destination?.verificationLevel})
+              {destination?.name ?? "Lereng Hijau Batu"} (
+              {destination?.verificationLevel ?? "BASIC"})
             </Badge>
           </div>
         </div>

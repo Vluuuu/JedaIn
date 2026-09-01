@@ -30,10 +30,8 @@ export function EoApplicationStatusScreen() {
     : (eoApp?.businessName ?? partner?.businessName ?? "EO Partner");
 
   const rejectionReason = isDestination
-    ? (destApp?.rejectionReason ??
-      "Akses evakuasi darurat dan fasilitas keselamatan belum memenuhi standar kurasi.")
-    : (eoApp?.rejectionReason ??
-      "Dokumen SOP penanganan darurat belum lengkap dan portofolio kegiatan wellness belum mencukupi standar kurasi JedaIn.");
+    ? (destApp?.rejectionReason ?? "Alasan verifikasi belum tersedia.")
+    : (eoApp?.rejectionReason ?? "Alasan verifikasi belum tersedia.");
 
   const submittedAt = isDestination ? destApp?.submittedAt : eoApp?.submittedAt;
 

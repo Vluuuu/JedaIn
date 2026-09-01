@@ -1,13 +1,10 @@
 import { Badge } from "../../components/ui";
-import { mockDestinationStore } from "../eo/mockDestinationStore";
-import { partnerSessionStore } from "../eo/partnerSessionStore";
+import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
 export function DestinationVerificationBadgeScreen() {
-  const partner = partnerSessionStore.get();
-  const destinationIdentityId =
-    partner?.destinationIdentityId ?? "dest_lereng_hijau";
-  const destination = mockDestinationStore.getById(destinationIdentityId);
+  const context = resolveAuthenticatedDestinationContext();
+  const destination = context?.destination;
 
   const verificationLevel = destination?.verificationLevel ?? "BASIC";
   const guideReady = destination?.guideReady ?? true;
@@ -44,7 +41,7 @@ export function DestinationVerificationBadgeScreen() {
               alignItems: "center",
             }}
           >
-            <Badge tone="success">Dimensi 1: Fasilitas & SOP</Badge>
+            <Badge tone="success">Dimensi 1: Verifikasi Fasilitas</Badge>
             <Badge tone={verificationLevel === "PLUS" ? "info" : "neutral"}>
               Level {verificationLevel}
             </Badge>
@@ -69,8 +66,8 @@ export function DestinationVerificationBadgeScreen() {
             }}
           >
             {verificationLevel === "PLUS"
-              ? "Kawasan telah melalui audit mendalam mencakup SOP keselamatan lengkap, fasilitas retreat eksklusif, dan keheningan maksimal."
-              : "Kawasan telah memenuhi standar dasar kebersihan, keamanan jalur tanah, fasilitas air bersih, dan suasana tenang alami."}
+              ? "PLUS adalah level verifikasi lanjutan dari trust lifecycle."
+              : "BASIC menunjukkan destinasi telah melewati verifikasi dasar JedaIn pada tahap MVP."}
           </p>
 
           <div
@@ -123,7 +120,7 @@ export function DestinationVerificationBadgeScreen() {
             }}
           >
             {guideReady
-              ? "Destinasi memiliki warga lokal binaan yang siap memandu rute perjalanan sehingga dapat dipilih oleh EO bertipe Concept-Only."
+              ? "Destinasi memiliki pemandu lokal yang siap memandu rute sehingga dapat dipilih oleh EO bertipe Concept-Only."
               : "Destinasi belum menyediakan pemandu lokal tetap di lokasi, sehingga hanya dapat dipilih oleh EO yang membawa Certified Guide sendiri."}
           </p>
 
@@ -136,7 +133,7 @@ export function DestinationVerificationBadgeScreen() {
             }}
           >
             Kesiapan pemandu diverifikasi berdasarkan bukti warga binaan
-            kelompok sadar wisata setempat.
+            setempat.
           </div>
         </article>
       </section>

@@ -1,7 +1,7 @@
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
-import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
 import type { DestinationRecord } from "../eo/types";
+import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import type { DestinationApplicationDraft } from "./types";
 
 export const mockDestinationPartnerService = {
@@ -21,11 +21,15 @@ export const mockDestinationPartnerService = {
 
     const res = mockDestinationVerificationStore.submitApplication({
       partnerIdentityId: partner.id,
-      destinationIdentityId: draft.destinationIdentityId,
       name: draft.name,
       locationLabel: draft.locationLabel,
       province: draft.province,
       city: draft.city,
+      managementName: draft.managementName,
+      contactPerson: draft.contactPerson,
+      phone: draft.phone,
+      email: draft.email,
+      legalEntityDoc: draft.legalEntityDoc,
       baseCostPerPerson: draft.baseCostPerPerson,
       description: draft.description,
       highlights: draft.highlights,
@@ -46,12 +50,7 @@ export const mockDestinationPartnerService = {
   },
 
   getCanonicalDestinationForPartner(): DestinationRecord | undefined {
-    const partner = partnerSessionStore.get();
-    if (!partner || partner.role !== "DESTINATION") return undefined;
-
-    const app = mockDestinationVerificationStore.getByPartnerId(partner.id);
-    if (!app || app.status !== "APPROVED") return undefined;
-
-    return mockDestinationStore.getById(app.destinationIdentityId);
+    const context = resolveAuthenticatedDestinationContext();
+    return context?.destination;
   },
 };

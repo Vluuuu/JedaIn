@@ -1,18 +1,21 @@
 import { Badge } from "../../components/ui";
-import { mockDestinationStore } from "../eo/mockDestinationStore";
-import { partnerSessionStore } from "../eo/partnerSessionStore";
 import { mockReviewStore } from "../reviews/mockReviewStore";
+import {
+  getDestinationReviewTargetRef,
+  resolveAuthenticatedDestinationContext,
+} from "./destinationContext";
 import "./destination.css";
 
 export function DestinationReviewsScreen() {
-  const partner = partnerSessionStore.get();
-  const destinationIdentityId =
-    partner?.destinationIdentityId ?? "dest_lereng_hijau";
-  const destination = mockDestinationStore.getById(destinationIdentityId);
+  const context = resolveAuthenticatedDestinationContext();
+  const destination = context?.destination;
 
-  // Filter ONLY DESTINATION reviews for this venue from shared review store (Exclude EO_GUIDE)
-  const venueReviews = destination
-    ? mockReviewStore.getReviewsForDestination(destination.name)
+  // Filter ONLY DESTINATION reviews for this venue using centralized target resolver (Exclude EO_GUIDE)
+  const reviewTarget = destination
+    ? getDestinationReviewTargetRef(destination)
+    : "";
+  const venueReviews = reviewTarget
+    ? mockReviewStore.getReviewsForDestination(reviewTarget)
     : [];
 
   const avgRating =

@@ -1,15 +1,14 @@
 import { Badge } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
-import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
-import { partnerSessionStore } from "../eo/partnerSessionStore";
+import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
 export function DestinationCapacityScreen() {
-  const partner = partnerSessionStore.get();
+  const context = resolveAuthenticatedDestinationContext();
+  const destination = context?.destination;
   const destinationIdentityId =
-    partner?.destinationIdentityId ?? "dest_lereng_hijau";
-  const destination = mockDestinationStore.getById(destinationIdentityId);
+    destination?.destinationId ?? "dest_lereng_hijau";
 
   const baseVenueCapacity = destination?.capacityPerSession ?? 20;
 
@@ -38,8 +37,9 @@ export function DestinationCapacityScreen() {
             Kapasitas & Alokasi Pengunjung Venue
           </h1>
           <p className="dest-page-subtitle">
-            Memantau daya tampung kawasan per sesi, alokasi kuota yang dibuka
-            EO, dan jumlah peserta terkonfirmasi.
+            Memantau daya tampung kawasan per sesi di{" "}
+            {destination?.name ?? "lokasi"}, alokasi kuota yang dibuka EO, dan
+            jumlah peserta terkonfirmasi.
           </p>
         </div>
       </header>

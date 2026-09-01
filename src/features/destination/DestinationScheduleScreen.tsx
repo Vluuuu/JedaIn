@@ -1,13 +1,14 @@
 import { Badge } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
-import { partnerSessionStore } from "../eo/partnerSessionStore";
+import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
 export function DestinationScheduleScreen() {
-  const partner = partnerSessionStore.get();
+  const context = resolveAuthenticatedDestinationContext();
+  const destination = context?.destination;
   const destinationIdentityId =
-    partner?.destinationIdentityId ?? "dest_lereng_hijau";
+    destination?.destinationId ?? "dest_lereng_hijau";
 
   // Filter only packages designed at this venue
   const allPackages = mockEoPackageStore.getAllPackages();
@@ -38,7 +39,7 @@ export function DestinationScheduleScreen() {
           </h1>
           <p className="dest-page-subtitle">
             Daftar sesi perjalanan yang diselenggarakan oleh mitra Event
-            Organizer di kawasan Anda (Read-Only).
+            Organizer di kawasan {destination?.name ?? "Anda"} (Read-Only).
           </p>
         </div>
       </header>

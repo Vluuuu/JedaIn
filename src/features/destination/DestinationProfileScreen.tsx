@@ -1,13 +1,10 @@
 import { Badge } from "../../components/ui";
-import { mockDestinationStore } from "../eo/mockDestinationStore";
-import { partnerSessionStore } from "../eo/partnerSessionStore";
+import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
 export function DestinationProfileScreen() {
-  const partner = partnerSessionStore.get();
-  const destinationIdentityId =
-    partner?.destinationIdentityId ?? "dest_lereng_hijau";
-  const destination = mockDestinationStore.getById(destinationIdentityId);
+  const context = resolveAuthenticatedDestinationContext();
+  const destination = context?.destination;
 
   return (
     <div className="dest-container" style={{ maxWidth: "900px" }}>

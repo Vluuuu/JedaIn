@@ -12,6 +12,15 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
       locationLabel: "Batu / Malang Raya",
       province: "Jawa Timur",
       city: "Batu",
+      managementName: "Pokdarwis Lereng Hijau",
+      contactPerson: "Hadi Purnomo",
+      contactPhone: "081233445566",
+      contactEmail: "destinasi@lerenghijau.id",
+      legalEntityDocument: {
+        name: "Izin_Pengelolaan_Lereng_Batu.pdf",
+        attachedAt: "2026-08-01T08:00:00Z",
+        status: "VERIFIED",
+      },
       baseCostPerPerson: 125000,
       description:
         "Kawasan perkebunan teh dan lereng bukit berkabut yang tenang, terkelola secara lestari bersama warga lokal. Memiliki pemandu lokal terlatih di lokasi.",
@@ -37,6 +46,15 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
       locationLabel: "Pujon, Malang",
       province: "Jawa Timur",
       city: "Batu / Malang",
+      managementName: "Pengelola Coban Rondo",
+      contactPerson: "Hadi",
+      contactPhone: "0812998877",
+      contactEmail: "partner@cobanrondo.id",
+      legalEntityDocument: {
+        name: "Izin_Hutan_Pinus.pdf",
+        attachedAt: "2026-08-26T10:00:00Z",
+        status: "ATTACHED",
+      },
       baseCostPerPerson: 110000,
       description:
         "Kawasan hutan pinus alami berhawa dingin dengan area saung hening dan akses jalan tertata rapi.",
@@ -78,6 +96,10 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
       locationLabel: "Malang Selatan",
       province: "Jawa Timur",
       city: "Malang",
+      managementName: "Pengelola Curah Rawan",
+      contactPerson: "Rian",
+      contactPhone: "081298765432",
+      contactEmail: "partner@curahrawan.id",
       baseCostPerPerson: 80000,
       description: "Kawasan tebing dan sungai deras.",
       highlights: ["Tebing curam"],
@@ -97,6 +119,9 @@ function cloneVerificationApp(
   return {
     ...app,
     highlights: [...app.highlights],
+    legalEntityDocument: app.legalEntityDocument
+      ? { ...app.legalEntityDocument }
+      : undefined,
   };
 }
 
@@ -135,6 +160,15 @@ export const mockDestinationVerificationStore = {
     locationLabel: string;
     province: string;
     city: string;
+    managementName?: string;
+    contactPerson?: string;
+    phone?: string;
+    email?: string;
+    legalEntityDoc?: {
+      name: string;
+      uploadedAt: string;
+      status: "ATTACHED" | "VERIFIED";
+    };
     baseCostPerPerson: number;
     description: string;
     highlights: string[];
@@ -166,6 +200,20 @@ export const mockDestinationVerificationStore = {
       };
     }
 
+    if (input.baseCostPerPerson <= 0 || input.capacityPerSession <= 0) {
+      return {
+        success: false,
+        message: "Modal dasar dan kapasitas per sesi harus lebih dari 0.",
+      };
+    }
+
+    if (!input.highlights || input.highlights.length === 0) {
+      return {
+        success: false,
+        message: "Minimal masukkan 1 fasilitas atau daya tarik utama kawasan.",
+      };
+    }
+
     // Check existing application for this partner identity
     const existingIndex = verificationApps.findIndex(
       (a) => a.partnerIdentityId === input.partnerIdentityId,
@@ -191,13 +239,12 @@ export const mockDestinationVerificationStore = {
 
     const nowIso = new Date().toISOString();
     const destId =
-      input.destinationIdentityId ||
-      (existingIndex >= 0
+      existingIndex >= 0
         ? verificationApps[existingIndex].destinationIdentityId
         : `dest_${input.name
             .toLowerCase()
             .replace(/[^a-z0-9]/g, "_")
-            .slice(0, 20)}_${Date.now().toString(36).slice(-4)}`);
+            .slice(0, 20)}_${Date.now().toString(36).slice(-4)}`;
 
     const application: DestinationVerificationRecord = {
       applicationId:
@@ -210,13 +257,21 @@ export const mockDestinationVerificationStore = {
       locationLabel: input.locationLabel.trim(),
       province: input.province.trim() || "Jawa Timur",
       city: input.city.trim() || "Batu",
-      baseCostPerPerson: input.baseCostPerPerson || 100000,
+      managementName: input.managementName?.trim() || undefined,
+      contactPerson: input.contactPerson?.trim() || undefined,
+      contactPhone: input.phone?.trim() || undefined,
+      contactEmail: input.email?.trim() || undefined,
+      legalEntityDocument: input.legalEntityDoc
+        ? {
+            name: input.legalEntityDoc.name,
+            attachedAt: input.legalEntityDoc.uploadedAt,
+            status: input.legalEntityDoc.status,
+          }
+        : undefined,
+      baseCostPerPerson: input.baseCostPerPerson,
       description: input.description.trim(),
-      highlights:
-        input.highlights.length > 0
-          ? [...input.highlights]
-          : ["Kawasan alam tenang"],
-      capacityPerSession: input.capacityPerSession || 20,
+      highlights: [...input.highlights],
+      capacityPerSession: input.capacityPerSession,
       guideReadinessEvidence: input.guideReadinessEvidence.trim(),
       submittedAt: nowIso,
       status: "PENDING_REVIEW",
@@ -229,6 +284,13 @@ export const mockDestinationVerificationStore = {
     }
 
     return { success: true, application: cloneVerificationApp(application) };
+  },
+
+  setRejectionReason(applicationId: string, reason?: string): boolean {
+    const app = verificationApps.find((a) => a.applicationId === applicationId);
+    if (!app) return false;
+    app.rejectionReason = reason;
+    return true;
   },
 
   approveApplication(

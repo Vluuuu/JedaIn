@@ -1,17 +1,20 @@
 import { Link } from "react-router";
 import { Badge } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
-import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
-import { partnerSessionStore } from "../eo/partnerSessionStore";
 import { mockReviewStore } from "../reviews/mockReviewStore";
+import {
+  getDestinationReviewTargetRef,
+  resolveAuthenticatedDestinationContext,
+} from "./destinationContext";
 import "./destination.css";
 
 export function DestinationOverviewScreen() {
-  const partner = partnerSessionStore.get();
+  const context = resolveAuthenticatedDestinationContext();
+  const destination = context?.destination;
+  const partner = context?.partner;
   const destinationIdentityId =
-    partner?.destinationIdentityId ?? "dest_lereng_hijau";
-  const destination = mockDestinationStore.getById(destinationIdentityId);
+    destination?.destinationId ?? "dest_lereng_hijau";
 
   // Find all packages using this destination
   const allPackages = mockEoPackageStore.getAllPackages();
@@ -39,9 +42,12 @@ export function DestinationOverviewScreen() {
     0,
   );
 
-  // Reviews for this destination from shared review store
-  const venueReviews = destination
-    ? mockReviewStore.getReviewsForDestination(destination.name)
+  // Reviews for this destination using centralized resolver
+  const reviewTarget = destination
+    ? getDestinationReviewTargetRef(destination)
+    : "";
+  const venueReviews = reviewTarget
+    ? mockReviewStore.getReviewsForDestination(reviewTarget)
     : [];
   const avgRating =
     venueReviews.length > 0
@@ -51,7 +57,7 @@ export function DestinationOverviewScreen() {
         ).toFixed(1)
       : undefined;
 
-  // Profile completeness calculation (6 explicit core fields)
+  // Profile completeness calculation (6 core fields)
   const checklist = [
     Boolean(destination?.name),
     Boolean(destination?.locationLabel),
@@ -79,7 +85,10 @@ export function DestinationOverviewScreen() {
               marginBottom: "var(--space-1)",
             }}
           >
-            <Badge tone="success">Mitra Destinasi Terverifikasi</Badge>
+            <Badge tone="success">
+              Mitra Destinasi Terverifikasi (
+              {destination?.verificationLevel ?? "BASIC"})
+            </Badge>
             <Badge tone={destination?.guideReady ? "success" : "neutral"}>
               {destination?.guideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
             </Badge>
@@ -143,8 +152,8 @@ export function DestinationOverviewScreen() {
             {completedItems}/{totalItems} Informasi Inti Lengkap
           </h2>
           <p style={{ margin: 0 }}>
-            Profil destinasi telah memenuhi standar kurasi ketenangan, fasilitas
-            air bersih, dan SOP pemandu JedaIn.
+            Informasi inti profil destinasi tersedia dan telah divalidasi oleh
+            tim kurasi.
           </p>
         </div>
         <Link

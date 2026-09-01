@@ -40,7 +40,6 @@ import {
 } from "./features/destination";
 import {
   EoApplicationScreen,
-  EoApplicationStatusScreen,
   EoBookingsScreen,
   EoDestinationsScreen,
   EoInsightsScreen,
@@ -51,6 +50,7 @@ import {
   EoProfileScreen,
   EoReviewsScreen,
   EoSessionsScreen,
+  PartnerApplicationStatusScreen,
   PartnerLoginScreen,
   PartnerPortalLandingScreen,
   PartnerRouteGuard,
@@ -189,7 +189,7 @@ export function App() {
         <Route index element={<DestinationApplicationScreen />} />
       </Route>
       <Route path="partner/application" element={<DistractionFreeShell />}>
-        <Route index element={<EoApplicationStatusScreen />} />
+        <Route index element={<PartnerApplicationStatusScreen />} />
       </Route>
 
       {/* Destination Partner Protected Operational Workspace */}

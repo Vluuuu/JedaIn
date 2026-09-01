@@ -582,7 +582,8 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
   });
 
   describe("8. Partner Routing & Bookings Sessions (AH–AK)", () => {
-    it("AH. /partner/apply/destination renders destination application form", async () => {
+    it("AH. /partner/apply/destination renders destination application form for destination partner", async () => {
+      partnerSessionStore.loginAsDemoDestination();
       const view = await renderComponent(createElement(App), [
         "/partner/apply/destination",
       ]);

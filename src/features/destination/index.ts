@@ -1,4 +1,5 @@
 export * from "./types";
+export * from "./destinationContext";
 export * from "./DestinationRouteGuard";
 export * from "./mockDestinationPartnerService";
 export * from "./DestinationApplicationScreen";

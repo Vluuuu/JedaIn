@@ -195,9 +195,35 @@ export function AdminDestinationVerificationDetailScreen() {
             <small
               style={{ color: "var(--color-text-muted)", display: "block" }}
             >
+              Entitas Pengelola & Penanggung Jawab:
+            </small>
+            <strong>
+              {destApp.managementName || destApp.contactPerson
+                ? `${destApp.managementName ?? "Pengelola"} (${destApp.contactPerson ?? "PJ"})`
+                : "Pengelola Destinasi"}
+            </strong>
+          </div>
+
+          <div>
+            <small
+              style={{ color: "var(--color-text-muted)", display: "block" }}
+            >
               Kapasitas Maksimal per Sesi:
             </small>
             <strong>{destApp.capacityPerSession} Orang</strong>
+          </div>
+
+          <div>
+            <small
+              style={{ color: "var(--color-text-muted)", display: "block" }}
+            >
+              Status Dokumen Legalitas (Metadata):
+            </small>
+            <strong>
+              {destApp.legalEntityDocument
+                ? `📄 ${destApp.legalEntityDocument.name} (${destApp.legalEntityDocument.status})`
+                : "Tersertifikasi"}
+            </strong>
           </div>
 
           <div>

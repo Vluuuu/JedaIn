@@ -132,8 +132,7 @@ export function DestinationVerificationStatusScreen() {
                 color: "var(--color-text-primary)",
               }}
             >
-              {app?.rejectionReason ??
-                "Akses evakuasi darurat belum memadai untuk standar keselamatan JedaIn."}
+              {app?.rejectionReason ?? "Alasan verifikasi belum tersedia."}
             </blockquote>
           </div>
 

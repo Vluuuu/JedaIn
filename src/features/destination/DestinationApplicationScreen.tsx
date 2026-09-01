@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
 import { mockDestinationPartnerService } from "./mockDestinationPartnerService";
 import type { DestinationApplicationStep } from "./types";
@@ -18,45 +19,120 @@ const STEPS = [
 export function DestinationApplicationScreen() {
   const navigate = useNavigate();
   const partner = partnerSessionStore.get();
+  const isDestinationRole = partner?.role === "DESTINATION";
+
+  // Check if existing application exists for this partner (e.g. reapply)
+  const existingApp =
+    isDestinationRole && partner
+      ? mockDestinationVerificationStore.getByPartnerId(partner.id)
+      : undefined;
 
   const [currentStep, setCurrentStep] = useState<DestinationApplicationStep>(1);
 
-  // Form Fields
+  // Form Fields initialized from existing application if available, or neutral values
   const [managementName, setManagementName] = useState(
-    "Kelompok Sadar Wisata Lereng Batu",
+    existingApp?.managementName ?? partner?.businessName ?? "",
   );
   const [contactPerson, setContactPerson] = useState(
-    partner?.name ?? "Hadi Purnomo",
+    existingApp?.contactPerson ?? partner?.name ?? "",
   );
-  const [phone, setPhone] = useState("081233445566");
-  const [email] = useState(partner?.email ?? "destinasi@lerenghijau.id");
+  const [phone, setPhone] = useState(
+    existingApp?.contactPhone ?? "081234567890",
+  );
+  const [email] = useState(
+    existingApp?.contactEmail ?? partner?.email ?? "destinasi@mitra.id",
+  );
   const [legalDocName, setLegalDocName] = useState(
-    "Surat_Izin_Pengelolaan_Kawasan.pdf",
+    existingApp?.legalEntityDocument?.name ??
+      "Surat_Izin_Pengelolaan_Kawasan.pdf",
   );
 
-  const [name, setName] = useState("Lereng Hijau Batu");
-  const [locationLabel, setLocationLabel] = useState("Batu / Malang Raya");
-  const [city, setCity] = useState("Batu");
-  const [province] = useState("Jawa Timur");
+  const [name, setName] = useState(existingApp?.name ?? "");
+  const [locationLabel, setLocationLabel] = useState(
+    existingApp?.locationLabel ?? "",
+  );
+  const [city, setCity] = useState(existingApp?.city ?? "");
+  const [province] = useState(existingApp?.province ?? "Jawa Timur");
 
   const [description, setDescription] = useState(
-    "Kawasan perkebunan teh dan lereng bukit berkabut yang tenang, terkelola secara lestari bersama warga lokal. Memiliki pemandu lokal terlatih di lokasi.",
+    existingApp?.description ?? "",
   );
   const [highlightsInput, setHighlightsInput] = useState(
-    "Jalur jalan santai kebun teh dengan kontur landai\nPemandu lokal standby dan ramah rute\nSaung santai dan fasilitas air bersih",
+    existingApp?.highlights?.join("\n") ?? "",
   );
 
-  const [capacityPerSession, setCapacityPerSession] = useState<number>(20);
-  const [baseCostPerPerson, setBaseCostPerPerson] = useState<number>(125000);
+  const [capacityPerSession, setCapacityPerSession] = useState<number>(
+    existingApp?.capacityPerSession ?? 20,
+  );
+  const [baseCostPerPerson, setBaseCostPerPerson] = useState<number>(
+    existingApp?.baseCostPerPerson ?? 100000,
+  );
 
-  const [guideReady, setGuideReady] = useState<boolean>(true);
+  const [guideReady, setGuideReady] = useState<boolean>(
+    existingApp?.guideReadinessEvidence ? true : false,
+  );
   const [guideReadinessEvidence, setGuideReadinessEvidence] = useState(
-    "Tersedia 4 pemandu lokal terlatih dari kelompok tani binaan kawasan yang siap mendampingi trip mindful travel.",
+    existingApp?.guideReadinessEvidence ?? "",
   );
 
-  const [agreedToSop, setAgreedToSop] = useState<boolean>(true);
+  const [agreedToSop, setAgreedToSop] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Anonymous / Non-Destination user guard
+  if (!isDestinationRole) {
+    return (
+      <div
+        className="dest-container"
+        style={{ padding: "var(--space-8) var(--space-4)", maxWidth: "600px" }}
+      >
+        <div
+          className="eo-section"
+          style={{ textAlign: "center", padding: "var(--space-8)" }}
+        >
+          <h2>Pendaftaran Mitra Destinasi</h2>
+          <p style={{ color: "var(--color-text-secondary)" }}>
+            Silakan masuk atau buat akun kemitraan destinasi terlebih dahulu
+            sebelum mengisi formulir verifikasi lokasi.
+          </p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "var(--space-3)",
+              marginTop: "var(--space-4)",
+            }}
+          >
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={() => {
+                partnerSessionStore.setPartner({
+                  id: `dest_partner_${Date.now()}`,
+                  email: "mitra@destinasi.id",
+                  name: "Pengelola Destinasi Baru",
+                  role: "DESTINATION",
+                  businessName: "Entitas Destinasi",
+                });
+                navigate("/partner/apply/destination");
+              }}
+            >
+              Mulai Pendaftaran Destinasi
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={() => navigate("/partner/login")}
+            >
+              Masuk Akun
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleNext = () => {
     setErrorMessage(undefined);
@@ -83,17 +159,6 @@ export function DestinationApplicationScreen() {
       return;
     }
 
-    // Ensure partner session is set with DESTINATION role
-    if (!partner || partner.role !== "DESTINATION") {
-      partnerSessionStore.setPartner({
-        id: `dest_partner_${Date.now()}`,
-        email,
-        name: contactPerson,
-        role: "DESTINATION",
-        businessName: managementName,
-      });
-    }
-
     setIsSubmitting(true);
     const splitHighlights = highlightsInput
       .split("\n")
@@ -101,11 +166,7 @@ export function DestinationApplicationScreen() {
       .filter(Boolean);
 
     const res = mockDestinationPartnerService.submitApplication({
-      partnerIdentityId: partnerSessionStore.get()!.id,
-      destinationIdentityId: `dest_${name
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "_")
-        .slice(0, 15)}`,
+      partnerIdentityId: partner.id,
       name,
       locationLabel,
       province,
@@ -222,6 +283,7 @@ export function DestinationApplicationScreen() {
                 className="eo-form-input"
                 value={managementName}
                 onChange={(e) => setManagementName(e.target.value)}
+                placeholder="Nama kelompok pengelola..."
               />
             </div>
 
@@ -243,6 +305,7 @@ export function DestinationApplicationScreen() {
                   className="eo-form-input"
                   value={contactPerson}
                   onChange={(e) => setContactPerson(e.target.value)}
+                  placeholder="Nama pengelola..."
                 />
               </div>
 
@@ -257,6 +320,7 @@ export function DestinationApplicationScreen() {
                   className="eo-form-input"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  placeholder="08..."
                 />
               </div>
             </div>
@@ -349,6 +413,7 @@ export function DestinationApplicationScreen() {
                   className="eo-form-input"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
+                  placeholder="Kota / Kabupaten..."
                 />
               </div>
 
@@ -363,7 +428,7 @@ export function DestinationApplicationScreen() {
                   className="eo-form-input"
                   value={locationLabel}
                   onChange={(e) => setLocationLabel(e.target.value)}
-                  placeholder="Batu / Malang Raya"
+                  placeholder="Contoh: Batu / Malang Raya"
                 />
               </div>
             </div>
@@ -445,6 +510,7 @@ export function DestinationApplicationScreen() {
                 className="eo-form-textarea"
                 value={highlightsInput}
                 onChange={(e) => setHighlightsInput(e.target.value)}
+                placeholder="Fasilitas 1&#10;Fasilitas 2"
               />
             </div>
 
@@ -518,7 +584,7 @@ export function DestinationApplicationScreen() {
                   className="eo-form-input"
                   value={capacityPerSession}
                   onChange={(e) =>
-                    setCapacityPerSession(Number(e.target.value) || 1)
+                    setCapacityPerSession(Number(e.target.value) || 0)
                   }
                 />
                 <span className="eo-form-helper">
@@ -642,7 +708,7 @@ export function DestinationApplicationScreen() {
                 className="eo-form-textarea"
                 value={guideReadinessEvidence}
                 onChange={(e) => setGuideReadinessEvidence(e.target.value)}
-                placeholder="Ceritakan jumlah pemandu lokal yang standby di lokasi..."
+                placeholder="Ceritakan ketersediaan pemandu lokal di lokasi..."
               />
             </div>
 
@@ -717,7 +783,7 @@ export function DestinationApplicationScreen() {
                     fontSize: "var(--font-size-heading-md)",
                   }}
                 >
-                  {name}
+                  {name || "Nama Destinasi"}
                 </h3>
                 <p
                   style={{
@@ -726,7 +792,7 @@ export function DestinationApplicationScreen() {
                     fontSize: "var(--font-size-body-sm)",
                   }}
                 >
-                  {locationLabel} ({city}, {province})
+                  {locationLabel || "Wilayah"} ({city || "Kota"}, {province})
                 </p>
               </div>
 

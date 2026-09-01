@@ -10,6 +10,7 @@ import {
   partnerEoNavigation,
 } from "./components/shells";
 import { TravelerLoginScreen } from "./features/auth";
+import { CheckoutScreen } from "./features/checkout";
 import { ExploreScreen } from "./features/explore";
 import { HomeScreen } from "./features/home";
 import {
@@ -23,7 +24,6 @@ import { SessionSelectionScreen } from "./features/sessionSelection";
 import "./App.css";
 
 const travelerRoutes = [
-  ["checkout/:sessionId", "Checkout"],
   ["trips", "My Trips"],
   ["trips/:bookingId", "Trip detail"],
   ["trips/:bookingId/review", "Trip review"],
@@ -120,6 +120,34 @@ export function App() {
             }
           />
         ))}
+      </Route>
+
+      <Route
+        element={
+          <OnboardingRouteGuard>
+            <TravelerAppShell showBottomNav={false} />
+          </OnboardingRouteGuard>
+        }
+      >
+        <Route path="checkout/:sessionId" element={<CheckoutScreen />} />
+        <Route
+          path="checkout/:sessionId/contact"
+          element={
+            <PlaceholderPage
+              eyebrow="Traveler flow"
+              title="Contact Verification"
+            />
+          }
+        />
+        <Route
+          path="checkout/:sessionId/pending-payment"
+          element={
+            <PlaceholderPage
+              eyebrow="Traveler flow"
+              title="Pending Payment Handoff"
+            />
+          }
+        />
       </Route>
 
       <Route

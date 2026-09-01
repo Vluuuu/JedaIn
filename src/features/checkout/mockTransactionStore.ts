@@ -30,6 +30,25 @@ export const mockTransactionStore = {
     idempotencyMap.clear();
   },
 
+  reconcileExpiredPendingPayments(nowMs: number = Date.now()): void {
+    for (const booking of bookings) {
+      if (booking.status === "PENDING_PAYMENT") {
+        const expTime = new Date(booking.paymentExpiresAt).getTime();
+        if (nowMs >= expTime) {
+          booking.status = "EXPIRED";
+          booking.reservedQuantity = 0;
+
+          const attempt = paymentAttempts.find(
+            (p) => p.bookingId === booking.bookingId && p.status === "PENDING",
+          );
+          if (attempt) {
+            attempt.status = "EXPIRED";
+          }
+        }
+      }
+    }
+  },
+
   getBookings(): readonly BookingRecord[] {
     return bookings;
   },
@@ -38,27 +57,34 @@ export const mockTransactionStore = {
     return paymentAttempts;
   },
 
-  getReservedQuantity(sessionId: string): number {
-    const now = new Date().getTime();
+  getPaymentAttemptForBooking(
+    bookingId: string,
+  ): PaymentAttemptRecord | undefined {
+    return paymentAttempts.find((p) => p.bookingId === bookingId);
+  },
+
+  getReservedQuantity(sessionId: string, nowMs: number = Date.now()): number {
+    this.reconcileExpiredPendingPayments(nowMs);
     return bookings
       .filter((b) => {
         if (b.sessionId !== sessionId || b.status !== "PENDING_PAYMENT") {
           return false;
         }
-        return new Date(b.paymentExpiresAt).getTime() > now;
+        return new Date(b.paymentExpiresAt).getTime() > nowMs;
       })
       .reduce((sum, b) => sum + b.reservedQuantity, 0);
   },
 
   getActivePendingPayment(
     travelerId: string,
+    nowMs: number = Date.now(),
   ): PendingPaymentHandoff | undefined {
-    const now = new Date().getTime();
+    this.reconcileExpiredPendingPayments(nowMs);
     const active = bookings.find((b) => {
       if (b.travelerId !== travelerId || b.status !== "PENDING_PAYMENT") {
         return false;
       }
-      return new Date(b.paymentExpiresAt).getTime() > now;
+      return new Date(b.paymentExpiresAt).getTime() > nowMs;
     });
 
     if (!active) return undefined;
@@ -69,6 +95,74 @@ export const mockTransactionStore = {
       amount: active.totalAmount,
       expiresAt: active.paymentExpiresAt,
     };
+  },
+
+  getActiveBookingRecord(
+    travelerId: string,
+    nowMs: number = Date.now(),
+  ): BookingRecord | undefined {
+    this.reconcileExpiredPendingPayments(nowMs);
+    return bookings.find((b) => {
+      if (b.travelerId !== travelerId || b.status !== "PENDING_PAYMENT") {
+        return false;
+      }
+      return new Date(b.paymentExpiresAt).getTime() > nowMs;
+    });
+  },
+
+  cancelPendingBooking(params: {
+    travelerId: string;
+    bookingId: string;
+    nowMs?: number;
+  }): {
+    success: boolean;
+    reason?: "NOT_FOUND" | "EXPIRED" | "ALREADY_RESOLVED" | "INVALID_OWNER";
+    booking?: BookingRecord;
+  } {
+    const nowMs = params.nowMs ?? Date.now();
+    this.reconcileExpiredPendingPayments(nowMs);
+
+    const booking = bookings.find((b) => b.bookingId === params.bookingId);
+    if (!booking) {
+      return { success: false, reason: "NOT_FOUND" };
+    }
+
+    if (booking.travelerId !== params.travelerId) {
+      return { success: false, reason: "INVALID_OWNER" };
+    }
+
+    if (booking.status === "CANCELLED") {
+      return { success: true, booking, reason: "ALREADY_RESOLVED" };
+    }
+
+    if (booking.status === "EXPIRED") {
+      return { success: false, reason: "EXPIRED", booking };
+    }
+
+    // Check expiry race
+    const expTime = new Date(booking.paymentExpiresAt).getTime();
+    if (nowMs >= expTime) {
+      booking.status = "EXPIRED";
+      booking.reservedQuantity = 0;
+      const attempt = paymentAttempts.find(
+        (p) => p.bookingId === booking.bookingId && p.status === "PENDING",
+      );
+      if (attempt) attempt.status = "EXPIRED";
+      return { success: false, reason: "EXPIRED", booking };
+    }
+
+    // Transition to CANCELLED atomically
+    booking.status = "CANCELLED";
+    booking.reservedQuantity = 0;
+
+    const attempt = paymentAttempts.find(
+      (p) => p.bookingId === booking.bookingId && p.status === "PENDING",
+    );
+    if (attempt) {
+      attempt.status = "CANCELLED";
+    }
+
+    return { success: true, booking };
   },
 
   getIdempotentTransaction(
@@ -114,13 +208,20 @@ export const mockTransactionStore = {
     unitPricePerPerson: number;
     capacitySnapshot: number;
     idempotencyKey: string;
+    nowMs?: number;
   }):
     | { success: true; booking: BookingRecord; payment: PaymentAttemptRecord }
     | {
         success: false;
-        reason: "INSUFFICIENT_CAPACITY" | "IDEMPOTENCY_CONFLICT";
+        reason:
+          | "INSUFFICIENT_CAPACITY"
+          | "IDEMPOTENCY_CONFLICT"
+          | "ACTIVE_PENDING_PAYMENT";
+        existingPending?: PendingPaymentHandoff;
       } {
-    // 1. Idempotency check
+    const nowMs = input.nowMs ?? Date.now();
+
+    // 1. Idempotency check (allows replay of same committed transaction)
     const existing = idempotencyMap.get(input.idempotencyKey);
     if (existing) {
       const match =
@@ -139,16 +240,32 @@ export const mockTransactionStore = {
       };
     }
 
-    // 2. Capacity ledger check (in-memory atomic boundary)
-    const currentActiveReserved = this.getReservedQuantity(input.sessionId);
+    // 2. Reconcile expired pending records
+    this.reconcileExpiredPendingPayments(nowMs);
+
+    // 3. STORE-LEVEL ATOMIC INVARIANT: Check active pending payment for traveler
+    const activePending = this.getActivePendingPayment(input.travelerId, nowMs);
+    if (activePending) {
+      return {
+        success: false,
+        reason: "ACTIVE_PENDING_PAYMENT",
+        existingPending: activePending,
+      };
+    }
+
+    // 4. Capacity ledger check (in-memory atomic boundary)
+    const currentActiveReserved = this.getReservedQuantity(
+      input.sessionId,
+      nowMs,
+    );
     const availableSlots = input.capacitySnapshot - currentActiveReserved;
 
     if (availableSlots < input.participantCount) {
       return { success: false, reason: "INSUFFICIENT_CAPACITY" };
     }
 
-    // 3. Atomically create booking & payment attempt
-    const now = new Date();
+    // 5. Atomically create booking & payment attempt
+    const now = new Date(nowMs);
     const expiresAt = new Date(
       now.getTime() + CHECKOUT_MVP_CONFIG.paymentTimeoutMinutes * 60 * 1000,
     ).toISOString();

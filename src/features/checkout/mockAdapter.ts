@@ -387,6 +387,14 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
           message: "Konflik transaksi idempotensi.",
         };
       }
+      if (txResult.reason === "ACTIVE_PENDING_PAYMENT") {
+        return {
+          status: "ACTIVE_PENDING_PAYMENT",
+          pendingPayment: txResult.existingPending,
+          message:
+            "Kamu memiliki pembayaran aktif yang belum diselesaikan. Selesaikan atau batalkan pesanan tersebut lebih dahulu.",
+        };
+      }
       return {
         status: "INSUFFICIENT_CAPACITY",
         latestRemainingSlots: Math.max(0, effectiveRemaining),

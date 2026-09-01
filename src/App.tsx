@@ -19,6 +19,7 @@ import {
   TravelerConsentScreen,
 } from "./features/onboarding";
 import { PackageDetailScreen } from "./features/packageDetail";
+import { PendingPaymentResolutionScreen } from "./features/pendingPayment";
 import { TravelerQuizScreen } from "./features/quiz";
 import { RecommendationResultScreen } from "./features/recommendation";
 import { SessionSelectionScreen } from "./features/sessionSelection";
@@ -137,12 +138,7 @@ export function App() {
         />
         <Route
           path="checkout/:sessionId/pending-payment"
-          element={
-            <PlaceholderPage
-              eyebrow="Traveler flow"
-              title="Pending Payment Handoff"
-            />
-          }
+          element={<PendingPaymentResolutionScreen />}
         />
       </Route>
 

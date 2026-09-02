@@ -1,4 +1,4 @@
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
+import { getCombinedCatalogPackages } from "../marketplace/marketplaceAdapter";
 import type { PackageRecommendationSource } from "../recommendation/types";
 import {
   extractAvailableDestinations,
@@ -14,16 +14,20 @@ export interface MockExploreAdapterOptions {
 }
 
 export class MockExploreAdapter implements ExploreAdapter {
-  private packages: PackageRecommendationSource[];
+  private explicitPackages?: PackageRecommendationSource[];
   private delayMs: number;
   private failExploreCount: number;
   private errorMessage: string;
 
   constructor(options: MockExploreAdapterOptions = {}) {
-    this.packages = options.packages ?? MOCK_RECOMMENDATION_PACKAGES;
+    this.explicitPackages = options.packages;
     this.delayMs = options.delayMs ?? 0;
     this.failExploreCount = options.failExploreCount ?? 0;
     this.errorMessage = options.errorMessage ?? "Experience belum bisa dimuat.";
+  }
+
+  private resolveCatalog(): PackageRecommendationSource[] {
+    return this.explicitPackages ?? getCombinedCatalogPackages();
   }
 
   async getExplorePackages(filters: ExploreFilters): Promise<ExploreResult> {
@@ -36,8 +40,9 @@ export class MockExploreAdapter implements ExploreAdapter {
       throw new Error(this.errorMessage);
     }
 
-    const filtered = filterAndSortExplorePackages(this.packages, filters);
-    const availableDestinations = extractAvailableDestinations(this.packages);
+    const catalog = this.resolveCatalog();
+    const filtered = filterAndSortExplorePackages(catalog, filters);
+    const availableDestinations = extractAvailableDestinations(catalog);
 
     return {
       packages: filtered,

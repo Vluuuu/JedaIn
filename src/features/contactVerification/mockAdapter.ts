@@ -1,10 +1,12 @@
+import {
+  getCombinedCatalogPackages,
+  getCombinedPackageDetails,
+} from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
-import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import type {
   PackageDetailSource,
   PackageSessionPreview,
 } from "../packageDetail/types";
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import type { PackageRecommendationSource } from "../recommendation/types";
 import { mockContactVerificationStore } from "./mockContactVerificationStore";
 import {
@@ -29,8 +31,8 @@ export interface MockContactVerificationAdapterOptions {
 }
 
 export class MockContactVerificationAdapter implements ContactVerificationAdapter {
-  private packages: PackageRecommendationSource[];
-  private details: Record<string, PackageDetailSource>;
+  private explicitPackages?: PackageRecommendationSource[];
+  private explicitDetails?: Record<string, PackageDetailSource>;
   private delayMs: number;
   private failRequestCount: number;
   private failVerifyCount: number;
@@ -39,8 +41,8 @@ export class MockContactVerificationAdapter implements ContactVerificationAdapte
   private expirySeconds: number;
 
   constructor(options: MockContactVerificationAdapterOptions = {}) {
-    this.packages = options.packages ?? MOCK_RECOMMENDATION_PACKAGES;
-    this.details = options.details ?? MOCK_PACKAGE_DETAILS;
+    this.explicitPackages = options.packages;
+    this.explicitDetails = options.details;
     this.delayMs = options.delayMs ?? 0;
     this.failRequestCount = options.failRequestCount ?? 0;
     this.failVerifyCount = options.failVerifyCount ?? 0;
@@ -53,6 +55,14 @@ export class MockContactVerificationAdapter implements ContactVerificationAdapte
       options.expirySeconds ?? CONTACT_VERIFICATION_MVP_CONFIG.otpExpirySeconds;
   }
 
+  private resolvePackages(): PackageRecommendationSource[] {
+    return this.explicitPackages ?? getCombinedCatalogPackages();
+  }
+
+  private resolveDetails(): Record<string, PackageDetailSource> {
+    return this.explicitDetails ?? getCombinedPackageDetails();
+  }
+
   async getVerificationContext(sessionId: string): Promise<{
     sessionValid: boolean;
     travelerId?: string;
@@ -63,13 +73,16 @@ export class MockContactVerificationAdapter implements ContactVerificationAdapte
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
 
+    const packages = this.resolvePackages();
+    const details = this.resolveDetails();
+
     // 1. Resolve session, detail & package with full LIVE package consistency check
     let foundPkg: PackageRecommendationSource | undefined;
     let foundDetail: PackageDetailSource | undefined;
     let foundSession: PackageSessionPreview | undefined;
 
-    for (const [pkgId, detail] of Object.entries(this.details)) {
-      const pkg = this.packages.find((p) => p.id === pkgId);
+    for (const [pkgId, detail] of Object.entries(details)) {
+      const pkg = packages.find((p) => p.id === pkgId);
       if (!pkg) continue;
       if (detail.packageId !== pkg.id) continue;
 

@@ -577,6 +577,60 @@ export const mockEoPackageStore = {
     return true;
   },
 
+  publishApprovedPackage(packageId: string): {
+    success: boolean;
+    package?: EoPackageRecord;
+    message?: string;
+  } {
+    const actor = partnerSessionStore.get();
+    if (!actor || actor.role !== "EO") {
+      return {
+        success: false,
+        message:
+          "Akses ditolak: Hanya EO terautentikasi yang dapat mempublikasikan paket.",
+      };
+    }
+
+    const pkg = packages.find((p) => p.packageId === packageId);
+    if (!pkg) {
+      return {
+        success: false,
+        message: "Paket tidak ditemukan.",
+      };
+    }
+
+    if (pkg.eoId !== actor.id) {
+      return {
+        success: false,
+        message: "Akses ditolak: Anda bukan pemilik paket ini.",
+      };
+    }
+
+    // Idempotency: if already LIVE, return success deterministically
+    if (pkg.status === "LIVE") {
+      return {
+        success: true,
+        package: clonePackage(pkg),
+        message: "ALREADY_LIVE",
+      };
+    }
+
+    if (pkg.status !== "APPROVED") {
+      return {
+        success: false,
+        message:
+          "Hanya paket yang telah disetujui kurator Admin (APPROVED) yang dapat dipublikasikan.",
+      };
+    }
+
+    pkg.status = "LIVE";
+    pkg.updatedAt = new Date().toISOString();
+    return {
+      success: true,
+      package: clonePackage(pkg),
+    };
+  },
+
   rejectPackage(packageId: string, reason: string): boolean {
     const pkg = packages.find((p) => p.packageId === packageId);
     if (!pkg || pkg.status !== "PENDING_ADMIN_REVIEW" || !reason.trim()) {

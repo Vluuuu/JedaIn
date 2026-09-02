@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { resetCompetitionDemoState } from "../demo/demoReset";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
 
 export function PartnerPortalLandingScreen() {
   const navigate = useNavigate();
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   const handleDemoLogin = (
     guideStatus: "CERTIFIED_GUIDE" | "CONCEPT_ONLY" = "CERTIFIED_GUIDE",
@@ -16,6 +19,12 @@ export function PartnerPortalLandingScreen() {
   const handleDemoDestinationLogin = () => {
     partnerSessionStore.loginAsDemoDestination();
     navigate("/partner/destination");
+  };
+
+  const handleResetDemo = () => {
+    resetCompetitionDemoState();
+    setResetMessage("State demo berhasil direset ke kondisi awal baseline.");
+    setTimeout(() => setResetMessage(null), 3500);
   };
 
   return (
@@ -48,7 +57,12 @@ export function PartnerPortalLandingScreen() {
           </p>
         </div>
         <div
-          style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}
+          style={{
+            display: "flex",
+            gap: "var(--space-3)",
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
         >
           <Button
             type="button"
@@ -74,7 +88,28 @@ export function PartnerPortalLandingScreen() {
           >
             Masuk sebagai Mitra Destinasi Demo
           </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            style={{ color: "var(--color-text-muted)" }}
+            onClick={handleResetDemo}
+          >
+            ↺ Reset Demo State
+          </Button>
         </div>
+        {resetMessage && (
+          <div
+            className="eo-alert eo-alert--success"
+            style={{
+              marginTop: "var(--space-2)",
+              padding: "var(--space-2) var(--space-3)",
+            }}
+            role="status"
+          >
+            {resetMessage}
+          </div>
+        )}
       </section>
 
       {/* Partner Registration Cards */}

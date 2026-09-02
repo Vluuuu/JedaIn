@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { mockDestinationStore } from "./mockDestinationStore";
@@ -11,6 +12,8 @@ export function EoPackageDetailScreen() {
   const navigate = useNavigate();
   const partner = partnerSessionStore.get();
   const eoId = partner?.id ?? "eo_jeda_alam";
+  const [publishMessage, setPublishMessage] = useState<string | null>(null);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   // Ownership verification
   const pkg = packageId
@@ -46,6 +49,19 @@ export function EoPackageDetailScreen() {
     ? mockInsightStore.getInsightById(pkg.insightId)
     : undefined;
 
+  const handlePublishLive = () => {
+    setPublishError(null);
+    setPublishMessage(null);
+    const res = mockEoPackageStore.publishApprovedPackage(pkg.packageId);
+    if (res.success) {
+      setPublishMessage(
+        "Paket berhasil dipublikasikan LIVE ke Marketplace Traveler!",
+      );
+    } else {
+      setPublishError(res.message ?? "Gagal mempublikasikan paket.");
+    }
+  };
+
   return (
     <div className="eo-container">
       <div
@@ -65,45 +81,78 @@ export function EoPackageDetailScreen() {
           &larr; Kembali ke Daftar Paket
         </Link>
 
-        {(pkg.status === "APPROVED" || pkg.status === "LIVE") && (
-          <Button
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={() =>
-              navigate(`/partner/eo/packages/${pkg.packageId}/sessions`)
-            }
-          >
-            Atur Jadwal Sesi &rarr;
-          </Button>
-        )}
+        <div style={{ display: "flex", gap: "var(--space-2)" }}>
+          {pkg.status === "APPROVED" && (
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={handlePublishLive}
+            >
+              Publish ke Marketplace
+            </Button>
+          )}
 
-        {pkg.status === "DRAFT" && (
-          <Button
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={() =>
-              navigate(`/partner/eo/packages/new?draftId=${pkg.packageId}`)
-            }
-          >
-            Lanjut Edit Draf &rarr;
-          </Button>
-        )}
+          {(pkg.status === "APPROVED" || pkg.status === "LIVE") && (
+            <Button
+              type="button"
+              variant={pkg.status === "APPROVED" ? "secondary" : "primary"}
+              size="md"
+              onClick={() =>
+                navigate(`/partner/eo/packages/${pkg.packageId}/sessions`)
+              }
+            >
+              Atur Jadwal Sesi &rarr;
+            </Button>
+          )}
 
-        {pkg.status === "REJECTED" && (
-          <Button
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={() =>
-              navigate(`/partner/eo/packages/new?draftId=${pkg.packageId}`)
-            }
-          >
-            Perbaiki & Ajukan Ulang &rarr;
-          </Button>
-        )}
+          {pkg.status === "DRAFT" && (
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={() =>
+                navigate(`/partner/eo/packages/new?draftId=${pkg.packageId}`)
+              }
+            >
+              Lanjut Edit Draf &rarr;
+            </Button>
+          )}
+
+          {pkg.status === "REJECTED" && (
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={() =>
+                navigate(`/partner/eo/packages/new?draftId=${pkg.packageId}`)
+              }
+            >
+              Perbaiki & Ajukan Ulang &rarr;
+            </Button>
+          )}
+        </div>
       </div>
+
+      {publishMessage && (
+        <div
+          className="eo-alert eo-alert--success"
+          style={{ marginTop: "var(--space-3)" }}
+          role="status"
+        >
+          {publishMessage}
+        </div>
+      )}
+
+      {publishError && (
+        <div
+          className="eo-alert eo-alert--error"
+          style={{ marginTop: "var(--space-3)" }}
+          role="alert"
+        >
+          {publishError}
+        </div>
+      )}
 
       <header className="eo-page-header">
         <div>

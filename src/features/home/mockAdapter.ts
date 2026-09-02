@@ -1,10 +1,12 @@
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import {
+  getCombinedCatalogPackages,
+  getCombinedPackageDetails,
+} from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
-import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import { evaluateRecommendations } from "../recommendation/engine";
 import { isCompletedQuizDraft } from "../recommendation/mockAdapter";
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import { getDerivedVerifiedDestinations, HOME_MOOD_PRESETS } from "./config";
 import type {
   HomeAdapter,
@@ -65,6 +67,9 @@ export class MockHomeAdapter implements HomeAdapter {
     const traveler = session.user;
     const quizDraft = session.quizDraft;
 
+    const catalogPackages = getCombinedCatalogPackages();
+    const packageDetails = getCombinedPackageDetails();
+
     const moduleErrors: HomeViewModel["moduleErrors"] = {};
 
     // 1. Pending payment (Sync with shared mockTransactionStore if not overridden)
@@ -78,7 +83,7 @@ export class MockHomeAdapter implements HomeAdapter {
         traveler.id,
       );
       if (activePending) {
-        const pkg = MOCK_RECOMMENDATION_PACKAGES.find(
+        const pkg = catalogPackages.find(
           (p) => p.id === activePending.packageId,
         );
         pendingPayment = {
@@ -100,10 +105,8 @@ export class MockHomeAdapter implements HomeAdapter {
         .filter((b) => b.status === "PAID");
       if (paidBookings.length > 0) {
         const latestPaid = paidBookings[0];
-        const pkg = MOCK_RECOMMENDATION_PACKAGES.find(
-          (p) => p.id === latestPaid.packageId,
-        );
-        const detail = MOCK_PACKAGE_DETAILS[latestPaid.packageId];
+        const pkg = catalogPackages.find((p) => p.id === latestPaid.packageId);
+        const detail = packageDetails[latestPaid.packageId];
         const sess = detail?.upcomingSessionPreviews?.find(
           (s) => s.sessionId === latestPaid.sessionId,
         );
@@ -133,10 +136,7 @@ export class MockHomeAdapter implements HomeAdapter {
       this.failedRecommendationAttempts++;
       moduleErrors.recommendation = "Gagal memuat rekomendasi personal.";
     } else if (isCompletedQuizDraft(quizDraft)) {
-      const recResult = evaluateRecommendations(
-        quizDraft,
-        MOCK_RECOMMENDATION_PACKAGES,
-      );
+      const recResult = evaluateRecommendations(quizDraft, catalogPackages);
       if (recResult.topRecommendation) {
         personalizedRecommendation = {
           mode: recResult.state,
@@ -146,9 +146,9 @@ export class MockHomeAdapter implements HomeAdapter {
     }
 
     // 4. Popular packages sorted by popularityRank
-    let popularPackages = MOCK_RECOMMENDATION_PACKAGES.filter(
-      (p) => p.status === "LIVE",
-    ).sort((a, b) => b.popularityRank - a.popularityRank);
+    let popularPackages = catalogPackages
+      .filter((p) => p.status === "LIVE")
+      .sort((a, b) => b.popularityRank - a.popularityRank);
 
     if (opts.shouldFailPopular) {
       moduleErrors.popular = "Gagal memuat paket populer.";
@@ -164,12 +164,12 @@ export class MockHomeAdapter implements HomeAdapter {
     } else if (quizDraft?.departure_area_id) {
       if (quizDraft.departure_area_id === "MALANG") {
         departureAreaName = "Malang";
-        departureAreaPackages = MOCK_RECOMMENDATION_PACKAGES.filter(
+        departureAreaPackages = catalogPackages.filter(
           (p) => p.status === "LIVE" && p.departureAreas.includes("MALANG"),
         );
       } else if (quizDraft.departure_area_id === "SURABAYA") {
         departureAreaName = "Surabaya";
-        departureAreaPackages = MOCK_RECOMMENDATION_PACKAGES.filter(
+        departureAreaPackages = catalogPackages.filter(
           (p) => p.status === "LIVE" && p.departureAreas.includes("SURABAYA"),
         );
       } else {

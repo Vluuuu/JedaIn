@@ -1,7 +1,10 @@
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import { resolveOrganizerReviewRef } from "../identity/identityResolvers";
+import {
+  getCombinedCatalogPackages,
+  getCombinedPackageDetails,
+} from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
-import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import { createDemoTravelerHistory } from "../trips/demoHistory";
 import { mockReviewStore, type ReviewTargetType } from "./mockReviewStore";
 import type { ReviewAdapter, TripReviewViewModel } from "./types";
@@ -28,15 +31,18 @@ export class MockReviewAdapter implements ReviewAdapter {
       return null;
     }
 
-    const pkg = MOCK_RECOMMENDATION_PACKAGES.find(
-      (p) => p.id === booking!.packageId,
-    );
-    const detail = MOCK_PACKAGE_DETAILS[booking.packageId];
+    const catalog = getCombinedCatalogPackages();
+    const details = getCombinedPackageDetails();
+
+    const pkg = catalog.find((p) => p.id === booking!.packageId);
+    const detail = details[booking.packageId];
 
     const targetRef =
       targetType === "DESTINATION"
         ? (pkg?.destinationName ?? booking.packageId)
-        : (detail?.organizer.id ?? "org_default");
+        : detail?.organizer?.id
+          ? resolveOrganizerReviewRef(detail.organizer.id)
+          : "org_default";
 
     const targetName =
       targetType === "DESTINATION"
@@ -100,15 +106,18 @@ export class MockReviewAdapter implements ReviewAdapter {
       };
     }
 
-    const pkg = MOCK_RECOMMENDATION_PACKAGES.find(
-      (p) => p.id === booking!.packageId,
-    );
-    const detail = MOCK_PACKAGE_DETAILS[booking.packageId];
+    const catalog = getCombinedCatalogPackages();
+    const details = getCombinedPackageDetails();
+
+    const pkg = catalog.find((p) => p.id === booking!.packageId);
+    const detail = details[booking.packageId];
 
     const targetRef =
       params.targetType === "DESTINATION"
         ? (pkg?.destinationName ?? booking.packageId)
-        : (detail?.organizer.id ?? "org_default");
+        : detail?.organizer?.id
+          ? resolveOrganizerReviewRef(detail.organizer.id)
+          : "org_default";
 
     const result = mockReviewStore.submitReview({
       bookingId: params.bookingId,

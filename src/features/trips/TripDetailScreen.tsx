@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Badge, Button, Skeleton } from "../../components/ui";
+import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import { sessionStore } from "../onboarding/sessionStore";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
 import { defaultTripsAdapter } from "./mockAdapter";
 import type { TripDetailViewModel, TripsAdapter } from "./types";
@@ -19,26 +21,22 @@ export function TripDetailScreen({
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<TripDetailViewModel | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadData = useCallback(() => {
     if (!bookingId) return;
-
     adapter
       .getTripDetail(bookingId)
       .then((res) => {
-        if (!isMounted) return;
         setIsLoading(false);
         setData(res);
       })
       .catch(() => {
-        if (!isMounted) return;
         setIsLoading(false);
       });
-
-    return () => {
-      isMounted = false;
-    };
   }, [bookingId, adapter]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   if (isLoading) {
     return (
@@ -85,6 +83,21 @@ export function TripDetailScreen({
       : undefined;
 
   const isCompleted = booking.status === "COMPLETED";
+  const isPaid = booking.status === "PAID";
+
+  const handleSimulateTripCompletion = () => {
+    const traveler = sessionStore.get().user;
+    if (!traveler || !booking) return;
+
+    const res = mockTransactionStore.completePaidBookingForDemo({
+      travelerId: traveler.id,
+      bookingId: booking.bookingId,
+    });
+
+    if (res.success) {
+      loadData();
+    }
+  };
 
   return (
     <div className="trips-container">
@@ -106,6 +119,57 @@ export function TripDetailScreen({
           </p>
         )}
       </header>
+
+      {/* PROTOTYPE DEMO TRIP COMPLETION SIMULATION */}
+      {isPaid && (
+        <section
+          className="trip-detail-section"
+          aria-label="Simulasi penyelesaian trip demo"
+          style={{
+            border: "1px dashed var(--color-brand-primary)",
+            background: "var(--color-bg-surface-subtle)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "var(--space-3)",
+            }}
+          >
+            <div>
+              <strong
+                style={{
+                  display: "block",
+                  color: "var(--color-brand-primary)",
+                }}
+              >
+                Prototype Demo: Simulasikan Trip Selesai
+              </strong>
+              <p
+                style={{
+                  margin: "0.25rem 0 0",
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                Klik untuk memajukan status pesanan menjadi COMPLETED agar dapat
+                menguji alur ulasan destinasi & EO.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={handleSimulateTripCompletion}
+            >
+              Simulasikan Trip Selesai &rarr;
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* COMPLETED TRIP: Review Section */}
       {isCompleted && (

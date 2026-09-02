@@ -111,6 +111,66 @@
   padding: var(--space-6) var(--space-4);
 }
 
+.traveler-public-shell--opening {
+  position: relative;
+  color: var(--color-sand-50);
+  background: var(--color-forest-950);
+}
+
+.traveler-public-shell--opening .public-header {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  color: var(--color-sand-50);
+  background: transparent;
+  border-bottom: 0;
+  animation: public-header-enter 480ms var(--ease-standard) both;
+}
+
+.traveler-public-shell--opening .brand-mark,
+.traveler-public-shell--opening .brand-mark span {
+  color: var(--color-sand-50);
+}
+
+.traveler-public-shell--opening .public-header__menu {
+  color: var(--color-sand-50);
+  background: rgb(15 33 23 / 58%);
+  border-color: rgb(251 248 240 / 38%);
+}
+
+.traveler-public-shell--opening .public-navigation {
+  background: rgb(15 33 23 / 96%);
+  border-color: rgb(251 248 240 / 18%);
+}
+
+.traveler-public-shell--opening .public-navigation > a {
+  color: rgb(251 248 240 / 86%);
+}
+
+.traveler-public-shell--opening .public-navigation > a:hover,
+.traveler-public-shell--opening .public-navigation > a[aria-current="page"] {
+  color: var(--color-stone-0);
+  background: rgb(251 248 240 / 10%);
+}
+
+.traveler-public-shell--opening .public-navigation .public-navigation__auth,
+.traveler-public-shell--opening
+  .public-navigation
+  .public-navigation__auth:hover,
+.traveler-public-shell--opening
+  .public-navigation
+  .public-navigation__auth[aria-current="page"] {
+  color: var(--color-forest-950);
+  background: var(--color-sand-50);
+}
+
+.traveler-public-shell--opening .public-content {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
 .traveler-app-shell {
   padding-bottom: calc(var(--nav-bottom-height) + env(safe-area-inset-bottom));
 }
@@ -433,6 +493,24 @@
     margin-left: var(--space-2);
   }
 
+  .traveler-public-shell--opening .public-navigation,
+  .traveler-public-shell--opening .public-navigation[data-open] {
+    background: transparent;
+    border: 0;
+  }
+
+  .traveler-public-shell--opening .public-navigation > a {
+    min-height: 2.5rem;
+    padding-inline: var(--space-4);
+  }
+
+  .traveler-public-shell--opening .public-navigation .public-navigation__auth {
+    min-width: 5.25rem;
+    margin-left: var(--space-3);
+    border: 1px solid rgb(251 248 240 / 52%);
+    border-radius: var(--radius-pill);
+  }
+
   .public-content,
   .traveler-app-content {
     padding: var(--space-8);
@@ -486,7 +564,25 @@
   }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes public-header-enter {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .traveler-public-shell--opening .public-header {
+    animation: none;
+  }
+
   .workspace-sidebar {
     transition: none;
   }

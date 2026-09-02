@@ -6,13 +6,20 @@ import "./shells.css";
 
 export interface TravelerPublicShellProps {
   children?: ReactNode;
+  variant?: "default" | "opening";
 }
 
-export function TravelerPublicShell({ children }: TravelerPublicShellProps) {
+export function TravelerPublicShell({
+  children,
+  variant = "default",
+}: TravelerPublicShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const opening = variant === "opening";
 
   return (
-    <div className="traveler-public-shell">
+    <div
+      className={`traveler-public-shell${opening ? " traveler-public-shell--opening" : ""}`}
+    >
       <header className="public-header">
         <Link className="brand-mark" to="/" aria-label="JedaIn, halaman utama">
           JedaIn<span aria-hidden="true">.</span>
@@ -34,15 +41,16 @@ export function TravelerPublicShell({ children }: TravelerPublicShellProps) {
           data-open={menuOpen || undefined}
           aria-label="Navigasi publik"
         >
-          <NavLink to="/explore">Explore</NavLink>
-          <a href="/#tentang">Tentang JedaIn</a>
-          <NavLink to="/partner">Untuk Partner</NavLink>
+          <NavLink to="/explore">{opening ? "Jelajahi" : "Explore"}</NavLink>
+          {opening && <a href="/#cara-kerja">Cara Kerja</a>}
+          <a href="/#tentang">{opening ? "Tentang" : "Tentang JedaIn"}</a>
+          {!opening && <NavLink to="/partner">Untuk Partner</NavLink>}
           <Link
             className="public-navigation__auth"
             to="/login"
             onClick={() => setMenuOpen(false)}
           >
-            Masuk / Daftar
+            {opening ? "Masuk" : "Masuk / Daftar"}
           </Link>
         </nav>
       </header>

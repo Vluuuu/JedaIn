@@ -57,6 +57,7 @@ import {
 } from "./features/eo";
 import { ExploreScreen } from "./features/explore";
 import { HomeScreen } from "./features/home";
+import { OpeningHero } from "./features/landing";
 import {
   OnboardingRouteGuard,
   TravelerConsentScreen,
@@ -80,8 +81,8 @@ const placeholderTravelerRoutes = [
 export function App() {
   return (
     <Routes>
-      <Route element={<TravelerPublicShell />}>
-        <Route index element={<PublicLandingPlaceholder />} />
+      <Route element={<TravelerPublicShell variant="opening" />}>
+        <Route index element={<OpeningHero />} />
       </Route>
 
       <Route element={<DistractionFreeShell />}>
@@ -299,22 +300,6 @@ export function App() {
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
-  );
-}
-
-function PublicLandingPlaceholder() {
-  return (
-    <section className="landing-placeholder">
-      <p className="eyebrow">JedaIn</p>
-      <h1>Temukan jeda yang benar-benar kamu butuhkan.</h1>
-      <p>
-        Public shell sudah siap. Konten landing akan hadir pada issue terpisah.
-      </p>
-      <div className="landing-placeholder__actions">
-        <Link to="/login">Mulai Cari Jedamu</Link>
-        <Link to="/explore">Explore</Link>
-      </div>
-    </section>
   );
 }
 

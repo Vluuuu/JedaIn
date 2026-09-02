@@ -2,6 +2,10 @@ import { useState } from "react";
 import { Badge, Button } from "../../components/ui";
 import { mockApplicationStore } from "../eo/mockApplicationStore";
 import { mockDestinationStore } from "../eo/mockDestinationStore";
+import {
+  resolveDestinationReviewRef,
+  resolveOrganizerReviewRef,
+} from "../identity/identityResolvers";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockAdminDecisionService } from "./mockAdminDecisionService";
 import { mockComplaintStore } from "./mockComplaintStore";
@@ -20,8 +24,7 @@ export function AdminTrustStatusScreen() {
   const allComplaints = mockComplaintStore.getAll();
 
   const eoEntities: TrustEntitySummary[] = eoApps.map((app) => {
-    const orgRef =
-      app.identityId === "eo_jeda_alam" ? "org_lereng_batu" : app.identityId;
+    const orgRef = resolveOrganizerReviewRef(app.identityId);
     const reviews = mockReviewStore.getReviewsForOrganizer(orgRef);
     const avgRating =
       reviews.length > 0
@@ -56,7 +59,8 @@ export function AdminTrustStatusScreen() {
 
   // Collect Destination entities from mockDestinationStore
   const destEntities: TrustEntitySummary[] = allDestinations.map((d) => {
-    const reviews = mockReviewStore.getReviewsForDestination(d.name);
+    const destRef = resolveDestinationReviewRef(d);
+    const reviews = mockReviewStore.getReviewsForDestination(destRef);
     const avgRating =
       reviews.length > 0
         ? (

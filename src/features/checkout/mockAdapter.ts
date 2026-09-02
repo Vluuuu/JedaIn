@@ -1,12 +1,14 @@
 import type { AuthUser } from "../auth/types";
 import { mockContactVerificationStore } from "../contactVerification/mockContactVerificationStore";
+import {
+  getCombinedCatalogPackages,
+  getCombinedPackageDetails,
+} from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
-import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import type {
   PackageDetailSource,
   PackageSessionPreview,
 } from "../packageDetail/types";
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import type { PackageRecommendationSource } from "../recommendation/types";
 import { mockTransactionStore } from "./mockTransactionStore";
 import type {
@@ -33,8 +35,8 @@ export interface MockCheckoutAdapterOptions {
 }
 
 export class MockCheckoutAdapter implements CheckoutAdapter {
-  private packages: PackageRecommendationSource[];
-  private details: Record<string, PackageDetailSource>;
+  private explicitPackages?: PackageRecommendationSource[];
+  private explicitDetails?: Record<string, PackageDetailSource>;
   private sessionOverrides: Record<string, PackageSessionPreview[]>;
   private travelerOverride?: AuthUser | null;
   private contactRequirementOverride?: CheckoutContactRequirement;
@@ -46,8 +48,8 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
   private errorMessage: string;
 
   constructor(options: MockCheckoutAdapterOptions = {}) {
-    this.packages = options.packages ?? MOCK_RECOMMENDATION_PACKAGES;
-    this.details = options.details ?? MOCK_PACKAGE_DETAILS;
+    this.explicitPackages = options.packages;
+    this.explicitDetails = options.details;
     this.sessionOverrides = options.sessionOverrides ?? {};
     this.travelerOverride = options.travelerOverride;
     this.contactRequirementOverride = options.contactRequirementOverride;
@@ -57,6 +59,14 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
     this.failLoadCount = options.failLoadCount ?? 0;
     this.failSubmitCount = options.failSubmitCount ?? 0;
     this.errorMessage = options.errorMessage ?? "Checkout belum bisa dimuat.";
+  }
+
+  private resolvePackages(): PackageRecommendationSource[] {
+    return this.explicitPackages ?? getCombinedCatalogPackages();
+  }
+
+  private resolveDetails(): Record<string, PackageDetailSource> {
+    return this.explicitDetails ?? getCombinedPackageDetails();
   }
 
   async getCheckout(sessionId: string): Promise<CheckoutViewModel> {
@@ -69,13 +79,16 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       throw new Error(this.errorMessage);
     }
 
+    const packages = this.resolvePackages();
+    const details = this.resolveDetails();
+
     // 1. Find session across all package details
     let foundPkg: PackageRecommendationSource | undefined;
     let foundDetail: PackageDetailSource | undefined;
     let foundSession: PackageSessionPreview | undefined;
 
-    for (const [pkgId, detail] of Object.entries(this.details)) {
-      const pkg = this.packages.find((p) => p.id === pkgId);
+    for (const [pkgId, detail] of Object.entries(details)) {
+      const pkg = packages.find((p) => p.id === pkgId);
       if (!pkg) continue;
 
       // Validate package mapping consistency
@@ -285,13 +298,16 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
+    const packages = this.resolvePackages();
+    const details = this.resolveDetails();
+
     // 6. Latest Session/package/status/exact-price/capacity revalidation
     let foundPkg: PackageRecommendationSource | undefined;
     let foundDetail: PackageDetailSource | undefined;
     let foundSession: PackageSessionPreview | undefined;
 
-    for (const [pkgId, detail] of Object.entries(this.details)) {
-      const pkg = this.packages.find((p) => p.id === pkgId);
+    for (const [pkgId, detail] of Object.entries(details)) {
+      const pkg = packages.find((p) => p.id === pkgId);
       if (!pkg) continue;
 
       if (detail.packageId !== pkg.id) continue;

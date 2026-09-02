@@ -13,7 +13,7 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
     QUIZ_DURATION_OPTIONS.find((d) => d.value === packageData.durationType)
       ?.label ?? packageData.durationType;
 
-  const visual = getPackageVisual(packageData.id);
+  const visual = getPackageVisual(packageData.id, packageData.destinationName);
   const formattedPrice = `Rp${packageData.pricePerPerson.toLocaleString("id-ID")}`;
 
   return (
@@ -31,7 +31,9 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
               : "Terverifikasi Dasar"}
           </Badge>
           <span className="explore-package-card__rating-pill">
-            ★ {packageData.rating.toFixed(2)}
+            {packageData.rating !== undefined && packageData.rating !== null
+              ? `★ ${packageData.rating.toFixed(1)}`
+              : "Belum ada rating"}
           </span>
         </div>
       </div>

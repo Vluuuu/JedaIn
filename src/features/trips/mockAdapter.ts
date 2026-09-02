@@ -1,8 +1,10 @@
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import {
+  getCombinedCatalogPackages,
+  getCombinedPackageDetails,
+} from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
-import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import type { PackageDetailSource } from "../packageDetail/types";
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import type { PackageRecommendationSource } from "../recommendation/types";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { createDemoTravelerHistory } from "./demoHistory";
@@ -21,24 +23,34 @@ export interface MockTripsAdapterOptions {
 }
 
 export class MockTripsAdapter implements TripsAdapter {
-  private packages: PackageRecommendationSource[];
-  private details: Record<string, PackageDetailSource>;
+  private explicitPackages?: PackageRecommendationSource[];
+  private explicitDetails?: Record<string, PackageDetailSource>;
   private delayMs: number;
   private now: () => Date;
 
   constructor(options: MockTripsAdapterOptions = {}) {
-    this.packages = options.packages ?? MOCK_RECOMMENDATION_PACKAGES;
-    this.details = options.details ?? MOCK_PACKAGE_DETAILS;
+    this.explicitPackages = options.packages;
+    this.explicitDetails = options.details;
     this.delayMs = options.delayMs ?? 0;
     this.now = options.now ?? (() => new Date());
+  }
+
+  private resolvePackages(): PackageRecommendationSource[] {
+    return this.explicitPackages ?? getCombinedCatalogPackages();
+  }
+
+  private resolveDetails(): Record<string, PackageDetailSource> {
+    return this.explicitDetails ?? getCombinedPackageDetails();
   }
 
   private resolveCardItem(
     booking: import("../checkout/types").BookingRecord,
     overrideSession?: import("../packageDetail/types").PackageSessionPreview,
   ): TripCardItem {
-    const pkg = this.packages.find((p) => p.id === booking.packageId);
-    const detail = this.details[booking.packageId];
+    const packages = this.resolvePackages();
+    const details = this.resolveDetails();
+    const pkg = packages.find((p) => p.id === booking.packageId);
+    const detail = details[booking.packageId];
     const session =
       overrideSession ??
       detail?.upcomingSessionPreviews?.find(
@@ -133,8 +145,11 @@ export class MockTripsAdapter implements TripsAdapter {
       return null;
     }
 
-    const pkg = this.packages.find((p) => p.id === booking.packageId);
-    const detail = this.details[booking.packageId];
+    const packages = this.resolvePackages();
+    const details = this.resolveDetails();
+
+    const pkg = packages.find((p) => p.id === booking.packageId);
+    const detail = details[booking.packageId];
     const session =
       sessionOverride ??
       detail?.upcomingSessionPreviews?.find(

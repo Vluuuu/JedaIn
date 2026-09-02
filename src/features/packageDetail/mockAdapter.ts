@@ -1,6 +1,8 @@
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
+import {
+  getCombinedCatalogPackages,
+  getCombinedPackageDetails,
+} from "../marketplace/marketplaceAdapter";
 import type { PackageRecommendationSource } from "../recommendation/types";
-import { MOCK_PACKAGE_DETAILS } from "./mockPackageDetails";
 import type {
   PackageDetailAdapter,
   PackageDetailSource,
@@ -19,21 +21,29 @@ export interface MockPackageDetailAdapterOptions {
 }
 
 export class MockPackageDetailAdapter implements PackageDetailAdapter {
-  private packages: PackageRecommendationSource[];
-  private details: Record<string, PackageDetailSource>;
+  private explicitPackages?: PackageRecommendationSource[];
+  private explicitDetails?: Record<string, PackageDetailSource>;
   private sessionOverrides: Record<string, PackageSessionPreview[]>;
   private delayMs: number;
   private failCount: number;
   private errorMessage: string;
 
   constructor(options: MockPackageDetailAdapterOptions = {}) {
-    this.packages = options.packages ?? MOCK_RECOMMENDATION_PACKAGES;
-    this.details = options.details ?? MOCK_PACKAGE_DETAILS;
+    this.explicitPackages = options.packages;
+    this.explicitDetails = options.details;
     this.sessionOverrides = options.sessionOverrides ?? {};
     this.delayMs = options.delayMs ?? 0;
     this.failCount = options.failCount ?? 0;
     this.errorMessage =
       options.errorMessage ?? "Detail experience belum bisa dimuat.";
+  }
+
+  private resolvePackages(): PackageRecommendationSource[] {
+    return this.explicitPackages ?? getCombinedCatalogPackages();
+  }
+
+  private resolveDetails(): Record<string, PackageDetailSource> {
+    return this.explicitDetails ?? getCombinedPackageDetails();
   }
 
   async getPackageDetail(
@@ -49,7 +59,10 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
       throw new Error(this.errorMessage);
     }
 
-    const pkg = this.packages.find((p) => p.id === packageId);
+    const packages = this.resolvePackages();
+    const details = this.resolveDetails();
+
+    const pkg = packages.find((p) => p.id === packageId);
     if (!pkg || pkg.status !== "LIVE") {
       return {
         state: "NOT_FOUND",
@@ -57,7 +70,7 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
       };
     }
 
-    const detail = this.details[packageId];
+    const detail = details[packageId];
     if (!detail) {
       return {
         state: "NOT_FOUND",

@@ -172,7 +172,7 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
             <div
               className="home-hero-card__visual"
               style={{
-                backgroundImage: `url("${getPackageVisual(recPkg.id).svgDataUri}")`,
+                backgroundImage: `url("${getPackageVisual(recPkg.id, recPkg.destinationName).svgDataUri}")`,
               }}
               role="img"
               aria-label={`Ilustrasi suasana ${recPkg.title}`}

@@ -3,6 +3,7 @@ import type { DestinationVerificationRecord } from "../admin/types";
 import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
 import type { DestinationRecord, PartnerUser } from "../eo/types";
+import { resolveDestinationReviewRef } from "../identity/identityResolvers";
 
 export interface AuthenticatedDestinationContext {
   partner: PartnerUser;
@@ -36,10 +37,7 @@ export function resolveAuthenticatedDestinationContext(): AuthenticatedDestinati
 export function getDestinationReviewTargetRef(
   destination: { name: string } | string,
 ): string {
-  if (typeof destination === "string") {
-    return destination;
-  }
-  return destination.name;
+  return resolveDestinationReviewRef(destination);
 }
 
 export function generateUniqueDestinationPartnerId(email: string): string {

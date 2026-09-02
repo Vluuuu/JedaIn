@@ -29,8 +29,8 @@ export interface PackageRecommendationSource {
   activityTags: PreferredActivity[];
   suitableGroupTypes: GroupType[];
   suitableGroupSizeBands: GroupSizeBand[];
-  rating: number;
-  popularityRank: number;
+  rating?: number | null;
+  popularityRank?: number | null;
 }
 
 export type RecommendationState = "LOADING" | "MATCHED" | "FALLBACK" | "ERROR";

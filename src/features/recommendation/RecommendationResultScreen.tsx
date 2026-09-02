@@ -100,7 +100,7 @@ export function RecommendationResultScreen({
   const { state, topRecommendation, alternatives } = result;
   const isFallback = state === "FALLBACK";
   const topPkg = topRecommendation.package;
-  const topVisual = getPackageVisual(topPkg.id);
+  const topVisual = getPackageVisual(topPkg.id, topPkg.destinationName);
   const durationLabel =
     QUIZ_DURATION_OPTIONS.find((d) => d.value === topPkg.durationType)?.label ??
     topPkg.durationType;

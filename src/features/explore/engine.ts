@@ -179,9 +179,12 @@ export function sortPackages(
   switch (sortOption) {
     case "rating":
       return list.sort((a, b) => {
-        if (b.rating !== a.rating) return b.rating - a.rating;
-        if (b.popularityRank !== a.popularityRank)
-          return b.popularityRank - a.popularityRank;
+        const ratingA = a.rating ?? -1;
+        const ratingB = b.rating ?? -1;
+        if (ratingB !== ratingA) return ratingB - ratingA;
+        const popA = a.popularityRank ?? -1;
+        const popB = b.popularityRank ?? -1;
+        if (popB !== popA) return popB - popA;
         return a.title.localeCompare(b.title, "id");
       });
 
@@ -189,16 +192,21 @@ export function sortPackages(
       return list.sort((a, b) => {
         if (a.pricePerPerson !== b.pricePerPerson)
           return a.pricePerPerson - b.pricePerPerson;
-        if (b.rating !== a.rating) return b.rating - a.rating;
+        const ratingA = a.rating ?? -1;
+        const ratingB = b.rating ?? -1;
+        if (ratingB !== ratingA) return ratingB - ratingA;
         return a.title.localeCompare(b.title, "id");
       });
 
     case "popular":
     default:
       return list.sort((a, b) => {
-        if (b.popularityRank !== a.popularityRank)
-          return b.popularityRank - a.popularityRank;
-        if (b.rating !== a.rating) return b.rating - a.rating;
+        const popA = a.popularityRank ?? -1;
+        const popB = b.popularityRank ?? -1;
+        if (popB !== popA) return popB - popA;
+        const ratingA = a.rating ?? -1;
+        const ratingB = b.rating ?? -1;
+        if (ratingB !== ratingA) return ratingB - ratingA;
         return a.title.localeCompare(b.title, "id");
       });
   }

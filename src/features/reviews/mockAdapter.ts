@@ -1,7 +1,13 @@
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import {
+  resolveDestinationReviewRef,
+  resolveOrganizerReviewRef,
+} from "../identity/identityResolvers";
+import {
+  getCombinedCatalogPackages,
+  getCombinedPackageDetails,
+} from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
-import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import { createDemoTravelerHistory } from "../trips/demoHistory";
 import { mockReviewStore, type ReviewTargetType } from "./mockReviewStore";
 import type { ReviewAdapter, TripReviewViewModel } from "./types";
@@ -28,20 +34,39 @@ export class MockReviewAdapter implements ReviewAdapter {
       return null;
     }
 
-    const pkg = MOCK_RECOMMENDATION_PACKAGES.find(
-      (p) => p.id === booking!.packageId,
-    );
-    const detail = MOCK_PACKAGE_DETAILS[booking.packageId];
+    const catalog = getCombinedCatalogPackages();
+    const details = getCombinedPackageDetails();
+
+    const pkg = catalog.find((p) => p.id === booking!.packageId);
+    const detail = details[booking.packageId];
+
+    if (!pkg || !detail) {
+      return null;
+    }
+
+    if (targetType === "DESTINATION") {
+      if (!pkg.destinationName || !pkg.destinationName.trim()) {
+        return null;
+      }
+    } else {
+      if (!detail.organizer?.id || !detail.organizer.id.trim()) {
+        return null;
+      }
+    }
 
     const targetRef =
       targetType === "DESTINATION"
-        ? (pkg?.destinationName ?? booking.packageId)
-        : (detail?.organizer.id ?? "org_default");
+        ? resolveDestinationReviewRef(pkg.destinationName)
+        : resolveOrganizerReviewRef(detail.organizer.id);
+
+    if (!targetRef || !targetRef.trim()) {
+      return null;
+    }
 
     const targetName =
       targetType === "DESTINATION"
-        ? (pkg?.destinationName ?? "Destinasi")
-        : (detail?.organizer.displayName ?? "EO / Guide");
+        ? pkg.destinationName
+        : detail.organizer.displayName;
 
     const existingReviews = mockReviewStore.getReviewsForBooking(bookingId);
     const existingReview = existingReviews.find(
@@ -100,15 +125,46 @@ export class MockReviewAdapter implements ReviewAdapter {
       };
     }
 
-    const pkg = MOCK_RECOMMENDATION_PACKAGES.find(
-      (p) => p.id === booking!.packageId,
-    );
-    const detail = MOCK_PACKAGE_DETAILS[booking.packageId];
+    const catalog = getCombinedCatalogPackages();
+    const details = getCombinedPackageDetails();
+
+    const pkg = catalog.find((p) => p.id === booking!.packageId);
+    const detail = details[booking.packageId];
+
+    if (!pkg || !detail) {
+      return {
+        success: false,
+        message: "Data paket pengalaman tidak ditemukan untuk diulas.",
+      };
+    }
+
+    if (params.targetType === "DESTINATION") {
+      if (!pkg.destinationName || !pkg.destinationName.trim()) {
+        return {
+          success: false,
+          message: "Target ulasan destinasi tidak valid.",
+        };
+      }
+    } else {
+      if (!detail.organizer?.id || !detail.organizer.id.trim()) {
+        return {
+          success: false,
+          message: "Target ulasan penyelenggara (EO) tidak valid.",
+        };
+      }
+    }
 
     const targetRef =
       params.targetType === "DESTINATION"
-        ? (pkg?.destinationName ?? booking.packageId)
-        : (detail?.organizer.id ?? "org_default");
+        ? resolveDestinationReviewRef(pkg.destinationName)
+        : resolveOrganizerReviewRef(detail.organizer.id);
+
+    if (!targetRef || !targetRef.trim()) {
+      return {
+        success: false,
+        message: "Entitas review tidak dapat diverifikasi.",
+      };
+    }
 
     const result = mockReviewStore.submitReview({
       bookingId: params.bookingId,

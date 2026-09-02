@@ -1,8 +1,10 @@
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import {
+  getCombinedCatalogPackages,
+  getCombinedPackageDetails,
+} from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
-import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import type { PackageDetailSource } from "../packageDetail/types";
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import type { PackageRecommendationSource } from "../recommendation/types";
 import type {
   CancelBookingResult,
@@ -22,8 +24,8 @@ export interface MockPendingPaymentAdapterOptions {
 }
 
 export class MockPendingPaymentResolutionAdapter implements PendingPaymentResolutionAdapter {
-  private packages: PackageRecommendationSource[];
-  private details: Record<string, PackageDetailSource>;
+  private explicitPackages?: PackageRecommendationSource[];
+  private explicitDetails?: Record<string, PackageDetailSource>;
   private delayMs: number;
   private failLoadCount: number;
   private failRevalidateCount: number;
@@ -31,13 +33,21 @@ export class MockPendingPaymentResolutionAdapter implements PendingPaymentResolu
   private now: () => Date;
 
   constructor(options: MockPendingPaymentAdapterOptions = {}) {
-    this.packages = options.packages ?? MOCK_RECOMMENDATION_PACKAGES;
-    this.details = options.details ?? MOCK_PACKAGE_DETAILS;
+    this.explicitPackages = options.packages;
+    this.explicitDetails = options.details;
     this.delayMs = options.delayMs ?? 0;
     this.failLoadCount = options.failLoadCount ?? 0;
     this.failRevalidateCount = options.failRevalidateCount ?? 0;
     this.failCancelCount = options.failCancelCount ?? 0;
     this.now = options.now ?? (() => new Date());
+  }
+
+  private resolvePackages(): PackageRecommendationSource[] {
+    return this.explicitPackages ?? getCombinedCatalogPackages();
+  }
+
+  private resolveDetails(): Record<string, PackageDetailSource> {
+    return this.explicitDetails ?? getCombinedPackageDetails();
   }
 
   async getPendingPaymentResolution(
@@ -74,9 +84,12 @@ export class MockPendingPaymentResolutionAdapter implements PendingPaymentResolu
       };
     }
 
+    const packages = this.resolvePackages();
+    const details = this.resolveDetails();
+
     // Resolve existing package & session
-    const pkg = this.packages.find((p) => p.id === activeBooking.packageId);
-    const detail = this.details[activeBooking.packageId];
+    const pkg = packages.find((p) => p.id === activeBooking.packageId);
+    const detail = details[activeBooking.packageId];
     const session = detail?.upcomingSessionPreviews?.find(
       (s) => s.sessionId === activeBooking.sessionId,
     );

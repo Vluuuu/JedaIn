@@ -1,10 +1,12 @@
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
-import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
+import {
+  getCombinedCatalogPackages,
+  getCombinedPackageDetails,
+} from "../marketplace/marketplaceAdapter";
 import type {
   PackageDetailSource,
   PackageSessionPreview,
 } from "../packageDetail/types";
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import type { PackageRecommendationSource } from "../recommendation/types";
 import type {
   SessionSelectionAdapter,
@@ -25,8 +27,8 @@ export interface MockSessionSelectionAdapterOptions {
 }
 
 export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
-  private packages: PackageRecommendationSource[];
-  private details: Record<string, PackageDetailSource>;
+  private explicitPackages?: PackageRecommendationSource[];
+  private explicitDetails?: Record<string, PackageDetailSource>;
   private sessionOverrides: Record<string, PackageSessionPreview[]>;
   private delayMs: number;
   private failLoadCount: number;
@@ -35,14 +37,22 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
   private errorMessage: string;
 
   constructor(options: MockSessionSelectionAdapterOptions = {}) {
-    this.packages = options.packages ?? MOCK_RECOMMENDATION_PACKAGES;
-    this.details = options.details ?? MOCK_PACKAGE_DETAILS;
+    this.explicitPackages = options.packages;
+    this.explicitDetails = options.details;
     this.sessionOverrides = options.sessionOverrides ?? {};
     this.delayMs = options.delayMs ?? 0;
     this.failLoadCount = options.failLoadCount ?? 0;
     this.failValidationCount = options.failValidationCount ?? 0;
     this.validationFailureOverride = options.validationFailureOverride ?? {};
     this.errorMessage = options.errorMessage ?? "Jadwal belum bisa dimuat.";
+  }
+
+  private resolvePackages(): PackageRecommendationSource[] {
+    return this.explicitPackages ?? getCombinedCatalogPackages();
+  }
+
+  private resolveDetails(): Record<string, PackageDetailSource> {
+    return this.explicitDetails ?? getCombinedPackageDetails();
   }
 
   private resolveEffectiveSessions(
@@ -80,7 +90,10 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
       throw new Error(this.errorMessage);
     }
 
-    const pkg = this.packages.find((p) => p.id === packageId);
+    const packages = this.resolvePackages();
+    const details = this.resolveDetails();
+
+    const pkg = packages.find((p) => p.id === packageId);
     if (!pkg || pkg.status !== "LIVE") {
       return {
         state: "NOT_FOUND",
@@ -89,7 +102,7 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
       };
     }
 
-    const detail = this.details[packageId];
+    const detail = details[packageId];
     if (!detail) {
       return {
         state: "NOT_FOUND",
@@ -150,7 +163,8 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
       };
     }
 
-    const detail = this.details[packageId];
+    const details = this.resolveDetails();
+    const detail = details[packageId];
     const rawSessions =
       this.sessionOverrides[packageId] ?? detail?.upcomingSessionPreviews ?? [];
 

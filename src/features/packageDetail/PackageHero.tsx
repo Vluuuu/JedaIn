@@ -7,7 +7,7 @@ export interface PackageHeroProps {
 }
 
 export function PackageHero({ packageData }: PackageHeroProps) {
-  const visual = getPackageVisual(packageData.id);
+  const visual = getPackageVisual(packageData.id, packageData.destinationName);
 
   return (
     <header className="package-detail-hero">
@@ -24,7 +24,9 @@ export function PackageHero({ packageData }: PackageHeroProps) {
             : "Terverifikasi Dasar"}
         </Badge>
         <span className="package-detail-hero__rating-pill">
-          ★ {packageData.rating.toFixed(2)}
+          {packageData.rating !== undefined && packageData.rating !== null
+            ? `★ ${packageData.rating.toFixed(1)}`
+            : "Belum ada rating"}
         </span>
       </div>
     </header>

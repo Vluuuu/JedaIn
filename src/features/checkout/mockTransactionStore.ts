@@ -319,6 +319,43 @@ export const mockTransactionStore = {
     return { success: true, booking };
   },
 
+  completePaidBookingForDemo(params: {
+    travelerId: string;
+    bookingId: string;
+    nowMs?: number;
+  }): {
+    success: boolean;
+    reason?: "NOT_FOUND" | "INVALID_OWNER" | "INVALID_STATE";
+    booking?: BookingRecord;
+  } {
+    const nowMs = params.nowMs ?? Date.now();
+    this.reconcileExpiredPendingPayments(nowMs);
+
+    const booking = bookings.find((b) => b.bookingId === params.bookingId);
+    if (!booking) {
+      return { success: false, reason: "NOT_FOUND" };
+    }
+
+    if (booking.travelerId !== params.travelerId) {
+      return { success: false, reason: "INVALID_OWNER" };
+    }
+
+    // Idempotent for already COMPLETED
+    if (booking.status === "COMPLETED") {
+      return { success: true, booking };
+    }
+
+    // Only PAID bookings can be completed
+    if (booking.status !== "PAID") {
+      return { success: false, reason: "INVALID_STATE", booking };
+    }
+
+    booking.status = "COMPLETED";
+    booking.completedAt = new Date(nowMs).toISOString();
+
+    return { success: true, booking };
+  },
+
   getIdempotentTransaction(
     idempotencyKey: string,
     input?: {

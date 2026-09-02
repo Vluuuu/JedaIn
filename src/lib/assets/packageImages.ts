@@ -315,24 +315,37 @@ export const DESTINATION_VISUALS: Record<string, VisualAssetData> = {
   },
 };
 
-export function getPackageVisual(packageId: string): VisualAssetData {
-  return (
-    PACKAGE_VISUALS[packageId] || {
-      id: packageId,
-      title: "JedaIn Experience",
-      themeColor: "#285e3d",
-      svgDataUri: PACKAGE_VISUALS.slow_green_day.svgDataUri,
-    }
-  );
+export const NEUTRAL_JEDAIN_VISUAL: VisualAssetData = {
+  id: "neutral_jedain_placeholder",
+  title: "JedaIn Mindful Experience",
+  themeColor: "#285e3d",
+  svgDataUri: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+    <defs>
+      <linearGradient id="neutralSky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="%23F4EFE6"/>
+        <stop offset="100%" stop-color="%23E7DFC6"/>
+      </linearGradient>
+    </defs>
+    <rect width="800" height="500" fill="url(%23neutralSky)"/>
+    <circle cx="400" cy="220" r="80" fill="%23285E3D" opacity="0.12"/>
+    <path d="M0 380 Q400 300 800 380 L800 500 L0 500 Z" fill="%23285E3D" opacity="0.18"/>
+    <text x="400" y="230" font-family="system-ui, sans-serif" font-size="28" font-weight="600" fill="%23285E3D" text-anchor="middle" opacity="0.8">JedaIn</text>
+  </svg>`,
+};
+
+export function getPackageVisual(
+  packageId: string,
+  destinationName?: string,
+): VisualAssetData {
+  if (PACKAGE_VISUALS[packageId]) {
+    return PACKAGE_VISUALS[packageId];
+  }
+  if (destinationName && DESTINATION_VISUALS[destinationName]) {
+    return DESTINATION_VISUALS[destinationName];
+  }
+  return NEUTRAL_JEDAIN_VISUAL;
 }
 
 export function getDestinationVisual(destinationName: string): VisualAssetData {
-  return (
-    DESTINATION_VISUALS[destinationName] || {
-      id: destinationName,
-      title: destinationName,
-      themeColor: "#285e3d",
-      svgDataUri: PACKAGE_VISUALS.slow_green_day.svgDataUri,
-    }
-  );
+  return DESTINATION_VISUALS[destinationName] || NEUTRAL_JEDAIN_VISUAL;
 }

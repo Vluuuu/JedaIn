@@ -239,10 +239,14 @@ export function evaluateRecommendations(
       if (grpA !== grpB) return grpB - grpA;
 
       // 5. Rating
-      if (a.rating !== b.rating) return b.rating - a.rating;
+      const ratA = a.rating ?? -1;
+      const ratB = b.rating ?? -1;
+      if (ratA !== ratB) return ratB - ratA;
 
       // 6. Popularity
-      return b.popularityRank - a.popularityRank;
+      const popA = a.popularityRank ?? -1;
+      const popB = b.popularityRank ?? -1;
+      return popB - popA;
     });
 
     const topPkg = sorted[0];
@@ -309,10 +313,14 @@ export function evaluateRecommendations(
     if (grpA !== grpB) return grpB - grpA;
 
     // 7. Rating
-    if (a.rating !== b.rating) return b.rating - a.rating;
+    const ratA = a.rating ?? -1;
+    const ratB = b.rating ?? -1;
+    if (ratA !== ratB) return ratB - ratA;
 
     // 8. Popularity
-    return b.popularityRank - a.popularityRank;
+    const popA = a.popularityRank ?? -1;
+    const popB = b.popularityRank ?? -1;
+    return popB - popA;
   });
 
   const topFallback = fallbackSorted[0];

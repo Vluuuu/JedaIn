@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { resetCompetitionDemoState } from "../demo/demoReset";
 import { adminSessionStore } from "./adminSessionStore";
 import "./admin.css";
 
 export function AdminLoginScreen() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("admin@jedain.id");
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +19,12 @@ export function AdminLoginScreen() {
   const handleDemoQuickLogin = () => {
     adminSessionStore.loginAsDemoAdmin();
     navigate("/admin");
+  };
+
+  const handleResetDemo = () => {
+    resetCompetitionDemoState();
+    setResetMessage("State demo berhasil direset ke kondisi awal baseline.");
+    setTimeout(() => setResetMessage(null), 3500);
   };
 
   return (
@@ -52,14 +60,42 @@ export function AdminLoginScreen() {
         >
           Masuk langsung sebagai Administrator Tim Kurasi JedaIn.
         </p>
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          onClick={handleDemoQuickLogin}
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--space-2)",
+            alignItems: "center",
+          }}
         >
-          Masuk sebagai Admin Demo
-        </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            onClick={handleDemoQuickLogin}
+          >
+            Masuk sebagai Admin Demo
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleResetDemo}
+          >
+            ↺ Reset Demo
+          </Button>
+        </div>
+        {resetMessage && (
+          <div
+            style={{
+              marginTop: "var(--space-2)",
+              fontSize: "var(--font-size-caption)",
+              color: "var(--color-brand-primary)",
+              fontWeight: 600,
+            }}
+          >
+            {resetMessage}
+          </div>
+        )}
       </div>
 
       <form

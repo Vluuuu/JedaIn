@@ -275,6 +275,36 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     );
   });
 
+  it("renders SIGN IN / SIGN UP tabs and toggles active state cleanly", async () => {
+    const view = await renderScreen();
+
+    const signInTab = view.querySelector<HTMLButtonElement>("#tab-sign-in");
+    const signUpTab = view.querySelector<HTMLButtonElement>("#tab-sign-up");
+
+    expect(signInTab).not.toBeNull();
+    expect(signUpTab).not.toBeNull();
+    expect(signInTab?.getAttribute("aria-selected")).toBe("true");
+    expect(signUpTab?.getAttribute("aria-selected")).toBe("false");
+    expect(view.textContent).toContain("Masuk ke JedaIn");
+
+    // Click SIGN UP tab
+    await act(() => signUpTab?.click());
+
+    expect(signInTab?.getAttribute("aria-selected")).toBe("false");
+    expect(signUpTab?.getAttribute("aria-selected")).toBe("true");
+    expect(view.textContent).toContain("Daftar JedaIn");
+
+    // Click bottom switch link to return to SIGN IN
+    const switchBtn = view.querySelector<HTMLButtonElement>(
+      ".auth-inline-switch-btn",
+    );
+    expect(switchBtn?.textContent).toContain("Masuk ke akun");
+    await act(() => switchBtn?.click());
+
+    expect(signInTab?.getAttribute("aria-selected")).toBe("true");
+    expect(view.textContent).toContain("Masuk ke JedaIn");
+  });
+
   it("shows email magic link only when enableEmailAuth is true", async () => {
     const viewDefault = await renderScreen({ enableEmailAuth: false });
     expect(viewDefault.querySelector('input[type="email"]')).toBeNull();

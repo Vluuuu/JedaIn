@@ -34,6 +34,7 @@ export function TravelerLoginScreen({
 }: TravelerLoginScreenProps) {
   const navigate = useNavigate();
 
+  const [tabMode, setTabMode] = useState<"SIGN_IN" | "SIGN_UP">("SIGN_IN");
   const [authState, setAuthState] = useState<AuthState>("IDLE");
   const [activeMethod, setActiveMethod] = useState<AuthMethod>(null);
 
@@ -170,170 +171,246 @@ export function TravelerLoginScreen({
 
   return (
     <div className="auth-screen">
-      <div className="auth-stage">
-        {/* Left Visual Atmosphere Panel (Desktop) */}
-        <section className="auth-visual" aria-hidden="true">
-          <img
-            src={LOGIN_ATMOSPHERE_VISUAL.svgDataUri}
-            alt=""
-            className="auth-visual__image"
-            loading="eager"
-            width="1000"
-            height="800"
-          />
-          <div className="auth-visual__scrim" />
-          <div className="auth-visual__grain" />
-          <div className="auth-visual__inner">
-            <p className="auth-visual__phrase">Jeda kamu dimulai di sini.</p>
+      {/* Immersive Nature / Landscape Background Layer */}
+      <div className="auth-screen__backdrop" aria-hidden="true">
+        <img
+          src={LOGIN_ATMOSPHERE_VISUAL.svgDataUri}
+          alt=""
+          className="auth-screen__backdrop-image"
+          loading="eager"
+          width="1000"
+          height="800"
+        />
+        <div className="auth-screen__backdrop-scrim" />
+        <div className="auth-screen__backdrop-grain" />
+      </div>
+
+      {/* Floating Centered Card Container */}
+      <div className="auth-screen__container">
+        {/* Top Floating Return Action */}
+        <header className="auth-screen__topbar">
+          <Link
+            to="/"
+            className="auth-back-action"
+            aria-label="Kembali ke halaman awal"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              width="18"
+              height="18"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M12.5 15L7.5 10L12.5 5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Kembali ke Beranda</span>
+          </Link>
+        </header>
+
+        {/* The Centered Floating Auth Card */}
+        <main className="auth-card" aria-labelledby="auth-card-title">
+          {/* Brand Logo inside Card Header */}
+          <div className="auth-card__brand">
+            <Link to="/" aria-label="JedaIn">
+              <img
+                src={JedaInLogo}
+                alt="JedaIn"
+                className="auth-card__logo"
+                width="1407"
+                height="768"
+                loading="eager"
+              />
+            </Link>
+            <span className="auth-card__tagline">
+              Travel &amp; Mindful Living
+            </span>
           </div>
-        </section>
 
-        {/* Right Authentication Canvas */}
-        <main className="auth-canvas">
-          <div className="auth-canvas__inner">
-            {/* Top Navigation & Brand Header */}
-            <header className="auth-canvas__topbar">
-              <Link
-                to="/"
-                className="auth-back-action"
-                aria-label="Kembali ke halaman awal"
-              >
-                <svg
-                  viewBox="0 0 20 20"
-                  width="18"
-                  height="18"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M12.5 15L7.5 10L12.5 5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span>Beranda</span>
-              </Link>
+          {/* Segmented Top Switch / Auth Tabs: SIGN IN vs SIGN UP */}
+          <div
+            className="auth-tabs"
+            role="tablist"
+            aria-label="Metode autentikasi"
+          >
+            <button
+              type="button"
+              role="tab"
+              id="tab-sign-in"
+              aria-selected={tabMode === "SIGN_IN"}
+              aria-controls="auth-panel"
+              className={`auth-tab ${tabMode === "SIGN_IN" ? "auth-tab--active" : ""}`}
+              onClick={() => {
+                setTabMode("SIGN_IN");
+                setGoogleError(undefined);
+              }}
+            >
+              SIGN IN
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-sign-up"
+              aria-selected={tabMode === "SIGN_UP"}
+              aria-controls="auth-panel"
+              className={`auth-tab ${tabMode === "SIGN_UP" ? "auth-tab--active" : ""}`}
+              onClick={() => {
+                setTabMode("SIGN_UP");
+                setGoogleError(undefined);
+              }}
+            >
+              SIGN UP
+            </button>
+          </div>
 
-              <Link to="/" className="auth-canvas__brand" aria-label="JedaIn">
-                <img
-                  src={JedaInLogo}
-                  alt="JedaIn"
-                  className="auth-canvas__logo"
-                  width="1407"
-                  height="768"
-                  loading="eager"
-                />
-              </Link>
+          {/* Card Content / Form Area */}
+          <div
+            id="auth-panel"
+            role="tabpanel"
+            aria-labelledby={
+              tabMode === "SIGN_IN" ? "tab-sign-in" : "tab-sign-up"
+            }
+            className="auth-card__content"
+          >
+            <header className="auth-header">
+              <h1 id="auth-card-title">
+                {tabMode === "SIGN_IN" ? "Masuk ke JedaIn" : "Daftar JedaIn"}
+              </h1>
+              <p>
+                {tabMode === "SIGN_IN"
+                  ? "Masuk atau daftar untuk menemukan experience yang lebih personal."
+                  : "Mulai perjalanan mindful travel dan temukan ritme jedamu."}
+              </p>
             </header>
 
-            {/* Auth Form Body */}
-            <div className="auth-canvas__content">
-              <header className="auth-header">
-                <h1>Masuk ke JedaIn</h1>
-                <p>
-                  Masuk atau daftar untuk menemukan experience yang lebih
-                  personal.
-                </p>
-              </header>
+            {googleError && (
+              <div className="auth-error-banner" role="alert">
+                <p>{googleError}</p>
+              </div>
+            )}
 
-              {googleError && (
-                <div className="auth-error-banner" role="alert">
-                  <p>{googleError}</p>
-                </div>
+            <div className="auth-actions">
+              {/* Primary Auth Method: Phone OTP Form */}
+              <PhoneOtpForm
+                phone={phone}
+                onPhoneChange={(val) => {
+                  setPhone(val);
+                  if (phoneError) setPhoneError(undefined);
+                }}
+                onRequestOtp={handleRequestPhoneOtp}
+                onVerifyOtp={handleVerifyPhoneOtp}
+                onResetToPhone={handleResetToPhone}
+                isOtpSent={
+                  Boolean(otpSession) ||
+                  authState === "OTP_SENT" ||
+                  authState === "OTP_VERIFYING"
+                }
+                isSubmitting={
+                  activeMethod === "PHONE_REQUEST" ||
+                  activeMethod === "PHONE_VERIFY"
+                }
+                isDisabled={isAnyLoading}
+                error={phoneError}
+              />
+
+              {/* Optional Email Auth */}
+              {enableEmailAuth && (
+                <>
+                  <AuthMethodDivider label="atau dengan email" />
+                  <EmailAuthForm
+                    email={email}
+                    onEmailChange={(val) => {
+                      setEmail(val);
+                      if (emailError) setEmailError(undefined);
+                    }}
+                    onRequestEmailLink={handleRequestEmailLink}
+                    isSubmitting={activeMethod === "EMAIL"}
+                    isDisabled={isAnyLoading}
+                    isSent={emailSent}
+                    error={emailError}
+                  />
+                </>
               )}
 
-              <div className="auth-actions">
-                {/* Secondary Auth Method: Google OAuth */}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="lg"
-                  className="auth-google-button"
-                  onClick={handleGoogleLogin}
-                  loading={activeMethod === "GOOGLE"}
-                  loadingLabel="Menghubungkan Google..."
-                  disabled={isAnyLoading}
-                >
-                  <GoogleIcon />
-                  <span>Lanjut dengan Google</span>
-                </Button>
+              {/* Divider for Social Auth */}
+              <AuthMethodDivider label="atau lanjutkan dengan" />
 
-                <AuthMethodDivider />
-
-                {/* Primary Auth Method: Phone OTP */}
-                <PhoneOtpForm
-                  phone={phone}
-                  onPhoneChange={(val) => {
-                    setPhone(val);
-                    if (phoneError) setPhoneError(undefined);
-                  }}
-                  onRequestOtp={handleRequestPhoneOtp}
-                  onVerifyOtp={handleVerifyPhoneOtp}
-                  onResetToPhone={handleResetToPhone}
-                  isOtpSent={
-                    Boolean(otpSession) ||
-                    authState === "OTP_SENT" ||
-                    authState === "OTP_VERIFYING"
-                  }
-                  isSubmitting={
-                    activeMethod === "PHONE_REQUEST" ||
-                    activeMethod === "PHONE_VERIFY"
-                  }
-                  isDisabled={isAnyLoading}
-                  error={phoneError}
-                />
-
-                {/* Optional Auth Method: Email Magic Link */}
-                {enableEmailAuth && (
-                  <>
-                    <AuthMethodDivider label="atau dengan email" />
-                    <EmailAuthForm
-                      email={email}
-                      onEmailChange={(val) => {
-                        setEmail(val);
-                        if (emailError) setEmailError(undefined);
-                      }}
-                      onRequestEmailLink={handleRequestEmailLink}
-                      isSubmitting={activeMethod === "EMAIL"}
-                      isDisabled={isAnyLoading}
-                      isSent={emailSent}
-                      error={emailError}
-                    />
-                  </>
-                )}
-              </div>
-
-              {/* Legal & Partner Links */}
-              <footer className="auth-footer">
-                <p className="auth-footer__legal">
-                  Dengan masuk atau mendaftar, kamu menyetujui{" "}
-                  <button
-                    type="button"
-                    className="auth-legal-link"
-                    onClick={() => setLegalModal("terms")}
-                  >
-                    Syarat &amp; Ketentuan
-                  </button>{" "}
-                  serta{" "}
-                  <button
-                    type="button"
-                    className="auth-legal-link"
-                    onClick={() => setLegalModal("privacy")}
-                  >
-                    Kebijakan Privasi
-                  </button>{" "}
-                  JedaIn.
-                </p>
-
-                <div className="auth-footer__partner">
-                  <Link to="/partner" className="auth-partner-link">
-                    Masuk sebagai Partner Event Organizer / Destinasi &rarr;
-                  </Link>
-                </div>
-              </footer>
+              {/* Social Auth: Google OAuth Only */}
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                className="auth-google-button"
+                onClick={handleGoogleLogin}
+                loading={activeMethod === "GOOGLE"}
+                loadingLabel="Menghubungkan Google..."
+                disabled={isAnyLoading}
+              >
+                <GoogleIcon />
+                <span>Lanjut dengan Google</span>
+              </Button>
             </div>
+
+            {/* Bottom Switch Helper Text */}
+            <div className="auth-card__switch">
+              {tabMode === "SIGN_IN" ? (
+                <p>
+                  Belum punya akun?{" "}
+                  <button
+                    type="button"
+                    className="auth-inline-switch-btn"
+                    onClick={() => setTabMode("SIGN_UP")}
+                  >
+                    Daftar sekarang
+                  </button>
+                </p>
+              ) : (
+                <p>
+                  Sudah punya akun?{" "}
+                  <button
+                    type="button"
+                    className="auth-inline-switch-btn"
+                    onClick={() => setTabMode("SIGN_IN")}
+                  >
+                    Masuk ke akun
+                  </button>
+                </p>
+              )}
+            </div>
+
+            {/* Legal & Partner Links */}
+            <footer className="auth-footer">
+              <p className="auth-footer__legal">
+                Dengan masuk atau mendaftar, kamu menyetujui{" "}
+                <button
+                  type="button"
+                  className="auth-legal-link"
+                  onClick={() => setLegalModal("terms")}
+                >
+                  Syarat &amp; Ketentuan
+                </button>{" "}
+                serta{" "}
+                <button
+                  type="button"
+                  className="auth-legal-link"
+                  onClick={() => setLegalModal("privacy")}
+                >
+                  Kebijakan Privasi
+                </button>{" "}
+                JedaIn.
+              </p>
+
+              <div className="auth-footer__partner">
+                <Link to="/partner" className="auth-partner-link">
+                  Masuk sebagai Partner Event Organizer / Destinasi &rarr;
+                </Link>
+              </div>
+            </footer>
           </div>
         </main>
       </div>

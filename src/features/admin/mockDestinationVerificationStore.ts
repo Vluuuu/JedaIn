@@ -5,12 +5,57 @@ import type { DestinationVerificationRecord } from "./types";
 export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
   [
     {
+      applicationId: "dest_app_lereng_hijau",
+      partnerIdentityId: "dest_partner_lereng_hijau",
+      destinationIdentityId: "dest_lereng_hijau",
+      name: "Lereng Hijau Batu",
+      locationLabel: "Batu / Malang Raya",
+      province: "Jawa Timur",
+      city: "Batu",
+      managementName: "Pokdarwis Lereng Hijau",
+      contactPerson: "Hadi Purnomo",
+      contactPhone: "081233445566",
+      contactEmail: "destinasi@lerenghijau.id",
+      legalEntityDocument: {
+        name: "Izin_Pengelolaan_Lereng_Batu.pdf",
+        attachedAt: "2026-08-01T08:00:00Z",
+        status: "VERIFIED",
+      },
+      baseCostPerPerson: 125000,
+      description:
+        "Kawasan perkebunan teh dan lereng bukit berkabut yang tenang, terkelola secara lestari bersama warga lokal. Memiliki pemandu lokal terlatih di lokasi.",
+      highlights: [
+        "Jalur jalan santai kebun teh dengan kontur landai",
+        "Pemandu lokal standby dan ramah rute",
+        "Saung santai dan fasilitas air bersih",
+      ],
+      capacityPerSession: 20,
+      declaredGuideReady: true,
+      guideReadinessEvidence:
+        "Tersedia 4 pemandu lokal terlatih dari kelompok tani binaan kawasan.",
+      submittedAt: "2026-08-01T08:00:00Z",
+      status: "APPROVED",
+      approvedLevel: "BASIC",
+      approvedGuideReady: true,
+      reviewedAt: "2026-08-02T10:00:00Z",
+    },
+    {
       applicationId: "dest_app_coban_rondo",
+      partnerIdentityId: "dest_partner_coban_rondo",
       destinationIdentityId: "dest_coban_rondo",
       name: "Hutan Pinus Coban Rondo",
       locationLabel: "Pujon, Malang",
       province: "Jawa Timur",
       city: "Batu / Malang",
+      managementName: "Pengelola Coban Rondo",
+      contactPerson: "Hadi",
+      contactPhone: "0812998877",
+      contactEmail: "partner@cobanrondo.id",
+      legalEntityDocument: {
+        name: "Izin_Hutan_Pinus.pdf",
+        attachedAt: "2026-08-26T10:00:00Z",
+        status: "ATTACHED",
+      },
       baseCostPerPerson: 110000,
       description:
         "Kawasan hutan pinus alami berhawa dingin dengan area saung hening dan akses jalan tertata rapi.",
@@ -20,6 +65,7 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
         "Pemandu lokal standby di gerbang utama",
       ],
       capacityPerSession: 25,
+      declaredGuideReady: true,
       guideReadinessEvidence:
         "Memiliki 3 pemandu lokal binaan perhutani yang bersertifikasi kepemanduan dasar.",
       submittedAt: "2026-08-26T10:00:00Z",
@@ -27,21 +73,51 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
     },
     {
       applicationId: "dest_app_trawas_bambu",
+      partnerIdentityId: "dest_partner_trawas_bambu",
       destinationIdentityId: "dest_hutan_trawas",
       name: "Hutan Bambu Trawas",
       locationLabel: "Mojokerto / Pasuruan",
       province: "Jawa Timur",
       city: "Pasuruan",
+      managementName: "Pokdarwis Bambu Trawas",
+      contactPerson: "Agus Santoso",
+      contactPhone: "081255667788",
+      contactEmail: "partner@trawas.id",
       baseCostPerPerson: 95000,
       description: "Kawasan hutan bambu hening untuk kontemplasi mandiri.",
       highlights: ["Spot meditasi", "Suasana sangat hening"],
       capacityPerSession: 12,
+      declaredGuideReady: false,
       guideReadinessEvidence: "Belum memiliki pemandu lokal resmi di lokasi.",
       submittedAt: "2026-08-15T09:00:00Z",
       status: "APPROVED",
       approvedLevel: "BASIC",
       approvedGuideReady: false,
       reviewedAt: "2026-08-16T11:00:00Z",
+    },
+    {
+      applicationId: "dest_app_rejected_demo",
+      partnerIdentityId: "dest_partner_rejected",
+      destinationIdentityId: "dest_curah_rawan",
+      name: "Lembah Curah Rawan",
+      locationLabel: "Malang Selatan",
+      province: "Jawa Timur",
+      city: "Malang",
+      managementName: "Pengelola Curah Rawan",
+      contactPerson: "Rian",
+      contactPhone: "081298765432",
+      contactEmail: "partner@curahrawan.id",
+      baseCostPerPerson: 80000,
+      description: "Kawasan tebing dan sungai deras.",
+      highlights: ["Tebing curam"],
+      capacityPerSession: 10,
+      declaredGuideReady: false,
+      guideReadinessEvidence: "Belum ada pemandu lokal.",
+      submittedAt: "2026-08-18T09:00:00Z",
+      status: "REJECTED",
+      rejectionReason:
+        "Akses evakuasi darurat belum memadai dan jalur terlalu curam untuk standar mindful travel.",
+      reviewedAt: "2026-08-19T10:00:00Z",
     },
   ];
 
@@ -51,7 +127,38 @@ function cloneVerificationApp(
   return {
     ...app,
     highlights: [...app.highlights],
+    legalEntityDocument: app.legalEntityDocument
+      ? { ...app.legalEntityDocument }
+      : undefined,
   };
+}
+
+function generateUniqueDestinationIdentityId(name: string): string {
+  const baseSlug = `dest_${name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "_")
+    .replace(/_+/g, "_")
+    .slice(0, 24)}`;
+
+  const existingAppIds = new Set(
+    verificationApps.map((a) => a.destinationIdentityId),
+  );
+  const existingCanonicalIds = new Set(
+    mockDestinationStore.getAll().map((d) => d.destinationId),
+  );
+
+  const isTaken = (id: string) =>
+    existingAppIds.has(id) || existingCanonicalIds.has(id);
+
+  if (!isTaken(baseSlug)) {
+    return baseSlug;
+  }
+
+  let counter = 1;
+  while (isTaken(`${baseSlug}_${counter}`)) {
+    counter++;
+  }
+  return `${baseSlug}_${counter}`;
 }
 
 let verificationApps: DestinationVerificationRecord[] =
@@ -71,6 +178,153 @@ export const mockDestinationVerificationStore = {
   getById(applicationId: string): DestinationVerificationRecord | undefined {
     const app = verificationApps.find((a) => a.applicationId === applicationId);
     return app ? cloneVerificationApp(app) : undefined;
+  },
+
+  getByPartnerId(
+    partnerIdentityId: string,
+  ): DestinationVerificationRecord | undefined {
+    const app = verificationApps.find(
+      (a) => a.partnerIdentityId === partnerIdentityId,
+    );
+    return app ? cloneVerificationApp(app) : undefined;
+  },
+
+  submitApplication(input: {
+    partnerIdentityId: string;
+    destinationIdentityId?: string;
+    name: string;
+    locationLabel: string;
+    province: string;
+    city: string;
+    managementName?: string;
+    contactPerson?: string;
+    phone?: string;
+    email?: string;
+    legalEntityDoc?: {
+      name: string;
+      uploadedAt: string;
+      status: "ATTACHED" | "VERIFIED";
+    };
+    baseCostPerPerson: number;
+    description: string;
+    highlights: string[];
+    capacityPerSession: number;
+    guideReady: boolean;
+    guideReadinessEvidence: string;
+    agreedToSop: boolean;
+  }): {
+    success: boolean;
+    application?: DestinationVerificationRecord;
+    message?: string;
+  } {
+    if (!input.agreedToSop) {
+      return {
+        success: false,
+        message: "Wajib menyetujui standar keselamatan & SOP destinasi JedaIn.",
+      };
+    }
+
+    if (
+      !input.name.trim() ||
+      !input.locationLabel.trim() ||
+      !input.province.trim() ||
+      !input.city.trim() ||
+      !input.managementName?.trim() ||
+      !input.contactPerson?.trim() ||
+      !input.phone?.trim() ||
+      !input.email?.trim() ||
+      !input.description.trim() ||
+      !input.guideReadinessEvidence.trim()
+    ) {
+      return {
+        success: false,
+        message:
+          "Semua informasi wajib (nama, lokasi, provinsi, kota, pengelola, penanggung jawab, kontak, deskripsi, bukti pemandu) harus diisi lengkap.",
+      };
+    }
+
+    if (input.baseCostPerPerson <= 0 || input.capacityPerSession <= 0) {
+      return {
+        success: false,
+        message: "Modal dasar dan kapasitas per sesi harus lebih dari 0.",
+      };
+    }
+
+    if (!input.highlights || input.highlights.length === 0) {
+      return {
+        success: false,
+        message: "Minimal masukkan 1 fasilitas atau daya tarik utama kawasan.",
+      };
+    }
+
+    // Check existing application for this partner identity
+    const existingIndex = verificationApps.findIndex(
+      (a) => a.partnerIdentityId === input.partnerIdentityId,
+    );
+
+    if (existingIndex >= 0) {
+      const existing = verificationApps[existingIndex];
+      if (existing.status === "APPROVED") {
+        return {
+          success: false,
+          message:
+            "Aplikasi destinasi Anda sudah disetujui (APPROVED) dan tidak dapat diajukan ulang.",
+        };
+      }
+      if (existing.status === "PENDING_REVIEW") {
+        return {
+          success: false,
+          message:
+            "Aplikasi destinasi Anda sedang dalam proses verifikasi (PENDING_REVIEW).",
+        };
+      }
+    }
+
+    const nowIso = new Date().toISOString();
+    const destId =
+      existingIndex >= 0
+        ? verificationApps[existingIndex].destinationIdentityId
+        : generateUniqueDestinationIdentityId(input.name.trim());
+
+    const application: DestinationVerificationRecord = {
+      applicationId:
+        existingIndex >= 0
+          ? verificationApps[existingIndex].applicationId
+          : `dest_app_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      partnerIdentityId: input.partnerIdentityId,
+      destinationIdentityId: destId,
+      name: input.name.trim(),
+      locationLabel: input.locationLabel.trim(),
+      province: input.province.trim(),
+      city: input.city.trim(),
+      managementName: input.managementName.trim(),
+      contactPerson: input.contactPerson.trim(),
+      contactPhone: input.phone.trim(),
+      contactEmail: input.email.trim(),
+      legalEntityDocument: input.legalEntityDoc
+        ? {
+            name: input.legalEntityDoc.name,
+            attachedAt: input.legalEntityDoc.uploadedAt,
+            status: input.legalEntityDoc.status,
+          }
+        : undefined,
+      baseCostPerPerson: input.baseCostPerPerson,
+      description: input.description.trim(),
+      highlights: [...input.highlights],
+      capacityPerSession: input.capacityPerSession,
+      declaredGuideReady: Boolean(input.guideReady),
+      guideReadinessEvidence: input.guideReadinessEvidence.trim(),
+      submittedAt: nowIso,
+      status: "PENDING_REVIEW",
+    };
+
+    if (existingIndex >= 0) {
+      verificationApps[existingIndex] = application;
+    } else {
+      verificationApps.push(application);
+    }
+
+    return { success: true, application: cloneVerificationApp(application) };
   },
 
   approveApplication(

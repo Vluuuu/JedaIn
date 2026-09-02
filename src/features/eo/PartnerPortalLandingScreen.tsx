@@ -13,6 +13,11 @@ export function PartnerPortalLandingScreen() {
     navigate("/partner/eo");
   };
 
+  const handleDemoDestinationLogin = () => {
+    partnerSessionStore.loginAsDemoDestination();
+    navigate("/partner/destination");
+  };
+
   return (
     <div
       className="eo-container"
@@ -37,9 +42,9 @@ export function PartnerPortalLandingScreen() {
           <Badge tone="warning">Simulasi Juri & Evaluasi</Badge>
           <h2>Akses Cepat Demo Workspace</h2>
           <p>
-            Masuk langsung ke operational dashboard Event Organizer (EO) yang
-            telah disetujui untuk mencoba seluruh alur kurasi paket, sesi
-            jadwal, dan transaksi.
+            Masuk langsung ke operational dashboard Event Organizer (EO) atau
+            Mitra Destinasi yang telah disetujui untuk mencoba seluruh alur tiga
+            sisi JedaIn.
           </p>
         </div>
         <div
@@ -51,7 +56,7 @@ export function PartnerPortalLandingScreen() {
             size="md"
             onClick={() => handleDemoLogin("CERTIFIED_GUIDE")}
           >
-            Masuk sebagai EO Demo (Certified Guide)
+            Masuk sebagai EO Demo (Certified)
           </Button>
           <Button
             type="button"
@@ -59,7 +64,15 @@ export function PartnerPortalLandingScreen() {
             size="md"
             onClick={() => handleDemoLogin("CONCEPT_ONLY")}
           >
-            Masuk sebagai EO Demo (Concept-Only)
+            Masuk sebagai EO Demo (Concept)
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={handleDemoDestinationLogin}
+          >
+            Masuk sebagai Mitra Destinasi Demo
           </Button>
         </div>
       </section>
@@ -143,11 +156,19 @@ export function PartnerPortalLandingScreen() {
           >
             <Button
               type="button"
-              variant="secondary"
+              variant="primary"
               size="md"
               onClick={() => navigate("/partner/apply/destination")}
             >
               Daftar sebagai Destinasi
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={() => navigate("/partner/login")}
+            >
+              Masuk Akun Destinasi
             </Button>
           </div>
         </article>

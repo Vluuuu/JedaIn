@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
@@ -7,23 +8,57 @@ import "./eo.css";
 export function EoApplicationStatusScreen() {
   const navigate = useNavigate();
   const partner = partnerSessionStore.get();
-  const application = partner
-    ? mockApplicationStore.getBySellerId(partner.id)
-    : mockApplicationStore.getAll()[0];
+  const isDestination = partner?.role === "DESTINATION";
 
-  const status = application?.status ?? "PENDING_REVIEW";
+  // If partner is Destination, route context to mockDestinationVerificationStore
+  const destApp =
+    isDestination && partner
+      ? mockDestinationVerificationStore.getByPartnerId(partner.id)
+      : undefined;
+
+  const eoApp =
+    !isDestination && partner
+      ? mockApplicationStore.getBySellerId(partner.id)
+      : mockApplicationStore.getAll()[0];
+
+  const status = isDestination
+    ? (destApp?.status ?? "PENDING_REVIEW")
+    : (eoApp?.status ?? "PENDING_REVIEW");
+
+  const businessName = isDestination
+    ? (destApp?.name ?? partner?.businessName ?? "Destinasi Mitra")
+    : (eoApp?.businessName ?? partner?.businessName ?? "EO Partner");
+
+  const rejectionReason = isDestination
+    ? (destApp?.rejectionReason ?? "Alasan verifikasi belum tersedia.")
+    : (eoApp?.rejectionReason ?? "Alasan verifikasi belum tersedia.");
+
+  const submittedAt = isDestination ? destApp?.submittedAt : eoApp?.submittedAt;
 
   const handleOpenDashboard = () => {
-    navigate("/partner/eo");
+    if (isDestination) {
+      navigate("/partner/destination");
+    } else {
+      navigate("/partner/eo");
+    }
   };
 
   const handleSwitchToApprovedDemo = () => {
-    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-    navigate("/partner/eo");
+    if (isDestination) {
+      partnerSessionStore.loginAsDemoDestination();
+      navigate("/partner/destination");
+    } else {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      navigate("/partner/eo");
+    }
   };
 
   const handleReapply = () => {
-    navigate("/partner/apply/eo");
+    if (isDestination) {
+      navigate("/partner/apply/destination");
+    } else {
+      navigate("/partner/apply/eo");
+    }
   };
 
   return (
@@ -49,15 +84,11 @@ export function EoApplicationStatusScreen() {
                 : "Sedang Ditinjau"}
           </Badge>
           <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Status Pengajuan Mitra EO
+            Status{" "}
+            {isDestination ? "Verifikasi Destinasi" : "Pengajuan Mitra EO"}
           </h1>
           <p className="eo-page-subtitle">
-            Penyelenggara:{" "}
-            <strong>
-              {application?.businessName ??
-                partner?.businessName ??
-                "EO Partner"}
-            </strong>
+            Entitas: <strong>{businessName}</strong>
           </p>
         </div>
       </header>
@@ -72,12 +103,12 @@ export function EoApplicationStatusScreen() {
                 margin: "0 0 var(--space-1)",
               }}
             >
-              Selamat! Akun Event Organizer telah Disetujui
+              Selamat! Akun Kemitraan telah Disetujui
             </h2>
             <p style={{ margin: 0 }}>
-              Tim Kurasi JedaIn telah memverifikasi profilmu. Kamu sekarang
-              dapat mengakses demand insight traveler, merancang paket wellness
-              terkurasi, dan mengelola jadwal perjalanan.
+              Tim Kurasi JedaIn telah memverifikasi profil dan standar
+              lokasi/pemandu Anda. Anda sekarang dapat mengakses dashboard
+              operasional.
             </p>
           </div>
 
@@ -110,7 +141,7 @@ export function EoApplicationStatusScreen() {
                 margin: "0 0 var(--space-1)",
               }}
             >
-              Pengajuan Memerlukan Perbaikan Dokumen
+              Pengajuan Memerlukan Perbaikan
             </h2>
             <p style={{ margin: "0 0 var(--space-2)" }}>
               Alasan kurator Admin JedaIn:
@@ -126,8 +157,7 @@ export function EoApplicationStatusScreen() {
                 color: "var(--color-text-primary)",
               }}
             >
-              {application?.rejectionReason ??
-                "Dokumen SOP penanganan darurat belum lengkap dan portofolio kegiatan wellness belum mencukupi standar kurasi JedaIn."}
+              {rejectionReason}
             </blockquote>
           </div>
 
@@ -138,7 +168,7 @@ export function EoApplicationStatusScreen() {
               margin: 0,
             }}
           >
-            Kamu dapat memperbarui informasi formulir dengan identitas yang sama
+            Anda dapat memperbarui informasi formulir dengan identitas yang sama
             tanpa perlu mendaftar dari awal.
           </p>
 
@@ -184,17 +214,14 @@ export function EoApplicationStatusScreen() {
               Pengajuan Sedang Dalam Proses Kurasi
             </h2>
             <p style={{ margin: 0 }}>
-              Formulir kemitraanmu telah diterima oleh Tim Kurasi JedaIn pada{" "}
+              Formulir kemitraan Anda telah diterima oleh Tim Kurasi JedaIn pada{" "}
               <strong>
-                {application?.submittedAt
-                  ? new Date(application.submittedAt).toLocaleDateString(
-                      "id-ID",
-                      {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      },
-                    )
+                {submittedAt
+                  ? new Date(submittedAt).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })
                   : "hari ini"}
               </strong>
               . Kami memastikan standar keselamatan dan filosofi mindful travel
@@ -234,7 +261,9 @@ export function EoApplicationStatusScreen() {
               size="sm"
               onClick={handleSwitchToApprovedDemo}
             >
-              Lihat Workspace EO Demo (Approved)
+              {isDestination
+                ? "Lihat Workspace Destinasi Demo (Approved)"
+                : "Lihat Workspace EO Demo (Approved)"}
             </Button>
           </div>
 

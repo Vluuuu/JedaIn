@@ -41,15 +41,26 @@ export type DestinationVerificationStatus =
 
 export interface DestinationVerificationRecord {
   applicationId: string;
+  partnerIdentityId: string;
   destinationIdentityId: string;
   name: string;
   locationLabel: string;
   province: string;
   city: string;
+  managementName?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  legalEntityDocument?: {
+    name: string;
+    attachedAt: string;
+    status: "ATTACHED" | "VERIFIED";
+  };
   baseCostPerPerson: number;
   description: string;
   highlights: string[];
   capacityPerSession: number;
+  declaredGuideReady: boolean;
   guideReadinessEvidence: string;
   submittedAt: string;
   status: DestinationVerificationStatus;

@@ -9,6 +9,7 @@ export * from "./PartnerPortalLandingScreen";
 export * from "./PartnerLoginScreen";
 export * from "./EoApplicationScreen";
 export * from "./EoApplicationStatusScreen";
+export * from "./PartnerApplicationStatusScreen";
 export * from "./EoOverviewScreen";
 export * from "./EoInsightsScreen";
 export * from "./EoPackagesScreen";

@@ -1,25 +1,64 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
+import { generateUniqueDestinationPartnerId } from "../destination/destinationContext";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
 
 export function PartnerLoginScreen() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("partner@jedaalam.id");
-  const [role, setRole] = useState<"EO" | "DESTINATION">("EO");
+  const [email, setEmail] = useState("destinasi@lerenghijau.id");
+  const [role, setRole] = useState<"EO" | "DESTINATION">("DESTINATION");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanEmail = email.trim();
+    const normalizedEmail = cleanEmail.toLowerCase();
 
     if (role === "DESTINATION") {
+      const destApp = mockDestinationVerificationStore
+        .getAll()
+        .find(
+          (a) =>
+            a.partnerIdentityId.toLowerCase() === normalizedEmail ||
+            a.applicationId.toLowerCase() === normalizedEmail ||
+            a.contactEmail?.trim().toLowerCase() === normalizedEmail,
+        );
+
+      if (destApp) {
+        partnerSessionStore.setPartner({
+          id: destApp.partnerIdentityId,
+          email: destApp.contactEmail ?? cleanEmail,
+          name: destApp.name,
+          role: "DESTINATION",
+          businessName: destApp.managementName ?? `Pengelola ${destApp.name}`,
+          destinationIdentityId: destApp.destinationIdentityId,
+        });
+
+        if (destApp.status === "APPROVED") {
+          navigate("/partner/destination");
+        } else {
+          navigate("/partner/application");
+        }
+        return;
+      }
+
+      // If new/unknown destination identity: establish collision-safe prototype DESTINATION session first
+      const uniquePartnerId = generateUniqueDestinationPartnerId(cleanEmail);
+      partnerSessionStore.setPartner({
+        id: uniquePartnerId,
+        email: cleanEmail,
+        name: "Mitra Destinasi Baru",
+        role: "DESTINATION",
+        businessName: "Pengelola Kawasan Destinasi",
+      });
       navigate("/partner/apply/destination");
       return;
     }
 
-    // Check if there is an existing application or user
+    // EO Login flow
     const app = mockApplicationStore
       .getAll()
       .find((a) => a.email === cleanEmail);
@@ -44,38 +83,43 @@ export function PartnerLoginScreen() {
       return;
     }
 
-    // Default demo login
+    // Default demo EO login
     partnerSessionStore.loginAsDemoApproved();
     navigate("/partner/eo");
   };
 
-  const handleDemoApproved = (
+  const handleDemoApprovedEo = (
     guideStatus: "CERTIFIED_GUIDE" | "CONCEPT_ONLY",
   ) => {
     partnerSessionStore.loginAsDemoApproved(guideStatus);
     navigate("/partner/eo");
   };
 
-  const handleDemoRejected = () => {
+  const handleDemoApprovedDestination = () => {
+    partnerSessionStore.loginAsDemoDestination();
+    navigate("/partner/destination");
+  };
+
+  const handleDemoPendingDestination = () => {
     partnerSessionStore.setPartner({
-      id: "eo_rejected_user",
-      email: "rian@kelanaliar.com",
-      name: "Rian Pratama",
-      role: "EO",
-      businessName: "Kelana Liar Adventure",
-      guideStatus: "CONCEPT_ONLY",
+      id: "dest_partner_coban_rondo",
+      email: "partner@cobanrondo.id",
+      name: "Pengelola Hutan Pinus Coban Rondo",
+      role: "DESTINATION",
+      businessName: "Pengelola Coban Rondo",
+      destinationIdentityId: "dest_coban_rondo",
     });
     navigate("/partner/application");
   };
 
-  const handleDemoPending = () => {
+  const handleDemoRejectedDestination = () => {
     partnerSessionStore.setPartner({
-      id: "eo_pending_user",
-      email: "maya@lestariwellness.id",
-      name: "Maya Safira",
-      role: "EO",
-      businessName: "Lestari Wellness Journey",
-      guideStatus: "CERTIFIED_GUIDE",
+      id: "dest_partner_rejected",
+      email: "partner@curahrawan.id",
+      name: "Pengelola Curah Rawan",
+      role: "DESTINATION",
+      businessName: "Pengelola Lembah Curah Rawan",
+      destinationIdentityId: "dest_curah_rawan",
     });
     navigate("/partner/application");
   };
@@ -83,7 +127,7 @@ export function PartnerLoginScreen() {
   return (
     <div
       className="eo-container"
-      style={{ padding: "var(--space-8) var(--space-4)", maxWidth: "560px" }}
+      style={{ padding: "var(--space-8) var(--space-4)", maxWidth: "580px" }}
     >
       <header style={{ textAlign: "center", marginBottom: "var(--space-6)" }}>
         <Badge tone="info">Partner Authentication</Badge>
@@ -91,7 +135,7 @@ export function PartnerLoginScreen() {
           Masuk ke Portal Partner
         </h1>
         <p className="eo-page-subtitle">
-          Kelola paket perjalanan, jadwal sesi, dan operasional wellness.
+          Pilih peran kemitraan dan kelola operasional wellness terkurasi.
         </p>
       </header>
 
@@ -100,7 +144,7 @@ export function PartnerLoginScreen() {
         className="eo-alert eo-alert--info"
         style={{ marginBottom: "var(--space-4)" }}
       >
-        <strong>Akses Cepat Evaluasi:</strong>
+        <strong>Akses Cepat Evaluasi Juri:</strong>
         <div
           style={{
             display: "flex",
@@ -113,33 +157,33 @@ export function PartnerLoginScreen() {
             type="button"
             variant="primary"
             size="sm"
-            onClick={() => handleDemoApproved("CERTIFIED_GUIDE")}
+            onClick={handleDemoApprovedDestination}
           >
-            EO Approved (Guide Certified)
+            Destinasi Approved (Lereng Hijau)
           </Button>
           <Button
             type="button"
             variant="secondary"
             size="sm"
-            onClick={() => handleDemoApproved("CONCEPT_ONLY")}
+            onClick={handleDemoPendingDestination}
           >
-            EO Approved (Concept-Only)
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={handleDemoPending}
-          >
-            EO Pending Review
+            Destinasi Pending (Coban Rondo)
           </Button>
           <Button
             type="button"
             variant="danger"
             size="sm"
-            onClick={handleDemoRejected}
+            onClick={handleDemoRejectedDestination}
           >
-            EO Rejected
+            Destinasi Rejected
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => handleDemoApprovedEo("CERTIFIED_GUIDE")}
+          >
+            EO Approved Demo
           </Button>
         </div>
       </div>
@@ -157,10 +201,18 @@ export function PartnerLoginScreen() {
             id="partner-role"
             className="eo-form-select"
             value={role}
-            onChange={(e) => setRole(e.target.value as "EO" | "DESTINATION")}
+            onChange={(e) => {
+              const nextRole = e.target.value as "EO" | "DESTINATION";
+              setRole(nextRole);
+              setEmail(
+                nextRole === "DESTINATION"
+                  ? "destinasi@lerenghijau.id"
+                  : "partner@jedaalam.id",
+              );
+            }}
           >
+            <option value="DESTINATION">Pengelola Destinasi Lokal</option>
             <option value="EO">Event Organizer (EO / Tour Guide)</option>
-            <option value="DESTINATION">Pengelola Destinasi</option>
           </select>
         </div>
 
@@ -175,7 +227,7 @@ export function PartnerLoginScreen() {
             className="eo-form-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="nama@organizer.id"
+            placeholder="nama@mitra.id"
           />
         </div>
 
@@ -185,7 +237,7 @@ export function PartnerLoginScreen() {
           size="lg"
           style={{ marginTop: "var(--space-2)" }}
         >
-          Masuk ke Portal
+          Masuk ke Portal Partner
         </Button>
 
         <div
@@ -197,10 +249,16 @@ export function PartnerLoginScreen() {
         >
           Belum menjadi mitra?{" "}
           <Link
-            to="/partner/apply/eo"
+            to={
+              role === "DESTINATION"
+                ? "/partner/apply/destination"
+                : "/partner/apply/eo"
+            }
             style={{ color: "var(--color-brand-primary)", fontWeight: 600 }}
           >
-            Daftar Pengajuan EO Baru
+            {role === "DESTINATION"
+              ? "Daftar Verifikasi Destinasi"
+              : "Daftar Pengajuan EO Baru"}
           </Link>
         </div>
       </form>

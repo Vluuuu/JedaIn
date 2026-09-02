@@ -195,6 +195,32 @@ export function AdminDestinationVerificationDetailScreen() {
             <small
               style={{ color: "var(--color-text-muted)", display: "block" }}
             >
+              Entitas Pengelola & Penanggung Jawab:
+            </small>
+            <strong>
+              {destApp.managementName || destApp.contactPerson
+                ? `${destApp.managementName ?? "Pengelola"} (${destApp.contactPerson ?? "PJ"})`
+                : "Pengelola Destinasi"}
+            </strong>
+            {(destApp.contactPhone || destApp.contactEmail) && (
+              <small
+                style={{
+                  display: "block",
+                  color: "var(--color-text-secondary)",
+                  marginTop: "var(--space-1)",
+                }}
+              >
+                {[destApp.contactPhone, destApp.contactEmail]
+                  .filter(Boolean)
+                  .join(" • ")}
+              </small>
+            )}
+          </div>
+
+          <div>
+            <small
+              style={{ color: "var(--color-text-muted)", display: "block" }}
+            >
               Kapasitas Maksimal per Sesi:
             </small>
             <strong>{destApp.capacityPerSession} Orang</strong>
@@ -204,8 +230,28 @@ export function AdminDestinationVerificationDetailScreen() {
             <small
               style={{ color: "var(--color-text-muted)", display: "block" }}
             >
-              Bukti Kesiapan Pemandu Lokal (Guide Ready):
+              Status Dokumen Legalitas (Metadata):
             </small>
+            <strong>
+              {destApp.legalEntityDocument
+                ? `📄 ${destApp.legalEntityDocument.name} (${destApp.legalEntityDocument.status})`
+                : "Belum ada metadata dokumen"}
+            </strong>
+          </div>
+
+          <div>
+            <small
+              style={{ color: "var(--color-text-muted)", display: "block" }}
+            >
+              Deklarasi & Bukti Kesiapan Pemandu Lokal:
+            </small>
+            <div style={{ marginTop: "var(--space-1)" }}>
+              <Badge tone={destApp.declaredGuideReady ? "success" : "neutral"}>
+                {destApp.declaredGuideReady
+                  ? "Deklarasi: Guide Ready"
+                  : "Deklarasi: Belum Guide Ready"}
+              </Badge>
+            </div>
             <p
               style={{
                 margin: "0.25rem 0 0",

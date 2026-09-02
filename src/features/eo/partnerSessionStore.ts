@@ -20,6 +20,15 @@ export const DEMO_CONCEPT_EO_USER: PartnerUser = {
   organizerReviewRef: "org_kreatif_desa",
 };
 
+export const DEMO_DESTINATION_USER: PartnerUser = {
+  id: "dest_partner_lereng_hijau",
+  email: "destinasi@lerenghijau.id",
+  name: "Hadi Purnomo",
+  role: "DESTINATION",
+  businessName: "Pengelola Lereng Hijau Batu",
+  destinationIdentityId: "dest_lereng_hijau",
+};
+
 let currentPartner: PartnerUser | null = DEMO_EO_USER;
 
 export const partnerSessionStore = {
@@ -38,6 +47,11 @@ export const partnerSessionStore = {
       guideStatus === "CERTIFIED_GUIDE"
         ? { ...DEMO_EO_USER }
         : { ...DEMO_CONCEPT_EO_USER };
+    return { ...currentPartner };
+  },
+
+  loginAsDemoDestination(): PartnerUser {
+    currentPartner = { ...DEMO_DESTINATION_USER };
     return { ...currentPartner };
   },
 

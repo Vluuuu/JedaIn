@@ -20,7 +20,7 @@ describe("Landing OpeningHero & SwipeJourneyControl", () => {
     expect(markup).toContain('class="swipe-control"');
   });
 
-  it("renders SwipeJourneyControl with accessible button semantics and cues", () => {
+  it("renders SwipeJourneyControl with accessible button semantics, microcopy, and cues", () => {
     const markup = renderToStaticMarkup(
       createElement(
         MemoryRouter,
@@ -31,6 +31,8 @@ describe("Landing OpeningHero & SwipeJourneyControl", () => {
 
     expect(markup).toContain('class="swipe-control"');
     expect(markup).toContain('class="swipe-control__cues"');
+    expect(markup).toContain('class="swipe-control__label"');
+    expect(markup).toContain("mulai");
     expect(markup).toContain('class="swipe-control__thumb"');
     expect(markup).toContain('aria-label="Geser ke atas untuk memulai"');
   });

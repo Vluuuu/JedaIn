@@ -28,11 +28,13 @@ export function SwipeJourneyControl({
   const maxTravelRef = useRef<number>(0);
 
   const [dragY, setDragY] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
 
   const finishJourney = useCallback(() => {
     setIsCompleted(true);
+    setProgress(1);
     if (onComplete) {
       onComplete();
     }
@@ -66,10 +68,12 @@ export function SwipeJourneyControl({
     const deltaY = startYRef.current - e.clientY;
     const maxTravel = maxTravelRef.current;
     const clampedY = Math.max(0, Math.min(deltaY, maxTravel));
+    const currentProgress = maxTravel > 0 ? clampedY / maxTravel : 0;
 
     setDragY(clampedY);
+    setProgress(currentProgress);
 
-    if (maxTravel > 0 && clampedY / maxTravel >= THRESHOLD_RATIO) {
+    if (maxTravel > 0 && currentProgress >= THRESHOLD_RATIO) {
       setIsDragging(false);
       pointerIdRef.current = null;
       try {
@@ -94,11 +98,13 @@ export function SwipeJourneyControl({
     }
 
     const maxTravel = maxTravelRef.current;
-    if (maxTravel > 0 && dragY / maxTravel >= THRESHOLD_RATIO) {
+    const currentProgress = maxTravel > 0 ? dragY / maxTravel : 0;
+    if (maxTravel > 0 && currentProgress >= THRESHOLD_RATIO) {
       setDragY(maxTravel);
       finishJourney();
     } else {
       setDragY(0);
+      setProgress(0);
     }
   };
 
@@ -112,6 +118,7 @@ export function SwipeJourneyControl({
         // pointer capture already released
       }
       setDragY(0);
+      setProgress(0);
     }
   };
 
@@ -123,40 +130,79 @@ export function SwipeJourneyControl({
       if (track && thumb) {
         const trackRect = track.getBoundingClientRect();
         const thumbRect = thumb.getBoundingClientRect();
-        setDragY(Math.max(0, trackRect.height - thumbRect.height - 8));
+        const maxTravel = Math.max(0, trackRect.height - thumbRect.height - 8);
+        setDragY(maxTravel);
       }
       finishJourney();
     }
   };
+
+  const labelOpacity = isCompleted
+    ? 0
+    : Math.max(0, (1 - progress * 1.45) * 0.72);
+  const chevron1Opacity =
+    isDragging || isCompleted ? 0.35 + progress * 0.65 : undefined;
+  const chevron2Opacity =
+    isDragging || isCompleted ? 0.55 + progress * 0.45 : undefined;
 
   return (
     <div
       ref={trackRef}
       className={`swipe-control ${isCompleted ? "swipe-control--completed" : ""} ${className}`.trim()}
       aria-hidden="false"
+      style={
+        {
+          "--swipe-progress": progress.toString(),
+        } as React.CSSProperties
+      }
     >
       <div className="swipe-control__cues" aria-hidden="true">
-        <span className="swipe-control__chevron swipe-control__chevron--1">
-          <svg viewBox="0 0 16 10" width="16" height="10" fill="none">
-            <path
-              d="M1 8.5L8 1.5L15 8.5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-        <span className="swipe-control__chevron swipe-control__chevron--2">
-          <svg viewBox="0 0 16 10" width="16" height="10" fill="none">
-            <path
-              d="M1 8.5L8 1.5L15 8.5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+        <div className="swipe-control__chevrons">
+          <span
+            className="swipe-control__chevron swipe-control__chevron--1"
+            style={
+              chevron1Opacity !== undefined
+                ? { opacity: chevron1Opacity }
+                : undefined
+            }
+          >
+            <svg viewBox="0 0 16 10" width="14" height="9" fill="none">
+              <path
+                d="M1 8.5L8 1.5L15 8.5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <span
+            className="swipe-control__chevron swipe-control__chevron--2"
+            style={
+              chevron2Opacity !== undefined
+                ? { opacity: chevron2Opacity }
+                : undefined
+            }
+          >
+            <svg viewBox="0 0 16 10" width="14" height="9" fill="none">
+              <path
+                d="M1 8.5L8 1.5L15 8.5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </div>
+        <span
+          className="swipe-control__label"
+          style={{
+            opacity: labelOpacity,
+            transition: isDragging ? "none" : "opacity 200ms ease",
+          }}
+        >
+          mulai
         </span>
       </div>
 

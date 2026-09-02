@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router";
+import JedaInLogo from "../../JedaIn_logo_vector.svg";
 import { LOGIN_ATMOSPHERE_VISUAL } from "../../lib/assets/packageImages";
 import { SwipeJourneyControl } from "./SwipeJourneyControl";
 import "./openingHero.css";
@@ -25,6 +27,27 @@ export function OpeningHero() {
         fetchPriority="high"
       />
       <div className="opening-hero__scrim" aria-hidden="true" />
+      <div className="opening-hero__grain" aria-hidden="true" />
+
+      <header className="opening-hero__topbar">
+        <Link to="/" className="opening-hero__brand" aria-label="JedaIn">
+          <img
+            src={JedaInLogo}
+            alt="JedaIn"
+            className="opening-hero__logo"
+            width="1407"
+            height="768"
+            loading="eager"
+          />
+        </Link>
+        <Link
+          to="/login"
+          className="opening-hero__login-action"
+          aria-label="Masuk ke akun Anda"
+        >
+          <span>Masuk</span>
+        </Link>
+      </header>
 
       <div className="opening-hero__content">
         <h1 id="opening-hero-title">

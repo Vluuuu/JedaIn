@@ -1,13 +1,19 @@
-import { Link } from "react-router";
+import { useState } from "react";
 import { LOGIN_ATMOSPHERE_VISUAL } from "../../lib/assets/packageImages";
+import { SwipeJourneyControl } from "./SwipeJourneyControl";
 import "./openingHero.css";
 
-// ponytail: This neutral prototype visual is the ceiling until JedaIn owns a 2000px+ portrait-safe highland photograph with cleared usage rights.
+// ponytail: This neutral highland atmosphere SVG is the current ceiling until JedaIn owns a 2000px+ portrait-safe photograph with cleared usage rights.
 const heroVisual = LOGIN_ATMOSPHERE_VISUAL;
 
 export function OpeningHero() {
+  const [exiting, setExiting] = useState(false);
+
   return (
-    <section className="opening-hero" aria-labelledby="opening-hero-title">
+    <section
+      className={`opening-hero ${exiting ? "opening-hero--exiting" : ""}`}
+      aria-labelledby="opening-hero-title"
+    >
       <img
         className="opening-hero__image"
         src={heroVisual.svgDataUri}
@@ -21,34 +27,19 @@ export function OpeningHero() {
       <div className="opening-hero__scrim" aria-hidden="true" />
 
       <div className="opening-hero__content">
-        <p className="opening-hero__eyebrow">Jeda yang lebih personal</p>
         <h1 id="opening-hero-title">
           <span>Temukan jeda</span>
           <span>yang benar-benar</span>
           <span>kamu butuhkan.</span>
         </h1>
-        <p className="opening-hero__support">
-          Temukan experience lokal yang dikurasi berdasarkan apa yang sedang
-          kamu butuhkan.
-        </p>
-        <Link className="opening-hero__secondary" to="/explore">
-          Jelajahi Experience
-        </Link>
       </div>
 
-      <Link
-        className="journey-cta"
-        to="/login"
-        aria-label="Mulai temukan jeda personal"
-      >
-        <span className="journey-cta__label" aria-hidden="true">
-          Temukan Jeda
-        </span>
-        <span className="journey-cta__control" aria-hidden="true">
-          <span>Mulai</span>
-          <span className="journey-cta__arrow">↓</span>
-        </span>
-      </Link>
+      <div className="opening-hero__control-wrap">
+        <SwipeJourneyControl
+          onComplete={() => setExiting(true)}
+          targetRoute="/login"
+        />
+      </div>
     </section>
   );
 }

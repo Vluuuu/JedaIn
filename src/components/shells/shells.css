@@ -53,6 +53,11 @@
   border-bottom: 1px solid var(--color-border-default);
 }
 
+.distraction-free-shell--no-header > main,
+.distraction-free-shell__main--full {
+  min-height: 100svh;
+}
+
 .public-header__menu {
   display: grid;
 }

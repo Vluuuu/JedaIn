@@ -85,8 +85,11 @@ export function App() {
         <Route index element={<OpeningHero />} />
       </Route>
 
-      <Route element={<DistractionFreeShell />}>
+      <Route element={<DistractionFreeShell hideHeader />}>
         <Route path="login" element={<TravelerLoginScreen />} />
+      </Route>
+
+      <Route element={<DistractionFreeShell />}>
         <Route
           path="onboarding/consent"
           element={

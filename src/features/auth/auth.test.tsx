@@ -46,10 +46,11 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
   it("renders Google primary action, phone OTP input, and partner secondary link without guest button", async () => {
     const view = await renderScreen();
 
-    expect(view.textContent).toContain("Masuk atau mulai perjalananmu");
+    expect(view.textContent).toContain("Masuk ke JedaIn");
     expect(view.textContent).toContain("Lanjut dengan Google");
     expect(view.querySelector('input[type="tel"]')).not.toBeNull();
     expect(view.textContent).toContain("Masuk sebagai Partner");
+    expect(view.textContent).not.toContain("Traveler Portal");
     expect(view.textContent).not.toContain("Tamu");
     expect(view.textContent).not.toContain("Guest");
   });

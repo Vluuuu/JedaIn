@@ -366,18 +366,27 @@ export const mockEoPackageStore = {
     message?: string;
   } {
     const actor = partnerSessionStore.get();
-    if (!actor || !actor.id) {
+    if (!actor || actor.role !== "EO") {
       return {
         success: false,
-        message: "Pengguna belum terautentikasi sebagai EO.",
+        message:
+          "Akses ditolak: Hanya EO terautentikasi yang dapat mengelola draf paket.",
       };
     }
 
     const actorEoId = actor.id;
-    const actorDisplayName = actor.businessName || "EO Partner";
     const app = mockApplicationStore.getBySellerId(actorEoId);
+    if (!app || app.status !== "APPROVED") {
+      return {
+        success: false,
+        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+      };
+    }
+
+    const actorDisplayName =
+      actor.businessName || app.businessName || "EO Partner";
     const authorGuideStatus: EoGuideStatus =
-      app?.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
+      app.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
 
     const nowIso = new Date().toISOString();
     const existingIndex = draft.packageId
@@ -477,7 +486,7 @@ export const mockEoPackageStore = {
     message?: string;
   } {
     const actor = partnerSessionStore.get();
-    if (!actor || !actor.id) {
+    if (!actor || actor.role !== "EO") {
       return {
         success: false,
         validationResult: {
@@ -495,8 +504,24 @@ export const mockEoPackageStore = {
 
     const actorEoId = actor.id;
     const app = mockApplicationStore.getBySellerId(actorEoId);
+    if (!app || app.status !== "APPROVED") {
+      return {
+        success: false,
+        validationResult: {
+          valid: false,
+          errors: [
+            {
+              step: 1,
+              field: "auth",
+              message: "Akun EO belum berstatus APPROVED.",
+            },
+          ],
+        },
+      };
+    }
+
     const authorGuideStatus: EoGuideStatus =
-      app?.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
+      app.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
 
     const pkg = packages.find((p) => p.packageId === packageId);
     if (!pkg || pkg.eoId !== actorEoId) {
@@ -569,14 +594,6 @@ export const mockEoPackageStore = {
     return true;
   },
 
-  makePackageLive(packageId: string): boolean {
-    const pkg = packages.find((p) => p.packageId === packageId);
-    if (!pkg || pkg.status !== "APPROVED") return false;
-    pkg.status = "LIVE";
-    pkg.reviewedAt = new Date().toISOString();
-    return true;
-  },
-
   publishApprovedPackage(packageId: string): {
     success: boolean;
     package?: EoPackageRecord;
@@ -588,6 +605,14 @@ export const mockEoPackageStore = {
         success: false,
         message:
           "Akses ditolak: Hanya EO terautentikasi yang dapat mempublikasikan paket.",
+      };
+    }
+
+    const app = mockApplicationStore.getBySellerId(actor.id);
+    if (!app || app.status !== "APPROVED") {
+      return {
+        success: false,
+        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
       };
     }
 
@@ -665,14 +690,23 @@ export const mockEoPackageStore = {
     pricePerPerson: number;
   }): { success: boolean; session?: EoSessionRecord; message?: string } {
     const actor = partnerSessionStore.get();
-    if (!actor || !actor.id) {
+    if (!actor || actor.role !== "EO") {
       return {
         success: false,
-        message: "Pengguna belum terautentikasi sebagai EO.",
+        message:
+          "Akses ditolak: Hanya EO terautentikasi yang dapat membuka sesi.",
       };
     }
 
     const actorEoId = actor.id;
+    const app = mockApplicationStore.getBySellerId(actorEoId);
+    if (!app || app.status !== "APPROVED") {
+      return {
+        success: false,
+        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+      };
+    }
+
     const pkg = packages.find((p) => p.packageId === input.packageId);
     if (!pkg || pkg.eoId !== actorEoId) {
       return {
@@ -716,7 +750,10 @@ export const mockEoPackageStore = {
     status: "OPEN" | "FULL" | "CLOSED" | "CANCELLED",
   ): boolean {
     const actor = partnerSessionStore.get();
-    if (!actor || !actor.id) return false;
+    if (!actor || actor.role !== "EO") return false;
+
+    const app = mockApplicationStore.getBySellerId(actor.id);
+    if (!app || app.status !== "APPROVED") return false;
 
     const s = sessions.find(
       (item) => item.sessionId === sessionId && item.eoId === actor.id,

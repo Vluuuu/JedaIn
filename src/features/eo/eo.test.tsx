@@ -337,8 +337,10 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       const pId = saveRes.package!.packageId;
 
-      // P: DRAFT -> LIVE rejected
-      expect(mockEoPackageStore.makePackageLive(pId)).toBe(false);
+      // P: DRAFT -> LIVE rejected (cannot publish unapproved draft)
+      expect(mockEoPackageStore.publishApprovedPackage(pId).success).toBe(
+        false,
+      );
 
       // Submit -> PENDING_ADMIN_REVIEW
       mockEoPackageStore.submitForReview(pId);
@@ -368,8 +370,8 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(mockEoPackageStore.approvePackage(pId)).toBe(true);
       expect(mockEoPackageStore.getPackageById(pId)?.status).toBe("APPROVED");
 
-      // Q: APPROVED -> LIVE allowed
-      expect(mockEoPackageStore.makePackageLive(pId)).toBe(true);
+      // Q: APPROVED -> LIVE allowed via publishApprovedPackage
+      expect(mockEoPackageStore.publishApprovedPackage(pId).success).toBe(true);
       expect(mockEoPackageStore.getPackageById(pId)?.status).toBe("LIVE");
     });
   });

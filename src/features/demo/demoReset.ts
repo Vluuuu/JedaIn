@@ -29,6 +29,7 @@ export function resetCompetitionDemoState(): void {
   mockApplicationStore.reset();
   mockEoPackageStore.reset();
   partnerSessionStore.reset();
+  partnerSessionStore.logout();
 
   // 3. Reset Traveler transactions, OTP, and reviews
   mockTransactionStore.reset();

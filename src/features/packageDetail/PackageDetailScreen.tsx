@@ -485,7 +485,11 @@ export function PackageDetailScreen({
             Ulasan Traveler
           </h2>
           <div className="package-detail-reviews-summary">
-            <span>★ {pkg.rating.toFixed(2)} / 5.0</span>
+            <span>
+              {pkg.rating !== undefined && pkg.rating !== null
+                ? `★ ${pkg.rating.toFixed(1)} / 5.0`
+                : "Belum ada rating"}
+            </span>
           </div>
           {detail.reviewPreview?.excerpts &&
           detail.reviewPreview.excerpts.length > 0 ? (

@@ -31,7 +31,9 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
               : "Terverifikasi Dasar"}
           </Badge>
           <span className="explore-package-card__rating-pill">
-            ★ {packageData.rating.toFixed(2)}
+            {packageData.rating !== undefined && packageData.rating !== null
+              ? `★ ${packageData.rating.toFixed(1)}`
+              : "Belum ada rating"}
           </span>
         </div>
       </div>

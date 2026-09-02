@@ -1,8 +1,12 @@
 import { mockApplicationStore } from "../eo/mockApplicationStore";
 import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
-import type { EoPackageRecord } from "../eo/types";
-import { resolveOrganizerReviewRef } from "../identity/identityResolvers";
+import { mockInsightStore } from "../eo/mockInsightStore";
+import type { DemandIntent, EoPackageRecord } from "../eo/types";
+import {
+  resolveDestinationReviewRef,
+  resolveOrganizerReviewRef,
+} from "../identity/identityResolvers";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import type {
   PackageDetailSource,
@@ -13,11 +17,11 @@ import type {
   CurrentIntent,
   DepartureAreaId,
   DurationPreference,
-  GroupSizeBand,
   GroupType,
   PreferredActivity,
 } from "../quiz/types";
 import type { PackageRecommendationSource } from "../recommendation/types";
+import { mockReviewStore } from "../reviews/mockReviewStore";
 
 /**
  * Maps duration string to DurationPreference.
@@ -45,20 +49,42 @@ function inferDurationType(durationLabel: string): DurationPreference {
 }
 
 /**
- * Maps destination location or city to DepartureAreaId.
+ * Maps DemandIntent to Traveler CurrentIntent.
  */
-function inferDepartureAreas(cityOrProvince: string): DepartureAreaId[] {
-  const norm = cityOrProvince.toLowerCase();
-  if (
-    norm.includes("surabaya") ||
-    norm.includes("mojokerto") ||
-    norm.includes("pasuruan") ||
-    norm.includes("trawas") ||
-    norm.includes("pacet")
-  ) {
-    return ["SURABAYA", "MALANG"];
+function mapDemandIntentToTraveler(intent?: DemandIntent): CurrentIntent[] {
+  if (!intent) return [];
+  switch (intent) {
+    case "NATURE":
+      return ["NATURE"];
+    case "CALM":
+      return ["RECHARGE"];
+    case "EXPLORATION":
+      return ["NOVELTY"];
+    case "REFLECTION":
+      return ["REFLECTION"];
+    case "ACTIVE":
+      return ["ACTIVE"];
+    case "QUALITY_TIME":
+      return ["SOCIAL"];
+    default:
+      return [];
   }
-  return ["MALANG"];
+}
+
+/**
+ * Maps authoritative insight target area to DepartureAreaId.
+ */
+function mapTargetAreaToDepartureAreas(targetArea?: string): DepartureAreaId[] {
+  if (!targetArea) return [];
+  const norm = targetArea.toLowerCase();
+  const areas: DepartureAreaId[] = [];
+  if (norm.includes("malang") || norm.includes("batu")) {
+    areas.push("MALANG");
+  }
+  if (norm.includes("surabaya") || norm.includes("sidoarjo")) {
+    areas.push("SURABAYA");
+  }
+  return areas;
 }
 
 /**
@@ -71,7 +97,27 @@ function mapGroupTypes(types: string[]): GroupType[] {
       valid.push(t);
     }
   }
-  return valid.length > 0 ? valid : ["SOLO", "PARTNER", "FRIENDS"];
+  return valid;
+}
+
+/**
+ * Derives real average rating from actual reviews for the package or destination/organizer.
+ */
+function deriveActualPackageRating(
+  eoPkg: EoPackageRecord,
+  destinationName: string,
+): number | null {
+  const destRef = resolveDestinationReviewRef(destinationName);
+  const orgRef = resolveOrganizerReviewRef(eoPkg.eoId);
+
+  const destReviews = mockReviewStore.getReviewsForDestination(destRef);
+  const orgReviews = mockReviewStore.getReviewsForOrganizer(orgRef);
+
+  const allRatings = [...destReviews, ...orgReviews].map((r) => r.rating);
+  if (allRatings.length === 0) return null;
+
+  const avg = allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length;
+  return Number(avg.toFixed(2));
 }
 
 /**
@@ -85,18 +131,18 @@ export function buildTravelerPackageFromEo(
   const dest = mockDestinationStore.getById(eoPkg.destinationId);
   if (!dest || dest.status !== "ACTIVE") return null;
 
-  // Derive experience intents from highlights/summary
-  const intents: CurrentIntent[] = ["RECHARGE", "NATURE"];
-  const activityTags: PreferredActivity[] = [
-    "NATURE_SCENERY",
-    "MINDFULNESS_RELAXATION",
-  ];
+  const app = mockApplicationStore.getBySellerId(eoPkg.eoId);
+  if (!app || app.status !== "APPROVED") return null;
 
-  const suitableGroupSizeBands: GroupSizeBand[] = [
-    "ONE",
-    "TWO",
-    "THREE_TO_FOUR",
-  ];
+  const insight = eoPkg.insightId
+    ? mockInsightStore.getInsightById(eoPkg.insightId)
+    : undefined;
+
+  const experienceIntents = mapDemandIntentToTraveler(insight?.intent);
+  const departureAreas = mapTargetAreaToDepartureAreas(insight?.targetArea);
+  const activityTags: PreferredActivity[] = [];
+
+  const actualRating = deriveActualPackageRating(eoPkg, dest.name);
 
   return {
     id: eoPkg.packageId,
@@ -104,18 +150,18 @@ export function buildTravelerPackageFromEo(
     shortSummary: eoPkg.shortSummary || eoPkg.valueProposition,
     destinationName: dest.name,
     locationLabel: dest.locationLabel,
-    visualAsset: dest.imageUrl || "/assets/packages/slow_green_day.jpg",
+    visualAsset: dest.imageUrl || "",
     status: "LIVE",
     verificationLevel: dest.verificationLevel,
     pricePerPerson: eoPkg.pricing.customerPrice,
     durationType: inferDurationType(eoPkg.durationLabel),
-    departureAreas: inferDepartureAreas(dest.city || dest.locationLabel),
-    experienceIntents: intents,
+    departureAreas,
+    experienceIntents,
     activityTags,
     suitableGroupTypes: mapGroupTypes(eoPkg.suitableGroupTypes),
-    suitableGroupSizeBands,
-    rating: 5.0, // Default for newly verified packages without review skew
-    popularityRank: 90,
+    suitableGroupSizeBands: [],
+    rating: actualRating,
+    popularityRank: null,
   };
 }
 
@@ -131,6 +177,8 @@ export function buildTravelerPackageDetailFromEo(
   if (!dest || dest.status !== "ACTIVE") return null;
 
   const app = mockApplicationStore.getBySellerId(eoPkg.eoId);
+  if (!app || app.status !== "APPROVED") return null;
+
   const eoSessions = mockEoPackageStore.getSessionsByPackage(eoPkg.packageId);
 
   const upcomingSessionPreviews: PackageSessionPreview[] = eoSessions.map(
@@ -162,15 +210,15 @@ export function buildTravelerPackageDetailFromEo(
     excludedItems: [...eoPkg.excludedItems],
     safetyNotes: [...eoPkg.safetyNotes],
     cancellationPolicySummary:
-      "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
+      "Kebijakan pembatalan spesifik belum tersedia pada prototype ini.",
     organizer: {
       id: organizerRef,
       displayName:
-        eoPkg.eoDisplayName || app?.businessName || "Mitra EO Terverifikasi",
+        eoPkg.eoDisplayName || app.businessName || "Mitra EO Terverifikasi",
       guideStatus: eoPkg.guideStatus,
       roleDescription: "Event Organizer Komunitas Wellness Terverifikasi",
       bioSummary:
-        app?.experienceDescription ||
+        app.experienceDescription ||
         "Penyelenggara perjalanan mindful terverifikasi JedaIn.",
     },
     destinationDetail: {
@@ -191,7 +239,6 @@ export function getCombinedCatalogPackages(
 
   for (const eoPkg of eoPackages) {
     if (eoPkg.status === "LIVE") {
-      // If packageId is already in static fixtures, static fixture takes precedence or can be updated
       const alreadyInStatic = fallbackPackages.some(
         (p) => p.id === eoPkg.packageId,
       );
@@ -224,7 +271,6 @@ export function getCombinedPackageDetails(
           combined[eoPkg.packageId] = detail;
         }
       } else {
-        // For slow_green_day or existing packages, ensure sessions from mockEoPackageStore are also bridged
         const eoSessions = mockEoPackageStore.getSessionsByPackage(
           eoPkg.packageId,
         );

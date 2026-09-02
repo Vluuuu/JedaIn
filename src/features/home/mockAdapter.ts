@@ -148,7 +148,7 @@ export class MockHomeAdapter implements HomeAdapter {
     // 4. Popular packages sorted by popularityRank
     let popularPackages = catalogPackages
       .filter((p) => p.status === "LIVE")
-      .sort((a, b) => b.popularityRank - a.popularityRank);
+      .sort((a, b) => (b.popularityRank ?? -1) - (a.popularityRank ?? -1));
 
     if (opts.shouldFailPopular) {
       moduleErrors.popular = "Gagal memuat paket populer.";

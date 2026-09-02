@@ -13,7 +13,7 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
     QUIZ_DURATION_OPTIONS.find((d) => d.value === packageData.durationType)
       ?.label ?? packageData.durationType;
 
-  const visual = getPackageVisual(packageData.id);
+  const visual = getPackageVisual(packageData.id, packageData.destinationName);
   const formattedPrice = `Rp${packageData.pricePerPerson.toLocaleString("id-ID")}`;
 
   return (

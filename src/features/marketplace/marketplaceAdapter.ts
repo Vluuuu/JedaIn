@@ -1,12 +1,10 @@
+import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockApplicationStore } from "../eo/mockApplicationStore";
 import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
 import { mockInsightStore } from "../eo/mockInsightStore";
 import type { DemandIntent, EoPackageRecord } from "../eo/types";
-import {
-  resolveDestinationReviewRef,
-  resolveOrganizerReviewRef,
-} from "../identity/identityResolvers";
+import { resolveOrganizerReviewRef } from "../identity/identityResolvers";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import type {
   PackageDetailSource,
@@ -101,22 +99,21 @@ function mapGroupTypes(types: string[]): GroupType[] {
 }
 
 /**
- * Derives real average rating from actual reviews for the package or destination/organizer.
+ * Derives real average rating from actual reviews specifically belonging to this package.
  */
-function deriveActualPackageRating(
-  eoPkg: EoPackageRecord,
-  destinationName: string,
-): number | null {
-  const destRef = resolveDestinationReviewRef(destinationName);
-  const orgRef = resolveOrganizerReviewRef(eoPkg.eoId);
+function deriveActualPackageRating(eoPkg: EoPackageRecord): number | null {
+  const allReviews = mockReviewStore.getAllReviews();
+  const packageRatings = allReviews
+    .filter((r) => {
+      const booking = mockTransactionStore.getBookingById(r.bookingId);
+      return booking && booking.packageId === eoPkg.packageId;
+    })
+    .map((r) => r.rating);
 
-  const destReviews = mockReviewStore.getReviewsForDestination(destRef);
-  const orgReviews = mockReviewStore.getReviewsForOrganizer(orgRef);
+  if (packageRatings.length === 0) return null;
 
-  const allRatings = [...destReviews, ...orgReviews].map((r) => r.rating);
-  if (allRatings.length === 0) return null;
-
-  const avg = allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length;
+  const avg =
+    packageRatings.reduce((sum, r) => sum + r, 0) / packageRatings.length;
   return Number(avg.toFixed(2));
 }
 
@@ -142,7 +139,7 @@ export function buildTravelerPackageFromEo(
   const departureAreas = mapTargetAreaToDepartureAreas(insight?.targetArea);
   const activityTags: PreferredActivity[] = [];
 
-  const actualRating = deriveActualPackageRating(eoPkg, dest.name);
+  const actualRating = deriveActualPackageRating(eoPkg);
 
   return {
     id: eoPkg.packageId,

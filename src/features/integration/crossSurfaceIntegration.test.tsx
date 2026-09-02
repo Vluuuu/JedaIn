@@ -26,6 +26,8 @@ import { defaultExploreAdapter } from "../explore/mockAdapter";
 import { defaultPackageDetailAdapter } from "../packageDetail/mockAdapter";
 import { defaultSessionSelectionAdapter } from "../sessionSelection/mockAdapter";
 import { defaultTripsAdapter } from "../trips/mockAdapter";
+import { defaultPaymentAdapter } from "../payment/mockAdapter";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { defaultReviewAdapter } from "../reviews/mockAdapter";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { sessionStore } from "../onboarding/sessionStore";
@@ -209,6 +211,59 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
       );
       expect(pubRes.success).toBe(true);
       expect(pubRes.package?.status).toBe("LIVE");
+    });
+  });
+
+  describe("2. Visual and Package-Scoped Rating Regressions", () => {
+    it("Dynamic package with unknown ID falls back to neutral JedaIn visual, NOT slow_green_day", () => {
+      const visual = getPackageVisual("pkg_totally_unknown_custom_xyz");
+      expect(visual.id).toBe("neutral_jedain_placeholder");
+      expect(visual.title).toBe("JedaIn Mindful Experience");
+      expect(visual.svgDataUri).toContain("JedaIn");
+    });
+
+    it("New package without its own reviews has rating=null even if destination/EO has reviews from another package", async () => {
+      // Seed a review for slow_green_day booking
+      mockReviewStore.submitReview({
+        bookingId: "bk_other_pkg_review",
+        travelerId: "usr_other_1",
+        targetType: "DESTINATION",
+        targetRef: "Lereng Hijau Batu",
+        rating: 5,
+        comment: "Bagus",
+      });
+
+      // Save a new package at the same destination
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const draft = mockEoPackageStore.saveDraft({
+        title: "Paket Baru Nol Review",
+        destinationId: "dest_lereng_hijau",
+        shortSummary: "Ringkasan paket baru 10 karakter.",
+        durationLabel: "1 hari",
+        itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi sesi" }],
+        safetyNotes: ["Aman"],
+        pricing: {
+          destinationBaseCost: 125000,
+          eoMargin: 100000,
+          customerPrice: 225000,
+        },
+      });
+      mockEoPackageStore.submitForReview(draft.package!.packageId);
+
+      adminSessionStore.loginAsDemoAdmin();
+      mockAdminDecisionService.approvePackage(
+        draft.package!.packageId,
+        "Approved",
+      );
+
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      mockEoPackageStore.publishApprovedPackage(draft.package!.packageId);
+
+      // Fetch via explore adapter
+      const res = await defaultExploreAdapter.getExplorePackages({});
+      const found = res.packages.find((p) => p.id === draft.package!.packageId);
+      expect(found).toBeDefined();
+      expect(found?.rating).toBeNull();
     });
   });
 
@@ -421,11 +476,20 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
       expect(checkoutRes.status).toBe("SUCCESS");
       const goldenBookingId = checkoutRes.bookingId!;
 
-      const payRes = mockTransactionStore.executePaymentSuccess({
-        bookingId: goldenBookingId,
-      });
+      // Payment Adapter verification: getPayment -> ACTIVE -> executePayment -> SUCCEEDED -> PAID
+      const paymentView =
+        await defaultPaymentAdapter.getPayment(goldenBookingId);
+      expect(paymentView.state).toBe("ACTIVE");
+      expect(paymentView.booking?.status).toBe("PENDING_PAYMENT");
+
+      const payRes =
+        await defaultPaymentAdapter.executePayment(goldenBookingId);
       expect(payRes.success).toBe(true);
-      expect(payRes.booking?.status).toBe("PAID");
+      expect(payRes.status).toBe("SUCCEEDED");
+
+      const updatedBooking =
+        mockTransactionStore.getBookingById(goldenBookingId);
+      expect(updatedBooking?.status).toBe("PAID");
 
       // 11. Proof across surfaces:
       // a. Traveler MyTrips sees booking

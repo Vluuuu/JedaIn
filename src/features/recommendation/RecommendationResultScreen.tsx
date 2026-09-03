@@ -121,7 +121,7 @@ export function RecommendationResultScreen({
         </div>
 
         <div className="recommendation-screen__container">
-          <main className="recommendation-error-card" role="alert">
+          <section className="recommendation-error-card" role="alert">
             <div className="recommendation-error-card__icon" aria-hidden="true">
               <svg
                 width="28"
@@ -149,7 +149,7 @@ export function RecommendationResultScreen({
             >
               <span>Coba lagi</span>
             </button>
-          </main>
+          </section>
         </div>
       </div>
     );
@@ -209,7 +209,7 @@ export function RecommendationResultScreen({
         </header>
 
         {/* DOMINANT HERO TOP RECOMMENDATION CARD */}
-        <main
+        <section
           className="recommendation-hero-card"
           aria-labelledby="top-package-title"
         >
@@ -339,7 +339,7 @@ export function RecommendationResultScreen({
               <span>Lihat Experience</span>
             </button>
           </div>
-        </main>
+        </section>
 
         {/* ALTERNATIVES DISCOVERY */}
         {alternatives.length > 0 && (

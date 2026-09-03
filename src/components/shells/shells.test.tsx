@@ -4,6 +4,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { TravelerAppShell } from "./TravelerAppShell";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { partnerEoNavigation } from "./navigation";
 
@@ -89,5 +90,61 @@ describe("responsive workspace navigation semantics", () => {
       view.querySelector(".workspace-sidebar")?.hasAttribute("data-open"),
     ).toBe(false);
     expect(document.activeElement).toBe(openButton);
+  });
+});
+
+describe("TravelerAppShell notification affordance", () => {
+  it("renders bell button with proper accessible label and no dot when no unread", async () => {
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+    await act(() =>
+      root.render(
+        createElement(
+          MemoryRouter,
+          undefined,
+          createElement(TravelerAppShell, {
+            hasUnreadNotification: false,
+          }),
+        ),
+      ),
+    );
+
+    const btn = container.querySelector<HTMLButtonElement>(
+      ".traveler-app-header__notification-btn",
+    );
+    expect(btn).not.toBeNull();
+    expect(btn?.getAttribute("aria-label")).toBe("Notifikasi");
+    expect(
+      container.querySelector(".traveler-app-header__notification-dot"),
+    ).toBeNull();
+  });
+
+  it("renders bell button with unread label and red dot when has unread", async () => {
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+    await act(() =>
+      root.render(
+        createElement(
+          MemoryRouter,
+          undefined,
+          createElement(TravelerAppShell, {
+            hasUnreadNotification: true,
+          }),
+        ),
+      ),
+    );
+
+    const btn = container.querySelector<HTMLButtonElement>(
+      ".traveler-app-header__notification-btn",
+    );
+    expect(btn).not.toBeNull();
+    expect(btn?.getAttribute("aria-label")).toBe(
+      "Notifikasi, ada notifikasi baru",
+    );
+    expect(
+      container.querySelector(".traveler-app-header__notification-dot"),
+    ).not.toBeNull();
   });
 });

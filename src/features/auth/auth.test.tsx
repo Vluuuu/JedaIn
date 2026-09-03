@@ -13,6 +13,14 @@ let root: Root;
 
 beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+
+  HTMLDialogElement.prototype.showModal ??= function showModal() {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close ??= function close() {
+    this.removeAttribute("open");
+    this.dispatchEvent(new Event("close"));
+  };
 });
 
 afterEach(async () => {
@@ -43,16 +51,41 @@ async function renderScreen(
 }
 
 describe("TravelerLoginScreen UI & Auth Flows", () => {
-  it("renders Google primary action, phone OTP input, and partner secondary link without guest button", async () => {
+  it("renders SIGN IN / SIGN UP tabs, Email, Password, and Google social login without Apple or Guest button", async () => {
     const view = await renderScreen();
 
-    expect(view.textContent).toContain("Masuk ke JedaIn");
-    expect(view.textContent).toContain("Lanjut dengan Google");
-    expect(view.querySelector('input[type="tel"]')).not.toBeNull();
-    expect(view.textContent).toContain("Masuk sebagai Partner");
-    expect(view.textContent).not.toContain("Traveler Portal");
+    // Check tabs
+    expect(view.querySelector("#tab-sign-in")).not.toBeNull();
+    expect(view.querySelector("#tab-sign-up")).not.toBeNull();
+    expect(view.textContent).toContain("SIGN IN");
+    expect(view.textContent).toContain("SIGN UP");
+
+    // Check fields
+    expect(view.querySelector('input[name="email"]')).not.toBeNull();
+    expect(view.querySelector('input[name="password"]')).not.toBeNull();
+
+    // Check forgot password action
+    expect(view.querySelector(".auth-forgot-link")).not.toBeNull();
+    expect(view.querySelector(".auth-forgot-link")?.textContent).toBe(
+      "Forgot password?",
+    );
+
+    // Check primary button & divider
+    expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
+      "SIGN IN",
+    );
+    expect(view.textContent).toContain("or continue with");
+
+    // Check social login: Google only, NO Apple
+    expect(view.textContent).toContain("Continue with Google");
+    expect(view.textContent).not.toContain("Apple");
+    expect(view.textContent).not.toContain("Continue with Apple");
     expect(view.textContent).not.toContain("Tamu");
     expect(view.textContent).not.toContain("Guest");
+
+    // Check bottom prompt
+    expect(view.textContent).toContain("Don't have an account?");
+    expect(view.textContent).toContain("Sign up");
   });
 
   it("handles Google OAuth success and triggers onboarding redirect for new user", async () => {
@@ -63,7 +96,7 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
 
     const view = await renderScreen({ adapter, onSuccess });
     const googleBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Lanjut dengan Google"),
+      b.textContent?.includes("Continue with Google"),
     )!;
 
     await act(() => googleBtn.click());
@@ -82,7 +115,7 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
 
     const view = await renderScreen({ adapter, onSuccess });
     const googleBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Lanjut dengan Google"),
+      b.textContent?.includes("Continue with Google"),
     )!;
 
     await act(() => googleBtn.click());
@@ -100,171 +133,45 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
 
     const view = await renderScreen({ adapter });
     const googleBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Lanjut dengan Google"),
+      b.textContent?.includes("Continue with Google"),
     )!;
 
     await act(() => googleBtn.click());
 
     expect(view.querySelector('[role="alert"]')).toBeNull();
-    expect(view.textContent).not.toContain("Gagal masuk dengan Google");
+    expect(view.textContent).not.toContain("Failed to sign in with Google");
   });
 
-  it("handles recoverable error without clearing phone input", async () => {
-    const adapter = new MockAuthAdapter({
-      shouldFailPhoneRequest: true,
-      errorMessage: "Jaringan bermasalah, silakan coba lagi.",
-    });
-
-    const view = await renderScreen({ adapter });
-    const phoneInput =
-      view.querySelector<HTMLInputElement>('input[type="tel"]')!;
-
-    await act(() => {
-      phoneInput.value = "081299887766";
-      phoneInput.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-
-    const form = view.querySelector<HTMLFormElement>(
-      'form[aria-label="Masuk dengan nomor HP"]',
-    )!;
-    await act(() => {
-      form.dispatchEvent(
-        new Event("submit", { bubbles: true, cancelable: true }),
-      );
-    });
-
-    expect(view.textContent).toContain(
-      "Jaringan bermasalah, silakan coba lagi.",
-    );
-    expect(phoneInput.value).toBe("081299887766");
-  });
-
-  it("isolates errors between phone OTP and email methods", async () => {
-    const adapter = new MockAuthAdapter({
-      shouldFailPhoneRequest: true,
-      errorMessage: "Error khusus nomor HP.",
-      shouldFailEmail: true,
-    });
-
-    const view = await renderScreen({ adapter, enableEmailAuth: true });
-    const phoneInput =
-      view.querySelector<HTMLInputElement>('input[type="tel"]')!;
-
-    await act(() => {
-      phoneInput.value = "0812345678";
-      phoneInput.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-
-    const phoneForm = view.querySelector<HTMLFormElement>(
-      'form[aria-label="Masuk dengan nomor HP"]',
-    )!;
-    await act(() => {
-      phoneForm.dispatchEvent(
-        new Event("submit", { bubbles: true, cancelable: true }),
-      );
-    });
-
-    const phoneField = view.querySelector(".ui-field:has(input[type='tel'])");
-    const emailField = view.querySelector(".ui-field:has(input[type='email'])");
-
-    expect(phoneField?.textContent).toContain("Error khusus nomor HP.");
-    expect(emailField?.textContent).not.toContain("Error khusus nomor HP.");
-  });
-
-  it("maintains method-specific loading without showing Google loading label during phone OTP request", async () => {
-    let resolvePhone: () => void;
-    const adapter = new MockAuthAdapter();
-    adapter.requestPhoneOtp = () =>
-      new Promise((resolve) => {
-        resolvePhone = () =>
-          resolve({ phone: "08123456789", verificationId: "v1" });
-      });
-
-    const view = await renderScreen({ adapter });
-    const phoneInput =
-      view.querySelector<HTMLInputElement>('input[type="tel"]')!;
-
-    await act(() => {
-      phoneInput.value = "08123456789";
-      phoneInput.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-
-    const phoneForm = view.querySelector<HTMLFormElement>(
-      'form[aria-label="Masuk dengan nomor HP"]',
-    )!;
-
-    // Trigger submit without awaiting immediately
-    let submitPromise: Promise<void>;
-    act(() => {
-      submitPromise = new Promise((resolve) => {
-        phoneForm.dispatchEvent(
-          new Event("submit", { bubbles: true, cancelable: true }),
-        );
-        resolve();
-      });
-    });
-
-    const googleBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-      b.className.includes("auth-google-button"),
-    )!;
-    const phoneBtn = Array.from(phoneForm.querySelectorAll("button")).find(
-      (b) => b.type === "submit",
-    )!;
-
-    expect(googleBtn.disabled).toBe(true);
-    expect(googleBtn.textContent).toContain("Lanjut dengan Google");
-    expect(googleBtn.textContent).not.toContain("Menghubungkan Google");
-    expect(phoneBtn.textContent).toContain("Mengirim kode...");
-
-    await act(async () => {
-      resolvePhone!();
-      await submitPromise!;
-    });
-  });
-
-  it("executes full Phone OTP flow: request -> enter OTP -> verify -> redirect", async () => {
+  it("executes email and password sign in flow successfully", async () => {
     const onSuccess = vi.fn();
     const adapter = new MockAuthAdapter({
-      mockUser: { isNewUser: false, onboardingStatus: "IN_PROGRESS" },
+      mockUser: {
+        id: "usr_email_123",
+        isNewUser: false,
+        onboardingStatus: "IN_PROGRESS",
+      },
     });
 
     const view = await renderScreen({ adapter, onSuccess });
-    const phoneInput =
-      view.querySelector<HTMLInputElement>('input[type="tel"]')!;
+    const emailInput = view.querySelector<HTMLInputElement>(
+      'input[name="email"]',
+    )!;
+    const passwordInput = view.querySelector<HTMLInputElement>(
+      'input[name="password"]',
+    )!;
 
     await act(() => {
-      phoneInput.value = "081234567890";
-      phoneInput.dispatchEvent(new Event("change", { bubbles: true }));
+      emailInput.value = "user@example.com";
+      emailInput.dispatchEvent(new Event("input", { bubbles: true }));
+      emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+      passwordInput.value = "validpass123";
+      passwordInput.dispatchEvent(new Event("input", { bubbles: true }));
+      passwordInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
-    const reqForm = view.querySelector<HTMLFormElement>(
-      'form[aria-label="Masuk dengan nomor HP"]',
-    )!;
+    const form = view.querySelector<HTMLFormElement>(".auth-form")!;
     await act(() => {
-      reqForm.dispatchEvent(
-        new Event("submit", { bubbles: true, cancelable: true }),
-      );
-    });
-
-    // Verify OTP_SENT state UI is rendered
-    expect(view.textContent).toContain("081234567890");
-    expect(
-      view.querySelector('input[autoComplete="one-time-code"]'),
-    ).not.toBeNull();
-
-    const otpInput = view.querySelector<HTMLInputElement>(
-      'input[autoComplete="one-time-code"]',
-    )!;
-    await act(() => {
-      otpInput.value = "123456";
-      otpInput.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-
-    const verifyForm = view.querySelector<HTMLFormElement>(
-      'form[aria-label="Verifikasi kode OTP"]',
-    )!;
-    await act(() => {
-      verifyForm.dispatchEvent(
+      form.dispatchEvent(
         new Event("submit", { bubbles: true, cancelable: true }),
       );
     });
@@ -275,43 +182,105 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     );
   });
 
-  it("renders SIGN IN / SIGN UP tabs and toggles active state cleanly", async () => {
-    const view = await renderScreen();
+  it("handles password login failure with clear error message", async () => {
+    const adapter = new MockAuthAdapter({
+      shouldFailPasswordLogin: true,
+      errorMessage: "Invalid email or password.",
+    });
 
-    const signInTab = view.querySelector<HTMLButtonElement>("#tab-sign-in");
-    const signUpTab = view.querySelector<HTMLButtonElement>("#tab-sign-up");
+    const view = await renderScreen({ adapter });
+    const emailInput = view.querySelector<HTMLInputElement>(
+      'input[name="email"]',
+    )!;
+    const passwordInput = view.querySelector<HTMLInputElement>(
+      'input[name="password"]',
+    )!;
 
-    expect(signInTab).not.toBeNull();
-    expect(signUpTab).not.toBeNull();
-    expect(signInTab?.getAttribute("aria-selected")).toBe("true");
-    expect(signUpTab?.getAttribute("aria-selected")).toBe("false");
-    expect(view.textContent).toContain("Masuk ke JedaIn");
+    await act(() => {
+      emailInput.value = "user@example.com";
+      emailInput.dispatchEvent(new Event("input", { bubbles: true }));
+      emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+      passwordInput.value = "wrongpass";
+      passwordInput.dispatchEvent(new Event("input", { bubbles: true }));
+      passwordInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
 
-    // Click SIGN UP tab
-    await act(() => signUpTab?.click());
+    const form = view.querySelector<HTMLFormElement>(".auth-form")!;
+    await act(() => {
+      form.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+    });
 
-    expect(signInTab?.getAttribute("aria-selected")).toBe("false");
-    expect(signUpTab?.getAttribute("aria-selected")).toBe("true");
-    expect(view.textContent).toContain("Daftar JedaIn");
-
-    // Click bottom switch link to return to SIGN IN
-    const switchBtn = view.querySelector<HTMLButtonElement>(
-      ".auth-inline-switch-btn",
-    );
-    expect(switchBtn?.textContent).toContain("Masuk ke akun");
-    await act(() => switchBtn?.click());
-
-    expect(signInTab?.getAttribute("aria-selected")).toBe("true");
-    expect(view.textContent).toContain("Masuk ke JedaIn");
+    const errorAlert = view.querySelector('[role="alert"]');
+    expect(errorAlert?.textContent).toContain("Invalid email or password.");
   });
 
-  it("shows email magic link only when enableEmailAuth is true", async () => {
-    const viewDefault = await renderScreen({ enableEmailAuth: false });
-    expect(viewDefault.querySelector('input[type="email"]')).toBeNull();
+  it("toggles between SIGN IN and SIGN UP tabs and updates UI copy accordingly", async () => {
+    const view = await renderScreen();
 
-    await act(() => root.unmount());
+    const signInTab = view.querySelector<HTMLButtonElement>("#tab-sign-in")!;
+    const signUpTab = view.querySelector<HTMLButtonElement>("#tab-sign-up")!;
 
-    const viewWithEmail = await renderScreen({ enableEmailAuth: true });
-    expect(viewWithEmail.querySelector('input[type="email"]')).not.toBeNull();
+    expect(signInTab.getAttribute("aria-selected")).toBe("true");
+    expect(signUpTab.getAttribute("aria-selected")).toBe("false");
+    expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
+      "SIGN IN",
+    );
+    expect(view.querySelector(".auth-forgot-link")).not.toBeNull();
+    expect(view.textContent).toContain("Don't have an account?");
+
+    // Click SIGN UP
+    await act(() => signUpTab.click());
+
+    expect(signInTab.getAttribute("aria-selected")).toBe("false");
+    expect(signUpTab.getAttribute("aria-selected")).toBe("true");
+    expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
+      "SIGN UP",
+    );
+    expect(view.querySelector(".auth-forgot-link")).toBeNull();
+    expect(view.textContent).toContain("Already have an account? Sign in");
+
+    // Click bottom switch link to switch back to SIGN IN
+    const switchBtn = view.querySelector<HTMLButtonElement>(
+      ".auth-switch-action",
+    )!;
+    await act(() => switchBtn.click());
+
+    expect(signInTab.getAttribute("aria-selected")).toBe("true");
+    expect(signUpTab.getAttribute("aria-selected")).toBe("false");
+    expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
+      "SIGN IN",
+    );
+  });
+
+  it("opens Forgot Password modal when clicking forgot password link", async () => {
+    const view = await renderScreen();
+
+    const forgotLink =
+      view.querySelector<HTMLButtonElement>(".auth-forgot-link")!;
+    await act(() => forgotLink.click());
+
+    expect(view.querySelector("dialog[open]")).not.toBeNull();
+    expect(view.textContent).toContain("Password recovery functionality");
+  });
+
+  it("toggles password visibility with eye icon button", async () => {
+    const view = await renderScreen();
+
+    const passwordInput = view.querySelector<HTMLInputElement>(
+      'input[name="password"]',
+    )!;
+    expect(passwordInput.type).toBe("password");
+
+    const toggleBtn = view.querySelector<HTMLButtonElement>(
+      ".auth-password-toggle",
+    )!;
+    await act(() => toggleBtn.click());
+
+    expect(passwordInput.type).toBe("text");
+
+    await act(() => toggleBtn.click());
+    expect(passwordInput.type).toBe("password");
   });
 });

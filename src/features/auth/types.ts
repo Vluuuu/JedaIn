@@ -13,7 +13,7 @@ export type AuthState =
   "IDLE" | "AUTHENTICATING" | "OTP_SENT" | "OTP_VERIFYING" | "ERROR";
 
 export type AuthMethod =
-  "GOOGLE" | "PHONE_REQUEST" | "PHONE_VERIFY" | "EMAIL" | null;
+  "GOOGLE" | "PHONE_REQUEST" | "PHONE_VERIFY" | "EMAIL" | "PASSWORD" | null;
 
 export type AuthErrorCode =
   "CANCELLED" | "NETWORK" | "PROVIDER_ERROR" | "INVALID_INPUT";
@@ -35,6 +35,8 @@ export interface PhoneOtpSession {
 
 export interface AuthAdapter {
   loginWithGoogle(): Promise<AuthUser>;
+  loginWithPassword?(email: string, password: string): Promise<AuthUser>;
+  signupWithPassword?(email: string, password: string): Promise<AuthUser>;
   requestPhoneOtp(phone: string): Promise<PhoneOtpSession>;
   verifyPhoneOtp(params: {
     phone: string;

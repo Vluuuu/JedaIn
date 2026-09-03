@@ -64,10 +64,15 @@ export function OtpVerificationForm({
       noValidate
       aria-label="Verifikasi kode OTP"
     >
-      <div className="contact-verification-info-box">
-        <p>
-          Kode verifikasi telah dikirim ke <strong>{session.phone}</strong>
-        </p>
+      <div className="contact-verification-info-row">
+        <div className="contact-verification-info-text">
+          <span className="contact-verification-info-label">
+            Kode verifikasi telah dikirim ke
+          </span>
+          <strong className="contact-verification-info-phone">
+            {session.phone}
+          </strong>
+        </div>
         <button
           type="button"
           className="contact-verification-change-phone-btn"

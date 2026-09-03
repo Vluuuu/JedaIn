@@ -32,11 +32,6 @@ export function PhoneEntryForm({
       noValidate
       aria-label="Form nomor telepon"
     >
-      <p className="contact-verification-explanation">
-        Nomor HP digunakan untuk kebutuhan trip dan notifikasi terkait
-        pemesanan.
-      </p>
-
       <TextField
         id="contact-phone-input"
         name="phone"

@@ -939,8 +939,260 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(container.textContent).toContain("Terverifikasi");
   });
 
+  // CHECKOUT DRAFT CONTINUITY ACROSS T11 (REGRESSION TESTS)
+  it("29. preserves participantCount, policy acknowledgement, and idempotencyKey across T10 -> T11 -> T10 roundtrip", async () => {
+    const traveler: AuthUser = {
+      id: "usr_draft_cont",
+      name: "Draft Traveler",
+      email: "draft@example.com",
+      phone: "08123456789",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    let currentPath = "";
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    const checkoutAdapter = new MockCheckoutAdapter({
+      travelerOverride: traveler,
+    });
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/checkout/ses_sgd_1"] },
+          createElement(LocationObserver, {
+            onLocation: (p) => {
+              currentPath = p;
+            },
+          }),
+          createElement(Routes, undefined, [
+            createElement(Route, {
+              path: "/checkout/:sessionId",
+              element: createElement(CheckoutScreen, {
+                adapter: checkoutAdapter,
+              }),
+            }),
+            createElement(Route, {
+              path: "/checkout/:sessionId/contact",
+              element: createElement(ContactVerificationScreen),
+            }),
+            createElement(Route, {
+              path: "/payment/:bookingId",
+              element: createElement("div", undefined, "Payment Screen Target"),
+            }),
+          ]),
+        ),
+      );
+    });
+
+    // Set participantCount = 3
+    const incBtn = container.querySelector<HTMLButtonElement>(
+      'button[aria-label="Tambah jumlah peserta"]',
+    )!;
+    await act(async () => {
+      incBtn.click();
+    });
+    await act(async () => {
+      incBtn.click();
+    });
+
+    const quantityDisplay = container.querySelector("#participant-count-val");
+    expect(quantityDisplay?.textContent).toBe("3");
+
+    // Check policy
+    const policyCb = container.querySelector<HTMLInputElement>(
+      "#cancellation-policy-ack",
+    )!;
+    await act(async () => {
+      policyCb.click();
+    });
+    expect(policyCb.checked).toBe(true);
+
+    // Click Lanjut ke Pembayaran -> goes to T11
+    const ctaBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut ke Pembayaran"),
+    )!;
+    await act(async () => {
+      ctaBtn.click();
+    });
+
+    expect(currentPath).toBe("/checkout/ses_sgd_1/contact");
+
+    // Complete T11 OTP verification
+    const reqOtpBtn = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-submit-btn",
+    )!;
+    await act(async () => {
+      reqOtpBtn.click();
+    });
+
+    const otpInput =
+      container.querySelector<HTMLInputElement>("#contact-otp-input")!;
+    await act(async () => {
+      otpInput.value = "123456";
+      otpInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    const verifyOtpBtn = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-submit-btn",
+    )!;
+    await act(async () => {
+      verifyOtpBtn.click();
+    });
+
+    // Returned to Checkout
+    expect(currentPath).toBe("/checkout/ses_sgd_1");
+    expect(container.textContent).toContain("Terverifikasi");
+
+    // ASSERTION A: participantCount remains 3!
+    const restoredQty = container.querySelector("#participant-count-val");
+    expect(restoredQty?.textContent).toBe("3");
+
+    // ASSERTION B: policyAcknowledged remains true!
+    const restoredCb = container.querySelector<HTMLInputElement>(
+      "#cancellation-policy-ack",
+    )!;
+    expect(restoredCb.checked).toBe(true);
+
+    // ASSERTION C: second submit proceeds to Payment!
+    const finalCta = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
+    )!;
+    expect(finalCta.disabled).toBe(false);
+
+    await act(async () => {
+      finalCta.click();
+    });
+
+    // Navigates away to payment!
+    expect(currentPath).toMatch(/^\/payment\/bk_/);
+    expect(container.textContent).toContain("Payment Screen Target");
+    expect(mockTransactionStore.getBookings().length).toBe(1);
+    expect(mockTransactionStore.getBookings()[0].participantCount).toBe(3);
+  });
+
+  it("30. draft for session A does NOT hydrate session B", async () => {
+    sessionStore.setUser({
+      id: "usr_session_mismatch",
+      onboardingStatus: "COMPLETED",
+    });
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          {
+            initialEntries: [
+              {
+                pathname: "/checkout/ses_sgd_2",
+                state: {
+                  checkoutDraft: {
+                    sessionId: "ses_sgd_1", // Different session ID!
+                    participantCount: 5,
+                    policyAcknowledged: true,
+                    idempotencyKey: "k_foreign",
+                  },
+                },
+              },
+            ],
+          },
+          createElement(Routes, undefined, [
+            createElement(Route, {
+              path: "/checkout/:sessionId",
+              element: createElement(CheckoutScreen),
+            }),
+          ]),
+        ),
+      );
+    });
+
+    // Must NOT hydrate from mismatching session ID
+    const quantityDisplay = container.querySelector("#participant-count-val");
+    expect(quantityDisplay?.textContent).toBe("1");
+    const policyCb = container.querySelector<HTMLInputElement>(
+      "#cancellation-policy-ack",
+    )!;
+    expect(policyCb.checked).toBe(false);
+  });
+
+  it("31. back button from T11 preserves supplied draft on return to Checkout", async () => {
+    const traveler: AuthUser = {
+      id: "usr_back_draft",
+      phone: "08123456789",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    let currentPath = "";
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          {
+            initialEntries: [
+              {
+                pathname: "/checkout/ses_sgd_1/contact",
+                state: {
+                  checkoutDraft: {
+                    sessionId: "ses_sgd_1",
+                    participantCount: 4,
+                    policyAcknowledged: true,
+                    idempotencyKey: "k_back_preserve",
+                  },
+                },
+              },
+            ],
+          },
+          createElement(LocationObserver, {
+            onLocation: (p) => {
+              currentPath = p;
+            },
+          }),
+          createElement(Routes, undefined, [
+            createElement(Route, {
+              path: "/checkout/:sessionId",
+              element: createElement(CheckoutScreen),
+            }),
+            createElement(Route, {
+              path: "/checkout/:sessionId/contact",
+              element: createElement(ContactVerificationScreen),
+            }),
+          ]),
+        ),
+      );
+    });
+
+    // Click "Kembali ke Checkout"
+    const backBtn = container.querySelector<HTMLAnchorElement>(
+      ".contact-verification-back-btn",
+    )!;
+    await act(async () => {
+      backBtn.click();
+    });
+
+    expect(currentPath).toBe("/checkout/ses_sgd_1");
+    const restoredQty = container.querySelector("#participant-count-val");
+    expect(restoredQty?.textContent).toBe("4");
+    const restoredCb = container.querySelector<HTMLInputElement>(
+      "#cancellation-policy-ack",
+    )!;
+    expect(restoredCb.checked).toBe(true);
+  });
+
   // ACCESSIBILITY & SEMANTICS
-  it("28. accessible inputs, tel semantics, and one-time-code autocomplete", async () => {
+  it("32. accessible inputs, tel semantics, and one-time-code autocomplete", async () => {
     sessionStore.setUser({
       id: "usr_a11y",
       phone: "08123456789",

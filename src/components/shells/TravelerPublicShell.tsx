@@ -6,47 +6,68 @@ import "./shells.css";
 
 export interface TravelerPublicShellProps {
   children?: ReactNode;
+  variant?: "default" | "opening";
 }
 
-export function TravelerPublicShell({ children }: TravelerPublicShellProps) {
+export function TravelerPublicShell({
+  children,
+  variant = "default",
+}: TravelerPublicShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const isOpening = variant === "opening";
 
   return (
-    <div className="traveler-public-shell">
-      <header className="public-header">
-        <Link className="brand-mark" to="/" aria-label="JedaIn, halaman utama">
-          JedaIn<span aria-hidden="true">.</span>
-        </Link>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="shell-icon-button public-header__menu"
-          aria-label={menuOpen ? "Tutup menu utama" : "Buka menu utama"}
-          aria-expanded={menuOpen}
-          aria-controls="public-navigation"
-          onClick={() => setMenuOpen((current) => !current)}
-        >
-          {menuOpen ? <CloseIcon /> : <MenuIcon />}
-        </Button>
-        <nav
-          id="public-navigation"
-          className="public-navigation"
-          data-open={menuOpen || undefined}
-          aria-label="Navigasi publik"
-        >
-          <NavLink to="/explore">Explore</NavLink>
-          <a href="/#tentang">Tentang JedaIn</a>
-          <NavLink to="/partner">Untuk Partner</NavLink>
+    <div
+      className={`traveler-public-shell${isOpening ? " traveler-public-shell--opening" : ""}`}
+    >
+      {!isOpening && (
+        <header className="public-header">
           <Link
-            className="public-navigation__auth"
-            to="/login"
-            onClick={() => setMenuOpen(false)}
+            className="brand-mark"
+            to="/"
+            aria-label="JedaIn, halaman utama"
           >
-            Masuk / Daftar
+            JedaIn<span aria-hidden="true">.</span>
           </Link>
-        </nav>
-      </header>
-      <main className="public-content">{children ?? <Outlet />}</main>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="shell-icon-button public-header__menu"
+            aria-label={menuOpen ? "Tutup menu utama" : "Buka menu utama"}
+            aria-expanded={menuOpen}
+            aria-controls="public-navigation"
+            onClick={() => setMenuOpen((current) => !current)}
+          >
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+          </Button>
+          <nav
+            id="public-navigation"
+            className="public-navigation"
+            data-open={menuOpen || undefined}
+            aria-label="Navigasi publik"
+          >
+            <NavLink to="/explore">Explore</NavLink>
+            <a href="/#tentang">Tentang JedaIn</a>
+            <NavLink to="/partner">Untuk Partner</NavLink>
+            <Link
+              className="public-navigation__auth"
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+            >
+              Masuk / Daftar
+            </Link>
+          </nav>
+        </header>
+      )}
+      <main
+        className={
+          isOpening
+            ? "public-content public-content--opening"
+            : "public-content"
+        }
+      >
+        {children ?? <Outlet />}
+      </main>
     </div>
   );
 }

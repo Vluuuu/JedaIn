@@ -186,22 +186,23 @@ Suggested message hierarchy:
 
 ### Layout
 
-- JedaIn logo
-- Heading: `Masuk atau mulai perjalananmu`
-- Google OAuth button
-- Divider `atau`
-- Phone OTP option
-- Email/magic-link option jika diaktifkan MVP
-- Link Privacy Policy / Terms
+- JedaIn leaf brand mark
+- Mode tabs: `SIGN IN` / `SIGN UP`
+- Email & Password input fields (+ Name & Confirm Password on `SIGN UP`)
+- Primary CTA: `SIGN IN` / `SIGN UP`
+- Divider `or continue with`
+- Google OAuth button: `Continue with Google`
+- Mode switch link
+- Link Terms & Conditions / Privacy Policy dialogs + Partner portal link
 
 ### Primary CTA
 
-**Continue with Google**
+**SIGN IN / SIGN UP (or Continue with Google)**
 
 ### Secondary actions
 
-- Continue with phone
-- Continue with email
+- Continue with Google
+- Mode switch (Sign in / Sign up)
 
 ### Rules
 

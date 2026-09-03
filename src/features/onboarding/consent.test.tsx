@@ -62,12 +62,11 @@ describe("TravelerConsentScreen UI & State Transitions", () => {
 
     expect(checkbox.checked).toBe(false);
     expect(submitBtn.disabled).toBe(true);
-    expect(view.textContent).toContain(
-      "Persetujuan Penggunaan Data Preferensi",
-    );
+    expect(view.textContent).toContain("Kenali jeda yang cocok untukmu");
     expect(view.textContent).toContain("Rekomendasi Personal");
-    expect(view.textContent).toContain("Wawasan Kebutuhan Agregat");
-    expect(view.textContent).toContain("Penyempurnaan Layanan");
+    expect(view.textContent).toContain("Wawasan Kebutuhan");
+    expect(view.textContent).toContain("Pengembangan JedaIn");
+    expect(view.textContent).toContain("SETUJU & LANJUT");
   });
 
   it("enables primary CTA when consent checkbox is checked and submits successfully", async () => {

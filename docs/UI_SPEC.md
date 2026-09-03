@@ -351,13 +351,14 @@ Required content:
 
 ### Layout hierarchy
 
-1. Logo
-2. Short value statement
-3. Google OAuth primary button
-4. Divider `atau`
-5. Phone/email authentication alternative
-6. Terms/privacy links
-7. Small Partner Portal link
+1. JedaIn leaf brand mark
+2. SIGN IN / SIGN UP mode tabs
+3. Email and Password fields (+ Name and Confirm Password in SIGN UP mode)
+4. Primary CTA: `SIGN IN` / `SIGN UP`
+5. Divider `or continue with`
+6. Continue with Google primary social button
+7. Contextual switch prompt ("Don't have an account? Sign up" / "Already have an account? Sign in")
+8. Terms & Conditions / Privacy Policy dialog links + Partner Portal link
 
 ### Required states
 

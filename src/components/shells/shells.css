@@ -53,6 +53,11 @@
   border-bottom: 1px solid var(--color-border-default);
 }
 
+.distraction-free-shell--no-header > main,
+.distraction-free-shell__main--full {
+  min-height: 100svh;
+}
+
 .public-header__menu {
   display: grid;
 }
@@ -109,6 +114,26 @@
   width: min(100%, 75rem);
   margin-inline: auto;
   padding: var(--space-6) var(--space-4);
+}
+
+.traveler-public-shell--opening {
+  position: relative;
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+  color: var(--color-sand-50);
+  background: var(--color-forest-950);
+}
+
+.public-content--opening {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .traveler-app-shell {
@@ -433,7 +458,7 @@
     margin-left: var(--space-2);
   }
 
-  .public-content,
+  .public-content:not(.public-content--opening),
   .traveler-app-content {
     padding: var(--space-8);
   }

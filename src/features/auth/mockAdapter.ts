@@ -12,6 +12,8 @@ export interface MockAuthAdapterOptions {
   shouldFailPhoneRequest?: boolean;
   shouldFailPhoneVerify?: boolean;
   shouldFailEmail?: boolean;
+  shouldFailPasswordLogin?: boolean;
+  shouldFailPasswordSignup?: boolean;
   errorMessage?: string;
   delayMs?: number;
 }
@@ -50,6 +52,69 @@ export class MockAuthAdapter implements AuthAdapter {
       isNewUser: this.options.mockUser?.isNewUser ?? true,
       onboardingStatus:
         this.options.mockUser?.onboardingStatus ?? "NOT_STARTED",
+      ...this.options.mockUser,
+    };
+  }
+
+  async loginWithPassword(email: string, password: string): Promise<AuthUser> {
+    await this.delay();
+    const cleanEmail = email.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      throw new AuthError("Format email tidak valid.", "INVALID_INPUT");
+    }
+    if (!cleanPass) {
+      throw new AuthError("Password wajib diisi.", "INVALID_INPUT");
+    }
+
+    if (this.options.shouldFailPasswordLogin || cleanPass === "invalid") {
+      throw new AuthError(
+        this.options.errorMessage ?? "Email atau password salah.",
+        "PROVIDER_ERROR",
+      );
+    }
+
+    return {
+      id: "usr_pass_default",
+      name: cleanEmail.split("@")[0],
+      email: cleanEmail,
+      isNewUser: this.options.mockUser?.isNewUser ?? false,
+      onboardingStatus: this.options.mockUser?.onboardingStatus ?? "COMPLETED",
+      ...this.options.mockUser,
+    };
+  }
+
+  async signupWithPassword(
+    email: string,
+    password: string,
+    name?: string,
+  ): Promise<AuthUser> {
+    await this.delay();
+    const cleanEmail = email.trim();
+    const cleanPass = password.trim();
+    const cleanName = name?.trim() || cleanEmail.split("@")[0] || "Traveler";
+
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      throw new AuthError("Format email tidak valid.", "INVALID_INPUT");
+    }
+    if (!cleanPass || cleanPass.length < 6) {
+      throw new AuthError("Password minimal 6 karakter.", "INVALID_INPUT");
+    }
+
+    if (this.options.shouldFailPasswordSignup) {
+      throw new AuthError(
+        this.options.errorMessage ?? "Pendaftaran gagal. Silakan coba lagi.",
+        "PROVIDER_ERROR",
+      );
+    }
+
+    return {
+      id: "usr_signup_default",
+      email: cleanEmail,
+      isNewUser: true,
+      onboardingStatus: "NOT_STARTED",
+      name: this.options.mockUser?.name ?? cleanName,
       ...this.options.mockUser,
     };
   }

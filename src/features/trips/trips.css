@@ -1,3 +1,480 @@
+/* ==========================================================================
+   JedaIn Traveler My Trips (T16) & Trip Detail (T17/T18) Styles
+   Strictly scoped to prevent regressions on Trip Detail.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   T16 Scoped: My Trips Page Container & Header
+   -------------------------------------------------------------------------- */
+.my-trips-container {
+  width: 100%;
+  max-width: 48rem;
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-4)
+    calc(var(--space-12) + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .my-trips-container {
+    padding-top: var(--space-6);
+  }
+}
+
+.my-trips-header {
+  margin-bottom: var(--space-6);
+}
+
+.my-trips-title {
+  font-size: var(--font-size-heading-lg);
+  line-height: var(--line-height-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0 0 var(--space-1) 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+@media (min-width: 768px) {
+  .my-trips-title {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+}
+
+.my-trips-subtitle {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.my-trips-skeleton-subtitle {
+  margin-top: var(--space-2);
+}
+
+.my-trips-tabs-skeleton {
+  margin-bottom: var(--space-6);
+}
+
+/* --------------------------------------------------------------------------
+   T16 Scoped: Inline Lifecycle Status System
+   -------------------------------------------------------------------------- */
+.my-trips-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.my-trips-status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.my-trips-status-dot--pending {
+  background-color: var(--color-warning-solid);
+}
+
+.my-trips-status-dot--upcoming {
+  background-color: var(--color-forest-700);
+}
+
+.my-trips-status-dot--completed {
+  background-color: var(--color-stone-500);
+}
+
+.my-trips-status-dot--history {
+  background-color: var(--color-stone-400);
+}
+
+.my-trips-status--pending .my-trips-status-text {
+  color: var(--color-warning-text);
+}
+
+.my-trips-status-text {
+  color: var(--color-stone-600);
+}
+
+/* --------------------------------------------------------------------------
+   T16 Scoped: Special Pending Payment Card (Outside Tabs)
+   -------------------------------------------------------------------------- */
+.my-trips-pending-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-stone-300);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .my-trips-pending-card {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.my-trips-pending-card__thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .my-trips-pending-card__thumb {
+    width: 12rem;
+    aspect-ratio: auto;
+  }
+}
+
+.my-trips-pending-card__body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.my-trips-pending-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.my-trips-pending-card__title {
+  font-size: var(--font-size-heading-sm);
+  line-height: 1.35;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0;
+}
+
+.my-trips-pending-card__meta {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-500);
+  margin: 0;
+}
+
+.my-trips-pending-card__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-stone-200);
+}
+
+@media (min-width: 480px) {
+  .my-trips-pending-card__footer {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+}
+
+.my-trips-pending-card__amount-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.my-trips-pending-card__amount-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+}
+
+.my-trips-pending-card__amount-value {
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forest-700);
+}
+
+.my-trips-pending-card__cta {
+  min-height: 2.75rem; /* Touch target >= 44px */
+}
+
+/* --------------------------------------------------------------------------
+   T16 Scoped: Editorial Tabs Navigation
+   -------------------------------------------------------------------------- */
+.my-trips-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-stone-200);
+  margin-bottom: var(--space-6);
+  gap: var(--space-1);
+}
+
+@media (min-width: 480px) {
+  .my-trips-tabs {
+    gap: var(--space-2);
+  }
+}
+
+.my-trips-tab-btn {
+  background: none;
+  border: none;
+  padding: var(--space-3) var(--space-2);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-600);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+  min-height: 2.75rem; /* Touch target >= 44px */
+  white-space: nowrap;
+  flex: 1;
+  text-align: center;
+}
+
+@media (min-width: 480px) {
+  .my-trips-tab-btn {
+    flex: initial;
+    padding-inline: var(--space-4);
+  }
+}
+
+.my-trips-tab-btn:hover {
+  color: var(--color-stone-900);
+}
+
+.my-trips-tab-btn--active {
+  color: var(--color-forest-700);
+  border-bottom-color: var(--color-forest-700);
+}
+
+.my-trips-tab-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* --------------------------------------------------------------------------
+   T16 Scoped: Trip Cards & List
+   -------------------------------------------------------------------------- */
+.my-trips-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.my-trip-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+.my-trip-card:hover {
+  border-color: var(--color-stone-300);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 640px) {
+  .my-trip-card {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.my-trip-card__thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .my-trip-card__thumb {
+    width: 13rem;
+    aspect-ratio: auto;
+  }
+}
+
+.my-trip-card__body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.my-trip-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.my-trip-card__title {
+  font-size: var(--font-size-heading-sm);
+  line-height: 1.35;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0;
+}
+
+.my-trip-card__meta {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-500);
+  margin: 0;
+}
+
+.my-trip-card__facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--color-stone-200);
+}
+
+.my-trip-card__fact-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-stone-800);
+  font-size: var(--font-size-body-sm);
+}
+
+.my-trip-card__fact-icon {
+  color: var(--color-stone-500);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.my-trip-card__fact-text {
+  font-size: var(--font-size-body-sm);
+  line-height: 1.4;
+  color: var(--color-stone-800);
+}
+
+.my-trip-card__fact-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+}
+
+.my-trip-card__bullet-separator {
+  color: var(--color-stone-400);
+}
+
+.my-trip-card__action {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  align-self: flex-start;
+}
+
+.my-trip-card__action button {
+  min-height: 2.75rem; /* Touch target >= 44px */
+  padding-inline: var(--space-5);
+}
+
+/* Skeleton State */
+.my-trip-card--skeleton {
+  border-color: var(--color-stone-200);
+}
+
+.my-trip-card__skeleton-body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   T16 Scoped: Contextual Empty & Error States
+   -------------------------------------------------------------------------- */
+.my-trips-empty-state {
+  text-align: center;
+  padding: var(--space-10) var(--space-6);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
+  margin-top: var(--space-2);
+  box-shadow: var(--shadow-xs);
+}
+
+.my-trips-empty-state__title {
+  font-size: var(--font-size-heading-sm);
+  line-height: 1.4;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-700);
+  margin: 0;
+}
+
+.my-trips-empty-state__action {
+  margin-top: var(--space-5);
+}
+
+.my-trips-empty-state__action button {
+  min-height: 2.75rem;
+}
+
+.my-trips-error-state {
+  text-align: center;
+  padding: var(--space-10) var(--space-6);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
+  margin-top: var(--space-2);
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.my-trips-error-state__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.my-trips-error-state__title {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0;
+}
+
+.my-trips-error-state__desc {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  margin: 0;
+}
+
+.my-trips-retry-btn {
+  min-height: 2.75rem;
+  min-width: 8rem;
+}
+
+/* ==========================================================================
+   Trip Detail Screen (T17/T18) - Preserved & Untouched
+   ========================================================================== */
 .trips-container {
   max-width: 48rem;
   margin: 0 auto;
@@ -23,123 +500,6 @@
   margin: 0;
 }
 
-/* Pending Banner on Trips */
-.trips-pending-banner {
-  background-color: var(--color-warning-bg);
-  border: 1px solid var(--color-warning-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-4) var(--space-5);
-  margin-bottom: var(--space-6);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.trips-pending-banner__content {
-  flex: 1;
-}
-
-.trips-pending-banner__title {
-  font-size: var(--font-size-heading-sm);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: var(--space-1) 0 0 0;
-}
-
-/* Tabs */
-.trips-tabs {
-  display: flex;
-  gap: var(--space-2);
-  border-bottom: 1px solid var(--color-border-default);
-  margin-bottom: var(--space-6);
-}
-
-.trips-tab-btn {
-  background: none;
-  border: none;
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  transition: all var(--motion-normal) var(--ease-standard);
-  min-height: 44px;
-}
-
-.trips-tab-btn:hover {
-  color: var(--color-text-primary);
-}
-
-.trips-tab-btn--active {
-  color: var(--color-brand-primary);
-  border-bottom-color: var(--color-brand-primary);
-}
-
-.trips-tab-btn:focus-visible {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
-}
-
-.trips-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.trip-card {
-  background-color: var(--color-bg-surface);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-xs);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  transition: border-color var(--motion-normal) var(--ease-standard);
-}
-
-.trip-card:hover {
-  border-color: var(--color-brand-primary);
-}
-
-.trip-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.trip-card__title {
-  font-size: var(--font-size-heading-sm);
-  line-height: var(--line-height-heading-sm);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.trip-card__meta {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.trip-card__details {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  font-size: var(--font-size-body-sm);
-  color: var(--color-text-secondary);
-}
-
-.trip-card__action {
-  margin-top: var(--space-2);
-  align-self: flex-start;
-}
-
-/* Trip Detail Screen */
 .trip-detail-topbar {
   margin-bottom: var(--space-4);
 }
@@ -200,6 +560,12 @@
   color: var(--color-text-primary);
 }
 
+.trip-card__meta {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
 /* Reviews Box on Completed */
 .trip-reviews-grid {
   display: grid;
@@ -234,11 +600,6 @@
 @media (max-width: 640px) {
   .trips-container {
     padding: var(--space-4) var(--space-4) var(--space-10) var(--space-4);
-  }
-
-  .trips-pending-banner {
-    flex-direction: column;
-    align-items: flex-start;
   }
 
   .trip-reviews-grid {

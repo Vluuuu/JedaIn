@@ -100,6 +100,13 @@ export interface PaymentAttemptRecord {
   updatedAt?: string;
 }
 
+export interface CheckoutDraftState {
+  sessionId: string;
+  participantCount: number;
+  policyAcknowledged: boolean;
+  idempotencyKey: string;
+}
+
 export interface CheckoutAdapter {
   getCheckout(sessionId: string): Promise<CheckoutViewModel>;
   submitCheckout(input: CheckoutSubmitInput): Promise<CheckoutSubmitResult>;

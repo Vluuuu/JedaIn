@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Badge, Button, Checkbox, Skeleton } from "../../components/ui";
 import { CheckoutSummaryCard } from "./CheckoutSummaryCard";
 import { defaultCheckoutAdapter } from "./mockAdapter";
 import { ParticipantQuantity } from "./ParticipantQuantity";
-import type { CheckoutAdapter, CheckoutViewModel } from "./types";
+import type {
+  CheckoutAdapter,
+  CheckoutDraftState,
+  CheckoutViewModel,
+} from "./types";
 import "./checkout.css";
 
 export interface CheckoutScreenProps {
@@ -16,16 +20,29 @@ export function CheckoutScreen({
 }: CheckoutScreenProps) {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const locationDraft = (
+    location.state as { checkoutDraft?: CheckoutDraftState } | null
+  )?.checkoutDraft;
+  const isMatchingDraft =
+    locationDraft && locationDraft.sessionId === sessionId;
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewModel, setViewModel] = useState<CheckoutViewModel | null>(null);
 
-  // Screen draft states
-  const [participantCount, setParticipantCount] = useState<number>(1);
-  const [policyAcknowledged, setPolicyAcknowledged] = useState<boolean>(false);
-  const [idempotencyKey] = useState<string>(
-    () => `idemp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+  // Screen draft states initialized from matching location draft or defaults
+  const [participantCount, setParticipantCount] = useState<number>(() =>
+    isMatchingDraft ? locationDraft.participantCount : 1,
+  );
+  const [policyAcknowledged, setPolicyAcknowledged] = useState<boolean>(() =>
+    isMatchingDraft ? locationDraft.policyAcknowledged : false,
+  );
+  const [idempotencyKey] = useState<string>(() =>
+    isMatchingDraft
+      ? locationDraft.idempotencyKey
+      : `idemp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
   );
   const [submitErrorNotice, setSubmitErrorNotice] = useState<
     string | undefined
@@ -114,7 +131,15 @@ export function CheckoutScreen({
       }
 
       if (res.status === "CONTACT_VERIFICATION_REQUIRED") {
-        navigate(`/checkout/${sessionId}/contact`);
+        const checkoutDraft: CheckoutDraftState = {
+          sessionId,
+          participantCount,
+          policyAcknowledged,
+          idempotencyKey,
+        };
+        navigate(`/checkout/${sessionId}/contact`, {
+          state: { checkoutDraft },
+        });
         return;
       }
 

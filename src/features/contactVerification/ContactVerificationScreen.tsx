@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
+import type { CheckoutDraftState } from "../checkout/types";
 import { sessionStore } from "../onboarding/sessionStore";
 import { defaultContactVerificationAdapter } from "./mockAdapter";
 import { OtpVerificationForm } from "./OtpVerificationForm";
@@ -21,6 +22,13 @@ export function ContactVerificationScreen({
 }: ContactVerificationScreenProps) {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const checkoutDraft = (
+    location.state as { checkoutDraft?: CheckoutDraftState } | null
+  )?.checkoutDraft;
+  const isMatchingDraft =
+    checkoutDraft && checkoutDraft.sessionId === sessionId;
 
   const [isLoading, setIsLoading] = useState(true);
   const [step, setStep] = useState<ContactVerificationStep>("LOADING");
@@ -48,7 +56,10 @@ export function ContactVerificationScreen({
 
         // Check if already verified
         if (ctx.isAlreadyVerified) {
-          navigate(`/checkout/${sessionId}`, { replace: true });
+          navigate(`/checkout/${sessionId}`, {
+            replace: true,
+            state: isMatchingDraft ? { checkoutDraft } : undefined,
+          });
           return;
         }
 
@@ -65,7 +76,7 @@ export function ContactVerificationScreen({
     return () => {
       isMounted = false;
     };
-  }, [sessionId, adapter, navigate]);
+  }, [sessionId, adapter, navigate, isMatchingDraft, checkoutDraft]);
 
   const handleRequestOtp = async (inputPhone: string) => {
     const user = sessionStore.get().user;
@@ -118,8 +129,11 @@ export function ContactVerificationScreen({
         // Update current sessionStore.user.phone preserving all other identity & onboarding state
         sessionStore.updateUserContact(activeSession.phone);
 
-        // Return to SAME Checkout context
-        navigate(`/checkout/${sessionId}`, { replace: true });
+        // Return to SAME Checkout context carrying matching draft if available
+        navigate(`/checkout/${sessionId}`, {
+          replace: true,
+          state: isMatchingDraft ? { checkoutDraft } : undefined,
+        });
         return;
       }
 
@@ -184,6 +198,7 @@ export function ContactVerificationScreen({
       <div className="contact-verification-topbar">
         <Link
           to={`/checkout/${sessionId}`}
+          state={isMatchingDraft ? { checkoutDraft } : undefined}
           className="contact-verification-back-btn"
           aria-label="Kembali ke Checkout"
         >

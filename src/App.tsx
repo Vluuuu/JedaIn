@@ -95,9 +95,6 @@ export function App() {
             </OnboardingRouteGuard>
           }
         />
-      </Route>
-
-      <Route element={<DistractionFreeShell />}>
         <Route
           path="onboarding/quiz"
           element={
@@ -106,6 +103,9 @@ export function App() {
             </OnboardingRouteGuard>
           }
         />
+      </Route>
+
+      <Route element={<DistractionFreeShell />}>
         <Route
           path="onboarding/result"
           element={

@@ -382,7 +382,7 @@ describe("TravelerQuizScreen Full Six-Step Flow & Rules", () => {
     const finishBtn = view.querySelector<HTMLButtonElement>(
       ".quiz-submit-button",
     )!;
-    expect(finishBtn.textContent).toContain("Lihat Rekomendasiku");
+    expect(finishBtn.textContent).toContain("TEMUKAN JEDAKU");
 
     await act(() => finishBtn.click());
 

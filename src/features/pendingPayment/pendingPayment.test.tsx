@@ -875,4 +875,617 @@ describe("PendingPaymentResolutionScreen (T12) Unit & Integration Tests", () => 
     );
     expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(2);
   });
+
+  // CHECKOUT DRAFT CONTINUITY ACROSS T12 (SPEC SECTION 29)
+  describe("CheckoutDraftState continuity across T10 -> T12 -> T10", () => {
+    it("H1. ACTIVE_PENDING_PAYMENT hands off checkoutDraft in route state to T12", async () => {
+      const traveler: AuthUser = {
+        id: "usr_draft_t12_handoff",
+        name: "Handoff User",
+        email: "handoff@example.com",
+        phone: "08123456789",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      // Old booking
+      mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_old_h1",
+      });
+
+      let currentPath = "";
+      let lastLocationState: unknown;
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      const checkoutAdapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+        verifiedPhoneStore: { usr_draft_t12_handoff: true },
+      });
+
+      function StateObserver({
+        onUpdate,
+      }: {
+        onUpdate: (path: string, state: unknown) => void;
+      }) {
+        const loc = useLocation();
+        onUpdate(loc.pathname, loc.state);
+        return null;
+      }
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            { initialEntries: ["/checkout/ses_sgd_2"] },
+            createElement(StateObserver, {
+              onUpdate: (p, s) => {
+                currentPath = p;
+                lastLocationState = s;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, {
+                  adapter: checkoutAdapter,
+                }),
+              }),
+              createElement(Route, {
+                path: "/checkout/:sessionId/pending-payment",
+                element: createElement(PendingPaymentResolutionScreen),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      // Increase participantCount to 3
+      const incBtn = container.querySelector<HTMLButtonElement>(
+        'button[aria-label="Tambah jumlah peserta"]',
+      )!;
+      await act(async () => {
+        incBtn.click();
+      });
+      await act(async () => {
+        incBtn.click();
+      });
+      expect(
+        container.querySelector("#participant-count-val")?.textContent,
+      ).toBe("3");
+
+      // Check policy
+      const policyCb = container.querySelector<HTMLInputElement>(
+        "#cancellation-policy-ack",
+      )!;
+      await act(async () => {
+        policyCb.click();
+      });
+
+      // Submit
+      const ctaBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
+      )!;
+      await act(async () => {
+        ctaBtn.click();
+      });
+
+      expect(currentPath).toBe("/checkout/ses_sgd_2/pending-payment");
+      const draft = (
+        lastLocationState as {
+          checkoutDraft?: import("../checkout/types").CheckoutDraftState;
+        }
+      )?.checkoutDraft;
+      expect(draft).toBeDefined();
+      expect(draft?.sessionId).toBe("ses_sgd_2");
+      expect(draft?.participantCount).toBe(3);
+      expect(draft?.policyAcknowledged).toBe(true);
+      expect(typeof draft?.idempotencyKey).toBe("string");
+    });
+
+    it("H2. Kembali ke Checkout from T12 preserves checkout draft in T10", async () => {
+      const traveler: AuthUser = {
+        id: "usr_draft_t12_back",
+        name: "Back User",
+        email: "back@example.com",
+        phone: "08123456789",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_old_h2",
+      });
+
+      let currentPath = "";
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      const checkoutAdapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+        verifiedPhoneStore: { usr_draft_t12_back: true },
+      });
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            { initialEntries: ["/checkout/ses_sgd_2"] },
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, {
+                  adapter: checkoutAdapter,
+                }),
+              }),
+              createElement(Route, {
+                path: "/checkout/:sessionId/pending-payment",
+                element: createElement(PendingPaymentResolutionScreen),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      // Set participant count to 2
+      const incBtn = container.querySelector<HTMLButtonElement>(
+        'button[aria-label="Tambah jumlah peserta"]',
+      )!;
+      await act(async () => {
+        incBtn.click();
+      });
+
+      // Check policy
+      const policyCb = container.querySelector<HTMLInputElement>(
+        "#cancellation-policy-ack",
+      )!;
+      await act(async () => {
+        policyCb.click();
+      });
+
+      // Submit -> goes to T12
+      const ctaBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
+      )!;
+      await act(async () => {
+        ctaBtn.click();
+      });
+
+      expect(currentPath).toBe("/checkout/ses_sgd_2/pending-payment");
+
+      // Click Kembali ke Checkout
+      const backBtn = container.querySelector<HTMLAnchorElement>(
+        ".pending-payment-back-btn",
+      )!;
+      await act(async () => {
+        backBtn.click();
+      });
+
+      expect(currentPath).toBe("/checkout/ses_sgd_2");
+      // Preserved!
+      expect(
+        container.querySelector("#participant-count-val")?.textContent,
+      ).toBe("2");
+      const restoredCb = container.querySelector<HTMLInputElement>(
+        "#cancellation-policy-ack",
+      )!;
+      expect(restoredCb.checked).toBe(true);
+    });
+
+    it("H3. Cancel old booking carries draft back to intended Checkout without auto-submitting", async () => {
+      const traveler: AuthUser = {
+        id: "usr_draft_t12_cancel",
+        name: "Cancel Draft User",
+        email: "canceldraft@example.com",
+        phone: "08123456789",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_old_h3",
+      });
+
+      let currentPath = "";
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      const checkoutAdapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+        verifiedPhoneStore: { usr_draft_t12_cancel: true },
+      });
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            { initialEntries: ["/checkout/ses_sgd_2"] },
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, {
+                  adapter: checkoutAdapter,
+                }),
+              }),
+              createElement(Route, {
+                path: "/checkout/:sessionId/pending-payment",
+                element: createElement(PendingPaymentResolutionScreen),
+              }),
+              createElement(Route, {
+                path: "/payment/:bookingId",
+                element: createElement(
+                  "div",
+                  undefined,
+                  "Payment Screen Target",
+                ),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      // Set participant count to 4
+      const incBtn = container.querySelector<HTMLButtonElement>(
+        'button[aria-label="Tambah jumlah peserta"]',
+      )!;
+      await act(async () => {
+        incBtn.click();
+      });
+      await act(async () => {
+        incBtn.click();
+      });
+      await act(async () => {
+        incBtn.click();
+      });
+
+      // Check policy
+      const policyCb = container.querySelector<HTMLInputElement>(
+        "#cancellation-policy-ack",
+      )!;
+      await act(async () => {
+        policyCb.click();
+      });
+
+      // Submit -> goes to T12
+      const ctaBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
+      )!;
+      await act(async () => {
+        ctaBtn.click();
+      });
+
+      expect(currentPath).toBe("/checkout/ses_sgd_2/pending-payment");
+
+      // Open cancel confirm
+      const cancelTrigger = container.querySelector<HTMLButtonElement>(
+        ".pending-payment-cancel-trigger",
+      )!;
+      await act(async () => {
+        cancelTrigger.click();
+      });
+
+      // Confirm cancel
+      const confirmCancelBtn = Array.from(
+        container.querySelectorAll("button"),
+      ).find((b) => b.textContent?.includes("Ya, Batalkan Pesanan Lama"))!;
+      await act(async () => {
+        confirmCancelBtn.click();
+      });
+
+      // Returned to Checkout
+      expect(currentPath).toBe("/checkout/ses_sgd_2");
+      expect(
+        container.querySelector("#participant-count-val")?.textContent,
+      ).toBe("4");
+      expect(
+        container.querySelector<HTMLInputElement>("#cancellation-policy-ack")
+          ?.checked,
+      ).toBe(true);
+
+      // Old booking cancelled & NO automatic new booking created!
+      expect(mockTransactionStore.getBookings()[0].status).toBe("CANCELLED");
+      expect(mockTransactionStore.getBookings().length).toBe(1);
+
+      // Explicit second submit succeeds to Payment!
+      const finalCta = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
+      )!;
+      expect(finalCta.disabled).toBe(false);
+
+      await act(async () => {
+        finalCta.click();
+      });
+
+      expect(currentPath).toMatch(/^\/payment\/bk_/);
+      expect(mockTransactionStore.getBookings().length).toBe(2);
+      expect(mockTransactionStore.getBookings()[1].participantCount).toBe(4);
+    });
+
+    it("H4. Direct T12 visit without draft works safely and returns fresh defaults to Checkout", async () => {
+      const traveler: AuthUser = {
+        id: "usr_direct_t12",
+        name: "Direct User",
+        email: "direct@example.com",
+        phone: "08123456789",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_old_h4",
+      });
+
+      let currentPath = "";
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      const checkoutAdapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+      });
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            { initialEntries: ["/checkout/ses_sgd_2/pending-payment"] }, // Direct T12 entry (no state)
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, {
+                  adapter: checkoutAdapter,
+                }),
+              }),
+              createElement(Route, {
+                path: "/checkout/:sessionId/pending-payment",
+                element: createElement(PendingPaymentResolutionScreen),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      expect(container.textContent).toContain(
+        "Kamu masih punya pembayaran yang belum selesai.",
+      );
+
+      const backBtn = container.querySelector<HTMLAnchorElement>(
+        ".pending-payment-back-btn",
+      )!;
+      await act(async () => {
+        backBtn.click();
+      });
+
+      expect(currentPath).toBe("/checkout/ses_sgd_2");
+      // Defaults to 1 and unchecked policy
+      expect(
+        container.querySelector("#participant-count-val")?.textContent,
+      ).toBe("1");
+      expect(
+        container.querySelector<HTMLInputElement>("#cancellation-policy-ack")
+          ?.checked,
+      ).toBe(false);
+    });
+
+    it("H5. Cross-session draft protection: draft for session A does not hydrate session B", async () => {
+      const traveler: AuthUser = {
+        id: "usr_cross_session_t12",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_old_h5",
+      });
+
+      let currentPath = "";
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      const checkoutAdapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+      });
+
+      // Enter T12 for ses_sgd_2 with draft created for ses_sgd_1
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            {
+              initialEntries: [
+                {
+                  pathname: "/checkout/ses_sgd_2/pending-payment",
+                  state: {
+                    checkoutDraft: {
+                      sessionId: "ses_sgd_1", // MISMATCH: belongs to ses_sgd_1, not ses_sgd_2
+                      participantCount: 5,
+                      policyAcknowledged: true,
+                      idempotencyKey: "k_mismatch",
+                    },
+                  },
+                },
+              ],
+            },
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, {
+                  adapter: checkoutAdapter,
+                }),
+              }),
+              createElement(Route, {
+                path: "/checkout/:sessionId/pending-payment",
+                element: createElement(PendingPaymentResolutionScreen),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      const backBtn = container.querySelector<HTMLAnchorElement>(
+        ".pending-payment-back-btn",
+      )!;
+      await act(async () => {
+        backBtn.click();
+      });
+
+      expect(currentPath).toBe("/checkout/ses_sgd_2");
+      // Defaults to 1 and unchecked policy, NOT the mismatched draft values
+      expect(
+        container.querySelector("#participant-count-val")?.textContent,
+      ).toBe("1");
+      expect(
+        container.querySelector<HTMLInputElement>("#cancellation-policy-ack")
+          ?.checked,
+      ).toBe(false);
+    });
+
+    it("H6. Expired state and No-Active state preserve matching draft on return to Checkout", async () => {
+      vi.useFakeTimers();
+
+      const traveler: AuthUser = {
+        id: "usr_expired_return_t12",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_old_h6",
+      });
+
+      let currentPath = "";
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      const checkoutAdapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+      });
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            {
+              initialEntries: [
+                {
+                  pathname: "/checkout/ses_sgd_2/pending-payment",
+                  state: {
+                    checkoutDraft: {
+                      sessionId: "ses_sgd_2",
+                      participantCount: 3,
+                      policyAcknowledged: true,
+                      idempotencyKey: "k_exp_preserved",
+                    },
+                  },
+                },
+              ],
+            },
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, {
+                  adapter: checkoutAdapter,
+                }),
+              }),
+              createElement(Route, {
+                path: "/checkout/:sessionId/pending-payment",
+                element: createElement(PendingPaymentResolutionScreen),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      expect(container.textContent).toContain("Menunggu Pembayaran");
+
+      // Advance timers past 15 minutes to trigger countdown expiration revalidation
+      await act(async () => {
+        vi.advanceTimersByTime(16 * 60 * 1000);
+      });
+
+      expect(container.textContent).toContain("Pembayaran sudah kedaluwarsa.");
+
+      const returnBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent === "Kembali ke Checkout",
+      )!;
+      await act(async () => {
+        returnBtn.click();
+      });
+
+      expect(currentPath).toBe("/checkout/ses_sgd_2");
+      expect(
+        container.querySelector("#participant-count-val")?.textContent,
+      ).toBe("3");
+      expect(
+        container.querySelector<HTMLInputElement>("#cancellation-policy-ack")
+          ?.checked,
+      ).toBe(true);
+    });
+  });
 });

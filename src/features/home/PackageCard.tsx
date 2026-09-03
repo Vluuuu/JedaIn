@@ -24,6 +24,7 @@ export function PackageCard({ packageData }: PackageCardProps) {
         role="img"
         aria-label={`Ilustrasi suasana ${packageData.title}`}
       >
+        <div className="home-package-card__visual-scrim" />
         <div className="home-package-card__badges">
           <Badge tone="neutral">
             {packageData.verificationLevel === "PLUS"
@@ -35,15 +36,16 @@ export function PackageCard({ packageData }: PackageCardProps) {
       <div className="home-package-card__body">
         <div className="home-package-card__meta">
           <span>{packageData.locationLabel}</span>
-          <span>•</span>
+          <span className="home-package-card__dot">•</span>
           <span>{durationLabel}</span>
         </div>
         <h3 className="home-package-card__title">{packageData.title}</h3>
         <p className="home-package-card__summary">{packageData.shortSummary}</p>
         <div className="home-package-card__footer">
-          <span className="home-package-card__price">
-            <strong>{formattedPrice}</strong> / orang
-          </span>
+          <div className="home-package-card__price">
+            <strong>{formattedPrice}</strong>
+            <span className="home-package-card__unit"> / org</span>
+          </div>
           <span className="home-package-card__link">Detail &rarr;</span>
         </div>
       </div>

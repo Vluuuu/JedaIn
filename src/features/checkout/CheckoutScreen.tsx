@@ -172,13 +172,39 @@ export function CheckoutScreen({
   if (isLoading) {
     return (
       <div className="checkout-container" aria-busy="true">
-        <Skeleton width="12rem" height="1.5rem" />
-        <Skeleton width="60%" height="2rem" />
-        <div className="checkout-summary-card">
-          <Skeleton height="6rem" />
+        <div className="checkout-topbar">
+          <Skeleton width="8rem" height="2.25rem" />
         </div>
-        <div className="checkout-section">
-          <Skeleton height="4rem" />
+        <div className="checkout-header">
+          <Skeleton width="10rem" height="2.25rem" />
+          <Skeleton width="22rem" height="1.25rem" />
+        </div>
+        <div className="checkout-layout">
+          <div className="checkout-main-col">
+            <div className="checkout-surface">
+              <Skeleton height="6rem" />
+              <div
+                style={{
+                  height: "1px",
+                  background: "var(--color-border-subtle)",
+                }}
+              />
+              <Skeleton height="8rem" />
+              <div
+                style={{
+                  height: "1px",
+                  background: "var(--color-border-subtle)",
+                }}
+              />
+              <Skeleton height="8rem" />
+            </div>
+          </div>
+          <aside className="checkout-side-col">
+            <div className="checkout-summary-pane">
+              <Skeleton height="14rem" />
+              <Skeleton height="8rem" />
+            </div>
+          </aside>
         </div>
       </div>
     );
@@ -191,6 +217,23 @@ export function CheckoutScreen({
           className="checkout-state-box checkout-state-box--error"
           role="alert"
         >
+          <div className="checkout-state-box__icon-wrap checkout-state-box__icon-wrap--error">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
           <h2>Checkout belum bisa dimuat.</h2>
           <p>{viewModel?.errorMessage ?? "Silakan coba lagi beberapa saat."}</p>
           <Button
@@ -209,6 +252,24 @@ export function CheckoutScreen({
     return (
       <div className="checkout-container">
         <div className="checkout-state-box">
+          <div className="checkout-state-box__icon-wrap">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
+              <line x1="9" y1="9" x2="9.01" y2="9" />
+              <line x1="15" y1="9" x2="15.01" y2="9" />
+            </svg>
+          </div>
           <h2>Jadwal checkout tidak ditemukan.</h2>
           <p>
             Experience atau jadwal ini mungkin sudah tidak tersedia atau
@@ -238,6 +299,26 @@ export function CheckoutScreen({
     return (
       <div className="checkout-container">
         <div className="checkout-state-box">
+          <div className="checkout-state-box__icon-wrap">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+              <line x1="10" y1="14" x2="14" y2="18" />
+              <line x1="14" y1="14" x2="10" y2="18" />
+            </svg>
+          </div>
           <h2>Jadwal ini baru saja tidak tersedia.</h2>
           <p>Pilih jadwal lain untuk melanjutkan pemesanan.</p>
           <Button
@@ -260,6 +341,24 @@ export function CheckoutScreen({
     return (
       <div className="checkout-container">
         <div className="checkout-state-box">
+          <div className="checkout-state-box__icon-wrap">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
+              <line x1="9" y1="9" x2="9.01" y2="9" />
+              <line x1="15" y1="9" x2="15.01" y2="9" />
+            </svg>
+          </div>
           <h2>Jadwal checkout tidak ditemukan.</h2>
           <p>
             Experience atau jadwal ini mungkin sudah tidak tersedia atau
@@ -309,7 +408,22 @@ export function CheckoutScreen({
           className="checkout-back-btn"
           aria-label="Kembali ke Pilih Jadwal"
         >
-          &larr; Pilih Jadwal
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="checkout-back-icon"
+          >
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>Pilih Jadwal</span>
         </Link>
       </div>
 
@@ -323,113 +437,211 @@ export function CheckoutScreen({
       {/* Submit Error / Race Notice */}
       {submitErrorNotice && (
         <div className="checkout-alert checkout-alert--error" role="alert">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="checkout-alert__icon"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
           <p>{submitErrorNotice}</p>
         </div>
       )}
 
-      {/* 2. Package & Session Summary Card */}
-      <CheckoutSummaryCard packageData={pkg} sessionData={session} />
-
-      {/* 3. Participant Quantity */}
-      <section className="checkout-section" aria-label="Jumlah peserta">
-        <h2 className="checkout-section__title">Jumlah Peserta</h2>
-        <ParticipantQuantity
-          value={participantCount}
-          min={1}
-          max={maxSelectableParticipants}
-          onChange={setParticipantCount}
-          disabled={isSubmitting}
-        />
-      </section>
-
-      {/* 4. Traveler & Contact Summary */}
-      <section
-        className="checkout-section"
-        aria-label="Informasi kontak pemesan"
-      >
-        <h2 className="checkout-section__title">Kontak Pemesan</h2>
-        <div className="checkout-contact-box">
-          <div className="checkout-contact-row">
-            <span className="checkout-contact-label">Nama</span>
-            <span className="checkout-contact-val">
-              {contactRequirement?.name || traveler?.name || "-"}
-            </span>
+      {/* Two-Column Layout on Desktop, Fluid Stack on Mobile */}
+      <div className="checkout-layout">
+        {/* Left / Main Column: Decision & Verification Controls */}
+        <div className="checkout-main-col">
+          {/* Mobile-only Summary presentation for early context confirmation */}
+          <div className="checkout-mobile-summary-wrapper">
+            <CheckoutSummaryCard packageData={pkg} sessionData={session} />
           </div>
-          <div className="checkout-contact-row">
-            <span className="checkout-contact-label">Email</span>
-            <span className="checkout-contact-val">
-              {contactRequirement?.email || traveler?.email || "-"}
-            </span>
-          </div>
-          <div className="checkout-contact-row">
-            <span className="checkout-contact-label">Nomor HP</span>
-            <span className="checkout-contact-val">
-              {contactRequirement?.phone || traveler?.phone || "-"}
-            </span>
-            <Badge
-              tone={contactRequirement?.phoneVerified ? "success" : "warning"}
+
+          <div className="checkout-surface">
+            {/* 2. Participant Quantity */}
+            <section className="checkout-section" aria-label="Jumlah peserta">
+              <h2 className="checkout-section__title">Jumlah Peserta</h2>
+              <ParticipantQuantity
+                value={participantCount}
+                min={1}
+                max={maxSelectableParticipants}
+                onChange={setParticipantCount}
+                disabled={isSubmitting}
+              />
+            </section>
+
+            <div className="checkout-surface__divider" role="separator" />
+
+            {/* 3. Traveler & Contact Summary */}
+            <section
+              className="checkout-section"
+              aria-label="Informasi kontak pemesan"
             >
-              {contactRequirement?.phoneVerified
-                ? "Terverifikasi"
-                : "Belum Verifikasi"}
-            </Badge>
+              <div className="checkout-section__header-row">
+                <h2 className="checkout-section__title">Kontak Pemesan</h2>
+                <span className="checkout-section__hint">
+                  Identitas pemesanan
+                </span>
+              </div>
+              <div className="checkout-contact-box">
+                <div className="checkout-contact-row">
+                  <span className="checkout-contact-label">Nama</span>
+                  <span className="checkout-contact-val">
+                    {contactRequirement?.name || traveler?.name || "-"}
+                  </span>
+                </div>
+                <div className="checkout-contact-row">
+                  <span className="checkout-contact-label">Email</span>
+                  <span className="checkout-contact-val">
+                    {contactRequirement?.email || traveler?.email || "-"}
+                  </span>
+                </div>
+                <div className="checkout-contact-row">
+                  <span className="checkout-contact-label">Nomor HP</span>
+                  <div className="checkout-contact-val-group">
+                    <span className="checkout-contact-val">
+                      {contactRequirement?.phone || traveler?.phone || "-"}
+                    </span>
+                    <Badge
+                      tone={
+                        contactRequirement?.phoneVerified
+                          ? "success"
+                          : "warning"
+                      }
+                    >
+                      {contactRequirement?.phoneVerified
+                        ? "Terverifikasi"
+                        : "Belum Verifikasi"}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 4. Cancellation & Refund Policy Summary */}
+            {cancellationPolicySummary && (
+              <>
+                <div className="checkout-surface__divider" role="separator" />
+                <section
+                  className="checkout-section"
+                  aria-label="Kebijakan pembatalan dan refund"
+                >
+                  <h2 className="checkout-section__title">
+                    Kebijakan Pembatalan & Refund
+                  </h2>
+                  <div className="checkout-policy-box">
+                    <div className="checkout-policy-box__icon-wrap">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                      </svg>
+                    </div>
+                    <p className="checkout-policy-box__text">
+                      {cancellationPolicySummary}
+                    </p>
+                  </div>
+                  <div className="checkout-policy-wrapper">
+                    <Checkbox
+                      id="cancellation-policy-ack"
+                      label="Saya sudah membaca ringkasan kebijakan pembatalan & refund."
+                      checked={policyAcknowledged}
+                      onChange={(e) => setPolicyAcknowledged(e.target.checked)}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                </section>
+              </>
+            )}
           </div>
         </div>
-      </section>
 
-      {/* 5. Price Breakdown */}
-      <section
-        className="checkout-section"
-        aria-label="Rincian harga pembayaran"
-      >
-        <h2 className="checkout-section__title">Rincian Pembayaran</h2>
-        <div className="checkout-price-list">
-          <div className="checkout-price-row">
-            <span>Harga experience ({participantCount} peserta)</span>
-            <span>
-              {participantCount} ×{" "}
-              {unitPrice ? `Rp${unitPrice.toLocaleString("id-ID")}` : "Rp-"}
-            </span>
-          </div>
-          <div className="checkout-price-row checkout-price-row--total">
-            <span>Total Pembayaran</span>
-            <span className="checkout-price-total-val">
-              {formattedTotalPrice}
-            </span>
-          </div>
-        </div>
-      </section>
+        {/* Right Column: Experience, Session & Payment Breakdown Summary */}
+        <aside className="checkout-side-col">
+          <div className="checkout-summary-pane">
+            {/* Desktop presentation of Summary Card */}
+            <div className="checkout-desktop-summary-wrapper">
+              <CheckoutSummaryCard packageData={pkg} sessionData={session} />
+            </div>
 
-      {/* 6. Cancellation & Refund Policy Summary */}
-      {cancellationPolicySummary && (
-        <section
-          className="checkout-section"
-          aria-label="Kebijakan pembatalan dan refund"
-        >
-          <h2 className="checkout-section__title">
-            Kebijakan Pembatalan & Refund
-          </h2>
-          <div className="checkout-notice-box">
-            <p>{cancellationPolicySummary}</p>
-          </div>
-          <div className="checkout-policy-wrapper">
-            <Checkbox
-              id="cancellation-policy-ack"
-              label="Saya sudah membaca ringkasan kebijakan pembatalan & refund."
-              checked={policyAcknowledged}
-              onChange={(e) => setPolicyAcknowledged(e.target.checked)}
-              disabled={isSubmitting}
-            />
-          </div>
-        </section>
-      )}
+            {/* Price Breakdown Card / Section */}
+            <section
+              className="checkout-price-card"
+              aria-label="Rincian harga pembayaran"
+            >
+              <h2 className="checkout-price-card__title">Rincian Pembayaran</h2>
+              <div className="checkout-price-list">
+                <div className="checkout-price-row">
+                  <span>Harga experience ({participantCount} peserta)</span>
+                  <span>
+                    {participantCount} ×{" "}
+                    {unitPrice
+                      ? `Rp${unitPrice.toLocaleString("id-ID")}`
+                      : "Rp-"}
+                  </span>
+                </div>
+                <div className="checkout-price-row checkout-price-row--total">
+                  <div className="checkout-price-row__total-label-wrap">
+                    <span className="checkout-price-row__total-title">
+                      Total Pembayaran
+                    </span>
+                    <span className="checkout-price-row__total-subtitle">
+                      Termasuk seluruh fasilitas sesi
+                    </span>
+                  </div>
+                  <span className="checkout-price-total-val">
+                    {formattedTotalPrice}
+                  </span>
+                </div>
+              </div>
+            </section>
 
-      {/* 7. Slot reservation notice */}
-      <div className="checkout-notice-box">
-        <p>Slot baru diamankan setelah kamu lanjut ke pembayaran.</p>
+            {/* Slot Reservation Notice */}
+            <div className="checkout-notice-box">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="checkout-notice-box__icon"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              <p>Slot baru diamankan setelah kamu lanjut ke pembayaran.</p>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      {/* 8. Sticky Action Bar */}
+      {/* Sticky Action Bar for Mobile and Final Confirmation */}
       <div className="checkout-sticky-bar">
         <div className="checkout-sticky-bar__container">
           <div className="checkout-sticky-bar__summary">

@@ -33,12 +33,17 @@ export function ParticipantQuantity({
       className="checkout-quantity-wrap"
       aria-label="Pengaturan jumlah peserta"
     >
-      <label
-        htmlFor="participant-count-val"
-        className="checkout-quantity-label"
-      >
-        Jumlah peserta
-      </label>
+      <div className="checkout-quantity-header">
+        <label
+          htmlFor="participant-count-val"
+          className="checkout-quantity-label"
+        >
+          Jumlah peserta
+        </label>
+        <span className="checkout-quantity-hint">
+          Sesuai kapasitas yang tersedia
+        </span>
+      </div>
       <div className="checkout-quantity-stepper">
         <button
           type="button"
@@ -47,7 +52,19 @@ export function ParticipantQuantity({
           disabled={isDecrementDisabled}
           aria-label="Kurangi jumlah peserta"
         >
-          −
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
         </button>
         <span
           id="participant-count-val"
@@ -63,7 +80,20 @@ export function ParticipantQuantity({
           disabled={isIncrementDisabled}
           aria-label="Tambah jumlah peserta"
         >
-          +
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
         </button>
       </div>
     </div>

@@ -23,14 +23,12 @@
 }
 
 .traveler-public-shell,
-.traveler-app-shell,
 .distraction-free-shell {
   min-height: 100svh;
   background: var(--color-bg-page);
 }
 
-.public-header,
-.traveler-app-header {
+.public-header {
   position: relative;
   z-index: 10;
   display: flex;
@@ -137,34 +135,112 @@
 }
 
 .traveler-app-shell {
+  min-height: 100svh;
+  min-height: 100dvh;
   padding-bottom: calc(var(--nav-bottom-height) + env(safe-area-inset-bottom));
+  background-color: var(--color-sand-50);
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(40, 94, 61, 0.05) 0%,
+      rgba(40, 94, 61, 0.015) 12rem,
+      transparent 28rem
+    ),
+    radial-gradient(
+      circle at 50% -6rem,
+      rgba(40, 94, 61, 0.08) 0%,
+      transparent 32rem
+    );
+  background-repeat: no-repeat;
 }
 
 .traveler-app-header {
   position: sticky;
   top: 0;
-  backdrop-filter: blur(12px);
-  background: var(--color-surface-glass);
+  z-index: 25;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: var(--color-surface-glass-strong);
+  border-bottom: 1px solid var(--color-stone-200);
+  box-shadow: var(--shadow-xs);
+  padding: 0;
+  min-height: 4rem;
+}
+
+.traveler-app-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 75rem;
+  margin-inline: auto;
+  min-height: 4rem;
+  padding-inline: var(--space-4);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .traveler-app-header__inner {
+    padding-inline: var(--space-8);
+  }
+}
+
+.traveler-app-brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  outline: none;
+  min-height: 2.75rem; /* touch target >= 44px */
+}
+
+.traveler-app-brand:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.traveler-app-logo {
+  display: block;
+  width: 6.875rem; /* ~110px on mobile */
+  height: auto;
+  aspect-ratio: 1407 / 768;
+}
+
+@media (min-width: 768px) {
+  .traveler-app-logo {
+    width: 8rem; /* ~128px on tablet & desktop */
+  }
 }
 
 .traveler-app-header__status {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  color: var(--color-text-muted);
+  gap: 0.375rem;
+  padding: 0.3125rem 0.625rem;
+  background: var(--color-stone-100);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-pill);
+  color: var(--color-stone-600);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
 }
 
-.traveler-app-header__notification {
-  width: 0.5rem;
-  height: 0.5rem;
-  background: var(--color-border-strong);
+.traveler-app-header__notification-dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  background: var(--color-stone-400);
   border-radius: var(--radius-pill);
+  flex-shrink: 0;
 }
 
-.traveler-app-header__notification[data-unread] {
-  background: var(--color-info-solid);
+.traveler-app-header__notification-dot[data-unread] {
+  background: var(--color-brand-primary);
+  box-shadow: 0 0 0 2px var(--color-forest-100);
+}
+
+.traveler-app-header__status-text {
+  line-height: 1;
 }
 
 .traveler-app-content {

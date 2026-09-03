@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
+import JedaInLogo from "../../JedaIn_logo_vector.svg";
 import { ExploreIcon, HomeIcon, ProfileIcon, TripsIcon } from "./icons";
 import "./shells.css";
 
@@ -31,19 +32,43 @@ export function TravelerAppShell({
       data-navigation={showBottomNav ? "visible" : "hidden"}
     >
       <header className="traveler-app-header">
-        <Link className="brand-mark" to="/home" aria-label="JedaIn, Home">
-          JedaIn<span aria-hidden="true">.</span>
-        </Link>
-        <span className="traveler-app-header__status">
-          <span
-            className="traveler-app-header__notification"
-            data-unread={hasUnreadNotification || undefined}
-            aria-hidden="true"
-          />
-          {hasUnreadNotification
-            ? "Ada notifikasi baru"
-            : "Tidak ada notifikasi baru"}
-        </span>
+        <div className="traveler-app-header__inner">
+          <Link
+            className="traveler-app-brand"
+            to="/home"
+            aria-label="JedaIn, Home"
+          >
+            <img
+              src={JedaInLogo}
+              alt=""
+              aria-hidden="true"
+              className="traveler-app-logo"
+              width="1407"
+              height="768"
+              loading="eager"
+            />
+          </Link>
+
+          <div
+            className="traveler-app-header__status"
+            aria-label={
+              hasUnreadNotification
+                ? "Ada notifikasi baru"
+                : "Tidak ada notifikasi baru"
+            }
+          >
+            <span
+              className="traveler-app-header__notification-dot"
+              data-unread={hasUnreadNotification || undefined}
+              aria-hidden="true"
+            />
+            <span className="traveler-app-header__status-text">
+              {hasUnreadNotification
+                ? "Ada notifikasi baru"
+                : "Tidak ada notifikasi baru"}
+            </span>
+          </div>
+        </div>
       </header>
       <main className="traveler-app-content">{children ?? <Outlet />}</main>
       {showBottomNav && (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { defaultSessionSelectionAdapter } from "./mockAdapter";
 import { SessionCard } from "./SessionCard";
 import type {
@@ -143,15 +144,37 @@ export function SessionSelectionScreen({
   if (isLoading) {
     return (
       <div className="session-selection-container" aria-busy="true">
-        <Skeleton width="12rem" height="1.5rem" />
-        <Skeleton width="60%" height="2rem" />
-        <div className="session-selection-pkg-summary">
-          <Skeleton width="50%" height="2rem" />
-          <Skeleton width="20%" height="1.5rem" />
+        <div className="session-selection-topbar">
+          <Skeleton width="10rem" height="2rem" />
         </div>
-        <div className="session-selection-list">
-          <Skeleton height="5rem" />
-          <Skeleton height="5rem" />
+        <div className="session-selection-header">
+          <Skeleton width="14rem" height="2.25rem" />
+          <Skeleton width="22rem" height="1.25rem" />
+        </div>
+        <div className="session-selection-layout">
+          <div className="session-selection-main-col">
+            <div className="session-selection-list">
+              <Skeleton height="5.5rem" />
+              <Skeleton height="5.5rem" />
+            </div>
+          </div>
+          <aside className="session-selection-side-col">
+            <div className="session-selection-pkg-summary">
+              <Skeleton width="4.75rem" height="4.75rem" />
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                }}
+              >
+                <Skeleton width="40%" height="1rem" />
+                <Skeleton width="70%" height="1.5rem" />
+                <Skeleton width="30%" height="1rem" />
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     );
@@ -207,6 +230,7 @@ export function SessionSelectionScreen({
   }
 
   const { package: pkg, sessions, hasSelectableSession } = viewModel;
+  const visual = getPackageVisual(pkg.id, pkg.destinationName);
 
   const selectedSession = sessions.find(
     (s) => s.sessionId === selectedSessionId,
@@ -221,7 +245,22 @@ export function SessionSelectionScreen({
           className="session-selection-back-btn"
           aria-label="Kembali ke Detail Experience"
         >
-          &larr; Detail Experience
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="session-selection-back-icon"
+          >
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>Detail Experience</span>
         </Link>
       </div>
 
@@ -232,75 +271,106 @@ export function SessionSelectionScreen({
         </p>
       </header>
 
-      {/* 2. Compact Package Summary Card */}
-      <section
-        className="session-selection-pkg-summary"
-        aria-label="Ringkasan paket"
-      >
-        <div className="session-selection-pkg-info">
-          <span className="session-selection-pkg-meta">
-            {pkg.destinationName} • {pkg.locationLabel}
-          </span>
-          <h2 className="session-selection-pkg-title">{pkg.title}</h2>
-        </div>
-        <span className="session-selection-pkg-price">
-          Mulai dari Rp{pkg.pricePerPerson.toLocaleString("id-ID")} / orang
-        </span>
-      </section>
+      {/* Main Two-Column Layout on Desktop, Fluid Stack on Mobile */}
+      <div className="session-selection-layout">
+        {/* Left Column: Schedule Selection */}
+        <div className="session-selection-main-col">
+          {/* Revalidation Alert / Notice */}
+          {validationNotice && (
+            <div
+              className={`session-selection-alert ${
+                validationNotice.type === "error"
+                  ? "session-selection-alert--error"
+                  : "session-selection-alert--warning"
+              }`}
+              role="alert"
+            >
+              <p>{validationNotice.message}</p>
+            </div>
+          )}
 
-      {/* Revalidation Alert / Notice */}
-      {validationNotice && (
-        <div
-          className={`session-selection-alert ${
-            validationNotice.type === "error"
-              ? "session-selection-alert--error"
-              : "session-selection-alert--warning"
-          }`}
-          role="alert"
-        >
-          <p>{validationNotice.message}</p>
-        </div>
-      )}
+          {/* Schedule Selection Radio Group */}
+          {sessions.length > 0 ? (
+            <fieldset className="session-selection-fieldset">
+              <legend className="session-selection-legend">
+                Jadwal Keberangkatan
+              </legend>
+              <div className="session-selection-list">
+                {sessions.map((session) => (
+                  <SessionCard
+                    key={session.sessionId}
+                    session={session}
+                    isSelected={selectedSessionId === session.sessionId}
+                    onSelect={handleSelectSession}
+                    disabled={isRevalidating}
+                  />
+                ))}
+              </div>
+            </fieldset>
+          ) : (
+            <div className="session-selection-no-session-card">
+              <p>Belum ada jadwal yang bisa dipilih saat ini.</p>
+            </div>
+          )}
 
-      {/* 3. Session Selection Radio Group */}
-      {sessions.length > 0 ? (
-        <fieldset className="session-selection-fieldset">
-          <legend className="session-selection-legend">
-            Jadwal Keberangkatan
-          </legend>
-          <div className="session-selection-list">
-            {sessions.map((session) => (
-              <SessionCard
-                key={session.sessionId}
-                session={session}
-                isSelected={selectedSessionId === session.sessionId}
-                onSelect={handleSelectSession}
-                disabled={isRevalidating}
-              />
-            ))}
+          {!hasSelectableSession && sessions.length > 0 && (
+            <div className="session-selection-no-session-card">
+              <p>Belum ada jadwal yang bisa dipilih saat ini.</p>
+            </div>
+          )}
+
+          {/* Concurrency Notice */}
+          <div className="session-selection-notice-box">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className="session-selection-notice-icon"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <p>
+              Memilih jadwal belum mengamankan slot. Ketersediaan akan
+              dipastikan saat kamu melanjutkan ke checkout.
+            </p>
           </div>
-        </fieldset>
-      ) : (
-        <div className="session-selection-no-session-card">
-          <p>Belum ada jadwal yang bisa dipilih saat ini.</p>
         </div>
-      )}
 
-      {!hasSelectableSession && sessions.length > 0 && (
-        <div className="session-selection-no-session-card">
-          <p>Belum ada jadwal yang bisa dipilih saat ini.</p>
-        </div>
-      )}
-
-      {/* 4. Concurrency Notice */}
-      <div className="session-selection-notice-box">
-        <p>
-          Memilih jadwal belum mengamankan slot. Ketersediaan akan dipastikan
-          saat kamu melanjutkan ke checkout.
-        </p>
+        {/* Right Column: Compact Package Summary & Side Context */}
+        <aside className="session-selection-side-col">
+          <section
+            className="session-selection-pkg-summary"
+            aria-label="Ringkasan paket"
+          >
+            <div
+              className="session-selection-pkg-thumb"
+              style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
+              role="img"
+              aria-label={`Ilustrasi ${pkg.title}`}
+            />
+            <div className="session-selection-pkg-info">
+              <span className="session-selection-pkg-meta">
+                {pkg.destinationName} • {pkg.locationLabel}
+              </span>
+              <h2 className="session-selection-pkg-title">{pkg.title}</h2>
+              <span className="session-selection-pkg-price">
+                Mulai dari Rp{pkg.pricePerPerson.toLocaleString("id-ID")} /
+                orang
+              </span>
+            </div>
+          </section>
+        </aside>
       </div>
 
-      {/* 5. Sticky Progression Action Bar */}
+      {/* Sticky Progression Action Bar */}
       <div className="session-selection-sticky-bar">
         <div className="session-selection-sticky-bar__container">
           <div className="session-selection-sticky-bar__summary-wrap">

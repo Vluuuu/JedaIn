@@ -103,9 +103,6 @@ export function App() {
             </OnboardingRouteGuard>
           }
         />
-      </Route>
-
-      <Route element={<DistractionFreeShell />}>
         <Route
           path="onboarding/result"
           element={
@@ -114,6 +111,9 @@ export function App() {
             </OnboardingRouteGuard>
           }
         />
+      </Route>
+
+      <Route element={<DistractionFreeShell />}>
         <Route
           path="payment/:bookingId"
           element={

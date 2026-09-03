@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Badge, Button, Skeleton } from "../../components/ui";
-import { getPackageVisual } from "../../lib/assets/packageImages";
+import {
+  LOGIN_ATMOSPHERE_VISUAL,
+  getPackageVisual,
+} from "../../lib/assets/packageImages";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
 import { defaultRecommendationAdapter } from "./mockAdapter";
 import type { RecommendationAdapter, RecommendationResult } from "./types";
@@ -61,19 +63,39 @@ export function RecommendationResultScreen({
 
   if (isLoading) {
     return (
-      <div className="recommendation-container" aria-busy="true">
-        <div className="recommendation-layout">
-          <div className="recommendation-header">
-            <h1>Menyiapkan rekomendasi untukmu...</h1>
-            <p>Mencocokkan pilihan jedamu dengan kurasi paket yang tersedia.</p>
-          </div>
-          <div className="recommendation-hero-card">
-            <Skeleton height="14rem" />
+      <div className="recommendation-screen" aria-busy="true">
+        {/* Full-Screen Immersive Nature Backdrop */}
+        <div className="recommendation-screen__backdrop" aria-hidden="true">
+          <img
+            src={LOGIN_ATMOSPHERE_VISUAL.svgDataUri}
+            alt=""
+            className="recommendation-screen__backdrop-image"
+            loading="eager"
+            width="1000"
+            height="800"
+          />
+          <div className="recommendation-screen__backdrop-scrim" />
+          <div className="recommendation-screen__backdrop-grain" />
+        </div>
+
+        <div className="recommendation-screen__container">
+          <header className="recommendation-header">
+            <h1 className="recommendation-header__title">
+              Menyiapkan rekomendasi untukmu...
+            </h1>
+            <p className="recommendation-header__subtitle">
+              Mencocokkan pilihan jedamu dengan kurasi paket yang tersedia.
+            </p>
+          </header>
+
+          <div className="recommendation-hero-card recommendation-hero-card--skeleton">
+            <div className="recommendation-skeleton-visual" />
             <div className="recommendation-hero-content">
-              <Skeleton width="40%" height="1.5rem" />
-              <Skeleton width="80%" height="2rem" />
-              <Skeleton width="100%" height="3rem" />
-              <Skeleton width="100%" height="3rem" />
+              <div className="recommendation-skeleton-badge" />
+              <div className="recommendation-skeleton-title" />
+              <div className="recommendation-skeleton-text" />
+              <div className="recommendation-skeleton-box" />
+              <div className="recommendation-skeleton-btn" />
             </div>
           </div>
         </div>
@@ -83,15 +105,51 @@ export function RecommendationResultScreen({
 
   if (errorMessage || !result || !result.topRecommendation) {
     return (
-      <div className="recommendation-container">
-        <div className="recommendation-error-box" role="alert">
-          <h1>Rekomendasi belum bisa dimuat.</h1>
-          <p>
-            Jawaban kuismu tetap tersimpan. Coba lagi untuk melihat pilihanmu.
-          </p>
-          <Button variant="primary" size="md" onClick={fetchRecommendations}>
-            Coba lagi
-          </Button>
+      <div className="recommendation-screen">
+        {/* Full-Screen Immersive Nature Backdrop */}
+        <div className="recommendation-screen__backdrop" aria-hidden="true">
+          <img
+            src={LOGIN_ATMOSPHERE_VISUAL.svgDataUri}
+            alt=""
+            className="recommendation-screen__backdrop-image"
+            loading="eager"
+            width="1000"
+            height="800"
+          />
+          <div className="recommendation-screen__backdrop-scrim" />
+          <div className="recommendation-screen__backdrop-grain" />
+        </div>
+
+        <div className="recommendation-screen__container">
+          <section className="recommendation-error-card" role="alert">
+            <div className="recommendation-error-card__icon" aria-hidden="true">
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <h1 className="recommendation-error-card__title">
+              Rekomendasi belum bisa dimuat.
+            </h1>
+            <p className="recommendation-error-card__desc">
+              Jawaban kuismu tetap tersimpan. Coba lagi untuk melihat pilihanmu.
+            </p>
+            <button
+              type="button"
+              className="recommendation-primary-btn"
+              onClick={fetchRecommendations}
+            >
+              <span>Coba lagi</span>
+            </button>
+          </section>
         </div>
       </div>
     );
@@ -108,24 +166,41 @@ export function RecommendationResultScreen({
   const formattedPrice = `Rp${topPkg.pricePerPerson.toLocaleString("id-ID")}`;
 
   return (
-    <div className="recommendation-container">
-      <div className="recommendation-layout">
+    <div className="recommendation-screen">
+      {/* Full-Screen Immersive Nature Backdrop */}
+      <div className="recommendation-screen__backdrop" aria-hidden="true">
+        <img
+          src={LOGIN_ATMOSPHERE_VISUAL.svgDataUri}
+          alt=""
+          className="recommendation-screen__backdrop-image"
+          loading="eager"
+          width="1000"
+          height="800"
+        />
+        <div className="recommendation-screen__backdrop-scrim" />
+        <div className="recommendation-screen__backdrop-grain" />
+      </div>
+
+      <div className="recommendation-screen__container">
+        {/* Editorial Heading */}
         <header className="recommendation-header">
           {isFallback ? (
             <>
-              <h1>
+              <h1 className="recommendation-header__title">
                 Belum ada yang pas banget, tapi ini pilihan yang paling
                 mendekati preferensimu.
               </h1>
-              <p>
+              <p className="recommendation-header__subtitle">
                 Kamu tetap bisa melihat experience yang paling dekat dengan
                 pilihanmu sekarang.
               </p>
             </>
           ) : (
             <>
-              <h1>Ini jeda yang paling cocok buat kamu sekarang.</h1>
-              <p>
+              <h1 className="recommendation-header__title">
+                Ini jeda yang paling cocok buat kamu sekarang.
+              </h1>
+              <p className="recommendation-header__subtitle">
                 Berdasarkan pilihan terbarumu, ini experience yang paling
                 relevan untuk dicoba lebih dulu.
               </p>
@@ -133,7 +208,7 @@ export function RecommendationResultScreen({
           )}
         </header>
 
-        {/* HERO TOP RECOMMENDATION */}
+        {/* DOMINANT HERO TOP RECOMMENDATION CARD */}
         <section
           className="recommendation-hero-card"
           aria-labelledby="top-package-title"
@@ -144,23 +219,54 @@ export function RecommendationResultScreen({
             role="img"
             aria-label={`Ilustrasi suasana ${topPkg.title}`}
           >
+            <div className="recommendation-hero-visual__scrim" />
             <div className="recommendation-hero-visual__overlay">
-              <Badge tone={isFallback ? "neutral" : "success"}>
+              <span
+                className={`recommendation-badge ${isFallback ? "recommendation-badge--fallback" : "recommendation-badge--matched"}`}
+              >
                 {isFallback ? "Pilihan terdekat" : "Pilihan utama"}
-              </Badge>
-              <Badge tone="neutral">
+              </span>
+              <span className="recommendation-badge recommendation-badge--neutral">
                 {topPkg.verificationLevel === "PLUS"
                   ? "Terverifikasi Plus"
                   : "Terverifikasi Dasar"}
-              </Badge>
+              </span>
             </div>
           </div>
 
           <div className="recommendation-hero-content">
             <div className="recommendation-meta-row">
-              <span>{topPkg.locationLabel}</span>
-              <span>•</span>
-              <span>{durationLabel}</span>
+              <span className="recommendation-meta-location">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                {topPkg.locationLabel}
+              </span>
+              <span className="recommendation-meta-dot">•</span>
+              <span className="recommendation-meta-duration">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                {durationLabel}
+              </span>
             </div>
 
             <h2 id="top-package-title" className="recommendation-title">
@@ -170,10 +276,13 @@ export function RecommendationResultScreen({
             <p className="recommendation-summary">{topPkg.shortSummary}</p>
 
             <div className="recommendation-price-box">
-              <span className="recommendation-price-amount">
-                {formattedPrice}
-              </span>
-              <span className="recommendation-price-unit">/ orang</span>
+              <span className="recommendation-price-label">Mulai dari</span>
+              <div className="recommendation-price-wrap">
+                <span className="recommendation-price-amount">
+                  {formattedPrice}
+                </span>
+                <span className="recommendation-price-unit">/ orang</span>
+              </div>
             </div>
 
             {topRecommendation.reasons.length > 0 && (
@@ -186,21 +295,36 @@ export function RecommendationResultScreen({
                 <span className="recommendation-why-title">
                   {isFallback ? "Kenapa ini mendekati?" : "Kenapa ini cocok?"}
                 </span>
-                <div className="recommendation-chips">
+                <div className="recommendation-reasons-list">
                   {topRecommendation.reasons.map((reason, idx) => (
-                    <span key={idx} className="recommendation-chip">
-                      {reason}
-                    </span>
+                    <div key={idx} className="recommendation-reason-item">
+                      <span
+                        className="recommendation-reason-icon"
+                        aria-hidden="true"
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </span>
+                      <span className="recommendation-reason-text">
+                        {reason}
+                      </span>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <Button
+            <button
               type="button"
-              variant="primary"
-              size="lg"
-              className="recommendation-cta-btn"
+              className="recommendation-primary-btn"
               onClick={() =>
                 navigate(`/packages/${topPkg.id}`, {
                   state: {
@@ -212,12 +336,12 @@ export function RecommendationResultScreen({
                 })
               }
             >
-              Lihat Experience
-            </Button>
+              <span>Lihat Experience</span>
+            </button>
           </div>
         </section>
 
-        {/* ALTERNATIVES */}
+        {/* ALTERNATIVES DISCOVERY */}
         {alternatives.length > 0 && (
           <section
             className="recommendation-alternatives-section"
@@ -232,7 +356,10 @@ export function RecommendationResultScreen({
             <div className="recommendation-alternatives-grid">
               {alternatives.map((item) => {
                 const altPkg = item.package;
-                const altVisual = getPackageVisual(altPkg.id);
+                const altVisual = getPackageVisual(
+                  altPkg.id,
+                  altPkg.destinationName,
+                );
                 const altDuration =
                   QUIZ_DURATION_OPTIONS.find(
                     (d) => d.value === altPkg.durationType,
@@ -242,6 +369,12 @@ export function RecommendationResultScreen({
                   <Link
                     key={altPkg.id}
                     to={`/packages/${altPkg.id}`}
+                    state={{
+                      personalizedContext: {
+                        reasons: item.reasons,
+                        mode: isFallback ? "FALLBACK" : "MATCHED",
+                      },
+                    }}
                     className="recommendation-alt-card"
                   >
                     <div
@@ -250,23 +383,34 @@ export function RecommendationResultScreen({
                         backgroundImage: `url("${altVisual.svgDataUri}")`,
                       }}
                       aria-hidden="true"
-                    />
+                    >
+                      <div className="recommendation-alt-thumb__scrim" />
+                      <span className="recommendation-alt-badge">
+                        {altDuration}
+                      </span>
+                    </div>
                     <div className="recommendation-alt-body">
                       <div className="recommendation-alt-content">
                         <div className="recommendation-alt-meta">
-                          <span>{altPkg.locationLabel}</span> •{" "}
-                          <span>{altDuration}</span>
+                          <span>{altPkg.locationLabel}</span>
                         </div>
-                        <span className="recommendation-alt-title">
+                        <h4 className="recommendation-alt-title">
                           {altPkg.title}
-                        </span>
+                        </h4>
                       </div>
 
                       <div className="recommendation-alt-footer">
-                        <span className="recommendation-price-amount">
-                          Rp{altPkg.pricePerPerson.toLocaleString("id-ID")}
+                        <div className="recommendation-alt-price">
+                          <span className="recommendation-alt-price-amount">
+                            Rp{altPkg.pricePerPerson.toLocaleString("id-ID")}
+                          </span>
+                          <span className="recommendation-alt-price-unit">
+                            /org
+                          </span>
+                        </div>
+                        <span className="recommendation-alt-action">
+                          Lihat &rarr;
                         </span>
-                        <Badge tone="neutral">Lihat</Badge>
                       </div>
                     </div>
                   </Link>
@@ -276,18 +420,16 @@ export function RecommendationResultScreen({
           </section>
         )}
 
-        {/* SECONDARY ACTION */}
-        <div className="recommendation-bottom-actions">
-          <Button
+        {/* SECONDARY PROMPT: LANJUT KE HOME */}
+        <footer className="recommendation-bottom-actions">
+          <button
             type="button"
-            variant="ghost"
-            size="md"
             className="recommendation-home-btn"
             onClick={() => navigate("/home")}
           >
-            Lanjut ke Home &rarr;
-          </Button>
-        </div>
+            <span>Lanjut ke Home &rarr;</span>
+          </button>
+        </footer>
       </div>
     </div>
   );

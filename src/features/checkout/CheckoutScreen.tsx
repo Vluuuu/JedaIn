@@ -144,7 +144,15 @@ export function CheckoutScreen({
       }
 
       if (res.status === "ACTIVE_PENDING_PAYMENT") {
-        navigate(`/checkout/${sessionId}/pending-payment`);
+        const checkoutDraft: CheckoutDraftState = {
+          sessionId,
+          participantCount,
+          policyAcknowledged,
+          idempotencyKey,
+        };
+        navigate(`/checkout/${sessionId}/pending-payment`, {
+          state: { checkoutDraft },
+        });
         return;
       }
 

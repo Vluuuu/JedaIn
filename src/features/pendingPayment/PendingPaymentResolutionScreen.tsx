@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
+import type { CheckoutDraftState } from "../checkout/types";
 import { defaultPendingPaymentResolutionAdapter } from "./mockAdapter";
 import { PendingPaymentSummary } from "./PendingPaymentSummary";
 import type {
@@ -28,6 +29,13 @@ export function PendingPaymentResolutionScreen({
 }: PendingPaymentResolutionScreenProps) {
   const { sessionId: intendedSessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const checkoutDraft = (
+    location.state as { checkoutDraft?: CheckoutDraftState } | null
+  )?.checkoutDraft;
+  const isMatchingDraft =
+    checkoutDraft && checkoutDraft.sessionId === intendedSessionId;
 
   const [isLoading, setIsLoading] = useState(true);
   const [step, setStep] = useState<PendingPaymentResolutionStep>("LOADING");
@@ -237,7 +245,10 @@ export function PendingPaymentResolutionScreen({
 
       if (res.success) {
         // Return to intended NEW Checkout route (DO NOT auto-create transaction)
-        navigate(`/checkout/${intendedSessionId}`, { replace: true });
+        navigate(`/checkout/${intendedSessionId}`, {
+          replace: true,
+          state: isMatchingDraft ? { checkoutDraft } : undefined,
+        });
         return;
       }
 
@@ -264,10 +275,17 @@ export function PendingPaymentResolutionScreen({
   if (isLoading) {
     return (
       <div className="pending-payment-container" aria-busy="true">
-        <Skeleton width="10rem" height="1.5rem" />
-        <Skeleton width="60%" height="2rem" />
-        <div className="pending-payment-card">
-          <Skeleton height="10rem" />
+        <div className="pending-payment-topbar">
+          <Skeleton width="8rem" height="2.25rem" />
+        </div>
+        <div className="pending-payment-header">
+          <Skeleton width="18rem" height="2rem" />
+          <Skeleton width="22rem" height="1.25rem" />
+        </div>
+        <div className="pending-payment-surface">
+          <Skeleton height="3rem" />
+          <Skeleton height="6rem" />
+          <Skeleton height="8rem" />
         </div>
       </div>
     );
@@ -277,6 +295,23 @@ export function PendingPaymentResolutionScreen({
     return (
       <div className="pending-payment-container">
         <div className="pending-payment-state-box" role="alert">
+          <div className="pending-payment-state-box__icon-wrap pending-payment-state-box__icon-wrap--error">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
           <h2>Pembayaran tertunda belum bisa dimuat.</h2>
           <p>{errorMessage ?? "Silakan coba lagi beberapa saat."}</p>
           <Button
@@ -295,6 +330,22 @@ export function PendingPaymentResolutionScreen({
     return (
       <div className="pending-payment-container">
         <div className="pending-payment-state-box" role="status">
+          <div className="pending-payment-state-box__icon-wrap">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
           <h2>Pembayaran sudah kedaluwarsa.</h2>
           <p>
             Waktu pembayaran telah habis dan slot yang dipesan telah dilepas.
@@ -302,7 +353,11 @@ export function PendingPaymentResolutionScreen({
           <Button
             variant="primary"
             size="md"
-            onClick={() => navigate(`/checkout/${intendedSessionId}`)}
+            onClick={() =>
+              navigate(`/checkout/${intendedSessionId}`, {
+                state: isMatchingDraft ? { checkoutDraft } : undefined,
+              })
+            }
           >
             Kembali ke Checkout
           </Button>
@@ -315,12 +370,32 @@ export function PendingPaymentResolutionScreen({
     return (
       <div className="pending-payment-container">
         <div className="pending-payment-state-box">
+          <div className="pending-payment-state-box__icon-wrap">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
           <h2>Tidak ada pembayaran tertunda yang aktif.</h2>
           <p>Kamu dapat melanjutkan proses checkout untuk jadwal yang baru.</p>
           <Button
             variant="primary"
             size="md"
-            onClick={() => navigate(`/checkout/${intendedSessionId}`)}
+            onClick={() =>
+              navigate(`/checkout/${intendedSessionId}`, {
+                state: isMatchingDraft ? { checkoutDraft } : undefined,
+              })
+            }
           >
             Kembali ke Checkout
           </Button>
@@ -335,10 +410,26 @@ export function PendingPaymentResolutionScreen({
       <div className="pending-payment-topbar">
         <Link
           to={`/checkout/${intendedSessionId}`}
+          state={isMatchingDraft ? { checkoutDraft } : undefined}
           className="pending-payment-back-btn"
           aria-label="Kembali ke Checkout"
         >
-          &larr; Kembali ke Checkout
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="pending-payment-back-icon"
+          >
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>Kembali ke Checkout</span>
         </Link>
       </div>
 
@@ -351,17 +442,32 @@ export function PendingPaymentResolutionScreen({
         </p>
       </header>
 
-      {/* Error Banner */}
+      {/* Recoverable Error Banner */}
       {errorMessage && (
         <div
           className="pending-payment-alert pending-payment-alert--error"
           role="alert"
         >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
           <p>{errorMessage}</p>
         </div>
       )}
 
-      {/* 2. Existing Payment Summary Card */}
+      {/* 2. Existing Payment Summary Surface */}
       <PendingPaymentSummary
         summary={summary}
         secondsRemaining={secondsRemaining}

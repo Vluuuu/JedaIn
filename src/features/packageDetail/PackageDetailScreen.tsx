@@ -232,33 +232,67 @@ export function PackageDetailScreen({
           className="package-detail-section"
           aria-labelledby="dest-trust-heading"
         >
-          <h2 id="dest-trust-heading" className="package-detail-section__title">
-            Destinasi
-          </h2>
-          <div className="package-detail-trust-card">
-            <div className="package-detail-trust-header">
-              <div>
-                <h3 className="package-detail-trust-title">
-                  {pkg.destinationName}
-                </h3>
-                <p className="package-detail-trust-subtitle">
-                  {pkg.locationLabel}
-                </p>
-              </div>
-              <span className="package-detail-trust-badge">
+          <div className="package-detail-section__header">
+            <div>
+              <span className="package-detail-section__eyebrow">Destinasi</span>
+              <h2
+                id="dest-trust-heading"
+                className="package-detail-section__title"
+              >
+                {pkg.destinationName}
+              </h2>
+              <p className="package-detail-section__subtitle">
+                {pkg.locationLabel}
+              </p>
+            </div>
+            <span className="package-detail-inline-trust">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="package-detail-inline-trust__icon"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <polyline points="9 12 11 14 15 10" />
+              </svg>
+              <span>
                 {pkg.verificationLevel === "PLUS"
                   ? "Terverifikasi Plus"
                   : "Terverifikasi Dasar"}
               </span>
-            </div>
-            <p className="package-detail-trust-body">
-              {detail.destinationDetail.overviewDescription}
-            </p>
-            <p className="package-detail-trust-notice">
+            </span>
+          </div>
+          <p className="package-detail-editorial-text">
+            {detail.destinationDetail.overviewDescription}
+          </p>
+          <p className="package-detail-subtle-note">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className="package-detail-subtle-note__icon"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>
               Status mitra destinasi berdasarkan proses verifikasi internal
               JedaIn.
-            </p>
-          </div>
+            </span>
+          </p>
         </section>
 
         {/* 5. EO / Guide Identity & Status */}
@@ -266,36 +300,77 @@ export function PackageDetailScreen({
           className="package-detail-section"
           aria-labelledby="organizer-heading"
         >
-          <h2 id="organizer-heading" className="package-detail-section__title">
-            Penyelenggara & Pemandu
-          </h2>
-          <div className="package-detail-trust-card">
-            <div className="package-detail-trust-header">
-              <div>
-                <h3 className="package-detail-trust-title">
-                  {detail.organizer.displayName}
-                </h3>
-                {detail.organizer.roleDescription && (
-                  <p className="package-detail-trust-subtitle">
-                    {detail.organizer.roleDescription}
-                  </p>
+          <div className="package-detail-section__header">
+            <div>
+              <span className="package-detail-section__eyebrow">
+                Penyelenggara & Pemandu
+              </span>
+              <h2
+                id="organizer-heading"
+                className="package-detail-section__title"
+              >
+                {detail.organizer.displayName}
+              </h2>
+              {detail.organizer.roleDescription && (
+                <p className="package-detail-section__subtitle">
+                  {detail.organizer.roleDescription}
+                </p>
+              )}
+            </div>
+            <div className="package-detail-guide-meta">
+              <span className="package-detail-guide-meta__label">
+                Status pemandu
+              </span>
+              <span className="package-detail-guide-meta__value">
+                {detail.organizer.guideStatus === "CERTIFIED_GUIDE" ? (
+                  <>
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className="package-detail-guide-meta__icon"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <polyline points="9 12 11 14 15 10" />
+                    </svg>
+                    <span>Certified Guide</span>
+                  </>
+                ) : (
+                  <span>Concept Organizer</span>
                 )}
-              </div>
-              <span className="package-detail-trust-badge">
-                {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
-                  ? "Status Guide: Certified Guide"
-                  : "Status Guide: Concept Organizer"}
               </span>
             </div>
-            {detail.organizer.bioSummary && (
-              <p className="package-detail-trust-body">
-                {detail.organizer.bioSummary}
-              </p>
-            )}
-            <p className="package-detail-trust-notice">
-              Penyelenggara terdaftar di JedaIn Partner Portal.
-            </p>
           </div>
+          {detail.organizer.bioSummary && (
+            <p className="package-detail-editorial-text">
+              {detail.organizer.bioSummary}
+            </p>
+          )}
+          <p className="package-detail-subtle-note">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className="package-detail-subtle-note__icon"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>Penyelenggara terdaftar di JedaIn Partner Portal.</span>
+          </p>
         </section>
 
         {/* 6. Experience Highlights */}
@@ -391,58 +466,59 @@ export function PackageDetailScreen({
             Fasilitas & Ketentuan
           </h2>
           <div className="package-detail-in-out-grid">
-            <div className="package-detail-in-out-box package-detail-in-out-box--included">
-              <h3 className="package-detail-in-out-title">Sudah Termasuk</h3>
+            <div className="package-detail-in-out-col">
+              <h3 className="package-detail-in-out-heading">Sudah Termasuk</h3>
               <ul className="package-detail-in-out-list">
                 {detail.includedItems.map((item, idx) => (
-                  <li key={idx} className="package-detail-in-out-item">
+                  <li key={idx} className="package-detail-in-out-row">
                     <span
                       className="package-detail-in-out-icon package-detail-in-out-icon--included"
                       aria-hidden="true"
                     >
                       <svg
-                        width="12"
-                        height="12"
+                        width="15"
+                        height="15"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2.5"
+                        strokeWidth="2.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </span>
-                    <span>{item}</span>
+                    <span className="package-detail-in-out-text">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="package-detail-in-out-box package-detail-in-out-box--excluded">
-              <h3 className="package-detail-in-out-title">Belum Termasuk</h3>
+            <div className="package-detail-in-out-divider" aria-hidden="true" />
+
+            <div className="package-detail-in-out-col">
+              <h3 className="package-detail-in-out-heading">Belum Termasuk</h3>
               <ul className="package-detail-in-out-list">
                 {detail.excludedItems.map((item, idx) => (
-                  <li key={idx} className="package-detail-in-out-item">
+                  <li key={idx} className="package-detail-in-out-row">
                     <span
                       className="package-detail-in-out-icon package-detail-in-out-icon--excluded"
                       aria-hidden="true"
                     >
                       <svg
-                        width="12"
-                        height="12"
+                        width="15"
+                        height="15"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2.5"
+                        strokeWidth="2.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
                       </svg>
                     </span>
-                    <span>{item}</span>
+                    <span className="package-detail-in-out-text">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -475,9 +551,9 @@ export function PackageDetailScreen({
           <h2 id="policy-heading" className="package-detail-section__title">
             Kebijakan Pembatalan & Refund
           </h2>
-          <div className="package-detail-policy-box">
-            <p>{detail.cancellationPolicySummary}</p>
-          </div>
+          <p className="package-detail-editorial-text">
+            {detail.cancellationPolicySummary}
+          </p>
         </section>
 
         {/* 11. Upcoming Sessions Preview */}
@@ -510,12 +586,24 @@ export function PackageDetailScreen({
                           {dateLabel}
                         </span>
                       </div>
-                      <span className="package-detail-session-card__status">
-                        {session.status === "OPEN"
-                          ? "Tersedia"
-                          : session.status === "FULL"
-                            ? "Penuh"
-                            : "Ditutup"}
+                      <span
+                        className={`package-detail-session-card__status${
+                          session.status === "OPEN"
+                            ? " package-detail-session-card__status--open"
+                            : ""
+                        }`}
+                      >
+                        <span
+                          className="package-detail-session-card__status-dot"
+                          aria-hidden="true"
+                        />
+                        <span>
+                          {session.status === "OPEN"
+                            ? "Tersedia"
+                            : session.status === "FULL"
+                              ? "Penuh"
+                              : "Ditutup"}
+                        </span>
                       </span>
                     </div>
                     {session.remainingSlots !== undefined && (

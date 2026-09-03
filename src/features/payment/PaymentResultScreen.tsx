@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Badge, Button, Skeleton } from "../../components/ui";
+import { Button, Skeleton } from "../../components/ui";
+import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
 import { defaultPaymentAdapter } from "./mockAdapter";
 import type { PaymentAdapter, PaymentResultViewModel } from "./types";
 import "./payment.css";
@@ -69,16 +70,35 @@ export function PaymentResultScreen({
     );
   }
 
-  const { booking, package: pkg } = result;
+  const { booking, package: pkg, session } = result;
+  const sessionDateLabel =
+    session?.startAt && session?.endAt
+      ? formatSessionDateTimeRange(session.startAt, session.endAt).dateLabel
+      : undefined;
 
   if (result.status === "SUCCESS") {
     return (
       <div className="payment-container payment-result-container">
         <div className="payment-result-header">
-          <div className="payment-result-icon payment-result-icon--success">
-            ✓
+          <div className="payment-success-visual" aria-hidden="true">
+            <svg
+              className="payment-success-check"
+              width="44"
+              height="44"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 25L19.5 34.5L38 14"
+                stroke="var(--color-forest-700)"
+                strokeWidth="4.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
-          <Badge tone="success">Pembayaran Berhasil</Badge>
+          <span className="payment-success-badge">Pembayaran Berhasil</span>
           <h1 className="payment-result-title">Siap untuk jedamu!</h1>
           <p className="payment-result-subtitle">
             Pembayaranmu telah berhasil diverifikasi. Detail trip sudah
@@ -86,29 +106,57 @@ export function PaymentResultScreen({
           </p>
         </div>
 
-        <div className="payment-card">
-          <h2 className="payment-card__title">
-            {pkg?.title ?? booking.packageId}
-          </h2>
-          {pkg?.destinationName && (
-            <p className="payment-card__meta">
-              {pkg.destinationName} • {pkg.locationLabel}
-            </p>
-          )}
+        <section
+          className="payment-summary-card"
+          aria-label="Informasi pesanan terkonfirmasi"
+        >
+          <div className="payment-summary-card__header">
+            <h2 className="payment-summary-card__title">
+              {pkg?.title ?? booking.packageId}
+            </h2>
+            {pkg?.destinationName && (
+              <p className="payment-summary-card__meta">
+                {pkg.destinationName} • {pkg.locationLabel}
+              </p>
+            )}
+          </div>
 
-          <div className="payment-card__rows">
-            <div className="payment-card__row">
-              <span>Nomor Pesanan</span>
-              <strong>{booking.bookingId}</strong>
+          <div className="payment-summary-card__facts">
+            <div className="payment-summary-card__section-label">
+              Informasi Pesanan
             </div>
-            <div className="payment-card__row">
-              <span>Total Terbayar</span>
-              <strong className="payment-card__total">
+
+            <div className="payment-fact-row">
+              <span className="payment-fact-label">Nomor Pesanan</span>
+              <strong className="payment-fact-value">
+                {booking.bookingId}
+              </strong>
+            </div>
+
+            {sessionDateLabel && (
+              <div className="payment-fact-row">
+                <span className="payment-fact-label">Waktu Keberangkatan</span>
+                <strong className="payment-fact-value">
+                  {sessionDateLabel}
+                </strong>
+              </div>
+            )}
+
+            <div className="payment-fact-row">
+              <span className="payment-fact-label">Jumlah Peserta</span>
+              <span className="payment-fact-value">
+                {booking.participantCount} Orang
+              </span>
+            </div>
+
+            <div className="payment-fact-row payment-fact-row--total">
+              <span className="payment-fact-total-label">Total Terbayar</span>
+              <strong className="payment-fact-total-value">
                 Rp{booking.totalAmount.toLocaleString("id-ID")}
               </strong>
             </div>
           </div>
-        </div>
+        </section>
 
         <div className="payment-actions">
           <Button
@@ -136,7 +184,10 @@ export function PaymentResultScreen({
     return (
       <div className="payment-container payment-result-container">
         <div className="payment-result-header">
-          <Badge tone="warning">Menunggu Pembayaran</Badge>
+          <div className="payment-status-badge">
+            <span className="payment-status-dot" aria-hidden="true" />
+            <span>Menunggu Pembayaran</span>
+          </div>
           <h1 className="payment-result-title">Pembayaran Belum Selesai</h1>
           <p className="payment-result-subtitle">
             Transaksi ini masih menunggu pembayaran atau proses verifikasi.
@@ -169,7 +220,13 @@ export function PaymentResultScreen({
     return (
       <div className="payment-container payment-result-container">
         <div className="payment-result-header">
-          <Badge tone="neutral">Status Tidak Dikenal</Badge>
+          <div className="payment-status-badge">
+            <span
+              className="payment-status-dot payment-status-dot--neutral"
+              aria-hidden="true"
+            />
+            <span>Status Tidak Dikenal</span>
+          </div>
           <h1 className="payment-result-title">Status Belum Diketahui</h1>
           <p className="payment-result-subtitle">
             Terjadi kendala saat memeriksa status transaksi. Silakan coba
@@ -195,10 +252,23 @@ export function PaymentResultScreen({
     return (
       <div className="payment-container payment-result-container">
         <div className="payment-result-header">
-          <div className="payment-result-icon payment-result-icon--danger">
-            ✕
+          <div className="payment-fail-visual" aria-hidden="true">
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 40 40"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 12L28 28M28 12L12 28"
+                stroke="var(--color-danger-solid)"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+              />
+            </svg>
           </div>
-          <Badge tone="danger">Pembayaran Belum Berhasil</Badge>
+          <span className="payment-fail-badge">Pembayaran Belum Berhasil</span>
           <h1 className="payment-result-title">Pembayaran Gagal</h1>
           <p className="payment-result-subtitle">
             Slot pemesananmu masih tersimpan. Silakan coba kembali sebelum waktu
@@ -233,7 +303,13 @@ export function PaymentResultScreen({
     return (
       <div className="payment-container payment-result-container">
         <div className="payment-result-header">
-          <Badge tone="neutral">Kedaluwarsa</Badge>
+          <div className="payment-status-badge">
+            <span
+              className="payment-status-dot payment-status-dot--neutral"
+              aria-hidden="true"
+            />
+            <span>Kedaluwarsa</span>
+          </div>
           <h1 className="payment-result-title">Waktu Pembayaran Habis</h1>
           <p className="payment-result-subtitle">
             Batas waktu pembayaran telah berakhir dan slot yang dipilih telah
@@ -271,7 +347,13 @@ export function PaymentResultScreen({
   return (
     <div className="payment-container payment-result-container">
       <div className="payment-result-header">
-        <Badge tone="neutral">Dibatalkan</Badge>
+        <div className="payment-status-badge">
+          <span
+            className="payment-status-dot payment-status-dot--neutral"
+            aria-hidden="true"
+          />
+          <span>Dibatalkan</span>
+        </div>
         <h1 className="payment-result-title">Pesanan Dibatalkan</h1>
         <p className="payment-result-subtitle">
           Pesanan ini telah dibatalkan dan slot telah dilepas untuk traveler

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Badge, Button, Skeleton } from "../../components/ui";
+import { Button, Skeleton } from "../../components/ui";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
 import { defaultPaymentAdapter } from "./mockAdapter";
 import type { PaymentAdapter, PaymentState, PaymentViewModel } from "./types";
@@ -225,7 +225,10 @@ export function PaymentScreen({
   return (
     <div className="payment-container">
       <header className="payment-header">
-        <Badge tone="warning">Menunggu Pembayaran</Badge>
+        <div className="payment-status-badge">
+          <span className="payment-status-dot" aria-hidden="true" />
+          <span>Menunggu Pembayaran</span>
+        </div>
         <h1 className="payment-title">Konfirmasi Pembayaran</h1>
         <p className="payment-subtitle">
           Selesaikan pembayaran sebelum batas waktu berakhir.
@@ -246,50 +249,56 @@ export function PaymentScreen({
         </div>
       )}
 
-      {/* Booking Summary Card */}
-      <div className="payment-card">
-        <h2 className="payment-card__title">
-          {pkg?.title ?? booking.packageId}
-        </h2>
-        {pkg?.destinationName && (
-          <p className="payment-card__meta">
-            {pkg.destinationName} • {pkg.locationLabel}
-          </p>
-        )}
+      {/* Booking Summary Section */}
+      <section className="payment-summary-card" aria-label="Informasi pesanan">
+        <div className="payment-summary-card__header">
+          <h2 className="payment-summary-card__title">
+            {pkg?.title ?? booking.packageId}
+          </h2>
+          {pkg?.destinationName && (
+            <p className="payment-summary-card__meta">
+              {pkg.destinationName} • {pkg.locationLabel}
+            </p>
+          )}
+        </div>
 
-        <div className="payment-card__rows">
-          <div className="payment-card__row">
-            <span>Nomor Pesanan</span>
-            <strong>{booking.bookingId}</strong>
+        <div className="payment-summary-card__facts">
+          <div className="payment-summary-card__section-label">
+            Informasi Pesanan
+          </div>
+
+          <div className="payment-fact-row">
+            <span className="payment-fact-label">Nomor Pesanan</span>
+            <strong className="payment-fact-value">{booking.bookingId}</strong>
           </div>
 
           {sessionDateLabel && (
-            <div className="payment-card__row">
-              <span>Jadwal Keberangkatan</span>
-              <strong>{sessionDateLabel}</strong>
+            <div className="payment-fact-row">
+              <span className="payment-fact-label">Jadwal Keberangkatan</span>
+              <strong className="payment-fact-value">{sessionDateLabel}</strong>
             </div>
           )}
 
-          <div className="payment-card__row">
-            <span>Jumlah Peserta</span>
-            <span>{booking.participantCount} Orang</span>
+          <div className="payment-fact-row">
+            <span className="payment-fact-label">Jumlah Peserta</span>
+            <span className="payment-fact-value">
+              {booking.participantCount} Orang
+            </span>
           </div>
 
-          <div className="payment-card__row payment-card__row--total">
-            <span>Total Pembayaran</span>
-            <strong className="payment-card__total">
+          <div className="payment-fact-row payment-fact-row--total">
+            <span className="payment-fact-total-label">Total Pembayaran</span>
+            <strong className="payment-fact-total-value">
               Rp{booking.totalAmount.toLocaleString("id-ID")}
             </strong>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Prototype Notice */}
       <div className="payment-method-box">
         <span className="payment-method-title">Metode Pembayaran</span>
-        <p className="payment-method-desc">
-          Simulasi Pembayaran Instan (Prototype Sandbox)
-        </p>
+        <p className="payment-method-desc">Pembayaran Prototype</p>
       </div>
 
       {/* Action Buttons */}

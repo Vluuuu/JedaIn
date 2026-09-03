@@ -92,9 +92,9 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.3125rem 0.6875rem;
-  background: rgb(15 33 23 / 85%);
+  background: var(--color-overlay-dark);
   color: var(--color-text-inverse);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid color-mix(in srgb, var(--color-stone-0) 20%, transparent);
   border-radius: var(--radius-pill);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
@@ -600,6 +600,48 @@
   color: var(--color-stone-600);
   font-size: var(--font-size-body-sm);
   line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   10. Upcoming Session Previews
+   -------------------------------------------------------------------------- */
+.package-detail-sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.package-detail-session-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-bg-surface);
+  border: 1.5px solid var(--color-stone-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--motion-fast) var(--ease-standard);
+}
+
+@media (min-width: 640px) {
+  .package-detail-session-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.package-detail-session-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.package-detail-session-card__date {
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
 }
 
 .package-detail-session-card__status {

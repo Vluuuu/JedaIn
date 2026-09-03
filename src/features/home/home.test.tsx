@@ -377,6 +377,40 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
     });
     expect(container.textContent).toContain("Sehari Pelan di Lereng Hijau");
     expect(container.textContent).toContain("Mulai dari");
+    // Verifies personalized context reasons are preserved in Package Detail
+    expect(container.textContent).toContain("Kenapa cocok untukmu?");
+  });
+
+  it("A2. preserves FALLBACK personalizedContext when clicking 'Lihat Experience'", async () => {
+    sessionStore.setUser({
+      id: "usr_rec_fallback_nav",
+      onboardingStatus: "COMPLETED",
+    });
+    sessionStore.setQuizDraft(fallbackQuiz);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(() =>
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/home"] },
+          createElement(App),
+        ),
+      ),
+    );
+
+    const recBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lihat Experience"),
+    )!;
+    await act(async () => {
+      recBtn.click();
+    });
+    expect(container.textContent).toContain(
+      "Kenapa pilihan ini mendekati preferensimu?",
+    );
   });
 
   it("B. routes 'Ubah preferensi' to /profile/preferences", async () => {
@@ -527,6 +561,58 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
     )!;
     await act(() => exploreBtn.click());
     expect(container.textContent).toContain("Explore");
+  });
+
+  it("G. routes contextual 'Lihat semua' for MALANG to /explore?departure=malang", async () => {
+    sessionStore.setUser({
+      id: "usr_malang_more",
+      onboardingStatus: "COMPLETED",
+    });
+    sessionStore.setQuizDraft({
+      ...sampleQuiz,
+      departure_area_id: "MALANG",
+    });
+
+    const view = await renderHome();
+    const moreLink = view.querySelector<HTMLAnchorElement>(
+      '[data-testid="departure-more-link"]',
+    )!;
+    expect(moreLink.getAttribute("href")).toBe("/explore?departure=malang");
+  });
+
+  it("H. routes contextual 'Lihat semua' for SURABAYA to /explore?departure=surabaya", async () => {
+    sessionStore.setUser({
+      id: "usr_sby_more",
+      onboardingStatus: "COMPLETED",
+    });
+    sessionStore.setQuizDraft({
+      ...sampleQuiz,
+      departure_area_id: "SURABAYA",
+    });
+
+    const view = await renderHome();
+    const moreLink = view.querySelector<HTMLAnchorElement>(
+      '[data-testid="departure-more-link"]',
+    )!;
+    expect(moreLink.getAttribute("href")).toBe("/explore?departure=surabaya");
+  });
+
+  it("I. routes 'Lihat semua' for OTHER/unsupported departure generically to /explore", async () => {
+    sessionStore.setUser({
+      id: "usr_other_more",
+      onboardingStatus: "COMPLETED",
+    });
+    sessionStore.setQuizDraft({
+      ...sampleQuiz,
+      departure_area_id: "OTHER",
+      departure_area_label: "Kediri",
+    });
+
+    const view = await renderHome();
+    const moreLink = view.querySelector<HTMLAnchorElement>(
+      '[data-testid="departure-more-link"]',
+    )!;
+    expect(moreLink.getAttribute("href")).toBe("/explore");
   });
 
   it("routes payment CTA correctly", async () => {

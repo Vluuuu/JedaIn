@@ -121,6 +121,14 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
       : "Pilihan untukmu"
     : "Rekomendasi Personal";
 
+  // Derive departure contextual link for Explore
+  const departureExploreHref =
+    quizDraft?.departure_area_id === "MALANG"
+      ? "/explore?departure=malang"
+      : quizDraft?.departure_area_id === "SURABAYA"
+        ? "/explore?departure=surabaya"
+        : "/explore";
+
   return (
     <div className="home-container">
       {/* 1. Greeting / App Header context */}
@@ -266,7 +274,16 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
                 variant="primary"
                 size="md"
                 className="home-hero-card__cta"
-                onClick={() => navigate(`/packages/${recPkg.id}`)}
+                onClick={() =>
+                  navigate(`/packages/${recPkg.id}`, {
+                    state: {
+                      personalizedContext: {
+                        reasons: recItem.reasons,
+                        mode: recMode === "FALLBACK" ? "FALLBACK" : "MATCHED",
+                      },
+                    },
+                  })
+                }
               >
                 Lihat Experience
               </Button>
@@ -398,7 +415,11 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
                 : "Berdasarkan Area Keberangkatan"}
             </h2>
           </div>
-          <Link to="/explore" className="home-section-header__more">
+          <Link
+            to={departureExploreHref}
+            className="home-section-header__more"
+            data-testid="departure-more-link"
+          >
             Lihat semua &rarr;
           </Link>
         </div>

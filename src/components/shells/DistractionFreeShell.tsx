@@ -1,4 +1,5 @@
 import { Link, Outlet } from "react-router";
+import JedaInLogo from "../../JedaIn_logo_vector.svg";
 import "./shells.css";
 
 export interface DistractionFreeShellProps {
@@ -16,11 +17,19 @@ export function DistractionFreeShell({
       {!hideHeader && (
         <header>
           <Link
-            className="brand-mark"
+            className="traveler-app-brand"
             to="/"
             aria-label="JedaIn, halaman utama"
           >
-            JedaIn<span aria-hidden="true">.</span>
+            <img
+              src={JedaInLogo}
+              alt=""
+              aria-hidden="true"
+              className="traveler-app-logo"
+              width="1407"
+              height="768"
+              loading="eager"
+            />
           </Link>
         </header>
       )}

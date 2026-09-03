@@ -593,11 +593,17 @@ export function PackageDetailScreen({
                             : ""
                         }`}
                       >
-                        {session.status === "OPEN"
-                          ? "Tersedia"
-                          : session.status === "FULL"
-                            ? "Penuh"
-                            : "Ditutup"}
+                        <span
+                          className="package-detail-session-card__status-dot"
+                          aria-hidden="true"
+                        />
+                        <span>
+                          {session.status === "OPEN"
+                            ? "Tersedia"
+                            : session.status === "FULL"
+                              ? "Penuh"
+                              : "Ditutup"}
+                        </span>
                       </span>
                     </div>
                     {session.remainingSlots !== undefined && (

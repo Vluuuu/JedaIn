@@ -24,6 +24,7 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
         role="img"
         aria-label={`Ilustrasi suasana ${packageData.title}`}
       >
+        <div className="explore-package-card__visual-scrim" />
         <div className="explore-package-card__badges">
           <Badge tone="neutral">
             {packageData.verificationLevel === "PLUS"
@@ -31,9 +32,21 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
               : "Terverifikasi Dasar"}
           </Badge>
           <span className="explore-package-card__rating-pill">
-            {packageData.rating !== undefined && packageData.rating !== null
-              ? `★ ${packageData.rating.toFixed(1)}`
-              : "Belum ada rating"}
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              className="explore-package-card__rating-star"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span>
+              {packageData.rating !== undefined && packageData.rating !== null
+                ? packageData.rating.toFixed(1)
+                : "Belum ada rating"}
+            </span>
           </span>
         </div>
       </div>
@@ -41,9 +54,9 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
       <div className="explore-package-card__body">
         <div className="explore-package-card__meta">
           <span>{packageData.destinationName}</span>
-          <span>•</span>
+          <span className="explore-package-card__dot">•</span>
           <span>{packageData.locationLabel}</span>
-          <span>•</span>
+          <span className="explore-package-card__dot">•</span>
           <span>{durationLabel}</span>
         </div>
 
@@ -53,10 +66,13 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
         </p>
 
         <div className="explore-package-card__footer">
-          <span className="explore-package-card__price">
-            <strong>{formattedPrice}</strong> / orang
+          <div className="explore-package-card__price">
+            <strong>{formattedPrice}</strong>
+            <span className="explore-package-card__unit"> / orang</span>
+          </div>
+          <span className="explore-package-card__link">
+            Lihat Detail &rarr;
           </span>
-          <span className="explore-package-card__link">Lihat &rarr;</span>
         </div>
       </div>
     </Link>

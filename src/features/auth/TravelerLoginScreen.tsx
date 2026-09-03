@@ -32,9 +32,12 @@ export function TravelerLoginScreen({
   const [activeMethod, setActiveMethod] = useState<AuthMethod>(null);
 
   // Form inputs
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Errors
   const [authError, setAuthError] = useState<string | undefined>();
@@ -45,6 +48,11 @@ export function TravelerLoginScreen({
   >(null);
 
   const isAnyLoading = activeMethod !== null;
+
+  const handleTabChange = (mode: "SIGN_IN" | "SIGN_UP") => {
+    setTabMode(mode);
+    setAuthError(undefined);
+  };
 
   const handleAuthSuccess = (user: AuthUser) => {
     sessionStore.setUser(user);
@@ -89,10 +97,31 @@ export function TravelerLoginScreen({
     if (isAnyLoading) return;
 
     const formData = new FormData(e.currentTarget);
-    const formEmail = ((formData.get("email") as string) || email).trim();
-    const formPassword = (
-      (formData.get("password") as string) || password
+    const formName = (
+      (formData.get("name") as string | null) ||
+      name ||
+      ""
     ).trim();
+    const formEmail = (
+      (formData.get("email") as string | null) ||
+      email ||
+      ""
+    ).trim();
+    const formPassword = (
+      (formData.get("password") as string | null) ||
+      password ||
+      ""
+    ).trim();
+    const formConfirmPassword = (
+      (formData.get("confirmPassword") as string | null) ||
+      confirmPassword ||
+      ""
+    ).trim();
+
+    if (tabMode === "SIGN_UP" && formPassword !== formConfirmPassword) {
+      setAuthError("Password and Confirm Password do not match.");
+      return;
+    }
 
     setAuthError(undefined);
     setActiveMethod("PASSWORD");
@@ -115,12 +144,16 @@ export function TravelerLoginScreen({
         }
       } else {
         if (adapter.signupWithPassword) {
-          user = await adapter.signupWithPassword(formEmail, formPassword);
+          user = await adapter.signupWithPassword(
+            formEmail,
+            formPassword,
+            formName || undefined,
+          );
         } else {
           // fallback mock signup
           user = {
             id: `usr_${Date.now()}`,
-            name: formEmail.split("@")[0] || "Traveler",
+            name: formName || formEmail.split("@")[0] || "Traveler",
             email: formEmail,
             isNewUser: true,
             onboardingStatus: "NOT_STARTED",
@@ -235,10 +268,7 @@ export function TravelerLoginScreen({
               aria-selected={tabMode === "SIGN_IN"}
               aria-controls="auth-panel"
               className={`auth-tab ${tabMode === "SIGN_IN" ? "auth-tab--active" : ""}`}
-              onClick={() => {
-                setTabMode("SIGN_IN");
-                setAuthError(undefined);
-              }}
+              onClick={() => handleTabChange("SIGN_IN")}
             >
               <span>SIGN IN</span>
             </button>
@@ -249,10 +279,7 @@ export function TravelerLoginScreen({
               aria-selected={tabMode === "SIGN_UP"}
               aria-controls="auth-panel"
               className={`auth-tab ${tabMode === "SIGN_UP" ? "auth-tab--active" : ""}`}
-              onClick={() => {
-                setTabMode("SIGN_UP");
-                setAuthError(undefined);
-              }}
+              onClick={() => handleTabChange("SIGN_UP")}
             >
               <span>SIGN UP</span>
             </button>
@@ -282,6 +309,46 @@ export function TravelerLoginScreen({
                   : "Sign up with Email"
               }
             >
+              {/* Name Input (Sign Up only) */}
+              {tabMode === "SIGN_UP" && (
+                <div className="auth-field">
+                  <label className="auth-label" htmlFor="auth-name">
+                    Name
+                  </label>
+                  <div className="auth-input-wrap">
+                    <span className="auth-input-icon" aria-hidden="true">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </span>
+                    <input
+                      id="auth-name"
+                      type="text"
+                      name="name"
+                      autoComplete="name"
+                      placeholder="Your Name"
+                      className="auth-input"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (authError) setAuthError(undefined);
+                      }}
+                      disabled={isAnyLoading}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* 3. Email Input */}
               <div className="auth-field">
                 <label className="auth-label" htmlFor="auth-email">
@@ -417,6 +484,99 @@ export function TravelerLoginScreen({
                   </div>
                 )}
               </div>
+
+              {/* Confirm Password Input (Sign Up only) */}
+              {tabMode === "SIGN_UP" && (
+                <div className="auth-field">
+                  <label className="auth-label" htmlFor="auth-confirm-password">
+                    Confirm your password
+                  </label>
+                  <div className="auth-input-wrap">
+                    <span className="auth-input-icon" aria-hidden="true">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="3"
+                          y="11"
+                          width="18"
+                          height="11"
+                          rx="2"
+                          ry="2"
+                        />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                    </span>
+                    <input
+                      id="auth-confirm-password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      autoComplete="new-password"
+                      required
+                      placeholder="••••••••••••"
+                      className="auth-input"
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        if (authError) setAuthError(undefined);
+                      }}
+                      disabled={isAnyLoading}
+                    />
+                    <button
+                      type="button"
+                      className="auth-password-toggle"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      aria-label={
+                        showConfirmPassword
+                          ? "Hide confirm password"
+                          : "Show confirm password"
+                      }
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                          <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                          <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                          <line x1="2" y1="2" x2="22" y2="22" />
+                        </svg>
+                      ) : (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* 6. SIGN IN / SIGN UP Primary Button (Warm near-white CTA with dark forest text) */}
               <button

@@ -85,10 +85,15 @@ export class MockAuthAdapter implements AuthAdapter {
     };
   }
 
-  async signupWithPassword(email: string, password: string): Promise<AuthUser> {
+  async signupWithPassword(
+    email: string,
+    password: string,
+    name?: string,
+  ): Promise<AuthUser> {
     await this.delay();
     const cleanEmail = email.trim();
     const cleanPass = password.trim();
+    const cleanName = name?.trim() || cleanEmail.split("@")[0] || "Traveler";
 
     if (!cleanEmail || !cleanEmail.includes("@")) {
       throw new AuthError("Format email tidak valid.", "INVALID_INPUT");
@@ -106,11 +111,10 @@ export class MockAuthAdapter implements AuthAdapter {
 
     return {
       id: "usr_signup_default",
-      name: cleanEmail.split("@")[0],
       email: cleanEmail,
-      isNewUser: this.options.mockUser?.isNewUser ?? true,
-      onboardingStatus:
-        this.options.mockUser?.onboardingStatus ?? "NOT_STARTED",
+      isNewUser: true,
+      onboardingStatus: "NOT_STARTED",
+      name: this.options.mockUser?.name ?? cleanName,
       ...this.options.mockUser,
     };
   }

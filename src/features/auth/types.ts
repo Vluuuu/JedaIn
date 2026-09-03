@@ -36,7 +36,11 @@ export interface PhoneOtpSession {
 export interface AuthAdapter {
   loginWithGoogle(): Promise<AuthUser>;
   loginWithPassword?(email: string, password: string): Promise<AuthUser>;
-  signupWithPassword?(email: string, password: string): Promise<AuthUser>;
+  signupWithPassword?(
+    email: string,
+    password: string,
+    name?: string,
+  ): Promise<AuthUser>;
   requestPhoneOtp(phone: string): Promise<PhoneOtpSession>;
   verifyPhoneOtp(params: {
     phone: string;

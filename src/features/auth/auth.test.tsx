@@ -235,6 +235,9 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
 
     expect(signInTab.getAttribute("aria-selected")).toBe("false");
     expect(signUpTab.getAttribute("aria-selected")).toBe("true");
+    expect(view.querySelector('input[name="name"]')).not.toBeNull();
+    expect(view.querySelector('input[name="confirmPassword"]')).not.toBeNull();
+    expect(view.textContent).toContain("Confirm your password");
     expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
       "SIGN UP",
     );
@@ -249,8 +252,96 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
 
     expect(signInTab.getAttribute("aria-selected")).toBe("true");
     expect(signUpTab.getAttribute("aria-selected")).toBe("false");
+    expect(view.querySelector('input[name="name"]')).toBeNull();
+    expect(view.querySelector('input[name="confirmPassword"]')).toBeNull();
     expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
       "SIGN IN",
+    );
+  });
+
+  it("handles password signup flow and confirms matching passwords", async () => {
+    const onSuccess = vi.fn();
+    const adapter = new MockAuthAdapter({
+      mockUser: {
+        id: "usr_new_123",
+        isNewUser: true,
+        onboardingStatus: "NOT_STARTED",
+      },
+    });
+
+    const view = await renderScreen({ adapter, onSuccess });
+    const signUpTab = view.querySelector<HTMLButtonElement>("#tab-sign-up")!;
+    await act(() => signUpTab.click());
+
+    const nameInput =
+      view.querySelector<HTMLInputElement>('input[name="name"]')!;
+    const emailInput = view.querySelector<HTMLInputElement>(
+      'input[name="email"]',
+    )!;
+    const passwordInput = view.querySelector<HTMLInputElement>(
+      'input[name="password"]',
+    )!;
+    const confirmPasswordInput = view.querySelector<HTMLInputElement>(
+      'input[name="confirmPassword"]',
+    )!;
+
+    // Test mismatched passwords
+    await act(() => {
+      nameInput.value = "John Doe";
+      nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+      nameInput.dispatchEvent(new Event("change", { bubbles: true }));
+      emailInput.value = "john@example.com";
+      emailInput.dispatchEvent(new Event("input", { bubbles: true }));
+      emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+      passwordInput.value = "secret123";
+      passwordInput.dispatchEvent(new Event("input", { bubbles: true }));
+      passwordInput.dispatchEvent(new Event("change", { bubbles: true }));
+      confirmPasswordInput.value = "secret999";
+      confirmPasswordInput.dispatchEvent(new Event("input", { bubbles: true }));
+      confirmPasswordInput.dispatchEvent(
+        new Event("change", { bubbles: true }),
+      );
+    });
+
+    const form = view.querySelector<HTMLFormElement>(".auth-form")!;
+    await act(() => {
+      form.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+    });
+
+    expect(view.querySelector('[role="alert"]')?.textContent).toContain(
+      "Password and Confirm Password do not match",
+    );
+    expect(onSuccess).not.toHaveBeenCalled();
+
+    // Fix confirm password to match
+    await act(() => {
+      nameInput.value = "John Doe";
+      nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+      nameInput.dispatchEvent(new Event("change", { bubbles: true }));
+      emailInput.value = "john@example.com";
+      emailInput.dispatchEvent(new Event("input", { bubbles: true }));
+      emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+      passwordInput.value = "secret123";
+      passwordInput.dispatchEvent(new Event("input", { bubbles: true }));
+      passwordInput.dispatchEvent(new Event("change", { bubbles: true }));
+      confirmPasswordInput.value = "secret123";
+      confirmPasswordInput.dispatchEvent(new Event("input", { bubbles: true }));
+      confirmPasswordInput.dispatchEvent(
+        new Event("change", { bubbles: true }),
+      );
+    });
+
+    await act(() => {
+      form.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+    });
+
+    expect(onSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ isNewUser: true, name: "John Doe" }),
+      "/onboarding/consent",
     );
   });
 

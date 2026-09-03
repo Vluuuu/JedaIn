@@ -70,7 +70,7 @@ Tanpa perlu mengetik kredensial atau registrasi manual, sistem menyediakan tombo
 3. Klik paket tersebut untuk membuka **Detail Paket** (`/packages/:packageId`).
 4. Klik **Pilih Jadwal Sesi** (`/packages/:packageId/sessions`) → Pilih sesi yang baru dibuat EO.
 5. Di halaman **Checkout** (`/checkout/:sessionId`):
-   - Jika nomor HP belum diverifikasi, lakukan verifikasi OTP (Kode demo default: `123456`).
+   - Jika nomor HP belum diverifikasi, lakukan verifikasi OTP (Kode demo default: `111111`).
    - Tinjau jumlah peserta, formula harga, dan setujui kebijakan pembatalan.
    - Klik **Lanjut ke Pembayaran**.
 6. Di halaman **Pembayaran** (`/payment/:bookingId`):

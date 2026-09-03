@@ -460,11 +460,11 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       submitBtn.click();
     });
 
-    // Enter default demo OTP "123456"
+    // Enter default demo OTP "111111"
     const otpInput =
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
     await act(async () => {
-      otpInput.value = "123456";
+      otpInput.value = "111111";
       otpInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
@@ -605,7 +605,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       travelerId: "usr_ad_1",
       phone: "08123456789",
       verificationId: "random_votp_fake_999",
-      code: "123456",
+      code: "111111",
     });
 
     expect(res.success).toBe(false);
@@ -629,7 +629,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       travelerId: "usr_ad_2",
       phone: "08999999999",
       verificationId: sess.verificationId,
-      code: "123456",
+      code: "111111",
     });
     expect(resPhone.success).toBe(false);
     expect(resPhone.status).toBe("STALE_SESSION");
@@ -639,7 +639,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       travelerId: "usr_different_attacker",
       phone: "08123456789",
       verificationId: sess.verificationId,
-      code: "123456",
+      code: "111111",
     });
     expect(resTrav.success).toBe(false);
     expect(resTrav.status).toBe("INVALID_IDENTITY");
@@ -665,7 +665,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       travelerId: "usr_ad_3",
       phone: "08123456789",
       verificationId: firstSess.verificationId,
-      code: "123456",
+      code: "111111",
     });
 
     expect(res.success).toBe(false);
@@ -687,7 +687,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       travelerId: "usr_ad_4",
       phone: "08123456789",
       verificationId: sess.verificationId,
-      code: "123456",
+      code: "111111",
     });
 
     expect(res.success).toBe(false);
@@ -708,7 +708,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       travelerId: "usr_ad_5",
       phone: "08123456789",
       verificationId: sess.verificationId,
-      code: "123456",
+      code: "111111",
     });
 
     expect(res.success).toBe(false);
@@ -728,7 +728,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       travelerId: "usr_ad_6",
       phone: "08123456789",
       verificationId: sess.verificationId,
-      code: "123456",
+      code: "111111",
     });
     expect(res1.success).toBe(true);
 
@@ -737,10 +737,55 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       travelerId: "usr_ad_6",
       phone: "08123456789",
       verificationId: sess.verificationId,
-      code: "123456",
+      code: "111111",
     });
     expect(res2.success).toBe(false);
     expect(res2.status).toBe("STALE_SESSION");
+  });
+
+  it("23b. direct adapter: default demo OTP 111111 succeeds and 123456 fails as INVALID_CODE", async () => {
+    sessionStore.setUser({
+      id: "usr_ad_otp_check",
+      onboardingStatus: "COMPLETED",
+    });
+    const adapter = new MockContactVerificationAdapter();
+
+    const sess = await adapter.requestOtp({
+      travelerId: "usr_ad_otp_check",
+      phone: "08123456789",
+    });
+
+    // Old demo OTP 123456 must be rejected as INVALID_CODE
+    const failRes = await adapter.verifyOtp({
+      travelerId: "usr_ad_otp_check",
+      phone: "08123456789",
+      verificationId: sess.verificationId,
+      code: "123456",
+    });
+    expect(failRes.success).toBe(false);
+    expect(failRes.status).toBe("INVALID_CODE");
+    expect(
+      mockContactVerificationStore.isPhoneVerified(
+        "usr_ad_otp_check",
+        "08123456789",
+      ),
+    ).toBe(false);
+
+    // Active session still intact, new demo OTP 111111 succeeds
+    const successRes = await adapter.verifyOtp({
+      travelerId: "usr_ad_otp_check",
+      phone: "08123456789",
+      verificationId: sess.verificationId,
+      code: "111111",
+    });
+    expect(successRes.success).toBe(true);
+    expect(successRes.status).toBe("SUCCESS");
+    expect(
+      mockContactVerificationStore.isPhoneVerified(
+        "usr_ad_otp_check",
+        "08123456789",
+      ),
+    ).toBe(true);
   });
 
   it("24. direct adapter: arbitrary unauthenticated traveler cannot request OTP", async () => {
@@ -775,10 +820,11 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       submitBtn.click();
     });
 
+    // First attempt fails with network error
     const otpInput =
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
     await act(async () => {
-      otpInput.value = "123456";
+      otpInput.value = "111111";
       otpInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
@@ -827,7 +873,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     const otpInput =
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
     await act(async () => {
-      otpInput.value = "123456";
+      otpInput.value = "111111";
       otpInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
@@ -922,7 +968,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     const otpInput =
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
     await act(async () => {
-      otpInput.value = "123456";
+      otpInput.value = "111111";
       otpInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
@@ -1033,7 +1079,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     const otpInput =
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
     await act(async () => {
-      otpInput.value = "123456";
+      otpInput.value = "111111";
       otpInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 

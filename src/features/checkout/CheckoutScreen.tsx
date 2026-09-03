@@ -186,14 +186,14 @@ export function CheckoutScreen({
               <div
                 style={{
                   height: "1px",
-                  background: "var(--color-border-subtle)",
+                  background: "var(--color-border-default)",
                 }}
               />
               <Skeleton height="8rem" />
               <div
                 style={{
                   height: "1px",
-                  background: "var(--color-border-subtle)",
+                  background: "var(--color-border-default)",
                 }}
               />
               <Skeleton height="8rem" />
@@ -607,7 +607,7 @@ export function CheckoutScreen({
                       Total Pembayaran
                     </span>
                     <span className="checkout-price-row__total-subtitle">
-                      Termasuk seluruh fasilitas sesi
+                      Total untuk {participantCount} peserta
                     </span>
                   </div>
                   <span className="checkout-price-total-val">

@@ -420,7 +420,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     expect(fallbackView.textContent).not.toContain("Kenapa cocok untukmu?");
   });
 
-  it("A. verifies PLUS verification label", async () => {
+  it("A. verifies PLUS verification label and accessible hero semantics", async () => {
     const adapter = new MockPackageDetailAdapter({
       packages: [
         {
@@ -448,6 +448,24 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
 
     const view = await renderPackageDetail("slow_green_day", { adapter });
     expect(view.textContent).toContain("Terverifikasi Plus");
+
+    // Hero semantic checks:
+    // 1. role="img" has accessible name and does NOT contain the badge or rating
+    const heroImg = view.querySelector('.package-detail-hero [role="img"]');
+    expect(heroImg).not.toBeNull();
+    expect(heroImg?.getAttribute("aria-label")).toBe(
+      "Ilustrasi suasana Sehari Pelan di Lereng Hijau",
+    );
+    expect(heroImg?.children.length).toBe(0);
+
+    // 2. Scrim is decorative
+    const scrim = view.querySelector(".package-detail-hero__visual-scrim");
+    expect(scrim?.getAttribute("aria-hidden")).toBe("true");
+
+    // 3. Badges are siblings outside role="img"
+    const badges = view.querySelector(".package-detail-hero__badges");
+    expect(badges).not.toBeNull();
+    expect(heroImg?.contains(badges)).toBe(false);
   });
 
   it("C & D. CANCELLED session is not rendered and remainingSlots undefined hides slot label", async () => {

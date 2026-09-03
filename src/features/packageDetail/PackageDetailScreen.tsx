@@ -206,7 +206,21 @@ export function PackageDetailScreen({
             <div className="package-detail-personalized-chips">
               {personalizedContext.reasons.slice(0, 3).map((reason, idx) => (
                 <span key={idx} className="package-detail-personalized-chip">
-                  {reason}
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className="package-detail-personalized-chip-icon"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span>{reason}</span>
                 </span>
               ))}
             </div>
@@ -303,7 +317,18 @@ export function PackageDetailScreen({
                     className="package-detail-highlight-bullet"
                     aria-hidden="true"
                   >
-                    ✓
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
                   </span>
                   <span>{item}</span>
                 </li>
@@ -371,7 +396,23 @@ export function PackageDetailScreen({
               <ul className="package-detail-in-out-list">
                 {detail.includedItems.map((item, idx) => (
                   <li key={idx} className="package-detail-in-out-item">
-                    <span aria-hidden="true">✓</span>
+                    <span
+                      className="package-detail-in-out-icon package-detail-in-out-icon--included"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -383,7 +424,24 @@ export function PackageDetailScreen({
               <ul className="package-detail-in-out-list">
                 {detail.excludedItems.map((item, idx) => (
                   <li key={idx} className="package-detail-in-out-item">
-                    <span aria-hidden="true">×</span>
+                    <span
+                      className="package-detail-in-out-icon package-detail-in-out-icon--excluded"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -485,9 +543,19 @@ export function PackageDetailScreen({
             Ulasan Traveler
           </h2>
           <div className="package-detail-reviews-summary">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              className="package-detail-reviews-star"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
             <span>
               {pkg.rating !== undefined && pkg.rating !== null
-                ? `★ ${pkg.rating.toFixed(1)} / 5.0`
+                ? `${pkg.rating.toFixed(1)} / 5.0`
                 : "Belum ada rating"}
             </span>
           </div>

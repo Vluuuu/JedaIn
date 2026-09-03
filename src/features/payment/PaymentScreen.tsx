@@ -287,12 +287,7 @@ export function PaymentScreen({
           </div>
 
           <div className="payment-fact-row payment-fact-row--total">
-            <div className="payment-fact-total-meta">
-              <span className="payment-fact-total-label">Total Pembayaran</span>
-              <span className="payment-fact-total-hint">
-                Termasuk biaya reservasi & pajak
-              </span>
-            </div>
+            <span className="payment-fact-total-label">Total Pembayaran</span>
             <strong className="payment-fact-total-value">
               Rp{booking.totalAmount.toLocaleString("id-ID")}
             </strong>
@@ -303,9 +298,7 @@ export function PaymentScreen({
       {/* Prototype Notice */}
       <div className="payment-method-box">
         <span className="payment-method-title">Metode Pembayaran</span>
-        <p className="payment-method-desc">
-          Simulasi Pembayaran Instan (Prototype Sandbox)
-        </p>
+        <p className="payment-method-desc">Pembayaran Prototype</p>
       </div>
 
       {/* Action Buttons */}

@@ -150,12 +150,7 @@ export function PaymentResultScreen({
             </div>
 
             <div className="payment-fact-row payment-fact-row--total">
-              <div className="payment-fact-total-meta">
-                <span className="payment-fact-total-label">Total Terbayar</span>
-                <span className="payment-fact-total-hint">
-                  Lunas via verifikasi instan
-                </span>
-              </div>
+              <span className="payment-fact-total-label">Total Terbayar</span>
               <strong className="payment-fact-total-value">
                 Rp{booking.totalAmount.toLocaleString("id-ID")}
               </strong>

@@ -1,7 +1,7 @@
 import type { OtpVerificationSession } from "./types";
 
 export const CONTACT_VERIFICATION_MVP_CONFIG = {
-  defaultOtpCode: "123456",
+  defaultOtpCode: "111111",
   resendCooldownSeconds: 30,
   otpExpirySeconds: 300, // 5 minutes
 };

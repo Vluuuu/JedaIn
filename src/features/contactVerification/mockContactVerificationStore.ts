@@ -1,10 +1,5 @@
 import type { ContactVerificationRecord } from "./types";
 
-export const CONTACT_VERIFICATION_MVP_CONFIG = {
-  defaultOtpCode: "123456",
-  resendCooldownSeconds: 30,
-};
-
 let records: ContactVerificationRecord[] = [];
 
 export const mockContactVerificationStore = {

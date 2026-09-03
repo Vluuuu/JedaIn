@@ -63,7 +63,7 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
           <Skeleton width="12rem" height="2rem" />
         </div>
         <div className="home-hero-card">
-          <Skeleton height="12rem" />
+          <Skeleton height="14rem" />
           <div className="home-hero-card__body">
             <Skeleton width="40%" height="1.5rem" />
             <Skeleton width="80%" height="2rem" />
@@ -125,7 +125,8 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
     <div className="home-container">
       {/* 1. Greeting / App Header context */}
       <header className="home-greeting-row">
-        <div>
+        <div className="home-greeting-content">
+          <div className="home-greeting-brand-chip">JedaIn Traveler</div>
           <h1 className="home-greeting-title">{greetingText}</h1>
           <p className="home-greeting-subtitle">
             Mau jeda seperti apa hari ini?
@@ -155,6 +156,7 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
         aria-labelledby="rec-section-title"
       >
         <div className="home-section-header">
+          <div className="home-section-header__tag">Personal</div>
           <h2 id="rec-section-title" className="home-section-title">
             {recommendationHeading}
           </h2>
@@ -177,6 +179,7 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
               role="img"
               aria-label={`Ilustrasi suasana ${recPkg.title}`}
             >
+              <div className="home-hero-card__visual-scrim" />
               <div className="home-hero-card__visual-badges">
                 <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>
                   {recMode === "FALLBACK"
@@ -192,25 +195,68 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
             </div>
             <div className="home-hero-card__body">
               <div className="home-hero-card__meta">
-                <span>{recPkg.locationLabel}</span>
-                <span>•</span>
-                <span>{recDuration}</span>
+                <span className="home-hero-card__meta-item">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  {recPkg.locationLabel}
+                </span>
+                <span className="home-hero-card__meta-dot">•</span>
+                <span className="home-hero-card__meta-item">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  {recDuration}
+                </span>
               </div>
               <h3 className="home-hero-card__title">{recPkg.title}</h3>
               <p className="home-hero-card__summary">{recPkg.shortSummary}</p>
-              <div className="home-hero-card__price">
-                <strong>
-                  Rp{recPkg.pricePerPerson.toLocaleString("id-ID")}
-                </strong>{" "}
-                / orang
+
+              <div className="home-hero-card__price-box">
+                <span className="home-hero-card__price-label">Mulai dari</span>
+                <div className="home-hero-card__price">
+                  <strong>
+                    Rp{recPkg.pricePerPerson.toLocaleString("id-ID")}
+                  </strong>{" "}
+                  <span>/ orang</span>
+                </div>
               </div>
 
               {recItem.reasons.length > 0 && (
                 <div className="home-hero-card__why">
                   {recItem.reasons.slice(0, 3).map((r, i) => (
-                    <span key={i} className="home-hero-card__chip">
-                      {r}
-                    </span>
+                    <div key={i} className="home-hero-card__chip">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        aria-hidden="true"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>{r}</span>
+                    </div>
                   ))}
                 </div>
               )}
@@ -228,6 +274,19 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
           </div>
         ) : (
           <div className="home-module-empty">
+            <div className="home-module-empty__icon" aria-hidden="true">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+              </svg>
+            </div>
             <p>Belum ada rekomendasi personal yang bisa ditampilkan.</p>
             <Button
               variant="secondary"
@@ -243,7 +302,7 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
         {quizDraft && (
           <div className="home-preference-bar" aria-label="Preferensi saat ini">
             <div className="home-preference-bar__chips">
-              <span>Preferensi:</span>
+              <span className="home-preference-bar__label">Preferensi:</span>
               {intentLabel && (
                 <span className="home-preference-bar__chip">{intentLabel}</span>
               )}
@@ -262,14 +321,14 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
               to="/profile/preferences"
               className="home-preference-bar__link"
             >
-              Ubah preferensi
+              Ubah preferensi &rarr;
             </Link>
           </div>
         )}
       </section>
 
       {/* 5. Search Bar */}
-      <section aria-label="Pencarian JedaIn">
+      <section className="home-search-section" aria-label="Pencarian JedaIn">
         <SearchBar />
       </section>
 
@@ -278,9 +337,11 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
         className="home-mood-section"
         aria-labelledby="mood-section-title"
       >
-        <h2 id="mood-section-title" className="home-section-title">
-          Eksplorasi Berdasarkan Suasana
-        </h2>
+        <div className="home-section-header">
+          <h2 id="mood-section-title" className="home-section-title">
+            Eksplorasi Berdasarkan Suasana
+          </h2>
+        </div>
         <div
           className="home-mood-row"
           role="region"
@@ -298,9 +359,14 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
         aria-labelledby="popular-section-title"
       >
         <div className="home-section-header">
-          <h2 id="popular-section-title" className="home-section-title">
-            Populer Minggu Ini
-          </h2>
+          <div>
+            <h2 id="popular-section-title" className="home-section-title">
+              Populer Minggu Ini
+            </h2>
+          </div>
+          <Link to="/explore" className="home-section-header__more">
+            Lihat semua &rarr;
+          </Link>
         </div>
         {moduleErrors?.popular ? (
           <div className="home-module-error" role="alert">
@@ -325,11 +391,16 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
         aria-labelledby="departure-section-title"
       >
         <div className="home-section-header">
-          <h2 id="departure-section-title" className="home-section-title">
-            {departureAreaName
-              ? `Dari Area ${departureAreaName}`
-              : "Berdasarkan Area Keberangkatan"}
-          </h2>
+          <div>
+            <h2 id="departure-section-title" className="home-section-title">
+              {departureAreaName
+                ? `Dari Area ${departureAreaName}`
+                : "Berdasarkan Area Keberangkatan"}
+            </h2>
+          </div>
+          <Link to="/explore" className="home-section-header__more">
+            Lihat semua &rarr;
+          </Link>
         </div>
         {moduleErrors?.departure ? (
           <div className="home-module-error" role="alert">
@@ -368,9 +439,14 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
         aria-labelledby="destinations-section-title"
       >
         <div className="home-section-header">
-          <h2 id="destinations-section-title" className="home-section-title">
-            Destinasi Terverifikasi
-          </h2>
+          <div>
+            <h2 id="destinations-section-title" className="home-section-title">
+              Destinasi Terverifikasi
+            </h2>
+          </div>
+          <Link to="/explore" className="home-section-header__more">
+            Eksplorasi &rarr;
+          </Link>
         </div>
         {moduleErrors?.destinations ? (
           <div className="home-module-error" role="alert">

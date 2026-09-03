@@ -1,107 +1,204 @@
+/* ==========================================================================
+   JedaIn Traveler Session Selection Visual System (P9 Competition Polish)
+   Continuity from Package Detail to Concrete Occurrence Choice:
+   - Calming, scannable schedule comparison
+   - Structured 2-column layout on desktop (~72rem) with compact package summary
+   - Strong date-led session cards with obvious selected state and clear availability
+   - Coherent SVG outline iconography (back, calendar, notice)
+   - Reliable sticky progression bar above bottom nav
+   ========================================================================== */
+
 .session-selection-container {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
   width: 100%;
-  max-width: 52rem;
+  max-width: 72rem; /* 1152px - matches Home, Explore & Package Detail family */
   margin-inline: auto;
-  padding-bottom: calc(
-    var(--nav-bottom-height) + var(--sticky-cta-height) +
-      env(safe-area-inset-bottom) + var(--space-6)
-  );
+  padding: 0 0
+    calc(
+      var(--nav-bottom-height) + var(--sticky-cta-height) +
+        env(safe-area-inset-bottom) + var(--space-4)
+    );
+  box-sizing: border-box;
 }
 
-/* 1. Header context & back link */
+@media (min-width: 768px) {
+  .session-selection-container {
+    gap: var(--space-8);
+  }
+}
+
+/* 1. Header Context & Back Navigation */
 .session-selection-topbar {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
 }
 
 .session-selection-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
+  min-height: 2.75rem; /* Touch target >= 44px */
+  padding: var(--space-1) var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
   background: transparent;
   border: 0;
-  color: var(--color-brand-primary);
-  font: inherit;
+  border-radius: var(--radius-md);
+  color: var(--color-stone-600);
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  padding: var(--space-1) 0;
   text-decoration: none;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
 }
 
 .session-selection-back-btn:hover {
-  text-decoration: underline;
+  color: var(--color-brand-primary);
+  background: var(--color-stone-100);
+}
+
+.session-selection-back-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.session-selection-back-icon {
+  flex-shrink: 0;
 }
 
 .session-selection-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 .session-selection-title {
   margin: 0;
-  color: var(--color-text-primary);
+  color: var(--color-stone-900);
   font-size: var(--font-size-heading-lg);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-heading-lg);
   letter-spacing: var(--letter-spacing-tight);
 }
 
-.session-selection-subtitle {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-body-sm);
+@media (min-width: 768px) {
+  .session-selection-title {
+    font-size: 2.25rem;
+    line-height: 2.75rem;
+  }
 }
 
-/* 2. Compact Package Summary Card */
+.session-selection-subtitle {
+  margin: 0;
+  color: var(--color-stone-600);
+  font-size: var(--font-size-body-md);
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   Layout Structure: Responsive Two-Column Grid on Desktop
+   -------------------------------------------------------------------------- */
+.session-selection-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+@media (min-width: 1024px) {
+  .session-selection-layout {
+    display: grid;
+    grid-template-columns: 1fr 22rem;
+    align-items: start;
+    gap: var(--space-8);
+  }
+}
+
+.session-selection-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.session-selection-side-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (min-width: 1024px) {
+  .session-selection-side-col {
+    position: sticky;
+    top: calc(var(--space-6) + 4rem);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. Compact Package Summary Card (Continuity from Package Detail)
+   -------------------------------------------------------------------------- */
 .session-selection-pkg-summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-4) var(--space-5);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-border-default);
+  border: 1.5px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xs);
+}
+
+.session-selection-pkg-thumb {
+  width: 4.75rem;
+  height: 4.75rem;
+  border-radius: var(--radius-lg);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  border: 1px solid var(--color-stone-200);
 }
 
 .session-selection-pkg-info {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 0.25rem;
+  min-width: 0;
 }
 
 .session-selection-pkg-meta {
-  color: var(--color-text-muted);
+  color: var(--color-stone-500);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
 }
 
 .session-selection-pkg-title {
   margin: 0;
-  color: var(--color-text-primary);
-  font-size: var(--font-size-heading-sm);
+  color: var(--color-stone-900);
+  font-size: 1.0625rem;
   font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+  letter-spacing: var(--letter-spacing-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .session-selection-pkg-price {
-  color: var(--color-brand-primary);
+  color: var(--color-stone-600);
   font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-bold);
-  white-space: nowrap;
+  font-weight: var(--font-weight-regular);
 }
 
-/* 3. Session Selection Radio Group */
+/* --------------------------------------------------------------------------
+   3. Session Selection Radio Group & Cards
+   -------------------------------------------------------------------------- */
 .session-selection-fieldset {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
   margin: 0;
   padding: 0;
   border: 0;
@@ -109,7 +206,7 @@
 
 .session-selection-legend {
   margin: 0 0 var(--space-2);
-  color: var(--color-text-primary);
+  color: var(--color-stone-900);
   font-size: var(--font-size-heading-sm);
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--letter-spacing-tight);
@@ -125,13 +222,14 @@
 .session-card {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
+  gap: var(--space-4);
+  padding: var(--space-5);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-border-default);
+  border: 1.5px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xs);
   cursor: pointer;
+  position: relative;
   transition:
     border-color var(--motion-fast) var(--ease-standard),
     background-color var(--motion-fast) var(--ease-standard),
@@ -140,24 +238,24 @@
 }
 
 .session-card:hover:not(.session-card--disabled) {
-  border-color: var(--color-border-strong);
+  border-color: var(--color-forest-400);
   box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
 .session-card--selected {
   border-color: var(--color-brand-primary);
-  background: var(--color-forest-50);
+  background: var(--color-brand-primary-soft);
   box-shadow:
-    0 0 0 1px var(--color-brand-primary),
+    0 0 0 1.5px var(--color-brand-primary),
     var(--shadow-sm);
 }
 
 .session-card--disabled {
-  background: var(--color-bg-surface-subtle);
-  border-color: var(--color-border-default);
+  background: var(--color-stone-50);
+  border-color: var(--color-stone-200);
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.72;
 }
 
 .session-card__radio-wrap {
@@ -169,6 +267,7 @@
 .session-card__radio {
   width: 1.25rem;
   height: 1.25rem;
+  margin: 0;
   accent-color: var(--color-brand-primary);
   cursor: pointer;
 }
@@ -181,16 +280,15 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  min-width: 0;
 }
 
 .session-card__label {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
   cursor: pointer;
+  margin: 0;
 }
 
 .session-card--disabled .session-card__label {
@@ -198,21 +296,23 @@
 }
 
 .session-card__date-text {
-  font-size: var(--font-size-body-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-body-md);
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  line-height: var(--line-height-body-sm);
+  color: var(--color-stone-950);
+  line-height: 1.4;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-.session-card__duration-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.125rem 0.5rem;
-  background: var(--color-sand-100);
-  color: var(--color-sand-900);
-  border-radius: var(--radius-pill);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
+.session-card__calendar-icon {
+  color: var(--color-forest-700);
+  flex-shrink: 0;
+}
+
+.session-card--disabled .session-card__calendar-icon {
+  color: var(--color-stone-400);
 }
 
 .session-card__meta-row {
@@ -225,57 +325,88 @@
 .session-card__slot-info {
   color: var(--color-forest-800);
   font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
+  background: var(--color-forest-50);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
 }
 
 .session-card__price {
   margin-left: auto;
-  color: var(--color-brand-primary);
+  color: var(--color-stone-900);
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-/* 4. Concurrency notice & Selection feedback */
+/* --------------------------------------------------------------------------
+   4. Concurrency Notice & Alerts
+   -------------------------------------------------------------------------- */
 .session-selection-notice-box {
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-bg-surface-subtle);
-  border-radius: var(--radius-lg);
-  border-left: 3px solid var(--color-brand-primary);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-sand-50);
+  border: 1px solid var(--color-sand-200);
+  border-radius: var(--radius-xl);
+  color: var(--color-stone-700);
   font-size: var(--font-size-caption);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-body-sm);
+  line-height: 1.5;
+}
+
+.session-selection-notice-icon {
+  color: var(--color-forest-700);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.session-selection-notice-box p {
+  margin: 0;
 }
 
 /* Alerts and feedback */
 .session-selection-alert {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+}
+
+.session-selection-alert p {
+  margin: 0;
 }
 
 .session-selection-alert--warning {
   background: var(--color-warning-bg);
-  border: 1px solid var(--color-warning-border);
+  border: 1.5px solid var(--color-warning-border);
   color: var(--color-warning-text);
 }
 
 .session-selection-alert--error {
   background: var(--color-danger-bg);
-  border: 1px solid var(--color-danger-border);
+  border: 1.5px solid var(--color-danger-border);
   color: var(--color-danger-text);
 }
 
 .session-selection-no-session-card {
-  padding: var(--space-6);
+  padding: var(--space-8) var(--space-6);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-border-default);
+  border: 1.5px dashed var(--color-stone-300);
   border-radius: var(--radius-xl);
   text-align: center;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  font-size: var(--font-size-body-md);
 }
 
-/* Sticky Action Bar */
+.session-selection-no-session-card p {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   5. Sticky Progression Action Bar
+   -------------------------------------------------------------------------- */
 .session-selection-sticky-bar {
   position: fixed;
   bottom: calc(var(--nav-bottom-height) + env(safe-area-inset-bottom));
@@ -289,7 +420,7 @@
   padding: var(--space-3) var(--space-4);
   background: var(--color-surface-glass-strong);
   backdrop-filter: blur(16px);
-  border-top: 1px solid var(--color-border-default);
+  border-top: 1px solid var(--color-stone-200);
   box-shadow: var(--shadow-sm-top);
 }
 
@@ -298,7 +429,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 52rem;
+  max-width: 72rem;
   margin-inline: auto;
   gap: var(--space-4);
 }
@@ -306,34 +437,45 @@
 .session-selection-sticky-bar__summary-wrap {
   display: flex;
   flex-direction: column;
+  gap: 0.125rem;
 }
 
 .session-selection-sticky-bar__label {
   font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
+  color: var(--color-stone-500);
+  font-weight: var(--font-weight-semibold);
 }
 
 .session-selection-sticky-bar__status-text {
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+  color: var(--color-stone-950);
+}
+
+@media (min-width: 768px) {
+  .session-selection-sticky-bar__status-text {
+    font-size: var(--font-size-body-md);
+  }
 }
 
 .session-selection-sticky-bar__cta {
-  min-width: 11rem;
+  min-width: 12rem;
+  min-height: 2.875rem;
 }
 
-/* Empty & Error States */
+/* --------------------------------------------------------------------------
+   6. Empty & Error States
+   -------------------------------------------------------------------------- */
 .session-selection-state-box {
-  padding: var(--space-8) var(--space-4);
+  padding: var(--space-10) var(--space-6);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-border-default);
+  border: 1.5px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
   box-shadow: var(--shadow-sm);
   max-width: 32rem;
   margin: var(--space-8) auto;
@@ -343,13 +485,14 @@
   margin: 0;
   font-size: var(--font-size-heading-sm);
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+  color: var(--color-stone-900);
 }
 
 .session-selection-state-box p {
   margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  font-size: var(--font-size-body-md);
+  line-height: 1.5;
 }
 
 .session-selection-state-box--error {
@@ -361,13 +504,14 @@
   color: var(--color-danger-text);
 }
 
+/* Desktop bottom padding adjustment (desktop bottom-nav is static in footer) */
 @media (min-width: 64rem) {
   .session-selection-container {
-    padding-bottom: calc(var(--sticky-cta-height) + var(--space-6));
+    padding-bottom: calc(var(--sticky-cta-height) + var(--space-8));
   }
 
   .session-selection-sticky-bar {
     bottom: 0;
-    padding-bottom: var(--space-3);
+    padding: var(--space-4) var(--space-6);
   }
 }

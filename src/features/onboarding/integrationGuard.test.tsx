@@ -41,9 +41,7 @@ describe("Integration Onboarding Route Guard Real Navigation", () => {
     sessionStore.setOnboardingStatus("NOT_STARTED");
     const view = await renderAppAt("/home");
 
-    expect(view.textContent).toContain(
-      "Persetujuan Penggunaan Data Preferensi",
-    );
+    expect(view.textContent).toContain("Kenali jeda yang cocok untukmu");
     expect(view.querySelector(".traveler-bottom-nav")).toBeNull();
   });
 
@@ -51,9 +49,7 @@ describe("Integration Onboarding Route Guard Real Navigation", () => {
     sessionStore.setOnboardingStatus("NOT_STARTED");
     const view = await renderAppAt("/onboarding/quiz");
 
-    expect(view.textContent).toContain(
-      "Persetujuan Penggunaan Data Preferensi",
-    );
+    expect(view.textContent).toContain("Kenali jeda yang cocok untukmu");
   });
 
   it("redirects IN_PROGRESS traveler trying to access /home to /onboarding/quiz", async () => {
@@ -64,9 +60,7 @@ describe("Integration Onboarding Route Guard Real Navigation", () => {
     expect(view.textContent).toContain(
       "Jeda seperti apa yang paling kamu butuhkan sekarang?",
     );
-    expect(view.textContent).not.toContain(
-      "Persetujuan Penggunaan Data Preferensi",
-    );
+    expect(view.textContent).not.toContain("Kenali jeda yang cocok untukmu");
   });
 
   it("redirects IN_PROGRESS traveler trying to access /onboarding/result to /onboarding/quiz", async () => {
@@ -102,9 +96,7 @@ describe("Integration Onboarding Route Guard Real Navigation", () => {
     const view = await renderAppAt("/onboarding/consent");
 
     expect(view.textContent).toContain("Home");
-    expect(view.textContent).not.toContain(
-      "Persetujuan Penggunaan Data Preferensi",
-    );
+    expect(view.textContent).not.toContain("Kenali jeda yang cocok untukmu");
   });
 
   it("allows COMPLETED traveler to directly access /home", async () => {

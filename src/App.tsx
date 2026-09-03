@@ -87,9 +87,6 @@ export function App() {
 
       <Route element={<DistractionFreeShell hideHeader />}>
         <Route path="login" element={<TravelerLoginScreen />} />
-      </Route>
-
-      <Route element={<DistractionFreeShell />}>
         <Route
           path="onboarding/consent"
           element={
@@ -98,6 +95,9 @@ export function App() {
             </OnboardingRouteGuard>
           }
         />
+      </Route>
+
+      <Route element={<DistractionFreeShell />}>
         <Route
           path="onboarding/quiz"
           element={

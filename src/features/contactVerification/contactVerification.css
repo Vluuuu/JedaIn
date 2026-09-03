@@ -2,10 +2,7 @@
   width: 100%;
   max-width: 36rem;
   margin-inline: auto;
-  padding: 0 0
-    calc(
-      var(--sticky-cta-height) + env(safe-area-inset-bottom) + var(--space-6)
-    );
+  padding: 0 var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
@@ -113,10 +110,10 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  background-color: var(--color-stone-50);
-  border: 1px solid var(--color-stone-200);
-  border-radius: var(--radius-lg);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
 .contact-verification-info-text {

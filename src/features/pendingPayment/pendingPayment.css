@@ -78,7 +78,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3-5) var(--space-5);
+  padding: var(--space-3) var(--space-5);
   background-color: var(--color-stone-50);
   border-bottom: 1px solid var(--color-border-default);
 }
@@ -92,7 +92,7 @@
 .pending-payment-status__dot {
   width: 0.5rem;
   height: 0.5rem;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-pill);
   background-color: var(--color-warning-solid);
   flex-shrink: 0;
 }
@@ -101,13 +101,12 @@
   font-size: var(--font-size-label-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-stone-800);
-  letter-spacing: var(--letter-spacing-wide);
 }
 
 .pending-payment-countdown {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1-5);
+  gap: var(--space-2);
   font-size: var(--font-size-label-sm);
   color: var(--color-stone-700);
 }
@@ -118,7 +117,7 @@
 }
 
 .pending-payment-countdown__timer strong {
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-family-sans);
   font-variant-numeric: tabular-nums;
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-bold);
@@ -168,7 +167,7 @@
 .pending-payment-surface__pkg-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-1-5);
+  gap: var(--space-2);
   font-size: var(--font-size-caption);
   color: var(--color-stone-500);
   margin: 0;
@@ -201,7 +200,7 @@
 
 .pending-payment-fact-row__value {
   color: var(--color-stone-900);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
   text-align: right;
 }
 
@@ -278,7 +277,7 @@
 .pending-payment-alert {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2-5);
+  gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-sm);
@@ -317,16 +316,11 @@
 .pending-payment-state-box__icon-wrap {
   display: inline-grid;
   place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-forest-50);
-  color: var(--color-forest-700);
   margin-bottom: var(--space-4);
+  color: var(--color-stone-500);
 }
 
 .pending-payment-state-box__icon-wrap--error {
-  background-color: var(--color-danger-bg);
   color: var(--color-danger-solid);
 }
 

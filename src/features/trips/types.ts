@@ -21,6 +21,12 @@ export interface MyTripsViewModel {
   historyTrips: TripCardItem[];
 }
 
+export interface TripOrganizerContact {
+  contactPerson: string;
+  phone?: string;
+  email?: string;
+}
+
 export interface TripDetailViewModel {
   booking: BookingRecord;
   package?: PackageRecommendationSource;
@@ -28,6 +34,7 @@ export interface TripDetailViewModel {
   session?: PackageSessionPreview;
   hasDestinationReview?: boolean;
   hasEoReview?: boolean;
+  organizerContact?: TripOrganizerContact;
 }
 
 export interface TripsAdapter {

@@ -31,10 +31,10 @@ afterEach(async () => {
 function LocationObserver({
   onLocation,
 }: {
-  onLocation: (pathname: string) => void;
+  onLocation: (location: { pathname: string; search: string }) => void;
 }) {
   const location = useLocation();
-  onLocation(location.pathname);
+  onLocation({ pathname: location.pathname, search: location.search });
   return null;
 }
 
@@ -47,6 +47,7 @@ async function renderMyTrips(
   root = createRoot(container);
 
   let currentPath = "";
+  let currentSearch = "";
 
   await act(async () => {
     root.render(
@@ -54,8 +55,9 @@ async function renderMyTrips(
         MemoryRouter,
         { initialEntries },
         createElement(LocationObserver, {
-          onLocation: (p) => {
-            currentPath = p;
+          onLocation: (loc) => {
+            currentPath = loc.pathname;
+            currentSearch = loc.search;
           },
         }),
         createElement(
@@ -70,6 +72,10 @@ async function renderMyTrips(
             element: createElement(TripDetailScreen, props),
           }),
           createElement(Route, {
+            path: "/trips/:bookingId/review",
+            element: createElement("div", undefined, "Review Screen Target"),
+          }),
+          createElement(Route, {
             path: "/payment/:bookingId",
             element: createElement("div", undefined, "Payment Screen Target"),
           }),
@@ -78,7 +84,11 @@ async function renderMyTrips(
     );
   });
 
-  return { container, getPath: () => currentPath };
+  return {
+    container,
+    getPath: () => currentPath,
+    getFullPath: () => `${currentPath}${currentSearch}`,
+  };
 }
 
 describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
@@ -162,7 +172,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
 
     expect(container.textContent).toContain("Trip Terkonfirmasi");
     expect(container.textContent).toContain("Sehari Pelan di Lereng Hijau");
-    expect(container.textContent).toContain("Penyelenggara & Panduan");
+    expect(container.textContent).toContain("Penyelenggara & Kontak Trip");
     expect(container.textContent).not.toContain("Bayar Sekarang");
     expect(container.textContent).not.toContain("Penilaian Pengalaman");
   });
@@ -509,5 +519,467 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     });
 
     expect(getPath()).toBe("/explore");
+  });
+
+  /* ========================================================================
+     P9.17 Tests: Contact, Inclusions/Exclusions/Safety, Demo Completion & Review Hierarchy
+     ======================================================================== */
+
+  describe("P9.17 Detailed Trip Detail & Contact Tests", () => {
+    it("V1. PAID owned Trip Detail with resolvable APPROVED EO displays canonical contact and tel link", async () => {
+      const traveler: AuthUser = {
+        id: "usr_contact_paid_approved",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_cont_paid_app",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+      // Check canonical EO information
+      expect(container.textContent).toContain("Jeda Alam Nusantara");
+      expect(container.textContent).toContain("Budi Santoso");
+      expect(container.textContent).toContain("081234567890");
+      expect(container.textContent).toContain("partner@jedaalam.id");
+      expect(container.textContent).toContain("Hubungi EO");
+
+      // Verify tel link
+      const telLink = container.querySelector(
+        'a[href="tel:081234567890"]',
+      ) as HTMLAnchorElement;
+      expect(telLink).not.toBeNull();
+      expect(telLink.textContent).toContain("Hubungi EO");
+
+      // Verify mailto link
+      const mailtoLink = container.querySelector(
+        'a[href="mailto:partner@jedaalam.id"]',
+      ) as HTMLAnchorElement;
+      expect(mailtoLink).not.toBeNull();
+
+      // Check inclusion, exclusion, and safety notes
+      expect(container.textContent).toContain("Termasuk dalam Paket");
+      expect(container.textContent).toContain("Tidak Termasuk");
+      expect(container.textContent).toContain(
+        "Transportasi menuju titik kumpul awal",
+      );
+      expect(container.textContent).toContain("Sebelum Berangkat");
+      expect(container.textContent).toContain(
+        "Gunakan sepatu berjalan yang nyaman",
+      );
+
+      // Check no raw Badge element rendered
+      expect(container.querySelector(".ui-badge")).toBeNull();
+    });
+
+    it("V2. COMPLETED owned Trip Detail retains source-backed EO contact", async () => {
+      const traveler: AuthUser = {
+        id: "usr_contact_completed",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const bId = `bk_demo_completed_${traveler.id}`;
+      const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+      expect(container.textContent).toContain("Trip Selesai");
+      expect(container.textContent).toContain("Budi Santoso");
+      expect(container.textContent).toContain("081234567890");
+      expect(container.textContent).toContain("Hubungi EO");
+    });
+
+    it("V3. Wrong-owner Trip Detail is blocked and does not expose contact", async () => {
+      const travelerOwner: AuthUser = {
+        id: "usr_owner_protect",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(travelerOwner);
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: travelerOwner.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_own_prot",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      // Switch to different traveler
+      const travelerIntruder: AuthUser = {
+        id: "usr_intruder",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(travelerIntruder);
+
+      const adapter = new MockTripsAdapter();
+      const tripDetail = await adapter.getTripDetail(bId);
+      expect(tripDetail).toBeNull();
+
+      const { container } = await renderMyTrips({ adapter }, [`/trips/${bId}`]);
+      expect(container.textContent).toContain("Trip tidak ditemukan.");
+      expect(container.textContent).not.toContain("081234567890");
+      expect(container.textContent).not.toContain("Budi Santoso");
+      expect(container.textContent).not.toContain("Hubungi EO");
+    });
+
+    it("V4. PENDING booking blocks Trip Detail and does not leak contact", async () => {
+      const traveler: AuthUser = {
+        id: "usr_pending_block",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_pend_prot",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+
+      const adapter = new MockTripsAdapter();
+      const tripDetail = await adapter.getTripDetail(bId);
+      expect(tripDetail).toBeNull();
+
+      const { container } = await renderMyTrips({ adapter }, [`/trips/${bId}`]);
+      expect(container.textContent).toContain("Trip tidak ditemukan.");
+      expect(container.textContent).not.toContain("081234567890");
+      expect(container.textContent).not.toContain("Hubungi EO");
+    });
+
+    it("V5. Unresolvable EO mapping still loads Trip Detail without fabricating contact", async () => {
+      const traveler: AuthUser = {
+        id: "usr_unresolvable_eo",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const customDetails = {
+        pkg_no_eo_map: {
+          packageId: "pkg_no_eo_map",
+          valueProposition: "Value prop",
+          highlights: ["Highlight 1"],
+          itinerary: [],
+          includedItems: ["Item 1"],
+          excludedItems: [],
+          safetyNotes: [],
+          cancellationPolicySummary: "Policy",
+          organizer: {
+            id: "org_unknown_unmapped",
+            displayName: "Penyelenggara Tanpa Akun EO",
+            guideStatus: "CONCEPT_ONLY" as const,
+          },
+          destinationDetail: {
+            overviewDescription: "Destinasi belum terpetakan",
+          },
+          upcomingSessionPreviews: [
+            {
+              sessionId: "ses_no_eo",
+              packageId: "pkg_no_eo_map",
+              startAt: "2026-09-20T08:00:00+07:00",
+              endAt: "2026-09-20T12:00:00+07:00",
+              status: "OPEN" as const,
+              remainingSlots: 5,
+              pricePerPerson: 200000,
+            },
+          ],
+        },
+      };
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "pkg_no_eo_map",
+        sessionId: "ses_no_eo",
+        participantCount: 1,
+        unitPricePerPerson: 200000,
+        capacitySnapshot: 5,
+        idempotencyKey: "k_unres_eo",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      const adapter = new MockTripsAdapter({ details: customDetails });
+      const detail = await adapter.getTripDetail(bId);
+      expect(detail).not.toBeNull();
+      expect(detail?.organizerContact).toBeUndefined();
+
+      const { container } = await renderMyTrips({ adapter }, [`/trips/${bId}`]);
+      expect(container.textContent).toContain("Penyelenggara Tanpa Akun EO");
+      expect(container.textContent).not.toContain("Penanggung Jawab EO");
+      expect(container.textContent).not.toContain("Hubungi EO");
+      // Does not crash
+      expect(container.textContent).toContain("Informasi Trip");
+    });
+
+    it("V6. Non-APPROVED EO application does not expose contact", async () => {
+      const traveler: AuthUser = {
+        id: "usr_pending_eo_app",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      // Map a custom package to an organizer whose application is PENDING_REVIEW (eo_pending_user)
+      const customDetails = {
+        pkg_with_pending_eo: {
+          packageId: "pkg_with_pending_eo",
+          valueProposition: "Value prop",
+          highlights: [],
+          itinerary: [],
+          includedItems: [],
+          excludedItems: [],
+          safetyNotes: [],
+          cancellationPolicySummary: "Policy",
+          organizer: {
+            id: "eo_pending_user", // resolveOrganizerReviewRef('eo_pending_user') returns 'eo_pending_user'
+            displayName: "Lestari Wellness Journey",
+            guideStatus: "CERTIFIED_GUIDE" as const,
+          },
+          destinationDetail: {
+            overviewDescription: "Destinasi belum terpetakan",
+          },
+          upcomingSessionPreviews: [
+            {
+              sessionId: "ses_pend_eo",
+              packageId: "pkg_with_pending_eo",
+              startAt: "2026-09-20T08:00:00+07:00",
+              endAt: "2026-09-20T12:00:00+07:00",
+              status: "OPEN" as const,
+              remainingSlots: 5,
+              pricePerPerson: 200000,
+            },
+          ],
+        },
+      };
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "pkg_with_pending_eo",
+        sessionId: "ses_pend_eo",
+        participantCount: 1,
+        unitPricePerPerson: 200000,
+        capacitySnapshot: 5,
+        idempotencyKey: "k_non_appr_eo",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      const adapter = new MockTripsAdapter({ details: customDetails });
+      const detail = await adapter.getTripDetail(bId);
+      expect(detail).not.toBeNull();
+      // Because eo_pending_user status is PENDING_REVIEW, organizerContact is undefined
+      expect(detail?.organizerContact).toBeUndefined();
+
+      const { container } = await renderMyTrips({ adapter }, [`/trips/${bId}`]);
+      expect(container.textContent).not.toContain("081255667788");
+      expect(container.textContent).not.toContain("Hubungi EO");
+    });
+
+    it("W. Discreet prototype demo completion control advances booking to COMPLETED", async () => {
+      const traveler: AuthUser = {
+        id: "usr_demo_sim_advance",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_demo_sim",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+      // Initially confirmed
+      expect(container.textContent).toContain("Trip Terkonfirmasi");
+      expect(container.textContent).not.toContain("Penilaian Pengalaman");
+
+      // Verify native disclosure exists
+      const demoDetails = container.querySelector(
+        "details.trip-detail-demo-disclosure",
+      );
+      expect(demoDetails).not.toBeNull();
+      expect(container.textContent).toContain("Kontrol Demo");
+
+      const simBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Simulasikan Trip Selesai"),
+      );
+      expect(simBtn).toBeDefined();
+
+      await act(async () => {
+        simBtn?.click();
+      });
+
+      // Now transitions to COMPLETED
+      expect(container.textContent).toContain("Trip Selesai");
+      expect(container.textContent).toContain("Penilaian Pengalaman");
+      // Demo control is not rendered in COMPLETED
+      expect(
+        container.querySelector("details.trip-detail-demo-disclosure"),
+      ).toBeNull();
+    });
+
+    it("X. Completed review priority: Destination primary first, EO primary when destination reviewed, both reviewed shows flat state", async () => {
+      const traveler: AuthUser = {
+        id: "usr_review_priority_check",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const bId = `bk_demo_completed_${traveler.id}`;
+
+      // Reset reviews for this booking if any
+      const { container, getFullPath } = await renderMyTrips({}, [
+        `/trips/${bId}`,
+      ]);
+
+      // 1. Both unreviewed: Destination is primary, EO is secondary
+      const destBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.trim() === "Beri Nilai Destinasi",
+      );
+      const eoBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.trim() === "Beri Nilai EO / Guide",
+      );
+      expect(destBtn).toBeDefined();
+      expect(eoBtn).toBeDefined();
+      expect(destBtn?.className).toContain("ui-button--primary");
+      expect(eoBtn?.className).toContain("ui-button--secondary");
+
+      // Clicking destination routes to ?target=destination
+      await act(async () => {
+        destBtn?.click();
+      });
+      expect(getFullPath()).toBe(`/trips/${bId}/review?target=destination`);
+
+      // 2. Submit Destination review
+      mockReviewStore.submitReview({
+        travelerId: traveler.id,
+        bookingId: bId,
+        targetType: "DESTINATION",
+        targetRef: "Lereng Hijau Batu",
+        rating: 5,
+      });
+
+      // Re-render
+      const { container: container2, getFullPath: getFullPath2 } =
+        await renderMyTrips({}, [`/trips/${bId}`]);
+      expect(container2.textContent).toContain("Sudah dinilai");
+      expect(container2.textContent).not.toContain("Beri Nilai Destinasi");
+
+      // EO CTA now becomes primary!
+      const eoBtn2 = Array.from(container2.querySelectorAll("button")).find(
+        (b) => b.textContent?.trim() === "Beri Nilai EO / Guide",
+      );
+      expect(eoBtn2).toBeDefined();
+      expect(eoBtn2?.className).toContain("ui-button--primary");
+
+      await act(async () => {
+        eoBtn2?.click();
+      });
+      expect(getFullPath2()).toBe(`/trips/${bId}/review?target=eo`);
+
+      // 3. Submit EO review
+      mockReviewStore.submitReview({
+        travelerId: traveler.id,
+        bookingId: bId,
+        targetType: "EO_GUIDE",
+        targetRef: "org_lereng_batu",
+        rating: 5,
+      });
+
+      // Re-render
+      const { container: container3 } = await renderMyTrips({}, [
+        `/trips/${bId}`,
+      ]);
+      const reviewButtons = container3.querySelectorAll(
+        ".trip-detail-review-item__action button",
+      );
+      expect(reviewButtons.length).toBe(0);
+      const reviewedBadges = container3.querySelectorAll(
+        ".trip-detail-reviewed-badge",
+      );
+      expect(reviewedBadges.length).toBe(2);
+    });
+
+    it("Y. Error state shows retry CTA and does not redirect automatically", async () => {
+      const traveler: AuthUser = {
+        id: "usr_trip_err_retry",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      let shouldFail = true;
+      const failingAdapter = {
+        getMyTrips: async () => ({
+          upcomingTrips: [],
+          completedTrips: [],
+          historyTrips: [],
+        }),
+        getTripDetail: async () => {
+          if (shouldFail) {
+            throw new Error("Network timeout");
+          }
+          return {
+            booking: {
+              bookingId: "bk_retry_success",
+              travelerId: traveler.id,
+              packageId: "slow_green_day",
+              sessionId: "ses_sgd_1",
+              participantCount: 1,
+              unitPricePerPerson: 275000,
+              totalAmount: 275000,
+              status: "PAID" as const,
+              reservedQuantity: 1,
+              bookedQuantity: 1,
+              paymentExpiresAt: "2026-09-01T01:00:00Z",
+              createdAt: "2026-09-01T00:00:00Z",
+              updatedAt: "2026-09-01T00:00:00Z",
+            },
+          };
+        },
+      };
+
+      const { container, getPath } = await renderMyTrips(
+        { adapter: failingAdapter },
+        ["/trips/bk_retry_success"],
+      );
+
+      expect(container.textContent).toContain("Trip belum bisa dimuat.");
+      expect(getPath()).toBe("/trips/bk_retry_success"); // Did not redirect
+
+      const retryBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Coba Lagi"),
+      );
+      expect(retryBtn).toBeDefined();
+
+      shouldFail = false;
+      await act(async () => {
+        retryBtn?.click();
+      });
+
+      expect(container.textContent).toContain("Trip Terkonfirmasi");
+      expect(container.textContent).not.toContain("Trip belum bisa dimuat.");
+    });
   });
 });

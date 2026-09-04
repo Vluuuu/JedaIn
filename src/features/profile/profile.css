@@ -1,8 +1,8 @@
 /* ==========================================================================
    JedaIn Traveler Profile (T21) Styles
    North Star: Personal Jeda Journal
-   Forest Identity Cover -> Warm Sand Transition
-   Editorial rhythm, continuous layout, solid subtle separators. No card wall.
+   Elevated Identity Cover -> Warm Sand Transition
+   Framed silhouette, ambient forest depth, refined focal points.
    Zero em-dashes. Zero undefined tokens.
    ========================================================================== */
 
@@ -14,7 +14,14 @@
 }
 
 .profile-main-page {
+  padding-top: var(--space-2);
   padding-bottom: calc(var(--space-16) + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+  .profile-main-page {
+    padding-top: var(--space-4);
+  }
 }
 
 .profile-subpage {
@@ -30,32 +37,73 @@
 }
 
 /* --------------------------------------------------------------------------
-   Forest Green Profile Identity Cover / Hero
+   Forest Identity Cover (Framed, Multi-Stop Ambient Depth)
    -------------------------------------------------------------------------- */
 .profile-hero-forest {
-  background: var(--color-forest-900);
-  color: var(--color-stone-0);
-  padding: var(--space-4) var(--space-4) var(--space-6);
-  border-bottom-left-radius: var(--radius-xl);
-  border-bottom-right-radius: var(--radius-xl);
   position: relative;
   overflow: hidden;
+  color: var(--color-stone-0);
+  background:
+    radial-gradient(
+      circle at 50% 28%,
+      rgba(58, 145, 91, 0.18) 0%,
+      rgba(40, 94, 61, 0.1) 45%,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-forest-900) 0%,
+      var(--color-forest-950) 100%
+    );
+  /* Full 4-corner intentional cover silhouette (removes broken/patah top) */
+  border-radius: var(--radius-2xl);
+  border: 1px solid rgba(139, 199, 156, 0.15);
+  padding: var(--space-4) var(--space-4) var(--space-6);
+  box-shadow:
+    0 12px 32px -4px rgba(15, 33, 23, 0.4),
+    0 4px 12px rgba(15, 33, 23, 0.2);
+  margin-inline: var(--space-2);
+}
+
+@media (min-width: 640px) {
+  .profile-hero-forest {
+    margin-inline: 0;
+  }
 }
 
 @media (min-width: 768px) {
   .profile-hero-forest {
     padding: var(--space-6) var(--space-8) var(--space-8);
-    border-bottom-left-radius: var(--radius-2xl);
-    border-bottom-right-radius: var(--radius-2xl);
+    border-radius: var(--radius-2xl);
   }
 }
 
+/* Subtle botanical ambient accent glow in background */
+.profile-hero-forest::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140%;
+  height: 65%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(93, 174, 118, 0.12) 0%,
+    transparent 65%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
 .profile-hero-top-action {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .profile-top-icon-btn {
@@ -65,41 +113,56 @@
   min-width: 2.75rem; /* Touch target >= 44px */
   min-height: 2.75rem;
   color: var(--color-forest-200);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-pill);
   transition:
     color var(--motion-fast) var(--ease-standard),
-    background-color var(--motion-fast) var(--ease-standard);
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
   text-decoration: none;
 }
 
 .profile-top-icon-btn:hover {
   color: var(--color-stone-0);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 .profile-identity-center {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-5);
 }
 
+/* Elevated Focal Avatar */
 .profile-avatar-monogram {
-  width: 4.75rem;
-  height: 4.75rem;
+  position: relative;
+  width: 5.25rem;
+  height: 5.25rem;
   border-radius: var(--radius-pill);
-  background: var(--color-forest-700);
+  background: linear-gradient(
+    145deg,
+    var(--color-forest-600) 0%,
+    var(--color-forest-800) 100%
+  );
   color: var(--color-stone-0);
-  border: 2.5px solid var(--color-forest-300);
+  border: 3px solid var(--color-forest-300);
+  outline: 4px solid rgba(93, 174, 118, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.875rem;
+  font-size: 2.1rem;
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--letter-spacing-tight);
   margin-bottom: var(--space-3);
-  box-shadow: 0 6px 16px rgba(15, 33, 23, 0.45);
+  box-shadow:
+    0 8px 24px rgba(15, 33, 23, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
   overflow: hidden;
 }
 
@@ -111,11 +174,12 @@
 
 .profile-hero-name {
   font-size: var(--font-size-heading-md);
-  line-height: var(--line-height-heading-md);
+  line-height: 1.25;
   font-weight: var(--font-weight-bold);
   color: var(--color-stone-0);
   margin: 0 0 var(--space-1) 0;
   letter-spacing: var(--letter-spacing-tight);
+  text-shadow: 0 1px 2px rgba(15, 33, 23, 0.5);
 }
 
 @media (min-width: 768px) {
@@ -127,10 +191,11 @@
 
 .profile-hero-bio {
   font-size: var(--font-size-body-sm);
-  color: var(--color-forest-200);
+  color: var(--color-forest-100);
   margin: 0 0 var(--space-3) 0;
-  max-width: 42ch;
+  max-width: 44ch;
   line-height: 1.45;
+  opacity: 0.92;
 }
 
 /* Micro-identity: Current Jeda */
@@ -138,15 +203,16 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  background: rgba(15, 33, 23, 0.65);
+  background: rgba(15, 33, 23, 0.7);
   padding: 0.35rem 0.85rem;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--color-forest-700);
+  border: 1px solid rgba(139, 199, 156, 0.3);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
 }
 
 .profile-current-jeda-prefix {
   font-size: var(--font-size-caption);
-  color: var(--color-forest-300);
+  color: var(--color-forest-200);
   font-weight: var(--font-weight-regular);
 }
 
@@ -156,7 +222,7 @@
   gap: 0.35rem;
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-forest-100);
+  color: var(--color-stone-0);
 }
 
 .profile-current-jeda-icon {
@@ -200,16 +266,21 @@
 }
 
 /* --------------------------------------------------------------------------
-   Journey + Social Stat Row (Interactive)
+   Journey + Social Stat Band (Integrated into Cover Surface)
    -------------------------------------------------------------------------- */
 .profile-stats-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-around;
   padding: var(--space-3) var(--space-2);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
   margin-bottom: var(--space-5);
 }
 
@@ -223,7 +294,7 @@
 
 .profile-stat-link {
   text-decoration: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding: 0.25rem;
   transition: background-color var(--motion-fast) var(--ease-standard);
 }
@@ -234,7 +305,7 @@
 
 .profile-stat-number {
   font-size: 1.35rem;
-  line-height: 1.6rem;
+  line-height: 1.5;
   font-weight: var(--font-weight-bold);
   color: var(--color-stone-0);
   letter-spacing: var(--letter-spacing-tight);
@@ -248,24 +319,26 @@
 
 .profile-stat-divider {
   width: 1px;
-  height: 2rem;
-  background: rgba(255, 255, 255, 0.12);
+  height: 1.85rem;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* --------------------------------------------------------------------------
-   Jeda Milestones Strip (With Custom Medallions)
+   Jeda Milestones Strip (Floating Medallions)
    -------------------------------------------------------------------------- */
 .profile-milestones-section {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
 .profile-milestones-title {
-  font-size: var(--font-size-label-sm);
+  font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
   letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
   color: var(--color-forest-300);
   margin: 0;
 }
@@ -281,42 +354,41 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: var(--space-2) var(--space-1);
-  border-radius: var(--radius-md);
-  border: 1px solid transparent;
-  gap: 0.2rem;
-}
-
-.profile-milestone-item--earned {
-  background: rgba(93, 174, 118, 0.15);
-  border-color: rgba(93, 174, 118, 0.35);
-}
-
-.profile-milestone-item--locked {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.05);
-  opacity: 0.6;
+  padding: var(--space-1) 0;
+  border: none;
+  background: transparent;
+  gap: 0.25rem;
 }
 
 .profile-milestone-medallion {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: var(--radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 0.15rem;
+  transition: transform var(--motion-fast) var(--ease-standard);
 }
 
 .profile-milestone-item--earned .profile-milestone-medallion {
-  background: var(--color-forest-600);
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--color-forest-400) 0%,
+    var(--color-forest-600) 100%
+  );
   color: var(--color-stone-0);
-  box-shadow: 0 2px 6px rgba(15, 33, 23, 0.3);
+  box-shadow:
+    0 4px 10px rgba(15, 33, 23, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
 }
 
 .profile-milestone-item--locked .profile-milestone-medallion {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-forest-300);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0.7;
 }
 
 .profile-milestone-name {

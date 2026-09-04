@@ -2,7 +2,7 @@
 
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { App } from "../../App";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
@@ -845,35 +845,68 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
     it("AR. Demand Insights preserves exact insightIds across all CTAs", async () => {
       partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-      const view = await renderComponent(createElement(App), [
-        "/partner/eo/insights",
-      ]);
 
-      // Verify all 3 exact insight titles exist in DOM
-      expect(view.textContent).toContain(
-        "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
-      );
-      expect(view.textContent).toContain(
-        "Kebutuhan Retreat Singkat Setengah Hari di Mojokerto / Pacet",
-      );
-      expect(view.textContent).toContain(
-        "Minat Belajar Kerajinan & Tradisi Lokal Akhir Pekan",
-      );
+      function LocationProbe() {
+        const location = useLocation();
+        return (
+          <output data-testid="location">
+            {location.pathname}
+            {location.search}
+          </output>
+        );
+      }
 
-      // Verify exact insightId query handoffs in action CTAs
-      const buttons = Array.from(view.querySelectorAll("button")).filter((b) =>
-        b.textContent?.includes("Buat Paket"),
-      );
-      expect(buttons.length).toBe(3);
+      const insightCases = [
+        {
+          title: "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
+          insightId: "ins_nature_batu_1d",
+          expectedDestination:
+            "/partner/eo/packages/new?insightId=ins_nature_batu_1d",
+        },
+        {
+          title: "Kebutuhan Retreat Singkat Setengah Hari di Mojokerto / Pacet",
+          insightId: "ins_mindful_pacet_halfday",
+          expectedDestination:
+            "/partner/eo/packages/new?insightId=ins_mindful_pacet_halfday",
+        },
+        {
+          title: "Minat Belajar Kerajinan & Tradisi Lokal Akhir Pekan",
+          insightId: "ins_workshop_culture_weekend",
+          expectedDestination:
+            "/partner/eo/packages/new?insightId=ins_workshop_culture_weekend",
+        },
+      ];
 
-      // Render screen directly to test handleCreateFromInsight router navigation trigger
-      const directView = await renderComponent(
-        createElement(EoInsightsScreen),
-      );
-      const directButtons = Array.from(
-        directView.querySelectorAll("button"),
-      ).filter((b) => b.textContent?.includes("Buat Paket"));
-      expect(directButtons.length).toBe(3);
+      for (const testCase of insightCases) {
+        const view = await renderComponent(
+          createElement(
+            "div",
+            null,
+            createElement(EoInsightsScreen),
+            createElement(LocationProbe),
+          ),
+          ["/partner/eo/insights"],
+        );
+
+        // Find the article card for this specific opportunity
+        const cards = Array.from(view.querySelectorAll("article"));
+        const targetCard = cards.find((card) =>
+          card.textContent?.includes(testCase.title),
+        );
+        expect(targetCard).toBeDefined();
+
+        const ctaButton = Array.from(
+          targetCard!.querySelectorAll("button"),
+        ).find((btn) => btn.textContent?.includes("Buat Paket"));
+        expect(ctaButton).toBeDefined();
+
+        await act(async () => {
+          ctaButton!.click();
+        });
+
+        const locationOutput = view.querySelector('[data-testid="location"]');
+        expect(locationOutput?.textContent).toBe(testCase.expectedDestination);
+      }
     });
 
     it("AS. Zero fake trend strings (+12%, naik, dibanding bulan lalu, 30 hari terakhir)", async () => {

@@ -9,6 +9,7 @@ import {
   QUIZ_GROUP_TYPE_OPTIONS,
   QUIZ_INTENT_OPTIONS,
 } from "../quiz/config";
+import { isCompletedQuizDraft } from "../recommendation/mockAdapter";
 import { defaultProfileAdapter } from "./mockAdapter";
 import type { ProfileAdapter, TravelerProfileData } from "./types";
 import "./profile.css";
@@ -129,11 +130,7 @@ export function ProfileScreen({
   const { user, isPhoneVerified, quizDraft } = data;
 
   // Resolve human-readable labels from quiz draft
-  const hasValidPreferences = Boolean(
-    quizDraft?.current_intent &&
-    quizDraft.preferred_activities &&
-    quizDraft.preferred_activities.length > 0,
-  );
+  const hasValidPreferences = isCompletedQuizDraft(quizDraft);
 
   const intentLabel = quizDraft?.current_intent
     ? (QUIZ_INTENT_OPTIONS.find((opt) => opt.value === quizDraft.current_intent)

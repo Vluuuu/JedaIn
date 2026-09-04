@@ -170,6 +170,63 @@ describe("Traveler Profile Screen (T21)", () => {
     expect(container.textContent).toContain("Atur Preferensi");
   });
 
+  it("D2. fails safely to empty preference state when QuizDraft is incomplete", async () => {
+    sessionStore.setUser(sampleUser);
+    // Partially completed draft missing budget, duration, departure, group
+    sessionStore.setQuizDraft({
+      currentStep: 2,
+      current_intent: "NATURE",
+      preferred_activities: ["NATURE_SCENERY"],
+    });
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Preferensi belum tersedia.");
+    expect(container.textContent).toContain("Atur Preferensi");
+    // Partial values must not be rendered as active preference
+    expect(container.textContent).not.toContain("Fokus Utama");
+    expect(container.textContent).not.toContain("Ubah Preferensi");
+  });
+
+  it("D3. fails safely to empty preference state when departure is OTHER with blank label", async () => {
+    sessionStore.setUser(sampleUser);
+    sessionStore.setQuizDraft({
+      ...sampleQuizDraft,
+      departure_area_id: "OTHER",
+      departure_area_label: "   ",
+    });
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Preferensi belum tersedia.");
+    expect(container.textContent).toContain("Atur Preferensi");
+    expect(container.textContent).not.toContain("Fokus Utama");
+  });
+
   it("E. displays privacy and data notice from source-backed consent", async () => {
     sessionStore.setUser(sampleUser);
 

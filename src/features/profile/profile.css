@@ -1,7 +1,7 @@
 /* ==========================================================================
    JedaIn Traveler Profile (T21) Styles
    North Star: Personal Jeda Journal
-   Forest Green Identity Hero -> Warm Sand Transition
+   Forest Identity Cover -> Warm Sand Transition
    Editorial rhythm, continuous layout, solid subtle separators. No card wall.
    Zero em-dashes. Zero undefined tokens.
    ========================================================================== */
@@ -30,7 +30,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Forest Green Profile Identity Hero
+   Forest Green Profile Identity Cover / Hero
    -------------------------------------------------------------------------- */
 .profile-hero-forest {
   background: var(--color-forest-900);
@@ -54,10 +54,11 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  gap: var(--space-2);
   margin-bottom: var(--space-2);
 }
 
-.profile-settings-gear-link {
+.profile-top-icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -68,9 +69,10 @@
   transition:
     color var(--motion-fast) var(--ease-standard),
     background-color var(--motion-fast) var(--ease-standard);
+  text-decoration: none;
 }
 
-.profile-settings-gear-link:hover {
+.profile-top-icon-btn:hover {
   color: var(--color-stone-0);
   background: rgba(255, 255, 255, 0.08);
 }
@@ -84,12 +86,12 @@
 }
 
 .profile-avatar-monogram {
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 4.75rem;
+  height: 4.75rem;
   border-radius: var(--radius-pill);
   background: var(--color-forest-700);
   color: var(--color-stone-0);
-  border: 2px solid var(--color-forest-400);
+  border: 2.5px solid var(--color-forest-300);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,7 +99,14 @@
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--letter-spacing-tight);
   margin-bottom: var(--space-3);
-  box-shadow: 0 4px 12px rgba(15, 33, 23, 0.4);
+  box-shadow: 0 6px 16px rgba(15, 33, 23, 0.45);
+  overflow: hidden;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .profile-hero-name {
@@ -129,7 +138,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  background: rgba(15, 33, 23, 0.6);
+  background: rgba(15, 33, 23, 0.65);
   padding: 0.35rem 0.85rem;
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-forest-700);
@@ -154,8 +163,44 @@
   color: var(--color-forest-300);
 }
 
+/* Follow CTA in Public Profile */
+.profile-follow-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  margin-top: var(--space-2);
+  transition: all var(--motion-fast) var(--ease-standard);
+}
+
+.profile-follow-action-btn--follow {
+  background: var(--color-stone-0);
+  color: var(--color-forest-900);
+  border: none;
+}
+
+.profile-follow-action-btn--follow:hover {
+  background: var(--color-forest-100);
+}
+
+.profile-follow-action-btn--following {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-stone-0);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.profile-follow-action-btn--following:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 /* --------------------------------------------------------------------------
-   Journey + Social Stat Row
+   Journey + Social Stat Row (Interactive)
    -------------------------------------------------------------------------- */
 .profile-stats-row {
   display: flex;
@@ -174,6 +219,17 @@
   align-items: center;
   gap: 0.15rem;
   flex: 1;
+}
+
+.profile-stat-link {
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: 0.25rem;
+  transition: background-color var(--motion-fast) var(--ease-standard);
+}
+
+.profile-stat-link:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .profile-stat-number {
@@ -197,7 +253,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Jeda Milestones Strip
+   Jeda Milestones Strip (With Custom Medallions)
    -------------------------------------------------------------------------- */
 .profile-milestones-section {
   display: flex;
@@ -239,29 +295,28 @@
 .profile-milestone-item--locked {
   background: rgba(255, 255, 255, 0.03);
   border-color: rgba(255, 255, 255, 0.05);
-  opacity: 0.65;
+  opacity: 0.6;
 }
 
-.profile-milestone-mark {
-  width: 1.75rem;
-  height: 1.75rem;
+.profile-milestone-medallion {
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: var(--radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.15rem;
 }
 
-.profile-milestone-item--earned .profile-milestone-mark {
-  background: var(--color-forest-500);
+.profile-milestone-item--earned .profile-milestone-medallion {
+  background: var(--color-forest-600);
   color: var(--color-stone-0);
+  box-shadow: 0 2px 6px rgba(15, 33, 23, 0.3);
 }
 
-.profile-milestone-item--locked .profile-milestone-mark {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--color-forest-200);
+.profile-milestone-item--locked .profile-milestone-medallion {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-forest-300);
 }
 
 .profile-milestone-name {
@@ -289,6 +344,69 @@
   }
 }
 
+/* Contextual Phone Verification Nudge */
+.profile-nudge-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-6);
+}
+
+@media (min-width: 640px) {
+  .profile-nudge-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.profile-nudge-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.profile-nudge-title {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-warning-text);
+}
+
+.profile-nudge-desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-warning-text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.profile-nudge-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  background: var(--color-warning-solid);
+  color: var(--color-stone-0);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity var(--motion-fast) var(--ease-standard);
+}
+
+.profile-nudge-cta:hover {
+  opacity: 0.9;
+}
+
+/* --------------------------------------------------------------------------
+   Activity Rows
+   -------------------------------------------------------------------------- */
 .profile-section {
   padding-block: var(--space-6);
   border-bottom: 1px solid var(--color-border-default);
@@ -296,14 +414,6 @@
 
 .profile-section:last-of-type {
   border-bottom: none;
-}
-
-.profile-section-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-  gap: var(--space-3);
 }
 
 .profile-section-header-split {
@@ -322,137 +432,24 @@
   letter-spacing: var(--letter-spacing-tight);
 }
 
-.profile-view-all-link {
+.profile-section-title-link {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-brand-primary);
-  text-decoration: none;
-}
-
-.profile-view-all-link:hover {
-  color: var(--color-brand-primary-hover);
-  text-decoration: underline;
-}
-
-/* --------------------------------------------------------------------------
-   Preference Surface
-   -------------------------------------------------------------------------- */
-.profile-intent-block {
-  margin-bottom: var(--space-4);
-}
-
-.profile-intent-badge {
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-caps);
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-1);
-}
-
-.profile-intent-value {
-  font-size: var(--font-size-body-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-brand-primary);
-  line-height: var(--line-height-body-lg);
-}
-
-.profile-facts-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
-}
-
-@media (min-width: 640px) {
-  .profile-facts-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
-  }
-}
-
-.profile-fact-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.profile-fact-label {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: var(--font-weight-semibold);
-}
-
-.profile-fact-value {
-  font-size: var(--font-size-body-sm);
-  color: var(--color-text-primary);
-  line-height: 1.4;
-}
-
-.profile-chips-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-top: var(--space-1);
-}
-
-.profile-restrained-chip {
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--font-size-caption);
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-pill);
-  background: var(--color-bg-surface-subtle);
-  border: 1px solid var(--color-border-default);
-  color: var(--color-text-secondary);
-}
-
-.profile-preference-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   gap: var(--space-2);
-  min-height: 2.75rem; /* touch target >= 44px */
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-strong);
-  color: var(--color-brand-primary);
-  font-family: inherit;
-  font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   text-decoration: none;
-  cursor: pointer;
-  transition:
-    background-color var(--motion-fast) var(--ease-standard),
-    border-color var(--motion-fast) var(--ease-standard),
-    color var(--motion-fast) var(--ease-standard);
 }
 
-.profile-preference-cta:hover {
-  background: var(--color-brand-primary-soft);
-  border-color: var(--color-brand-primary);
-  color: var(--color-brand-primary-hover);
+.profile-section-title-link:hover .profile-title-arrow {
+  transform: translateX(3px);
 }
 
-.profile-empty-preference {
-  padding: var(--space-4) 0;
+.profile-title-arrow {
+  display: inline-block;
+  color: var(--color-brand-primary);
+  transition: transform var(--motion-fast) var(--ease-standard);
 }
 
-.profile-empty-preference p {
-  font-size: var(--font-size-body-sm);
-  color: var(--color-text-secondary);
-  margin: 0 0 var(--space-3) 0;
-}
-
-/* --------------------------------------------------------------------------
-   Activity Rows
-   -------------------------------------------------------------------------- */
 .profile-activity-list {
   list-style: none;
   padding: 0;
@@ -475,10 +472,8 @@
 }
 
 .profile-activity-icon-bullet {
-  font-size: 1rem;
-  line-height: 1.25rem;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: var(--radius-pill);
   background: var(--color-forest-50);
   color: var(--color-forest-700);
@@ -593,7 +588,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Subpage Headers (Settings & Activity)
+   Subpage Headers (Settings, Activity, Search, Public Profile)
    -------------------------------------------------------------------------- */
 .profile-subpage-header {
   margin-bottom: var(--space-6);
@@ -639,7 +634,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Settings Content
+   Settings Page Visual Rebuild
    -------------------------------------------------------------------------- */
 .profile-settings-section {
   padding-block: var(--space-6);
@@ -662,6 +657,72 @@
   max-width: 28rem;
 }
 
+.profile-settings-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.profile-avatar-preview-wrap {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-forest-700);
+  border: 2px solid var(--color-forest-400);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-avatar-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-preview-monogram {
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-0);
+}
+
+.profile-avatar-upload-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.profile-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  background: var(--color-bg-surface);
+  color: var(--color-brand-primary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all var(--motion-fast) var(--ease-standard);
+}
+
+.profile-upload-btn:hover {
+  background: var(--color-forest-50);
+  border-color: var(--color-brand-primary);
+}
+
+.profile-upload-hint {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
 .profile-settings-field {
   display: flex;
   flex-direction: column;
@@ -675,7 +736,7 @@
 }
 
 .profile-settings-input {
-  min-height: 2.75rem; /* Touch target >= 44px */
+  min-height: 2.75rem;
   padding: 0 var(--space-3);
   font-family: inherit;
   font-size: var(--font-size-body-sm);
@@ -695,7 +756,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.75rem; /* Touch target >= 44px */
+  min-height: 2.75rem;
   padding: 0 var(--space-4);
   background: var(--color-brand-primary);
   color: var(--color-stone-0);
@@ -808,16 +869,6 @@
   color: var(--color-text-muted);
 }
 
-.profile-verification-note {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
-  line-height: 1.4;
-  margin: 0;
-}
-
-/* --------------------------------------------------------------------------
-   Privacy & Logout
-   -------------------------------------------------------------------------- */
 .profile-privacy-note {
   font-size: var(--font-size-body-sm);
   color: var(--color-text-secondary);
@@ -841,7 +892,7 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 4px;
-  min-height: 2.75rem; /* Touch target >= 44px */
+  min-height: 2.75rem;
   transition: color var(--motion-fast) var(--ease-standard);
 }
 
@@ -852,6 +903,149 @@
 .profile-logout-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Search & Traveler List Styles
+   -------------------------------------------------------------------------- */
+.profile-search-form {
+  margin-bottom: var(--space-6);
+}
+
+.profile-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profile-search-icon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.profile-search-input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 var(--space-4) 0 calc(var(--space-8) + 0.25rem);
+  font-family: inherit;
+  font-size: var(--font-size-body-sm);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.profile-search-input:focus {
+  outline: 2px solid var(--color-forest-500);
+  outline-offset: 1px;
+}
+
+.profile-travelers-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.profile-traveler-card {
+  border-bottom: 1px solid var(--color-stone-100);
+}
+
+.profile-traveler-card:last-child {
+  border-bottom: none;
+}
+
+.profile-traveler-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  text-decoration: none;
+  color: inherit;
+  min-height: 2.75rem;
+}
+
+.profile-traveler-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-forest-700);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-avatar-small-monogram {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-0);
+}
+
+.profile-traveler-meta {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.1rem;
+}
+
+.profile-traveler-name {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.profile-traveler-bio {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  line-height: 1.35;
+}
+
+.profile-traveler-trips {
+  font-size: 0.7rem;
+  color: var(--color-forest-700);
+  font-weight: var(--font-weight-semibold);
+}
+
+.profile-traveler-arrow {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  padding-left: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Phone Verification Screen Elements
+   -------------------------------------------------------------------------- */
+.profile-verify-phone-card {
+  padding: var(--space-2) 0;
+}
+
+.profile-demo-code-pill {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-800);
+  margin-bottom: var(--space-4);
+}
+
+.profile-back-link-subtle {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-body-sm);
+  cursor: pointer;
+  text-decoration: underline;
+  min-height: 2.75rem;
 }
 
 /* --------------------------------------------------------------------------

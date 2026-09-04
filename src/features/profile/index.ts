@@ -1,6 +1,10 @@
 export { ProfileScreen, type ProfileScreenProps } from "./ProfileScreen";
 export { SettingsScreen, type SettingsScreenProps } from "./SettingsScreen";
 export { ActivityScreen, type ActivityScreenProps } from "./ActivityScreen";
+export { ProfilePhoneVerificationScreen } from "./ProfilePhoneVerificationScreen";
+export { TravelerSearchScreen } from "./TravelerSearchScreen";
+export { PublicProfileScreen } from "./PublicProfileScreen";
+export { FollowListScreen } from "./FollowListScreen";
 export {
   MockProfileAdapter,
   defaultProfileAdapter,
@@ -9,6 +13,7 @@ export {
 export {
   mockTravelerCommunityStore,
   type CommunityCounts,
+  type PublicTravelerRecord,
 } from "./mockCommunityStore";
 export { mockMomentStore } from "./mockMomentStore";
 export { mockPresentationProfileStore } from "./mockPresentationProfileStore";

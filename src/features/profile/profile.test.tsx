@@ -97,14 +97,10 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
     expect(container.textContent).toContain("Lagi butuh:");
     expect(container.textContent).toContain("Dekat dengan alam");
 
-    // Preferences summary
-    expect(container.textContent).toContain("Alam & pemandangan");
-    expect(container.textContent).toContain("Relaksasi & mindfulness");
-    expect(container.textContent).toContain("Sekitar Rp200–300 ribu");
-    expect(container.textContent).toContain("1 hari");
-    expect(container.textContent).toContain("Malang");
-    expect(container.textContent).toContain("Sendiri");
-    expect(container.textContent).toContain("Ubah Preferensi");
+    // NEW APPROVED RULE: Full preference summary (Aktivitas, Budget, Durasi, Keberangkatan, Ubah Preferensi) is REMOVED from main Profile
+    expect(container.textContent).not.toContain("Alam & pemandangan");
+    expect(container.textContent).not.toContain("Sekitar Rp200–300 ribu");
+    expect(container.textContent).not.toContain("Ubah Preferensi");
 
     // Main Profile Privacy Check: Email, Phone, Logout, and Privacy block must NOT be prominent on main profile
     expect(container.textContent).not.toContain("08123456789");
@@ -707,7 +703,7 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
     expect(currentPath).toBe("/login");
   });
 
-  it("J. displays safe empty preference state when QuizDraft is missing", async () => {
+  it("J. displays safe empty current jeda state when QuizDraft is missing", async () => {
     sessionStore.setUser(sampleUser);
     sessionStore.setQuizDraft(null);
 
@@ -725,11 +721,10 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
       );
     });
 
-    expect(container.textContent).toContain("Preferensi belum tersedia.");
-    expect(container.textContent).toContain("Atur Preferensi");
+    expect(container.textContent).not.toContain("Lagi butuh:");
   });
 
-  it("K. fails safely to empty preference state when QuizDraft is incomplete", async () => {
+  it("K. fails safely when QuizDraft is incomplete without rendering partial intent", async () => {
     sessionStore.setUser(sampleUser);
     sessionStore.setQuizDraft({
       currentStep: 2,
@@ -751,10 +746,7 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
       );
     });
 
-    expect(container.textContent).toContain("Preferensi belum tersedia.");
-    expect(container.textContent).toContain("Atur Preferensi");
-    expect(container.textContent).not.toContain("Fokus Utama");
-    expect(container.textContent).not.toContain("Ubah Preferensi");
+    expect(container.textContent).not.toContain("Lagi butuh:");
   });
 
   it("L. Profile nav item is active when mounted under App router", async () => {
@@ -780,6 +772,311 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
     );
     expect(activeNav).not.toBeNull();
     expect(activeNav?.textContent).toContain("Profile");
+  });
+
+  it("M. Contextual Phone Verification nudge: shown when phone is unverified, hidden when verified", async () => {
+    const unverifiedUser: AuthUser = {
+      id: "usr_unverified_nudge",
+      name: "Sinta",
+      email: "sinta@example.com",
+      phone: "08199988877",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(unverifiedUser);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Lengkapi profilmu");
+    expect(container.textContent).toContain(
+      "Verifikasi nomor agar kontak perjalananmu siap saat booking",
+    );
+    expect(container.textContent).toContain("Verifikasi Nomor");
+
+    // When verified: nudge must disappear
+    mockContactVerificationStore.markPhoneVerified(
+      unverifiedUser.id,
+      unverifiedUser.phone!,
+    );
+
+    const freshAdapter = new (
+      await import("./mockAdapter")
+    ).MockProfileAdapter();
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen, { adapter: freshAdapter }),
+        ),
+      );
+    });
+
+    expect(container.textContent).not.toContain("Lengkapi profilmu");
+  });
+
+  it("N. Social Discovery: TravelerSearchScreen searches by name without exposing private fields", async () => {
+    const { TravelerSearchScreen } = await import("./TravelerSearchScreen");
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/travelers/search"] },
+          createElement(TravelerSearchScreen),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Cari Traveler");
+    expect(container.textContent).toContain("Budi Santoso");
+    expect(container.textContent).toContain("Siti Rahma");
+
+    // Privacy verification: no email, phone, or payment IDs in search results
+    expect(container.textContent).not.toContain("@");
+    expect(container.textContent).not.toContain("081");
+    expect(container.textContent).not.toContain("PAY-");
+  });
+
+  it("O. Public Profile: displays safe public information and functional follow/unfollow without self-follow", async () => {
+    const { PublicProfileScreen } = await import("./PublicProfileScreen");
+    sessionStore.setUser(sampleUser); // Authenticated as usr_traveler_1
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/travelers/usr_demo"] },
+          createElement(
+            Routes,
+            null,
+            createElement(Route, {
+              path: "/travelers/:travelerId",
+              element: createElement(PublicProfileScreen),
+            }),
+          ),
+        ),
+      );
+    });
+
+    // Public details for Dewo
+    expect(container.textContent).toContain("Dewo");
+    expect(container.textContent).toContain("Jeda Selesai");
+    expect(container.textContent).toContain("Followers");
+    expect(container.textContent).toContain("Following");
+
+    // Privacy assertions: Public profile must not render private fields
+    expect(container.textContent).not.toContain("budi@example.com");
+    expect(container.textContent).not.toContain("Pengaturan Profil");
+    expect(container.textContent).not.toContain("Lagi butuh:");
+    expect(container.textContent).not.toContain("Keluar dari Akun");
+
+    // Follow action toggle
+    const followBtn = container.querySelector<HTMLButtonElement>(
+      ".profile-follow-action-btn",
+    );
+    expect(followBtn).not.toBeNull();
+
+    // Toggle follow state
+    await act(async () => {
+      followBtn?.click();
+    });
+    expect(followBtn?.textContent).toBe("Mengikuti");
+
+    // Click again to unfollow
+    await act(async () => {
+      followBtn?.click();
+    });
+    expect(followBtn?.textContent).toBe("+ Ikuti");
+  });
+
+  it("P. Avatar editing in Settings: updates presentation profile without altering user auth credentials", async () => {
+    sessionStore.setUser(sampleUser);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile/settings"] },
+          createElement(SettingsScreen),
+        ),
+      );
+    });
+
+    const nameInput =
+      container.querySelector<HTMLInputElement>("#settings-name")!;
+    expect(nameInput).not.toBeNull();
+
+    await act(async () => {
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value",
+      )?.set;
+      nativeSetter?.call(nameInput, "Budi Traveler Baru");
+      nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+      nameInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    const form = container.querySelector<HTMLFormElement>(
+      ".profile-settings-form",
+    )!;
+    await act(async () => {
+      form.dispatchEvent(
+        new Event("submit", { cancelable: true, bubbles: true }),
+      );
+    });
+
+    // Presentation profile updated
+    const { mockPresentationProfileStore } =
+      await import("./mockPresentationProfileStore");
+    const updatedPres = mockPresentationProfileStore.getProfile(sampleUser.id);
+    expect(updatedPres?.displayName).toBe("Budi Traveler Baru");
+
+    // User auth credentials in sessionStore MUST remain completely untampered
+    const authSession = sessionStore.get().user;
+    expect(authSession?.id).toBe(sampleUser.id);
+    expect(authSession?.email).toBe(sampleUser.email);
+    expect(authSession?.phone).toBe(sampleUser.phone);
+  });
+
+  it("Q. Dedicated phone verification flow (/profile/verify-phone) marks phone verified upon entering 111111", async () => {
+    const unverifiedUser: AuthUser = {
+      id: "usr_otp_flow",
+      name: "Tomi",
+      email: "tomi@example.com",
+      phone: "08129876543",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(unverifiedUser);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    const { ProfilePhoneVerificationScreen } =
+      await import("./ProfilePhoneVerificationScreen");
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile/verify-phone"] },
+          createElement(ProfilePhoneVerificationScreen),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Verifikasi Nomor HP");
+
+    // Submit phone to request OTP
+    const form = container.querySelector<HTMLFormElement>(
+      ".profile-settings-form",
+    )!;
+    await act(async () => {
+      form.dispatchEvent(
+        new Event("submit", { cancelable: true, bubbles: true }),
+      );
+    });
+
+    // Advance timer for OTP step transition
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 250));
+    });
+
+    expect(container.textContent).toContain(
+      "Untuk prototype, gunakan kode 111111.",
+    );
+
+    // Enter valid demo OTP
+    const otpInput =
+      container.querySelector<HTMLInputElement>("#verify-otp-input")!;
+    await act(async () => {
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value",
+      )?.set;
+      nativeSetter?.call(otpInput, "111111");
+      otpInput.dispatchEvent(new Event("input", { bubbles: true }));
+      otpInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    const otpForm = container.querySelector<HTMLFormElement>(
+      ".profile-settings-form",
+    )!;
+    await act(async () => {
+      otpForm.dispatchEvent(
+        new Event("submit", { cancelable: true, bubbles: true }),
+      );
+    });
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 250));
+    });
+
+    // Phone is now verified in store
+    expect(
+      mockContactVerificationStore.isPhoneVerified(
+        unverifiedUser.id,
+        unverifiedUser.phone,
+      ),
+    ).toBe(true);
+  });
+
+  it("R. Follow Lists (/travelers/:id/followers and /following) displays follower identities safely", async () => {
+    const { FollowListScreen } = await import("./FollowListScreen");
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/travelers/usr_traveler_1/followers"] },
+          createElement(
+            Routes,
+            null,
+            createElement(Route, {
+              path: "/travelers/:travelerId/followers",
+              element: createElement(FollowListScreen, { type: "followers" }),
+            }),
+          ),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Followers");
+    expect(container.textContent).toContain("Siti Rahma");
+
+    // Privacy check: No email, phone, or payment IDs in follower lists
+    expect(container.textContent).not.toContain("@");
+    expect(container.textContent).not.toContain("081");
+    expect(container.textContent).not.toContain("PAY-");
   });
 });
 

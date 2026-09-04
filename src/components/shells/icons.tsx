@@ -81,6 +81,15 @@ export function SettingsIcon(props: IconProps) {
   );
 }
 
+export function SearchIcon(props: IconProps) {
+  return (
+    <svg {...sharedProps} {...props}>
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.35-4.35" />
+    </svg>
+  );
+}
+
 export function ArrowLeftIcon(props: IconProps) {
   return (
     <svg {...sharedProps} {...props}>
@@ -98,21 +107,51 @@ export function LeafIcon(props: IconProps) {
   );
 }
 
-export function MilestoneIcon(props: IconProps) {
-  return (
-    <svg {...sharedProps} {...props}>
-      <path d="M18 6H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h13l4-3.5L18 6Z" />
-      <path d="M12 13v8" />
-      <path d="M12 3v3" />
-    </svg>
-  );
-}
-
 export function PlayCircleIcon(props: IconProps) {
   return (
     <svg {...sharedProps} {...props}>
       <circle cx="12" cy="12" r="10" />
       <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+    </svg>
+  );
+}
+
+// Custom SVG Milestone Medallion Icons
+export function MilestoneSproutIcon(props: IconProps) {
+  return (
+    <svg {...sharedProps} {...props}>
+      <path d="M7 20h10" />
+      <path d="M12 20v-8" />
+      <path d="M12 12c-3-4-8-3-8-3s1 5 5 5c1 0 2-.4 3-2Z" />
+      <path d="M12 9c3-4 8-3 8-3s-1 5-5 5c-1 0-2-.4-3-2Z" />
+    </svg>
+  );
+}
+
+export function MilestoneTrailIcon(props: IconProps) {
+  return (
+    <svg {...sharedProps} {...props}>
+      <path d="M4 19c4-2 6-8 10-10 2-1 4-1 6-1" />
+      <path d="M8 21l2-2" />
+      <path d="M12 15l2-2" />
+      <path d="M16 11l2-2" />
+    </svg>
+  );
+}
+
+export function MilestoneMapPinIcon(props: IconProps) {
+  return (
+    <svg {...sharedProps} {...props}>
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+export function MilestoneReflectionStarIcon(props: IconProps) {
+  return (
+    <svg {...sharedProps} {...props}>
+      <path d="m12 3 2.5 6.5 6.5 2.5-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z" />
     </svg>
   );
 }

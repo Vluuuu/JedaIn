@@ -2,18 +2,15 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
   LeafIcon,
+  MilestoneMapPinIcon,
+  MilestoneReflectionStarIcon,
+  MilestoneSproutIcon,
+  MilestoneTrailIcon,
   PlayCircleIcon,
+  SearchIcon,
   SettingsIcon,
 } from "../../components/shells/icons";
-import {
-  QUIZ_ACTIVITY_OPTIONS,
-  QUIZ_BUDGET_OPTIONS,
-  QUIZ_DEPARTURE_OPTIONS,
-  QUIZ_DURATION_OPTIONS,
-  QUIZ_GROUP_SIZE_OPTIONS,
-  QUIZ_GROUP_TYPE_OPTIONS,
-  QUIZ_INTENT_OPTIONS,
-} from "../quiz/config";
+import { QUIZ_INTENT_OPTIONS } from "../quiz/config";
 import { isCompletedQuizDraft } from "../recommendation/mockAdapter";
 import { defaultProfileAdapter } from "./mockAdapter";
 import type { ProfileAdapter, TravelerProfileData } from "./types";
@@ -121,9 +118,10 @@ export function ProfileScreen({
     recentActivities,
     moments,
     quizDraft,
+    isPhoneVerified,
   } = data;
 
-  // Resolve displayName & monogram
+  // Resolve displayName, avatar & monogram
   const displayName = presentation?.displayName?.trim()
     ? presentation.displayName
     : user.name?.trim()
@@ -131,6 +129,7 @@ export function ProfileScreen({
       : "Traveler JedaIn";
 
   const monogram = displayName.charAt(0).toUpperCase() || "J";
+  const avatarUrl = presentation?.avatarUrl;
   const bioText = presentation?.bio?.trim() || null;
 
   // Resolve human-readable labels from quiz draft
@@ -141,49 +140,8 @@ export function ProfileScreen({
         ?.label ?? quizDraft.current_intent)
     : null;
 
-  const activityLabels = (quizDraft?.preferred_activities ?? []).map(
-    (act) =>
-      QUIZ_ACTIVITY_OPTIONS.find((opt) => opt.value === act)?.label ?? act,
-  );
-
-  const budgetLabel = quizDraft?.budget_band
-    ? (QUIZ_BUDGET_OPTIONS.find((opt) => opt.value === quizDraft.budget_band)
-        ?.label ?? quizDraft.budget_band)
-    : null;
-
-  const durationLabel = quizDraft?.duration_preference
-    ? (QUIZ_DURATION_OPTIONS.find(
-        (opt) => opt.value === quizDraft.duration_preference,
-      )?.label ?? quizDraft.duration_preference)
-    : null;
-
-  const departureLabel =
-    quizDraft?.departure_area_label ||
-    (quizDraft?.departure_area_id
-      ? (QUIZ_DEPARTURE_OPTIONS.find(
-          (opt) => opt.value === quizDraft.departure_area_id,
-        )?.label ?? quizDraft.departure_area_id)
-      : null);
-
-  const groupTypeLabel = quizDraft?.group_type
-    ? (QUIZ_GROUP_TYPE_OPTIONS.find((opt) => opt.value === quizDraft.group_type)
-        ?.label ?? quizDraft.group_type)
-    : null;
-
-  const groupSizeLabel = quizDraft?.group_size_band
-    ? (QUIZ_GROUP_SIZE_OPTIONS.find(
-        (opt) => opt.value === quizDraft.group_size_band,
-      )?.label ?? quizDraft.group_size_band)
-    : null;
-
-  const groupSummary =
-    quizDraft?.group_type === "SOLO"
-      ? "Sendiri"
-      : quizDraft?.group_type === "PARTNER"
-        ? "Pasangan"
-        : groupTypeLabel && groupSizeLabel
-          ? `${groupTypeLabel} (${groupSizeLabel})`
-          : groupTypeLabel || null;
+  // Phone nudge condition: user has phone AND phone is unverified
+  const showPhoneNudge = Boolean(user.phone && !isPhoneVerified);
 
   return (
     <div className="profile-container profile-main-page">
@@ -193,21 +151,38 @@ export function ProfileScreen({
         </div>
       )}
 
-      {/* 1. Forest Green Profile Identity Hero */}
+      {/* 1. Forest Identity Cover / Hero */}
       <header className="profile-hero-forest">
         <div className="profile-hero-top-action">
           <Link
-            to="/profile/settings"
-            className="profile-settings-gear-link"
-            aria-label="Pengaturan Profil"
+            to="/travelers/search"
+            className="profile-top-icon-btn"
+            aria-label="Cari Traveler"
+            title="Cari Traveler"
           >
-            <SettingsIcon width={22} height={22} />
+            <SearchIcon width={20} height={20} />
+          </Link>
+          <Link
+            to="/profile/settings"
+            className="profile-top-icon-btn profile-settings-gear-link"
+            aria-label="Pengaturan Profil"
+            title="Pengaturan Profil"
+          >
+            <SettingsIcon width={20} height={20} />
           </Link>
         </div>
 
         <div className="profile-identity-center">
           <div className="profile-avatar-monogram" aria-hidden="true">
-            {monogram}
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                className="profile-avatar-img"
+              />
+            ) : (
+              monogram
+            )}
           </div>
           <h1 className="profile-hero-name">{displayName}</h1>
           {bioText && <p className="profile-hero-bio">{bioText}</p>}
@@ -228,7 +203,7 @@ export function ProfileScreen({
           )}
         </div>
 
-        {/* 2. Journey + Social Stat Row */}
+        {/* 2. Journey + Social Stat Row (Interactive) */}
         <div
           className="profile-stats-row"
           role="group"
@@ -241,18 +216,26 @@ export function ProfileScreen({
             <span className="profile-stat-label">Jeda Selesai</span>
           </div>
           <div className="profile-stat-divider" aria-hidden="true" />
-          <div className="profile-stat-col">
+          <Link
+            to={`/travelers/${user.id}/followers`}
+            className="profile-stat-col profile-stat-link"
+            aria-label={`Daftar pengikut: ${stats.followersCount}`}
+          >
             <span className="profile-stat-number">{stats.followersCount}</span>
             <span className="profile-stat-label">Followers</span>
-          </div>
+          </Link>
           <div className="profile-stat-divider" aria-hidden="true" />
-          <div className="profile-stat-col">
+          <Link
+            to={`/travelers/${user.id}/following`}
+            className="profile-stat-col profile-stat-link"
+            aria-label={`Daftar yang diikuti: ${stats.followingCount}`}
+          >
             <span className="profile-stat-number">{stats.followingCount}</span>
             <span className="profile-stat-label">Following</span>
-          </div>
+          </Link>
         </div>
 
-        {/* 3. Jeda Milestones Strip */}
+        {/* 3. Jeda Milestones Strip with Custom SVG Medallion Icons */}
         <section
           className="profile-milestones-section"
           aria-label="Pencapaian Jeda"
@@ -269,8 +252,19 @@ export function ProfileScreen({
                 }`}
                 title={`${ach.title}: ${ach.description}`}
               >
-                <div className="profile-milestone-mark" aria-hidden="true">
-                  {ach.earned ? "✓" : ach.progressText || "•"}
+                <div className="profile-milestone-medallion" aria-hidden="true">
+                  {ach.id === "JEDA_PERTAMA" && (
+                    <MilestoneSproutIcon width={18} height={18} />
+                  )}
+                  {ach.id === "TIGA_JEDA" && (
+                    <MilestoneTrailIcon width={18} height={18} />
+                  )}
+                  {ach.id === "LIMA_DESTINASI" && (
+                    <MilestoneMapPinIcon width={18} height={18} />
+                  )}
+                  {ach.id === "PEMBERI_ULASAN" && (
+                    <MilestoneReflectionStarIcon width={18} height={18} />
+                  )}
                 </div>
                 <span className="profile-milestone-name">{ach.title}</span>
                 <span className="profile-milestone-status">
@@ -284,108 +278,46 @@ export function ProfileScreen({
 
       {/* Warm Sand Content Area */}
       <div className="profile-warm-content">
-        {/* 4. Current Preferences Section */}
-        <section
-          className="profile-section"
-          aria-labelledby="profile-pref-heading"
-        >
-          <div className="profile-section-header">
-            <h2 id="profile-pref-heading" className="profile-section-title">
-              Jeda yang kamu butuhkan sekarang
-            </h2>
-          </div>
-
-          {hasValidPreferences && quizDraft ? (
-            <div className="profile-preference-content">
-              <div className="profile-intent-block">
-                <div className="profile-intent-badge">Fokus Utama</div>
-                <div className="profile-intent-value">{intentLabel}</div>
-              </div>
-
-              <div className="profile-facts-grid">
-                {activityLabels.length > 0 && (
-                  <div className="profile-fact-item">
-                    <span className="profile-fact-label">Aktivitas</span>
-                    <div className="profile-chips-group">
-                      {activityLabels.map((act) => (
-                        <span key={act} className="profile-restrained-chip">
-                          {act}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {budgetLabel && (
-                  <div className="profile-fact-item">
-                    <span className="profile-fact-label">Budget</span>
-                    <span className="profile-fact-value">{budgetLabel}</span>
-                  </div>
-                )}
-
-                {durationLabel && (
-                  <div className="profile-fact-item">
-                    <span className="profile-fact-label">Durasi</span>
-                    <span className="profile-fact-value">{durationLabel}</span>
-                  </div>
-                )}
-
-                {departureLabel && (
-                  <div className="profile-fact-item">
-                    <span className="profile-fact-label">Berangkat dari</span>
-                    <span className="profile-fact-value">{departureLabel}</span>
-                  </div>
-                )}
-
-                {groupSummary && (
-                  <div className="profile-fact-item">
-                    <span className="profile-fact-label">Pergi bersama</span>
-                    <span className="profile-fact-value">{groupSummary}</span>
-                  </div>
-                )}
-              </div>
-
-              <Link
-                to="/profile/preferences"
-                className="profile-preference-cta"
-                aria-label="Ubah preferensi perjalanan"
-              >
-                <span>Ubah Preferensi</span>
-                <span aria-hidden="true">&rarr;</span>
-              </Link>
+        {/* Contextual Phone Verification Nudge (Only if unverified and phone exists) */}
+        {showPhoneNudge && (
+          <aside
+            className="profile-nudge-card"
+            aria-label="Verifikasi nomor HP"
+          >
+            <div className="profile-nudge-text">
+              <span className="profile-nudge-title">Lengkapi profilmu</span>
+              <p className="profile-nudge-desc">
+                Verifikasi nomor agar kontak perjalananmu siap saat booking.
+              </p>
             </div>
-          ) : (
-            <div className="profile-empty-preference">
-              <p>Preferensi belum tersedia.</p>
-              <Link
-                to="/profile/preferences"
-                className="profile-preference-cta"
-                aria-label="Atur preferensi perjalanan"
-              >
-                <span>Atur Preferensi</span>
-                <span aria-hidden="true">&rarr;</span>
-              </Link>
-            </div>
-          )}
-        </section>
+            <Link
+              to="/profile/verify-phone"
+              className="profile-nudge-cta"
+              aria-label="Verifikasi nomor HP sekarang"
+            >
+              Verifikasi Nomor
+            </Link>
+          </aside>
+        )}
 
-        {/* 5. Recent Activity (Max 3) */}
+        {/* 4. Recent Activity (Max 3) */}
         <section
           className="profile-section"
           aria-labelledby="profile-activity-heading"
         >
           <div className="profile-section-header-split">
             <h2 id="profile-activity-heading" className="profile-section-title">
-              Aktivitas Terbaru
+              <Link
+                to="/profile/activity"
+                className="profile-section-title-link profile-view-all-link"
+                aria-label="Aktivitas Terbaru"
+              >
+                <span>Aktivitas Terbaru</span>
+                <span aria-hidden="true" className="profile-title-arrow">
+                  &rarr;
+                </span>
+              </Link>
             </h2>
-            <Link
-              to="/profile/activity"
-              className="profile-view-all-link"
-              aria-label="Lihat seluruh aktivitas perjalanan"
-            >
-              <span>Lihat Semua</span>
-              <span aria-hidden="true">&rarr;</span>
-            </Link>
           </div>
 
           {recentActivities.length > 0 ? (
@@ -399,10 +331,18 @@ export function ProfileScreen({
                     className="profile-activity-icon-bullet"
                     aria-hidden="true"
                   >
-                    {act.type === "TRIP_COMPLETED" && "🌿"}
-                    {act.type === "REVIEW_SUBMITTED" && "★"}
-                    {act.type === "ACHIEVEMENT_EARNED" && "✦"}
-                    {act.type === "MOMENT_SHARED" && "📷"}
+                    {act.type === "TRIP_COMPLETED" && (
+                      <MilestoneTrailIcon width={14} height={14} />
+                    )}
+                    {act.type === "REVIEW_SUBMITTED" && (
+                      <MilestoneReflectionStarIcon width={14} height={14} />
+                    )}
+                    {act.type === "ACHIEVEMENT_EARNED" && (
+                      <MilestoneSproutIcon width={14} height={14} />
+                    )}
+                    {act.type === "MOMENT_SHARED" && (
+                      <PlayCircleIcon width={14} height={14} />
+                    )}
                   </div>
                   <div className="profile-activity-text">
                     <span className="profile-activity-title">{act.title}</span>
@@ -424,7 +364,7 @@ export function ProfileScreen({
           )}
         </section>
 
-        {/* 6. Momen Jeda */}
+        {/* 5. Momen Jeda */}
         <section
           className="profile-section"
           aria-labelledby="profile-moments-heading"

@@ -107,6 +107,15 @@ export class MockProfileAdapter implements ProfileAdapter {
       displayName: user.name ?? "",
     };
 
+    // Register/sync current traveler with public directory
+    mockTravelerCommunityStore.registerOrUpdateTraveler({
+      travelerId: user.id,
+      displayName: presentation.displayName || user.name || "Traveler JedaIn",
+      bio: presentation.bio,
+      avatarUrl: presentation.avatarUrl,
+      completedJedaCount,
+    });
+
     return {
       user,
       isPhoneVerified,
@@ -140,7 +149,22 @@ export class MockProfileAdapter implements ProfileAdapter {
     if (!user) {
       throw new Error("Sesi tidak ditemukan. Silakan login kembali.");
     }
-    return mockPresentationProfileStore.updateProfile(user.id, updates);
+    const updated = mockPresentationProfileStore.updateProfile(
+      user.id,
+      updates,
+    );
+
+    // Synchronize to public traveler directory
+    const completedBookings = this.resolveCompletedBookings(user.id);
+    mockTravelerCommunityStore.registerOrUpdateTraveler({
+      travelerId: user.id,
+      displayName: updated.displayName,
+      bio: updated.bio,
+      avatarUrl: updated.avatarUrl,
+      completedJedaCount: completedBookings.length,
+    });
+
+    return updated;
   }
 
   async logout(): Promise<void> {

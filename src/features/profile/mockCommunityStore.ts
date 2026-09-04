@@ -2,6 +2,9 @@
 // SINGLE SOURCE OF TRUTH: All followers and following counts are 100% derived from the graph edges (followRelations).
 // Zero fake counters, zero arbitrary fallback lists, zero random numbers.
 
+import { sessionStore } from "../onboarding/sessionStore";
+import { mockPresentationProfileStore } from "./mockPresentationProfileStore";
+
 export interface CommunityCounts {
   followers: number;
   following: number;
@@ -51,10 +54,6 @@ const defaultTravelers: PublicTravelerRecord[] = [
 let travelersDirectory: PublicTravelerRecord[] = [...defaultTravelers];
 
 // Graph relationship: Set of "followerId:followingId"
-// Seeded truthful relationships:
-// usr_traveler_siti follows usr_traveler_1
-// usr_traveler_adi follows usr_traveler_1
-// usr_traveler_1 follows usr_traveler_maya
 let followRelations = new Set<string>([
   "usr_traveler_siti:usr_traveler_1",
   "usr_traveler_adi:usr_traveler_1",
@@ -88,7 +87,16 @@ export const mockTravelerCommunityStore = {
       (t) => t.travelerId === traveler.travelerId,
     );
     if (idx >= 0) {
-      travelersDirectory[idx] = { ...travelersDirectory[idx], ...traveler };
+      const existing = travelersDirectory[idx];
+      travelersDirectory[idx] = {
+        ...existing,
+        ...traveler,
+        // Preserve existing completedJedaCount if not explicitly provided
+        completedJedaCount:
+          traveler.completedJedaCount !== undefined
+            ? traveler.completedJedaCount
+            : existing.completedJedaCount,
+      };
     } else {
       travelersDirectory.push({
         travelerId: traveler.travelerId,
@@ -114,6 +122,29 @@ export const mockTravelerCommunityStore = {
     ) {
       return false;
     }
+
+    // Ensure source traveler is registered if they are authenticated in session/presentation
+    if (!this.getTravelerById(currentTravelerId)) {
+      const sessionUser = sessionStore.get().user;
+      const pres = mockPresentationProfileStore.getProfile(currentTravelerId);
+      if (sessionUser && sessionUser.id === currentTravelerId) {
+        this.registerOrUpdateTraveler({
+          travelerId: currentTravelerId,
+          displayName: pres?.displayName || sessionUser.name || "Traveler",
+          bio: pres?.bio,
+          avatarUrl: pres?.avatarUrl,
+          completedJedaCount: 0,
+        });
+      }
+    }
+
+    // Both source and target must have resolvable directory identities
+    const sourceExists = Boolean(this.getTravelerById(currentTravelerId));
+    const targetExists = Boolean(this.getTravelerById(targetTravelerId));
+    if (!sourceExists || !targetExists) {
+      return false;
+    }
+
     const key = `${currentTravelerId}:${targetTravelerId}`;
     if (!followRelations.has(key)) {
       followRelations.add(key);
@@ -132,7 +163,7 @@ export const mockTravelerCommunityStore = {
     return false;
   },
 
-  // Graph-Derived Lists (Truthful: zero fake fallbacks, returns empty array if no edges)
+  // Graph-Derived Lists (Truthful: zero fake fallbacks, strictly resolves real directory records)
   getFollowersList(travelerId: string): PublicTravelerRecord[] {
     if (!travelerId) return [];
     const followerIds: string[] = [];
@@ -142,16 +173,9 @@ export const mockTravelerCommunityStore = {
         followerIds.push(follower);
       }
     }
-    return followerIds.map((id) => {
-      const found = travelersDirectory.find((t) => t.travelerId === id);
-      return (
-        found || {
-          travelerId: id,
-          displayName: "Traveler JedaIn",
-          completedJedaCount: 0,
-        }
-      );
-    });
+    return followerIds
+      .map((id) => travelersDirectory.find((t) => t.travelerId === id))
+      .filter((t): t is PublicTravelerRecord => Boolean(t));
   },
 
   getFollowingList(travelerId: string): PublicTravelerRecord[] {
@@ -163,16 +187,9 @@ export const mockTravelerCommunityStore = {
         followingIds.push(following);
       }
     }
-    return followingIds.map((id) => {
-      const found = travelersDirectory.find((t) => t.travelerId === id);
-      return (
-        found || {
-          travelerId: id,
-          displayName: "Traveler JedaIn",
-          completedJedaCount: 0,
-        }
-      );
-    });
+    return followingIds
+      .map((id) => travelersDirectory.find((t) => t.travelerId === id))
+      .filter((t): t is PublicTravelerRecord => Boolean(t));
   },
 
   // Graph-Derived Counts (Strict Single Source of Truth)

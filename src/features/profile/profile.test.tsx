@@ -956,6 +956,13 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
     const updatedPres = mockPresentationProfileStore.getProfile(sampleUser.id);
     expect(updatedPres?.displayName).toBe("Budi Traveler Baru");
 
+    // Public traveler directory also updated synchronously
+    const { mockTravelerCommunityStore } = await import("./mockCommunityStore");
+    const publicTraveler = mockTravelerCommunityStore.getTravelerById(
+      sampleUser.id,
+    );
+    expect(publicTraveler?.displayName).toBe("Budi Traveler Baru");
+
     // User auth credentials in sessionStore MUST remain completely untampered
     const authSession = sessionStore.get().user;
     expect(authSession?.id).toBe(sampleUser.id);
@@ -1090,8 +1097,14 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
       mockTravelerCommunityStore.getFollowingList("usr_traveler_1").length,
     );
 
-    // Zero-relation traveler: zero graph edges yields exactly 0 counts and empty arrays
+    // Zero-relation traveler registered with no graph edges yields exactly 0 counts and empty arrays
     const zeroUser = "usr_traveler_lonely";
+    mockTravelerCommunityStore.registerOrUpdateTraveler({
+      travelerId: zeroUser,
+      displayName: "Lonely Traveler",
+      completedJedaCount: 0,
+    });
+
     expect(mockTravelerCommunityStore.getFollowerCount(zeroUser)).toBe(0);
     expect(mockTravelerCommunityStore.getFollowingCount(zeroUser)).toBe(0);
     expect(mockTravelerCommunityStore.getFollowersList(zeroUser)).toEqual([]);
@@ -1102,7 +1115,8 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
       mockTravelerCommunityStore.getFollowerCount("usr_demo");
     const beforeCountA = mockTravelerCommunityStore.getFollowingCount(zeroUser);
 
-    mockTravelerCommunityStore.follow(zeroUser, "usr_demo");
+    const followed = mockTravelerCommunityStore.follow(zeroUser, "usr_demo");
+    expect(followed).toBe(true);
     expect(mockTravelerCommunityStore.getFollowerCount("usr_demo")).toBe(
       beforeCountB + 1,
     );
@@ -1157,6 +1171,55 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
 
     expect(container.textContent).toContain(
       "File harus berupa gambar (JPG, PNG, WebP).",
+    );
+  });
+
+  it("U. Search and Public Profile reflect synchronized identity changes and non-seed user follow works without fabricated identity", async () => {
+    const { mockTravelerCommunityStore } = await import("./mockCommunityStore");
+    sessionStore.setUser(sampleUser);
+
+    const adapter = new (await import("./mockAdapter")).MockProfileAdapter();
+    await adapter.updatePresentationProfile({
+      displayName: "Budi Traveler Baru",
+      bio: "Mencari jeda pelan.",
+    });
+
+    // 1. Search sync: searching new name returns traveler, searching old name does not
+    const searchNew =
+      mockTravelerCommunityStore.searchTravelers("Budi Traveler Baru");
+    expect(searchNew.some((t) => t.travelerId === sampleUser.id)).toBe(true);
+
+    const searchOld =
+      mockTravelerCommunityStore.searchTravelers("Budi Santoso");
+    expect(searchOld.some((t) => t.travelerId === sampleUser.id)).toBe(false);
+
+    // 2. Non-seed traveler can follow without fabricated 'Traveler JedaIn' identity
+    const nonSeedUser: AuthUser = {
+      id: "usr_custom_traveler_101",
+      name: "Riko Purnomo",
+      email: "riko@example.com",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(nonSeedUser);
+
+    await adapter.getProfile(); // registers non-seed user with real identity in directory
+
+    // Non-seed user follows usr_demo
+    const followSuccess = mockTravelerCommunityStore.follow(
+      nonSeedUser.id,
+      "usr_demo",
+    );
+    expect(followSuccess).toBe(true);
+
+    const demoFollowers =
+      mockTravelerCommunityStore.getFollowersList("usr_demo");
+    const rikoEntry = demoFollowers.find(
+      (t) => t.travelerId === nonSeedUser.id,
+    );
+    expect(rikoEntry).toBeDefined();
+    expect(rikoEntry?.displayName).toBe("Riko Purnomo");
+    expect(demoFollowers.some((t) => t.displayName === "Traveler JedaIn")).toBe(
+      false,
     );
   });
 });

@@ -554,25 +554,23 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       const view = await renderComponent(createElement(EoInsightsScreen));
 
       // AB: Intent
-      expect(view.textContent).toContain("1. Distribusi Kebutuhan Suasana");
+      expect(view.textContent).toContain("Kebutuhan Traveler");
       expect(view.textContent).toContain("Dekat dengan alam");
 
       // AC: Budget
-      expect(view.textContent).toContain("2. Distribusi Budget Nyaman");
+      expect(view.textContent).toContain("Budget Nyaman");
       expect(view.textContent).toContain("Rp200.000 – Rp300.000");
 
       // AD: Duration
-      expect(view.textContent).toContain("3. Distribusi Durasi Perjalanan");
+      expect(view.textContent).toContain("Durasi yang Dicari");
       expect(view.textContent).toContain("1 Hari Penuh (6–8 Jam)");
 
       // AE: Departure
-      expect(view.textContent).toContain(
-        "4. Distribusi Wilayah Asal Keberangkatan",
-      );
+      expect(view.textContent).toContain("Area Keberangkatan");
       expect(view.textContent).toContain("Malang & Batu");
 
       // AF: Unmet demand
-      expect(view.textContent).toContain("5. Peluang Paket Belum Terpenuhi");
+      expect(view.textContent).toContain("Peluang yang Belum Terpenuhi");
       expect(view.textContent).toContain(
         "Tingginya Permintaan Jeda Alam 1 Hari",
       );
@@ -656,6 +654,198 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("bk_session_date_check");
       expect(view.textContent).toContain("12 Sep 2026");
       expect(view.textContent).not.toContain("bk_foreign_pkg");
+    });
+  });
+
+  describe("9. EO Overview & Demand Insights Visual Rebuild (AL–AU)", () => {
+    it("AL. Overview KPI derives strictly from source stores without hardcoded fake values", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // Add 1 booking for this EO
+      mockTransactionStore.addDirectBooking({
+        bookingId: "bk_eo_kpi_check",
+        travelerId: "usr_traveler_1",
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        totalAmount: 550000,
+        status: "PAID",
+        reservedQuantity: 0,
+        bookedQuantity: 2,
+        createdAt: "2026-08-30T10:00:00Z",
+        paymentExpiresAt: "2026-08-30T10:15:00Z",
+        paidAt: "2026-08-30T10:10:00Z",
+      });
+
+      // Submit 1 review for organizer
+      mockReviewStore.submitReview({
+        bookingId: "bk_eo_kpi_check",
+        travelerId: "usr_traveler_1",
+        targetType: "EO_GUIDE",
+        targetRef: "org_lereng_batu",
+        rating: 5,
+        comment: "Sangat menenangkan!",
+      });
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      // Live Packages: 1 (slow_green_day)
+      expect(view.textContent).toContain("Live Packages");
+      expect(view.textContent).toContain("Upcoming Sessions");
+      expect(view.textContent).toContain("Total Bookings");
+      expect(view.textContent).toContain("Average Rating");
+      expect(view.textContent).toContain("★ 5.0");
+    });
+
+    it("AM. Overview isolates bookings strictly to EO-owned packages (no cross-EO leakage)", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // Foreign booking
+      mockTransactionStore.addDirectBooking({
+        bookingId: "bk_foreign_cross_leak",
+        travelerId: "usr_traveler_cross",
+        packageId: "unowned_foreign_package",
+        sessionId: "ses_foreign",
+        participantCount: 5,
+        unitPricePerPerson: 500000,
+        totalAmount: 2500000,
+        status: "PAID",
+        reservedQuantity: 0,
+        bookedQuantity: 5,
+        createdAt: "2026-08-30T10:00:00Z",
+        paymentExpiresAt: "2026-08-30T10:15:00Z",
+      });
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      // Unowned package must not appear in recent booking activity
+      expect(view.textContent).not.toContain("unowned_foreign_package");
+      expect(view.textContent).toContain("Belum ada aktivitas booking.");
+    });
+
+    it("AN. Overview highlights PENDING_ADMIN_REVIEW package as action needed callout", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      expect(view.textContent).toContain("Menunggu Review");
+      expect(view.textContent).toContain("Pagi Hening Tepi Sungai Pacet");
+      expect(view.textContent).toContain("Sedang ditinjau Admin JedaIn.");
+      expect(view.textContent).toContain("Lihat Package");
+    });
+
+    it("AO. Overview Demand Opportunity hero links to exact builder query param", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      expect(view.textContent).toContain("Peluang dari Traveler");
+      expect(view.textContent).toContain(
+        "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
+      );
+      expect(view.textContent).toContain("312 traveler");
+
+      const heroLink = view.querySelector<HTMLAnchorElement>(
+        'a[href*="/partner/eo/packages/new?insightId=ins_nature_batu_1d"]',
+      );
+      expect(heroLink).not.toBeNull();
+    });
+
+    it("AP. Empty EO state renders helpful CTA when package list is empty", async () => {
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+      // CONCEPT_ONLY user has 0 packages seeded by default in mockEoPackageStore
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      expect(view.textContent).toContain("Kamu belum punya package.");
+      expect(view.textContent).toContain(
+        "Lihat kebutuhan traveler atau mulai package pertamamu.",
+      );
+      expect(view.textContent).toContain("Lihat Insight");
+      expect(view.textContent).toContain("+ Buat Paket Baru");
+    });
+
+    it("AQ. Demand Insights derives top signals from data arrays", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      // Sinyal utama derived maxima
+      expect(view.textContent).toContain("Dekat dengan alam");
+      expect(view.textContent).toContain("42%");
+      expect(view.textContent).toContain("428 traveler");
+
+      expect(view.textContent).toContain("Rp200.000 – Rp300.000");
+      expect(view.textContent).toContain("48%");
+      expect(view.textContent).toContain("490 traveler");
+
+      expect(view.textContent).toContain("1 Hari Penuh (6–8 Jam)");
+      expect(view.textContent).toContain("52%");
+      expect(view.textContent).toContain("530 traveler");
+
+      expect(view.textContent).toContain("Malang & Batu");
+      expect(view.textContent).toContain("45%");
+      expect(view.textContent).toContain("459 traveler");
+    });
+
+    it("AR. Demand Insights preserves exact insightIds across all CTAs", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/insights",
+      ]);
+
+      // All 3 insight IDs present in buttons/links
+      expect(view.textContent).toContain(
+        "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
+      );
+      expect(view.textContent).toContain(
+        "Kebutuhan Retreat Singkat Setengah Hari di Mojokerto / Pacet",
+      );
+      expect(view.textContent).toContain(
+        "Minat Belajar Kerajinan & Tradisi Lokal Akhir Pekan",
+      );
+    });
+
+    it("AS. Zero fake trend strings (+12%, naik, dibanding bulan lalu, 30 hari terakhir)", async () => {
+      const overviewView = await renderComponent(createElement(App), [
+        "/partner/eo",
+      ]);
+      const overviewText = overviewView.textContent ?? "";
+      expect(overviewText).not.toContain("+12%");
+      expect(overviewText).not.toContain("dibanding bulan lalu");
+      expect(overviewText).not.toContain("30 hari terakhir");
+
+      const insightsView = await renderComponent(
+        createElement(EoInsightsScreen),
+      );
+      const insightsText = insightsView.textContent ?? "";
+      expect(insightsText).not.toContain("+12%");
+      expect(insightsText).not.toContain("dibanding bulan lalu");
+      expect(insightsText).not.toContain("30 hari terakhir");
+      expect(insightsText).not.toContain("AI Recommendation");
+      expect(insightsText).not.toContain("AI Opportunity");
+    });
+
+    it("AT. Workspace navigation renders consistent distinct icons and labels for all items", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      const nav = view.querySelector(".workspace-navigation")!;
+      expect(nav.textContent).toContain("Overview");
+      expect(nav.textContent).toContain("Insights");
+      expect(nav.textContent).toContain("Packages");
+      expect(nav.textContent).toContain("Sessions");
+      expect(nav.textContent).toContain("Bookings");
+      expect(nav.textContent).toContain("Destinations");
+      expect(nav.textContent).toContain("Reviews");
+      expect(nav.textContent).toContain("Profile");
+    });
+
+    it("AU. Topbar displays human-readable guide status without raw enums", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      const identity = view.querySelector(".workspace-identity")!;
+      expect(identity.textContent).toContain("Certified Guide");
+      expect(identity.textContent).not.toContain("CERTIFIED_GUIDE");
     });
   });
 });

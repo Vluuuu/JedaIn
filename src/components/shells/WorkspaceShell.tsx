@@ -2,7 +2,18 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import { partnerSessionStore } from "../../features/eo/partnerSessionStore";
 import { Button } from "../ui";
-import { CloseIcon, MenuIcon, OverviewIcon } from "./icons";
+import {
+  BookingsIcon,
+  CloseIcon,
+  DestinationsIcon,
+  InsightsIcon,
+  MenuIcon,
+  OverviewIcon,
+  PackagesIcon,
+  ProfileIcon,
+  ReviewsIcon,
+  SessionsIcon,
+} from "./icons";
 import "./shells.css";
 
 interface WorkspaceNavigationItem {
@@ -15,6 +26,32 @@ export interface WorkspaceShellProps {
   title: string;
   navigation: readonly WorkspaceNavigationItem[];
   children?: ReactNode;
+}
+
+function getNavigationIcon(to: string) {
+  if (to.endsWith("/insights")) return <InsightsIcon />;
+  if (to.endsWith("/packages") || to.includes("/package-approvals"))
+    return <PackagesIcon />;
+  if (to.endsWith("/sessions") || to.endsWith("/schedule"))
+    return <SessionsIcon />;
+  if (to.endsWith("/bookings")) return <BookingsIcon />;
+  if (
+    to.endsWith("/destinations") ||
+    to.includes("/destination-verifications") ||
+    to.endsWith("/verification")
+  )
+    return <DestinationsIcon />;
+  if (to.endsWith("/reviews")) return <ReviewsIcon />;
+  if (to.endsWith("/profile") || to.endsWith("/profile-settings"))
+    return <ProfileIcon />;
+  return <OverviewIcon />;
+}
+
+function formatGuideStatus(guideStatus?: string | null): string {
+  if (!guideStatus) return "";
+  if (guideStatus === "CERTIFIED_GUIDE") return "Certified Guide";
+  if (guideStatus === "CONCEPT_ONLY") return "Concept Only";
+  return guideStatus.replace(/_/g, " ");
 }
 
 export function WorkspaceShell({
@@ -63,7 +100,13 @@ export function WorkspaceShell({
           <Link className="brand-mark" to={`/${surface}`}>
             JedaIn<span aria-hidden="true">.</span>
           </Link>
-          <span>{surface === "admin" ? "Admin" : "Partner"}</span>
+          <span>
+            {surface === "admin"
+              ? "Admin"
+              : partner?.role === "DESTINATION"
+                ? "Destination Partner"
+                : "EO Partner"}
+          </span>
           <Button
             variant="secondary"
             size="sm"
@@ -82,10 +125,10 @@ export function WorkspaceShell({
             <NavLink
               key={to}
               to={to}
-              end={to === `/${surface}`}
+              end={to === `/${surface}` || to === `/${surface}/destination`}
               onClick={() => setDrawerOpen(false)}
             >
-              <OverviewIcon />
+              {getNavigationIcon(to)}
               <span>{label}</span>
             </NavLink>
           ))}
@@ -105,8 +148,14 @@ export function WorkspaceShell({
           >
             <MenuIcon />
           </Button>
-          <div>
-            <p>{surface === "admin" ? "Operations" : "Workspace"}</p>
+          <div className="workspace-topbar__context">
+            <p>
+              {surface === "admin"
+                ? "Admin Trust & Governance"
+                : partner?.role === "DESTINATION"
+                  ? "Destination Partner"
+                  : "EO Partner"}
+            </p>
             <h1>{title}</h1>
           </div>
           <div
@@ -127,7 +176,7 @@ export function WorkspaceShell({
               </strong>
               <small>
                 {partner?.name
-                  ? `${partner.name}${partner.guideStatus ? ` (${partner.guideStatus})` : ""}`
+                  ? `${partner.name}${partner.guideStatus ? ` · ${formatGuideStatus(partner.guideStatus)}` : ""}`
                   : "Terhubung"}
               </small>
             </div>

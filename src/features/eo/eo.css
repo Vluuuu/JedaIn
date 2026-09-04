@@ -503,3 +503,797 @@
   border-color: var(--color-brand-primary);
   box-shadow: var(--shadow-md);
 }
+
+/* ==========================================================================
+   EO Overview Rebuild (.eo-overview-*)
+   North Star: CALM CREATOR WORKSPACE
+   ========================================================================== */
+
+.eo-overview-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 1200px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.eo-overview-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-overview-header__main h1 {
+  font-size: var(--font-size-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.eo-overview-header__main p {
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-secondary);
+  margin: var(--space-1) 0 0;
+}
+
+/* 11. KPI Treatment: One cohesive metric band with vertical separators */
+.eo-overview-metric-band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-4);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-overview-metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-inline: var(--space-4);
+}
+
+.eo-overview-metric-item:not(:first-child) {
+  border-left: 1px solid var(--color-border-default);
+}
+
+.eo-overview-metric-label {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.eo-overview-metric-value {
+  font-size: var(--font-size-heading-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-heading-xl);
+}
+
+.eo-overview-metric-desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+/* 12. Pending Approval Callout: Action Needed */
+.eo-overview-attention {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-lg);
+}
+
+.eo-overview-attention__content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.eo-overview-attention__tag {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-warning-text);
+  background: var(--color-warning-border);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+.eo-overview-attention__title {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body-md);
+}
+
+.eo-overview-attention__desc {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+}
+
+/* 13 & 14. Demand Opportunity Hero: Dark Forest Solid Anchor */
+.eo-overview-demand-hero {
+  background: var(--color-forest-900);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-xl);
+  padding: var(--space-7) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  border: 1px solid var(--color-forest-800);
+  box-shadow: var(--shadow-sm);
+}
+
+.eo-overview-demand-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-forest-300);
+}
+
+.eo-overview-demand-hero__eyebrow-badge {
+  background: var(--color-forest-800);
+  color: var(--color-forest-200);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-caption);
+}
+
+.eo-overview-demand-hero__headline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.eo-overview-demand-hero__headline h2 {
+  font-size: var(--font-size-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-0);
+  margin: 0;
+  line-height: var(--line-height-heading-lg);
+}
+
+.eo-overview-demand-hero__headline p {
+  font-size: var(--font-size-body-md);
+  color: var(--color-forest-100);
+  margin: 0;
+  max-width: 68ch;
+  line-height: var(--line-height-body-md);
+}
+
+.eo-overview-demand-hero__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-forest-200);
+  padding-block: var(--space-2);
+  border-block: 1px solid var(--color-forest-800);
+}
+
+.eo-overview-demand-hero__facts span strong {
+  color: var(--color-stone-0);
+}
+
+.eo-overview-demand-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.eo-overview-demand-hero__cta {
+  background: var(--color-brand-primary-soft);
+  color: var(--color-forest-900);
+  font-weight: var(--font-weight-bold);
+  border: none;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-size: var(--font-size-body-sm);
+  transition: background var(--motion-fast) var(--ease-standard);
+  display: inline-flex;
+  align-items: center;
+}
+
+.eo-overview-demand-hero__cta:hover {
+  background: var(--color-stone-0);
+}
+
+.eo-overview-demand-hero__secondary {
+  color: var(--color-forest-200);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.eo-overview-demand-hero__secondary:hover {
+  color: var(--color-stone-0);
+}
+
+/* 17. Operations Grid: Side-by-side balanced (Upcoming Sessions + Recent Bookings) */
+.eo-overview-ops-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.eo-overview-panel {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eo-overview-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-overview-panel__header h2 {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.eo-overview-panel__link {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+.eo-overview-panel__link:hover {
+  text-decoration: underline;
+}
+
+.eo-overview-list {
+  display: flex;
+  flex-direction: column;
+  divide-y: 1px solid var(--color-border-default);
+}
+
+.eo-overview-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-overview-list-row:last-child {
+  border-bottom: none;
+}
+
+.eo-overview-list-row__primary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.eo-overview-list-row__title {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eo-overview-list-row__meta {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.eo-overview-list-row__secondary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.eo-overview-empty {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body-sm);
+}
+
+.eo-overview-empty-account {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-6);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+}
+
+.eo-overview-empty-account h2 {
+  font-size: var(--font-size-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.eo-overview-empty-account p {
+  color: var(--color-text-secondary);
+  max-width: 50ch;
+  margin: 0;
+}
+
+.eo-overview-empty-account__actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   EO Demand Insights Rebuild (.eo-demand-*)
+   ========================================================================== */
+
+.eo-demand-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 1200px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.eo-demand-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-demand-header h1 {
+  font-size: var(--font-size-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.eo-demand-header__subtitle {
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.eo-demand-header__meta {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+/* Top Signal Summary Band */
+.eo-demand-signals-band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-4);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-demand-signal-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-inline: var(--space-4);
+}
+
+.eo-demand-signal-stat:not(:first-child) {
+  border-left: 1px solid var(--color-border-default);
+}
+
+.eo-demand-signal-stat__label {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.eo-demand-signal-stat__value {
+  font-size: var(--font-size-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brand-primary);
+  line-height: var(--line-height-heading-md);
+}
+
+.eo-demand-signal-stat__detail {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+/* Flat Content Section */
+.eo-demand-section {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eo-demand-section__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-demand-section__header h2 {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.eo-demand-section__header p {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Ranked Horizontal Bar List */
+.eo-demand-bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eo-demand-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.eo-demand-bar-row__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--font-size-body-sm);
+}
+
+.eo-demand-bar-row__label {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.eo-demand-bar-row__metric {
+  color: var(--color-text-secondary);
+}
+
+.eo-demand-bar-row__metric strong {
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-body-md);
+}
+
+.eo-demand-bar-row__desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.eo-demand-bar-track {
+  height: 0.5rem;
+  background: var(--color-stone-100);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.eo-demand-bar-fill {
+  height: 100%;
+  background: var(--color-brand-primary);
+  border-radius: var(--radius-pill);
+  transition: width 0.4s var(--ease-standard);
+}
+
+.eo-demand-bar-fill--sand {
+  background: var(--color-sand-600);
+}
+
+/* 24. Budget + Duration Shared Container */
+.eo-demand-dual-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.eo-demand-dual-column {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eo-demand-dual-column:not(:first-child) {
+  border-left: 1px solid var(--color-border-default);
+}
+
+/* Unmet Demand Opportunities */
+.eo-demand-opportunities {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* 27. Featured Opportunity: Large Hero Anchor */
+.eo-demand-featured-card {
+  background: var(--color-bg-surface);
+  border: 2px solid var(--color-forest-300);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-demand-featured-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.eo-demand-featured-card__meta-tags {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.eo-demand-tag {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-stone-100);
+  color: var(--color-text-secondary);
+}
+
+.eo-demand-tag--primary {
+  background: var(--color-forest-50);
+  color: var(--color-forest-800);
+  font-weight: var(--font-weight-bold);
+}
+
+.eo-demand-tag--featured {
+  background: var(--color-forest-700);
+  color: var(--color-stone-0);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.eo-demand-featured-card h3 {
+  font-size: var(--font-size-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.eo-demand-featured-card__desc {
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-body-md);
+  margin: 0;
+}
+
+.eo-demand-curation-box {
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.eo-demand-curation-box strong {
+  display: block;
+  font-size: var(--font-size-label-sm);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.eo-demand-curation-box ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.eo-demand-featured-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.eo-demand-featured-card__budget {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.eo-demand-featured-card__budget small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.eo-demand-featured-card__budget strong {
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-body-md);
+}
+
+/* Secondary Opportunity Cards: Compact Grid */
+.eo-demand-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.eo-demand-secondary-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.eo-demand-secondary-card h4 {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: var(--space-2) 0 var(--space-1);
+}
+
+.eo-demand-secondary-card p {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.eo-demand-secondary-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+}
+
+/* Responsive adjustments */
+@media (max-width: 64rem) {
+  .eo-overview-ops-grid {
+    grid-template-columns: 1fr;
+  }
+  .eo-demand-dual-section {
+    grid-template-columns: 1fr;
+  }
+  .eo-demand-dual-column:not(:first-child) {
+    border-left: none;
+    border-top: 1px solid var(--color-border-default);
+  }
+  .eo-demand-secondary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 48rem) {
+  .eo-overview-metric-band {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+  .eo-overview-metric-item:nth-child(2) {
+    border-left: 1px solid var(--color-border-default);
+  }
+  .eo-overview-metric-item:nth-child(3) {
+    border-left: none;
+    border-top: 1px solid var(--color-border-default);
+    padding-top: var(--space-3);
+  }
+  .eo-overview-metric-item:nth-child(4) {
+    border-top: 1px solid var(--color-border-default);
+    padding-top: var(--space-3);
+  }
+  .eo-demand-signals-band {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+  .eo-demand-signal-stat:nth-child(2) {
+    border-left: 1px solid var(--color-border-default);
+  }
+  .eo-demand-signal-stat:nth-child(3) {
+    border-left: none;
+    border-top: 1px solid var(--color-border-default);
+    padding-top: var(--space-3);
+  }
+  .eo-demand-signal-stat:nth-child(4) {
+    border-top: 1px solid var(--color-border-default);
+    padding-top: var(--space-3);
+  }
+}
+
+@media (max-width: 30rem) {
+  .eo-overview-metric-band {
+    grid-template-columns: 1fr;
+  }
+  .eo-overview-metric-item:not(:first-child) {
+    border-left: none;
+    border-top: 1px solid var(--color-border-default);
+    padding-top: var(--space-3);
+    padding-inline: 0;
+  }
+  .eo-overview-metric-item:first-child {
+    padding-inline: 0;
+  }
+  .eo-demand-signals-band {
+    grid-template-columns: 1fr;
+  }
+  .eo-demand-signal-stat:not(:first-child) {
+    border-left: none;
+    border-top: 1px solid var(--color-border-default);
+    padding-top: var(--space-3);
+    padding-inline: 0;
+  }
+  .eo-demand-signal-stat:first-child {
+    padding-inline: 0;
+  }
+}

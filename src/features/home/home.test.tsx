@@ -435,7 +435,9 @@ describe("HomeScreen Router-Level Interactive Navigation", () => {
       ".home-preference-bar__link",
     )!;
     await act(() => prefLink.click());
-    expect(container.textContent).toContain("Preferences");
+    expect(container.textContent).toContain(
+      "Perbarui jeda yang kamu butuhkan sekarang",
+    );
   });
 
   it("C. routes non-empty search to /explore with query param", async () => {

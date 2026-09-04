@@ -60,11 +60,13 @@ import "./quiz.css";
 
 export interface TravelerQuizScreenProps {
   adapter?: QuizAdapter;
+  mode?: "onboarding" | "retake";
   onComplete?: (finalDraft: QuizDraft) => void;
 }
 
 export function TravelerQuizScreen({
   adapter = defaultQuizAdapter,
+  mode = "onboarding",
   onComplete,
 }: TravelerQuizScreenProps) {
   const navigate = useNavigate();
@@ -94,7 +96,7 @@ export function TravelerQuizScreen({
     GroupSizeBand | undefined
   >();
 
-  // Load existing draft for resume capability
+  // Load existing draft for resume / prefill capability
   useEffect(() => {
     let isMounted = true;
     adapter
@@ -114,7 +116,14 @@ export function TravelerQuizScreen({
         if (draft.group_type) setGroupType(draft.group_type);
         if (draft.group_size_band) setGroupSizeBand(draft.group_size_band);
 
-        // Resume at latest incomplete step
+        // Retake mode: always starts from step 1 with existing answers prefilled
+        if (mode === "retake") {
+          setCurrentStep(1);
+          setIsLoading(false);
+          return;
+        }
+
+        // Onboarding mode: resume at latest incomplete step
         let resumeStep = draft.currentStep || 1;
         if (!draft.current_intent) resumeStep = 1;
         else if (
@@ -143,7 +152,7 @@ export function TravelerQuizScreen({
     return () => {
       isMounted = false;
     };
-  }, [adapter]);
+  }, [adapter, mode]);
 
   // Validation per step
   const isStepValid = (): boolean => {
@@ -230,6 +239,8 @@ export function TravelerQuizScreen({
     if (currentStep > 1 && !isSubmitting) {
       setErrorMessage(undefined);
       setCurrentStep((prev) => prev - 1);
+    } else if (currentStep === 1 && mode === "retake" && !isSubmitting) {
+      navigate("/profile");
     }
   };
 
@@ -379,11 +390,21 @@ export function TravelerQuizScreen({
                   type="button"
                   className="quiz-back-button"
                   onClick={handleBack}
-                  disabled={currentStep === 1 || isSubmitting}
-                  aria-label="Kembali ke pertanyaan sebelumnya"
+                  disabled={
+                    (currentStep === 1 && mode !== "retake") || isSubmitting
+                  }
+                  aria-label={
+                    currentStep === 1 && mode === "retake"
+                      ? "Kembali ke profil"
+                      : "Kembali ke pertanyaan sebelumnya"
+                  }
                 >
                   <ArrowLeftIcon />
-                  <span>Kembali</span>
+                  <span>
+                    {currentStep === 1 && mode === "retake"
+                      ? "Ke Profil"
+                      : "Kembali"}
+                  </span>
                 </button>
                 <span className="quiz-step-count" aria-live="polite">
                   Langkah {currentStep} dari {TOTAL_QUIZ_STEPS}
@@ -415,7 +436,9 @@ export function TravelerQuizScreen({
               <section aria-labelledby="q1-title">
                 <div className="quiz-question-header">
                   <h1 id="q1-title">
-                    Jeda seperti apa yang paling kamu butuhkan sekarang?
+                    {mode === "retake"
+                      ? "Perbarui jeda yang kamu butuhkan sekarang"
+                      : "Jeda seperti apa yang paling kamu butuhkan sekarang?"}
                   </h1>
                   <p>Pilih yang paling menggambarkan kebutuhanmu kali ini.</p>
                 </div>

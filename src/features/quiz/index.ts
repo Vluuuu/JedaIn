@@ -15,6 +15,10 @@ export {
   type MockQuizAdapterOptions,
 } from "./mockAdapter";
 export {
+  RetakeQuizAdapter,
+  type RetakeQuizAdapterOptions,
+} from "./retakeAdapter";
+export {
   TravelerQuizScreen,
   type TravelerQuizScreenProps,
 } from "./TravelerQuizScreen";

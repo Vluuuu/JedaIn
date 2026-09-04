@@ -65,7 +65,11 @@ import {
 import { PackageDetailScreen } from "./features/packageDetail";
 import { PaymentResultScreen, PaymentScreen } from "./features/payment";
 import { PendingPaymentResolutionScreen } from "./features/pendingPayment";
-import { ProfileScreen } from "./features/profile";
+import {
+  ActivityScreen,
+  ProfileScreen,
+  SettingsScreen,
+} from "./features/profile";
 import { RetakeQuizAdapter, TravelerQuizScreen } from "./features/quiz";
 import { RecommendationResultScreen } from "./features/recommendation";
 import { TripReviewScreen } from "./features/reviews";
@@ -178,6 +182,8 @@ export function App() {
         <Route path="trips/:bookingId" element={<TripDetailScreen />} />
         <Route path="trips/:bookingId/review" element={<TripReviewScreen />} />
         <Route path="profile" element={<ProfileScreen />} />
+        <Route path="profile/settings" element={<SettingsScreen />} />
+        <Route path="profile/activity" element={<ActivityScreen />} />
         {placeholderTravelerRoutes.map(([path, title]) => (
           <Route
             key={path}

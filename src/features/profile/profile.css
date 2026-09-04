@@ -1,78 +1,294 @@
 /* ==========================================================================
    JedaIn Traveler Profile (T21) Styles
-   North Star: Quiet Personal Travel Profile
+   North Star: Personal Jeda Journal
+   Forest Green Identity Hero -> Warm Sand Transition
    Editorial rhythm, continuous layout, solid subtle separators. No card wall.
+   Zero em-dashes. Zero undefined tokens.
    ========================================================================== */
 
 .profile-container {
   width: 100%;
-  max-width: 48rem; /* 768px */
+  max-width: 52rem; /* Bounded personal journal width */
   margin-inline: auto;
-  padding: var(--space-4) var(--space-4)
-    calc(var(--space-12) + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
+.profile-main-page {
+  padding-bottom: calc(var(--space-16) + env(safe-area-inset-bottom));
+}
+
+.profile-subpage {
+  padding: var(--space-4) var(--space-4)
+    calc(var(--space-12) + env(safe-area-inset-bottom));
+}
+
 @media (min-width: 768px) {
-  .profile-container {
-    padding-top: var(--space-6);
+  .profile-subpage {
+    padding: var(--space-6) var(--space-6)
+      calc(var(--space-16) + env(safe-area-inset-bottom));
   }
 }
 
 /* --------------------------------------------------------------------------
-   Header: Calm Typographic Identity
+   Forest Green Profile Identity Hero
    -------------------------------------------------------------------------- */
-.profile-header {
-  margin-bottom: var(--space-6);
-  padding-bottom: var(--space-6);
-  border-bottom: 1px solid var(--color-border-default);
+.profile-hero-forest {
+  background: var(--color-forest-900);
+  color: var(--color-stone-0);
+  padding: var(--space-4) var(--space-4) var(--space-6);
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
 }
 
-.profile-eyebrow {
-  display: inline-block;
-  font-size: var(--font-size-label-sm);
-  line-height: var(--line-height-label-sm);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--letter-spacing-caps);
-  text-transform: uppercase;
-  color: var(--color-brand-primary);
+@media (min-width: 768px) {
+  .profile-hero-forest {
+    padding: var(--space-6) var(--space-8) var(--space-8);
+    border-bottom-left-radius: var(--radius-2xl);
+    border-bottom-right-radius: var(--radius-2xl);
+  }
+}
+
+.profile-hero-top-action {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   margin-bottom: var(--space-2);
 }
 
-.profile-name {
-  font-size: var(--font-size-heading-lg);
-  line-height: var(--line-height-heading-lg);
+.profile-settings-gear-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem; /* Touch target >= 44px */
+  min-height: 2.75rem;
+  color: var(--color-forest-200);
+  border-radius: var(--radius-pill);
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+.profile-settings-gear-link:hover {
+  color: var(--color-stone-0);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-identity-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.profile-avatar-monogram {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-forest-700);
+  color: var(--color-stone-0);
+  border: 2px solid var(--color-forest-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.875rem;
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-3);
+  box-shadow: 0 4px 12px rgba(15, 33, 23, 0.4);
+}
+
+.profile-hero-name {
+  font-size: var(--font-size-heading-md);
+  line-height: var(--line-height-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-0);
   margin: 0 0 var(--space-1) 0;
   letter-spacing: var(--letter-spacing-tight);
 }
 
 @media (min-width: 768px) {
-  .profile-name {
-    font-size: 2rem;
-    line-height: 2.5rem;
+  .profile-hero-name {
+    font-size: var(--font-size-heading-lg);
+    line-height: var(--line-height-heading-lg);
   }
 }
 
-.profile-email {
+.profile-hero-bio {
   font-size: var(--font-size-body-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  margin: 0 0 var(--space-2) 0;
-  word-break: break-word;
+  color: var(--color-forest-200);
+  margin: 0 0 var(--space-3) 0;
+  max-width: 42ch;
+  line-height: 1.45;
 }
 
-.profile-lead {
+/* Micro-identity: Current Jeda */
+.profile-current-jeda-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(15, 33, 23, 0.6);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-forest-700);
+}
+
+.profile-current-jeda-prefix {
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-300);
+  font-weight: var(--font-weight-regular);
+}
+
+.profile-current-jeda-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: var(--font-size-body-sm);
-  color: var(--color-text-muted);
-  line-height: 1.5;
-  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-100);
+}
+
+.profile-current-jeda-icon {
+  color: var(--color-forest-300);
 }
 
 /* --------------------------------------------------------------------------
-   Sections & Continuous Editorial Layout
+   Journey + Social Stat Row
    -------------------------------------------------------------------------- */
+.profile-stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: var(--space-3) var(--space-2);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: var(--space-5);
+}
+
+.profile-stat-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.profile-stat-number {
+  font-size: 1.35rem;
+  line-height: 1.6rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-0);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.profile-stat-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-200);
+  font-weight: var(--font-weight-regular);
+}
+
+.profile-stat-divider {
+  width: 1px;
+  height: 2rem;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* --------------------------------------------------------------------------
+   Jeda Milestones Strip
+   -------------------------------------------------------------------------- */
+.profile-milestones-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.profile-milestones-title {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+  color: var(--color-forest-300);
+  margin: 0;
+}
+
+.profile-milestones-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+.profile-milestone-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-2) var(--space-1);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  gap: 0.2rem;
+}
+
+.profile-milestone-item--earned {
+  background: rgba(93, 174, 118, 0.15);
+  border-color: rgba(93, 174, 118, 0.35);
+}
+
+.profile-milestone-item--locked {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+  opacity: 0.65;
+}
+
+.profile-milestone-mark {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 0.1rem;
+}
+
+.profile-milestone-item--earned .profile-milestone-mark {
+  background: var(--color-forest-500);
+  color: var(--color-stone-0);
+}
+
+.profile-milestone-item--locked .profile-milestone-mark {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-forest-200);
+}
+
+.profile-milestone-name {
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-0);
+  line-height: 1.2;
+}
+
+.profile-milestone-status {
+  font-size: 0.65rem;
+  color: var(--color-forest-300);
+}
+
+/* --------------------------------------------------------------------------
+   Warm Sand Content Container
+   -------------------------------------------------------------------------- */
+.profile-warm-content {
+  padding: var(--space-6) var(--space-4) 0;
+}
+
+@media (min-width: 768px) {
+  .profile-warm-content {
+    padding: var(--space-8) var(--space-6) 0;
+  }
+}
+
 .profile-section {
   padding-block: var(--space-6);
   border-bottom: 1px solid var(--color-border-default);
@@ -90,6 +306,13 @@
   gap: var(--space-3);
 }
 
+.profile-section-header-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
 .profile-section-title {
   font-size: var(--font-size-heading-sm);
   line-height: var(--line-height-heading-sm);
@@ -99,8 +322,23 @@
   letter-spacing: var(--letter-spacing-tight);
 }
 
+.profile-view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+.profile-view-all-link:hover {
+  color: var(--color-brand-primary-hover);
+  text-decoration: underline;
+}
+
 /* --------------------------------------------------------------------------
-   Preference Surface (Restrained & Calm)
+   Preference Surface
    -------------------------------------------------------------------------- */
 .profile-intent-block {
   margin-bottom: var(--space-4);
@@ -179,7 +417,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: 2.75rem;
+  min-height: 2.75rem; /* touch target >= 44px */
   padding: 0 var(--space-4);
   border-radius: var(--radius-md);
   background: var(--color-bg-surface);
@@ -210,6 +448,310 @@
   font-size: var(--font-size-body-sm);
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-3) 0;
+}
+
+/* --------------------------------------------------------------------------
+   Activity Rows
+   -------------------------------------------------------------------------- */
+.profile-activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.profile-activity-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-stone-100);
+}
+
+.profile-activity-row:last-child {
+  border-bottom: none;
+}
+
+.profile-activity-icon-bullet {
+  font-size: 1rem;
+  line-height: 1.25rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-forest-50);
+  color: var(--color-forest-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-activity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.profile-activity-title {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.profile-activity-subtitle {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.profile-empty-activity {
+  padding: var(--space-3) 0;
+}
+
+.profile-empty-activity p {
+  margin: 0 0 0.25rem 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-primary);
+}
+
+.profile-empty-subtext {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Momen Jeda (Media Grid)
+   -------------------------------------------------------------------------- */
+.profile-moments-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .profile-moments-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+.profile-moment-card {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-stone-100);
+  aspect-ratio: 1 / 1;
+}
+
+.profile-moment-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-moment-video-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.profile-moment-video-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-stone-0);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.profile-moment-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 33, 23, 0.7);
+  color: var(--color-stone-0);
+  font-size: 0.65rem;
+  padding: 0.2rem 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-empty-moments {
+  padding: var(--space-4) 0;
+}
+
+.profile-empty-lead {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1) 0;
+}
+
+/* --------------------------------------------------------------------------
+   Subpage Headers (Settings & Activity)
+   -------------------------------------------------------------------------- */
+.profile-subpage-header {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.profile-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  color: var(--color-brand-primary);
+  font-family: inherit;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-1) 0;
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+  min-height: 2.75rem; /* Touch target >= 44px */
+}
+
+.profile-back-button:hover {
+  color: var(--color-brand-primary-hover);
+  text-decoration: underline;
+}
+
+.profile-subpage-title {
+  font-size: var(--font-size-heading-md);
+  line-height: var(--line-height-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1) 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.profile-subpage-lead {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Settings Content
+   -------------------------------------------------------------------------- */
+.profile-settings-section {
+  padding-block: var(--space-6);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.profile-settings-section-title {
+  font-size: var(--font-size-heading-sm);
+  line-height: var(--line-height-heading-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4) 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.profile-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 28rem;
+}
+
+.profile-settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.profile-settings-label {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.profile-settings-input {
+  min-height: 2.75rem; /* Touch target >= 44px */
+  padding: 0 var(--space-3);
+  font-family: inherit;
+  font-size: var(--font-size-body-sm);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.profile-settings-input:focus {
+  outline: 2px solid var(--color-forest-500);
+  outline-offset: 1px;
+}
+
+.profile-save-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem; /* Touch target >= 44px */
+  padding: 0 var(--space-4);
+  background: var(--color-brand-primary);
+  color: var(--color-stone-0);
+  border: 1px solid var(--color-brand-primary);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--ease-standard);
+  align-self: flex-start;
+}
+
+.profile-save-button:hover:not(:disabled) {
+  background: var(--color-brand-primary-hover);
+}
+
+.profile-save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-settings-pref-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .profile-settings-pref-summary {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.profile-settings-pref-text {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.profile-settings-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+.profile-settings-action-link:hover {
+  text-decoration: underline;
 }
 
 /* --------------------------------------------------------------------------
@@ -246,7 +788,6 @@
   color: var(--color-text-primary);
 }
 
-/* Truthful Flat Verification Status (NO green/amber pills) */
 .profile-phone-status {
   display: flex;
   flex-direction: column;
@@ -275,7 +816,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Privacy & Data Notice
+   Privacy & Logout
    -------------------------------------------------------------------------- */
 .profile-privacy-note {
   font-size: var(--font-size-body-sm);
@@ -284,9 +825,6 @@
   margin: 0;
 }
 
-/* --------------------------------------------------------------------------
-   Logout Action
-   -------------------------------------------------------------------------- */
 .profile-logout-section {
   padding-top: var(--space-6);
   margin-top: var(--space-2);
@@ -303,6 +841,7 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 4px;
+  min-height: 2.75rem; /* Touch target >= 44px */
   transition: color var(--motion-fast) var(--ease-standard);
 }
 
@@ -316,7 +855,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Loading & Error States
+   Feedback & Loading States
    -------------------------------------------------------------------------- */
 .profile-loading {
   display: flex;
@@ -351,4 +890,36 @@
   border: 1px solid var(--color-danger-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
+}
+
+.profile-success-box {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-md);
+  color: var(--color-success-text);
+  margin-bottom: var(--space-4);
+}
+
+.profile-success-box p {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+}
+
+.profile-empty-content {
+  padding: var(--space-6) 0;
+  text-align: center;
+}
+
+.profile-text-link {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+.profile-text-link:hover {
+  text-decoration: underline;
 }

@@ -1,28 +1,36 @@
-# JedaIn — Traveler Profile & Preference Retake Contract
+# JedaIn - Traveler Profile & Preference Retake Contract
 
-**Version:** 1.0  
-**Date:** 4 September 2026  
-**Status:** Feature Contract  
-**Applies to:** T21 Profile (`/profile`) & T22 Preference Retake (`/profile/preferences`) / Issue #64  
+**Version:** 1.1\
+**Date:** 4 September 2026\
+**Status:** Feature Contract\
+**Applies to:** T21 Profile (`/profile`), Settings (`/profile/settings`), Activity (`/profile/activity`), & T22 Preference Retake (`/profile/preferences`) / Issue #64 / PR #65
 
-> Dokumen ini mengunci kontrak antarmuka, routing, state lifecycle, isolasi data, copy, dan aturan integrasi untuk Traveler Profile (T21) dan Preference Retake (T22). Dokumen ini berakar langsung pada `PRD.md`, `docs/SYSTEM_FLOW.md`, `docs/WIREFRAME_SPEC.md`, `docs/UI_SPEC.md`, dan `docs/QUIZ_CONTENT_CONTRACT.md`.
+> Dokumen ini mengunci kontrak antarmuka, routing, state lifecycle, isolasi data, copy, dan aturan integrasi untuk Traveler Profile (T21), Settings, Activity, serta Preference Retake (T22). Dokumen ini berakar langsung pada `PRD.md`, `docs/SYSTEM_FLOW.md`, `docs/WIREFRAME_SPEC.md`, `docs/UI_SPEC.md`, `docs/QUIZ_CONTENT_CONTRACT.md`, dan arahan produk v1.1.
 
 ---
 
 ## 1. Product Context & Objectives
 
-1. **T21 Profile (`/profile`)**:
-   - Sebagai personal quiet travel profile untuk traveler yang sudah menyelesaikan onboarding.
-   - Menampilkan identitas akun, status verifikasi nomor telepon secara truthful, ringkasan preferensi perjalanan saat ini, entry point untuk ubah preferensi, informasi transparansi data/privasi, serta opsi logout (keluar sesi).
-   - Tampil di dalam navigasi utama Traveler (`TravelerAppShell`), dengan tab "Profile" aktif.
+### 1.1 Evolusi Konsep Profil (v1.0 ke v1.1)
+Pada v1.0, Traveler Profile dirancang sebagai "Quiet account/settings profile". Pada v1.1, arahan produk berevolusi menjadi:
 
-2. **T22 Preference Retake (`/profile/preferences`)**:
-   - Menggunakan kembali komponen kuis onboarding (T04) secara reusable dan konsisten.
-   - Menampilkan visual kuis imersif layar penuh (`DistractionFreeShell hideHeader`).
-   - Prefilled dengan preferensi yang tersimpan saat ini, tetapi **selalu mulai dari Langkah 1**.
-   - Copy konteks retake: `"Perbarui jeda yang kamu butuhkan sekarang"`.
-   - **ISOLASI WORKING DRAFT:** Perubahan jawaban selama retake tidak boleh mengubah preferensi aktif di `sessionStore` sampai seluruh 6 langkah berhasil diselesaikan dan divalidasi.
-   - Setelah sukses complete, commit draft baru secara atomik ke `sessionStore`, status onboarding tetap `COMPLETED`, dan diarahkan ke `/onboarding/result` (T05 Recommendation Result) yang langsung mengkalkulasi rekomendasi baru dari intent terbaru.
+> **"Traveler identity + current Jeda + journey history + achievements + activity + memories"**
+
+- **Profile (`/profile`)** = Identitas traveler, kebutuhan jeda saat ini (*Current Jeda*), riwayat perjalanan (*Jeda Selesai*), pencapaian objektif (*Jeda Milestones*), aktivitas terbaru (*Aktivitas Terbaru*), dan momen perjalanan (*Momen Jeda*).
+- **Settings (`/profile/settings`)** = Manajemen akun, kontak, status verifikasi telepon, transparansi privasi, dan keluar sesi (*Keluar dari Akun*).
+- **Activity (`/profile/activity`)** = Garis waktu lengkap aktivitas perjalanan traveler (*Aktivitas Perjalanan*), terurut kronologis terbaru.
+- **Preference Retake (`/profile/preferences`)** = Evaluasi ulang kebutuhan jeda melalui 6 langkah kuis kanonikal secara terisolasi.
+
+### 1.2 Dokumen & Aturan yang Diperbarui vs Dijamin Tetap
+Revisi v1.1 **hanya menggantikan** batasan presentasi lama terkait larangan foto profil/avatar, follower/following, dan milestone/badge.
+Revisi ini **TIDAK memperlemah** dan **MENJAGA 100%**:
+- Kebenaran status verifikasi kontak (`mockContactVerificationStore.isPhoneVerified`).
+- Batasan privasi (tidak ada pembocoran email, nomor HP, referensi pembayaran, atau OTP pada feed publik/aktivitas).
+- Isolasi working-draft saat retake kuis (`RetakeQuizAdapter`).
+- Sinkronisasi pembaruan rekomendasi ke Home setelah commit retake.
+- Semantik logout (`sessionStore.reset() -> navigate("/login", { replace: true })`).
+- Tanpa OTP palsu.
+- Validasi ketat kelengkapan `QuizDraft`.
 
 ---
 
@@ -31,115 +39,89 @@
 | Route | Shell | Guards | Nav Status |
 |---|---|---|---|
 | `/profile` | `TravelerAppShell` | `OnboardingRouteGuard` | Bottom Nav visible, tab `profile` active |
+| `/profile/settings` | `TravelerAppShell` | `OnboardingRouteGuard` | Bottom Nav visible, tab `profile` active |
+| `/profile/activity` | `TravelerAppShell` | `OnboardingRouteGuard` | Bottom Nav visible, tab `profile` active |
 | `/profile/preferences` | `DistractionFreeShell hideHeader` | `OnboardingRouteGuard` | Immersive full screen, no bottom nav |
 
-### Route Cleanup in `App.tsx`
-- Hapus `"profile"` dan `"profile/preferences"` dari array `placeholderTravelerRoutes`.
-- Tetap biarkan `["complaints/new", "New complaint"]` pada placeholder.
-- Mount rute nyata:
-  - `/profile` di dalam `TravelerAppShell` (bersama `/home`, `/explore`, `/trips`).
-  - `/profile/preferences` di dalam `DistractionFreeShell hideHeader` membungkus `<TravelerQuizScreen mode="retake" adapter={...} />`.
+---
+
+## 3. T21 Profile Screen Specification (Main Profile)
+
+### 3.1 Layout & Visual Hierarchy (North Star: Personal Jeda Journal)
+- **Forest Identity Hero (Atas)**: Menggunakan nuansa Forest Green (`var(--color-forest-900)` / `var(--color-forest-700)`).
+  - Avatar / monogram inisial nama (bukan foto orang acak internet atau stok gambar).
+  - Nama traveler (`user.name`).
+  - Bio singkat jika tersedia.
+  - Micro-identity "Lagi butuh: [intent label]" (misal: "Dekat dengan alam"). Menggunakan opsi dari `QUIZ_INTENT_OPTIONS`.
+  - Icon Gear / Pengaturan Profil di pojok kanan atas menuju `/profile/settings` (accessible label: `Pengaturan Profil`).
+  - **TIDAK ADA**: level, score XP, badge anak-anak, nomor HP, email mencolok, tombol Follow pada profil sendiri.
+- **Journey & Social Stat Row**:
+  - 3 Kolom simetris:
+    1. **Jeda Selesai**: Dihitung otoritatif dari booking dengan status `COMPLETED` milik traveler.
+    2. **Followers**: Dikelola melalui store prototipe terpusat (`mockTravelerCommunityStore`), default 0 untuk traveler baru.
+    3. **Following**: Dikelola melalui store prototipe terpusat (`mockTravelerCommunityStore`), default 0 untuk traveler baru.
+  - Label konsisten: `Jeda Selesai`, `Followers`, `Following`.
+- **Jeda Milestones (Pencapaian Perjalanan)**:
+  - 4-5 milestone perjalanan berbasis data nyata (contoh: *Jeda Pertama*, *Tiga Jeda*, *Lima Destinasi*, *Pemberi Ulasan*).
+  - Menampilkan status tercapai (*earned*) dan terkunci (*locked*) secara bermakna tanpa gamifikasi agresif.
+  - **TIDAK ADA**: leaderboard, points, tier perunggu/perak/emas.
+- **Transisi ke Kontainer Warm Sand**:
+  - Transisi visual natural dari Forest Hero ke Warm Sand / Off-White (`var(--color-bg-page)`).
+  - Kontainer konten dibatasi secara proporsional (`48rem` - `56rem` pada desktop), terpusat, mobile-first (`390px`).
+- **Jeda yang kamu butuhkan sekarang**:
+  - Ringkasan preferensi aktif (Intent, Aktivitas, Budget, Durasi, Keberangkatan, Grup).
+  - Tombol aksi: `Ubah Preferensi` &rarr; `/profile/preferences`.
+  - Empty state jika draft belum lengkap: `"Preferensi belum tersedia."`.
+- **Aktivitas Terbaru**:
+  - Menampilkan maksimal 3 entri aktivitas perjalanan terbaru (booking `COMPLETED`, ulasan selesai, milestone tercapai).
+  - Tombol/link `Lihat Semua` / `Aktivitas Terbaru ->` &rarr; `/profile/activity`.
+- **Momen Jeda**:
+  - Galeri media foto/video dari perjalanan `COMPLETED` milik traveler bersangkutan.
+  - Grid responsif (3 kolom mobile).
+  - Jika belum ada media riil dari booking selesai: wajib menampilkan truthful empty state: `"Belum ada Momen Jeda."` dengan keterangan `"Setelah perjalanan selesai, foto dan video perjalananmu bisa tampil di sini."`.
 
 ---
 
-## 3. T21 Profile Screen Specification
+## 4. Settings Screen Specification (`/profile/settings`)
 
-### 3.1 Layout & Hierarchy (Taste Direction: Quiet Personal Travel Profile)
-- Lebar kontainer maksimal `48rem` (768px), terpusat, dengan padding aman mobile-first.
-- Dominasi latar Warm Sand / Stone Off-White (`var(--color-bg-page)`), tipografi tenang dengan Forest Identity (`var(--color-brand-primary)`).
-- **Anti-Card-Wall**: Tidak membungkus setiap elemen ke dalam kartu melayang bertumpuk. Menggunakan ritme editorial berkelanjutan dengan divider solid halus (`var(--color-border-default)`).
-- Tidak ada badge gamefikasi, tier, reward points, follower/following, atau foto profil buatan.
-
-### 3.2 Sections Order & Content
-1. **Header Profil**:
-   - Eyebrow / Label: `Profil`
-   - Nama Traveler: `user.name` (fallback jika kosong: bagian depan email atau "Traveler JedaIn")
-   - Email: `user.email`
-   - Copy pendukung: `"Preferensi dan informasi perjalananmu di JedaIn."`
-2. **Preferensi Saat Ini (Jeda yang kamu butuhkan sekarang)**:
-   - Judul seksi: `Jeda yang kamu butuhkan sekarang`
-   - Label Intent Utama: dipetakan dari `QUIZ_INTENT_OPTIONS` (contoh: *Dekat dengan alam*).
-   - Fakta Pendukung (editorial typography & restrained chips):
-     - **Aktivitas**: label dari `QUIZ_ACTIVITY_OPTIONS`.
-     - **Budget**: label dari `QUIZ_BUDGET_OPTIONS`.
-     - **Durasi**: label dari `QUIZ_DURATION_OPTIONS`.
-     - **Berangkat dari**: label kota keberangkatan (`departure_area_label`).
-     - **Pergi bersama**: tipe & ukuran grup dari `QUIZ_GROUP_TYPE_OPTIONS` / `QUIZ_GROUP_SIZE_OPTIONS`.
-   - Tombol CTA: `Ubah Preferensi` &rarr; mengarah ke `/profile/preferences`.
-   - **Empty State**: Jika `quizDraft` belum lengkap/kosong, tampilkan pesan tenang: `"Preferensi belum tersedia."` dengan tombol CTA `Atur Preferensi` &rarr; `/profile/preferences`.
-3. **Identitas Akun & Kontak**:
-   - Judul seksi: `Kontak & Akun`
-   - Nama lengkap, Email.
-   - Nomor Telepon + Status Verifikasi:
-     - Menggunakan `mockContactVerificationStore.isPhoneVerified(user.id, user.phone)`.
-     - **Verified**: Teks flat inline `✓ Nomor terverifikasi`.
-     - **Unverified**: Teks flat inline `Belum terverifikasi` disertai catatan penjelasan bahwa verifikasi akan diminta saat transaksi pemesanan membutuhkan kontak valid.
-     - **Tanpa button OTP palsu** (tidak ada flow OTP mandiri di profil).
-4. **Privasi & Transparansi Data**:
-   - Judul seksi: `Privasi & Data`
-   - Penjelasan berbasis sumber resmi T03/PRD:
-     *"Preferensimu digunakan untuk personalisasi rekomendasi dan insight agregat, bukan untuk menampilkan data pribadi ke partner."*
-   - Bersifat informasional, tanpa alur palsu atau tombol tiket data tiruan.
-5. **Logout (Keluar Sesi)**:
-   - Tombol teks / secondary tenang: `Keluar dari Akun`.
-   - Aksi: `sessionStore.reset()` &rarr; redirect ke `/login` via `navigate("/login", { replace: true })`.
-   - Tidak menghapus booking, payment, review, atau storage sistem lain.
+Layar tenang dan utilitarian untuk pengelolaan akun:
+1. **Header**: `Pengaturan Profil` dengan tombol kembali ke `/profile`.
+2. **Edit Profil**: Pengaturan nama tampilan, bio singkat, dan inisial/avatar tanpa merusak autentikasi.
+3. **Kontak & Akun**:
+   - Nama lengkap, email.
+   - Nomor HP dengan status verifikasi dari `mockContactVerificationStore.isPhoneVerified`.
+   - Menampilkan `✓ Nomor terverifikasi` atau `Belum terverifikasi` dengan catatan kontekstual.
+   - Tanpa tombol OTP berdiri sendiri.
+4. **Preferensi**:
+   - Ringkasan singkat intent saat ini dan tombol `Ubah Preferensi` &rarr; `/profile/preferences`.
+5. **Privasi & Data**:
+   - Copy transparansi: *"Preferensimu digunakan untuk personalisasi rekomendasi dan insight agregat, bukan untuk menampilkan data pribadi ke partner."*
+6. **Keluar dari Akun (Logout)**:
+   - Aksi: `sessionStore.reset()` &rarr; `navigate("/login", { replace: true })`.
 
 ---
 
-## 4. T22 Preference Retake Specification
+## 5. Activity Screen Specification (`/profile/activity`)
 
-### 4.1 Reusable Quiz Extension
-- Props `TravelerQuizScreen`:
-  - `mode?: "onboarding" | "retake"` (default: `"onboarding"`).
-  - `adapter?: QuizAdapter`.
-  - `onComplete?: (finalDraft: QuizDraft) => void`.
-- Pada `mode === "retake"`:
-  - Header copy konteks: `"Perbarui jeda yang kamu butuhkan sekarang"`.
-  - Jawaban yang tersimpan dimuat sebagai nilai awal (prefill).
-  - Penanda langkah **selalu mulai dari Langkah 1** (`currentStep = 1`), bukan langkah 6.
-  - Tombol Kembali pada Langkah 1:
-    - Menampilkan opsi keluar aman kembali ke `/profile` (`Kembali ke Profil`) tanpa merusak preferensi yang sedang aktif.
-  - Tombol Kembali pada Langkah 2–6:
-    - Mundur ke langkah pertanyaan sebelumnya seperti biasa.
-
-### 4.2 Working Draft Isolation Contract
-- Dibuat adapter khusus: `RetakeQuizAdapter implements QuizAdapter`.
-- Mekanisme:
-  1. Inisialisasi: mengklon data dari `sessionStore.getQuizDraft()`.
-  2. `saveQuizStep(stepData)`:
-     - **HANYA** memperbarui in-memory working draft di dalam adapter instance.
-     - **DILARANG** memanggil `sessionStore.setQuizDraft(...)`.
-  3. `completeQuiz(finalDraft)`:
-     - Melakukan validasi 6 langkah kuis kanonikal secara ketat.
-     - Hanya setelah validasi berhasil:
-       - Memanggil `sessionStore.setQuizDraft(finalDraft)`.
-       - Memastikan status onboarding tetap `COMPLETED` (`sessionStore.setOnboardingStatus("COMPLETED")`).
-       - Mengembalikan hasil completion.
-  4. Jika retake dibatalkan di tengah jalan (misal navigasi keluar sebelum submit step 6):
-     - `sessionStore.getQuizDraft()` tetap utuh bernilai preferensi lama.
-     - Home dan engine rekomendasi tetap memakai preferensi lama.
-  5. Jika completeQuiz gagal (error jaringan/validasi):
-     - Preferensi lama di `sessionStore` tetap tidak berubah.
-     - State form pada layar retake tetap ada sehingga user dapat mencoba lagi.
+- Header: `Aktivitas Perjalanan` dengan tombol kembali ke `/profile`.
+- Menampilkan seluruh riwayat aktivitas perjalanan (perjalanan selesai, ulasan diserahkan, milestone diraih) secara kronologis (terbaru di atas).
+- **Perlindungan Privasi**: Aktivitas TIDAK memuat email, nomor telepon, referensi pembayaran, token, atau rincian pembatalan.
 
 ---
 
-## 5. Integration Contracts
+## 6. Preference Retake Specification (`/profile/preferences`)
 
-1. **Home Integration**:
-   - Link `Ubah preferensi` di `/home` mengarah ke `/profile/preferences`.
-   - Mengklik link tersebut membuka kuis retake nyata, bukan placeholder.
-2. **Recommendation Engine Integration**:
-   - `MockHomeAdapter` dan `engine.ts` membaca preferensi dari `sessionStore.getQuizDraft()`.
-   - Setelah retake selesai, navigasi ke `/onboarding/result` langsung mengevaluasi draft baru, dan kembali ke `/home` menampilkan kartu rekomendasi baru yang sinkron.
+- Menggunakan `RetakeQuizAdapter` dengan isolasi working-draft.
+- Prefill jawaban yang tersimpan, namun selalu mulai dari Langkah 1.
+- Tombol `Ke Profil` / `Kembali ke Profil` pada Langkah 1 membatalkan retake tanpa mengubah preferensi aktif di `sessionStore`.
+- Setelah Langkah 6 selesai divalidasi, preferensi baru di-commit ke `sessionStore`, status onboarding tetap `COMPLETED`, dan diarahkan ke `/onboarding/result`.
 
 ---
 
-## 6. Non-Negotiable Boundaries
+## 7. Non-Negotiable Boundaries
 
-- Dilarang membuat sistem navigasi kedua.
-- Dilarang membuat fake photo upload / avatar generator.
-- Dilarang membuat mock OTP generator pada halaman profil.
-- Dilarang membuat card wall / rounded boxes untuk setiap baris.
+- Dilarang membuat feed penemuan publik, rute profil user lain, follow/unfollow interaktif, DM, atau komentar publik pada PR ini.
+- Dilarang membuat fake photo upload pihak ketiga / fetching foto sembarang dari internet.
+- Dilarang membuat card wall bertumpuk tanpa ritme desain.
 - Zero undefined CSS variables.
+- Mematuhi Taste Skill (0 em-dash, WCAG AA contrast, touch target >= 44px).

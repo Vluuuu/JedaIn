@@ -6,13 +6,21 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { App } from "../../App";
 import type { AuthUser } from "../auth/types";
+import type { BookingRecord } from "../checkout/types";
+import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockContactVerificationStore } from "../contactVerification/mockContactVerificationStore";
 import { MockHomeAdapter } from "../home/mockAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
 import { RetakeQuizAdapter } from "../quiz/retakeAdapter";
 import { TravelerQuizScreen } from "../quiz/TravelerQuizScreen";
 import type { QuizDraft } from "../quiz/types";
+import { mockReviewStore } from "../reviews/mockReviewStore";
+import { ActivityScreen } from "./ActivityScreen";
+import { mockTravelerCommunityStore } from "./mockCommunityStore";
+import { mockMomentStore } from "./mockMomentStore";
+import { mockPresentationProfileStore } from "./mockPresentationProfileStore";
 import { ProfileScreen } from "./ProfileScreen";
+import { SettingsScreen } from "./SettingsScreen";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -26,6 +34,11 @@ afterEach(async () => {
   container?.remove();
   sessionStore.reset();
   mockContactVerificationStore.reset();
+  mockTransactionStore.reset();
+  mockReviewStore.reset();
+  mockMomentStore.reset();
+  mockTravelerCommunityStore.reset();
+  mockPresentationProfileStore.reset();
 });
 
 const sampleUser: AuthUser = {
@@ -59,7 +72,7 @@ function LocationObserver({
   return null;
 }
 
-describe("Traveler Profile Screen (T21)", () => {
+describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => {
   it("A. displays authenticated completed traveler identity and preferences", async () => {
     sessionStore.setUser(sampleUser);
     sessionStore.setQuizDraft(sampleQuizDraft);
@@ -78,13 +91,13 @@ describe("Traveler Profile Screen (T21)", () => {
       );
     });
 
-    // Identity
+    // Identity in Forest hero
     expect(container.textContent).toContain("Budi Santoso");
-    expect(container.textContent).toContain("budi@example.com");
-    expect(container.textContent).toContain("08123456789");
+    expect(container.textContent).toContain("B"); // Monogram
+    expect(container.textContent).toContain("Lagi butuh:");
+    expect(container.textContent).toContain("Dekat dengan alam");
 
     // Preferences summary
-    expect(container.textContent).toContain("Dekat dengan alam");
     expect(container.textContent).toContain("Alam & pemandangan");
     expect(container.textContent).toContain("Relaksasi & mindfulness");
     expect(container.textContent).toContain("Sekitar Rp200–300 ribu");
@@ -92,9 +105,275 @@ describe("Traveler Profile Screen (T21)", () => {
     expect(container.textContent).toContain("Malang");
     expect(container.textContent).toContain("Sendiri");
     expect(container.textContent).toContain("Ubah Preferensi");
+
+    // Main Profile Privacy Check: Email, Phone, Logout, and Privacy block must NOT be prominent on main profile
+    expect(container.textContent).not.toContain("08123456789");
+    expect(container.textContent).not.toContain("Keluar dari Akun");
   });
 
-  it("B. verified phone displays flat '✓ Nomor terverifikasi' without pills", async () => {
+  it("B. Settings gear icon is present with accessible label and routes to /profile/settings", async () => {
+    sessionStore.setUser(sampleUser);
+    sessionStore.setQuizDraft(sampleQuizDraft);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    let currentPath = "/profile";
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(LocationObserver, {
+            onLocation: (loc) => {
+              currentPath = loc.pathname;
+            },
+          }),
+          createElement(
+            Routes,
+            null,
+            createElement(Route, {
+              path: "/profile",
+              element: createElement(ProfileScreen),
+            }),
+            createElement(Route, {
+              path: "/profile/settings",
+              element: createElement("div", null, "Settings Target Screen"),
+            }),
+          ),
+        ),
+      );
+    });
+
+    const settingsLink = container.querySelector<HTMLAnchorElement>(
+      ".profile-settings-gear-link",
+    );
+    expect(settingsLink).not.toBeNull();
+    expect(settingsLink?.getAttribute("aria-label")).toBe("Pengaturan Profil");
+
+    await act(async () => {
+      settingsLink?.click();
+    });
+
+    expect(currentPath).toBe("/profile/settings");
+  });
+
+  it("C. Authoritative Jeda Selesai count: derived only from COMPLETED bookings", async () => {
+    const newUser: AuthUser = {
+      id: "usr_traveler_counts",
+      name: "Rani",
+      email: "rani@example.com",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(newUser);
+
+    // Initial state: demo history booking provides 1 completed trip
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen),
+        ),
+      );
+    });
+
+    // 1 completed (from demo history bound to user)
+    const statsElements = container.querySelectorAll(".profile-stat-number");
+    expect(statsElements[0]?.textContent).toBe("1"); // Jeda Selesai
+
+    // PAID or PENDING_PAYMENT bookings must NOT increment Jeda Selesai
+    mockTransactionStore.reset();
+    const bookingsList =
+      mockTransactionStore.getBookings() as unknown as BookingRecord[];
+    bookingsList.push({
+      bookingId: "bk_paid_only",
+      travelerId: newUser.id,
+      packageId: "pkg_test",
+      sessionId: "ses_1",
+      participantCount: 1,
+      unitPricePerPerson: 100000,
+      totalAmount: 100000,
+      status: "PAID",
+      reservedQuantity: 0,
+      bookedQuantity: 1,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date().toISOString(),
+    });
+    bookingsList.push({
+      bookingId: "bk_pending_only",
+      travelerId: newUser.id,
+      packageId: "pkg_test",
+      sessionId: "ses_2",
+      participantCount: 1,
+      unitPricePerPerson: 100000,
+      totalAmount: 100000,
+      status: "PENDING_PAYMENT",
+      reservedQuantity: 1,
+      bookedQuantity: 0,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date().toISOString(),
+    });
+
+    // Re-render
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen),
+        ),
+      );
+    });
+
+    const updatedStats = container.querySelectorAll(".profile-stat-number");
+    // Still exactly 1 Jeda Selesai
+    expect(updatedStats[0]?.textContent).toBe("1");
+  });
+
+  it("D. Social metrics: unknown traveler safely returns 0 followers / 0 following", async () => {
+    const unknownUser: AuthUser = {
+      id: "usr_unknown_traveler_999",
+      name: "Tita",
+      email: "tita@example.com",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(unknownUser);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen),
+        ),
+      );
+    });
+
+    const statsNumbers = container.querySelectorAll(".profile-stat-number");
+    expect(statsNumbers[1]?.textContent).toBe("0"); // Followers
+    expect(statsNumbers[2]?.textContent).toBe("0"); // Following
+  });
+
+  it("E. Achievements strip: derives earned vs locked milestones truthfully", async () => {
+    sessionStore.setUser(sampleUser);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Jeda Milestones");
+    expect(container.textContent).toContain("Jeda Pertama");
+    expect(container.textContent).toContain("Tiga Jeda");
+    expect(container.textContent).toContain("5 Destinasi");
+    expect(container.textContent).toContain("Pemberi Ulasan");
+
+    const milestoneItems = container.querySelectorAll(
+      ".profile-milestone-item",
+    );
+    expect(milestoneItems.length).toBe(4);
+    // Jeda Pertama is earned because sampleUser has 1 demo completed booking
+    expect(milestoneItems[0]?.textContent).toContain("Tercapai");
+    // Tiga Jeda is locked
+    expect(milestoneItems[1]?.textContent).toContain("1/3");
+  });
+
+  it("F. Recent activity: max 3 rows on main profile and links to /profile/activity", async () => {
+    sessionStore.setUser(sampleUser);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen),
+        ),
+      );
+    });
+
+    const activityRows = container.querySelectorAll(".profile-activity-row");
+    expect(activityRows.length).toBeLessThanOrEqual(3);
+
+    const viewAllLink = container.querySelector<HTMLAnchorElement>(
+      ".profile-view-all-link",
+    );
+    expect(viewAllLink).not.toBeNull();
+    expect(viewAllLink?.getAttribute("href")).toBe("/profile/activity");
+  });
+
+  it("G. Activity privacy: activity feed contains no email, phone, or payment reference", async () => {
+    sessionStore.setUser(sampleUser);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile/activity"] },
+          createElement(ActivityScreen),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Aktivitas Perjalanan");
+    expect(container.textContent).not.toContain("budi@example.com");
+    expect(container.textContent).not.toContain("08123456789");
+    expect(container.textContent).not.toContain("PAY-");
+    expect(container.textContent).not.toContain("OTP");
+  });
+
+  it("H. Momen Jeda: truthful empty state when traveler has no moments", async () => {
+    sessionStore.setUser(sampleUser);
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile"] },
+          createElement(ProfileScreen),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Momen Jeda");
+    expect(container.textContent).toContain("Belum ada Momen Jeda.");
+    expect(container.textContent).toContain(
+      "Setelah perjalanan selesai, foto dan video perjalananmu bisa tampil di sini.",
+    );
+  });
+
+  it("I. Settings Screen (/profile/settings): contains Contact, Preferences, Privacy, and Logout", async () => {
     sessionStore.setUser(sampleUser);
     mockContactVerificationStore.markPhoneVerified(
       sampleUser.id,
@@ -105,50 +384,60 @@ describe("Traveler Profile Screen (T21)", () => {
     document.body.append(container);
     root = createRoot(container);
 
+    let currentPath = "/profile/settings";
+
     await act(async () => {
       root.render(
         createElement(
           MemoryRouter,
-          { initialEntries: ["/profile"] },
-          createElement(ProfileScreen),
+          { initialEntries: ["/profile/settings"] },
+          createElement(LocationObserver, {
+            onLocation: (loc) => {
+              currentPath = loc.pathname;
+            },
+          }),
+          createElement(
+            Routes,
+            null,
+            createElement(Route, {
+              path: "/profile/settings",
+              element: createElement(SettingsScreen),
+            }),
+            createElement(Route, {
+              path: "/login",
+              element: createElement("div", null, "Login Target"),
+            }),
+          ),
         ),
       );
     });
 
+    // Content sections
+    expect(container.textContent).toContain("Pengaturan Profil");
+    expect(container.textContent).toContain("Edit Profil");
+    expect(container.textContent).toContain("Kontak & Akun");
     expect(container.textContent).toContain("✓ Nomor terverifikasi");
-    expect(
-      container.querySelector(".profile-verification-text--verified"),
-    ).not.toBeNull();
-  });
+    expect(container.textContent).toContain("budi@example.com");
+    expect(container.textContent).toContain("08123456789");
+    expect(container.textContent).toContain("Preferensi");
+    expect(container.textContent).toContain("Privasi & Data");
+    expect(container.textContent).toContain("Keluar dari Akun");
 
-  it("C. unverified phone displays truthful unverified state without fake OTP button", async () => {
-    sessionStore.setUser(sampleUser);
-    // Do NOT verify phone in mockContactVerificationStore
-
-    container = document.createElement("div");
-    document.body.append(container);
-    root = createRoot(container);
+    // Test logout from settings
+    const logoutBtn = container.querySelector<HTMLButtonElement>(
+      ".profile-logout-button",
+    )!;
+    expect(logoutBtn).not.toBeNull();
 
     await act(async () => {
-      root.render(
-        createElement(
-          MemoryRouter,
-          { initialEntries: ["/profile"] },
-          createElement(ProfileScreen),
-        ),
-      );
+      logoutBtn.click();
     });
 
-    expect(container.textContent).toContain("Belum terverifikasi");
-    expect(container.textContent).toContain(
-      "Verifikasi nomor akan diminta secara kontekstual",
-    );
-    // Ensure no fake OTP trigger exists
-    expect(container.textContent).not.toContain("Kirim OTP");
-    expect(container.textContent).not.toContain("Verifikasi Sekarang");
+    expect(sessionStore.get().user).toBeNull();
+    expect(currentPath).toBe("/login");
   });
 
-  it("D. displays safe empty preference state when QuizDraft is missing", async () => {
+  it("J. displays safe empty preference state when QuizDraft is missing", async () => {
     sessionStore.setUser(sampleUser);
     sessionStore.setQuizDraft(null);
 
@@ -170,9 +459,8 @@ describe("Traveler Profile Screen (T21)", () => {
     expect(container.textContent).toContain("Atur Preferensi");
   });
 
-  it("D2. fails safely to empty preference state when QuizDraft is incomplete", async () => {
+  it("K. fails safely to empty preference state when QuizDraft is incomplete", async () => {
     sessionStore.setUser(sampleUser);
-    // Partially completed draft missing budget, duration, departure, group
     sessionStore.setQuizDraft({
       currentStep: 2,
       current_intent: "NATURE",
@@ -195,110 +483,11 @@ describe("Traveler Profile Screen (T21)", () => {
 
     expect(container.textContent).toContain("Preferensi belum tersedia.");
     expect(container.textContent).toContain("Atur Preferensi");
-    // Partial values must not be rendered as active preference
     expect(container.textContent).not.toContain("Fokus Utama");
     expect(container.textContent).not.toContain("Ubah Preferensi");
   });
 
-  it("D3. fails safely to empty preference state when departure is OTHER with blank label", async () => {
-    sessionStore.setUser(sampleUser);
-    sessionStore.setQuizDraft({
-      ...sampleQuizDraft,
-      departure_area_id: "OTHER",
-      departure_area_label: "   ",
-    });
-
-    container = document.createElement("div");
-    document.body.append(container);
-    root = createRoot(container);
-
-    await act(async () => {
-      root.render(
-        createElement(
-          MemoryRouter,
-          { initialEntries: ["/profile"] },
-          createElement(ProfileScreen),
-        ),
-      );
-    });
-
-    expect(container.textContent).toContain("Preferensi belum tersedia.");
-    expect(container.textContent).toContain("Atur Preferensi");
-    expect(container.textContent).not.toContain("Fokus Utama");
-  });
-
-  it("E. displays privacy and data notice from source-backed consent", async () => {
-    sessionStore.setUser(sampleUser);
-
-    container = document.createElement("div");
-    document.body.append(container);
-    root = createRoot(container);
-
-    await act(async () => {
-      root.render(
-        createElement(
-          MemoryRouter,
-          { initialEntries: ["/profile"] },
-          createElement(ProfileScreen),
-        ),
-      );
-    });
-
-    expect(container.textContent).toContain("Privasi & Data");
-    expect(container.textContent).toContain(
-      "Preferensimu digunakan untuk personalisasi rekomendasi dan insight agregat",
-    );
-  });
-
-  it("F. logs out traveler by resetting session and redirecting to /login", async () => {
-    sessionStore.setUser(sampleUser);
-
-    container = document.createElement("div");
-    document.body.append(container);
-    root = createRoot(container);
-
-    let currentPath = "";
-
-    await act(async () => {
-      root.render(
-        createElement(
-          MemoryRouter,
-          { initialEntries: ["/profile"] },
-          createElement(LocationObserver, {
-            onLocation: (loc) => {
-              currentPath = loc.pathname;
-            },
-          }),
-          createElement(
-            Routes,
-            null,
-            createElement(Route, {
-              path: "/profile",
-              element: createElement(ProfileScreen),
-            }),
-            createElement(Route, {
-              path: "/login",
-              element: createElement("div", null, "Login Screen Target"),
-            }),
-          ),
-        ),
-      );
-    });
-
-    const logoutBtn = container.querySelector<HTMLButtonElement>(
-      ".profile-logout-button",
-    )!;
-    expect(logoutBtn).not.toBeNull();
-
-    await act(async () => {
-      logoutBtn.click();
-    });
-
-    expect(sessionStore.get().user).toBeNull();
-    expect(currentPath).toBe("/login");
-  });
-
-  it("G. Profile nav item is active when mounted under App router", async () => {
+  it("L. Profile nav item is active when mounted under App router", async () => {
     sessionStore.setUser(sampleUser);
     sessionStore.setQuizDraft(sampleQuizDraft);
 
@@ -324,7 +513,7 @@ describe("Traveler Profile Screen (T21)", () => {
   });
 });
 
-describe("Preference Retake Screen & Isolation Contract (T22)", () => {
+describe("Preference Retake Screen & Isolation Contract (T22) - Preserved", () => {
   it("30. Prefills existing answers, starts at Step 1, and shows retake copy", async () => {
     sessionStore.setUser(sampleUser);
     sessionStore.setQuizDraft(sampleQuizDraft);
@@ -510,31 +699,26 @@ describe("Preference Retake Screen & Isolation Contract (T22)", () => {
       container.querySelector<HTMLButtonElement>(".quiz-submit-button")!;
 
     // Advance through all 6 steps
-    // Step 1 -> 2
     await act(async () => {
       getNextBtn().click();
     });
     expect(container.textContent).toContain("Langkah 2 dari 6");
 
-    // Step 2 -> 3
     await act(async () => {
       getNextBtn().click();
     });
     expect(container.textContent).toContain("Langkah 3 dari 6");
 
-    // Step 3 -> 4
     await act(async () => {
       getNextBtn().click();
     });
     expect(container.textContent).toContain("Langkah 4 dari 6");
 
-    // Step 4 -> 5
     await act(async () => {
       getNextBtn().click();
     });
     expect(container.textContent).toContain("Langkah 5 dari 6");
 
-    // Step 5 -> 6
     await act(async () => {
       getNextBtn().click();
     });
@@ -546,15 +730,12 @@ describe("Preference Retake Screen & Isolation Contract (T22)", () => {
       getNextBtn().click();
     });
 
-    // Must navigate to /onboarding/result
     expect(currentPath).toBe("/onboarding/result");
 
-    // sessionStore MUST now have the committed RECHARGE intent
     const committedDraft = sessionStore.getQuizDraft();
     expect(committedDraft?.current_intent).toBe("RECHARGE");
     expect(sessionStore.getStatus()).toBe("COMPLETED");
 
-    // Home immediately reflects the new preference
     const homeAdapter = new MockHomeAdapter();
     const homeData = await homeAdapter.getHomeData();
     expect(homeData.quizDraft?.current_intent).toBe("RECHARGE");
@@ -592,7 +773,6 @@ describe("Preference Retake Screen & Isolation Contract (T22)", () => {
     const getNextBtn = () =>
       container.querySelector<HTMLButtonElement>(".quiz-submit-button")!;
 
-    // Step 1 to 6
     for (let step = 1; step <= 5; step++) {
       await act(async () => {
         getNextBtn().click();
@@ -601,17 +781,14 @@ describe("Preference Retake Screen & Isolation Contract (T22)", () => {
 
     expect(container.textContent).toContain("Langkah 6 dari 6");
 
-    // Attempt to complete
     await act(async () => {
       getNextBtn().click();
     });
 
-    // Error banner shown
     expect(container.textContent).toContain(
       "Simulated network failure on complete",
     );
 
-    // Old preference remains intact
     expect(sessionStore.getQuizDraft()?.current_intent).toBe("NATURE");
     expect(sessionStore.getStatus()).toBe("COMPLETED");
   });

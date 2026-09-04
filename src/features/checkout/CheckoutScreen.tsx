@@ -44,6 +44,7 @@ export function CheckoutScreen({
       ? locationDraft.idempotencyKey
       : `idemp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
   );
+  const [policyError, setPolicyError] = useState<string | undefined>();
   const [submitErrorNotice, setSubmitErrorNotice] = useState<
     string | undefined
   >();
@@ -96,13 +97,21 @@ export function CheckoutScreen({
   }, [sessionId, adapter]);
 
   const handleSubmit = async () => {
-    if (
-      !sessionId ||
-      !viewModel ||
-      !viewModel.traveler ||
-      !policyAcknowledged ||
-      isSubmitting
-    ) {
+    if (!sessionId || !viewModel || !viewModel.traveler || isSubmitting) {
+      return;
+    }
+
+    if (!policyAcknowledged) {
+      setPolicyError(
+        "Setujui kebijakan pembatalan & refund untuk melanjutkan.",
+      );
+      const checkboxEl = document.getElementById("cancellation-policy-ack");
+      if (checkboxEl) {
+        checkboxEl.focus();
+        if (typeof checkboxEl.scrollIntoView === "function") {
+          checkboxEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
       return;
     }
 
@@ -427,7 +436,6 @@ export function CheckoutScreen({
   // CTA disabled while participantCount > latest selectable max or price is missing
   const isSubmitDisabled =
     isSubmitting ||
-    !policyAcknowledged ||
     unitPrice === undefined ||
     participantCount > maxSelectableParticipants ||
     viewModel.state === "PRICE_UNAVAILABLE";
@@ -579,8 +587,14 @@ export function CheckoutScreen({
                       id="cancellation-policy-ack"
                       label="Saya sudah membaca ringkasan kebijakan pembatalan & refund."
                       checked={policyAcknowledged}
-                      onChange={(e) => setPolicyAcknowledged(e.target.checked)}
+                      onChange={(e) => {
+                        setPolicyAcknowledged(e.target.checked);
+                        if (e.target.checked) {
+                          setPolicyError(undefined);
+                        }
+                      }}
                       disabled={isSubmitting}
+                      error={policyError}
                     />
                   </div>
                 </section>

@@ -9,7 +9,7 @@ import { sessionStore } from "../onboarding/sessionStore";
 import { CheckoutScreen } from "./CheckoutScreen";
 import { MockCheckoutAdapter } from "./mockAdapter";
 import { mockTransactionStore } from "./mockTransactionStore";
-import type { CheckoutSubmitInput } from "./types";
+import type { CheckoutDraftState, CheckoutSubmitInput } from "./types";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -1056,5 +1056,395 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     const resConflict = await adapter.submitCheckout(conflictingInput);
     expect(resConflict.status).toBe("IDEMPOTENCY_CONFLICT");
     expect(mockTransactionStore.getBookings().length).toBe(1);
+  });
+
+  /* ========================================================================
+     P9.18 Fix Regression Tests: Unchecked Policy UX, Double-Click Spam, and End-to-End Roundtrips
+     ======================================================================== */
+
+  describe("Checkout Payment CTA & Policy Validation UX Fixes", () => {
+    it("21. clicking CTA with policy unchecked shows inline validation error, focuses checkbox, and creates 0 bookings", async () => {
+      const traveler: AuthUser = {
+        id: "usr_policy_ux_test",
+        name: "Policy UX Traveler",
+        email: "policy@example.com",
+        phone: "08123456789",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const adapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+        verifiedPhoneStore: { usr_policy_ux_test: true },
+      });
+
+      let currentPath = "";
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            { initialEntries: ["/checkout/ses_sgd_1"] },
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, { adapter }),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      const policyCheckbox = container.querySelector<HTMLInputElement>(
+        "#cancellation-policy-ack",
+      )!;
+      expect(policyCheckbox).toBeDefined();
+      expect(policyCheckbox.checked).toBe(false);
+
+      const ctaBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
+      )!;
+      expect(ctaBtn).toBeDefined();
+
+      // CTA must NOT be natively disabled
+      expect(ctaBtn.disabled).toBe(false);
+
+      // Click CTA while policy is unchecked
+      await act(async () => {
+        ctaBtn.click();
+      });
+
+      // Assertions:
+      // 1. Stayed on checkout
+      expect(currentPath).toBe("/checkout/ses_sgd_1");
+
+      // 2. Inline validation error is visible adjacent to checkbox
+      expect(container.textContent).toContain(
+        "Setujui kebijakan pembatalan & refund untuk melanjutkan.",
+      );
+      const errorMsg = container.querySelector('[role="alert"]')!;
+      expect(errorMsg.textContent).toContain(
+        "Setujui kebijakan pembatalan & refund untuk melanjutkan.",
+      );
+
+      // 3. Checkbox received focus
+      expect(document.activeElement).toBe(policyCheckbox);
+
+      // 4. Zero transactional mutations
+      expect(mockTransactionStore.getBookings().length).toBe(0);
+      expect(mockTransactionStore.getPaymentAttempts().length).toBe(0);
+      expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(0);
+
+      // 5. Checking the policy clears the error
+      await act(async () => {
+        policyCheckbox.click();
+      });
+
+      expect(policyCheckbox.checked).toBe(true);
+      expect(container.textContent).not.toContain(
+        "Setujui kebijakan pembatalan & refund untuk melanjutkan.",
+      );
+    });
+
+    it("22. verified traveler completes Checkout -> /payment/:bookingId with exactly 1 Booking and 1 PaymentAttempt", async () => {
+      const traveler: AuthUser = {
+        id: "usr_verified_happy",
+        name: "Verified Happy",
+        email: "happy@example.com",
+        phone: "08123456789",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const adapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+        verifiedPhoneStore: { usr_verified_happy: true },
+      });
+
+      let currentPath = "";
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            { initialEntries: ["/checkout/ses_sgd_1"] },
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, { adapter }),
+              }),
+              createElement(Route, {
+                path: "/payment/:bookingId",
+                element: createElement("div", undefined, "Payment Screen"),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      const policyCheckbox = container.querySelector<HTMLInputElement>(
+        "#cancellation-policy-ack",
+      )!;
+      await act(async () => {
+        policyCheckbox.click();
+      });
+
+      const ctaBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
+      )!;
+      await act(async () => {
+        ctaBtn.click();
+      });
+
+      expect(currentPath).toMatch(/^\/payment\/bk_/);
+      expect(mockTransactionStore.getBookings().length).toBe(1);
+      expect(mockTransactionStore.getPaymentAttempts().length).toBe(1);
+    });
+
+    it("23. contact verification roundtrip preserves participant count and policy, second explicit CTA click creates booking", async () => {
+      const traveler: AuthUser = {
+        id: "usr_rt_traveler",
+        name: "Roundtrip Traveler",
+        email: "roundtrip@example.com",
+        phone: "081298765432",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      // Starts as unverified
+      let isVerified = false;
+      const checkoutAdapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+        verifiedPhoneStore: {
+          get usr_rt_traveler() {
+            return isVerified;
+          },
+        } as unknown as Record<string, boolean>,
+      });
+
+      let currentPath = "";
+
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            { initialEntries: ["/checkout/ses_sgd_1"] },
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, {
+                  adapter: checkoutAdapter,
+                }),
+              }),
+              createElement(Route, {
+                path: "/checkout/:sessionId/contact",
+                element: createElement(
+                  "div",
+                  undefined,
+                  "Contact Verification Screen",
+                ),
+              }),
+              createElement(Route, {
+                path: "/payment/:bookingId",
+                element: createElement("div", undefined, "Payment Screen"),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      // Increase participant count to 3
+      const plusBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.getAttribute("aria-label") === "Tambah jumlah peserta",
+      )!;
+      await act(async () => {
+        plusBtn.click();
+      });
+      await act(async () => {
+        plusBtn.click();
+      });
+      expect(container.textContent).toContain("3 × Rp275.000");
+
+      // Check policy
+      const policyCheckbox = container.querySelector<HTMLInputElement>(
+        "#cancellation-policy-ack",
+      )!;
+      await act(async () => {
+        policyCheckbox.click();
+      });
+
+      // Submit 1st time
+      const ctaBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
+      )!;
+      await act(async () => {
+        ctaBtn.click();
+      });
+
+      // Navigates to Contact Verification
+      expect(currentPath).toBe("/checkout/ses_sgd_1/contact");
+      expect(mockTransactionStore.getBookings().length).toBe(0);
+
+      // Simulate draft state payload returned from T11 Contact Verification after successful OTP
+      const restoredDraft: CheckoutDraftState = {
+        sessionId: "ses_sgd_1",
+        participantCount: 3,
+        policyAcknowledged: true,
+        idempotencyKey: "k_rt_preserved",
+      };
+
+      // Mark phone verified in store
+      isVerified = true;
+      const newContainer = document.createElement("div");
+      document.body.append(newContainer);
+      const newRoot = createRoot(newContainer);
+
+      await act(async () => {
+        newRoot.render(
+          createElement(
+            MemoryRouter,
+            {
+              initialEntries: [
+                {
+                  pathname: "/checkout/ses_sgd_1",
+                  state: { checkoutDraft: restoredDraft },
+                },
+              ],
+            },
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, {
+                  adapter: checkoutAdapter,
+                }),
+              }),
+              createElement(Route, {
+                path: "/payment/:bookingId",
+                element: createElement("div", undefined, "Payment Screen"),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      // Verify draft restoration
+      expect(newContainer.textContent).toContain("3 × Rp275.000");
+      const restoredPolicyCheckbox =
+        newContainer.querySelector<HTMLInputElement>(
+          "#cancellation-policy-ack",
+        )!;
+      expect(restoredPolicyCheckbox.checked).toBe(true);
+      expect(newContainer.textContent).toContain("Terverifikasi");
+
+      // 2nd explicit CTA click
+      const secondCtaBtn = Array.from(
+        newContainer.querySelectorAll("button"),
+      ).find((b) => b.textContent?.includes("Lanjut ke Pembayaran"))!;
+      await act(async () => {
+        secondCtaBtn.click();
+      });
+
+      // Creates booking with 3 participants!
+      expect(currentPath).toMatch(/^\/payment\/bk_/);
+      expect(mockTransactionStore.getBookings().length).toBe(1);
+      expect(mockTransactionStore.getBookings()[0].participantCount).toBe(3);
+
+      await act(async () => {
+        newRoot.unmount();
+      });
+      newContainer.remove();
+    });
+
+    it("24. rapid spam double-click on CTA does NOT produce duplicate bookings or capacity reservation", async () => {
+      const traveler: AuthUser = {
+        id: "usr_spam_traveler",
+        name: "Spam Traveler",
+        email: "spam@example.com",
+        phone: "08123456789",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const adapter = new MockCheckoutAdapter({
+        travelerOverride: traveler,
+        verifiedPhoneStore: { usr_spam_traveler: true },
+      });
+
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            { initialEntries: ["/checkout/ses_sgd_1"] },
+            createElement(Routes, undefined, [
+              createElement(Route, {
+                path: "/checkout/:sessionId",
+                element: createElement(CheckoutScreen, { adapter }),
+              }),
+              createElement(Route, {
+                path: "/payment/:bookingId",
+                element: createElement("div", undefined, "Payment Screen"),
+              }),
+            ]),
+          ),
+        );
+      });
+
+      const policyCheckbox = container.querySelector<HTMLInputElement>(
+        "#cancellation-policy-ack",
+      )!;
+      await act(async () => {
+        policyCheckbox.click();
+      });
+
+      const ctaBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lanjut ke Pembayaran"),
+      )!;
+
+      // Rapid double click
+      await act(async () => {
+        ctaBtn.click();
+        ctaBtn.click();
+        ctaBtn.click();
+      });
+
+      // Assert only 1 booking created
+      expect(mockTransactionStore.getBookings().length).toBe(1);
+      expect(mockTransactionStore.getPaymentAttempts().length).toBe(1);
+      expect(mockTransactionStore.getReservedQuantity("ses_sgd_1")).toBe(1);
+    });
   });
 });

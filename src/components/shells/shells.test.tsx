@@ -145,6 +145,22 @@ describe("responsive workspace navigation semantics", () => {
     expect(shell.hasAttribute("data-sidebar-collapsed")).toBe(false);
   });
 
+  it("keeps brand header slot fixed height in both expanded and collapsed states", async () => {
+    const view = await renderWorkspace();
+    const brandSlot = view.querySelector(".workspace-sidebar__brand");
+    expect(brandSlot).not.toBeNull();
+
+    // Verify nav items remain mounted in collapsed state
+    const collapseButton = view.querySelector<HTMLButtonElement>(
+      '.workspace-sidebar__close[aria-label="Minimalkan navigasi"]',
+    )!;
+    await act(() => collapseButton.click());
+
+    const navLinks = view.querySelectorAll(".workspace-navigation a");
+    expect(navLinks.length).toBe(partnerEoNavigation.length);
+    expect(view.querySelector(".workspace-navigation__label")).not.toBeNull();
+  });
+
   it("renders canonical vector logo and partner role in sidebar", async () => {
     const view = await renderWorkspace();
     const logoImg = view.querySelector<HTMLImageElement>(

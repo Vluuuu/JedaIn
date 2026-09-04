@@ -1,10 +1,10 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
+import JedaInLogo from "../../JedaIn_logo_vector.svg";
 import { partnerSessionStore } from "../../features/eo/partnerSessionStore";
 import { Button } from "../ui";
 import {
   BookingsIcon,
-  CloseIcon,
   DestinationsIcon,
   InsightsIcon,
   MenuIcon,
@@ -13,6 +13,7 @@ import {
   ProfileIcon,
   ReviewsIcon,
   SessionsIcon,
+  SidebarCollapseIcon,
 } from "./icons";
 import "./shells.css";
 
@@ -103,15 +104,23 @@ export function WorkspaceShell({
         aria-label={`Navigasi ${surface}`}
       >
         <div className="workspace-sidebar__brand">
-          <Link className="brand-mark" to={`/${surface}`}>
-            JedaIn<span aria-hidden="true">.</span>
+          <Link
+            className="workspace-sidebar__logo-link"
+            to={`/${surface}`}
+            aria-label={`JedaIn ${surface === "admin" ? "Admin" : "Partner"}`}
+          >
+            <img
+              src={JedaInLogo}
+              alt=""
+              aria-hidden="true"
+              className="workspace-sidebar__logo"
+              width="1407"
+              height="768"
+              loading="eager"
+            />
           </Link>
-          <span>
-            {surface === "admin"
-              ? "Admin"
-              : partner?.role === "DESTINATION"
-                ? "Destination Partner"
-                : "EO Partner"}
+          <span className="workspace-sidebar__role-tag">
+            {surface === "admin" ? "Admin" : "Partner"}
           </span>
           <Button
             variant="secondary"
@@ -123,7 +132,7 @@ export function WorkspaceShell({
               menuButtonRef.current?.focus();
             }}
           >
-            <CloseIcon />
+            <SidebarCollapseIcon />
           </Button>
         </div>
         <nav className="workspace-navigation" aria-label={`Menu ${surface}`}>
@@ -162,7 +171,10 @@ export function WorkspaceShell({
                   ? "Destination Partner"
                   : "EO Partner"}
             </p>
-            <h1>{title}</h1>
+            <span className="workspace-topbar__title">
+              {partner?.businessName ??
+                (surface === "admin" ? "JedaIn Admin" : title)}
+            </span>
           </div>
           <div
             className="workspace-identity"

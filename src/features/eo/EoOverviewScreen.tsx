@@ -158,7 +158,9 @@ export function EoOverviewScreen() {
           <strong className="eo-overview-metric-value">
             {upcomingSessions.length}
           </strong>
-          <span className="eo-overview-metric-desc">Sesi status OPEN</span>
+          <span className="eo-overview-metric-desc">
+            Jadwal keberangkatan mendatang
+          </span>
         </div>
 
         <div className="eo-overview-metric-item">
@@ -167,7 +169,7 @@ export function EoOverviewScreen() {
             {eoBookings.length}
           </strong>
           <span className="eo-overview-metric-desc">
-            Transaksi paket akun ini
+            Pesanan pada paket EO ini
           </span>
         </div>
 
@@ -197,7 +199,7 @@ export function EoOverviewScreen() {
                 {pendingPackage.title}
               </span>{" "}
               <span className="eo-overview-attention__desc">
-                — Sedang ditinjau Admin JedaIn.
+                - Sedang ditinjau Admin JedaIn.
               </span>
             </div>
           </div>
@@ -271,7 +273,10 @@ export function EoOverviewScreen() {
           aria-label="Jadwal sesi terdekat"
         >
           <div className="eo-overview-panel__header">
-            <h2>Upcoming Sessions</h2>
+            <div>
+              <h2>Jadwal Terdekat</h2>
+              <span className="eo-overview-panel__sub">Upcoming Sessions</span>
+            </div>
             <Link to="/partner/eo/sessions" className="eo-overview-panel__link">
               Lihat Semua Sesi &rarr;
             </Link>
@@ -279,7 +284,7 @@ export function EoOverviewScreen() {
 
           {sessionPreviewList.length === 0 ? (
             <div className="eo-overview-empty">
-              Belum ada sesi jadwal yang dibuka.
+              Belum ada jadwal keberangkatan mendatang.
             </div>
           ) : (
             <div className="eo-overview-list">
@@ -306,7 +311,7 @@ export function EoOverviewScreen() {
                     </div>
                     <div className="eo-overview-list-row__secondary">
                       <span className="eo-overview-list-row__meta">
-                        {s.remainingSlots}/{s.capacity} slot
+                        Sisa {s.remainingSlots} dari {s.capacity} slot
                       </span>
                       <Badge tone={s.status === "OPEN" ? "success" : "neutral"}>
                         {s.status}
@@ -325,9 +330,12 @@ export function EoOverviewScreen() {
           aria-label="Aktivitas booking terbaru"
         >
           <div className="eo-overview-panel__header">
-            <h2>Recent Booking Activity</h2>
+            <div>
+              <h2>Pesanan Traveler Terbaru</h2>
+              <span className="eo-overview-panel__sub">Recent Bookings</span>
+            </div>
             <Link to="/partner/eo/bookings" className="eo-overview-panel__link">
-              Lihat Semua Booking &rarr;
+              Lihat Semua Pesanan &rarr;
             </Link>
           </div>
 
@@ -353,7 +361,7 @@ export function EoOverviewScreen() {
                         {pkg?.title ?? b.packageId}
                       </span>
                       <span className="eo-overview-list-row__meta">
-                        {b.participantCount} peserta · {dateLabel}
+                        {b.participantCount} peserta · Dipesan {dateLabel}
                       </span>
                     </div>
                     <div className="eo-overview-list-row__secondary">

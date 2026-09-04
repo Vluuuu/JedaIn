@@ -767,6 +767,13 @@
   margin: 0;
 }
 
+.eo-overview-panel__sub {
+  display: block;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin-top: 0.125rem;
+}
+
 .eo-overview-panel__link {
   font-size: var(--font-size-body-sm);
   color: var(--color-brand-primary);

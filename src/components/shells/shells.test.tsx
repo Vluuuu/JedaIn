@@ -91,6 +91,40 @@ describe("responsive workspace navigation semantics", () => {
     ).toBe(false);
     expect(document.activeElement).toBe(openButton);
   });
+
+  it("closes the drawer on sidebar collapse button click and restores menu focus", async () => {
+    const view = await renderWorkspace();
+    const openButton = view.querySelector<HTMLButtonElement>(
+      '.workspace-topbar__menu[aria-label="Buka navigasi"]',
+    )!;
+    await act(() => openButton.click());
+
+    const collapseButton = view.querySelector<HTMLButtonElement>(
+      '.workspace-sidebar__close[aria-label="Tutup navigasi"]',
+    )!;
+    expect(collapseButton).not.toBeNull();
+
+    await act(() => collapseButton.click());
+
+    expect(openButton.getAttribute("aria-expanded")).toBe("false");
+    expect(
+      view.querySelector(".workspace-sidebar")?.hasAttribute("data-open"),
+    ).toBe(false);
+    expect(document.activeElement).toBe(openButton);
+  });
+
+  it("renders canonical vector logo and partner role in sidebar", async () => {
+    const view = await renderWorkspace();
+    const logoImg = view.querySelector<HTMLImageElement>(
+      ".workspace-sidebar__logo",
+    );
+    expect(logoImg).not.toBeNull();
+    expect(logoImg?.getAttribute("src")).toContain(".svg");
+    expect(view.textContent).not.toContain("JedaIn.");
+    expect(
+      view.querySelector(".workspace-sidebar__role-tag")?.textContent,
+    ).toBe("Partner");
+  });
 });
 
 describe("TravelerAppShell notification affordance", () => {

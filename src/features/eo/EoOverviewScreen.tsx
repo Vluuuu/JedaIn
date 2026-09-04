@@ -95,8 +95,12 @@ export function EoOverviewScreen() {
     );
   }
 
-  // Preview rows for upcoming sessions (max 3)
-  const sessionPreviewList = sessions.slice(0, 3);
+  // Preview rows for upcoming sessions (max 3 OPEN sessions, sorted chronologically)
+  const sessionPreviewList = [...upcomingSessions]
+    .sort(
+      (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
+    )
+    .slice(0, 3);
 
   // Preview rows for recent booking activity (max 3, sorted by createdAt desc)
   const recentBookings = [...eoBookings]
@@ -349,7 +353,7 @@ export function EoOverviewScreen() {
                         {pkg?.title ?? b.packageId}
                       </span>
                       <span className="eo-overview-list-row__meta">
-                        {b.bookedQuantity} peserta · {dateLabel}
+                        {b.participantCount} peserta · {dateLabel}
                       </span>
                     </div>
                     <div className="eo-overview-list-row__secondary">

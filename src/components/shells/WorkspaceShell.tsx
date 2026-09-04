@@ -54,6 +54,12 @@ function formatGuideStatus(guideStatus?: string | null): string {
   return guideStatus.replace(/_/g, " ");
 }
 
+const WORKSPACE_ROOT_PATHS = new Set([
+  "/admin",
+  "/partner/eo",
+  "/partner/destination",
+]);
+
 export function WorkspaceShell({
   surface,
   title,
@@ -125,7 +131,7 @@ export function WorkspaceShell({
             <NavLink
               key={to}
               to={to}
-              end={to === `/${surface}` || to === `/${surface}/destination`}
+              end={WORKSPACE_ROOT_PATHS.has(to)}
               onClick={() => setDrawerOpen(false)}
             >
               {getNavigationIcon(to)}

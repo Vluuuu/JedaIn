@@ -14,6 +14,7 @@ export interface AchievementItem {
   description: string;
   earned: boolean;
   progressText?: string;
+  earnedAt?: string;
 }
 
 export type ProfileActivityType =

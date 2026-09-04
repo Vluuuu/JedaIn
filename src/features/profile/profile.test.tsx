@@ -14,7 +14,7 @@ import { sessionStore } from "../onboarding/sessionStore";
 import { RetakeQuizAdapter } from "../quiz/retakeAdapter";
 import { TravelerQuizScreen } from "../quiz/TravelerQuizScreen";
 import type { QuizDraft } from "../quiz/types";
-import { mockReviewStore } from "../reviews/mockReviewStore";
+import { mockReviewStore, type ReviewRecord } from "../reviews/mockReviewStore";
 import { ActivityScreen } from "./ActivityScreen";
 import { mockTravelerCommunityStore } from "./mockCommunityStore";
 import { mockMomentStore } from "./mockMomentStore";
@@ -370,6 +370,276 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
     expect(container.textContent).toContain("Belum ada Momen Jeda.");
     expect(container.textContent).toContain(
       "Setelah perjalanan selesai, foto dan video perjalananmu bisa tampil di sini.",
+    );
+  });
+
+  it("H1. Stable achievement timestamp: Jeda Pertama earnedAt corresponds to source completedAt and repeated calls are deterministic", async () => {
+    const fixedUser: AuthUser = {
+      id: "usr_fixed_time",
+      name: "Dian",
+      email: "dian@example.com",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(fixedUser);
+
+    const bookingTimestamp = "2026-08-20T17:00:00+07:00";
+    mockTransactionStore.reset();
+    const bookings =
+      mockTransactionStore.getBookings() as unknown as BookingRecord[];
+    bookings.push({
+      bookingId: "bk_det_1",
+      travelerId: fixedUser.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_det_1",
+      participantCount: 1,
+      unitPricePerPerson: 250000,
+      totalAmount: 250000,
+      status: "COMPLETED",
+      reservedQuantity: 0,
+      bookedQuantity: 1,
+      createdAt: "2026-08-15T08:00:00+07:00",
+      paidAt: "2026-08-15T08:10:00+07:00",
+      completedAt: bookingTimestamp,
+      paymentExpiresAt: "2026-08-15T08:15:00+07:00",
+    });
+
+    const adapter = new (await import("./mockAdapter")).MockProfileAdapter();
+    const profile = await adapter.getProfile();
+
+    const jedaPertama = profile.achievements.find(
+      (a) => a.id === "JEDA_PERTAMA",
+    );
+    expect(jedaPertama?.earned).toBe(true);
+    expect(jedaPertama?.earnedAt).toBeDefined();
+
+    // Call activity aggregator twice
+    const activitiesRun1 = await adapter.getAllActivities(fixedUser.id);
+    const activitiesRun2 = await adapter.getAllActivities(fixedUser.id);
+
+    expect(activitiesRun1.length).toBeGreaterThan(0);
+    expect(activitiesRun1).toEqual(activitiesRun2);
+
+    const achievementAct = activitiesRun1.find(
+      (a) => a.type === "ACHIEVEMENT_EARNED",
+    );
+    expect(achievementAct).toBeDefined();
+    // Timestamp must not be today/now - it must equal earnedAt
+    expect(achievementAct?.timestamp).toBe(jedaPertama?.earnedAt);
+  });
+
+  it("H2. Three journeys rule: Tiga Jeda earnedAt corresponds exactly to the third completed booking timestamp", async () => {
+    const multiUser: AuthUser = {
+      id: "usr_multi_trips",
+      name: "Fajar",
+      email: "fajar@example.com",
+      onboardingStatus: "COMPLETED",
+    };
+
+    const bookings: BookingRecord[] = [
+      {
+        bookingId: "bk_1",
+        travelerId: multiUser.id,
+        packageId: "pkg_1",
+        sessionId: "s1",
+        participantCount: 1,
+        unitPricePerPerson: 100000,
+        totalAmount: 100000,
+        status: "COMPLETED",
+        reservedQuantity: 0,
+        bookedQuantity: 1,
+        createdAt: "2026-06-01T08:00:00Z",
+        paymentExpiresAt: "2026-06-01T08:15:00Z",
+        completedAt: "2026-06-05T12:00:00Z",
+      },
+      {
+        bookingId: "bk_2",
+        travelerId: multiUser.id,
+        packageId: "pkg_2",
+        sessionId: "s2",
+        participantCount: 1,
+        unitPricePerPerson: 100000,
+        totalAmount: 100000,
+        status: "COMPLETED",
+        reservedQuantity: 0,
+        bookedQuantity: 1,
+        createdAt: "2026-07-01T08:00:00Z",
+        paymentExpiresAt: "2026-07-01T08:15:00Z",
+        completedAt: "2026-07-05T12:00:00Z",
+      },
+      {
+        bookingId: "bk_3",
+        travelerId: multiUser.id,
+        packageId: "pkg_3",
+        sessionId: "s3",
+        participantCount: 1,
+        unitPricePerPerson: 100000,
+        totalAmount: 100000,
+        status: "COMPLETED",
+        reservedQuantity: 0,
+        bookedQuantity: 1,
+        createdAt: "2026-08-01T08:00:00Z",
+        paymentExpiresAt: "2026-08-01T08:15:00Z",
+        completedAt: "2026-08-05T12:00:00Z", // <-- THIRD completion timestamp
+      },
+    ];
+
+    const { calculateTravelerAchievements } =
+      await import("./achievementsCalculator");
+    const achievements = calculateTravelerAchievements({
+      travelerId: multiUser.id,
+      completedBookings: bookings,
+    });
+
+    const tigaJeda = achievements.find((a) => a.id === "TIGA_JEDA");
+    expect(tigaJeda?.earned).toBe(true);
+    expect(tigaJeda?.earnedAt).toBe("2026-08-05T12:00:00Z");
+  });
+
+  it("H3. Review eligibility: reviews for non-completed bookings do not earn milestone or appear in activity feed", async () => {
+    const reviewUser: AuthUser = {
+      id: "usr_review_eligibility",
+      name: "Galih",
+      email: "galih@example.com",
+      onboardingStatus: "COMPLETED",
+    };
+
+    const completedBookings: BookingRecord[] = [
+      {
+        bookingId: "bk_comp_legit",
+        travelerId: reviewUser.id,
+        packageId: "slow_green_day",
+        sessionId: "s_legit",
+        participantCount: 1,
+        unitPricePerPerson: 100000,
+        totalAmount: 100000,
+        status: "COMPLETED",
+        reservedQuantity: 0,
+        bookedQuantity: 1,
+        createdAt: "2026-07-01T08:00:00Z",
+        paymentExpiresAt: "2026-07-01T08:15:00Z",
+        completedAt: "2026-07-02T12:00:00Z",
+      },
+    ];
+
+    const { calculateTravelerAchievements } =
+      await import("./achievementsCalculator");
+    const { getTravelerProfileActivity } = await import("./activityAdapter");
+
+    // Case 1: Review belongs to traveler BUT bookingId is NOT in completedBookings (e.g. cancelled/fake booking)
+    mockReviewStore.submitReview({
+      bookingId: "bk_unrelated_or_cancelled",
+      travelerId: reviewUser.id,
+      targetType: "DESTINATION",
+      targetRef: "dest_fake",
+      rating: 5,
+      comment: "Unrelated review",
+    });
+
+    const achievementsCase1 = calculateTravelerAchievements({
+      travelerId: reviewUser.id,
+      completedBookings,
+    });
+    const pemberiUlasanCase1 = achievementsCase1.find(
+      (a) => a.id === "PEMBERI_ULASAN",
+    );
+    expect(pemberiUlasanCase1?.earned).toBe(false);
+    expect(pemberiUlasanCase1?.earnedAt).toBeUndefined();
+
+    const activitiesCase1 = getTravelerProfileActivity(
+      reviewUser.id,
+      completedBookings,
+    );
+    expect(activitiesCase1.some((a) => a.type === "REVIEW_SUBMITTED")).toBe(
+      false,
+    );
+
+    // Case 2: Add review tied to completed booking
+    const reviewDate = "2026-07-03T09:00:00.000Z";
+    mockReviewStore.reset();
+    const allReviewsList =
+      mockReviewStore.getAllReviews() as unknown as ReviewRecord[];
+    allReviewsList.push({
+      reviewId: "rev_legit",
+      bookingId: "bk_comp_legit",
+      travelerId: reviewUser.id,
+      targetType: "DESTINATION",
+      targetRef: "dest_real",
+      rating: 5,
+      comment: "Qualifying review",
+      createdAt: reviewDate,
+    });
+
+    const achievementsCase2 = calculateTravelerAchievements({
+      travelerId: reviewUser.id,
+      completedBookings,
+    });
+    const pemberiUlasanCase2 = achievementsCase2.find(
+      (a) => a.id === "PEMBERI_ULASAN",
+    );
+    expect(pemberiUlasanCase2?.earned).toBe(true);
+    expect(pemberiUlasanCase2?.earnedAt).toBe(reviewDate);
+
+    const activitiesCase2 = getTravelerProfileActivity(
+      reviewUser.id,
+      completedBookings,
+    );
+    const reviewActivity = activitiesCase2.find(
+      (a) => a.type === "REVIEW_SUBMITTED",
+    );
+    expect(reviewActivity).toBeDefined();
+    expect(reviewActivity?.timestamp).toBe(reviewDate);
+  });
+
+  it("H4. Stable activity ordering: newest-first order based strictly on source timestamps and deterministic on repeated calls", async () => {
+    const orderUser: AuthUser = {
+      id: "usr_order_test",
+      name: "Hani",
+      email: "hani@example.com",
+      onboardingStatus: "COMPLETED",
+    };
+
+    const completedBookings: BookingRecord[] = [
+      {
+        bookingId: "bk_early",
+        travelerId: orderUser.id,
+        packageId: "slow_green_day",
+        sessionId: "s_early",
+        participantCount: 1,
+        unitPricePerPerson: 100000,
+        totalAmount: 100000,
+        status: "COMPLETED",
+        reservedQuantity: 0,
+        bookedQuantity: 1,
+        createdAt: "2026-07-01T08:00:00Z",
+        paymentExpiresAt: "2026-07-01T08:15:00Z",
+        completedAt: "2026-07-05T12:00:00Z", // Early event
+      },
+    ];
+
+    const reviewTimestamp = "2026-07-10T14:00:00.000Z"; // Later event
+    mockReviewStore.reset();
+    const orderReviews =
+      mockReviewStore.getAllReviews() as unknown as ReviewRecord[];
+    orderReviews.push({
+      reviewId: "rev_later",
+      bookingId: "bk_early",
+      travelerId: orderUser.id,
+      targetType: "DESTINATION",
+      targetRef: "dest_order",
+      rating: 5,
+      createdAt: reviewTimestamp,
+    });
+
+    const { getTravelerProfileActivity } = await import("./activityAdapter");
+
+    const run1 = getTravelerProfileActivity(orderUser.id, completedBookings);
+    const run2 = getTravelerProfileActivity(orderUser.id, completedBookings);
+
+    expect(run1).toEqual(run2);
+
+    // Verify newest first: review (July 10) before completed trip (July 5)
+    expect(new Date(run1[0].timestamp).getTime()).toBeGreaterThanOrEqual(
+      new Date(run1[1].timestamp).getTime(),
     );
   });
 

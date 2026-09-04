@@ -45,9 +45,15 @@ export function getTravelerProfileActivity(
     });
   }
 
-  // 2. Reviews submitted
+  // 2. Reviews submitted - strictly filtered to completed bookings owned by this traveler
+  const completedBookingIds = new Set(
+    completedBookings.map((b) => b.bookingId),
+  );
   const allReviews = mockReviewStore.getAllReviews();
-  const travelerReviews = allReviews.filter((r) => r.travelerId === travelerId);
+  const travelerReviews = allReviews.filter(
+    (r) => r.travelerId === travelerId && completedBookingIds.has(r.bookingId),
+  );
+
   for (const rev of travelerReviews) {
     const stars =
       "★".repeat(rev.rating) + "☆".repeat(Math.max(0, 5 - rev.rating));
@@ -67,20 +73,22 @@ export function getTravelerProfileActivity(
     });
   }
 
-  // 3. Earned Achievements
+  // 3. Earned Achievements - strictly source-backed earnedAt timestamp
   const achievements = calculateTravelerAchievements({
     travelerId,
     completedBookings,
   });
+
   for (const ach of achievements) {
-    if (ach.earned) {
+    if (ach.earned && ach.earnedAt) {
+      const dateFormatted = formatActivityDate(ach.earnedAt);
       activities.push({
         id: `act_ach_${ach.id}`,
         type: "ACHIEVEMENT_EARNED",
         title: `Meraih milestone: ${ach.title}`,
         subtitle: `${ach.description}`,
-        timestamp: new Date().toISOString(),
-        formattedDate: "Tercapai",
+        timestamp: ach.earnedAt,
+        formattedDate: dateFormatted,
       });
     }
   }
@@ -99,10 +107,13 @@ export function getTravelerProfileActivity(
     });
   }
 
-  // Chronological sort: newest first
+  // Chronological sort: newest first (stable sort with id fallback for ties)
   return activities.sort((a, b) => {
     const timeA = new Date(a.timestamp).getTime();
     const timeB = new Date(b.timestamp).getTime();
-    return timeB - timeA;
+    if (timeB !== timeA) {
+      return timeB - timeA;
+    }
+    return a.id.localeCompare(b.id);
   });
 }

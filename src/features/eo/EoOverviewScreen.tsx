@@ -176,7 +176,7 @@ export function EoOverviewScreen() {
         <div className="eo-overview-metric-item">
           <span className="eo-overview-metric-label">Average Rating</span>
           <strong className="eo-overview-metric-value">
-            {avgRating ? `★ ${avgRating}` : "Belum ada rating"}
+            {avgRating ? `★ ${avgRating}` : "—"}
           </strong>
           <span className="eo-overview-metric-desc">
             {eoReviews.length > 0

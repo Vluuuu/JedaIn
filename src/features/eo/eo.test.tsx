@@ -696,6 +696,18 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("Total Bookings");
       expect(view.textContent).toContain("Average Rating");
       expect(view.textContent).toContain("★ 5.0");
+      expect(view.textContent).toContain("1 ulasan traveler");
+    });
+
+    it("AL2. Overview KPI renders clean empty state when no reviews exist", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      // By default no reviews seeded for organizer in fresh test run
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      expect(view.textContent).toContain("Average Rating");
+      expect(view.textContent).toContain("—");
+      expect(view.textContent).toContain("Belum ada ulasan");
+      expect(view.textContent).not.toContain("Belum ada rating");
     });
 
     it("AM. Overview isolates bookings strictly to EO-owned packages (no cross-EO leakage)", async () => {

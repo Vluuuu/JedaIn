@@ -68,7 +68,9 @@ export function WorkspaceShell({
   children,
 }: WorkspaceShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const collapseButtonRef = useRef<HTMLButtonElement>(null);
   const drawerId = useId();
   const partner = surface === "partner" ? partnerSessionStore.get() : null;
 
@@ -85,8 +87,28 @@ export function WorkspaceShell({
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [drawerOpen]);
 
+  const toggleSidebar = () => {
+    // In mobile drawer mode (drawerOpen is true), button closes the drawer
+    if (drawerOpen) {
+      setDrawerOpen(false);
+      menuButtonRef.current?.focus();
+    } else {
+      // In desktop mode, toggle collapsed icon rail
+      setSidebarCollapsed((prev) => !prev);
+    }
+  };
+
+  const collapseLabel = drawerOpen
+    ? "Tutup navigasi"
+    : sidebarCollapsed
+      ? "Perluas navigasi"
+      : "Minimalkan navigasi";
+
   return (
-    <div className={`workspace-shell workspace-shell--${surface}`}>
+    <div
+      className={`workspace-shell workspace-shell--${surface}`}
+      data-sidebar-collapsed={sidebarCollapsed || undefined}
+    >
       <button
         type="button"
         className="workspace-shell__scrim"
@@ -101,6 +123,7 @@ export function WorkspaceShell({
         id={drawerId}
         className="workspace-sidebar"
         data-open={drawerOpen || undefined}
+        data-collapsed={sidebarCollapsed || undefined}
         aria-label={`Navigasi ${surface}`}
       >
         <div className="workspace-sidebar__brand">
@@ -108,6 +131,7 @@ export function WorkspaceShell({
             className="workspace-sidebar__logo-link"
             to={`/${surface}`}
             aria-label={`JedaIn ${surface === "admin" ? "Admin" : "Partner"}`}
+            title={`JedaIn ${surface === "admin" ? "Admin" : "Partner"}`}
           >
             <img
               src={JedaInLogo}
@@ -123,14 +147,13 @@ export function WorkspaceShell({
             {surface === "admin" ? "Admin" : "Partner"}
           </span>
           <Button
+            ref={collapseButtonRef}
             variant="secondary"
             size="sm"
             className="shell-icon-button workspace-sidebar__close"
-            aria-label="Tutup navigasi"
-            onClick={() => {
-              setDrawerOpen(false);
-              menuButtonRef.current?.focus();
-            }}
+            aria-label={collapseLabel}
+            title={collapseLabel}
+            onClick={toggleSidebar}
           >
             <SidebarCollapseIcon />
           </Button>
@@ -141,10 +164,11 @@ export function WorkspaceShell({
               key={to}
               to={to}
               end={WORKSPACE_ROOT_PATHS.has(to)}
+              title={label}
               onClick={() => setDrawerOpen(false)}
             >
               {getNavigationIcon(to)}
-              <span>{label}</span>
+              <span className="workspace-navigation__label">{label}</span>
             </NavLink>
           ))}
         </nav>

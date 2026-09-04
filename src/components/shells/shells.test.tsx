@@ -113,6 +113,38 @@ describe("responsive workspace navigation semantics", () => {
     expect(document.activeElement).toBe(openButton);
   });
 
+  it("toggles desktop collapsed state and updates accessible label", async () => {
+    const view = await renderWorkspace();
+    const collapseButton = view.querySelector<HTMLButtonElement>(
+      '.workspace-sidebar__close[aria-label="Minimalkan navigasi"]',
+    )!;
+    expect(collapseButton).not.toBeNull();
+    expect(collapseButton.getAttribute("aria-label")).toBe(
+      "Minimalkan navigasi",
+    );
+
+    const sidebar = view.querySelector(".workspace-sidebar")!;
+    const shell = view.querySelector(".workspace-shell")!;
+    expect(sidebar.hasAttribute("data-collapsed")).toBe(false);
+    expect(shell.hasAttribute("data-sidebar-collapsed")).toBe(false);
+
+    // Click collapse
+    await act(() => collapseButton.click());
+
+    expect(collapseButton.getAttribute("aria-label")).toBe("Perluas navigasi");
+    expect(sidebar.hasAttribute("data-collapsed")).toBe(true);
+    expect(shell.hasAttribute("data-sidebar-collapsed")).toBe(true);
+
+    // Click expand
+    await act(() => collapseButton.click());
+
+    expect(collapseButton.getAttribute("aria-label")).toBe(
+      "Minimalkan navigasi",
+    );
+    expect(sidebar.hasAttribute("data-collapsed")).toBe(false);
+    expect(shell.hasAttribute("data-sidebar-collapsed")).toBe(false);
+  });
+
   it("renders canonical vector logo and partner role in sidebar", async () => {
     const view = await renderWorkspace();
     const logoImg = view.querySelector<HTMLImageElement>(

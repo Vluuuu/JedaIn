@@ -65,7 +65,8 @@ import {
 import { PackageDetailScreen } from "./features/packageDetail";
 import { PaymentResultScreen, PaymentScreen } from "./features/payment";
 import { PendingPaymentResolutionScreen } from "./features/pendingPayment";
-import { TravelerQuizScreen } from "./features/quiz";
+import { ProfileScreen } from "./features/profile";
+import { RetakeQuizAdapter, TravelerQuizScreen } from "./features/quiz";
 import { RecommendationResultScreen } from "./features/recommendation";
 import { TripReviewScreen } from "./features/reviews";
 import { SessionSelectionScreen } from "./features/sessionSelection";
@@ -73,8 +74,6 @@ import { MyTripsScreen, TripDetailScreen } from "./features/trips";
 import "./App.css";
 
 const placeholderTravelerRoutes = [
-  ["profile", "Profile"],
-  ["profile/preferences", "Preferences"],
   ["complaints/new", "New complaint"],
 ] as const;
 
@@ -108,6 +107,17 @@ export function App() {
           element={
             <OnboardingRouteGuard>
               <RecommendationResultScreen />
+            </OnboardingRouteGuard>
+          }
+        />
+        <Route
+          path="profile/preferences"
+          element={
+            <OnboardingRouteGuard>
+              <TravelerQuizScreen
+                mode="retake"
+                adapter={new RetakeQuizAdapter()}
+              />
             </OnboardingRouteGuard>
           }
         />
@@ -167,6 +177,7 @@ export function App() {
         <Route path="trips" element={<MyTripsScreen />} />
         <Route path="trips/:bookingId" element={<TripDetailScreen />} />
         <Route path="trips/:bookingId/review" element={<TripReviewScreen />} />
+        <Route path="profile" element={<ProfileScreen />} />
         {placeholderTravelerRoutes.map(([path, title]) => (
           <Route
             key={path}

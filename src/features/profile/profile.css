@@ -1,0 +1,354 @@
+/* ==========================================================================
+   JedaIn Traveler Profile (T21) Styles
+   North Star: Quiet Personal Travel Profile
+   Editorial rhythm, continuous layout, solid subtle separators. No card wall.
+   ========================================================================== */
+
+.profile-container {
+  width: 100%;
+  max-width: 48rem; /* 768px */
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-4)
+    calc(var(--space-12) + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .profile-container {
+    padding-top: var(--space-6);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Header: Calm Typographic Identity
+   -------------------------------------------------------------------------- */
+.profile-header {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.profile-eyebrow {
+  display: inline-block;
+  font-size: var(--font-size-label-sm);
+  line-height: var(--line-height-label-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-brand-primary);
+  margin-bottom: var(--space-2);
+}
+
+.profile-name {
+  font-size: var(--font-size-heading-lg);
+  line-height: var(--line-height-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1) 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+@media (min-width: 768px) {
+  .profile-name {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+}
+
+.profile-email {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0 0 var(--space-2) 0;
+  word-break: break-word;
+}
+
+.profile-lead {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Sections & Continuous Editorial Layout
+   -------------------------------------------------------------------------- */
+.profile-section {
+  padding-block: var(--space-6);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.profile-section:last-of-type {
+  border-bottom: none;
+}
+
+.profile-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  gap: var(--space-3);
+}
+
+.profile-section-title {
+  font-size: var(--font-size-heading-sm);
+  line-height: var(--line-height-heading-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* --------------------------------------------------------------------------
+   Preference Surface (Restrained & Calm)
+   -------------------------------------------------------------------------- */
+.profile-intent-block {
+  margin-bottom: var(--space-4);
+}
+
+.profile-intent-badge {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.profile-intent-value {
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brand-primary);
+  line-height: var(--line-height-body-lg);
+}
+
+.profile-facts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .profile-facts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+}
+
+.profile-fact-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.profile-fact-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: var(--font-weight-semibold);
+}
+
+.profile-fact-value {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+.profile-chips-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.profile-restrained-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-caption);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+
+.profile-preference-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-brand-primary);
+  font-family: inherit;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
+}
+
+.profile-preference-cta:hover {
+  background: var(--color-brand-primary-soft);
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary-hover);
+}
+
+.profile-empty-preference {
+  padding: var(--space-4) 0;
+}
+
+.profile-empty-preference p {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-3) 0;
+}
+
+/* --------------------------------------------------------------------------
+   Contact & Account Info
+   -------------------------------------------------------------------------- */
+.profile-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.profile-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+@media (min-width: 640px) {
+  .profile-info-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+}
+
+.profile-info-term {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+}
+
+.profile-info-desc {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* Truthful Flat Verification Status (NO green/amber pills) */
+.profile-phone-status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.profile-verification-text {
+  font-size: var(--font-size-caption);
+  line-height: 1.4;
+}
+
+.profile-verification-text--verified {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.profile-verification-text--unverified {
+  color: var(--color-text-muted);
+}
+
+.profile-verification-note {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Privacy & Data Notice
+   -------------------------------------------------------------------------- */
+.profile-privacy-note {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Logout Action
+   -------------------------------------------------------------------------- */
+.profile-logout-section {
+  padding-top: var(--space-6);
+  margin-top: var(--space-2);
+}
+
+.profile-logout-button {
+  background: none;
+  border: none;
+  padding: var(--space-2) 0;
+  font-family: inherit;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.profile-logout-button:hover:not(:disabled) {
+  color: var(--color-danger-solid);
+}
+
+.profile-logout-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Loading & Error States
+   -------------------------------------------------------------------------- */
+.profile-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6) 0;
+}
+
+.profile-skeleton-bar {
+  background: var(--color-skeleton-base);
+  border-radius: var(--radius-xs);
+}
+
+.profile-error-box {
+  padding: var(--space-4);
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-md);
+  color: var(--color-danger-text);
+  margin-bottom: var(--space-4);
+}
+
+.profile-error-box p {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--font-size-body-sm);
+}
+
+.profile-error-box button {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-caption);
+  background: var(--color-stone-0);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}

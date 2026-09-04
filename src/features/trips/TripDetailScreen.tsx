@@ -483,9 +483,23 @@ export function TripDetailScreen({
               </div>
 
               {detail.organizer.guideStatus === "CERTIFIED_GUIDE" && (
-                <span className="trip-detail-certified-tag">
-                  Pemandu tersertifikasi
-                </span>
+                <div className="trip-detail-certified-inline">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className="trip-detail-certified-icon"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span>Pemandu tersertifikasi</span>
+                </div>
               )}
             </div>
 

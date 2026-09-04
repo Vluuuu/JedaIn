@@ -274,14 +274,19 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: var(--space-3) var(--space-2);
-  background: rgba(255, 255, 255, 0.04);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  border-left: none;
-  border-right: none;
-  border-radius: 0;
+  padding: var(--space-3) var(--space-3);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
   margin-bottom: var(--space-5);
+  margin-inline: var(--space-1);
+}
+
+@media (min-width: 640px) {
+  .profile-stats-row {
+    margin-inline: var(--space-2);
+    padding-inline: var(--space-4);
+  }
 }
 
 .profile-stat-col {
@@ -296,7 +301,9 @@
   text-decoration: none;
   border-radius: var(--radius-md);
   padding: 0.25rem;
-  transition: background-color var(--motion-fast) var(--ease-standard);
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    opacity var(--motion-fast) var(--ease-standard);
 }
 
 .profile-stat-link:hover {

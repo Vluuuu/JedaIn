@@ -473,33 +473,27 @@
 }
 
 /* ==========================================================================
-   Trip Detail Screen (T17/T18) - Preserved & Untouched
+   Trip Detail Screen (T17/T18) - Rebuilt with Calm Nature System
    ========================================================================== */
-.trips-container {
+
+.trip-detail-container {
+  width: 100%;
   max-width: 48rem;
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-12) var(--space-4);
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-4)
+    calc(var(--space-12) + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
-.trips-header {
-  margin-bottom: var(--space-6);
+@media (min-width: 768px) {
+  .trip-detail-container {
+    padding-top: var(--space-6);
+  }
 }
 
-.trips-title {
-  font-size: var(--font-size-heading-lg);
-  line-height: var(--line-height-heading-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-1) 0;
-  letter-spacing: var(--letter-spacing-tight);
-}
-
-.trips-subtitle {
-  font-size: var(--font-size-body-sm);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
+/* --------------------------------------------------------------------------
+   Back Navigation with Approved SVG Arrow
+   -------------------------------------------------------------------------- */
 .trip-detail-topbar {
   margin-bottom: var(--space-4);
 }
@@ -507,102 +501,700 @@
 .trip-detail-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  min-height: 44px;
+  gap: 0.375rem;
+  min-height: 2.75rem; /* Touch target >= 44px */
+  padding: var(--space-1) 0;
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
+  color: var(--color-stone-600);
   text-decoration: none;
-  transition: color var(--motion-normal) var(--ease-standard);
+  transition: color var(--motion-fast) var(--ease-standard);
 }
 
 .trip-detail-back-btn:hover {
-  color: var(--color-brand-primary);
+  color: var(--color-stone-900);
 }
 
-.trip-detail-header {
+.trip-detail-back-icon {
+  flex-shrink: 0;
+  color: var(--color-stone-500);
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.trip-detail-back-btn:hover .trip-detail-back-icon {
+  transform: translateX(-2px);
+  color: var(--color-stone-800);
+}
+
+/* --------------------------------------------------------------------------
+   Hero & Experience Identity
+   -------------------------------------------------------------------------- */
+.trip-detail-hero {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-stone-300);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
   margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .trip-detail-hero {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.trip-detail-hero__thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .trip-detail-hero__thumb {
+    width: 15rem;
+    aspect-ratio: auto;
+  }
+}
+
+.trip-detail-hero__body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+/* Lifecycle status dot system */
+.trip-detail-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.trip-detail-status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.trip-detail-status-dot--confirmed {
+  background-color: var(--color-forest-700);
+}
+
+.trip-detail-status-dot--completed {
+  background-color: var(--color-stone-500);
+}
+
+.trip-detail-status-text {
+  color: var(--color-stone-700);
 }
 
 .trip-detail-title {
   font-size: var(--font-size-heading-md);
+  line-height: 1.3;
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: var(--space-2) 0 var(--space-1) 0;
+  color: var(--color-stone-900);
+  margin: 0;
   letter-spacing: var(--letter-spacing-tight);
 }
 
+@media (min-width: 768px) {
+  .trip-detail-title {
+    font-size: var(--font-size-heading-lg);
+    line-height: var(--line-height-heading-lg);
+  }
+}
+
+.trip-detail-meta {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-500);
+  margin: 0;
+}
+
+.trip-detail-departure-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-forest-50);
+  border-radius: var(--radius-md);
+  margin-top: auto;
+}
+
+.trip-detail-departure-icon {
+  color: var(--color-forest-700);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.trip-detail-departure-text {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-900);
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   Editorial Sections & Rhythm
+   -------------------------------------------------------------------------- */
 .trip-detail-section {
   background-color: var(--color-bg-surface);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
   padding: var(--space-5);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
   box-shadow: var(--shadow-xs);
+}
+
+@media (min-width: 768px) {
+  .trip-detail-section {
+    padding: var(--space-6);
+  }
 }
 
 .trip-detail-section__title {
   font-size: var(--font-size-heading-sm);
+  line-height: 1.35;
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-3) 0;
+  color: var(--color-stone-900);
+  margin: 0 0 var(--space-4) 0;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-.trip-detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--space-2) 0;
+.trip-detail-section__subtitle {
   font-size: var(--font-size-body-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-stone-600);
+  margin: calc(var(--space-2) * -1) 0 var(--space-4) 0;
+  line-height: 1.5;
 }
 
-.trip-detail-row strong {
-  color: var(--color-text-primary);
-}
-
-.trip-card__meta {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-/* Reviews Box on Completed */
-.trip-reviews-grid {
+/* --------------------------------------------------------------------------
+   Trip Essentials: Facts Grid
+   -------------------------------------------------------------------------- */
+.trip-detail-facts-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-}
-
-.trip-review-card {
-  background-color: var(--color-bg-surface-subtle);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  grid-template-columns: 1fr;
   gap: var(--space-3);
 }
 
-.trip-review-card__title {
-  font-size: var(--font-size-body-md);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-1) 0;
+@media (min-width: 640px) {
+  .trip-detail-facts-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
 }
 
-.trip-review-card__desc {
+.trip-detail-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px dashed var(--color-stone-200);
+}
+
+.trip-detail-fact__label {
   font-size: var(--font-size-caption);
-  color: var(--color-text-secondary);
+  color: var(--color-stone-500);
+}
+
+.trip-detail-fact__value {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-800);
+  line-height: 1.4;
+}
+
+.trip-detail-fact__value--break {
+  word-break: break-all;
+}
+
+.trip-detail-fact__value--price {
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forest-700);
+}
+
+/* --------------------------------------------------------------------------
+   Post-Purchase EO Contact & Organizer Profile
+   -------------------------------------------------------------------------- */
+.trip-detail-organizer-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.trip-detail-organizer-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+@media (min-width: 480px) {
+  .trip-detail-organizer-header {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+}
+
+.trip-detail-organizer-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.trip-detail-organizer-name {
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
   margin: 0;
 }
 
-@media (max-width: 640px) {
-  .trips-container {
-    padding: var(--space-4) var(--space-4) var(--space-10) var(--space-4);
-  }
+.trip-detail-organizer-role {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+  margin: 0;
+}
 
-  .trip-reviews-grid {
-    grid-template-columns: 1fr;
+.trip-detail-certified-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-800);
+  background-color: var(--color-forest-50);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+  align-self: flex-start;
+}
+
+.trip-detail-organizer-bio {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.trip-detail-contact-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background-color: var(--color-stone-50);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 640px) {
+  .trip-detail-contact-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
+}
+
+.trip-detail-contact-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.trip-detail-contact-person {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.trip-detail-contact-person__label {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+}
+
+.trip-detail-contact-person__name {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+}
+
+.trip-detail-contact-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.trip-detail-contact-method-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-body-sm);
+}
+
+.trip-detail-contact-method-icon {
+  color: var(--color-stone-500);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.trip-detail-contact-method-val {
+  color: var(--color-stone-800);
+}
+
+.trip-detail-contact-email-link {
+  color: var(--color-forest-700);
+  text-decoration: none;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.trip-detail-contact-email-link:hover {
+  color: var(--color-forest-900);
+  text-decoration: underline;
+}
+
+.trip-detail-contact-cta {
+  min-height: 2.75rem; /* Touch target >= 44px */
+  padding-inline: var(--space-6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   Lists: Highlights, Inclusions, Exclusions, Safety Notes
+   -------------------------------------------------------------------------- */
+.trip-detail-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.trip-detail-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-700);
+  line-height: 1.5;
+}
+
+.trip-detail-list-icon {
+  flex-shrink: 0;
+  color: var(--color-stone-400);
+  font-weight: var(--font-weight-bold);
+}
+
+.trip-detail-list-icon--check {
+  color: var(--color-forest-700);
+}
+
+.trip-detail-list-icon--cross {
+  color: var(--color-stone-400);
+}
+
+.trip-detail-in-out-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .trip-detail-in-out-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+  }
+}
+
+.trip-detail-in-out-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.trip-detail-policy-text {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Itinerary Timeline
+   -------------------------------------------------------------------------- */
+.trip-detail-timeline {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: var(--space-5);
+}
+
+.trip-detail-timeline::before {
+  content: "";
+  position: absolute;
+  left: 0.3125rem;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 2px;
+  background-color: var(--color-stone-200);
+}
+
+.trip-detail-timeline-item {
+  position: relative;
+  padding-bottom: var(--space-5);
+}
+
+.trip-detail-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.trip-detail-timeline-marker {
+  position: absolute;
+  left: calc(var(--space-5) * -1 + 0.0625rem);
+  top: 0.25rem;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-forest-700);
+  box-shadow: 0 0 0 3px var(--color-bg-surface);
+}
+
+.trip-detail-timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.trip-detail-timeline-tag {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-800);
+}
+
+.trip-detail-timeline-title {
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.trip-detail-timeline-desc {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Completed Trip Reviews Section (T18)
+   -------------------------------------------------------------------------- */
+.trip-detail-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.trip-detail-review-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-stone-50);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 640px) {
+  .trip-detail-review-item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.trip-detail-review-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.trip-detail-review-item__type {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-500);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.trip-detail-review-item__title {
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0;
+}
+
+.trip-detail-review-item__target {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-800);
+  margin: 0;
+}
+
+.trip-detail-review-item__desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-600);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.trip-detail-review-item__action {
+  align-self: flex-start;
+}
+
+@media (min-width: 640px) {
+  .trip-detail-review-item__action {
+    align-self: center;
+    flex-shrink: 0;
+  }
+}
+
+.trip-detail-review-item__action button {
+  min-height: 2.75rem; /* Touch target >= 44px */
+  padding-inline: var(--space-5);
+  white-space: nowrap;
+}
+
+.trip-detail-reviewed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-700);
+  min-height: 2.75rem;
+}
+
+.trip-detail-reviewed-check {
+  font-weight: var(--font-weight-bold);
+}
+
+/* --------------------------------------------------------------------------
+   Discreet Prototype Demo Trip Completion Disclosure
+   -------------------------------------------------------------------------- */
+.trip-detail-demo-disclosure {
+  margin-top: var(--space-8);
+  border-top: 1px dashed var(--color-stone-200);
+  padding-top: var(--space-4);
+}
+
+.trip-detail-demo-summary {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-400);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  transition: color var(--motion-fast) var(--ease-standard);
+  width: fit-content;
+}
+
+.trip-detail-demo-summary:hover {
+  color: var(--color-stone-600);
+}
+
+.trip-detail-demo-body {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-stone-50);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.trip-detail-demo-desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-600);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.trip-detail-demo-btn {
+  align-self: flex-start;
+  min-height: 2.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Trip Detail Loading & Error/Not Found States
+   -------------------------------------------------------------------------- */
+.trip-detail-hero-skeleton {
+  margin-bottom: var(--space-5);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.trip-detail-skeleton-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.trip-detail-skeleton-section {
+  margin-bottom: var(--space-5);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.trip-detail-state {
+  text-align: center;
+  padding: var(--space-10) var(--space-6);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
+  margin-top: var(--space-4);
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.trip-detail-state__title {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0;
+}
+
+.trip-detail-state__desc {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  margin: 0;
+  max-width: 28rem;
+}
+
+.trip-detail-state__btn {
+  min-height: 2.75rem;
+  min-width: 8rem;
 }

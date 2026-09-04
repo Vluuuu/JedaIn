@@ -1,4 +1,6 @@
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import { mockApplicationStore } from "../eo/mockApplicationStore";
+import { resolveOrganizerReviewRef } from "../identity/identityResolvers";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
@@ -165,6 +167,25 @@ export class MockTripsAdapter implements TripsAdapter {
       "EO_GUIDE",
     );
 
+    // Resolve source-backed organizer contact for PAID / COMPLETED trip detail
+    let organizerContact: import("./types").TripOrganizerContact | undefined;
+    if (detail?.organizer?.id) {
+      const organizerId = detail.organizer.id;
+      const approvedApps = mockApplicationStore
+        .getAll()
+        .filter((app) => app.status === "APPROVED");
+      const matchedApp = approvedApps.find(
+        (app) => resolveOrganizerReviewRef(app.identityId) === organizerId,
+      );
+      if (matchedApp) {
+        organizerContact = {
+          contactPerson: matchedApp.contactPerson,
+          phone: matchedApp.phone,
+          email: matchedApp.email,
+        };
+      }
+    }
+
     return {
       booking,
       package: pkg,
@@ -172,6 +193,7 @@ export class MockTripsAdapter implements TripsAdapter {
       session,
       hasDestinationReview,
       hasEoReview,
+      organizerContact,
     };
   }
 }

@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import {
-  MilestoneMapPinIcon,
-  MilestoneReflectionStarIcon,
   MilestoneSproutIcon,
   MilestoneTrailIcon,
 } from "../../components/shells/icons";
@@ -69,6 +67,13 @@ export function PublicProfileScreen() {
   };
 
   const monogram = targetTraveler.displayName.charAt(0).toUpperCase() || "T";
+
+  // Source-backed milestone derivation:
+  // Jeda Pertama earned strictly when completedJedaCount >= 1
+  // Tiga Jeda earned strictly when completedJedaCount >= 3
+  // 5 Destinasi & Pemberi Ulasan omitted because unprovable from public record
+  const jedaPertamaEarned = targetTraveler.completedJedaCount >= 1;
+  const tigaJedaEarned = targetTraveler.completedJedaCount >= 3;
 
   return (
     <div className="profile-container profile-main-page">
@@ -154,27 +159,36 @@ export function PublicProfileScreen() {
           </Link>
         </div>
 
-        {/* 3. Jeda Milestones Medallions */}
+        {/* 3. Truthful Public Jeda Milestones */}
         <section
           className="profile-milestones-section"
           aria-label="Pencapaian Jeda"
         >
-          <h2 className="profile-milestones-title">Jeda Milestones</h2>
-          <div className="profile-milestones-strip">
+          <h2 className="profile-milestones-title">Pencapaian Jeda</h2>
+          <div
+            className="profile-milestones-strip"
+            style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
+          >
             <div
-              className="profile-milestone-item profile-milestone-item--earned"
+              className={`profile-milestone-item ${
+                jedaPertamaEarned
+                  ? "profile-milestone-item--earned"
+                  : "profile-milestone-item--locked"
+              }`}
               title="Jeda Pertama"
             >
               <div className="profile-milestone-medallion" aria-hidden="true">
                 <MilestoneSproutIcon width={18} height={18} />
               </div>
               <span className="profile-milestone-name">Jeda Pertama</span>
-              <span className="profile-milestone-status">Tercapai</span>
+              <span className="profile-milestone-status">
+                {jedaPertamaEarned ? "Tercapai" : "0/1"}
+              </span>
             </div>
 
             <div
               className={`profile-milestone-item ${
-                targetTraveler.completedJedaCount >= 3
+                tigaJedaEarned
                   ? "profile-milestone-item--earned"
                   : "profile-milestone-item--locked"
               }`}
@@ -185,32 +199,10 @@ export function PublicProfileScreen() {
               </div>
               <span className="profile-milestone-name">Tiga Jeda</span>
               <span className="profile-milestone-status">
-                {targetTraveler.completedJedaCount >= 3
+                {tigaJedaEarned
                   ? "Tercapai"
                   : `${Math.min(targetTraveler.completedJedaCount, 3)}/3`}
               </span>
-            </div>
-
-            <div
-              className="profile-milestone-item profile-milestone-item--locked"
-              title="5 Destinasi"
-            >
-              <div className="profile-milestone-medallion" aria-hidden="true">
-                <MilestoneMapPinIcon width={18} height={18} />
-              </div>
-              <span className="profile-milestone-name">5 Destinasi</span>
-              <span className="profile-milestone-status">Terkunci</span>
-            </div>
-
-            <div
-              className="profile-milestone-item profile-milestone-item--locked"
-              title="Pemberi Ulasan"
-            >
-              <div className="profile-milestone-medallion" aria-hidden="true">
-                <MilestoneReflectionStarIcon width={18} height={18} />
-              </div>
-              <span className="profile-milestone-name">Pemberi Ulasan</span>
-              <span className="profile-milestone-status">Terkunci</span>
             </div>
           </div>
         </section>

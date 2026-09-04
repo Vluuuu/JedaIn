@@ -116,18 +116,19 @@ export function ProfilePhoneVerificationScreen() {
               </div>
 
               <p className="profile-verification-note">
-                Untuk prototype, kode OTP simulasi akan ditampilkan di langkah
-                berikutnya.
+                Untuk prototype, verifikasi nomor menggunakan kode demo di
+                langkah berikutnya.
               </p>
 
               <button type="submit" className="profile-save-button">
-                Kirim Kode OTP
+                Lanjut ke Verifikasi
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="profile-settings-form">
               <p className="profile-verification-note">
-                Kode OTP telah dikirim ke nomor <strong>{phone}</strong>.
+                Gunakan kode demo berikut untuk menyelesaikan verifikasi nomor{" "}
+                {phone}.
               </p>
               <div className="profile-demo-code-pill">
                 <span>

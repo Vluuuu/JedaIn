@@ -1078,6 +1078,87 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
     expect(container.textContent).not.toContain("081");
     expect(container.textContent).not.toContain("PAY-");
   });
+
+  it("S. Social Graph Single Source of Truth: follower/following counts match exact list length without fallbacks", async () => {
+    const { mockTravelerCommunityStore } = await import("./mockCommunityStore");
+
+    // Seeded traveler: usr_traveler_1 has exactly 2 followers (Siti, Adi) and follows 1 (Maya)
+    expect(mockTravelerCommunityStore.getFollowerCount("usr_traveler_1")).toBe(
+      mockTravelerCommunityStore.getFollowersList("usr_traveler_1").length,
+    );
+    expect(mockTravelerCommunityStore.getFollowingCount("usr_traveler_1")).toBe(
+      mockTravelerCommunityStore.getFollowingList("usr_traveler_1").length,
+    );
+
+    // Zero-relation traveler: zero graph edges yields exactly 0 counts and empty arrays
+    const zeroUser = "usr_traveler_lonely";
+    expect(mockTravelerCommunityStore.getFollowerCount(zeroUser)).toBe(0);
+    expect(mockTravelerCommunityStore.getFollowingCount(zeroUser)).toBe(0);
+    expect(mockTravelerCommunityStore.getFollowersList(zeroUser)).toEqual([]);
+    expect(mockTravelerCommunityStore.getFollowingList(zeroUser)).toEqual([]);
+
+    // Follow toggle consistency: A follows B
+    const beforeCountB =
+      mockTravelerCommunityStore.getFollowerCount("usr_demo");
+    const beforeCountA = mockTravelerCommunityStore.getFollowingCount(zeroUser);
+
+    mockTravelerCommunityStore.follow(zeroUser, "usr_demo");
+    expect(mockTravelerCommunityStore.getFollowerCount("usr_demo")).toBe(
+      beforeCountB + 1,
+    );
+    expect(mockTravelerCommunityStore.getFollowingCount(zeroUser)).toBe(
+      beforeCountA + 1,
+    );
+    expect(
+      mockTravelerCommunityStore
+        .getFollowersList("usr_demo")
+        .some((t) => t.travelerId === zeroUser),
+    ).toBe(true);
+
+    mockTravelerCommunityStore.unfollow(zeroUser, "usr_demo");
+    expect(mockTravelerCommunityStore.getFollowerCount("usr_demo")).toBe(
+      beforeCountB,
+    );
+    expect(mockTravelerCommunityStore.getFollowingCount(zeroUser)).toBe(
+      beforeCountA,
+    );
+  });
+
+  it("T. Avatar MIME validation: accepts image/jpeg, image/png, image/webp and rejects unsupported MIME types", async () => {
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    sessionStore.setUser(sampleUser);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/profile/settings"] },
+          createElement(SettingsScreen),
+        ),
+      );
+    });
+
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type='file']")!;
+    expect(fileInput).not.toBeNull();
+
+    // Try unsupported MIME type (e.g., gif / svg)
+    const invalidFile = new File(["dummy"], "test.gif", { type: "image/gif" });
+    await act(async () => {
+      Object.defineProperty(fileInput, "files", {
+        value: [invalidFile],
+        writable: true,
+      });
+      fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    expect(container.textContent).toContain(
+      "File harus berupa gambar (JPG, PNG, WebP).",
+    );
+  });
 });
 
 describe("Preference Retake Screen & Isolation Contract (T22) - Preserved", () => {

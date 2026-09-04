@@ -64,7 +64,8 @@ export function SettingsScreen({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
+    const validMimes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validMimes.includes(file.type)) {
       setErrorMessage("File harus berupa gambar (JPG, PNG, WebP).");
       return;
     }

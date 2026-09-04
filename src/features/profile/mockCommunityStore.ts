@@ -1,7 +1,6 @@
 // Deterministic prototype community and directory store for social discovery
-// Zero random numbers, zero Math.random, zero hardcoded numbers in JSX
-// Safe default of 0 / 0 for unknown travelers
-// Complete follow/unfollow and search support
+// SINGLE SOURCE OF TRUTH: All followers and following counts are 100% derived from the graph edges (followRelations).
+// Zero fake counters, zero arbitrary fallback lists, zero random numbers.
 
 export interface CommunityCounts {
   followers: number;
@@ -52,21 +51,15 @@ const defaultTravelers: PublicTravelerRecord[] = [
 let travelersDirectory: PublicTravelerRecord[] = [...defaultTravelers];
 
 // Graph relationship: Set of "followerId:followingId"
+// Seeded truthful relationships:
+// usr_traveler_siti follows usr_traveler_1
+// usr_traveler_adi follows usr_traveler_1
+// usr_traveler_1 follows usr_traveler_maya
 let followRelations = new Set<string>([
   "usr_traveler_siti:usr_traveler_1",
   "usr_traveler_adi:usr_traveler_1",
   "usr_traveler_1:usr_traveler_maya",
 ]);
-
-const baseCounts: Record<string, CommunityCounts> = {
-  usr_traveler_1: { followers: 12, following: 8 },
-  usr_demo: { followers: 7, following: 5 },
-  usr_traveler_siti: { followers: 15, following: 9 },
-  usr_traveler_adi: { followers: 6, following: 4 },
-  usr_traveler_maya: { followers: 20, following: 11 },
-};
-
-let customCounts: Record<string, CommunityCounts> = { ...baseCounts };
 
 export const mockTravelerCommunityStore = {
   // Directory & Search
@@ -107,7 +100,7 @@ export const mockTravelerCommunityStore = {
     }
   },
 
-  // Follow State
+  // Follow State & Graph Manipulation
   isFollowing(currentTravelerId: string, targetTravelerId: string): boolean {
     if (!currentTravelerId || !targetTravelerId) return false;
     return followRelations.has(`${currentTravelerId}:${targetTravelerId}`);
@@ -124,17 +117,6 @@ export const mockTravelerCommunityStore = {
     const key = `${currentTravelerId}:${targetTravelerId}`;
     if (!followRelations.has(key)) {
       followRelations.add(key);
-      // adjust counts
-      const target = this.getCommunityCounts(targetTravelerId);
-      this.setCommunityCounts(targetTravelerId, {
-        followers: target.followers + 1,
-        following: target.following,
-      });
-      const source = this.getCommunityCounts(currentTravelerId);
-      this.setCommunityCounts(currentTravelerId, {
-        followers: source.followers,
-        following: source.following + 1,
-      });
       return true;
     }
     return false;
@@ -145,23 +127,14 @@ export const mockTravelerCommunityStore = {
     const key = `${currentTravelerId}:${targetTravelerId}`;
     if (followRelations.has(key)) {
       followRelations.delete(key);
-      // adjust counts
-      const target = this.getCommunityCounts(targetTravelerId);
-      this.setCommunityCounts(targetTravelerId, {
-        followers: Math.max(0, target.followers - 1),
-        following: target.following,
-      });
-      const source = this.getCommunityCounts(currentTravelerId);
-      this.setCommunityCounts(currentTravelerId, {
-        followers: source.followers,
-        following: Math.max(0, source.following - 1),
-      });
       return true;
     }
     return false;
   },
 
+  // Graph-Derived Lists (Truthful: zero fake fallbacks, returns empty array if no edges)
   getFollowersList(travelerId: string): PublicTravelerRecord[] {
+    if (!travelerId) return [];
     const followerIds: string[] = [];
     for (const rel of followRelations) {
       const [follower, following] = rel.split(":");
@@ -169,18 +142,20 @@ export const mockTravelerCommunityStore = {
         followerIds.push(follower);
       }
     }
-    // If store has seed relationships, return those; plus fill from directory if needed
-    const matched = travelersDirectory.filter((t) =>
-      followerIds.includes(t.travelerId),
-    );
-    if (matched.length > 0) return matched;
-    // Fallback deterministic sample for prototype
-    return travelersDirectory
-      .filter((t) => t.travelerId !== travelerId)
-      .slice(0, 3);
+    return followerIds.map((id) => {
+      const found = travelersDirectory.find((t) => t.travelerId === id);
+      return (
+        found || {
+          travelerId: id,
+          displayName: "Traveler JedaIn",
+          completedJedaCount: 0,
+        }
+      );
+    });
   },
 
   getFollowingList(travelerId: string): PublicTravelerRecord[] {
+    if (!travelerId) return [];
     const followingIds: string[] = [];
     for (const rel of followRelations) {
       const [follower, following] = rel.split(":");
@@ -188,40 +163,31 @@ export const mockTravelerCommunityStore = {
         followingIds.push(following);
       }
     }
-    const matched = travelersDirectory.filter((t) =>
-      followingIds.includes(t.travelerId),
-    );
-    if (matched.length > 0) return matched;
-    return travelersDirectory
-      .filter((t) => t.travelerId !== travelerId)
-      .slice(0, 2);
+    return followingIds.map((id) => {
+      const found = travelersDirectory.find((t) => t.travelerId === id);
+      return (
+        found || {
+          travelerId: id,
+          displayName: "Traveler JedaIn",
+          completedJedaCount: 0,
+        }
+      );
+    });
   },
 
-  // Counts
+  // Graph-Derived Counts (Strict Single Source of Truth)
   getFollowerCount(travelerId: string): number {
-    if (!travelerId) return 0;
-    return customCounts[travelerId]?.followers ?? 0;
+    return this.getFollowersList(travelerId).length;
   },
 
   getFollowingCount(travelerId: string): number {
-    if (!travelerId) return 0;
-    return customCounts[travelerId]?.following ?? 0;
+    return this.getFollowingList(travelerId).length;
   },
 
   getCommunityCounts(travelerId: string): CommunityCounts {
     return {
       followers: this.getFollowerCount(travelerId),
       following: this.getFollowingCount(travelerId),
-    };
-  },
-
-  setCommunityCounts(
-    travelerId: string,
-    counts: { followers: number; following: number },
-  ): void {
-    customCounts[travelerId] = {
-      followers: Math.max(0, counts.followers),
-      following: Math.max(0, counts.following),
     };
   },
 
@@ -232,10 +198,5 @@ export const mockTravelerCommunityStore = {
       "usr_traveler_adi:usr_traveler_1",
       "usr_traveler_1:usr_traveler_maya",
     ]);
-
-    customCounts = {};
-    for (const [k, v] of Object.entries(baseCounts)) {
-      customCounts[k] = { ...v };
-    }
   },
 };

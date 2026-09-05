@@ -18,5 +18,6 @@ export * from "./EoPackageDetailScreen";
 export * from "./EoSessionsScreen";
 export * from "./EoBookingsScreen";
 export * from "./EoDestinationsScreen";
+export * from "./EoDestinationDetailScreen";
 export * from "./EoReviewsScreen";
 export * from "./EoProfileScreen";

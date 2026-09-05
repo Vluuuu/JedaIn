@@ -2364,3 +2364,812 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   EO Destinations Directory & Detail Screens (.eo-destinations-* & .eo-dest-*)
+   ========================================================================== */
+
+.eo-destinations-container,
+.eo-dest-detail-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 1200px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.eo-destinations-header {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-destinations-header__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.eo-destinations-header h1 {
+  font-size: var(--font-size-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.eo-destinations-header__subtitle {
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Toolbar: Search + Filter Chips */
+.eo-destinations-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.eo-destinations-search {
+  flex: 1;
+  min-width: 260px;
+  max-width: 400px;
+}
+
+.eo-destinations-search-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
+.eo-destinations-search-input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+}
+
+.eo-destinations-filter-chips {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.eo-dest-chip {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--ease-standard);
+}
+
+.eo-dest-chip:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+.eo-dest-chip--active {
+  background: var(--color-forest-700);
+  border-color: var(--color-forest-700);
+  color: var(--color-stone-0);
+}
+
+.eo-destinations-empty {
+  padding: var(--space-8);
+  text-align: center;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Destination Cards Grid */
+.eo-destinations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-5);
+}
+
+.eo-dest-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  transition: border-color var(--motion-fast) var(--ease-standard);
+}
+
+.eo-dest-card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.eo-dest-card__media {
+  width: 100%;
+  height: 180px;
+  background: var(--color-stone-100);
+  position: relative;
+  overflow: hidden;
+}
+
+.eo-dest-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eo-dest-card__img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--color-forest-50),
+    var(--color-sand-50)
+  );
+}
+
+.eo-dest-card__badges {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+}
+
+.eo-dest-card__body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  gap: var(--space-4);
+}
+
+.eo-dest-card__title {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1);
+}
+
+.eo-dest-card__location {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2);
+}
+
+.eo-dest-card__desc {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.eo-dest-card__highlights {
+  margin: var(--space-3) 0 0;
+  padding-left: 1.15rem;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.eo-dest-card__guide {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-surface-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default);
+  font-size: var(--font-size-caption);
+}
+
+.eo-dest-card__guide-status {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-800);
+}
+
+.eo-dest-card__capacity {
+  color: var(--color-text-muted);
+}
+
+.eo-dest-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.eo-dest-card__pricing {
+  display: flex;
+  flex-direction: column;
+}
+
+.eo-dest-card__price-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.eo-dest-card__price-value {
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brand-primary);
+}
+
+.eo-dest-card__price-value small {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+.eo-dest-card__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Destination Detail Screen */
+.eo-dest-detail-back-nav {
+  display: flex;
+  align-items: center;
+}
+
+.eo-dest-detail-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.eo-dest-detail-back-link:hover {
+  color: var(--color-brand-primary);
+}
+
+.eo-dest-detail-back-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+}
+
+.eo-dest-detail-hero {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-6);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-dest-detail-hero__media {
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  background: var(--color-stone-100);
+}
+
+.eo-dest-detail-hero__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eo-dest-detail-hero__placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--color-forest-50),
+    var(--color-sand-50)
+  );
+}
+
+.eo-dest-detail-hero__content {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.eo-dest-detail-hero__badges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.eo-dest-detail-hero__guide-badge {
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-800);
+  font-weight: var(--font-weight-semibold);
+}
+
+.eo-dest-detail-hero__title {
+  font-size: var(--font-size-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.eo-dest-detail-hero__loc {
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.eo-dest-detail-hero__pricing-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.eo-dest-detail-hero__price-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  display: block;
+}
+
+.eo-dest-detail-hero__price-val {
+  font-size: var(--font-size-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brand-primary);
+}
+
+.eo-dest-detail-hero__price-val small {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+/* Detail Grid Layout */
+.eo-dest-detail-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.eo-dest-detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.eo-dest-detail-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eo-dest-detail-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-dest-detail-card__title {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-dest-detail-card__text {
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-body-md);
+  margin: 0;
+}
+
+.eo-dest-subheading {
+  display: block;
+  font-size: var(--font-size-label-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.eo-dest-detail-highlights ul,
+.eo-dest-detail-bullet-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  line-height: 1.45;
+}
+
+.eo-dest-detail-card__hint {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.eo-dest-detail-facility-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2) var(--space-4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.eo-dest-facility-item {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-primary);
+}
+
+/* Side Card for Dest Detail */
+.eo-dest-side-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-dest-side-title {
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-dest-side-text {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.eo-dest-side-badge-box {
+  margin-top: var(--space-1);
+}
+
+.eo-dest-badge-ready {
+  display: inline-block;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forest-800);
+  background: var(--color-forest-50);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+}
+
+.eo-dest-spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--font-size-body-sm);
+}
+
+.eo-dest-spec-label {
+  color: var(--color-text-secondary);
+}
+
+.eo-dest-spec-val {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.eo-dest-side-cta-card {
+  background: var(--color-forest-50);
+  border: 1.5px solid var(--color-forest-300);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.eo-dest-side-cta-title {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forest-900);
+  margin: 0;
+}
+
+.eo-dest-side-cta-desc {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-forest-800);
+  margin: 0;
+}
+
+/* Builder Step 1 Styles */
+.eo-builder-dest-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.eo-builder-dest-search {
+  flex: 1;
+  min-width: 250px;
+  max-width: 380px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
+.eo-builder-dest-chips {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.eo-builder-dest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.eo-builder-dest-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all var(--motion-fast) var(--ease-standard);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-builder-dest-card--selected {
+  border: 2px solid var(--color-forest-600);
+  background: var(--color-forest-50);
+}
+
+.eo-builder-dest-card__media {
+  width: 100%;
+  height: 140px;
+  position: relative;
+  background: var(--color-stone-100);
+}
+
+.eo-builder-dest-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eo-builder-dest-card__img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--color-forest-50),
+    var(--color-sand-50)
+  );
+}
+
+.eo-builder-dest-card__body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  gap: var(--space-3);
+}
+
+.eo-builder-dest-card__title {
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 0.15rem;
+}
+
+.eo-builder-dest-card__loc {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2);
+}
+
+.eo-builder-dest-card__desc {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.eo-builder-dest-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-default);
+  font-size: var(--font-size-caption);
+}
+
+.eo-builder-dest-card__guide-text {
+  color: var(--color-forest-800);
+  font-weight: var(--font-weight-semibold);
+}
+
+.eo-builder-dest-card__price strong {
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-body-sm);
+}
+
+.eo-builder-dest-card__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  padding-top: var(--space-2);
+}
+
+/* Guide Source Section */
+.eo-builder-guide-section {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.eo-builder-guide-title {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.eo-builder-guide-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+.eo-builder-guide-card {
+  background: var(--color-bg-surface);
+  border: 1.5px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--ease-standard);
+}
+
+.eo-builder-guide-card--active {
+  border-color: var(--color-brand-primary);
+  background: var(--color-forest-50);
+}
+
+.eo-builder-guide-card--locked {
+  cursor: default;
+  background: var(--color-bg-surface);
+  border-color: var(--color-forest-300);
+}
+
+.eo-builder-guide-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.eo-builder-guide-card__desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Destination Inspect Dialog */
+.eo-dest-inspect-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eo-dest-inspect-media {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-stone-100);
+}
+
+.eo-dest-inspect-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.eo-dest-inspect-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+}
+
+.eo-dest-inspect-section strong {
+  display: block;
+  font-size: var(--font-size-label-sm);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.eo-dest-inspect-section ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.eo-dest-inspect-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+}
+
+/* Responsive adjustments */
+@media (max-width: 64rem) {
+  .eo-dest-detail-hero {
+    grid-template-columns: 1fr;
+  }
+  .eo-dest-detail-hero__media {
+    height: 180px;
+  }
+  .eo-dest-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

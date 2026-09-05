@@ -20,6 +20,25 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     capacityPerSession: 20,
     imageUrl: "/images/packages/slow_green_day.jpg",
     status: "ACTIVE",
+    availableActivities: [
+      "Walking tour kebun teh lereng bukit",
+      "Sesi hening & respirasi udara sejuk",
+      "Edukasi petik teh bersama warga lokal",
+      "Santap siang lalapan pedesaan",
+    ],
+    facilities: [
+      "Saung istirahat bambu",
+      "Toilet & sanitasi bersih",
+      "Area parkir kendaraan",
+      "Musholla semi-terbuka",
+      "Pos P3K sederhana",
+    ],
+    operationalNotes: [
+      "Waktu terbaik berkunjung adalah pukul 07.00–14.00 WIB sebelum kabut tebal sore.",
+      "Disarankan mengenakan alas kaki anti-selip dan jaket ringan berhawa sejuk.",
+    ],
+    localGuideSummary:
+      "Pemandu lokal warga lereng terlatih memahami rute kebun teh dan sejarah konservasi perkebunan.",
   },
   {
     destinationId: "dest_lembah_pacet",
@@ -40,6 +59,25 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     capacityPerSession: 15,
     imageUrl: "/images/packages/weekend_nature_reset.jpg",
     status: "ACTIVE",
+    availableActivities: [
+      "Sound healing gemericik aliran sungai alami",
+      "Jeda meditasi hening tepi hutan pinus",
+      "Jalan kaki tanpa alas di area rumput terawat",
+      "Seduh wedang rempah herbal lokal",
+    ],
+    facilities: [
+      "Paviliun kayu untuk sesi hening",
+      "Toilet standar wisata bersih",
+      "Titik bilas air pegunungan",
+      "Dapur seduh rempah tradisional",
+      "Area parkir beraspal",
+    ],
+    operationalNotes: [
+      "Kawasan bebas asap rokok dan kebisingan musik eksternal untuk menjaga ketenangan.",
+      "Debit air sungai dipantau harian dengan batas aman debit terverifikasi tim pengelola.",
+    ],
+    localGuideSummary:
+      "Pemandu retreat lokal terakreditasi standar PLUS dengan pelatihan SOP darurat alam terbuka.",
   },
   {
     destinationId: "dest_hutan_trawas",
@@ -48,18 +86,36 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     province: "Jawa Timur",
     city: "Pasuruan",
     verificationLevel: "BASIC",
-    guideReady: false,
+    guideReady: true,
     baseCostPerPerson: 95000,
     description:
-      "Kawasan hutan bambu hening untuk kontemplasi mandiri. Belum memiliki guide lokal di tempat sehingga mewajibkan EO memiliki Certified Guide sendiri.",
+      "Kawasan hutan bambu hening untuk kontemplasi tenang dan jalan santai. Didukung pemandu lokal desa wisata yang siap memandu alur perjalanan.",
     highlights: [
       "Suasana sangat hening dan sejuk alami",
-      "Spot meditasi dan jalan hening",
-      "Wajib pemandu bersertifikat dari EO",
+      "Spot meditasi dan lorong bambu teduh",
+      "Pemandu lokal desa wisata siap mendampingi",
     ],
     capacityPerSession: 12,
     imageUrl: "/images/packages/mindful_morning.jpg",
     status: "ACTIVE",
+    availableActivities: [
+      "Jalan hening melintasi kanopi rumpun bambu",
+      "Sesi journaling & kontemplasi santai",
+      "Edukasi kerajinan anyaman bambu dasar",
+      "Cicip camilan umbi rebus pedesaan",
+    ],
+    facilities: [
+      "Gazebo anyaman bambu teduh",
+      "Toilet alam bersih",
+      "Titik kumpul awal pendopo desa",
+      "Tempat cuci tangan higienis",
+    ],
+    operationalNotes: [
+      "Jalur setapak tanah padat dengan kemiringan sangat landai, cocok untuk pemula.",
+      "Kapasitas per sesi dibatasi maksimal 12 orang demi menjaga kekhidmatan hening.",
+    ],
+    localGuideSummary:
+      "Pemandu desa wisata Trawas siap memandu alur jalan dan etika menjaga keheningan ekosistem bambu.",
   },
 ];
 
@@ -67,6 +123,13 @@ function cloneDestination(dest: DestinationRecord): DestinationRecord {
   return {
     ...dest,
     highlights: [...dest.highlights],
+    availableActivities: dest.availableActivities
+      ? [...dest.availableActivities]
+      : undefined,
+    facilities: dest.facilities ? [...dest.facilities] : undefined,
+    operationalNotes: dest.operationalNotes
+      ? [...dest.operationalNotes]
+      : undefined,
   };
 }
 

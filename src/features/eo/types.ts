@@ -60,7 +60,13 @@ export interface DestinationRecord {
   capacityPerSession: number;
   imageUrl?: string;
   status: "ACTIVE" | "INACTIVE";
+  availableActivities?: string[];
+  facilities?: string[];
+  operationalNotes?: string[];
+  localGuideSummary?: string;
 }
+
+export type PackageGuideSource = "DESTINATION" | "EO";
 
 export type DemandIntent =
   "NATURE" | "CALM" | "EXPLORATION" | "REFLECTION" | "ACTIVE" | "QUALITY_TIME";
@@ -154,6 +160,7 @@ export interface EoPackageRecord {
   safetyNotes: string[];
   pricing: EoPackagePricing;
   guideStatus: EoGuideStatus;
+  guideSource?: PackageGuideSource;
   status: EoPackageStatus;
   validationResult?: EoValidationResult;
   submittedAt?: string;

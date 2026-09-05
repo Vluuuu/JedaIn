@@ -30,6 +30,14 @@ let root: Root;
 
 beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+
+  HTMLDialogElement.prototype.showModal ??= function showModal() {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close ??= function close() {
+    this.removeAttribute("open");
+    this.dispatchEvent(new Event("close"));
+  };
 });
 
 afterEach(async () => {
@@ -222,18 +230,19 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(res.validationResult.valid).toBe(false);
     });
 
-    it("H2. authenticated Concept-Only EO cannot bypass guideReady rule by forging CERTIFIED_GUIDE in caller state", () => {
+    it("H2. authenticated Concept-Only EO cannot submit package with guideSource = 'EO'", () => {
       // Authenticate as Concept-Only EO (eo_kreatif_desa)
       partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
 
-      // Save draft with non-guide-ready destination (dest_hutan_trawas)
+      // Save draft with forged guideSource = "EO"
       const saveRes = mockEoPackageStore.saveDraft({
         title: "Retreat Hening Bambu",
         shortSummary: "Sesi hening di hutan bambu.",
-        destinationId: "dest_hutan_trawas", // guideReady: false!
+        destinationId: "dest_hutan_trawas",
         durationLabel: "1 hari",
         itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
         safetyNotes: ["Patuhi pemandu."],
+        guideSource: "EO", // Forbidden for Concept-Only!
         pricing: {
           destinationBaseCost: 95000,
           eoMargin: 100000,
@@ -249,8 +258,8 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(submitRes.success).toBe(false);
       expect(submitRes.package?.status).toBe("DRAFT");
       expect(
-        submitRes.validationResult.errors.some((e) =>
-          e.message.includes("Guide Ready"),
+        submitRes.validationResult.errors.some(
+          (e) => e.field === "guideSource",
         ),
       ).toBe(true);
     });
@@ -1620,6 +1629,195 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
       );
       expect(view.textContent).not.toContain("AI generated");
+    });
+  });
+
+  describe("11. Phase B2: Destination Discovery, Guide Source & Builder Step 1 (BG–BQ)", () => {
+    it("BG. All active verified destinations in MVP provide local guide capability", () => {
+      const allDests = mockDestinationStore.getAll();
+      expect(allDests.length).toBeGreaterThan(0);
+      for (const dest of allDests) {
+        if (dest.status === "ACTIVE") {
+          expect(dest.guideReady).toBe(true);
+        }
+      }
+    });
+
+    it("BH. EO Destination Directory renders cards with search, filters, and no duplicate checkmark", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/destinations",
+      ]);
+
+      // Header
+      expect(view.textContent).toContain("Destinasi Terverifikasi");
+      expect(view.textContent).toContain(
+        "Temukan mitra destinasi dan pelajari potensi aktivitasnya sebelum merancang package.",
+      );
+
+      // Search & Filter chips
+      const searchInput = view.querySelector<HTMLInputElement>(
+        ".eo-destinations-search-input",
+      );
+      expect(searchInput).not.toBeNull();
+      expect(view.textContent).toContain("Terverifikasi Plus");
+      expect(view.textContent).toContain("Terverifikasi Dasar");
+
+      // Destination cards
+      expect(view.textContent).toContain("Lereng Hijau Batu");
+      expect(view.textContent).toContain("Lembah Alam Pacet");
+      expect(view.textContent).toContain("Hutan Bambu Trawas");
+      expect(view.textContent).toContain("Pemandu lokal tersedia");
+      expect(view.textContent).not.toContain("Guide Ready ✓");
+      expect(view.textContent).not.toContain("✓ Guide Ready ✓");
+    });
+
+    it("BI. Search filters destination cards by name and location", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/destinations",
+      ]);
+
+      const searchInput = view.querySelector<HTMLInputElement>(
+        ".eo-destinations-search-input",
+      )!;
+
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(searchInput, "Pacet");
+        searchInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      expect(view.textContent).toContain("Lembah Alam Pacet");
+      expect(view.textContent).not.toContain("Lereng Hijau Batu");
+    });
+
+    it("BJ. EO Destination Detail route renders full identity, activities, facilities, and CTA", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/destinations/dest_lereng_hijau",
+      ]);
+
+      // Back button with SVG
+      expect(view.textContent).toContain("Kembali ke Destinasi");
+      expect(view.querySelector(".eo-dest-detail-back-icon")).not.toBeNull();
+
+      // Content
+      expect(view.textContent).toContain("Lereng Hijau Batu");
+      expect(view.textContent).toContain("Batu / Malang Raya");
+      expect(view.textContent).toContain("Tentang Destinasi");
+      expect(view.textContent).toContain("Aktivitas yang Tersedia");
+      expect(view.textContent).toContain("Fasilitas di Lokasi");
+      expect(view.textContent).toContain("Pemanduan Lokal");
+      expect(view.textContent).toContain("Pemandu Lokal Siap");
+      expect(view.textContent).toContain("Biaya dasar destinasi");
+
+      // CTA
+      const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("Buat Paket dengan Destinasi Ini"),
+      );
+      expect(ctaBtn).toBeDefined();
+    });
+
+    it("BK. Builder Step 1 preselects destination from destinationId query parameter", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new?destinationId=dest_lembah_pacet",
+      ]);
+
+      // Step 1 title
+      expect(view.textContent).toContain(
+        "Langkah 1: Pilih Destinasi & Status Pemanduan",
+      );
+
+      // Selected card has Terpilih indicator
+      const pacetCard = Array.from(
+        view.querySelectorAll(".eo-builder-dest-card"),
+      ).find((c) => c.textContent?.includes("Lembah Alam Pacet"))!;
+      expect(pacetCard).toBeDefined();
+      expect(pacetCard.textContent).toContain("Terpilih ✓");
+    });
+
+    it("BL. Builder guide source selection: Concept Only is locked to destination guide, Certified Guide has choice", async () => {
+      // 1. Concept Only
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+      const viewConcept = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new",
+      ]);
+
+      expect(viewConcept.textContent).toContain("Pemandu dari Destinasi");
+      expect(viewConcept.textContent).toContain(
+        "Tersedia melalui mitra destinasi",
+      );
+      expect(viewConcept.textContent).toContain(
+        "Kamu fokus merancang experience. Pemanduan akan disiapkan oleh mitra destinasi terverifikasi di lokasi.",
+      );
+      expect(viewConcept.textContent).not.toContain("Pemandu dari EO");
+
+      // 2. Certified Guide
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const viewCertified = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new",
+      ]);
+
+      expect(viewCertified.textContent).toContain("Pemandu dari Destinasi");
+      expect(viewCertified.textContent).toContain(
+        "Pemandu dari EO (Certified Guide)",
+      );
+    });
+
+    it("BM. Inspecting destination in Builder opens Dialog without selecting destination", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new",
+      ]);
+
+      // Click "Lihat Detail" on dest_hutan_trawas card
+      const trawasCard = Array.from(
+        view.querySelectorAll(".eo-builder-dest-card"),
+      ).find((c) => c.textContent?.includes("Hutan Bambu Trawas"))!;
+      expect(trawasCard).toBeDefined();
+
+      const inspectBtn = Array.from(trawasCard.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lihat Detail"),
+      )!;
+      expect(inspectBtn).toBeDefined();
+
+      await act(async () => {
+        inspectBtn.click();
+      });
+
+      // Dialog opens showing details
+      expect(view.textContent).toContain("Kawasan hutan bambu hening");
+      // Trawas card is not yet marked selected
+      expect(trawasCard.textContent).toContain("Pilih");
+    });
+
+    it("BN. Package sessions screen shows contextual back button when packageId is in route, but global sessions does not", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // 1. Route with packageId
+      const viewPackageSessions = await renderComponent(createElement(App), [
+        "/partner/eo/packages/slow_green_day/sessions",
+      ]);
+      expect(viewPackageSessions.textContent).toContain("Kembali ke Paket");
+      expect(
+        viewPackageSessions.querySelector(".eo-pkg-detail-back-icon"),
+      ).not.toBeNull();
+
+      // 2. Global sessions route
+      const viewGlobalSessions = await renderComponent(createElement(App), [
+        "/partner/eo/sessions",
+      ]);
+      expect(viewGlobalSessions.textContent).not.toContain("Kembali ke Paket");
     });
   });
 });

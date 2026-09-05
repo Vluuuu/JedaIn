@@ -1,11 +1,11 @@
 # PRD JedaIn
 
-**Nama Produk:** JedaIn  
-**Kompetisi:** HoloBiz – ICT Business Plan Competition, HOLOGY 9.0, Universitas Brawijaya  
-**Subtema:** Ekonomi Digital  
-**Tema Besar:** *Bloom Beyond: Where Ideas Take Root and Reach Further*  
-**Versi:** 0.3 — Product Flow Revision  
-**Tanggal:** 30 Agustus 2026  
+**Nama Produk:** JedaIn
+**Kompetisi:** HoloBiz – ICT Business Plan Competition, HOLOGY 9.0, Universitas Brawijaya
+**Subtema:** Ekonomi Digital
+**Tema Besar:** *Bloom Beyond: Where Ideas Take Root and Reach Further*
+**Versi:** 0.3 — Product Flow Revision
+**Tanggal:** 30 Agustus 2026
 **Status:** Working PRD — keputusan yang belum final ditandai **PENDING / DISCUSSION**
 
 > Dokumen ini menjadi source of truth kebutuhan produk JedaIn. Detail alur antar-layar, state, decision node, dan exception flow didokumentasikan terpisah di [`docs/SYSTEM_FLOW.md`](docs/SYSTEM_FLOW.md).
@@ -449,16 +449,25 @@ Recommended interaction:
 
 **PENDING:** apakah seluruh EO langsung memiliki akses insight lengkap atau limited pada fase pilot.
 
-## FR-2.5 Select Destination
+## FR-2.5 Select Destination & Guide Source — UPDATED FOR MVP
 
 EO hanya dapat memilih destination dengan verification level:
 
 - `BASIC`, atau
 - `PLUS`.
 
-Jika EO guide status = `CONCEPT_ONLY`, destination harus `guide_ready = true`.
+**MVP Product Rule (Locked):**
+Setiap Destinasi Terverifikasi (`ACTIVE` dengan verification `BASIC`/`PLUS`) yang tersedia untuk perancangan paket EO wajib menyediakan akses pemandu lokal (`guideReady = true`).
 
-Rule wajib divalidasi backend, bukan hanya frontend.
+Package menyimpan sumber kepemanduan secara eksplisit (`guideSource`):
+- `DESTINATION`: Pemanduan disediakan oleh pemandu lokal dari pihak destinasi.
+- `EO`: Pemanduan dipimpin langsung oleh EO yang memiliki sertifikasi kepemanduan (`CERTIFIED_GUIDE`).
+
+Aturan validasi:
+- EO dengan status `CONCEPT_ONLY` wajib memilih `guideSource = DESTINATION`.
+- EO dengan status `CERTIFIED_GUIDE` dapat memilih `guideSource = DESTINATION` atau `guideSource = EO`.
+
+Rule wajib divalidasi backend/store boundary, bukan hanya di antarmuka frontend.
 
 ## FR-2.6 Trip Builder
 

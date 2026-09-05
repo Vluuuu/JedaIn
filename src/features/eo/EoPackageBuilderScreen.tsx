@@ -455,15 +455,6 @@ export function EoPackageBuilderScreen() {
                     ) : (
                       <div className="eo-builder-dest-card__img-placeholder" />
                     )}
-                    <Badge
-                      tone={
-                        dest.verificationLevel === "PLUS" ? "info" : "success"
-                      }
-                    >
-                      {dest.verificationLevel === "PLUS"
-                        ? "Terverifikasi Plus"
-                        : "Terverifikasi Dasar"}
-                    </Badge>
                   </div>
 
                   {/* Body */}
@@ -472,6 +463,25 @@ export function EoPackageBuilderScreen() {
                       <h3 className="eo-builder-dest-card__title">
                         {dest.name}
                       </h3>
+
+                      <div className="eo-builder-dest-card__badges">
+                        <Badge
+                          tone={
+                            dest.verificationLevel === "PLUS"
+                              ? "info"
+                              : "success"
+                          }
+                          showSymbol={false}
+                        >
+                          {dest.verificationLevel === "PLUS"
+                            ? "Terverifikasi Plus"
+                            : "Terverifikasi Dasar"}
+                        </Badge>
+                        <span className="eo-builder-dest-card__guide-badge">
+                          Pemandu lokal tersedia
+                        </span>
+                      </div>
+
                       <p className="eo-builder-dest-card__loc">
                         {dest.locationLabel}
                       </p>
@@ -481,9 +491,6 @@ export function EoPackageBuilderScreen() {
                     </div>
 
                     <div className="eo-builder-dest-card__meta">
-                      <span className="eo-builder-dest-card__guide-text">
-                        🌿 Pemandu lokal tersedia
-                      </span>
                       <span className="eo-builder-dest-card__price">
                         Biaya dasar:{" "}
                         <strong>
@@ -1269,6 +1276,24 @@ export function EoPackageBuilderScreen() {
             )}
 
             <div className="eo-dest-inspect-body">
+              <div className="eo-dest-inspect-badges">
+                <Badge
+                  tone={
+                    inspectingDestination.verificationLevel === "PLUS"
+                      ? "info"
+                      : "success"
+                  }
+                  showSymbol={false}
+                >
+                  {inspectingDestination.verificationLevel === "PLUS"
+                    ? "Terverifikasi Plus"
+                    : "Terverifikasi Dasar"}
+                </Badge>
+                <span className="eo-dest-inspect-guide-badge">
+                  Pemandu lokal tersedia
+                </span>
+              </div>
+
               <p>{inspectingDestination.description}</p>
 
               {inspectingDestination.availableActivities && (

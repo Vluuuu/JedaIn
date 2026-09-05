@@ -127,23 +127,29 @@ export function EoDestinationsScreen() {
                 ) : (
                   <div className="eo-dest-card__img-placeholder" />
                 )}
-                <div className="eo-dest-card__badges">
-                  <Badge
-                    tone={
-                      dest.verificationLevel === "PLUS" ? "info" : "success"
-                    }
-                  >
-                    {dest.verificationLevel === "PLUS"
-                      ? "Terverifikasi Plus"
-                      : "Terverifikasi Dasar"}
-                  </Badge>
-                </div>
               </div>
 
               {/* Body */}
               <div className="eo-dest-card__body">
-                <div>
+                <div className="eo-dest-card__header-info">
                   <h2 className="eo-dest-card__title">{dest.name}</h2>
+
+                  <div className="eo-dest-card__meta-badges">
+                    <Badge
+                      tone={
+                        dest.verificationLevel === "PLUS" ? "info" : "success"
+                      }
+                      showSymbol={false}
+                    >
+                      {dest.verificationLevel === "PLUS"
+                        ? "Terverifikasi Plus"
+                        : "Terverifikasi Dasar"}
+                    </Badge>
+                    <span className="eo-dest-card__guide-badge">
+                      Pemandu lokal tersedia
+                    </span>
+                  </div>
+
                   <p className="eo-dest-card__location">{dest.locationLabel}</p>
                   <p className="eo-dest-card__desc">{dest.description}</p>
 
@@ -157,11 +163,8 @@ export function EoDestinationsScreen() {
                   )}
                 </div>
 
-                {/* Local Guide info */}
+                {/* Capacity info */}
                 <div className="eo-dest-card__guide">
-                  <span className="eo-dest-card__guide-status">
-                    🌿 Pemandu lokal tersedia
-                  </span>
                   <span className="eo-dest-card__capacity">
                     Kapasitas {dest.capacityPerSession} orang/sesi
                   </span>

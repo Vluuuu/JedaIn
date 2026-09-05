@@ -559,26 +559,20 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "Pahami pola kebutuhan traveler dan ubah sinyal demand menjadi experience yang relevan.",
       );
 
-      // AB: Intent
-      expect(view.textContent).toContain("Kebutuhan Traveler");
+      // Top signal summary band
+      expect(view.textContent).toContain("Kebutuhan Utama");
       expect(view.textContent).toContain("Dekat dengan alam");
 
-      // AC: Budget
-      expect(view.textContent).toContain("Budget Nyaman");
+      expect(view.textContent).toContain("Budget Terbanyak");
       expect(view.textContent).toContain("Rp200.000 – Rp300.000");
 
-      // AD: Duration
-      expect(view.textContent).toContain("Durasi yang Dicari");
+      expect(view.textContent).toContain("Durasi Terbanyak");
       expect(view.textContent).toContain("1 Hari Penuh (6–8 Jam)");
 
-      // AE: Departure
-      expect(view.textContent).toContain("Area Keberangkatan");
-      expect(view.textContent).toContain("Malang & Batu");
-      expect(view.textContent).toContain(
-        "Titik awal keberangkatan traveler pada data agregat.",
-      );
+      expect(view.textContent).toContain("Area Keberangkatan Terbesar");
+      expect(view.textContent).toContain("Malang");
 
-      // AF: Unmet demand
+      // AF: Unmet demand (Default Peluang tab)
       expect(view.textContent).toContain("Peluang yang Belum Terpenuhi");
       expect(view.textContent).toContain(
         "Tingginya Permintaan Jeda Alam 1 Hari",
@@ -586,7 +580,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       // AG: Truthful copy & creative brief context
       expect(view.textContent).toContain(
-        "Simulasi data agregat dari 1.020 respons preferensi traveler. Tidak menampilkan data pribadi traveler.",
+        "Simulasi data agregat · 1.020 respons pada seluruh periode prototype. Tidak menampilkan data pribadi traveler.",
       );
       expect(view.textContent).toContain(
         "Insight adalah creative brief dari kebutuhan traveler. EO tetap menentukan konsep, itinerary, dan pengalaman akhirnya.",
@@ -594,14 +588,31 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain(
         "Gunakan insight sebagai arahan. Itinerary tetap disusun oleh EO.",
       );
-      expect(view.textContent).toContain(
-        "Lihat distribusi tiap dimensi secara terpisah untuk memahami konteks demand.",
-      );
       expect(view.textContent).not.toContain("respons traveler terverifikasi");
       expect(view.textContent).not.toContain("Destinasi cocok");
       expect(view.textContent).not.toContain("Recommended destination");
       expect(view.textContent).not.toContain("Compatible with");
       expect(view.textContent).not.toContain("Trip Builder");
+
+      // Switch to Rincian Data tab and verify all 4 dimensions
+      const tabs = Array.from(view.querySelectorAll(".eo-demand-tab-btn"));
+      const rincianTab = tabs.find((t) =>
+        t.textContent?.includes("Rincian Data Permintaan"),
+      );
+      expect(rincianTab).toBeDefined();
+
+      await act(async () => {
+        (rincianTab as HTMLButtonElement).click();
+      });
+
+      expect(view.textContent).toContain("Rincian Pola Permintaan");
+      expect(view.textContent).toContain("Kebutuhan Traveler");
+      expect(view.textContent).toContain("Budget Nyaman");
+      expect(view.textContent).toContain("Durasi yang Dicari");
+      expect(view.textContent).toContain("Area Keberangkatan");
+      expect(view.textContent).toContain(
+        "Titik awal keberangkatan traveler pada data agregat.",
+      );
     });
   });
 
@@ -874,9 +885,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("52%");
       expect(view.textContent).toContain("530 traveler");
 
-      expect(view.textContent).toContain("Malang & Batu");
-      expect(view.textContent).toContain("45%");
-      expect(view.textContent).toContain("459 traveler");
+      expect(view.textContent).toContain("Malang");
+      expect(view.textContent).toContain("30%");
+      expect(view.textContent).toContain("306 traveler");
     });
 
     it("AR. Demand Insights preserves exact insightIds across all CTAs", async () => {
@@ -914,6 +925,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       ];
 
       for (const testCase of insightCases) {
+        await act(() => root?.unmount());
+        container?.remove();
+
         const view = await renderComponent(
           createElement(
             "div",
@@ -978,6 +992,175 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(text).not.toContain("Destinasi cocok");
       expect(text).not.toContain("Recommended destination");
       expect(text).not.toContain("Compatible with");
+    });
+
+    it("AS3. Time filter (TODAY, YESTERDAY, THIS_WEEK, THIS_MONTH, CUSTOM, zero-response) updates counts truthfully", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      const getPeriodSelect = () =>
+        view.querySelector<HTMLSelectElement>("#demand-period-select")!;
+
+      expect(getPeriodSelect()).toBeDefined();
+
+      // 1. ALL default: 1.020 responses
+      expect(view.textContent).toContain("1.020 respons");
+      expect(view.textContent).toContain("312 traveler mencari");
+
+      // 2. TODAY (2026-09-05): 18 responses
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "TODAY";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("18 respons pada periode Hari ini");
+      expect(view.textContent).not.toContain("1.020 respons");
+
+      // 3. YESTERDAY (2026-09-04): 24 responses
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "YESTERDAY";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("24 respons pada periode Kemarin");
+
+      // 4. THIS_WEEK: 126 responses
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "THIS_WEEK";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("126 respons pada periode Minggu ini");
+
+      // 5. THIS_MONTH: 108 responses
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "THIS_MONTH";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("108 respons pada periode Bulan ini");
+
+      // 6. CUSTOM date range with 0 responses (e.g. 2025-01-01 to 2025-01-02)
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "CUSTOM";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const dateInputs =
+        view.querySelectorAll<HTMLInputElement>('input[type="date"]');
+      expect(dateInputs.length).toBe(2);
+
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(dateInputs[0], "2025-01-01");
+        dateInputs[0].dispatchEvent(new Event("change", { bubbles: true }));
+        nativeSetter?.call(dateInputs[1], "2025-01-02");
+        dateInputs[1].dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      expect(view.textContent).toContain("0 respons");
+      expect(view.textContent).toContain("Belum ada respons pada periode ini.");
+    });
+
+    it("AS4. Departure area granularity, search, and Jakarta custom label support", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      // Switch to Rincian Data tab
+      const tabs = Array.from(view.querySelectorAll(".eo-demand-tab-btn"));
+      const rincianTab = tabs.find((t) =>
+        t.textContent?.includes("Rincian Data Permintaan"),
+      )!;
+
+      await act(async () => {
+        (rincianTab as HTMLButtonElement).click();
+      });
+
+      // Default shows top 5: Malang, Surabaya, Batu, Sidoarjo, Kediri
+      expect(view.textContent).toContain("Malang");
+      expect(view.textContent).toContain("Surabaya");
+      expect(view.textContent).toContain("Batu");
+      expect(view.textContent).toContain("Sidoarjo");
+      expect(view.textContent).toContain("Kediri");
+
+      // Click "Lihat semua area"
+      const seeAllBtn = view.querySelector<HTMLButtonElement>(
+        ".eo-demand-area-toggle-btn",
+      )!;
+      expect(seeAllBtn).toBeDefined();
+
+      await act(async () => {
+        seeAllBtn.click();
+      });
+
+      // Now expanded list includes Jakarta and Blitar
+      expect(view.textContent).toContain("Jakarta");
+      expect(view.textContent).toContain("35 traveler");
+      expect(view.textContent).toContain("Blitar");
+      expect(view.textContent).toContain("25 traveler");
+
+      // Test searching "Jakarta" in the area search box
+      const searchInput = view.querySelector<HTMLInputElement>(
+        ".eo-demand-area-search-input",
+      )!;
+      expect(searchInput).toBeDefined();
+
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(searchInput, "Jakarta");
+        searchInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const areaBlock = view.querySelector(
+        '[aria-label="Distribusi wilayah asal keberangkatan"]',
+      )!;
+      expect(areaBlock.textContent).toContain("Jakarta");
+      expect(areaBlock.textContent).not.toContain("Surabaya");
+    });
+
+    it("AS5. Tab switching preserves active period selection", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      const getPeriodSelect = () =>
+        view.querySelector<HTMLSelectElement>("#demand-period-select")!;
+
+      // Select THIS_WEEK on Peluang tab
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "THIS_WEEK";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("126 respons pada periode Minggu ini");
+
+      // Switch to Rincian Data tab
+      const tabs = Array.from(view.querySelectorAll(".eo-demand-tab-btn"));
+      const rincianTab = tabs.find((t) =>
+        t.textContent?.includes("Rincian Data Permintaan"),
+      )!;
+
+      await act(async () => {
+        (rincianTab as HTMLButtonElement).click();
+      });
+
+      // Period remains THIS_WEEK (126 responses)
+      expect(view.textContent).toContain("126 respons pada periode Minggu ini");
+      expect(getPeriodSelect()?.value).toBe("THIS_WEEK");
+
+      // Switch back to Peluang tab
+      const peluangTab = tabs.find((t) =>
+        t.textContent?.includes("Peluang Paket"),
+      )!;
+      await act(async () => {
+        (peluangTab as HTMLButtonElement).click();
+      });
+
+      expect(view.textContent).toContain("126 respons pada periode Minggu ini");
+      expect(getPeriodSelect()?.value).toBe("THIS_WEEK");
     });
 
     it("AT. Workspace navigation renders exact 1 active link per route", async () => {

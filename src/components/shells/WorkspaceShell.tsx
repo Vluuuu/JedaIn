@@ -7,13 +7,13 @@ import {
   BookingsIcon,
   DestinationsIcon,
   InsightsIcon,
-  MenuIcon,
   OverviewIcon,
   PackagesIcon,
   ProfileIcon,
   ReviewsIcon,
   SessionsIcon,
   SidebarCollapseIcon,
+  SidebarOpenIcon,
 } from "./icons";
 import "./shells.css";
 
@@ -155,7 +155,7 @@ export function WorkspaceShell({
             title={collapseLabel}
             onClick={toggleSidebar}
           >
-            <SidebarCollapseIcon />
+            {sidebarCollapsed ? <SidebarOpenIcon /> : <SidebarCollapseIcon />}
           </Button>
         </div>
         <nav className="workspace-navigation" aria-label={`Menu ${surface}`}>
@@ -185,7 +185,7 @@ export function WorkspaceShell({
             aria-controls={drawerId}
             onClick={() => setDrawerOpen(true)}
           >
-            <MenuIcon />
+            <SidebarOpenIcon />
           </Button>
           <div className="workspace-topbar__context">
             <p>

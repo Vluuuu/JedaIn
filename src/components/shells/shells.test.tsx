@@ -173,6 +173,56 @@ describe("responsive workspace navigation semantics", () => {
       view.querySelector(".workspace-sidebar__role-tag")?.textContent,
     ).toBe("Partner");
   });
+
+  it("does not render MenuIcon hamburger in workspace shell and uses panel icon for mobile opener", async () => {
+    const view = await renderWorkspace();
+    // Hamburger MenuIcon has 3 path lines (M4 7h16M4 12h16M4 17h16)
+    const hamburgerSvg = Array.from(view.querySelectorAll("svg")).find((svg) =>
+      svg.innerHTML.includes("M4 7h16M4 12h16M4 17h16"),
+    );
+    expect(hamburgerSvg).toBeUndefined();
+
+    const openButton = view.querySelector<HTMLButtonElement>(
+      '.workspace-topbar__menu[aria-label="Buka navigasi"]',
+    )!;
+    expect(openButton).not.toBeNull();
+    // Verify panel icon structure in mobile opener
+    const panelSvg = openButton.querySelector("svg");
+    expect(panelSvg).not.toBeNull();
+    expect(panelSvg?.innerHTML).toContain("<rect");
+  });
+
+  it("supports Admin surface role tag and branding layout", async () => {
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+    await act(() =>
+      root.render(
+        createElement(
+          MemoryRouter,
+          undefined,
+          createElement(WorkspaceShell, {
+            surface: "admin",
+            title: "Admin workspace",
+            navigation: [
+              { to: "/admin", label: "Overview" },
+              { to: "/admin/approvals", label: "Approvals" },
+            ],
+            children: createElement("p", undefined, "Admin Content"),
+          }),
+        ),
+      ),
+    );
+
+    expect(
+      container.querySelector(".workspace-sidebar__role-tag")?.textContent,
+    ).toBe("Admin");
+    const openButton = container.querySelector(
+      '.workspace-topbar__menu[aria-label="Buka navigasi"]',
+    );
+    expect(openButton).not.toBeNull();
+    expect(container.innerHTML).not.toContain("M4 7h16M4 12h16M4 17h16");
+  });
 });
 
 describe("TravelerAppShell notification affordance", () => {

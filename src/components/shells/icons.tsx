@@ -74,6 +74,16 @@ export function SidebarCollapseIcon(props: IconProps) {
   );
 }
 
+export function SidebarOpenIcon(props: IconProps) {
+  return (
+    <svg {...sharedProps} {...props}>
+      <rect x="3" y="4" width="18" height="16" rx="3" />
+      <path d="M9 4v16" />
+      <path d="m13 15 3-3-3-3" />
+    </svg>
+  );
+}
+
 export function OverviewIcon(props: IconProps) {
   return (
     <svg {...sharedProps} {...props}>

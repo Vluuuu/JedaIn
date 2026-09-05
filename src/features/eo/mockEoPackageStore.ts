@@ -46,9 +46,16 @@ export function validateEoPackage(
   }
 
   // Guide Source validation rule (MVP locked)
-  // CONCEPT_ONLY must use DESTINATION
-  // CERTIFIED_GUIDE may use DESTINATION or EO
-  if (pkg.guideSource === "EO" && eoGuideStatus === "CONCEPT_ONLY") {
+  // 1. guideSource is required
+  // 2. CONCEPT_ONLY must use DESTINATION
+  // 3. CERTIFIED_GUIDE may use DESTINATION or EO
+  if (!pkg.guideSource) {
+    errors.push({
+      step: 1,
+      field: "guideSource",
+      message: "Sumber kepemanduan wajib ditentukan (Destinasi atau EO).",
+    });
+  } else if (pkg.guideSource === "EO" && eoGuideStatus === "CONCEPT_ONLY") {
     errors.push({
       step: 1,
       field: "guideSource",
@@ -478,9 +485,7 @@ export const mockEoPackageStore = {
         customerPrice,
       },
       guideStatus: authorGuideStatus,
-      guideSource:
-        draft.guideSource ||
-        (authorGuideStatus === "CONCEPT_ONLY" ? "DESTINATION" : "DESTINATION"),
+      guideSource: draft.guideSource || "DESTINATION",
       status: "DRAFT",
       createdAt:
         existingIndex >= 0 ? packages[existingIndex].createdAt : nowIso,

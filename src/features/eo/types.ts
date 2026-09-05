@@ -160,7 +160,7 @@ export interface EoPackageRecord {
   safetyNotes: string[];
   pricing: EoPackagePricing;
   guideStatus: EoGuideStatus;
-  guideSource?: PackageGuideSource;
+  guideSource: PackageGuideSource;
   status: EoPackageStatus;
   validationResult?: EoValidationResult;
   submittedAt?: string;

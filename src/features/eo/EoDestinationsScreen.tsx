@@ -6,7 +6,8 @@ import "./eo.css";
 
 export function EoDestinationsScreen() {
   const navigate = useNavigate();
-  const destinations = mockDestinationStore.getAll();
+  // Authoritative EO-available destinations: ACTIVE + BASIC/PLUS + guideReady
+  const destinations = mockDestinationStore.getEligibleForEo();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState<"ALL" | "BASIC" | "PLUS">(

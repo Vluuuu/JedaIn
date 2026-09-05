@@ -163,17 +163,23 @@ export const mockDestinationStore = {
     return cloneDestination(cloned);
   },
 
+  /**
+   * Authoritative EO-available destination selector:
+   * Only returns destinations that are ACTIVE, verified (BASIC or PLUS),
+   * and have local guide capability (guideReady === true).
+   * Identical rule for BOTH CONCEPT_ONLY and CERTIFIED_GUIDE.
+   */
   getEligibleForEo(
-    guideStatus: "CONCEPT_ONLY" | "CERTIFIED_GUIDE",
+    guideStatus?: "CONCEPT_ONLY" | "CERTIFIED_GUIDE",
   ): readonly DestinationRecord[] {
+    void guideStatus; // Uniform eligibility in MVP: all EO-available destinations have local guide capability
     return destinations
       .filter((d) => {
         if (d.status !== "ACTIVE") return false;
-        if (guideStatus === "CONCEPT_ONLY") {
-          return d.guideReady === true;
+        if (d.verificationLevel !== "BASIC" && d.verificationLevel !== "PLUS") {
+          return false;
         }
-        // CERTIFIED_GUIDE can access all active BASIC/PLUS destinations
-        return true;
+        return d.guideReady === true;
       })
       .map((d) => cloneDestination(d));
   },

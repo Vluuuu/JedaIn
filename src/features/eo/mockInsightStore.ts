@@ -86,21 +86,200 @@ export function normalizeAreaLabel(raw: string): string {
  * - ALL: 1,020 responses (across August & early September 2026)
  */
 
-function buildPrototypeEvents(): PrototypeDemandEvent[] {
-  const events: PrototypeDemandEvent[] = [];
+// Seeded pseudo-random generator (Mulberry32) for deterministic reproducible interleaving
+function createDeterministicRng(seed: number) {
+  let s = seed;
+  return function () {
+    let t = (s += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
-  // Date partition targets summing to 1,020
+function deterministicShuffle<T>(array: T[], rng: () => number): void {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+}
+
+function buildPrototypeEvents(): PrototypeDemandEvent[] {
+  // 1. Quotas of all-time totals
+  const budgetsQuota = {
+    b_under_200k: 224,
+    b_200_300k: 490,
+    b_300_500k: 214,
+    b_above_500k: 92,
+  };
+  const durationsQuota = { d_halfday: 357, d_fullday: 530, d_2d1n: 133 };
+  const areasQuota: Record<string, number> = {
+    Malang: 306,
+    Surabaya: 260,
+    Batu: 153,
+    Sidoarjo: 148,
+    Kediri: 51,
+    Pasuruan: 42,
+    Jakarta: 35,
+    Blitar: 25,
+  };
+
+  interface EventDraft {
+    opp: string[];
+    intent: "NATURE" | "CALM" | "EXPLORATION" | "REFLECTION";
+    duration: "d_halfday" | "d_fullday" | "d_2d1n";
+    budget: "b_under_200k" | "b_200_300k" | "b_300_500k" | "b_above_500k";
+    area: string;
+  }
+
+  const drafts: EventDraft[] = [];
+
+  // Group 1: 312 events for ins_nature_batu_1d (Nature, mostly full day, Rp200k-300k, Malang/Surabaya/Batu)
+  for (let i = 0; i < 312; i++) {
+    drafts.push({
+      opp: ["ins_nature_batu_1d"],
+      intent: "NATURE",
+      duration: i < 280 ? "d_fullday" : "d_halfday",
+      budget: i < 230 ? "b_200_300k" : i < 280 ? "b_under_200k" : "b_300_500k",
+      area:
+        i < 140
+          ? "Malang"
+          : i < 240
+            ? "Surabaya"
+            : i < 290
+              ? "Batu"
+              : "Sidoarjo",
+    });
+  }
+
+  // Group 2: 198 events for ins_mindful_pacet_halfday (Calm, mostly half-day, Rp150-250k, Surabaya/Sidoarjo/Malang)
+  for (let i = 0; i < 198; i++) {
+    drafts.push({
+      opp: ["ins_mindful_pacet_halfday"],
+      intent: "CALM",
+      duration: i < 170 ? "d_halfday" : "d_fullday",
+      budget: i < 110 ? "b_200_300k" : i < 170 ? "b_under_200k" : "b_300_500k",
+      area:
+        i < 80
+          ? "Surabaya"
+          : i < 140
+            ? "Sidoarjo"
+            : i < 175
+              ? "Malang"
+              : "Pasuruan",
+    });
+  }
+
+  // Group 3: 145 events for ins_workshop_culture_weekend (Exploration, weekend, Rp250-350k, Malang/Batu/Kediri/Blitar/Surabaya)
+  for (let i = 0; i < 145; i++) {
+    drafts.push({
+      opp: ["ins_workshop_culture_weekend"],
+      intent: "EXPLORATION",
+      duration: i < 95 ? "d_fullday" : i < 125 ? "d_2d1n" : "d_halfday",
+      budget: i < 75 ? "b_200_300k" : i < 125 ? "b_300_500k" : "b_above_500k",
+      area:
+        i < 60
+          ? "Malang"
+          : i < 95
+            ? "Batu"
+            : i < 120
+              ? "Kediri"
+              : i < 135
+                ? "Blitar"
+                : "Surabaya",
+    });
+  }
+
+  // Group 4: Remaining 365 unmatched events to complete exact canonical totals:
+  // Nature: 428 - 312 = 116
+  // Calm: 286 - 198 = 88
+  // Exploration: 164 - 145 = 19
+  // Reflection: 142
+  const remIntents: ("NATURE" | "CALM" | "EXPLORATION" | "REFLECTION")[] = [
+    ...Array<"NATURE">(116).fill("NATURE"),
+    ...Array<"CALM">(88).fill("CALM"),
+    ...Array<"EXPLORATION">(19).fill("EXPLORATION"),
+    ...Array<"REFLECTION">(142).fill("REFLECTION"),
+  ];
+
+  const usedBudget = {
+    b_under_200k: 0,
+    b_200_300k: 0,
+    b_300_500k: 0,
+    b_above_500k: 0,
+  };
+  for (const d of drafts) usedBudget[d.budget]++;
+
+  const remBudgets: (
+    "b_under_200k" | "b_200_300k" | "b_300_500k" | "b_above_500k"
+  )[] = [
+    ...Array<"b_under_200k">(
+      budgetsQuota.b_under_200k - usedBudget.b_under_200k,
+    ).fill("b_under_200k"),
+    ...Array<"b_200_300k">(
+      budgetsQuota.b_200_300k - usedBudget.b_200_300k,
+    ).fill("b_200_300k"),
+    ...Array<"b_300_500k">(
+      budgetsQuota.b_300_500k - usedBudget.b_300_500k,
+    ).fill("b_300_500k"),
+    ...Array<"b_above_500k">(
+      budgetsQuota.b_above_500k - usedBudget.b_above_500k,
+    ).fill("b_above_500k"),
+  ];
+
+  const usedDur = { d_halfday: 0, d_fullday: 0, d_2d1n: 0 };
+  for (const d of drafts) usedDur[d.duration]++;
+
+  const remDurations: ("d_halfday" | "d_fullday" | "d_2d1n")[] = [
+    ...Array<"d_halfday">(durationsQuota.d_halfday - usedDur.d_halfday).fill(
+      "d_halfday",
+    ),
+    ...Array<"d_fullday">(durationsQuota.d_fullday - usedDur.d_fullday).fill(
+      "d_fullday",
+    ),
+    ...Array<"d_2d1n">(durationsQuota.d_2d1n - usedDur.d_2d1n).fill("d_2d1n"),
+  ];
+
+  const usedArea: Record<string, number> = {};
+  for (const d of drafts) usedArea[d.area] = (usedArea[d.area] || 0) + 1;
+
+  const remAreas: string[] = [];
+  for (const [a, tot] of Object.entries(areasQuota)) {
+    const rem = tot - (usedArea[a] || 0);
+    for (let k = 0; k < rem; k++) remAreas.push(a);
+  }
+
+  // Shuffle remaining uncorrelated attributes deterministically
+  const rngSetup = createDeterministicRng(12345);
+  deterministicShuffle(remIntents, rngSetup);
+  deterministicShuffle(remBudgets, rngSetup);
+  deterministicShuffle(remDurations, rngSetup);
+  deterministicShuffle(remAreas, rngSetup);
+
+  for (let i = 0; i < 365; i++) {
+    drafts.push({
+      opp: [],
+      intent: remIntents[i],
+      duration: remDurations[i],
+      budget: remBudgets[i],
+      area: remAreas[i],
+    });
+  }
+
+  // Interleave all 1,020 drafts deterministically across the chronological timeline
+  const rngDrafts = createDeterministicRng(98765);
+  deterministicShuffle(drafts, rngDrafts);
+
+  // Date partition targets summing to 1,020:
   // Today (2026-09-05): 18
   // Yesterday (2026-09-04): 24
-  // Earlier in This Month / This Week:
   // 2026-09-03: 20
   // 2026-09-02: 22
-  // 2026-09-01: 24 (Sum of Sep 1-5 = 108)
-  // Earlier in This Week (August):
-  // 2026-08-31: 18 (Sum of This Week Mon Aug 31 - Sat Sep 5 = 18 + 24 + 20 + 22 + 24 + 18 = 126)
-  // Prior days in August:
-  // 2026-08-01 through 2026-08-30: remaining 1,020 - 126 = 894 responses distributed deterministically.
-
+  // 2026-09-01: 24 (Sum Sep 1-5 = 108)
+  // 2026-08-31: 18 (Sum Mon Aug 31 - Sat Sep 5 = 126)
+  // Prior August days: 894 responses across 2026-08-01 to 2026-08-30
   const dateQuotas: Record<string, number> = {
     "2026-09-05": 18,
     "2026-09-04": 24,
@@ -115,7 +294,6 @@ function buildPrototypeEvents(): PrototypeDemandEvent[] {
     for (let i = 0; i < count; i++) datesToAssign.push(d);
   }
 
-  // 894 remaining dates across 2026-08-01 to 2026-08-30 (30 days, ~29-30 per day)
   const remainingTarget = 1020 - datesToAssign.length;
   for (let i = 0; i < remainingTarget; i++) {
     const day = 1 + (i % 30);
@@ -123,60 +301,9 @@ function buildPrototypeEvents(): PrototypeDemandEvent[] {
     datesToAssign.push(`2026-08-${dayStr}`);
   }
 
-  // Define total arrays for exact distributions
-  // Intents: 428 NATURE, 286 CALM, 164 EXPLORATION, 142 REFLECTION
-  const intentList: ("NATURE" | "CALM" | "EXPLORATION" | "REFLECTION")[] = [
-    ...Array<"NATURE">(428).fill("NATURE"),
-    ...Array<"CALM">(286).fill("CALM"),
-    ...Array<"EXPLORATION">(164).fill("EXPLORATION"),
-    ...Array<"REFLECTION">(142).fill("REFLECTION"),
-  ];
-
-  // Budgets: 224 b_under_200k, 490 b_200_300k, 214 b_300_500k, 92 b_above_500k
-  const budgetList: (
-    "b_under_200k" | "b_200_300k" | "b_300_500k" | "b_above_500k"
-  )[] = [
-    ...Array<"b_under_200k">(224).fill("b_under_200k"),
-    ...Array<"b_200_300k">(490).fill("b_200_300k"),
-    ...Array<"b_300_500k">(214).fill("b_300_500k"),
-    ...Array<"b_above_500k">(92).fill("b_above_500k"),
-  ];
-
-  // Durations: 357 d_halfday, 530 d_fullday, 133 d_2d1n
-  const durationList: ("d_halfday" | "d_fullday" | "d_2d1n")[] = [
-    ...Array<"d_halfday">(357).fill("d_halfday"),
-    ...Array<"d_fullday">(530).fill("d_fullday"),
-    ...Array<"d_2d1n">(133).fill("d_2d1n"),
-  ];
-
-  // Departures (Sum = 1,020):
-  // Malang: 306, Surabaya: 260, Batu: 153, Sidoarjo: 148,
-  // Kediri: 51, Pasuruan: 42, Jakarta: 35, Blitar: 25
-  const areaList: string[] = [
-    ...Array(306).fill("Malang"),
-    ...Array(260).fill("Surabaya"),
-    ...Array(153).fill("Batu"),
-    ...Array(148).fill("Sidoarjo"),
-    ...Array(51).fill("Kediri"),
-    ...Array(42).fill("Pasuruan"),
-    ...Array(35).fill("Jakarta"),
-    ...Array(25).fill("Blitar"),
-  ];
-
-  // Opportunities to match:
-  // ins_nature_batu_1d: 312 records
-  // ins_mindful_pacet_halfday: 198 records
-  // ins_workshop_culture_weekend: 145 records
-  const oppFlags: string[][] = Array.from({ length: 1020 }, () => []);
-  for (let i = 0; i < 312; i++) oppFlags[i].push("ins_nature_batu_1d");
-  for (let i = 312; i < 312 + 198; i++)
-    oppFlags[i].push("ins_mindful_pacet_halfday");
-  for (let i = 510; i < 510 + 145; i++)
-    oppFlags[i].push("ins_workshop_culture_weekend");
-
-  // Interleave deterministically so every time subset has natural proportional representation
-  // We use index directly so datesToAssign maintains exact counts
+  const events: PrototypeDemandEvent[] = [];
   for (let i = 0; i < 1020; i++) {
+    const d = drafts[i];
     const date = datesToAssign[i];
     const hour = (i * 7) % 24;
     const minute = (i * 13) % 60;
@@ -187,11 +314,11 @@ function buildPrototypeEvents(): PrototypeDemandEvent[] {
       id: `ev_${i + 1}`,
       timestamp: `${date}T${hourStr}:${minStr}:00Z`,
       date,
-      intent: intentList[i],
-      budgetBand: budgetList[i],
-      durationBand: durationList[i],
-      departureAreaRaw: areaList[i],
-      matchedOpportunityIds: oppFlags[i],
+      intent: d.intent,
+      budgetBand: d.budget,
+      durationBand: d.duration,
+      departureAreaRaw: d.area,
+      matchedOpportunityIds: d.opp,
     });
   }
 

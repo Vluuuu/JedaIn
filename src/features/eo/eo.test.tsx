@@ -10,6 +10,7 @@ import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore, validateEoPackage } from "./mockEoPackageStore";
+import { mockInsightStore } from "./mockInsightStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import { EoInsightsScreen } from "./EoInsightsScreen";
 import { EoPackageBuilderScreen } from "./EoPackageBuilderScreen";
@@ -1161,6 +1162,134 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       expect(view.textContent).toContain("126 respons pada periode Minggu ini");
       expect(getPeriodSelect()?.value).toBe("THIS_WEEK");
+    });
+
+    it("AS6. Period-aware distributions exhibit deterministic diversity without single-category monopoly", () => {
+      // 1. TODAY diversity checks
+      const todayOptions = { period: "TODAY" as const };
+      const todayTotal = mockInsightStore.getTotalResponses(todayOptions);
+      expect(todayTotal).toBe(18);
+
+      const todaySignals = mockInsightStore.getSignals(todayOptions);
+      const todayBudgets = mockInsightStore.getBudgetDistribution(todayOptions);
+      const todayDurations =
+        mockInsightStore.getDurationDistribution(todayOptions);
+      const todayDepartures =
+        mockInsightStore.getDepartureDistribution(todayOptions);
+      const todayInsights = mockInsightStore.getAllInsights(todayOptions);
+
+      // Invariant: sum of category counts equals total responses
+      expect(todaySignals.reduce((s, i) => s + i.travelerCount, 0)).toBe(
+        todayTotal,
+      );
+      expect(todayBudgets.reduce((s, b) => s + b.count, 0)).toBe(todayTotal);
+      expect(todayDurations.reduce((s, d) => s + d.count, 0)).toBe(todayTotal);
+      expect(todayDepartures.reduce((s, a) => s + a.count, 0)).toBe(todayTotal);
+
+      // Diversity check: more than 1 category with non-zero count
+      expect(
+        todaySignals.filter((s) => s.travelerCount > 0).length,
+      ).toBeGreaterThan(1);
+      expect(todayBudgets.filter((b) => b.count > 0).length).toBeGreaterThan(1);
+      expect(todayDurations.filter((d) => d.count > 0).length).toBeGreaterThan(
+        1,
+      );
+      expect(todayDepartures.filter((a) => a.count > 0).length).toBeGreaterThan(
+        1,
+      );
+
+      // Opportunity distribution: not all map to a single opportunity
+      expect(
+        todayInsights.filter((i) => i.travelerDemandCount > 0).length,
+      ).toBeGreaterThan(1);
+
+      // 2. THIS_WEEK diversity checks
+      const weekOptions = { period: "THIS_WEEK" as const };
+      const weekTotal = mockInsightStore.getTotalResponses(weekOptions);
+      expect(weekTotal).toBe(126);
+
+      const weekSignals = mockInsightStore.getSignals(weekOptions);
+      const weekBudgets = mockInsightStore.getBudgetDistribution(weekOptions);
+      const weekDurations =
+        mockInsightStore.getDurationDistribution(weekOptions);
+      const weekDepartures =
+        mockInsightStore.getDepartureDistribution(weekOptions);
+      const weekInsights = mockInsightStore.getAllInsights(weekOptions);
+
+      expect(weekSignals.reduce((s, i) => s + i.travelerCount, 0)).toBe(
+        weekTotal,
+      );
+      expect(weekBudgets.reduce((s, b) => s + b.count, 0)).toBe(weekTotal);
+      expect(weekDurations.reduce((s, d) => s + d.count, 0)).toBe(weekTotal);
+      expect(weekDepartures.reduce((s, a) => s + a.count, 0)).toBe(weekTotal);
+
+      // All 4 intents, 4 budgets, 3 durations represented in the week
+      expect(weekSignals.every((s) => s.travelerCount > 0)).toBe(true);
+      expect(weekBudgets.every((b) => b.count > 0)).toBe(true);
+      expect(weekDurations.every((d) => d.count > 0)).toBe(true);
+      expect(weekDepartures.length).toBeGreaterThan(4);
+      expect(weekInsights.every((i) => i.travelerDemandCount > 0)).toBe(true);
+
+      // 3. ALL canonical reference values preserved exactly
+      const allSignals = mockInsightStore.getSignals({ period: "ALL" });
+      const allBudgets = mockInsightStore.getBudgetDistribution({
+        period: "ALL",
+      });
+      const allDurations = mockInsightStore.getDurationDistribution({
+        period: "ALL",
+      });
+      const allDepartures = mockInsightStore.getDepartureDistribution({
+        period: "ALL",
+      });
+      const allInsights = mockInsightStore.getAllInsights({ period: "ALL" });
+
+      expect(allSignals.find((s) => s.intent === "NATURE")?.travelerCount).toBe(
+        428,
+      );
+      expect(allSignals.find((s) => s.intent === "CALM")?.travelerCount).toBe(
+        286,
+      );
+      expect(
+        allSignals.find((s) => s.intent === "EXPLORATION")?.travelerCount,
+      ).toBe(164);
+      expect(
+        allSignals.find((s) => s.intent === "REFLECTION")?.travelerCount,
+      ).toBe(142);
+
+      expect(allBudgets.find((b) => b.id === "b_under_200k")?.count).toBe(224);
+      expect(allBudgets.find((b) => b.id === "b_200_300k")?.count).toBe(490);
+      expect(allBudgets.find((b) => b.id === "b_300_500k")?.count).toBe(214);
+      expect(allBudgets.find((b) => b.id === "b_above_500k")?.count).toBe(92);
+
+      expect(allDurations.find((d) => d.id === "d_halfday")?.count).toBe(357);
+      expect(allDurations.find((d) => d.id === "d_fullday")?.count).toBe(530);
+      expect(allDurations.find((d) => d.id === "d_2d1n")?.count).toBe(133);
+
+      expect(allDepartures.find((a) => a.label === "Malang")?.count).toBe(306);
+      expect(allDepartures.find((a) => a.label === "Surabaya")?.count).toBe(
+        260,
+      );
+      expect(allDepartures.find((a) => a.label === "Batu")?.count).toBe(153);
+      expect(allDepartures.find((a) => a.label === "Sidoarjo")?.count).toBe(
+        148,
+      );
+      expect(allDepartures.find((a) => a.label === "Kediri")?.count).toBe(51);
+      expect(allDepartures.find((a) => a.label === "Pasuruan")?.count).toBe(42);
+      expect(allDepartures.find((a) => a.label === "Jakarta")?.count).toBe(35);
+      expect(allDepartures.find((a) => a.label === "Blitar")?.count).toBe(25);
+
+      expect(
+        allInsights.find((i) => i.insightId === "ins_nature_batu_1d")
+          ?.travelerDemandCount,
+      ).toBe(312);
+      expect(
+        allInsights.find((i) => i.insightId === "ins_mindful_pacet_halfday")
+          ?.travelerDemandCount,
+      ).toBe(198);
+      expect(
+        allInsights.find((i) => i.insightId === "ins_workshop_culture_weekend")
+          ?.travelerDemandCount,
+      ).toBe(145);
     });
 
     it("AT. Workspace navigation renders exact 1 active link per route", async () => {

@@ -72,7 +72,13 @@ export type DemandIntent =
   "NATURE" | "CALM" | "EXPLORATION" | "REFLECTION" | "ACTIVE" | "QUALITY_TIME";
 
 export type DemandPeriodPreset =
-  "TODAY" | "YESTERDAY" | "THIS_WEEK" | "THIS_MONTH" | "ALL" | "CUSTOM";
+  | "TODAY"
+  | "YESTERDAY"
+  | "THIS_WEEK"
+  | "THIS_MONTH"
+  | "THIS_YEAR"
+  | "ALL"
+  | "CUSTOM";
 
 export interface DemandDateRange {
   startDate?: string; // YYYY-MM-DD

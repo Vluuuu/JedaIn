@@ -1,4 +1,5 @@
 import { Badge } from "../../components/ui";
+import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
@@ -18,6 +19,7 @@ export function DestinationProfileScreen() {
   }
 
   const { destination } = context;
+  const visual = getDestinationVisual(destination.name);
 
   return (
     <div className="dest-container" style={{ maxWidth: "900px" }}>
@@ -45,6 +47,22 @@ export function DestinationProfileScreen() {
           </p>
         </div>
       </header>
+
+      {/* Hero Visual Card */}
+      <div
+        className="dest-identity__media"
+        style={{
+          borderRadius: "var(--radius-xl)",
+          marginBottom: "var(--space-5)",
+          border: "1px solid var(--color-border-default)",
+        }}
+        aria-hidden="true"
+      >
+        <img
+          src={visual.svgDataUri}
+          alt={`Suasana kawasan ${destination.name}`}
+        />
+      </div>
 
       {/* Critical Edit Policy Notice */}
       <div className="admin-alert admin-alert--info">

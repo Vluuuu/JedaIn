@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import "./eo.css";
 
@@ -118,15 +119,14 @@ export function EoDestinationsScreen() {
             <article key={dest.destinationId} className="eo-dest-card">
               {/* Media Thumb */}
               <div className="eo-dest-card__media">
-                {dest.imageUrl ? (
-                  <img
-                    src={dest.imageUrl}
-                    alt={dest.name}
-                    className="eo-dest-card__img"
-                  />
-                ) : (
-                  <div className="eo-dest-card__img-placeholder" />
-                )}
+                <img
+                  src={
+                    dest.imageUrl || getDestinationVisual(dest.name).svgDataUri
+                  }
+                  alt={dest.name}
+                  className="eo-dest-card__img"
+                  loading="lazy"
+                />
               </div>
 
               {/* Body */}

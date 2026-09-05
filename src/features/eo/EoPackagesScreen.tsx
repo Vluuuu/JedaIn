@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { getHumanStatusLabel, getStatusBadgeTone } from "./packageHelpers";
@@ -373,7 +374,8 @@ export function EoPackagesScreen() {
               const destination = mockDestinationStore.getById(
                 pkg.destinationId,
               );
-              const destinationImg = destination?.imageUrl;
+              const visual = getPackageVisual(pkg.packageId, destination?.name);
+              const destinationImg = destination?.imageUrl || visual.svgDataUri;
 
               return (
                 <article
@@ -381,17 +383,14 @@ export function EoPackagesScreen() {
                   className="eo-pkg-card"
                   aria-label={`Paket: ${pkg.title}`}
                 >
-                  {/* Visual Context: Source-backed destination image */}
+                  {/* Visual Context: Source-backed destination image or visual asset */}
                   <div className="eo-pkg-card__media">
-                    {destinationImg ? (
-                      <img
-                        src={destinationImg}
-                        alt={`Destinasi ${destination?.name ?? "paket"}`}
-                        className="eo-pkg-card__img"
-                      />
-                    ) : (
-                      <div className="eo-pkg-card__img-placeholder" />
-                    )}
+                    <img
+                      src={destinationImg}
+                      alt={`Destinasi ${destination?.name ?? "paket"}`}
+                      className="eo-pkg-card__img"
+                      loading="lazy"
+                    />
                   </div>
 
                   {/* Main Context: Identity, Destination, Duration */}

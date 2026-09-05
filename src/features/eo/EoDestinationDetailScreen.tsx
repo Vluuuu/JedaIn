@@ -1,6 +1,7 @@
 import { useNavigate, useParams, Link } from "react-router";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Badge, Button } from "../../components/ui";
+import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import "./eo.css";
 
@@ -53,15 +54,14 @@ export function EoDestinationDetailScreen() {
       {/* 2. Hero / Destination Identity */}
       <header className="eo-dest-detail-hero">
         <div className="eo-dest-detail-hero__media">
-          {destination.imageUrl ? (
-            <img
-              src={destination.imageUrl}
-              alt={destination.name}
-              className="eo-dest-detail-hero__img"
-            />
-          ) : (
-            <div className="eo-dest-detail-hero__placeholder" />
-          )}
+          <img
+            src={
+              destination.imageUrl ||
+              getDestinationVisual(destination.name).svgDataUri
+            }
+            alt={destination.name}
+            className="eo-dest-detail-hero__img"
+          />
         </div>
 
         <div className="eo-dest-detail-hero__content">

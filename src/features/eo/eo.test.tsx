@@ -2053,5 +2053,39 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(savedRes.success).toBe(true);
       expect(savedRes.package?.guideSource).toBe("EO");
     });
+
+    it("BR. Primary Action Spotlight renders consistently on Packages and Sessions screens", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // 1. Packages Screen Spotlight
+      const pkgView = await renderComponent(createElement(EoPackagesScreen));
+      const pkgSpotlight = pkgView.querySelector(
+        'aside[aria-label="Aksi utama paket experience"]',
+      );
+      expect(pkgSpotlight).not.toBeNull();
+      expect(pkgSpotlight?.textContent).toContain("Aksi Utama");
+      expect(pkgSpotlight?.textContent).toContain(
+        "Mulai rancang experience baru untuk traveler.",
+      );
+      expect(pkgSpotlight?.textContent).toContain("Buat Paket Baru");
+      expect(
+        pkgSpotlight?.querySelector(".eo-action-spotlight__btn-icon"),
+      ).not.toBeNull();
+
+      // 2. Sessions Screen Spotlight
+      const sessView = await renderComponent(createElement(EoSessionsScreen));
+      const sessSpotlight = sessView.querySelector(
+        'aside[aria-label="Aksi utama jadwal sesi"]',
+      );
+      expect(sessSpotlight).not.toBeNull();
+      expect(sessSpotlight?.textContent).toContain("Aksi Utama");
+      expect(sessSpotlight?.textContent).toContain(
+        "Tambahkan jadwal keberangkatan untuk paket yang siap berjalan.",
+      );
+      expect(sessSpotlight?.textContent).toContain("Buka Sesi Baru");
+      expect(
+        sessSpotlight?.querySelector(".eo-action-spotlight__btn-icon"),
+      ).not.toBeNull();
+    });
   });
 });

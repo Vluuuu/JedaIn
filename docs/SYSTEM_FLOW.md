@@ -1,8 +1,8 @@
 # JedaIn — System Flow
 
-**Version:** 0.1  
-**Date:** 30 Agustus 2026  
-**Source of Truth:** [`../PRD.md`](../PRD.md)  
+**Version:** 0.1
+**Date:** 30 Agustus 2026
+**Source of Truth:** [`../PRD.md`](../PRD.md)
 **Status:** Working System Flow
 
 > Dokumen ini menerjemahkan PRD menjadi alur sistem yang dapat langsung digunakan untuk membuat screen inventory, wireframe, prototype, state model, database schema, dan API contract. Jika ada konflik, product rule pada `PRD.md` harus diperbarui terlebih dahulu lalu flow ini diselaraskan.
@@ -404,41 +404,41 @@ Minimum Insight UI:
 
 ```mermaid
 flowchart TD
-    A[Create Package] --> B[Step 1 - Destination]
-    B --> C{EO guide status}
+    A[Create Package] --> B[Step 1 - Destination & Guide Source]
+    B --> C[All Verified Destinations have local guide capability]
+    C --> D[Select Destination]
+    D --> E{EO guide status}
 
-    C -- CONCEPT_ONLY --> D[Show only verified + guide_ready destinations]
-    C -- CERTIFIED_GUIDE --> E[Show verified destinations]
+    E -- CONCEPT_ONLY --> F[guideSource = DESTINATION locked]
+    E -- CERTIFIED_GUIDE --> G[Choose guideSource: DESTINATION or EO]
 
-    D --> F[Select Destination]
-    E --> F
+    F --> H[Step 2 - Relevant Insight]
+    G --> H
+    H --> I[Step 3 - Itinerary Builder]
+    I --> J[Step 4 - Pricing]
+    J --> K[Step 5 - Preview & Review]
+    K --> L[Submit]
 
-    F --> G[Step 2 - Relevant Insight]
-    G --> H[Step 3 - Itinerary Builder]
-    H --> I[Step 4 - Pricing]
-    I --> J[Step 5 - Preview & Review]
-    J --> K[Submit]
+    L --> M[Automatic Validation]
+    M -- Fail --> N[Specific Validation Errors]
+    N --> O[Edit Draft]
+    O --> L
 
-    K --> L[Automatic Validation]
-    L -- Fail --> M[Specific Validation Errors]
-    M --> N[Edit Draft]
-    N --> K
+    M -- Pass --> P[PENDING_ADMIN_REVIEW]
+    P --> Q[Admin Manual Checklist]
 
-    L -- Pass --> O[PENDING_ADMIN_REVIEW]
-    O --> P[Admin Manual Checklist]
+    Q -- Reject --> R[Specific Rejection Reason]
+    R --> O
 
-    P -- Reject --> Q[Specific Rejection Reason]
-    Q --> N
-
-    P -- Approve --> R[Package APPROVED]
-    R --> S[Publish LIVE]
-    S --> T[Create / Manage Sessions]
+    Q -- Approve --> S[Package APPROVED]
+    S --> T[Publish LIVE]
+    T --> U[Create / Manage Sessions]
 ```
 
 ### Builder stepper
 
 ```text
-1 Destination
+1 Destination & Guide
 2 Insight
 3 Itinerary
 4 Pricing
@@ -447,7 +447,10 @@ flowchart TD
 
 ### Important rule
 
-`CONCEPT_ONLY` EO cannot bypass the `guide_ready = true` destination requirement via frontend manipulation. Backend validates again on submit.
+Every active verified destination available to EO provides local destination guide capability. Package explicitly records `guideSource`:
+- `CONCEPT_ONLY` EO must use `guideSource = DESTINATION`.
+- `CERTIFIED_GUIDE` EO may choose `guideSource = DESTINATION` or `guideSource = EO`.
+Backend validates again on submit.
 
 ---
 

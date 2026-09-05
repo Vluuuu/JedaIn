@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Badge, Button } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
 import { partnerSessionStore } from "./partnerSessionStore";
+import { getHumanStatusLabel, getStatusBadgeTone } from "./packageHelpers";
 import "./eo.css";
 
 export function EoPackageDetailScreen() {
@@ -22,13 +25,10 @@ export function EoPackageDetailScreen() {
 
   if (!pkg) {
     return (
-      <div className="eo-container">
-        <div
-          className="eo-section"
-          style={{ textAlign: "center", padding: "var(--space-8)" }}
-        >
+      <div className="eo-pkg-detail-container">
+        <div className="eo-pkg-detail-empty">
           <h2>Paket Tidak Ditemukan</h2>
-          <p style={{ color: "var(--color-text-secondary)" }}>
+          <p>
             Rancangan paket ini tidak tersedia atau bukan milik akun EO Anda.
           </p>
           <Button
@@ -49,6 +49,11 @@ export function EoPackageDetailScreen() {
     ? mockInsightStore.getInsightById(pkg.insightId)
     : undefined;
 
+  const pkgSessions = mockEoPackageStore.getSessionsByPackage(pkg.packageId);
+  const openSessionsCount = pkgSessions.filter(
+    (s) => s.status === "OPEN",
+  ).length;
+
   const handlePublishLive = () => {
     setPublishError(null);
     setPublishMessage(null);
@@ -63,25 +68,75 @@ export function EoPackageDetailScreen() {
   };
 
   return (
-    <div className="eo-container">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Link
-          to="/partner/eo/packages"
-          style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "var(--font-size-body-sm)",
-          }}
-        >
-          &larr; Kembali ke Daftar Paket
+    <div className="eo-pkg-detail-container">
+      {/* 1. Back navigation with SVG icon */}
+      <nav className="eo-pkg-detail-back-nav" aria-label="Navigasi kembali">
+        <Link to="/partner/eo/packages" className="eo-pkg-detail-back-link">
+          <ArrowLeftIcon className="eo-pkg-detail-back-icon" />
+          <span>Kembali ke Daftar Paket</span>
         </Link>
+      </nav>
 
-        <div style={{ display: "flex", gap: "var(--space-2)" }}>
+      {/* Alerts */}
+      {publishMessage && (
+        <div className="eo-alert eo-alert--success" role="status">
+          {publishMessage}
+        </div>
+      )}
+
+      {publishError && (
+        <div className="eo-alert eo-alert--error" role="alert">
+          {publishError}
+        </div>
+      )}
+
+      {/* 2. Detail Header: Title, Value Prop, Metadata & Actions */}
+      <header className="eo-pkg-detail-header">
+        <div
+          className="eo-pkg-detail-header__visual"
+          style={{
+            backgroundImage: `url("${getPackageVisual(pkg.packageId, destination?.name).svgDataUri}")`,
+          }}
+          role="img"
+          aria-label={`Ilustrasi suasana ${pkg.title}`}
+        >
+          <div
+            className="eo-pkg-detail-header__visual-scrim"
+            aria-hidden="true"
+          />
+        </div>
+
+        <div className="eo-pkg-detail-header__main">
+          <div className="eo-pkg-detail-header__meta">
+            <Badge tone={getStatusBadgeTone(pkg.status)}>
+              {getHumanStatusLabel(pkg.status)}
+            </Badge>
+            <span className="eo-pkg-detail-header__dot" aria-hidden="true">
+              ·
+            </span>
+            <span className="eo-pkg-detail-header__duration">
+              {pkg.durationLabel}
+            </span>
+            {destination && (
+              <>
+                <span className="eo-pkg-detail-header__dot" aria-hidden="true">
+                  ·
+                </span>
+                <span className="eo-pkg-detail-header__dest">
+                  {destination.name}
+                </span>
+              </>
+            )}
+          </div>
+
+          <h1 className="eo-pkg-detail-title">{pkg.title}</h1>
+          <p className="eo-pkg-detail-subtitle">
+            {pkg.valueProposition || pkg.shortSummary}
+          </p>
+        </div>
+
+        {/* State-specific primary header actions */}
+        <div className="eo-pkg-detail-header__actions">
           {pkg.status === "APPROVED" && (
             <Button
               type="button"
@@ -132,78 +187,25 @@ export function EoPackageDetailScreen() {
             </Button>
           )}
         </div>
-      </div>
-
-      {publishMessage && (
-        <div
-          className="eo-alert eo-alert--success"
-          style={{ marginTop: "var(--space-3)" }}
-          role="status"
-        >
-          {publishMessage}
-        </div>
-      )}
-
-      {publishError && (
-        <div
-          className="eo-alert eo-alert--error"
-          style={{ marginTop: "var(--space-3)" }}
-          role="alert"
-        >
-          {publishError}
-        </div>
-      )}
-
-      <header className="eo-page-header">
-        <div>
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-2)",
-              alignItems: "center",
-            }}
-          >
-            <Badge
-              tone={
-                pkg.status === "LIVE" || pkg.status === "APPROVED"
-                  ? "success"
-                  : pkg.status === "REJECTED"
-                    ? "danger"
-                    : pkg.status === "PENDING_ADMIN_REVIEW"
-                      ? "warning"
-                      : "neutral"
-              }
-            >
-              {pkg.status === "PENDING_ADMIN_REVIEW"
-                ? "Menunggu Review Admin"
-                : pkg.status}
-            </Badge>
-            <Badge tone="neutral">{pkg.durationLabel}</Badge>
-            {destination && <Badge tone="info">{destination.name}</Badge>}
-          </div>
-
-          <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            {pkg.title}
-          </h1>
-          <p className="eo-page-subtitle">
-            {pkg.valueProposition || pkg.shortSummary}
-          </p>
-        </div>
       </header>
 
-      {/* Submission Status Explanation Box */}
+      {/* 3. Status Callout / Banner */}
       {pkg.status === "PENDING_ADMIN_REVIEW" && (
         <section
           className="eo-alert eo-alert--warning"
           aria-label="Status peninjauan kurator"
         >
-          <strong>Sedang Ditinjau Tim Kurator Admin JedaIn</strong>
-          <p style={{ margin: "var(--space-1) 0 0" }}>
-            Paket ini telah lolos validasi otomatis dan diajukan pada{" "}
+          <strong>Sedang ditinjau Admin JedaIn</strong>
+          <p>
+            Paket ini telah lolos validasi teknis dan diajukan pada{" "}
             {pkg.submittedAt
-              ? new Date(pkg.submittedAt).toLocaleDateString("id-ID")
+              ? new Date(pkg.submittedAt).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
               : "hari ini"}
-            . Setelah disetujui Admin, status akan menjadi APPROVED dan kamu
+            . Setelah disetujui Admin, status akan menjadi Disetujui dan kamu
             dapat membuka jadwal sesi penjualan.
           </p>
         </section>
@@ -212,44 +214,42 @@ export function EoPackageDetailScreen() {
       {pkg.status === "REJECTED" && (
         <section
           className="eo-alert eo-alert--error"
-          aria-label="Alasan penolakan kurator"
+          aria-label="Catatan perbaikan kurator"
         >
           <strong>Catatan Perbaikan dari Kurator Admin:</strong>
-          <p style={{ margin: "var(--space-1) 0 0" }}>
+          <p>
             {pkg.rejectionReason ??
               "Mohon perjelas rincian durasi waktu pada setiap sesi aktivitas itinerary."}
           </p>
         </section>
       )}
 
-      {/* Content Breakdown */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr",
-          gap: "var(--space-6)",
-        }}
-      >
-        {/* Left column: Itinerary & Description */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--space-5)",
-          }}
+      {pkg.status === "LIVE" && (
+        <section
+          className="eo-alert eo-alert--success"
+          aria-label="Informasi paket tayang"
         >
-          <section className="eo-section">
-            <h2 className="eo-section-title">Alur Itinerary Pengalaman</h2>
+          <strong>Paket Sedang Tayang (Live)</strong>
+          <p>
+            Paket ini aktif dan dapat dipesan oleh traveler di Marketplace. Saat
+            ini terdapat {openSessionsCount} jadwal keberangkatan mendatang.
+          </p>
+        </section>
+      )}
+
+      {/* 4. Two-Column Information Architecture: Main (65%) & Side (35%) */}
+      <div className="eo-pkg-detail-grid">
+        {/* MAIN COLUMN */}
+        <div className="eo-pkg-detail-main">
+          {/* Itinerary */}
+          <section className="eo-pkg-detail-section">
+            <h2 className="eo-pkg-detail-section-title">
+              Alur Itinerary Pengalaman
+            </h2>
             <div className="eo-itinerary-list">
               {pkg.itinerary.map((item) => (
                 <div key={item.order} className="eo-itinerary-item">
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
+                  <div className="eo-itinerary-item__header">
                     <strong>
                       #{item.order} {item.title}
                     </strong>
@@ -257,71 +257,34 @@ export function EoPackageDetailScreen() {
                       <Badge tone="neutral">{item.durationLabel}</Badge>
                     )}
                   </div>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "var(--font-size-body-sm)",
-                      color: "var(--color-text-secondary)",
-                    }}
-                  >
-                    {item.description}
-                  </p>
+                  <p className="eo-itinerary-item__desc">{item.description}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Included / Excluded items */}
-          <section className="eo-section">
-            <h2 className="eo-section-title">Ketentuan & Fasilitas</h2>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "var(--space-4)",
-                fontSize: "var(--font-size-body-sm)",
-              }}
-            >
-              <div>
-                <strong
-                  style={{
-                    display: "block",
-                    marginBottom: "var(--space-1)",
-                    color: "var(--color-success-text)",
-                  }}
-                >
+          {/* Ketentuan & Fasilitas */}
+          <section className="eo-pkg-detail-section">
+            <h2 className="eo-pkg-detail-section-title">
+              Ketentuan & Fasilitas
+            </h2>
+            <div className="eo-pkg-provisions-grid">
+              <div className="eo-pkg-provision-box">
+                <strong className="eo-pkg-provision-title eo-pkg-provision-title--included">
                   Sudah Termasuk:
                 </strong>
-                <ul
-                  style={{
-                    margin: 0,
-                    paddingLeft: "1.25rem",
-                    color: "var(--color-text-secondary)",
-                  }}
-                >
+                <ul className="eo-pkg-provision-list">
                   {pkg.includedItems.map((inc, i) => (
                     <li key={i}>{inc}</li>
                   ))}
                 </ul>
               </div>
 
-              <div>
-                <strong
-                  style={{
-                    display: "block",
-                    marginBottom: "var(--space-1)",
-                    color: "var(--color-text-muted)",
-                  }}
-                >
+              <div className="eo-pkg-provision-box">
+                <strong className="eo-pkg-provision-title eo-pkg-provision-title--excluded">
                   Belum Termasuk:
                 </strong>
-                <ul
-                  style={{
-                    margin: 0,
-                    paddingLeft: "1.25rem",
-                    color: "var(--color-text-secondary)",
-                  }}
-                >
+                <ul className="eo-pkg-provision-list">
                   {pkg.excludedItems.map((exc, i) => (
                     <li key={i}>{exc}</li>
                   ))}
@@ -329,90 +292,98 @@ export function EoPackageDetailScreen() {
               </div>
             </div>
           </section>
+
+          {/* Safety & Preparation */}
+          {pkg.safetyNotes && pkg.safetyNotes.length > 0 && (
+            <section className="eo-pkg-detail-section">
+              <h2 className="eo-pkg-detail-section-title">
+                Catatan Keselamatan & Persiapan
+              </h2>
+              <ul className="eo-pkg-safety-list">
+                {pkg.safetyNotes.map((note, i) => (
+                  <li key={i}>{note}</li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
 
-        {/* Right column: Pricing & Context Cards */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--space-4)",
-          }}
-        >
-          <div className="eo-pricing-summary">
-            <h3 style={{ fontSize: "var(--font-size-heading-sm)", margin: 0 }}>
-              Rincian Harga
-            </h3>
-            <div className="eo-pricing-row">
-              <span>Modal Destinasi:</span>
-              <strong>
-                Rp{pkg.pricing.destinationBaseCost.toLocaleString("id-ID")}
-              </strong>
-            </div>
-            <div className="eo-pricing-row">
-              <span>Margin EO:</span>
-              <strong>Rp{pkg.pricing.eoMargin.toLocaleString("id-ID")}</strong>
-            </div>
-            <div className="eo-pricing-row eo-pricing-row--total">
-              <span>Harga Jual:</span>
-              <span>
-                Rp{pkg.pricing.customerPrice.toLocaleString("id-ID")} / orang
-              </span>
-            </div>
-          </div>
-
-          {destination && (
-            <div className="eo-section" style={{ padding: "var(--space-4)" }}>
-              <strong
-                style={{
-                  fontSize: "var(--font-size-body-sm)",
-                  color: "var(--color-text-primary)",
-                }}
-              >
-                Lokasi Destinasi:
-              </strong>
-              <div style={{ marginTop: "var(--space-2)" }}>
-                <h4 style={{ margin: 0, fontSize: "var(--font-size-body-md)" }}>
-                  {destination.name}
-                </h4>
-                <p
-                  style={{
-                    margin: "0.25rem 0",
-                    fontSize: "var(--font-size-caption)",
-                    color: "var(--color-text-secondary)",
-                  }}
-                >
-                  {destination.locationLabel}
-                </p>
-                <Badge tone={destination.guideReady ? "success" : "neutral"}>
-                  {destination.guideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
-                </Badge>
+        {/* SIDE COLUMN */}
+        <aside className="eo-pkg-detail-side">
+          {/* Pricing Breakdown: Humanized terms */}
+          <section className="eo-pkg-side-card">
+            <h3 className="eo-pkg-side-title">Rincian Harga</h3>
+            <div className="eo-pkg-price-table">
+              <div className="eo-pkg-price-row">
+                <span className="eo-pkg-price-label">
+                  Biaya dasar destinasi
+                </span>
+                <strong className="eo-pkg-price-val">
+                  Rp{pkg.pricing.destinationBaseCost.toLocaleString("id-ID")}
+                </strong>
+              </div>
+              <div className="eo-pkg-price-row">
+                <span className="eo-pkg-price-label">Margin EO</span>
+                <strong className="eo-pkg-price-val">
+                  Rp{pkg.pricing.eoMargin.toLocaleString("id-ID")}
+                </strong>
+              </div>
+              <div className="eo-pkg-price-row eo-pkg-price-row--total">
+                <span className="eo-pkg-price-label">Harga traveler</span>
+                <span className="eo-pkg-price-total">
+                  Rp{pkg.pricing.customerPrice.toLocaleString("id-ID")}
+                  <small> / orang</small>
+                </span>
               </div>
             </div>
+          </section>
+
+          {/* Destination Context */}
+          {destination && (
+            <section className="eo-pkg-side-card">
+              <h3 className="eo-pkg-side-title">Lokasi Destinasi</h3>
+              {destination.imageUrl && (
+                <div className="eo-pkg-dest-thumb">
+                  <img
+                    src={destination.imageUrl}
+                    alt={destination.name}
+                    className="eo-pkg-dest-img"
+                  />
+                </div>
+              )}
+              <div className="eo-pkg-dest-info">
+                <h4 className="eo-pkg-dest-name">{destination.name}</h4>
+                <p className="eo-pkg-dest-loc">{destination.locationLabel}</p>
+
+                <div className="eo-pkg-dest-guide-state">
+                  <Badge tone={destination.guideReady ? "success" : "neutral"}>
+                    {destination.guideReady ? "Guide Ready" : "Non-Guide Ready"}
+                  </Badge>
+                  <p className="eo-pkg-guide-expl">
+                    {destination.guideReady
+                      ? "Pemandu lokal tersedia dari destinasi"
+                      : partner?.guideStatus === "CERTIFIED_GUIDE"
+                        ? "Pemanduan dapat disiapkan oleh EO bersertifikat"
+                        : "Perlu konfirmasi pemandu mandiri"}
+                  </p>
+                </div>
+              </div>
+            </section>
           )}
 
+          {/* Insight Context (if source-backed) */}
           {insight && (
-            <div className="eo-section" style={{ padding: "var(--space-4)" }}>
-              <strong
-                style={{
-                  fontSize: "var(--font-size-body-sm)",
-                  color: "var(--color-text-primary)",
-                }}
-              >
-                Konteks Demand Insight:
-              </strong>
-              <p
-                style={{
-                  margin: "var(--space-1) 0 0",
-                  fontSize: "var(--font-size-body-sm)",
-                  color: "var(--color-text-secondary)",
-                }}
-              >
-                {insight.title}
+            <section className="eo-pkg-side-card">
+              <span className="eo-pkg-insight-eyebrow">
+                Dibuat dari Insight Traveler
+              </span>
+              <h4 className="eo-pkg-insight-title">{insight.title}</h4>
+              <p className="eo-pkg-insight-desc">
+                {insight.unmetDemandDescription}
               </p>
-            </div>
+            </section>
           )}
-        </div>
+        </aside>
       </div>
     </div>
   );

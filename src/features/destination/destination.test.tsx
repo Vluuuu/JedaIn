@@ -24,6 +24,7 @@ import { DestinationSettingsScreen } from "./DestinationSettingsScreen";
 import { DestinationApplicationScreen } from "./DestinationApplicationScreen";
 import { DestinationVerificationStatusScreen } from "./DestinationVerificationStatusScreen";
 import { generateUniqueDestinationPartnerId } from "./destinationContext";
+import { getDestinationOverviewData } from "./destinationOverviewData";
 import { PartnerLoginScreen } from "../eo/PartnerLoginScreen";
 
 let container: HTMLDivElement;
@@ -921,14 +922,186 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
   });
 
   describe("5. Overview & Settings Screens (DP05 & DP11)", () => {
-    it("renders Destination Overview with completeness metrics and Settings info", async () => {
+    it("renders the source-backed destination identity, readiness, profile, sessions, and capacity", async () => {
       partnerSessionStore.loginAsDemoDestination();
 
-      const overviewView = await renderComponent(
+      const view = await renderComponent(
         createElement(DestinationOverviewScreen),
       );
-      expect(overviewView.textContent).toContain("Lereng Hijau Batu");
-      expect(overviewView.textContent).toContain("6/6 Informasi Inti Lengkap");
+
+      expect(view.textContent).toContain("Lereng Hijau Batu");
+      expect(view.textContent).toContain("Batu / Malang Raya");
+      expect(view.textContent).toContain("Pokdarwis Lereng Hijau");
+      expect(view.textContent).toContain("Terverifikasi Dasar");
+      expect(view.textContent).toContain("Pemandu lokal tersedia");
+      expect(view.textContent).not.toContain("Guide Ready ✓");
+      expect(view.textContent).not.toContain("Non-Guide Ready");
+      expect(view.textContent).not.toContain("Tanpa Guide Lokal");
+      expect(view.textContent).not.toContain("BASIC");
+      expect(view.textContent).not.toContain("DESTINATION_PARTNER");
+      expect(view.textContent).not.toContain("PAID");
+      expect(view.textContent).not.toContain("sessionId");
+      expect(view.textContent).not.toContain("packageId");
+      expect(view.textContent).toContain("9/9 informasi lengkap");
+      expect(view.textContent).toContain("Rp125.000 / orang");
+      expect(view.textContent).toContain("20 orang / sesi");
+      expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
+      expect(view.textContent).toContain("Jeda Alam Nusantara");
+      expect(view.querySelectorAll(".dest-session-row")).toHaveLength(2);
+      expect(view.textContent).toContain("6 kapasitas operasional");
+      expect(view.textContent).toContain("Walking tour kebun teh lereng bukit");
+      expect(view.textContent).toContain("Saung istirahat bambu");
+      expect(view.textContent).toContain(
+        "Waktu terbaik berkunjung adalah pukul 07.00–14.00 WIB",
+      );
+    });
+
+    it("derives only chronologically upcoming destination sessions", () => {
+      const destination = mockDestinationStore.getById("dest_lereng_hijau")!;
+
+      const beforeSecondSession = getDestinationOverviewData(
+        destination,
+        Date.parse("2026-09-15T00:00:00+07:00"),
+      );
+      const afterAllSessions = getDestinationOverviewData(
+        destination,
+        Date.parse("2026-09-20T00:00:00+07:00"),
+      );
+
+      expect(beforeSecondSession.upcomingSessions).toHaveLength(1);
+      expect(beforeSecondSession.upcomingSessions[0].session.sessionId).toBe(
+        "ses_sgd_2",
+      );
+      expect(afterAllSessions.upcomingSessions).toHaveLength(0);
+    });
+
+    it("derives confirmed participants per upcoming session and in the KPI", async () => {
+      partnerSessionStore.loginAsDemoDestination();
+      mockTransactionStore.addDirectBooking({
+        bookingId: "bk_dest_overview_paid",
+        travelerId: "usr_hidden_paid",
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        totalAmount: 550000,
+        status: "PAID",
+        reservedQuantity: 0,
+        bookedQuantity: 2,
+        createdAt: "2026-09-01T08:00:00Z",
+        paymentExpiresAt: "2026-09-01T08:15:00Z",
+        paidAt: "2026-09-01T08:05:00Z",
+      });
+      mockTransactionStore.addDirectBooking({
+        bookingId: "bk_dest_overview_completed",
+        travelerId: "usr_hidden_completed",
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_2",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        totalAmount: 275000,
+        status: "COMPLETED",
+        reservedQuantity: 0,
+        bookedQuantity: 1,
+        createdAt: "2026-09-02T08:00:00Z",
+        paymentExpiresAt: "2026-09-02T08:15:00Z",
+        paidAt: "2026-09-02T08:05:00Z",
+        completedAt: "2026-09-20T08:00:00Z",
+      });
+      mockTransactionStore.addDirectBooking({
+        bookingId: "bk_dest_overview_pending",
+        travelerId: "usr_hidden_pending",
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 4,
+        unitPricePerPerson: 275000,
+        totalAmount: 1100000,
+        status: "PENDING_PAYMENT",
+        reservedQuantity: 4,
+        bookedQuantity: 0,
+        createdAt: "2026-09-03T08:00:00Z",
+        paymentExpiresAt: "2026-09-30T08:15:00Z",
+      });
+
+      const view = await renderComponent(
+        createElement(DestinationOverviewScreen),
+      );
+      const participantMetric = [
+        ...view.querySelectorAll(".dest-metric-item"),
+      ].find((item) => item.textContent?.includes("Peserta Terkonfirmasi"));
+
+      expect(participantMetric?.textContent).toContain("3");
+      expect(view.textContent).toContain("2 peserta terkonfirmasi");
+      expect(view.textContent).toContain("1 peserta terkonfirmasi");
+      expect(view.textContent).not.toContain("usr_hidden_paid");
+    });
+
+    it("shows destination-only ratings and latest destination reviews", async () => {
+      partnerSessionStore.loginAsDemoDestination();
+      mockReviewStore.submitReview({
+        bookingId: "bk_overview_dest_old",
+        travelerId: "usr_dest_old",
+        targetType: "DESTINATION",
+        targetRef: "Lereng Hijau Batu",
+        rating: 4,
+        comment: "Jalur kebun tertata dan tenang.",
+      });
+      mockReviewStore.submitReview({
+        bookingId: "bk_overview_dest_new",
+        travelerId: "usr_dest_new",
+        targetType: "DESTINATION",
+        targetRef: "Lereng Hijau Batu",
+        rating: 5,
+        comment: "Saung bersih dan pemandu lokal sigap.",
+      });
+      mockReviewStore.submitReview({
+        bookingId: "bk_overview_eo_excluded",
+        travelerId: "usr_eo_excluded",
+        targetType: "EO_GUIDE",
+        targetRef: "org_lereng_batu",
+        rating: 1,
+        comment: "Ulasan EO tidak boleh tampil di kualitas destinasi.",
+      });
+
+      const view = await renderComponent(
+        createElement(DestinationOverviewScreen),
+      );
+
+      expect(view.textContent).toContain("4.5 / 5");
+      expect(view.textContent).toContain("2 ulasan destinasi");
+      expect(view.textContent).toContain("Jalur kebun tertata dan tenang.");
+      expect(view.textContent).toContain(
+        "Saung bersih dan pemandu lokal sigap.",
+      );
+      expect(view.textContent).not.toContain(
+        "Ulasan EO tidak boleh tampil di kualitas destinasi.",
+      );
+      expect(view.textContent).not.toContain("usr_dest_old");
+    });
+
+    it("renders calm empty states for sessions and destination reviews", async () => {
+      partnerSessionStore.setPartner({
+        id: "dest_partner_trawas_bambu",
+        email: "partner@trawas.id",
+        name: "Pengelola Trawas",
+        role: "DESTINATION",
+        businessName: "Pengelola Bambu Trawas",
+        destinationIdentityId: "dest_hutan_trawas",
+      });
+
+      const view = await renderComponent(
+        createElement(DestinationOverviewScreen),
+      );
+
+      expect(view.textContent).toContain(
+        "Belum ada jadwal keberangkatan mendatang.",
+      );
+      expect(view.textContent).toContain("Belum ada ulasan destinasi.");
+      expect(view.querySelectorAll(".dest-session-row")).toHaveLength(0);
+    });
+
+    it("keeps the supporting destination settings route functional", async () => {
+      partnerSessionStore.loginAsDemoDestination();
 
       const settingsView = await renderComponent(
         createElement(DestinationSettingsScreen),
@@ -939,6 +1112,17 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(settingsView.textContent).toContain(
         "Perjanjian Kemitraan Destinasi Aktif",
       );
+    });
+
+    it("keeps the destination route guard intact for an EO partner", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/destination",
+      ]);
+
+      expect(view.textContent).toContain("Masuk ke Portal Partner");
+      expect(view.textContent).not.toContain("Jadwal Keberangkatan Mendatang");
     });
 
     it("operational screens with invalid/unapproved context render safe unavailable state without falling back to Lereng Hijau", async () => {

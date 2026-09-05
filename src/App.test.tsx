@@ -73,16 +73,34 @@ describe("App shell routing", () => {
     expect(markup).not.toContain("Destination Profile");
   });
 
-  it("renders exact Destination partner navigation labels and links without EO items", () => {
+  it("exposes only the single Destination overview navigation while keeping EO navigation untouched", () => {
     partnerSessionStore.loginAsDemoDestination();
     const markup = renderRoute("/partner/destination");
-    for (const item of partnerDestinationNavigation) {
-      expect(markup).toContain(`href="${item.to}"`);
-      expect(markup).toContain(`>${item.label}</span>`);
-    }
+
+    expect(partnerDestinationNavigation).toEqual([
+      { to: "/partner/destination", label: "Overview" },
+    ]);
+    expect(markup).toContain('href="/partner/destination"');
+    expect(markup).toContain(">Overview</span>");
+    expect(markup).not.toContain("Destination Profile");
+    expect(markup).not.toContain(">Verification</span>");
+    expect(markup).not.toContain(">Schedule</span>");
+    expect(markup).not.toContain(">Capacity</span>");
+    expect(markup).not.toContain(">Reviews</span>");
     expect(markup).not.toContain(">Insights</span>");
     expect(markup).not.toContain(">Packages</span>");
     expect(markup).not.toContain(">Bookings</span>");
+
+    expect(partnerEoNavigation.map((item) => item.label)).toEqual([
+      "Overview",
+      "Insights",
+      "Packages",
+      "Sessions",
+      "Bookings",
+      "Destinations",
+      "Reviews",
+      "Profile",
+    ]);
   });
 
   it("renders exact Admin navigation labels matching source-of-truth", () => {

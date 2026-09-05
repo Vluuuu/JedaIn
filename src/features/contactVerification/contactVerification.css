@@ -226,6 +226,43 @@
   min-height: 2.75rem;
 }
 
+.contact-verification-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.contact-verification-demo-skip-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.contact-verification-demo-skip-btn {
+  width: 100%;
+  min-height: 2.75rem;
+  color: var(--color-stone-600);
+  font-weight: var(--font-weight-medium);
+  border: 1px dashed var(--color-stone-300);
+}
+
+.contact-verification-demo-skip-btn:hover:not(:disabled) {
+  color: var(--color-stone-900);
+  border-color: var(--color-stone-400);
+  background-color: var(--color-stone-100);
+}
+
+.contact-verification-demo-hint {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+  text-align: center;
+  line-height: 1.4;
+}
+
 .contact-verification-alert {
   display: flex;
   align-items: flex-start;

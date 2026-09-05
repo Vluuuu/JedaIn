@@ -60,13 +60,25 @@ export interface DestinationRecord {
   capacityPerSession: number;
   imageUrl?: string;
   status: "ACTIVE" | "INACTIVE";
+  availableActivities?: string[];
+  facilities?: string[];
+  operationalNotes?: string[];
+  localGuideSummary?: string;
 }
+
+export type PackageGuideSource = "DESTINATION" | "EO";
 
 export type DemandIntent =
   "NATURE" | "CALM" | "EXPLORATION" | "REFLECTION" | "ACTIVE" | "QUALITY_TIME";
 
 export type DemandPeriodPreset =
-  "TODAY" | "YESTERDAY" | "THIS_WEEK" | "THIS_MONTH" | "ALL" | "CUSTOM";
+  | "TODAY"
+  | "YESTERDAY"
+  | "THIS_WEEK"
+  | "THIS_MONTH"
+  | "THIS_YEAR"
+  | "ALL"
+  | "CUSTOM";
 
 export interface DemandDateRange {
   startDate?: string; // YYYY-MM-DD
@@ -154,6 +166,7 @@ export interface EoPackageRecord {
   safetyNotes: string[];
   pricing: EoPackagePricing;
   guideStatus: EoGuideStatus;
+  guideSource: PackageGuideSource;
   status: EoPackageStatus;
   validationResult?: EoValidationResult;
   submittedAt?: string;

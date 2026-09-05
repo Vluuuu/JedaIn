@@ -41,6 +41,7 @@ import {
 import {
   EoApplicationScreen,
   EoBookingsScreen,
+  EoDestinationDetailScreen,
   EoDestinationsScreen,
   EoInsightsScreen,
   EoOverviewScreen,
@@ -288,6 +289,10 @@ export function App() {
         <Route path="sessions" element={<EoSessionsScreen />} />
         <Route path="bookings" element={<EoBookingsScreen />} />
         <Route path="destinations" element={<EoDestinationsScreen />} />
+        <Route
+          path="destinations/:destinationId"
+          element={<EoDestinationDetailScreen />}
+        />
         <Route path="reviews" element={<EoReviewsScreen />} />
         <Route path="profile" element={<EoProfileScreen />} />
       </Route>

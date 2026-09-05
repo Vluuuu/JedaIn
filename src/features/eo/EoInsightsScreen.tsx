@@ -74,6 +74,8 @@ export function EoInsightsScreen() {
         return "Minggu ini";
       case "THIS_MONTH":
         return "Bulan ini";
+      case "THIS_YEAR":
+        return "Tahun ini";
       case "ALL":
         return "Semua data";
       case "CUSTOM":
@@ -115,6 +117,7 @@ export function EoInsightsScreen() {
                 }
               >
                 <option value="ALL">Semua data</option>
+                <option value="THIS_YEAR">Tahun ini</option>
                 <option value="THIS_MONTH">Bulan ini</option>
                 <option value="THIS_WEEK">Minggu ini</option>
                 <option value="YESTERDAY">Kemarin</option>

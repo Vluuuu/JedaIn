@@ -16,6 +16,7 @@ import {
 } from "./mockInsightStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import { EoInsightsScreen } from "./EoInsightsScreen";
+import { EoPackagesScreen } from "./EoPackagesScreen";
 import { EoPackageBuilderScreen } from "./EoPackageBuilderScreen";
 import { EoPackageDetailScreen } from "./EoPackageDetailScreen";
 import { EoSessionsScreen } from "./EoSessionsScreen";
@@ -29,6 +30,14 @@ let root: Root;
 
 beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+
+  HTMLDialogElement.prototype.showModal ??= function showModal() {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close ??= function close() {
+    this.removeAttribute("open");
+    this.dispatchEvent(new Event("close"));
+  };
 });
 
 afterEach(async () => {
@@ -221,18 +230,19 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(res.validationResult.valid).toBe(false);
     });
 
-    it("H2. authenticated Concept-Only EO cannot bypass guideReady rule by forging CERTIFIED_GUIDE in caller state", () => {
+    it("H2. authenticated Concept-Only EO cannot submit package with guideSource = 'EO'", () => {
       // Authenticate as Concept-Only EO (eo_kreatif_desa)
       partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
 
-      // Save draft with non-guide-ready destination (dest_hutan_trawas)
+      // Save draft with forged guideSource = "EO"
       const saveRes = mockEoPackageStore.saveDraft({
         title: "Retreat Hening Bambu",
         shortSummary: "Sesi hening di hutan bambu.",
-        destinationId: "dest_hutan_trawas", // guideReady: false!
+        destinationId: "dest_hutan_trawas",
         durationLabel: "1 hari",
         itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
         safetyNotes: ["Patuhi pemandu."],
+        guideSource: "EO", // Forbidden for Concept-Only!
         pricing: {
           destinationBaseCost: 95000,
           eoMargin: 100000,
@@ -248,8 +258,8 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(submitRes.success).toBe(false);
       expect(submitRes.package?.status).toBe("DRAFT");
       expect(
-        submitRes.validationResult.errors.some((e) =>
-          e.message.includes("Guide Ready"),
+        submitRes.validationResult.errors.some(
+          (e) => e.field === "guideSource",
         ),
       ).toBe(true);
     });
@@ -436,6 +446,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           durationLabel: "1 hari",
           itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
           safetyNotes: ["Catatan keselamatan."],
+          guideSource: "DESTINATION",
           pricing: {
             destinationBaseCost: 125000,
             eoMargin: 150000,
@@ -998,7 +1009,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(text).not.toContain("Compatible with");
     });
 
-    it("AS3. Time filter (TODAY, YESTERDAY, THIS_WEEK, THIS_MONTH, CUSTOM, zero-response) updates counts truthfully", async () => {
+    it("AS3. Time filter (TODAY, YESTERDAY, THIS_WEEK, THIS_MONTH, THIS_YEAR, CUSTOM, zero-response) updates counts truthfully", async () => {
       const view = await renderComponent(createElement(EoInsightsScreen));
 
       const getPeriodSelect = () =>
@@ -1010,7 +1021,17 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("1.020 respons");
       expect(view.textContent).toContain("312 traveler mencari");
 
-      // 2. TODAY (2026-09-05): 18 responses
+      // 2. THIS_YEAR: 1.020 responses for 2026 data
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "THIS_YEAR";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain(
+        "1.020 respons pada periode Tahun ini",
+      );
+
+      // 3. TODAY (2026-09-05): 18 responses
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "TODAY";
@@ -1019,7 +1040,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("18 respons pada periode Hari ini");
       expect(view.textContent).not.toContain("1.020 respons");
 
-      // 3. YESTERDAY (2026-09-04): 24 responses
+      // 4. YESTERDAY (2026-09-04): 24 responses
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "YESTERDAY";
@@ -1027,7 +1048,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
       expect(view.textContent).toContain("24 respons pada periode Kemarin");
 
-      // 4. THIS_WEEK: 126 responses
+      // 5. THIS_WEEK: 126 responses
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "THIS_WEEK";
@@ -1035,7 +1056,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
       expect(view.textContent).toContain("126 respons pada periode Minggu ini");
 
-      // 5. THIS_MONTH: 108 responses
+      // 6. THIS_MONTH: 108 responses
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "THIS_MONTH";
@@ -1043,7 +1064,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
       expect(view.textContent).toContain("108 respons pada periode Bulan ini");
 
-      // 6. CUSTOM date range with 0 responses (e.g. 2025-01-01 to 2025-01-02)
+      // 7. CUSTOM date range with 0 responses (e.g. 2025-01-01 to 2025-01-02)
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "CUSTOM";
@@ -1430,6 +1451,641 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       const identity = view.querySelector(".workspace-identity")!;
       expect(identity.textContent).toContain("Certified Guide");
       expect(identity.textContent).not.toContain("CERTIFIED_GUIDE");
+    });
+  });
+
+  describe("10. Phase B1: Packages Lifecycle Workspace & Detail Rebuild (AV–BF)", () => {
+    it("AV. Packages screen displays humanized status labels and no raw enums", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const view = await renderComponent(createElement(EoPackagesScreen));
+
+      // H1 & Subtitle
+      expect(view.textContent).toContain("Paket Experience");
+      expect(view.textContent).toContain(
+        "Kelola experience dari draf hingga tayang ke traveler.",
+      );
+
+      // Humanized tabs
+      expect(view.textContent).toContain("Semua");
+      expect(view.textContent).toContain("Draf");
+      expect(view.textContent).toContain("Menunggu Review");
+      expect(view.textContent).toContain("Perlu Perbaikan");
+      expect(view.textContent).toContain("Disetujui");
+      expect(view.textContent).toContain("Live");
+
+      // No raw enum text exposed
+      expect(view.textContent).not.toContain("PENDING_ADMIN_REVIEW");
+      expect(view.textContent).not.toContain("CONCEPT_ONLY");
+
+      // Seeded packages present
+      expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
+      expect(view.textContent).toContain("Pagi Hening Tepi Sungai Pacet");
+    });
+
+    it("AW. Package cards show state-specific primary actions and session context", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const view = await renderComponent(createElement(EoPackagesScreen));
+
+      // LIVE package (slow_green_day)
+      expect(view.textContent).toContain("Tayang ke traveler.");
+      expect(view.textContent).toContain("2 jadwal keberangkatan mendatang");
+      expect(view.textContent).toContain("Atur Jadwal");
+      expect(view.textContent).toContain("Lihat Paket");
+
+      // PENDING_ADMIN_REVIEW package (pkg_pacet_mindful_retreat)
+      expect(view.textContent).toContain("Sedang ditinjau Admin JedaIn.");
+      expect(view.textContent).toContain("Lihat Status");
+      // Pending package must NOT have an edit button
+      const pendingArticle = Array.from(view.querySelectorAll("article")).find(
+        (a) => a.textContent?.includes("Pagi Hening Tepi Sungai Pacet"),
+      )!;
+      expect(pendingArticle).toBeDefined();
+      expect(pendingArticle.textContent).not.toContain("Lanjut Edit");
+      expect(pendingArticle.textContent).not.toContain("Perbaiki");
+    });
+
+    it("AX. DRAFT and REJECTED packages route to draft builder on primary action", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // Save a DRAFT and a REJECTED package
+      const draftRes = mockEoPackageStore.saveDraft({
+        title: "Draf Baru Keren",
+        shortSummary: "Ringkasan draf pengalaman.",
+        destinationId: "dest_lereng_hijau",
+        durationLabel: "1 hari",
+        itinerary: [{ order: 1, title: "Sesi", description: "Desc" }],
+        safetyNotes: ["Aman"],
+        pricing: {
+          destinationBaseCost: 125000,
+          eoMargin: 75000,
+          customerPrice: 200000,
+        },
+      });
+      expect(draftRes.success).toBe(true);
+
+      const rejRes = mockEoPackageStore.saveDraft({
+        title: "Paket Butuh Perbaikan",
+        shortSummary: "Ringkasan paket revisi.",
+        destinationId: "dest_lereng_hijau",
+        durationLabel: "1 hari",
+        itinerary: [{ order: 1, title: "Sesi", description: "Desc" }],
+        safetyNotes: ["Aman"],
+        pricing: {
+          destinationBaseCost: 125000,
+          eoMargin: 75000,
+          customerPrice: 200000,
+        },
+      });
+      const rejPkgId = rejRes.package!.packageId;
+      mockEoPackageStore.submitForReview(rejPkgId);
+      mockEoPackageStore.rejectPackage(
+        rejPkgId,
+        "Mohon sesuaikan rincian jadwal makan siang.",
+      );
+
+      const view = await renderComponent(createElement(EoPackagesScreen));
+
+      // Check DRAFT card action
+      const draftCard = Array.from(view.querySelectorAll("article")).find((a) =>
+        a.textContent?.includes("Draf Baru Keren"),
+      )!;
+      expect(draftCard).toBeDefined();
+      expect(draftCard.textContent).toContain("Lanjut Edit");
+      expect(draftCard.textContent).toContain("Belum diajukan untuk review.");
+
+      // Check REJECTED card action & reason preview
+      const rejCard = Array.from(view.querySelectorAll("article")).find((a) =>
+        a.textContent?.includes("Paket Butuh Perbaikan"),
+      )!;
+      expect(rejCard).toBeDefined();
+      expect(rejCard.textContent).toContain("Perbaiki Paket");
+      expect(rejCard.textContent).toContain(
+        "Catatan: Mohon sesuaikan rincian jadwal makan siang.",
+      );
+    });
+
+    it("AY. Empty status filter differs truthfully from empty account state", async () => {
+      // 1. Account with packages selecting empty filter (e.g. Draf when 0 drafts exist)
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const view = await renderComponent(createElement(EoPackagesScreen));
+
+      const filterTabs = Array.from(
+        view.querySelectorAll<HTMLButtonElement>(".eo-packages-filter__tab"),
+      );
+      const draftTab = filterTabs.find((t) => t.textContent?.includes("Draf"))!;
+
+      await act(async () => {
+        draftTab.click();
+      });
+
+      expect(view.textContent).toContain("Belum ada paket dengan status ini.");
+      expect(view.textContent).toContain("Lihat Semua Paket");
+      expect(view.textContent).not.toContain(
+        "Kamu belum punya paket experience.",
+      );
+
+      // 2. Fresh account with 0 packages
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+      const emptyView = await renderComponent(createElement(EoPackagesScreen));
+
+      expect(emptyView.textContent).toContain(
+        "Kamu belum punya paket experience.",
+      );
+      expect(emptyView.textContent).toContain("Buat Paket Pertama");
+      expect(emptyView.textContent).toContain("Lihat Insight");
+      expect(emptyView.textContent).not.toContain(
+        "Belum ada paket dengan status ini.",
+      );
+    });
+
+    it("AZ. Package Detail renders SVG back button, clean Guide Ready, human pricing, and source-backed insight", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/packages/slow_green_day",
+      ]);
+
+      // Back navigation with SVG icon (no raw arrow)
+      expect(view.textContent).toContain("Kembali ke Daftar Paket");
+      expect(view.textContent).not.toContain("← Kembali");
+      expect(view.textContent).not.toContain("&larr;");
+      const backSvg = view.querySelector(".eo-pkg-detail-back-icon");
+      expect(backSvg).not.toBeNull();
+
+      // Lifecycle callout
+      expect(view.textContent).toContain("Paket Sedang Tayang (Live)");
+      expect(view.textContent).toContain("2 jadwal keberangkatan mendatang");
+
+      // Clean Guide Ready wording (no duplicate checkmarks like ✓ Guide Ready ✓)
+      expect(view.textContent).toContain("Guide Ready");
+      expect(view.textContent).not.toContain("✓ Guide Ready ✓");
+      expect(view.textContent).toContain(
+        "Pemandu lokal tersedia dari destinasi",
+      );
+
+      // Accurate pricing terminology
+      expect(view.textContent).toContain("Biaya dasar destinasi");
+      expect(view.textContent).toContain("Margin EO");
+      expect(view.textContent).toContain("Harga traveler");
+      expect(view.textContent).toContain("Rp125.000");
+      expect(view.textContent).toContain("Rp150.000");
+      expect(view.textContent).toContain("Rp275.000");
+      expect(view.textContent).not.toContain("Modal Destinasi");
+      expect(view.textContent).not.toContain("Harga Jual");
+      expect(view.textContent).not.toContain("Margin Layanan & Kepemanduan EO");
+
+      // Source-backed insight context (ins_nature_batu_1d)
+      expect(view.textContent).toContain("Dibuat dari Insight Traveler");
+      expect(view.textContent).toContain(
+        "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
+      );
+      expect(view.textContent).not.toContain("AI generated");
+    });
+  });
+
+  describe("11. Phase B2: Destination Discovery, Guide Source & Builder Step 1 (BG–BQ)", () => {
+    it("BG. All active verified destinations in MVP provide local guide capability", () => {
+      const allDests = mockDestinationStore.getAll();
+      expect(allDests.length).toBeGreaterThan(0);
+      for (const dest of allDests) {
+        if (dest.status === "ACTIVE") {
+          expect(dest.guideReady).toBe(true);
+        }
+      }
+    });
+
+    it("BH. EO Destination Directory renders cards with search, filters, and no duplicate checkmark", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/destinations",
+      ]);
+
+      // Header
+      expect(view.textContent).toContain("Destinasi Terverifikasi");
+      expect(view.textContent).toContain(
+        "Temukan mitra destinasi dan pelajari potensi aktivitasnya sebelum merancang package.",
+      );
+
+      // Search & Filter chips
+      const searchInput = view.querySelector<HTMLInputElement>(
+        ".eo-destinations-search-input",
+      );
+      expect(searchInput).not.toBeNull();
+      expect(view.textContent).toContain("Terverifikasi Plus");
+      expect(view.textContent).toContain("Terverifikasi Dasar");
+
+      // Destination cards
+      expect(view.textContent).toContain("Lereng Hijau Batu");
+      expect(view.textContent).toContain("Lembah Alam Pacet");
+      expect(view.textContent).toContain("Hutan Bambu Trawas");
+      expect(view.textContent).toContain("Pemandu lokal tersedia");
+      expect(view.textContent).not.toContain("Guide Ready ✓");
+      expect(view.textContent).not.toContain("✓ Guide Ready ✓");
+    });
+
+    it("BI. Search filters destination cards by name and location", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/destinations",
+      ]);
+
+      const searchInput = view.querySelector<HTMLInputElement>(
+        ".eo-destinations-search-input",
+      )!;
+
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(searchInput, "Pacet");
+        searchInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      expect(view.textContent).toContain("Lembah Alam Pacet");
+      expect(view.textContent).not.toContain("Lereng Hijau Batu");
+    });
+
+    it("BJ. EO Destination Detail route renders full identity, activities, facilities, and CTA", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/destinations/dest_lereng_hijau",
+      ]);
+
+      // Back button with SVG
+      expect(view.textContent).toContain("Kembali ke Destinasi");
+      expect(view.querySelector(".eo-dest-detail-back-icon")).not.toBeNull();
+
+      // Content
+      expect(view.textContent).toContain("Lereng Hijau Batu");
+      expect(view.textContent).toContain("Batu / Malang Raya");
+      expect(view.textContent).toContain("Tentang Destinasi");
+      expect(view.textContent).toContain("Aktivitas yang Tersedia");
+      expect(view.textContent).toContain("Fasilitas di Lokasi");
+      expect(view.textContent).toContain("Pemanduan Lokal");
+      expect(view.textContent).toContain("Pemandu Lokal Siap");
+      expect(view.textContent).toContain("Biaya dasar destinasi");
+
+      // CTA
+      const ctaBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("Buat Paket dengan Destinasi Ini"),
+      );
+      expect(ctaBtn).toBeDefined();
+    });
+
+    it("BK. Builder Step 1 preselects destination from destinationId query parameter", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new?destinationId=dest_lembah_pacet",
+      ]);
+
+      // Step 1 title
+      expect(view.textContent).toContain(
+        "Langkah 1: Pilih Destinasi & Status Pemanduan",
+      );
+
+      // Selected card has Terpilih indicator
+      const pacetCard = Array.from(
+        view.querySelectorAll(".eo-builder-dest-card"),
+      ).find((c) => c.textContent?.includes("Lembah Alam Pacet"))!;
+      expect(pacetCard).toBeDefined();
+      expect(pacetCard.textContent).toContain("Terpilih ✓");
+    });
+
+    it("BL. Builder guide source selection: Concept Only is locked to destination guide, Certified Guide has choice", async () => {
+      // 1. Concept Only
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+      const viewConcept = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new",
+      ]);
+
+      expect(viewConcept.textContent).toContain("Pemandu dari Destinasi");
+      expect(viewConcept.textContent).toContain(
+        "Tersedia melalui mitra destinasi",
+      );
+      expect(viewConcept.textContent).toContain(
+        "Kamu fokus merancang experience. Pemanduan akan disiapkan oleh mitra destinasi terverifikasi di lokasi.",
+      );
+      expect(viewConcept.textContent).not.toContain("Pemandu dari EO");
+
+      // 2. Certified Guide
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const viewCertified = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new",
+      ]);
+
+      expect(viewCertified.textContent).toContain("Pemandu dari Destinasi");
+      expect(viewCertified.textContent).toContain(
+        "Pemandu dari EO (Certified Guide)",
+      );
+    });
+
+    it("BM. Inspecting destination in Builder opens Dialog without selecting destination", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new",
+      ]);
+
+      // Click "Lihat Detail" on dest_hutan_trawas card
+      const trawasCard = Array.from(
+        view.querySelectorAll(".eo-builder-dest-card"),
+      ).find((c) => c.textContent?.includes("Hutan Bambu Trawas"))!;
+      expect(trawasCard).toBeDefined();
+
+      const inspectBtn = Array.from(trawasCard.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Lihat Detail"),
+      )!;
+      expect(inspectBtn).toBeDefined();
+
+      await act(async () => {
+        inspectBtn.click();
+      });
+
+      // Dialog opens showing details
+      expect(view.textContent).toContain("Kawasan hutan bambu hening");
+      // Trawas card is not yet marked selected
+      expect(trawasCard.textContent).toContain("Pilih");
+    });
+
+    it("BN. Package sessions screen shows contextual back button when packageId is in route, but global sessions does not", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // 1. Route with packageId
+      const viewPackageSessions = await renderComponent(createElement(App), [
+        "/partner/eo/packages/slow_green_day/sessions",
+      ]);
+      expect(viewPackageSessions.textContent).toContain("Kembali ke Paket");
+      expect(
+        viewPackageSessions.querySelector(".eo-pkg-detail-back-icon"),
+      ).not.toBeNull();
+
+      // 2. Global sessions route
+      const viewGlobalSessions = await renderComponent(createElement(App), [
+        "/partner/eo/sessions",
+      ]);
+      expect(viewGlobalSessions.textContent).not.toContain("Kembali ke Paket");
+    });
+
+    it("BO. Future ACTIVE + guideReady=false destination is excluded from both Directory and Builder", async () => {
+      // Inactive/pre-availability destination with guideReady = false
+      mockDestinationStore.upsertVerifiedDestination({
+        destinationId: "dest_future_noguide",
+        name: "Lembah Purba No Guide",
+        locationLabel: "Pasuruan Barat",
+        province: "Jawa Timur",
+        city: "Pasuruan",
+        verificationLevel: "BASIC",
+        guideReady: false, // Not ready!
+        baseCostPerPerson: 75000,
+        description: "Destinasi belum memiliki pemandu lokal.",
+        highlights: ["Hutan asri"],
+        capacityPerSession: 10,
+        status: "ACTIVE",
+      });
+
+      // 1. Selector check
+      const conceptEligible =
+        mockDestinationStore.getEligibleForEo("CONCEPT_ONLY");
+      const certifiedEligible =
+        mockDestinationStore.getEligibleForEo("CERTIFIED_GUIDE");
+      expect(
+        conceptEligible.some((d) => d.destinationId === "dest_future_noguide"),
+      ).toBe(false);
+      expect(
+        certifiedEligible.some(
+          (d) => d.destinationId === "dest_future_noguide",
+        ),
+      ).toBe(false);
+
+      // 2. Directory check
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const viewDir = await renderComponent(createElement(App), [
+        "/partner/eo/destinations",
+      ]);
+      expect(viewDir.textContent).not.toContain("Lembah Purba No Guide");
+
+      // 3. Builder Step 1 check
+      const viewBuilder = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new",
+      ]);
+      expect(viewBuilder.textContent).not.toContain("Lembah Purba No Guide");
+
+      // 4. Ineligible deep-link query param check:
+      // ?destinationId=dest_future_noguide must NOT be preselected or enable Continue
+      const viewDeepLinkIneligible = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new?destinationId=dest_future_noguide",
+      ]);
+      expect(viewDeepLinkIneligible.textContent).not.toContain(
+        "Lembah Purba No Guide",
+      );
+      expect(viewDeepLinkIneligible.textContent).not.toContain("Terpilih ✓");
+
+      // Continue button must be disabled
+      const continueBtn = Array.from(
+        viewDeepLinkIneligible.querySelectorAll<HTMLButtonElement>("button"),
+      ).find((b) => b.textContent?.includes("Lanjut ke Langkah 2"));
+      expect(continueBtn).toBeDefined();
+      expect(continueBtn!.disabled).toBe(true);
+
+      // 5. Unknown destination query param check:
+      const viewUnknown = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new?destinationId=unknown_dest_xyz",
+      ]);
+      const continueUnknown = Array.from(
+        viewUnknown.querySelectorAll<HTMLButtonElement>("button"),
+      ).find((b) => b.textContent?.includes("Lanjut ke Langkah 2"));
+      expect(continueUnknown).toBeDefined();
+      expect(continueUnknown!.disabled).toBe(true);
+
+      // 6. Valid eligible destination query param still preselects and enables Continue
+      const viewValid = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new?destinationId=dest_lembah_pacet",
+      ]);
+      expect(viewValid.textContent).toContain("Lembah Alam Pacet");
+      expect(viewValid.textContent).toContain("Terpilih ✓");
+      const continueValid = Array.from(
+        viewValid.querySelectorAll<HTMLButtonElement>("button"),
+      ).find((b) => b.textContent?.includes("Lanjut ke Langkah 2"));
+      expect(continueValid).toBeDefined();
+      expect(continueValid!.disabled).toBe(false);
+    });
+
+    it("BP. Package guideSource is strictly validated: missing rejected, Concept Only locked, Certified Guide flexible", () => {
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+
+      // 1. Missing guideSource is rejected
+      const missingRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: undefined as unknown as "DESTINATION",
+        },
+        "CONCEPT_ONLY",
+      );
+      expect(missingRes.valid).toBe(false);
+      expect(missingRes.errors.some((e) => e.field === "guideSource")).toBe(
+        true,
+      );
+
+      // 2. Concept Only with DESTINATION passes
+      const conceptDestRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: "DESTINATION",
+        },
+        "CONCEPT_ONLY",
+      );
+      expect(conceptDestRes.valid).toBe(true);
+
+      // 3. Concept Only with EO fails
+      const conceptEoRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: "EO",
+        },
+        "CONCEPT_ONLY",
+      );
+      expect(conceptEoRes.valid).toBe(false);
+      expect(conceptEoRes.errors.some((e) => e.field === "guideSource")).toBe(
+        true,
+      );
+
+      // 4. Certified Guide with DESTINATION passes
+      const certDestRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: "DESTINATION",
+        },
+        "CERTIFIED_GUIDE",
+      );
+      expect(certDestRes.valid).toBe(true);
+
+      // 5. Certified Guide with EO passes
+      const certEoRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: "EO",
+        },
+        "CERTIFIED_GUIDE",
+      );
+      expect(certEoRes.valid).toBe(true);
+    });
+
+    it("BQ. Seeded LIVE and PENDING packages have valid DESTINATION guideSource and saveDraft persists guideSource", () => {
+      const livePkg = mockEoPackageStore.getPackageById("slow_green_day");
+      const pendingPkg = mockEoPackageStore.getPackageById(
+        "pkg_pacet_mindful_retreat",
+      );
+
+      expect(livePkg?.guideSource).toBe("DESTINATION");
+      expect(pendingPkg?.guideSource).toBe("DESTINATION");
+
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const savedRes = mockEoPackageStore.saveDraft({
+        title: "Paket Pemandu EO",
+        shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+        destinationId: "dest_lereng_hijau",
+        durationLabel: "1 hari",
+        itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+        safetyNotes: ["Aman"],
+        guideSource: "EO",
+        pricing: {
+          destinationBaseCost: 125000,
+          eoMargin: 75000,
+          customerPrice: 200000,
+        },
+      });
+
+      expect(savedRes.success).toBe(true);
+      expect(savedRes.package?.guideSource).toBe("EO");
+    });
+
+    it("BR. Primary Action Spotlight renders consistently on Packages and Sessions screens", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // 1. Packages Screen Spotlight
+      const pkgView = await renderComponent(createElement(EoPackagesScreen));
+      const pkgSpotlight = pkgView.querySelector(
+        'aside[aria-label="Aksi utama paket experience"]',
+      );
+      expect(pkgSpotlight).not.toBeNull();
+      expect(pkgSpotlight?.textContent).toContain("Aksi Utama");
+      expect(pkgSpotlight?.textContent).toContain(
+        "Mulai rancang experience baru untuk traveler.",
+      );
+      expect(pkgSpotlight?.textContent).toContain("Buat Paket Baru");
+      expect(
+        pkgSpotlight?.querySelector(".eo-action-spotlight__btn-icon"),
+      ).not.toBeNull();
+
+      // 2. Sessions Screen Spotlight
+      const sessView = await renderComponent(createElement(EoSessionsScreen));
+      const sessSpotlight = sessView.querySelector(
+        'aside[aria-label="Aksi utama jadwal sesi"]',
+      );
+      expect(sessSpotlight).not.toBeNull();
+      expect(sessSpotlight?.textContent).toContain("Aksi Utama");
+      expect(sessSpotlight?.textContent).toContain(
+        "Tambahkan jadwal keberangkatan untuk paket yang siap berjalan.",
+      );
+      expect(sessSpotlight?.textContent).toContain("Buka Sesi Baru");
+      expect(
+        sessSpotlight?.querySelector(".eo-action-spotlight__btn-icon"),
+      ).not.toBeNull();
     });
   });
 });

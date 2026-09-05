@@ -1,7 +1,7 @@
 # JedaIn — EO Golden Flow Competition Contract
 
-**Status:** LOCKED FOR COMPETITION MVP  
-**Date:** 1 September 2026  
+**Status:** LOCKED FOR COMPETITION MVP
+**Date:** 1 September 2026
 **Scope:** EO01–EO18 / Phase 5 EO Partner Core
 
 This contract bundles the EO Partner surface so JedaIn can move quickly from the completed Traveler golden flow to Admin, Destination Partner, and the final cross-surface demo.
@@ -217,30 +217,39 @@ Minimum draft/submission data:
 
 Do not make the Admin sprint parse JSX/local forms to discover submissions.
 
-## 10. Destination Directory for Builder
+## 10. Destination Directory for Builder & Guide Source Model
 
-EO can select only a verified destination:
+EO can select only an active verified destination:
 
 - verification `BASIC`, or
 - verification `PLUS`.
 
-Guide rule:
+### Locked MVP Guide Model:
+Every active verified destination available to EO in MVP provides local destination guide capability (`guideReady = true`). Destination records with `guideReady = false` (pre-availability/remediation) are strictly excluded from EO discovery and Trip Builder. Destination eligibility is uniform across all EO guide statuses.
 
-- EO `CONCEPT_ONLY` → destination must also have `guide_ready = true`.
-- EO `CERTIFIED_GUIDE` → any BASIC/PLUS verified destination may be selected.
+Package explicitly stores its guide source:
+- `guideSource: "DESTINATION" | "EO"` (required)
 
-This rule must be checked again at builder submit/validation boundary, not only hidden by the UI.
+Rules:
+- EO `CONCEPT_ONLY` → must use `guideSource = DESTINATION`.
+- EO `CERTIFIED_GUIDE` → may choose `guideSource = DESTINATION` or `guideSource = EO`.
 
-For competition MVP, create one centralized prototype destination directory that later Destination Partner/Admin surfaces can reuse. It may contain 1–2 fictional verified destinations as required by PRD demo scope.
+This rule is enforced at builder submit/validation boundary and stored on `EoPackageRecord`. Packages without a valid `guideSource` fail validation.
+
+For competition MVP, create one centralized prototype destination directory that later Destination Partner/Admin surfaces can reuse.
 
 Minimum destination data:
 
 - `destinationId`
 - name/location
 - verification level
-- `guideReady`
+- `guideReady` (true for all active verified destinations in MVP)
 - base cost used by pricing
-- capacity/operational summary if needed
+- capacity/operational summary
+- `availableActivities[]`
+- `facilities[]`
+- `operationalNotes[]`
+- `localGuideSummary`
 - status.
 
 Do not mutate Traveler package fixtures directly as the destination database.
@@ -249,7 +258,7 @@ Do not mutate Traveler package fixtures directly as the destination database.
 
 Stepper is locked:
 
-1. Destination
+1. Destination & Guide Source
 2. Relevant Insight
 3. Itinerary
 4. Pricing

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { Badge, Button, Dialog } from "../../components/ui";
 import { mockDestinationStore } from "./mockDestinationStore";
@@ -49,9 +49,24 @@ export function EoPackageBuilderScreen() {
     initialDraft?.packageId ?? undefined,
   );
 
+  // Available data - Step 1 uses authoritative eligible destinations
+  const eligibleDestinations =
+    mockDestinationStore.getEligibleForEo(guideStatus);
+  const allInsights = mockInsightStore.getAllInsights();
+
+  // Authoritative initial destination: preselect only if the candidate is in eligibleDestinations
+  const candidateDestinationId =
+    initialDraft?.destinationId ?? initialDestinationId ?? "";
+  const isCandidateEligible = eligibleDestinations.some(
+    (d) => d.destinationId === candidateDestinationId,
+  );
+  const initialValidDestinationId = isCandidateEligible
+    ? candidateDestinationId
+    : "";
+
   // Step 1: Destination Selection & Filtering
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(
-    initialDraft?.destinationId ?? initialDestinationId ?? "",
+    initialValidDestinationId,
   );
   const [destSearchQuery, setDestSearchQuery] = useState<string>("");
   const [destLevelFilter, setDestLevelFilter] = useState<
@@ -120,29 +135,22 @@ export function EoPackageBuilderScreen() {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Available data - Step 1 uses eligible destinations
-  const eligibleDestinations =
-    mockDestinationStore.getEligibleForEo(guideStatus);
-  const allInsights = mockInsightStore.getAllInsights();
-
-  const filteredEligibleDestinations = useMemo(() => {
-    return eligibleDestinations.filter((dest) => {
-      if (
-        destLevelFilter !== "ALL" &&
-        dest.verificationLevel !== destLevelFilter
-      ) {
-        return false;
-      }
-      if (destSearchQuery.trim()) {
-        const q = destSearchQuery.toLowerCase().trim();
-        const matchesName = dest.name.toLowerCase().includes(q);
-        const matchesCity = dest.city.toLowerCase().includes(q);
-        const matchesLoc = dest.locationLabel.toLowerCase().includes(q);
-        if (!matchesName && !matchesCity && !matchesLoc) return false;
-      }
-      return true;
-    });
-  }, [eligibleDestinations, destLevelFilter, destSearchQuery]);
+  const filteredEligibleDestinations = eligibleDestinations.filter((dest) => {
+    if (
+      destLevelFilter !== "ALL" &&
+      dest.verificationLevel !== destLevelFilter
+    ) {
+      return false;
+    }
+    if (destSearchQuery.trim()) {
+      const q = destSearchQuery.toLowerCase().trim();
+      const matchesName = dest.name.toLowerCase().includes(q);
+      const matchesCity = dest.city.toLowerCase().includes(q);
+      const matchesLoc = dest.locationLabel.toLowerCase().includes(q);
+      if (!matchesName && !matchesCity && !matchesLoc) return false;
+    }
+    return true;
+  });
 
   if (isForeignDraft) {
     return (
@@ -169,7 +177,7 @@ export function EoPackageBuilderScreen() {
   }
 
   const selectedDestination: DestinationRecord | undefined =
-    mockDestinationStore.getById(selectedDestinationId);
+    eligibleDestinations.find((d) => d.destinationId === selectedDestinationId);
   const selectedInsight: DemandInsightRecord | undefined = selectedInsightId
     ? mockInsightStore.getInsightById(selectedInsightId)
     : undefined;
@@ -188,12 +196,17 @@ export function EoPackageBuilderScreen() {
     const effectiveGuideSource: PackageGuideSource =
       guideStatus === "CONCEPT_ONLY" ? "DESTINATION" : guideSource;
 
+    // Only persist destinationId if it is authoritative and eligible
+    const effectiveDestinationId = selectedDestination
+      ? selectedDestination.destinationId
+      : "";
+
     const res = mockEoPackageStore.saveDraft({
       packageId,
       title,
       shortSummary,
       valueProposition: shortSummary,
-      destinationId: selectedDestinationId,
+      destinationId: effectiveDestinationId,
       insightId: selectedInsightId,
       durationLabel,
       itinerary,
@@ -586,7 +599,7 @@ export function EoPackageBuilderScreen() {
               type="button"
               variant="primary"
               size="lg"
-              disabled={!selectedDestinationId}
+              disabled={!selectedDestination}
               onClick={handleNext}
             >
               Lanjut ke Langkah 2: Sinyal Insight

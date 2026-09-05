@@ -1864,6 +1864,45 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "/partner/eo/packages/new",
       ]);
       expect(viewBuilder.textContent).not.toContain("Lembah Purba No Guide");
+
+      // 4. Ineligible deep-link query param check:
+      // ?destinationId=dest_future_noguide must NOT be preselected or enable Continue
+      const viewDeepLinkIneligible = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new?destinationId=dest_future_noguide",
+      ]);
+      expect(viewDeepLinkIneligible.textContent).not.toContain(
+        "Lembah Purba No Guide",
+      );
+      expect(viewDeepLinkIneligible.textContent).not.toContain("Terpilih ✓");
+
+      // Continue button must be disabled
+      const continueBtn = Array.from(
+        viewDeepLinkIneligible.querySelectorAll<HTMLButtonElement>("button"),
+      ).find((b) => b.textContent?.includes("Lanjut ke Langkah 2"));
+      expect(continueBtn).toBeDefined();
+      expect(continueBtn!.disabled).toBe(true);
+
+      // 5. Unknown destination query param check:
+      const viewUnknown = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new?destinationId=unknown_dest_xyz",
+      ]);
+      const continueUnknown = Array.from(
+        viewUnknown.querySelectorAll<HTMLButtonElement>("button"),
+      ).find((b) => b.textContent?.includes("Lanjut ke Langkah 2"));
+      expect(continueUnknown).toBeDefined();
+      expect(continueUnknown!.disabled).toBe(true);
+
+      // 6. Valid eligible destination query param still preselects and enables Continue
+      const viewValid = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new?destinationId=dest_lembah_pacet",
+      ]);
+      expect(viewValid.textContent).toContain("Lembah Alam Pacet");
+      expect(viewValid.textContent).toContain("Terpilih ✓");
+      const continueValid = Array.from(
+        viewValid.querySelectorAll<HTMLButtonElement>("button"),
+      ).find((b) => b.textContent?.includes("Lanjut ke Langkah 2"));
+      expect(continueValid).toBeDefined();
+      expect(continueValid!.disabled).toBe(false);
     });
 
     it("BP. Package guideSource is strictly validated: missing rejected, Concept Only locked, Certified Guide flexible", () => {

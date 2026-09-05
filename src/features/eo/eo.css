@@ -886,9 +886,15 @@
 .eo-demand-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-3);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-demand-header__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .eo-demand-header h1 {
@@ -905,13 +911,32 @@
   margin: 0;
 }
 
-.eo-demand-header__meta {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
-  margin-top: var(--space-1);
+/* Prototype & Privacy Notice: quiet, small, clear */
+.eo-demand-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  width: fit-content;
 }
 
-/* Top Signal Summary Band */
+.eo-demand-notice__icon {
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.eo-demand-notice__text {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Top Signal Summary Band: Sinyal teratas per dimensi */
 .eo-demand-signals-band {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -925,7 +950,7 @@
 .eo-demand-signal-stat {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 0.2rem;
   padding-inline: var(--space-4);
 }
 
@@ -938,38 +963,50 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.15rem;
+}
+
+.eo-demand-signal-stat__pct {
+  font-size: var(--font-size-display-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brand-primary);
+  line-height: 1;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .eo-demand-signal-stat__value {
-  font-size: var(--font-size-heading-md);
+  font-size: var(--font-size-body-md);
   font-weight: var(--font-weight-bold);
-  color: var(--color-brand-primary);
-  line-height: var(--line-height-heading-md);
+  color: var(--color-text-primary);
+  margin-top: 0.25rem;
 }
 
 .eo-demand-signal-stat__detail {
   font-size: var(--font-size-caption);
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
 }
 
-/* Flat Content Section */
-.eo-demand-section {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
+/* Opportunities Section (Moved Up) */
+.eo-demand-opportunities {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
 .eo-demand-section__header {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
   padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-demand-section__header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .eo-demand-section__header h2 {
@@ -980,6 +1017,313 @@
 }
 
 .eo-demand-section__header p {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.eo-demand-creative-brief-note {
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-900);
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  max-width: 44ch;
+  line-height: var(--line-height-caption);
+}
+
+/* Featured Opportunity: Cohesive Creator Brief */
+.eo-demand-featured-card {
+  background: var(--color-bg-surface);
+  border: 1.5px solid var(--color-forest-400);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.eo-demand-featured-card__layout {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.eo-demand-featured-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.eo-demand-featured-card__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.eo-demand-badge-featured {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-forest-700);
+  color: var(--color-stone-0);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.eo-demand-featured-card__demand-stat {
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-800);
+}
+
+.eo-demand-featured-card__demand-stat strong {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brand-primary);
+}
+
+.eo-demand-featured-card__title {
+  font-size: var(--font-size-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--line-height-heading-md);
+}
+
+.eo-demand-featured-card__desc {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-body-md);
+  margin: 0;
+}
+
+/* Quiet Fact List (No pill soup) */
+.eo-demand-featured-facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  margin: 0;
+}
+
+.eo-demand-fact-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.eo-demand-fact-item dt {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.eo-demand-fact-item dd {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+/* Support Column: Curation and Sample Activities */
+.eo-demand-featured-card__support {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border-left: 1px solid var(--color-border-default);
+  padding-left: var(--space-6);
+}
+
+.eo-demand-brief-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.eo-demand-brief-heading {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.eo-demand-brief-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  line-height: 1.45;
+}
+
+/* Bottom Action Row */
+.eo-demand-featured-card__action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.eo-demand-featured-card__action-hint {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: 55ch;
+}
+
+/* Secondary Opportunity Cards: Balanced Grid */
+.eo-demand-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.eo-demand-secondary-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-demand-secondary-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.eo-demand-secondary-card__eyebrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.eo-demand-secondary-card__intent {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forest-800);
+  background: var(--color-forest-50);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+}
+
+.eo-demand-secondary-card__demand {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.eo-demand-secondary-card__demand strong {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brand-primary);
+}
+
+.eo-demand-secondary-card__title {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--line-height-heading-sm);
+}
+
+.eo-demand-secondary-card__desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.eo-demand-secondary-card__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-surface-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default);
+}
+
+.eo-demand-fact-label {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.eo-demand-secondary-card__curation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.eo-demand-secondary-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+}
+
+/* Detailed Supporting Distributions: Compact 2x2 Grid */
+.eo-demand-details-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.eo-demand-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+}
+
+.eo-demand-detail-block {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-demand-detail-block__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.eo-demand-detail-block__header h3 {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.eo-demand-detail-block__header p {
   font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
   margin: 0;
@@ -1012,17 +1356,19 @@
 
 .eo-demand-bar-row__metric {
   color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
 }
 
 .eo-demand-bar-row__metric strong {
   color: var(--color-brand-primary);
-  font-size: var(--font-size-body-md);
+  font-size: var(--font-size-body-sm);
 }
 
 .eo-demand-bar-row__desc {
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   margin: 0;
+  line-height: 1.35;
 }
 
 .eo-demand-bar-track {
@@ -1043,203 +1389,28 @@
   background: var(--color-sand-600);
 }
 
-/* 24. Budget + Duration Shared Container */
-.eo-demand-dual-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-}
-
-.eo-demand-dual-column {
-  padding: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.eo-demand-dual-column:not(:first-child) {
-  border-left: 1px solid var(--color-border-default);
-}
-
-/* Unmet Demand Opportunities */
-.eo-demand-opportunities {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-/* 27. Featured Opportunity: Large Hero Anchor */
-.eo-demand-featured-card {
-  background: var(--color-bg-surface);
-  border: 2px solid var(--color-forest-300);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  box-shadow: var(--shadow-xs);
-}
-
-.eo-demand-featured-card__top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-
-.eo-demand-featured-card__meta-tags {
-  display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.eo-demand-tag {
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-pill);
-  background: var(--color-stone-100);
-  color: var(--color-text-secondary);
-}
-
-.eo-demand-tag--primary {
-  background: var(--color-forest-50);
-  color: var(--color-forest-800);
-  font-weight: var(--font-weight-bold);
-}
-
-.eo-demand-tag--featured {
-  background: var(--color-forest-700);
-  color: var(--color-stone-0);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.eo-demand-featured-card h3 {
-  font-size: var(--font-size-heading-md);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.eo-demand-featured-card__desc {
-  font-size: var(--font-size-body-md);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-body-md);
-  margin: 0;
-}
-
-.eo-demand-curation-box {
-  background: var(--color-bg-surface-subtle);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-}
-
-.eo-demand-curation-box strong {
-  display: block;
-  font-size: var(--font-size-label-sm);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-2);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.eo-demand-curation-box ul {
-  margin: 0;
-  padding-left: 1.25rem;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-body-sm);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.eo-demand-featured-card__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border-default);
-}
-
-.eo-demand-featured-card__budget {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-
-.eo-demand-featured-card__budget small {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-caption);
-}
-
-.eo-demand-featured-card__budget strong {
-  color: var(--color-brand-primary);
-  font-size: var(--font-size-body-md);
-}
-
-/* Secondary Opportunity Cards: Compact Grid */
-.eo-demand-secondary-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
-}
-
-.eo-demand-secondary-card {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.eo-demand-secondary-card h4 {
-  font-size: var(--font-size-heading-sm);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: var(--space-2) 0 var(--space-1);
-}
-
-.eo-demand-secondary-card p {
-  font-size: var(--font-size-body-sm);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.eo-demand-secondary-card__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border-default);
-}
-
 /* Responsive adjustments */
 @media (max-width: 64rem) {
   .eo-overview-ops-grid {
     grid-template-columns: 1fr;
   }
-  .eo-demand-dual-section {
+  .eo-demand-featured-card__layout {
     grid-template-columns: 1fr;
   }
-  .eo-demand-dual-column:not(:first-child) {
+  .eo-demand-featured-card__support {
     border-left: none;
     border-top: 1px solid var(--color-border-default);
+    padding-left: 0;
+    padding-top: var(--space-4);
+  }
+  .eo-demand-details-grid {
+    grid-template-columns: 1fr;
   }
   .eo-demand-secondary-grid {
     grid-template-columns: 1fr;
+  }
+  .eo-demand-section__header {
+    flex-direction: column;
   }
 }
 
@@ -1302,5 +1473,8 @@
   }
   .eo-demand-signal-stat:first-child {
     padding-inline: 0;
+  }
+  .eo-demand-featured-facts {
+    grid-template-columns: 1fr;
   }
 }

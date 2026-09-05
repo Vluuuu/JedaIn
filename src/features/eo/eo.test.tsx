@@ -550,8 +550,14 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
   });
 
   describe("7. Complete Insights Distributions & Truthful Copy (AB–AG)", () => {
-    it("AB–AG. all 5 demand distributions are rendered with truthful prototype wording", async () => {
+    it("AB–AG. all 5 demand distributions are rendered with truthful prototype wording and creator brief context", async () => {
       const view = await renderComponent(createElement(EoInsightsScreen));
+
+      // Page Title & Subtitle
+      expect(view.textContent).toContain("Insight Permintaan Traveler");
+      expect(view.textContent).toContain(
+        "Pahami pola kebutuhan traveler dan ubah sinyal demand menjadi experience yang relevan.",
+      );
 
       // AB: Intent
       expect(view.textContent).toContain("Kebutuhan Traveler");
@@ -568,6 +574,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // AE: Departure
       expect(view.textContent).toContain("Area Keberangkatan");
       expect(view.textContent).toContain("Malang & Batu");
+      expect(view.textContent).toContain(
+        "Titik awal keberangkatan traveler pada data agregat.",
+      );
 
       // AF: Unmet demand
       expect(view.textContent).toContain("Peluang yang Belum Terpenuhi");
@@ -575,9 +584,24 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "Tingginya Permintaan Jeda Alam 1 Hari",
       );
 
-      // AG: Truthful copy
-      expect(view.textContent).toContain("Simulasi sinyal agregat");
+      // AG: Truthful copy & creative brief context
+      expect(view.textContent).toContain(
+        "Simulasi data agregat dari 1.020 respons preferensi traveler. Tidak menampilkan data pribadi traveler.",
+      );
+      expect(view.textContent).toContain(
+        "Insight adalah creative brief dari kebutuhan traveler. EO tetap menentukan konsep, itinerary, dan pengalaman akhirnya.",
+      );
+      expect(view.textContent).toContain(
+        "Gunakan insight sebagai arahan. Itinerary tetap disusun oleh EO.",
+      );
+      expect(view.textContent).toContain(
+        "Lihat distribusi tiap dimensi secara terpisah untuk memahami konteks demand.",
+      );
       expect(view.textContent).not.toContain("respons traveler terverifikasi");
+      expect(view.textContent).not.toContain("Destinasi cocok");
+      expect(view.textContent).not.toContain("Recommended destination");
+      expect(view.textContent).not.toContain("Compatible with");
+      expect(view.textContent).not.toContain("Trip Builder");
     });
   });
 
@@ -939,6 +963,21 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(insightsText).not.toContain("30 hari terakhir");
       expect(insightsText).not.toContain("AI Recommendation");
       expect(insightsText).not.toContain("AI Opportunity");
+      expect(insightsText).not.toContain("AI Insight");
+      expect(insightsText).not.toContain("AI score");
+      expect(insightsText).not.toContain("forecast");
+      expect(insightsText).not.toContain("conversion");
+      expect(insightsText).not.toContain("GMV");
+    });
+
+    it("AS2. Opportunity cards clearly label departure context as 'Asal traveler' without destination claims", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+      const text = view.textContent ?? "";
+
+      expect(text).toContain("Asal traveler");
+      expect(text).not.toContain("Destinasi cocok");
+      expect(text).not.toContain("Recommended destination");
+      expect(text).not.toContain("Compatible with");
     });
 
     it("AT. Workspace navigation renders exact 1 active link per route", async () => {

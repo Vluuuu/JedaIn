@@ -136,6 +136,41 @@ Selecting an insight opens the builder with the selected insight context preserv
 
 Use one centralized deterministic aggregate-insight source. Do not create separate numbers in different components. No fake longitudinal trend claims.
 
+### 7.1. Time Dimension & Deterministic As-Of Reference (V2)
+
+To truthfully support time filtering in prototype mode without fabricating real-time production analytics:
+
+- A centralized deterministic date is defined as `PROTOTYPE_AS_OF_DATE` (e.g. `2026-09-05`).
+- Supported period presets:
+  - `TODAY` (`Hari ini`): covers responses on the as-of date (`2026-09-05`).
+  - `YESTERDAY` (`Kemarin`): covers responses on the day prior (`2026-09-04`).
+  - `THIS_WEEK` (`Minggu ini`): covers Monday through as-of date of current calendar week (`2026-08-31` to `2026-09-05`).
+  - `THIS_MONTH` (`Bulan ini`): covers start of month to as-of date (`2026-09-01` to `2026-09-05`).
+  - `ALL` (`Semua data`): full prototype window, preserving the established all-time reference total (1,020 responses) and core distributions.
+  - `CUSTOM` (`Pilih rentang tanggal`): inclusive `startDate` and `endDate` boundaries.
+- The selected period uniformly drives the total response count, top-signal summary, distribution bars, and unmet-demand opportunity counts simultaneously.
+- If a narrow range has zero responses, render truthful empty state without silent all-time fallback.
+- No fake trend indicators (`+12%`, `dibanding minggu lalu`, `momentum`) or predictive forecasting are allowed.
+
+### 7.2. Departure Area Granularity & Normalization (V2)
+
+In alignment with `QUIZ_CONTENT_CONTRACT.md` (Q5 `SINGLE_SELECT_WITH_OTHER` storing `departure_area_id` and `departure_area_label`):
+
+- Departure demand is aggregated under normalized individual area labels (e.g. `Malang`, `Batu`, `Surabaya`, `Sidoarjo`, `Kediri`, `Pasuruan`, `Jakarta`) rather than permanently collapsing into a coarse `"Area Lain di Jawa Timur"` bucket.
+- A traveler-entered label like `Jakarta` from an `OTHER` response is preserved and eligible to appear as its own aggregate area.
+- Trivial casing/whitespace normalization is applied deterministically (e.g. `"jakarta "` → `"Jakarta"`).
+- Departure area semantics strictly denote **starting-area relevance** / **Asal traveler**, never pickup guarantees or destination compatibility.
+- UX provides top 5 exact areas by default with an interactive search and full list disclosure ("Lihat semua area").
+
+### 7.3. Two-View Information Architecture (V2)
+
+To eliminate long vertical report fatigue while keeping action front-and-center:
+- Page retains persistent header, period control, privacy/prototype notice, and 4-column top signal summary band.
+- Content divides into two dedicated tabs:
+  1. `[ Peluang ]` (Default): featured opportunity creative brief, secondary opportunities, and Create Package CTAs.
+  2. `[ Rincian Data ]`: 2x2 grid of detailed distributions (Kebutuhan Traveler, Budget Nyaman, Durasi yang Dicari, Area Keberangkatan).
+- Switching between Peluang and Rincian Data retains the active period selection without resetting.
+
 ## 8. Packages — EO07
 
 EO Packages screen must make lifecycle visible.

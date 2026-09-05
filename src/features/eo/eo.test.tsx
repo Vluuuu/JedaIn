@@ -2,7 +2,7 @@
 
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { App } from "../../App";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
@@ -10,6 +10,10 @@ import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore, validateEoPackage } from "./mockEoPackageStore";
+import {
+  mockInsightStore,
+  OPPORTUNITY_ALLOWED_ORIGINS,
+} from "./mockInsightStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import { EoInsightsScreen } from "./EoInsightsScreen";
 import { EoPackageBuilderScreen } from "./EoPackageBuilderScreen";
@@ -550,36 +554,69 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
   });
 
   describe("7. Complete Insights Distributions & Truthful Copy (AB–AG)", () => {
-    it("AB–AG. all 5 demand distributions are rendered with truthful prototype wording", async () => {
+    it("AB–AG. all 5 demand distributions are rendered with truthful prototype wording and creator brief context", async () => {
       const view = await renderComponent(createElement(EoInsightsScreen));
 
-      // AB: Intent
-      expect(view.textContent).toContain("1. Distribusi Kebutuhan Suasana");
+      // Page Title & Subtitle
+      expect(view.textContent).toContain("Insight Permintaan Traveler");
+      expect(view.textContent).toContain(
+        "Pahami pola kebutuhan traveler dan ubah sinyal demand menjadi experience yang relevan.",
+      );
+
+      // Top signal summary band
+      expect(view.textContent).toContain("Kebutuhan Utama");
       expect(view.textContent).toContain("Dekat dengan alam");
 
-      // AC: Budget
-      expect(view.textContent).toContain("2. Distribusi Budget Nyaman");
+      expect(view.textContent).toContain("Budget Terbanyak");
       expect(view.textContent).toContain("Rp200.000 – Rp300.000");
 
-      // AD: Duration
-      expect(view.textContent).toContain("3. Distribusi Durasi Perjalanan");
+      expect(view.textContent).toContain("Durasi Terbanyak");
       expect(view.textContent).toContain("1 Hari Penuh (6–8 Jam)");
 
-      // AE: Departure
-      expect(view.textContent).toContain(
-        "4. Distribusi Wilayah Asal Keberangkatan",
-      );
-      expect(view.textContent).toContain("Malang & Batu");
+      expect(view.textContent).toContain("Area Keberangkatan Terbesar");
+      expect(view.textContent).toContain("Malang");
 
-      // AF: Unmet demand
-      expect(view.textContent).toContain("5. Peluang Paket Belum Terpenuhi");
+      // AF: Unmet demand (Default Peluang tab)
+      expect(view.textContent).toContain("Peluang yang Belum Terpenuhi");
       expect(view.textContent).toContain(
         "Tingginya Permintaan Jeda Alam 1 Hari",
       );
 
-      // AG: Truthful copy
-      expect(view.textContent).toContain("Simulasi sinyal agregat");
+      // AG: Truthful copy & creative brief context
+      expect(view.textContent).toContain(
+        "Simulasi data agregat · 1.020 respons pada seluruh periode prototype. Tidak menampilkan data pribadi traveler.",
+      );
+      expect(view.textContent).toContain(
+        "Insight adalah creative brief dari kebutuhan traveler. EO tetap menentukan konsep, itinerary, dan pengalaman akhirnya.",
+      );
+      expect(view.textContent).toContain(
+        "Gunakan insight sebagai arahan. Itinerary tetap disusun oleh EO.",
+      );
       expect(view.textContent).not.toContain("respons traveler terverifikasi");
+      expect(view.textContent).not.toContain("Destinasi cocok");
+      expect(view.textContent).not.toContain("Recommended destination");
+      expect(view.textContent).not.toContain("Compatible with");
+      expect(view.textContent).not.toContain("Trip Builder");
+
+      // Switch to Rincian Data tab and verify all 4 dimensions
+      const tabs = Array.from(view.querySelectorAll(".eo-demand-tab-btn"));
+      const rincianTab = tabs.find((t) =>
+        t.textContent?.includes("Rincian Data Permintaan"),
+      );
+      expect(rincianTab).toBeDefined();
+
+      await act(async () => {
+        (rincianTab as HTMLButtonElement).click();
+      });
+
+      expect(view.textContent).toContain("Rincian Pola Permintaan");
+      expect(view.textContent).toContain("Kebutuhan Traveler");
+      expect(view.textContent).toContain("Budget Nyaman");
+      expect(view.textContent).toContain("Durasi yang Dicari");
+      expect(view.textContent).toContain("Area Keberangkatan");
+      expect(view.textContent).toContain(
+        "Titik awal keberangkatan traveler pada data agregat.",
+      );
     });
   });
 
@@ -656,6 +693,743 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("bk_session_date_check");
       expect(view.textContent).toContain("12 Sep 2026");
       expect(view.textContent).not.toContain("bk_foreign_pkg");
+    });
+  });
+
+  describe("9. EO Overview & Demand Insights Visual Rebuild (AL–AU)", () => {
+    it("AL. Overview KPI derives strictly from source stores without hardcoded fake values", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // Add 1 booking for this EO
+      mockTransactionStore.addDirectBooking({
+        bookingId: "bk_eo_kpi_check",
+        travelerId: "usr_traveler_1",
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        totalAmount: 550000,
+        status: "PAID",
+        reservedQuantity: 0,
+        bookedQuantity: 2,
+        createdAt: "2026-08-30T10:00:00Z",
+        paymentExpiresAt: "2026-08-30T10:15:00Z",
+        paidAt: "2026-08-30T10:10:00Z",
+      });
+
+      // Submit 1 review for organizer
+      mockReviewStore.submitReview({
+        bookingId: "bk_eo_kpi_check",
+        travelerId: "usr_traveler_1",
+        targetType: "EO_GUIDE",
+        targetRef: "org_lereng_batu",
+        rating: 5,
+        comment: "Sangat menenangkan!",
+      });
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      // Live Packages: 1 (slow_green_day)
+      expect(view.textContent).toContain("Live Packages");
+      expect(view.textContent).toContain("Upcoming Sessions");
+      expect(view.textContent).toContain("Total Bookings");
+      expect(view.textContent).toContain("Average Rating");
+      expect(view.textContent).toContain("★ 5.0");
+      expect(view.textContent).toContain("1 ulasan traveler");
+    });
+
+    it("AL2. Overview KPI renders clean empty state when no reviews exist", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      // By default no reviews seeded for organizer in fresh test run
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      expect(view.textContent).toContain("Average Rating");
+      expect(view.textContent).toContain("—");
+      expect(view.textContent).toContain("Belum ada ulasan");
+      expect(view.textContent).not.toContain("Belum ada rating");
+    });
+
+    it("AM. Overview isolates bookings strictly to EO-owned packages (no cross-EO leakage)", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // Foreign booking
+      mockTransactionStore.addDirectBooking({
+        bookingId: "bk_foreign_cross_leak",
+        travelerId: "usr_traveler_cross",
+        packageId: "unowned_foreign_package",
+        sessionId: "ses_foreign",
+        participantCount: 5,
+        unitPricePerPerson: 500000,
+        totalAmount: 2500000,
+        status: "PAID",
+        reservedQuantity: 0,
+        bookedQuantity: 5,
+        createdAt: "2026-08-30T10:00:00Z",
+        paymentExpiresAt: "2026-08-30T10:15:00Z",
+      });
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      // Unowned package must not appear in recent booking activity
+      expect(view.textContent).not.toContain("unowned_foreign_package");
+      expect(view.textContent).toContain("Belum ada aktivitas booking.");
+    });
+
+    it("AN. Overview highlights PENDING_ADMIN_REVIEW package as action needed callout", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      expect(view.textContent).toContain("Menunggu Review");
+      expect(view.textContent).toContain("Pagi Hening Tepi Sungai Pacet");
+      expect(view.textContent).toContain("Sedang ditinjau Admin JedaIn.");
+      expect(view.textContent).toContain("Lihat Package");
+    });
+
+    it("AO. Overview Demand Opportunity hero links to exact builder query param", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      expect(view.textContent).toContain("Peluang dari Traveler");
+      expect(view.textContent).toContain(
+        "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
+      );
+      expect(view.textContent).toContain("312 traveler");
+
+      const heroLink = view.querySelector<HTMLAnchorElement>(
+        'a[href*="/partner/eo/packages/new?insightId=ins_nature_batu_1d"]',
+      );
+      expect(heroLink).not.toBeNull();
+    });
+
+    it("AO2. Non-OPEN sessions do not appear in Upcoming Sessions preview but KPI remains aligned", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // Add a non-OPEN session (e.g. CLOSED)
+      const createRes = mockEoPackageStore.createSession({
+        packageId: "slow_green_day",
+        startAt: "2026-09-05T08:00:00+07:00",
+        endAt: "2026-09-05T14:00:00+07:00",
+        capacity: 6,
+        pricePerPerson: 275000,
+      });
+      expect(createRes.success).toBe(true);
+
+      if (createRes.session) {
+        // Mutate session in store to CLOSED for testing non-OPEN filtering
+        mockEoPackageStore.updateSessionStatus(
+          createRes.session.sessionId,
+          "CLOSED",
+        );
+      }
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      // Non-OPEN session must not appear in upcoming sessions panel
+      const upcomingPanel = view.querySelector(
+        '[aria-label="Jadwal sesi terdekat"]',
+      )!;
+      expect(upcomingPanel.textContent).not.toContain("CLOSED");
+    });
+
+    it("AO3. PENDING_PAYMENT booking displays participantCount not bookedQuantity", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      mockTransactionStore.addDirectBooking({
+        bookingId: "bk_pending_qty_test",
+        travelerId: "usr_traveler_pending",
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        totalAmount: 550000,
+        status: "PENDING_PAYMENT",
+        reservedQuantity: 2,
+        bookedQuantity: 0, // Canonical PENDING_PAYMENT semantics: bookedQuantity is 0 until paid
+        createdAt: "2026-09-01T10:00:00Z",
+        paymentExpiresAt: "2026-09-01T10:15:00Z",
+      });
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      const recentPanel = view.querySelector(
+        '[aria-label="Aktivitas booking terbaru"]',
+      )!;
+      expect(recentPanel.textContent).toContain("2 peserta");
+      expect(recentPanel.textContent).not.toContain("0 peserta");
+    });
+
+    it("AP. Empty EO state renders helpful CTA when package list is empty", async () => {
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+      // CONCEPT_ONLY user has 0 packages seeded by default in mockEoPackageStore
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      expect(view.textContent).toContain("Kamu belum punya package.");
+      expect(view.textContent).toContain(
+        "Lihat kebutuhan traveler atau mulai package pertamamu.",
+      );
+      expect(view.textContent).toContain("Lihat Insight");
+      expect(view.textContent).toContain("+ Buat Paket Baru");
+    });
+
+    it("AQ. Demand Insights derives top signals from data arrays", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      // Sinyal utama derived maxima
+      expect(view.textContent).toContain("Dekat dengan alam");
+      expect(view.textContent).toContain("42%");
+      expect(view.textContent).toContain("428 traveler");
+
+      expect(view.textContent).toContain("Rp200.000 – Rp300.000");
+      expect(view.textContent).toContain("48%");
+      expect(view.textContent).toContain("490 traveler");
+
+      expect(view.textContent).toContain("1 Hari Penuh (6–8 Jam)");
+      expect(view.textContent).toContain("52%");
+      expect(view.textContent).toContain("530 traveler");
+
+      expect(view.textContent).toContain("Malang");
+      expect(view.textContent).toContain("30%");
+      expect(view.textContent).toContain("306 traveler");
+    });
+
+    it("AR. Demand Insights preserves exact insightIds across all CTAs", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      function LocationProbe() {
+        const location = useLocation();
+        return (
+          <output data-testid="location">
+            {location.pathname}
+            {location.search}
+          </output>
+        );
+      }
+
+      const insightCases = [
+        {
+          title: "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
+          insightId: "ins_nature_batu_1d",
+          expectedDestination:
+            "/partner/eo/packages/new?insightId=ins_nature_batu_1d",
+        },
+        {
+          title: "Kebutuhan Retreat Singkat Setengah Hari di Mojokerto / Pacet",
+          insightId: "ins_mindful_pacet_halfday",
+          expectedDestination:
+            "/partner/eo/packages/new?insightId=ins_mindful_pacet_halfday",
+        },
+        {
+          title: "Minat Belajar Kerajinan & Tradisi Lokal Akhir Pekan",
+          insightId: "ins_workshop_culture_weekend",
+          expectedDestination:
+            "/partner/eo/packages/new?insightId=ins_workshop_culture_weekend",
+        },
+      ];
+
+      for (const testCase of insightCases) {
+        await act(() => root?.unmount());
+        container?.remove();
+
+        const view = await renderComponent(
+          createElement(
+            "div",
+            null,
+            createElement(EoInsightsScreen),
+            createElement(LocationProbe),
+          ),
+          ["/partner/eo/insights"],
+        );
+
+        // Find the article card for this specific opportunity
+        const cards = Array.from(view.querySelectorAll("article"));
+        const targetCard = cards.find((card) =>
+          card.textContent?.includes(testCase.title),
+        );
+        expect(targetCard).toBeDefined();
+
+        const ctaButton = Array.from(
+          targetCard!.querySelectorAll("button"),
+        ).find((btn) => btn.textContent?.includes("Buat Paket"));
+        expect(ctaButton).toBeDefined();
+
+        await act(async () => {
+          ctaButton!.click();
+        });
+
+        const locationOutput = view.querySelector('[data-testid="location"]');
+        expect(locationOutput?.textContent).toBe(testCase.expectedDestination);
+      }
+    });
+
+    it("AS. Zero fake trend strings (+12%, naik, dibanding bulan lalu, 30 hari terakhir)", async () => {
+      const overviewView = await renderComponent(createElement(App), [
+        "/partner/eo",
+      ]);
+      const overviewText = overviewView.textContent ?? "";
+      expect(overviewText).not.toContain("+12%");
+      expect(overviewText).not.toContain("dibanding bulan lalu");
+      expect(overviewText).not.toContain("30 hari terakhir");
+
+      const insightsView = await renderComponent(
+        createElement(EoInsightsScreen),
+      );
+      const insightsText = insightsView.textContent ?? "";
+      expect(insightsText).not.toContain("+12%");
+      expect(insightsText).not.toContain("dibanding bulan lalu");
+      expect(insightsText).not.toContain("30 hari terakhir");
+      expect(insightsText).not.toContain("AI Recommendation");
+      expect(insightsText).not.toContain("AI Opportunity");
+      expect(insightsText).not.toContain("AI Insight");
+      expect(insightsText).not.toContain("AI score");
+      expect(insightsText).not.toContain("forecast");
+      expect(insightsText).not.toContain("conversion");
+      expect(insightsText).not.toContain("GMV");
+    });
+
+    it("AS2. Opportunity cards clearly label departure context as 'Asal traveler' without destination claims", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+      const text = view.textContent ?? "";
+
+      expect(text).toContain("Asal traveler");
+      expect(text).not.toContain("Destinasi cocok");
+      expect(text).not.toContain("Recommended destination");
+      expect(text).not.toContain("Compatible with");
+    });
+
+    it("AS3. Time filter (TODAY, YESTERDAY, THIS_WEEK, THIS_MONTH, CUSTOM, zero-response) updates counts truthfully", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      const getPeriodSelect = () =>
+        view.querySelector<HTMLSelectElement>("#demand-period-select")!;
+
+      expect(getPeriodSelect()).toBeDefined();
+
+      // 1. ALL default: 1.020 responses
+      expect(view.textContent).toContain("1.020 respons");
+      expect(view.textContent).toContain("312 traveler mencari");
+
+      // 2. TODAY (2026-09-05): 18 responses
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "TODAY";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("18 respons pada periode Hari ini");
+      expect(view.textContent).not.toContain("1.020 respons");
+
+      // 3. YESTERDAY (2026-09-04): 24 responses
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "YESTERDAY";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("24 respons pada periode Kemarin");
+
+      // 4. THIS_WEEK: 126 responses
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "THIS_WEEK";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("126 respons pada periode Minggu ini");
+
+      // 5. THIS_MONTH: 108 responses
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "THIS_MONTH";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("108 respons pada periode Bulan ini");
+
+      // 6. CUSTOM date range with 0 responses (e.g. 2025-01-01 to 2025-01-02)
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "CUSTOM";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const dateInputs =
+        view.querySelectorAll<HTMLInputElement>('input[type="date"]');
+      expect(dateInputs.length).toBe(2);
+
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(dateInputs[0], "2025-01-01");
+        dateInputs[0].dispatchEvent(new Event("change", { bubbles: true }));
+        nativeSetter?.call(dateInputs[1], "2025-01-02");
+        dateInputs[1].dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      expect(view.textContent).toContain("0 respons");
+      expect(view.textContent).toContain("Belum ada respons pada periode ini.");
+    });
+
+    it("AS4. Departure area granularity, search, and Jakarta custom label support", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      // Switch to Rincian Data tab
+      const tabs = Array.from(view.querySelectorAll(".eo-demand-tab-btn"));
+      const rincianTab = tabs.find((t) =>
+        t.textContent?.includes("Rincian Data Permintaan"),
+      )!;
+
+      await act(async () => {
+        (rincianTab as HTMLButtonElement).click();
+      });
+
+      // Default shows top 5: Malang, Surabaya, Batu, Sidoarjo, Kediri
+      expect(view.textContent).toContain("Malang");
+      expect(view.textContent).toContain("Surabaya");
+      expect(view.textContent).toContain("Batu");
+      expect(view.textContent).toContain("Sidoarjo");
+      expect(view.textContent).toContain("Kediri");
+
+      // Click "Lihat semua area"
+      const seeAllBtn = view.querySelector<HTMLButtonElement>(
+        ".eo-demand-area-toggle-btn",
+      )!;
+      expect(seeAllBtn).toBeDefined();
+
+      await act(async () => {
+        seeAllBtn.click();
+      });
+
+      // Now expanded list includes Jakarta and Blitar
+      expect(view.textContent).toContain("Jakarta");
+      expect(view.textContent).toContain("35 traveler");
+      expect(view.textContent).toContain("Blitar");
+      expect(view.textContent).toContain("25 traveler");
+
+      // Test searching "Jakarta" in the area search box
+      const searchInput = view.querySelector<HTMLInputElement>(
+        ".eo-demand-area-search-input",
+      )!;
+      expect(searchInput).toBeDefined();
+
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(searchInput, "Jakarta");
+        searchInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const areaBlock = view.querySelector(
+        '[aria-label="Distribusi wilayah asal keberangkatan"]',
+      )!;
+      expect(areaBlock.textContent).toContain("Jakarta");
+      expect(areaBlock.textContent).not.toContain("Surabaya");
+    });
+
+    it("AS5. Tab switching preserves active period selection", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      const getPeriodSelect = () =>
+        view.querySelector<HTMLSelectElement>("#demand-period-select")!;
+
+      // Select THIS_WEEK on Peluang tab
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "THIS_WEEK";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain("126 respons pada periode Minggu ini");
+
+      // Switch to Rincian Data tab
+      const tabs = Array.from(view.querySelectorAll(".eo-demand-tab-btn"));
+      const rincianTab = tabs.find((t) =>
+        t.textContent?.includes("Rincian Data Permintaan"),
+      )!;
+
+      await act(async () => {
+        (rincianTab as HTMLButtonElement).click();
+      });
+
+      // Period remains THIS_WEEK (126 responses)
+      expect(view.textContent).toContain("126 respons pada periode Minggu ini");
+      expect(getPeriodSelect()?.value).toBe("THIS_WEEK");
+
+      // Switch back to Peluang tab
+      const peluangTab = tabs.find((t) =>
+        t.textContent?.includes("Peluang Paket"),
+      )!;
+      await act(async () => {
+        (peluangTab as HTMLButtonElement).click();
+      });
+
+      expect(view.textContent).toContain("126 respons pada periode Minggu ini");
+      expect(getPeriodSelect()?.value).toBe("THIS_WEEK");
+    });
+
+    it("AS6. Period-aware distributions exhibit deterministic diversity without single-category monopoly", () => {
+      // 1. TODAY diversity checks
+      const todayOptions = { period: "TODAY" as const };
+      const todayTotal = mockInsightStore.getTotalResponses(todayOptions);
+      expect(todayTotal).toBe(18);
+
+      const todaySignals = mockInsightStore.getSignals(todayOptions);
+      const todayBudgets = mockInsightStore.getBudgetDistribution(todayOptions);
+      const todayDurations =
+        mockInsightStore.getDurationDistribution(todayOptions);
+      const todayDepartures =
+        mockInsightStore.getDepartureDistribution(todayOptions);
+      const todayInsights = mockInsightStore.getAllInsights(todayOptions);
+
+      // Invariant: sum of category counts equals total responses
+      expect(todaySignals.reduce((s, i) => s + i.travelerCount, 0)).toBe(
+        todayTotal,
+      );
+      expect(todayBudgets.reduce((s, b) => s + b.count, 0)).toBe(todayTotal);
+      expect(todayDurations.reduce((s, d) => s + d.count, 0)).toBe(todayTotal);
+      expect(todayDepartures.reduce((s, a) => s + a.count, 0)).toBe(todayTotal);
+
+      // Diversity check: more than 1 category with non-zero count
+      expect(
+        todaySignals.filter((s) => s.travelerCount > 0).length,
+      ).toBeGreaterThan(1);
+      expect(todayBudgets.filter((b) => b.count > 0).length).toBeGreaterThan(1);
+      expect(todayDurations.filter((d) => d.count > 0).length).toBeGreaterThan(
+        1,
+      );
+      expect(todayDepartures.filter((a) => a.count > 0).length).toBeGreaterThan(
+        1,
+      );
+
+      // Opportunity distribution: not all map to a single opportunity
+      expect(
+        todayInsights.filter((i) => i.travelerDemandCount > 0).length,
+      ).toBeGreaterThan(1);
+
+      // 2. THIS_WEEK diversity checks
+      const weekOptions = { period: "THIS_WEEK" as const };
+      const weekTotal = mockInsightStore.getTotalResponses(weekOptions);
+      expect(weekTotal).toBe(126);
+
+      const weekSignals = mockInsightStore.getSignals(weekOptions);
+      const weekBudgets = mockInsightStore.getBudgetDistribution(weekOptions);
+      const weekDurations =
+        mockInsightStore.getDurationDistribution(weekOptions);
+      const weekDepartures =
+        mockInsightStore.getDepartureDistribution(weekOptions);
+      const weekInsights = mockInsightStore.getAllInsights(weekOptions);
+
+      expect(weekSignals.reduce((s, i) => s + i.travelerCount, 0)).toBe(
+        weekTotal,
+      );
+      expect(weekBudgets.reduce((s, b) => s + b.count, 0)).toBe(weekTotal);
+      expect(weekDurations.reduce((s, d) => s + d.count, 0)).toBe(weekTotal);
+      expect(weekDepartures.reduce((s, a) => s + a.count, 0)).toBe(weekTotal);
+
+      // All 4 intents, 4 budgets, 3 durations represented in the week
+      expect(weekSignals.every((s) => s.travelerCount > 0)).toBe(true);
+      expect(weekBudgets.every((b) => b.count > 0)).toBe(true);
+      expect(weekDurations.every((d) => d.count > 0)).toBe(true);
+      expect(weekDepartures.length).toBeGreaterThan(4);
+      expect(weekInsights.every((i) => i.travelerDemandCount > 0)).toBe(true);
+
+      // 3. ALL canonical reference values preserved exactly
+      const allSignals = mockInsightStore.getSignals({ period: "ALL" });
+      const allBudgets = mockInsightStore.getBudgetDistribution({
+        period: "ALL",
+      });
+      const allDurations = mockInsightStore.getDurationDistribution({
+        period: "ALL",
+      });
+      const allDepartures = mockInsightStore.getDepartureDistribution({
+        period: "ALL",
+      });
+      const allInsights = mockInsightStore.getAllInsights({ period: "ALL" });
+
+      expect(allSignals.find((s) => s.intent === "NATURE")?.travelerCount).toBe(
+        428,
+      );
+      expect(allSignals.find((s) => s.intent === "CALM")?.travelerCount).toBe(
+        286,
+      );
+      expect(
+        allSignals.find((s) => s.intent === "EXPLORATION")?.travelerCount,
+      ).toBe(164);
+      expect(
+        allSignals.find((s) => s.intent === "REFLECTION")?.travelerCount,
+      ).toBe(142);
+
+      expect(allBudgets.find((b) => b.id === "b_under_200k")?.count).toBe(224);
+      expect(allBudgets.find((b) => b.id === "b_200_300k")?.count).toBe(490);
+      expect(allBudgets.find((b) => b.id === "b_300_500k")?.count).toBe(214);
+      expect(allBudgets.find((b) => b.id === "b_above_500k")?.count).toBe(92);
+
+      expect(allDurations.find((d) => d.id === "d_halfday")?.count).toBe(357);
+      expect(allDurations.find((d) => d.id === "d_fullday")?.count).toBe(530);
+      expect(allDurations.find((d) => d.id === "d_2d1n")?.count).toBe(133);
+
+      expect(allDepartures.find((a) => a.label === "Malang")?.count).toBe(306);
+      expect(allDepartures.find((a) => a.label === "Surabaya")?.count).toBe(
+        260,
+      );
+      expect(allDepartures.find((a) => a.label === "Batu")?.count).toBe(153);
+      expect(allDepartures.find((a) => a.label === "Sidoarjo")?.count).toBe(
+        148,
+      );
+      expect(allDepartures.find((a) => a.label === "Kediri")?.count).toBe(51);
+      expect(allDepartures.find((a) => a.label === "Pasuruan")?.count).toBe(42);
+      expect(allDepartures.find((a) => a.label === "Jakarta")?.count).toBe(35);
+      expect(allDepartures.find((a) => a.label === "Blitar")?.count).toBe(25);
+
+      expect(
+        allInsights.find((i) => i.insightId === "ins_nature_batu_1d")
+          ?.travelerDemandCount,
+      ).toBe(312);
+      expect(
+        allInsights.find((i) => i.insightId === "ins_mindful_pacet_halfday")
+          ?.travelerDemandCount,
+      ).toBe(198);
+      expect(
+        allInsights.find((i) => i.insightId === "ins_workshop_culture_weekend")
+          ?.travelerDemandCount,
+      ).toBe(145);
+    });
+
+    it("AS7. True opportunity-origin invariants hold across all events in data store", () => {
+      const allEvents = mockInsightStore.getAllEvents();
+      expect(allEvents.length).toBe(1020);
+
+      for (const ev of allEvents) {
+        for (const oppId of ev.matchedOpportunityIds) {
+          const allowed = OPPORTUNITY_ALLOWED_ORIGINS[oppId];
+          expect(allowed).toBeDefined();
+          expect(allowed).toContain(ev.departureAreaRaw);
+        }
+      }
+
+      // Explicit verification per opportunity
+      const natureEvents = allEvents.filter((e) =>
+        e.matchedOpportunityIds.includes("ins_nature_batu_1d"),
+      );
+      expect(natureEvents.length).toBe(312);
+      expect(
+        natureEvents.every(
+          (e) =>
+            e.departureAreaRaw === "Malang" ||
+            e.departureAreaRaw === "Surabaya",
+        ),
+      ).toBe(true);
+      expect(natureEvents.some((e) => e.departureAreaRaw === "Batu")).toBe(
+        false,
+      );
+      expect(natureEvents.some((e) => e.departureAreaRaw === "Sidoarjo")).toBe(
+        false,
+      );
+
+      const pacetEvents = allEvents.filter((e) =>
+        e.matchedOpportunityIds.includes("ins_mindful_pacet_halfday"),
+      );
+      expect(pacetEvents.length).toBe(198);
+      expect(
+        pacetEvents.every(
+          (e) =>
+            e.departureAreaRaw === "Surabaya" ||
+            e.departureAreaRaw === "Sidoarjo",
+        ),
+      ).toBe(true);
+      expect(pacetEvents.some((e) => e.departureAreaRaw === "Malang")).toBe(
+        false,
+      );
+      expect(pacetEvents.some((e) => e.departureAreaRaw === "Pasuruan")).toBe(
+        false,
+      );
+
+      const workshopEvents = allEvents.filter((e) =>
+        e.matchedOpportunityIds.includes("ins_workshop_culture_weekend"),
+      );
+      expect(workshopEvents.length).toBe(145);
+      expect(
+        workshopEvents.every(
+          (e) =>
+            e.departureAreaRaw === "Malang" || e.departureAreaRaw === "Batu",
+        ),
+      ).toBe(true);
+      expect(workshopEvents.some((e) => e.departureAreaRaw === "Kediri")).toBe(
+        false,
+      );
+      expect(workshopEvents.some((e) => e.departureAreaRaw === "Blitar")).toBe(
+        false,
+      );
+      expect(
+        workshopEvents.some((e) => e.departureAreaRaw === "Surabaya"),
+      ).toBe(false);
+    });
+
+    it("AS8. Rendered opportunity cards truthfully match underlying origin sets", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      // 1. Featured card: ins_nature_batu_1d
+      const featuredCard = view.querySelector(".eo-demand-featured-card")!;
+      expect(featuredCard).toBeDefined();
+      expect(featuredCard.textContent).toContain("Asal traveler");
+      expect(featuredCard.textContent).toContain("Malang / Surabaya");
+
+      // 2. Secondary cards: ins_mindful_pacet_halfday and ins_workshop_culture_weekend
+      const secCards = Array.from(
+        view.querySelectorAll(".eo-demand-secondary-card"),
+      );
+      expect(secCards.length).toBe(2);
+
+      const pacetCard = secCards.find((c) => c.textContent?.includes("Pacet"))!;
+      expect(pacetCard.textContent).toContain("Surabaya / Sidoarjo");
+
+      const workshopCard = secCards.find((c) =>
+        c.textContent?.includes("Kerajinan"),
+      )!;
+      expect(workshopCard.textContent).toContain("Malang Raya");
+    });
+
+    it("AT. Workspace navigation renders exact 1 active link per route", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      // Route /partner/eo/insights
+      const viewInsights = await renderComponent(createElement(App), [
+        "/partner/eo/insights",
+      ]);
+      const activeInsights = viewInsights.querySelectorAll(
+        '.workspace-navigation a[aria-current="page"]',
+      );
+      expect(activeInsights.length).toBe(1);
+      expect(activeInsights[0].textContent).toContain("Insights");
+
+      // Route /partner/eo
+      const viewOverview = await renderComponent(createElement(App), [
+        "/partner/eo",
+      ]);
+      const activeOverview = viewOverview.querySelectorAll(
+        '.workspace-navigation a[aria-current="page"]',
+      );
+      expect(activeOverview.length).toBe(1);
+      expect(activeOverview[0].textContent).toContain("Overview");
+
+      // Route /partner/eo/packages
+      const viewPackages = await renderComponent(createElement(App), [
+        "/partner/eo/packages",
+      ]);
+      const activePackages = viewPackages.querySelectorAll(
+        '.workspace-navigation a[aria-current="page"]',
+      );
+      expect(activePackages.length).toBe(1);
+      expect(activePackages[0].textContent).toContain("Packages");
+    });
+
+    it("AU. Topbar displays human-readable guide status without raw enums", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+
+      const identity = view.querySelector(".workspace-identity")!;
+      expect(identity.textContent).toContain("Certified Guide");
+      expect(identity.textContent).not.toContain("CERTIFIED_GUIDE");
     });
   });
 });

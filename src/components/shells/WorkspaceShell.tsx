@@ -1,8 +1,20 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
+import JedaInLogo from "../../JedaIn_logo_vector.svg";
 import { partnerSessionStore } from "../../features/eo/partnerSessionStore";
 import { Button } from "../ui";
-import { CloseIcon, MenuIcon, OverviewIcon } from "./icons";
+import {
+  BookingsIcon,
+  DestinationsIcon,
+  InsightsIcon,
+  OverviewIcon,
+  PackagesIcon,
+  ProfileIcon,
+  ReviewsIcon,
+  SessionsIcon,
+  SidebarCollapseIcon,
+  SidebarOpenIcon,
+} from "./icons";
 import "./shells.css";
 
 interface WorkspaceNavigationItem {
@@ -17,6 +29,38 @@ export interface WorkspaceShellProps {
   children?: ReactNode;
 }
 
+function getNavigationIcon(to: string) {
+  if (to.endsWith("/insights")) return <InsightsIcon />;
+  if (to.endsWith("/packages") || to.includes("/package-approvals"))
+    return <PackagesIcon />;
+  if (to.endsWith("/sessions") || to.endsWith("/schedule"))
+    return <SessionsIcon />;
+  if (to.endsWith("/bookings")) return <BookingsIcon />;
+  if (
+    to.endsWith("/destinations") ||
+    to.includes("/destination-verifications") ||
+    to.endsWith("/verification")
+  )
+    return <DestinationsIcon />;
+  if (to.endsWith("/reviews")) return <ReviewsIcon />;
+  if (to.endsWith("/profile") || to.endsWith("/profile-settings"))
+    return <ProfileIcon />;
+  return <OverviewIcon />;
+}
+
+function formatGuideStatus(guideStatus?: string | null): string {
+  if (!guideStatus) return "";
+  if (guideStatus === "CERTIFIED_GUIDE") return "Certified Guide";
+  if (guideStatus === "CONCEPT_ONLY") return "Concept Only";
+  return guideStatus.replace(/_/g, " ");
+}
+
+const WORKSPACE_ROOT_PATHS = new Set([
+  "/admin",
+  "/partner/eo",
+  "/partner/destination",
+]);
+
 export function WorkspaceShell({
   surface,
   title,
@@ -24,72 +68,122 @@ export function WorkspaceShell({
   children,
 }: WorkspaceShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const restoreMenuFocusRef = useRef(false);
+  const collapseButtonRef = useRef<HTMLButtonElement>(null);
   const drawerId = useId();
   const partner = surface === "partner" ? partnerSessionStore.get() : null;
+
+  useEffect(() => {
+    if (drawerOpen || !restoreMenuFocusRef.current) return;
+    restoreMenuFocusRef.current = false;
+    menuButtonRef.current?.focus();
+  }, [drawerOpen]);
 
   useEffect(() => {
     if (!drawerOpen) return;
 
     function closeOnEscape(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
+      restoreMenuFocusRef.current = true;
       setDrawerOpen(false);
-      menuButtonRef.current?.focus();
     }
 
     document.addEventListener("keydown", closeOnEscape);
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [drawerOpen]);
 
+  const closeDrawer = () => {
+    restoreMenuFocusRef.current = true;
+    setDrawerOpen(false);
+  };
+
+  const toggleSidebar = () => {
+    // In mobile drawer mode (drawerOpen is true), button closes the drawer
+    if (drawerOpen) {
+      closeDrawer();
+    } else {
+      // In desktop mode, toggle collapsed icon rail
+      setSidebarCollapsed((prev) => !prev);
+    }
+  };
+
+  const collapseLabel = drawerOpen
+    ? "Tutup navigasi"
+    : sidebarCollapsed
+      ? "Perluas navigasi"
+      : "Minimalkan navigasi";
+
   return (
-    <div className={`workspace-shell workspace-shell--${surface}`}>
+    <div
+      className={`workspace-shell workspace-shell--${surface}`}
+      data-sidebar-collapsed={sidebarCollapsed || undefined}
+    >
       <button
         type="button"
         className="workspace-shell__scrim"
         data-open={drawerOpen || undefined}
         aria-label="Tutup navigasi"
-        onClick={() => {
-          setDrawerOpen(false);
-          menuButtonRef.current?.focus();
-        }}
+        onClick={closeDrawer}
       />
       <aside
         id={drawerId}
         className="workspace-sidebar"
         data-open={drawerOpen || undefined}
+        data-collapsed={sidebarCollapsed || undefined}
         aria-label={`Navigasi ${surface}`}
       >
         <div className="workspace-sidebar__brand">
-          <Link className="brand-mark" to={`/${surface}`}>
-            JedaIn<span aria-hidden="true">.</span>
+          <Link
+            className="workspace-sidebar__logo-link"
+            to={`/${surface}`}
+            aria-label={`JedaIn ${surface === "admin" ? "Admin" : "Partner"}`}
+            title={`JedaIn ${surface === "admin" ? "Admin" : "Partner"}`}
+          >
+            <img
+              src={JedaInLogo}
+              alt=""
+              aria-hidden="true"
+              className="workspace-sidebar__logo"
+              width="1407"
+              height="768"
+              loading="eager"
+            />
           </Link>
-          <span>{surface === "admin" ? "Admin" : "Partner"}</span>
           <Button
+            ref={collapseButtonRef}
             variant="secondary"
             size="sm"
             className="shell-icon-button workspace-sidebar__close"
-            aria-label="Tutup navigasi"
-            onClick={() => {
-              setDrawerOpen(false);
-              menuButtonRef.current?.focus();
-            }}
+            aria-label={collapseLabel}
+            title={collapseLabel}
+            onClick={toggleSidebar}
           >
-            <CloseIcon />
+            {sidebarCollapsed ? <SidebarOpenIcon /> : <SidebarCollapseIcon />}
           </Button>
         </div>
-        <nav className="workspace-navigation" aria-label={`Menu ${surface}`}>
-          {navigation.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === `/${surface}`}
-              onClick={() => setDrawerOpen(false)}
-            >
-              <OverviewIcon />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-        </nav>
+        <div className="workspace-sidebar__body">
+          <div className="workspace-sidebar__role-slot">
+            <span className="workspace-sidebar__role-tag">
+              {surface === "admin" ? "Admin" : "Partner"}
+            </span>
+          </div>
+          <nav className="workspace-navigation" aria-label={`Menu ${surface}`}>
+            {navigation.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={WORKSPACE_ROOT_PATHS.has(to)}
+                title={label}
+                onClick={() => setDrawerOpen(false)}
+              >
+                {getNavigationIcon(to)}
+                <span className="workspace-navigation__label">{label}</span>
+              </NavLink>
+            ))}
+          </nav>
+        </div>
       </aside>
       <div className="workspace-main">
         <header className="workspace-topbar">
@@ -102,12 +196,22 @@ export function WorkspaceShell({
             aria-expanded={drawerOpen}
             aria-controls={drawerId}
             onClick={() => setDrawerOpen(true)}
+            hidden={drawerOpen}
           >
-            <MenuIcon />
+            <SidebarOpenIcon />
           </Button>
-          <div>
-            <p>{surface === "admin" ? "Operations" : "Workspace"}</p>
-            <h1>{title}</h1>
+          <div className="workspace-topbar__context">
+            <p>
+              {surface === "admin"
+                ? "Admin Trust & Governance"
+                : partner?.role === "DESTINATION"
+                  ? "Destination Partner"
+                  : "EO Partner"}
+            </p>
+            <span className="workspace-topbar__title">
+              {partner?.businessName ??
+                (surface === "admin" ? "JedaIn Admin" : title)}
+            </span>
           </div>
           <div
             className="workspace-identity"
@@ -127,7 +231,7 @@ export function WorkspaceShell({
               </strong>
               <small>
                 {partner?.name
-                  ? `${partner.name}${partner.guideStatus ? ` (${partner.guideStatus})` : ""}`
+                  ? `${partner.name}${partner.guideStatus ? ` · ${formatGuideStatus(partner.guideStatus)}` : ""}`
                   : "Terhubung"}
               </small>
             </div>

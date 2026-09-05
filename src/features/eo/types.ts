@@ -65,6 +65,19 @@ export interface DestinationRecord {
 export type DemandIntent =
   "NATURE" | "CALM" | "EXPLORATION" | "REFLECTION" | "ACTIVE" | "QUALITY_TIME";
 
+export type DemandPeriodPreset =
+  "TODAY" | "YESTERDAY" | "THIS_WEEK" | "THIS_MONTH" | "ALL" | "CUSTOM";
+
+export interface DemandDateRange {
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD
+}
+
+export interface DemandFilterOptions {
+  period: DemandPeriodPreset;
+  customRange?: DemandDateRange;
+}
+
 export interface DemandSignalSummary {
   intent: DemandIntent;
   intentLabel: string;

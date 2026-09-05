@@ -4,9 +4,13 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { partnerSessionStore } from "../../features/eo/partnerSessionStore";
 import { TravelerAppShell } from "./TravelerAppShell";
 import { WorkspaceShell } from "./WorkspaceShell";
-import { partnerEoNavigation } from "./navigation";
+import {
+  partnerDestinationNavigation,
+  partnerEoNavigation,
+} from "./navigation";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -18,6 +22,7 @@ beforeAll(() => {
 afterEach(async () => {
   await act(() => root?.unmount());
   container?.remove();
+  partnerSessionStore.reset();
 });
 
 async function renderWorkspace() {
@@ -52,6 +57,7 @@ describe("responsive workspace navigation semantics", () => {
     await act(() => openButton.click());
 
     expect(openButton.getAttribute("aria-expanded")).toBe("true");
+    expect(openButton.hidden).toBe(true);
     expect(
       view.querySelector(".workspace-sidebar")?.hasAttribute("data-open"),
     ).toBe(true);
@@ -145,12 +151,11 @@ describe("responsive workspace navigation semantics", () => {
     expect(shell.hasAttribute("data-sidebar-collapsed")).toBe(false);
   });
 
-  it("keeps brand header slot fixed height in both expanded and collapsed states", async () => {
+  it("keeps the role slot and nav links mounted during collapse", async () => {
     const view = await renderWorkspace();
-    const brandSlot = view.querySelector(".workspace-sidebar__brand");
-    expect(brandSlot).not.toBeNull();
+    const roleSlot = view.querySelector(".workspace-sidebar__role-slot");
+    expect(roleSlot).not.toBeNull();
 
-    // Verify nav items remain mounted in collapsed state
     const collapseButton = view.querySelector<HTMLButtonElement>(
       '.workspace-sidebar__close[aria-label="Minimalkan navigasi"]',
     )!;
@@ -159,24 +164,29 @@ describe("responsive workspace navigation semantics", () => {
     const navLinks = view.querySelectorAll(".workspace-navigation a");
     expect(navLinks.length).toBe(partnerEoNavigation.length);
     expect(view.querySelector(".workspace-navigation__label")).not.toBeNull();
+    expect(view.querySelector(".workspace-sidebar__role-slot")).toBe(roleSlot);
   });
 
-  it("renders canonical vector logo and partner role in sidebar", async () => {
+  it("renders the canonical logo in the brand header and role below its divider", async () => {
     const view = await renderWorkspace();
-    const logoImg = view.querySelector<HTMLImageElement>(
+    const brand = view.querySelector(".workspace-sidebar__brand")!;
+    const body = view.querySelector(".workspace-sidebar__body")!;
+    const roleSlot = view.querySelector(".workspace-sidebar__role-slot")!;
+    const roleTag = view.querySelector(".workspace-sidebar__role-tag");
+    const logoImg = brand.querySelector<HTMLImageElement>(
       ".workspace-sidebar__logo",
     );
+
     expect(logoImg).not.toBeNull();
     expect(logoImg?.getAttribute("src")).toContain(".svg");
     expect(view.textContent).not.toContain("JedaIn.");
-    expect(
-      view.querySelector(".workspace-sidebar__role-tag")?.textContent,
-    ).toBe("Partner");
+    expect(brand.querySelector(".workspace-sidebar__role-tag")).toBeNull();
+    expect(roleSlot.parentElement).toBe(body);
+    expect(roleTag?.textContent).toBe("Partner");
   });
 
-  it("does not render MenuIcon hamburger in workspace shell and uses panel icon for mobile opener", async () => {
+  it("keeps the topbar opener mounted for the true-mobile drawer", async () => {
     const view = await renderWorkspace();
-    // Hamburger MenuIcon has 3 path lines (M4 7h16M4 12h16M4 17h16)
     const hamburgerSvg = Array.from(view.querySelectorAll("svg")).find((svg) =>
       svg.innerHTML.includes("M4 7h16M4 12h16M4 17h16"),
     );
@@ -186,10 +196,11 @@ describe("responsive workspace navigation semantics", () => {
       '.workspace-topbar__menu[aria-label="Buka navigasi"]',
     )!;
     expect(openButton).not.toBeNull();
-    // Verify panel icon structure in mobile opener
-    const panelSvg = openButton.querySelector("svg");
-    expect(panelSvg).not.toBeNull();
-    expect(panelSvg?.innerHTML).toContain("<rect");
+    expect(openButton.hidden).toBe(false);
+    expect(openButton.querySelector("svg")?.innerHTML).toContain("<rect");
+
+    await act(() => openButton.click());
+    expect(openButton.hidden).toBe(true);
   });
 
   it("supports Admin surface role tag and branding layout", async () => {
@@ -214,14 +225,48 @@ describe("responsive workspace navigation semantics", () => {
       ),
     );
 
+    const brand = container.querySelector(".workspace-sidebar__brand")!;
+    const roleSlot = container.querySelector(".workspace-sidebar__role-slot")!;
     expect(
-      container.querySelector(".workspace-sidebar__role-tag")?.textContent,
+      roleSlot.querySelector(".workspace-sidebar__role-tag")?.textContent,
     ).toBe("Admin");
+    expect(brand.querySelector(".workspace-sidebar__role-tag")).toBeNull();
     const openButton = container.querySelector(
       '.workspace-topbar__menu[aria-label="Buka navigasi"]',
     );
     expect(openButton).not.toBeNull();
     expect(container.innerHTML).not.toContain("M4 7h16M4 12h16M4 17h16");
+  });
+
+  it("supports Destination Partner context with the shared shell structure", async () => {
+    partnerSessionStore.loginAsDemoDestination();
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+    await act(() =>
+      root.render(
+        createElement(
+          MemoryRouter,
+          undefined,
+          createElement(WorkspaceShell, {
+            surface: "partner",
+            title: "Destination Partner Workspace",
+            navigation: partnerDestinationNavigation,
+            children: createElement("p", undefined, "Destination Content"),
+          }),
+        ),
+      ),
+    );
+
+    expect(container.querySelector(".workspace-topbar p")?.textContent).toBe(
+      "Destination Partner",
+    );
+    expect(
+      container.querySelector(".workspace-sidebar__role-tag")?.textContent,
+    ).toBe("Partner");
+    expect(container.querySelectorAll(".workspace-navigation a")).toHaveLength(
+      partnerDestinationNavigation.length,
+    );
   });
 });
 

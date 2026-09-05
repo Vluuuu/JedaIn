@@ -70,28 +70,39 @@ export function WorkspaceShell({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const restoreMenuFocusRef = useRef(false);
   const collapseButtonRef = useRef<HTMLButtonElement>(null);
   const drawerId = useId();
   const partner = surface === "partner" ? partnerSessionStore.get() : null;
+
+  useEffect(() => {
+    if (drawerOpen || !restoreMenuFocusRef.current) return;
+    restoreMenuFocusRef.current = false;
+    menuButtonRef.current?.focus();
+  }, [drawerOpen]);
 
   useEffect(() => {
     if (!drawerOpen) return;
 
     function closeOnEscape(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
+      restoreMenuFocusRef.current = true;
       setDrawerOpen(false);
-      menuButtonRef.current?.focus();
     }
 
     document.addEventListener("keydown", closeOnEscape);
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [drawerOpen]);
 
+  const closeDrawer = () => {
+    restoreMenuFocusRef.current = true;
+    setDrawerOpen(false);
+  };
+
   const toggleSidebar = () => {
     // In mobile drawer mode (drawerOpen is true), button closes the drawer
     if (drawerOpen) {
-      setDrawerOpen(false);
-      menuButtonRef.current?.focus();
+      closeDrawer();
     } else {
       // In desktop mode, toggle collapsed icon rail
       setSidebarCollapsed((prev) => !prev);
@@ -114,10 +125,7 @@ export function WorkspaceShell({
         className="workspace-shell__scrim"
         data-open={drawerOpen || undefined}
         aria-label="Tutup navigasi"
-        onClick={() => {
-          setDrawerOpen(false);
-          menuButtonRef.current?.focus();
-        }}
+        onClick={closeDrawer}
       />
       <aside
         id={drawerId}
@@ -143,9 +151,6 @@ export function WorkspaceShell({
               loading="eager"
             />
           </Link>
-          <span className="workspace-sidebar__role-tag">
-            {surface === "admin" ? "Admin" : "Partner"}
-          </span>
           <Button
             ref={collapseButtonRef}
             variant="secondary"
@@ -158,20 +163,27 @@ export function WorkspaceShell({
             {sidebarCollapsed ? <SidebarOpenIcon /> : <SidebarCollapseIcon />}
           </Button>
         </div>
-        <nav className="workspace-navigation" aria-label={`Menu ${surface}`}>
-          {navigation.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={WORKSPACE_ROOT_PATHS.has(to)}
-              title={label}
-              onClick={() => setDrawerOpen(false)}
-            >
-              {getNavigationIcon(to)}
-              <span className="workspace-navigation__label">{label}</span>
-            </NavLink>
-          ))}
-        </nav>
+        <div className="workspace-sidebar__body">
+          <div className="workspace-sidebar__role-slot">
+            <span className="workspace-sidebar__role-tag">
+              {surface === "admin" ? "Admin" : "Partner"}
+            </span>
+          </div>
+          <nav className="workspace-navigation" aria-label={`Menu ${surface}`}>
+            {navigation.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={WORKSPACE_ROOT_PATHS.has(to)}
+                title={label}
+                onClick={() => setDrawerOpen(false)}
+              >
+                {getNavigationIcon(to)}
+                <span className="workspace-navigation__label">{label}</span>
+              </NavLink>
+            ))}
+          </nav>
+        </div>
       </aside>
       <div className="workspace-main">
         <header className="workspace-topbar">
@@ -184,6 +196,7 @@ export function WorkspaceShell({
             aria-expanded={drawerOpen}
             aria-controls={drawerId}
             onClick={() => setDrawerOpen(true)}
+            hidden={drawerOpen}
           >
             <SidebarOpenIcon />
           </Button>

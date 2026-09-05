@@ -47,6 +47,15 @@ export function normalizeAreaLabel(raw: string): string {
 }
 
 /**
+ * Allowed origin sets per opportunity to guarantee truthful "Asal traveler" context.
+ */
+export const OPPORTUNITY_ALLOWED_ORIGINS: Record<string, readonly string[]> = {
+  ins_nature_batu_1d: ["Malang", "Surabaya"],
+  ins_mindful_pacet_halfday: ["Surabaya", "Sidoarjo"],
+  ins_workshop_culture_weekend: ["Malang", "Batu"],
+};
+
+/**
  * Deterministic generation of the 1,020 prototype traveler demand responses.
  * Exactly matches all-time distribution counts:
  *
@@ -136,59 +145,36 @@ function buildPrototypeEvents(): PrototypeDemandEvent[] {
 
   const drafts: EventDraft[] = [];
 
-  // Group 1: 312 events for ins_nature_batu_1d (Nature, mostly full day, Rp200k-300k, Malang/Surabaya/Batu)
+  // Group 1: 312 events for ins_nature_batu_1d (Nature, full/half day, Rp200k-300k, Malang/Surabaya ONLY)
   for (let i = 0; i < 312; i++) {
     drafts.push({
       opp: ["ins_nature_batu_1d"],
       intent: "NATURE",
       duration: i < 280 ? "d_fullday" : "d_halfday",
       budget: i < 230 ? "b_200_300k" : i < 280 ? "b_under_200k" : "b_300_500k",
-      area:
-        i < 140
-          ? "Malang"
-          : i < 240
-            ? "Surabaya"
-            : i < 290
-              ? "Batu"
-              : "Sidoarjo",
+      area: i < 170 ? "Malang" : "Surabaya",
     });
   }
 
-  // Group 2: 198 events for ins_mindful_pacet_halfday (Calm, mostly half-day, Rp150-250k, Surabaya/Sidoarjo/Malang)
+  // Group 2: 198 events for ins_mindful_pacet_halfday (Calm, half/full day, Rp150-250k, Surabaya/Sidoarjo ONLY)
   for (let i = 0; i < 198; i++) {
     drafts.push({
       opp: ["ins_mindful_pacet_halfday"],
       intent: "CALM",
       duration: i < 170 ? "d_halfday" : "d_fullday",
-      budget: i < 110 ? "b_200_300k" : i < 170 ? "b_under_200k" : "b_300_500k",
-      area:
-        i < 80
-          ? "Surabaya"
-          : i < 140
-            ? "Sidoarjo"
-            : i < 175
-              ? "Malang"
-              : "Pasuruan",
+      budget: i < 90 ? "b_under_200k" : i < 178 ? "b_200_300k" : "b_300_500k",
+      area: i < 108 ? "Surabaya" : "Sidoarjo",
     });
   }
 
-  // Group 3: 145 events for ins_workshop_culture_weekend (Exploration, weekend, Rp250-350k, Malang/Batu/Kediri/Blitar/Surabaya)
+  // Group 3: 145 events for ins_workshop_culture_weekend (Exploration, weekend, Rp250-350k, Malang/Batu ONLY for Malang Raya)
   for (let i = 0; i < 145; i++) {
     drafts.push({
       opp: ["ins_workshop_culture_weekend"],
       intent: "EXPLORATION",
       duration: i < 95 ? "d_fullday" : i < 125 ? "d_2d1n" : "d_halfday",
-      budget: i < 75 ? "b_200_300k" : i < 125 ? "b_300_500k" : "b_above_500k",
-      area:
-        i < 60
-          ? "Malang"
-          : i < 95
-            ? "Batu"
-            : i < 120
-              ? "Kediri"
-              : i < 135
-                ? "Blitar"
-                : "Surabaya",
+      budget: i < 80 ? "b_200_300k" : i < 130 ? "b_300_500k" : "b_above_500k",
+      area: i < 95 ? "Malang" : "Batu",
     });
   }
 

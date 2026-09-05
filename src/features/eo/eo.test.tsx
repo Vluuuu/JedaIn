@@ -10,7 +10,10 @@ import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore, validateEoPackage } from "./mockEoPackageStore";
-import { mockInsightStore } from "./mockInsightStore";
+import {
+  mockInsightStore,
+  OPPORTUNITY_ALLOWED_ORIGINS,
+} from "./mockInsightStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import { EoInsightsScreen } from "./EoInsightsScreen";
 import { EoPackageBuilderScreen } from "./EoPackageBuilderScreen";
@@ -1290,6 +1293,100 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         allInsights.find((i) => i.insightId === "ins_workshop_culture_weekend")
           ?.travelerDemandCount,
       ).toBe(145);
+    });
+
+    it("AS7. True opportunity-origin invariants hold across all events in data store", () => {
+      const allEvents = mockInsightStore.getAllEvents();
+      expect(allEvents.length).toBe(1020);
+
+      for (const ev of allEvents) {
+        for (const oppId of ev.matchedOpportunityIds) {
+          const allowed = OPPORTUNITY_ALLOWED_ORIGINS[oppId];
+          expect(allowed).toBeDefined();
+          expect(allowed).toContain(ev.departureAreaRaw);
+        }
+      }
+
+      // Explicit verification per opportunity
+      const natureEvents = allEvents.filter((e) =>
+        e.matchedOpportunityIds.includes("ins_nature_batu_1d"),
+      );
+      expect(natureEvents.length).toBe(312);
+      expect(
+        natureEvents.every(
+          (e) =>
+            e.departureAreaRaw === "Malang" ||
+            e.departureAreaRaw === "Surabaya",
+        ),
+      ).toBe(true);
+      expect(natureEvents.some((e) => e.departureAreaRaw === "Batu")).toBe(
+        false,
+      );
+      expect(natureEvents.some((e) => e.departureAreaRaw === "Sidoarjo")).toBe(
+        false,
+      );
+
+      const pacetEvents = allEvents.filter((e) =>
+        e.matchedOpportunityIds.includes("ins_mindful_pacet_halfday"),
+      );
+      expect(pacetEvents.length).toBe(198);
+      expect(
+        pacetEvents.every(
+          (e) =>
+            e.departureAreaRaw === "Surabaya" ||
+            e.departureAreaRaw === "Sidoarjo",
+        ),
+      ).toBe(true);
+      expect(pacetEvents.some((e) => e.departureAreaRaw === "Malang")).toBe(
+        false,
+      );
+      expect(pacetEvents.some((e) => e.departureAreaRaw === "Pasuruan")).toBe(
+        false,
+      );
+
+      const workshopEvents = allEvents.filter((e) =>
+        e.matchedOpportunityIds.includes("ins_workshop_culture_weekend"),
+      );
+      expect(workshopEvents.length).toBe(145);
+      expect(
+        workshopEvents.every(
+          (e) =>
+            e.departureAreaRaw === "Malang" || e.departureAreaRaw === "Batu",
+        ),
+      ).toBe(true);
+      expect(workshopEvents.some((e) => e.departureAreaRaw === "Kediri")).toBe(
+        false,
+      );
+      expect(workshopEvents.some((e) => e.departureAreaRaw === "Blitar")).toBe(
+        false,
+      );
+      expect(
+        workshopEvents.some((e) => e.departureAreaRaw === "Surabaya"),
+      ).toBe(false);
+    });
+
+    it("AS8. Rendered opportunity cards truthfully match underlying origin sets", async () => {
+      const view = await renderComponent(createElement(EoInsightsScreen));
+
+      // 1. Featured card: ins_nature_batu_1d
+      const featuredCard = view.querySelector(".eo-demand-featured-card")!;
+      expect(featuredCard).toBeDefined();
+      expect(featuredCard.textContent).toContain("Asal traveler");
+      expect(featuredCard.textContent).toContain("Malang / Surabaya");
+
+      // 2. Secondary cards: ins_mindful_pacet_halfday and ins_workshop_culture_weekend
+      const secCards = Array.from(
+        view.querySelectorAll(".eo-demand-secondary-card"),
+      );
+      expect(secCards.length).toBe(2);
+
+      const pacetCard = secCards.find((c) => c.textContent?.includes("Pacet"))!;
+      expect(pacetCard.textContent).toContain("Surabaya / Sidoarjo");
+
+      const workshopCard = secCards.find((c) =>
+        c.textContent?.includes("Kerajinan"),
+      )!;
+      expect(workshopCard.textContent).toContain("Malang Raya");
     });
 
     it("AT. Workspace navigation renders exact 1 active link per route", async () => {

@@ -1266,4 +1266,131 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
     expect(otpInput.getAttribute("inputmode")).toBe("numeric");
     expect(otpInput.getAttribute("autocomplete")).toBe("one-time-code");
   });
+
+  // DEMO SKIP (PROTOTYPE/DEMO SHORTCUT)
+  it("33. renders secondary 'Lewati untuk Demo' action with explanatory copy on phone entry and OTP entry", async () => {
+    sessionStore.setUser({
+      id: "usr_demo_skip_render",
+      phone: "08123456789",
+      onboardingStatus: "COMPLETED",
+    });
+
+    const { container } = await renderContactVerification("ses_sgd_1");
+
+    // Primary and secondary actions present in phone entry state
+    expect(container.textContent).toContain("Kirim Kode OTP");
+    const skipBtnPhone = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-demo-skip-btn",
+    );
+    expect(skipBtnPhone).not.toBeNull();
+    expect(skipBtnPhone?.textContent).toContain("Lewati untuk Demo");
+    expect(container.textContent).toContain(
+      "Untuk demo, verifikasi nomor dapat dilewati.",
+    );
+
+    // Transition to OTP state
+    const submitBtn = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-submit-btn",
+    )!;
+    await act(async () => {
+      submitBtn.click();
+    });
+
+    expect(container.textContent).toContain("Verifikasi & Lanjut");
+    const skipBtnOtp = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-demo-skip-btn",
+    );
+    expect(skipBtnOtp).not.toBeNull();
+    expect(skipBtnOtp?.textContent).toContain("Lewati untuk Demo");
+  });
+
+  it("34. 'Lewati untuk Demo' returns traveler to same checkout flow preserving draft without marking phone verified or creating fake records", async () => {
+    const traveler: AuthUser = {
+      id: "usr_demo_skip_flow",
+      name: "Demo Skip Traveler",
+      email: "demoskip@example.com",
+      phone: "08123456789",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    let currentPath = "";
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          {
+            initialEntries: [
+              {
+                pathname: "/checkout/ses_sgd_1/contact",
+                state: {
+                  checkoutDraft: {
+                    sessionId: "ses_sgd_1",
+                    participantCount: 2,
+                    policyAcknowledged: true,
+                    idempotencyKey: "k_demo_skip",
+                  },
+                },
+              },
+            ],
+          },
+          createElement(LocationObserver, {
+            onLocation: (p) => {
+              currentPath = p;
+            },
+          }),
+          createElement(Routes, undefined, [
+            createElement(Route, {
+              path: "/checkout/:sessionId",
+              element: createElement(CheckoutScreen),
+            }),
+            createElement(Route, {
+              path: "/checkout/:sessionId/contact",
+              element: createElement(ContactVerificationScreen),
+            }),
+          ]),
+        ),
+      );
+    });
+
+    const skipBtn = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-demo-skip-btn",
+    )!;
+    expect(skipBtn).not.toBeNull();
+
+    await act(async () => {
+      skipBtn.click();
+    });
+
+    // 1. Returns traveler to same checkout route
+    expect(currentPath).toBe("/checkout/ses_sgd_1");
+
+    // 2. Preserves matching checkout draft
+    const restoredQty = container.querySelector("#participant-count-val");
+    expect(restoredQty?.textContent).toBe("2");
+    const restoredCb = container.querySelector<HTMLInputElement>(
+      "#cancellation-policy-ack",
+    )!;
+    expect(restoredCb.checked).toBe(true);
+
+    // 3. Does NOT mark phone as verified
+    expect(
+      mockContactVerificationStore.isPhoneVerified(
+        "usr_demo_skip_flow",
+        "08123456789",
+      ),
+    ).toBe(false);
+
+    // 4. Does NOT create fake OTP session records
+    expect(
+      mockOtpSessionStore.getActiveSession("usr_demo_skip_flow"),
+    ).toBeUndefined();
+
+    // 5. Still renders "Belum Verifikasi" in Checkout
+    expect(container.textContent).toContain("Belum Verifikasi");
+  });
 });

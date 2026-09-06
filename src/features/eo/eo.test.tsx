@@ -1009,7 +1009,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(text).not.toContain("Compatible with");
     });
 
-    it("AS3. Time filter (TODAY, YESTERDAY, THIS_WEEK, THIS_MONTH, CUSTOM, zero-response) updates counts truthfully", async () => {
+    it("AS3. Time filter (TODAY, YESTERDAY, THIS_WEEK, THIS_MONTH, THIS_YEAR, CUSTOM, zero-response) updates counts truthfully", async () => {
       const view = await renderComponent(createElement(EoInsightsScreen));
 
       const getPeriodSelect = () =>
@@ -1021,7 +1021,17 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("1.020 respons");
       expect(view.textContent).toContain("312 traveler mencari");
 
-      // 2. TODAY (2026-09-05): 18 responses
+      // 2. THIS_YEAR: 1.020 responses for 2026 data
+      await act(async () => {
+        const select = getPeriodSelect();
+        select.value = "THIS_YEAR";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(view.textContent).toContain(
+        "1.020 respons pada periode Tahun ini",
+      );
+
+      // 3. TODAY (2026-09-05): 18 responses
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "TODAY";
@@ -1030,7 +1040,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("18 respons pada periode Hari ini");
       expect(view.textContent).not.toContain("1.020 respons");
 
-      // 3. YESTERDAY (2026-09-04): 24 responses
+      // 4. YESTERDAY (2026-09-04): 24 responses
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "YESTERDAY";
@@ -1038,7 +1048,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
       expect(view.textContent).toContain("24 respons pada periode Kemarin");
 
-      // 4. THIS_WEEK: 126 responses
+      // 5. THIS_WEEK: 126 responses
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "THIS_WEEK";
@@ -1046,7 +1056,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
       expect(view.textContent).toContain("126 respons pada periode Minggu ini");
 
-      // 5. THIS_MONTH: 108 responses
+      // 6. THIS_MONTH: 108 responses
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "THIS_MONTH";
@@ -1054,7 +1064,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
       expect(view.textContent).toContain("108 respons pada periode Bulan ini");
 
-      // 6. CUSTOM date range with 0 responses (e.g. 2025-01-01 to 2025-01-02)
+      // 7. CUSTOM date range with 0 responses (e.g. 2025-01-01 to 2025-01-02)
       await act(async () => {
         const select = getPeriodSelect();
         select.value = "CUSTOM";

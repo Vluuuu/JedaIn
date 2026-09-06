@@ -253,14 +253,27 @@ export function EoPackagesScreen() {
           </p>
         </div>
 
-        <Button
+        <button
           type="button"
-          variant="primary"
-          size="md"
+          className="eo-packages-create-btn"
           onClick={() => navigate("/partner/eo/packages/new")}
+          aria-label="Buat Paket Baru"
         >
-          + Buat Paket Baru
-        </Button>
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="eo-packages-create-btn__icon"
+          >
+            <line x1="10" y1="4" x2="10" y2="16" />
+            <line x1="4" y1="10" x2="16" y2="10" />
+          </svg>
+          <span>Buat Paket Baru</span>
+        </button>
       </header>
 
       {/* 2. Segmented Lifecycle Filter Navigation */}

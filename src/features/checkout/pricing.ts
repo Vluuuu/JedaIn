@@ -37,24 +37,10 @@ export function getBookingPaymentBreakdown(
     | "totalAmount"
   >,
 ): PaymentBreakdown {
-  const unitPrice = booking.unitPricePerPerson;
-  const participantCount = booking.participantCount;
-  const subtotal = booking.subtotal ?? unitPrice * participantCount;
-  const serviceFee = booking.serviceFee ?? TRAVELER_SERVICE_FEE;
-  const total =
-    booking.total !== undefined &&
-    booking.serviceFee !== undefined &&
-    booking.total === subtotal + booking.serviceFee
-      ? booking.total
-      : subtotal + serviceFee;
-
-  return {
-    unitPrice,
-    participantCount,
-    subtotal,
-    serviceFee,
-    total,
-  };
+  return calculatePaymentBreakdown(
+    booking.unitPricePerPerson,
+    booking.participantCount,
+  );
 }
 
 export function formatRupiah(amount: number): string {

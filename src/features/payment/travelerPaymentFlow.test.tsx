@@ -192,20 +192,60 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
       expect(breakdown.total).not.toBe(550000);
     });
 
-    it("invariant assertion: breakdown.total === breakdown.subtotal + breakdown.serviceFee holds across cases", () => {
+    it("malformed persisted breakdown cannot corrupt authoritative calculation", () => {
+      const corruptedBooking: Pick<
+        BookingRecord,
+        | "participantCount"
+        | "unitPricePerPerson"
+        | "subtotal"
+        | "serviceFee"
+        | "total"
+        | "totalAmount"
+      > = {
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        subtotal: 500000,
+        serviceFee: 5000,
+        total: 505000,
+        totalAmount: 505000,
+      };
+
+      const breakdown = getBookingPaymentBreakdown(corruptedBooking);
+      expect(breakdown.unitPrice).toBe(275000);
+      expect(breakdown.participantCount).toBe(2);
+      expect(breakdown.subtotal).toBe(550000);
+      expect(breakdown.serviceFee).toBe(7500);
+      expect(breakdown.total).toBe(557500);
+    });
+
+    it("invariant assertion: breakdown.total === breakdown.subtotal + breakdown.serviceFee and serviceFee === TRAVELER_SERVICE_FEE hold across cases", () => {
       // 1. Booking baru - 1 peserta
       const newBooking1 = calculatePaymentBreakdown(300000, 1);
+      expect(newBooking1.serviceFee).toBe(TRAVELER_SERVICE_FEE);
+      expect(newBooking1.subtotal).toBe(
+        newBooking1.unitPrice * newBooking1.participantCount,
+      );
+      expect(newBooking1.total).toBe(
+        newBooking1.subtotal + TRAVELER_SERVICE_FEE,
+      );
       expect(newBooking1.total).toBe(
         newBooking1.subtotal + newBooking1.serviceFee,
       );
 
       // 2. Booking baru - beberapa peserta (contoh 2 peserta)
       const newBooking2 = calculatePaymentBreakdown(400000, 2);
+      expect(newBooking2.serviceFee).toBe(TRAVELER_SERVICE_FEE);
+      expect(newBooking2.subtotal).toBe(
+        newBooking2.unitPrice * newBooking2.participantCount,
+      );
+      expect(newBooking2.total).toBe(
+        newBooking2.subtotal + TRAVELER_SERVICE_FEE,
+      );
       expect(newBooking2.total).toBe(
         newBooking2.subtotal + newBooking2.serviceFee,
       );
 
-      // 3. Booking legacy - 1 peserta
+      // 3. Booking legacy tanpa breakdown
       const legacyBooking1: Pick<
         BookingRecord,
         "participantCount" | "unitPricePerPerson" | "totalAmount"
@@ -215,28 +255,46 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
         totalAmount: 300000,
       };
       const breakdownLegacy1 = getBookingPaymentBreakdown(legacyBooking1);
-      expect(breakdownLegacy1.subtotal).toBe(300000);
-      expect(breakdownLegacy1.serviceFee).toBe(7500);
-      expect(breakdownLegacy1.total).toBe(307500);
+      expect(breakdownLegacy1.serviceFee).toBe(TRAVELER_SERVICE_FEE);
+      expect(breakdownLegacy1.subtotal).toBe(
+        breakdownLegacy1.unitPrice * breakdownLegacy1.participantCount,
+      );
+      expect(breakdownLegacy1.total).toBe(
+        breakdownLegacy1.subtotal + TRAVELER_SERVICE_FEE,
+      );
       expect(breakdownLegacy1.total).toBe(
         breakdownLegacy1.subtotal + breakdownLegacy1.serviceFee,
       );
 
-      // 4. Booking legacy - beberapa peserta (contoh 3 peserta)
-      const legacyBooking3: Pick<
+      // 4. Booking persisted yang nilainya inconsistent / corrupted
+      const inconsistentBooking: Pick<
         BookingRecord,
-        "participantCount" | "unitPricePerPerson" | "totalAmount"
+        | "participantCount"
+        | "unitPricePerPerson"
+        | "subtotal"
+        | "serviceFee"
+        | "total"
+        | "totalAmount"
       > = {
         participantCount: 3,
-        unitPricePerPerson: 275000,
-        totalAmount: 825000,
+        unitPricePerPerson: 250000,
+        subtotal: 600000, // wrong
+        serviceFee: 10000, // wrong
+        total: 610000, // wrong
+        totalAmount: 610000,
       };
-      const breakdownLegacy3 = getBookingPaymentBreakdown(legacyBooking3);
-      expect(breakdownLegacy3.subtotal).toBe(825000);
-      expect(breakdownLegacy3.serviceFee).toBe(7500);
-      expect(breakdownLegacy3.total).toBe(832500);
-      expect(breakdownLegacy3.total).toBe(
-        breakdownLegacy3.subtotal + breakdownLegacy3.serviceFee,
+      const breakdownInconsistent =
+        getBookingPaymentBreakdown(inconsistentBooking);
+      expect(breakdownInconsistent.serviceFee).toBe(TRAVELER_SERVICE_FEE);
+      expect(breakdownInconsistent.subtotal).toBe(
+        breakdownInconsistent.unitPrice *
+          breakdownInconsistent.participantCount,
+      );
+      expect(breakdownInconsistent.total).toBe(
+        breakdownInconsistent.subtotal + TRAVELER_SERVICE_FEE,
+      );
+      expect(breakdownInconsistent.total).toBe(
+        breakdownInconsistent.subtotal + breakdownInconsistent.serviceFee,
       );
     });
   });

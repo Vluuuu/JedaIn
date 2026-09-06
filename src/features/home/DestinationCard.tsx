@@ -15,13 +15,18 @@ export function DestinationCard({ destination }: DestinationCardProps) {
       to={`/explore?destination=${encodeURIComponent(destination.destinationName)}`}
       className="home-destination-card"
     >
-      <div
-        className="home-destination-card__visual"
-        style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
-        role="img"
-        aria-label={`Ilustrasi destinasi ${destination.destinationName}`}
-      >
-        <div className="home-destination-card__visual-scrim" />
+      <div className="home-destination-card__visual">
+        <img
+          src={visual.svgDataUri}
+          alt={`Ilustrasi destinasi ${destination.destinationName}`}
+          width={800}
+          height={500}
+          loading="lazy"
+        />
+        <div
+          className="home-destination-card__visual-scrim"
+          aria-hidden="true"
+        />
         <span className="home-destination-card__badge">
           <Badge tone="success">
             {destination.verificationLevel === "PLUS"

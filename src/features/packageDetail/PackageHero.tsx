@@ -10,11 +10,15 @@ export function PackageHero({ packageData }: PackageHeroProps) {
 
   return (
     <header className="package-detail-hero">
-      <div
+      <img
         className="package-detail-hero__visual"
-        style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
+        src={visual.svgDataUri}
+        alt={`Ilustrasi suasana ${packageData.title}`}
         role="img"
         aria-label={`Ilustrasi suasana ${packageData.title}`}
+        width={800}
+        height={500}
+        fetchPriority="high"
       />
       <div className="package-detail-hero__visual-scrim" aria-hidden="true" />
       <div className="package-detail-hero__badges">

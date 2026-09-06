@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { App } from "../../App";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { sessionStore } from "../onboarding/sessionStore";
 import { MOCK_PACKAGE_DETAILS } from "./mockPackageDetails";
 import { MockPackageDetailAdapter } from "./mockAdapter";
@@ -73,6 +74,27 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     expect(view.textContent).toContain("Fasilitas & Ketentuan");
     expect(view.textContent).toContain("Jadwal Terdekat");
     expect(view.textContent).toContain("Pilih Jadwal");
+  });
+
+  it.each([
+    "slow_green_day",
+    "mindful_morning",
+    "weekend_nature_reset",
+    "creative_village_halfday",
+    "light_mountain_explore",
+  ])("renders a real hero image for %s", async (id) => {
+    const view = await renderPackageDetail(id);
+    const image = view.querySelector<HTMLImageElement>(
+      "img.package-detail-hero__visual",
+    );
+    expect(image?.getAttribute("src")).toBe(getPackageVisual(id).svgDataUri);
+    expect(image?.alt).toBe(
+      `Ilustrasi suasana ${view.querySelector("h1")!.textContent}`,
+    );
+    expect(image?.getAttribute("fetchpriority")).toBe("high");
+    expect(
+      view.querySelector(".package-detail-hero__badges")?.textContent,
+    ).toContain("Terverifikasi");
   });
 
   it("2. unknown packageId renders NOT_FOUND state", async () => {

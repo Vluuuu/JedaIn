@@ -31,7 +31,7 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
           aria-hidden="true"
         />
         <div className="explore-package-card__badges">
-          <Badge tone="neutral">
+          <Badge tone="success">
             {packageData.verificationLevel === "PLUS"
               ? "Terverifikasi Plus"
               : "Terverifikasi Dasar"}

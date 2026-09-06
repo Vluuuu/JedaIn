@@ -199,7 +199,7 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
                     ? "Pilihan terdekat"
                     : "Pilihan utama"}
                 </Badge>
-                <Badge tone="neutral">
+                <Badge tone="success">
                   {recPkg.verificationLevel === "PLUS"
                     ? "Terverifikasi Plus"
                     : "Terverifikasi Dasar"}

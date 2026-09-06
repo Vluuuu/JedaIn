@@ -101,6 +101,12 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
       expect(
         card.querySelector(".explore-package-card__badges")?.textContent,
       ).toContain("Terverifikasi");
+      const badge = card.querySelector(
+        ".explore-package-card__badges .ui-badge--success",
+      );
+      expect(badge).not.toBeNull();
+      expect(badge?.textContent).toContain("✓");
+      expect(badge?.textContent).toContain("Terverifikasi");
       expect(
         card.querySelector(".explore-package-card__rating-pill"),
       ).not.toBeNull();

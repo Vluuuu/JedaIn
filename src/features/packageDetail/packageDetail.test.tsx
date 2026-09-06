@@ -92,9 +92,12 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
       `Ilustrasi suasana ${view.querySelector("h1")!.textContent}`,
     );
     expect(image?.getAttribute("fetchpriority")).toBe("high");
-    expect(
-      view.querySelector(".package-detail-hero__badges")?.textContent,
-    ).toContain("Terverifikasi");
+    const trustBadge = view.querySelector(
+      ".package-detail-hero__badges .ui-badge--success",
+    );
+    expect(trustBadge).not.toBeNull();
+    expect(trustBadge?.textContent).toContain("✓");
+    expect(trustBadge?.textContent).toContain("Terverifikasi");
   });
 
   it("2. unknown packageId renders NOT_FOUND state", async () => {

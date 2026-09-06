@@ -129,6 +129,12 @@ describe("HomeScreen State Matrix & Module Composition", () => {
       expect(image?.alt).toBe(
         `Ilustrasi suasana ${card.querySelector("h3")!.textContent}`,
       );
+      const badge = card.querySelector(
+        ".home-package-card__badges .ui-badge--success",
+      );
+      expect(badge).not.toBeNull();
+      expect(badge?.textContent).toContain("Terverifikasi");
+      expect(badge?.textContent).toContain("✓");
     }
 
     const destinations = view.querySelectorAll(".home-destination-card");
@@ -142,6 +148,12 @@ describe("HomeScreen State Matrix & Module Composition", () => {
         getDestinationVisual(name).svgDataUri,
       );
       expect(image?.alt).toBe(`Ilustrasi destinasi ${name}`);
+      const badge = card.querySelector(
+        ".home-destination-card__badge .ui-badge--success",
+      );
+      expect(badge).not.toBeNull();
+      expect(badge?.textContent).toContain("Terverifikasi");
+      expect(badge?.textContent).toContain("✓");
     }
 
     const hero = view.querySelector<HTMLImageElement>(
@@ -151,6 +163,12 @@ describe("HomeScreen State Matrix & Module Composition", () => {
       getPackageVisual("slow_green_day").svgDataUri,
     );
     expect(hero?.getAttribute("fetchpriority")).toBe("high");
+    const heroTrustBadge = view.querySelector(
+      ".home-hero-card__visual-badges .ui-badge--success:nth-child(2)",
+    );
+    expect(heroTrustBadge).not.toBeNull();
+    expect(heroTrustBadge?.textContent).toContain("Terverifikasi");
+    expect(heroTrustBadge?.textContent).toContain("✓");
   });
 
   it("1b. FALLBACK: renders neutral 'Pilihan terdekat untukmu' and NOT 'Pilihan untukmu'", async () => {

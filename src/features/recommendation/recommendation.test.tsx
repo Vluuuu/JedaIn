@@ -5,9 +5,11 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { App } from "../../App";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { QuizDraft } from "../quiz/types";
 import { MockRecommendationAdapter } from "./mockAdapter";
+import { MOCK_RECOMMENDATION_PACKAGES } from "./mockPackages";
 import { RecommendationResultScreen } from "./RecommendationResultScreen";
 
 let container: HTMLDivElement;
@@ -94,6 +96,77 @@ describe("RecommendationResultScreen UI States and Interactions", () => {
 
     const altCards = view.querySelectorAll(".recommendation-alt-card");
     expect(altCards.length).toBeLessThanOrEqual(2);
+  });
+
+  it("renders semantic <img> for top recommendation visual without inline background-image", async () => {
+    sessionStore.setQuizDraft(matchedQuiz);
+    const adapter = new MockRecommendationAdapter();
+    const view = await renderScreen({ adapter });
+
+    const heroVisual = view.querySelector(".recommendation-hero-visual");
+    expect(heroVisual).not.toBeNull();
+    expect(heroVisual?.getAttribute("style") || "").not.toContain(
+      "background-image",
+    );
+
+    const img = heroVisual?.querySelector<HTMLImageElement>("img");
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute("src")).toBe(
+      getPackageVisual("slow_green_day").svgDataUri,
+    );
+    expect(img?.alt).toBe("Ilustrasi suasana Sehari Pelan di Lereng Hijau");
+    expect(img?.getAttribute("fetchpriority")).toBe("high");
+
+    const altThumbs = view.querySelectorAll(".recommendation-alt-thumb");
+    expect(altThumbs.length).toBeGreaterThan(0);
+    for (const thumb of altThumbs) {
+      expect(thumb.getAttribute("style") || "").not.toContain(
+        "background-image",
+      );
+      const altImg = thumb.querySelector<HTMLImageElement>("img");
+      expect(altImg).not.toBeNull();
+      expect(altImg?.getAttribute("src")).toBeTruthy();
+      expect(altImg?.getAttribute("loading")).toBe("lazy");
+    }
+  });
+
+  it("renders standardized success verification badge and distinct recommendation-state badge", async () => {
+    sessionStore.setQuizDraft(matchedQuiz);
+    const adapter = new MockRecommendationAdapter();
+    const view = await renderScreen({ adapter });
+
+    // Recommendation-state badge
+    const stateBadge = view.querySelector(".recommendation-badge--matched");
+    expect(stateBadge?.textContent).toBe("Pilihan utama");
+
+    // Verification trust badge with success tone
+    const trustBadge = view.querySelector(
+      ".recommendation-hero-visual .ui-badge--success",
+    );
+    expect(trustBadge).not.toBeNull();
+    expect(trustBadge?.textContent).toContain("Terverifikasi Dasar");
+    expect(trustBadge?.textContent).toContain("✓");
+  });
+
+  it("renders Terverifikasi Plus when package verificationLevel is PLUS", async () => {
+    sessionStore.setQuizDraft(matchedQuiz);
+    const plusAdapter = new MockRecommendationAdapter({
+      catalog: [
+        {
+          ...MOCK_RECOMMENDATION_PACKAGES[0],
+          id: "plus_pkg",
+          verificationLevel: "PLUS",
+        },
+      ],
+    });
+    const view = await renderScreen({ adapter: plusAdapter });
+
+    const trustBadge = view.querySelector(
+      ".recommendation-hero-visual .ui-badge--success",
+    );
+    expect(trustBadge).not.toBeNull();
+    expect(trustBadge?.textContent).toContain("Terverifikasi Plus");
+    expect(trustBadge?.textContent).toContain("✓");
   });
 
   it("23. renders fallback state with locked copy and neutral 'Kenapa ini mendekati?' heading", async () => {

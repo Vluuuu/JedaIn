@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
+import { formatRupiah, getBookingPaymentBreakdown } from "../checkout/pricing";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
 import { defaultPaymentAdapter } from "./mockAdapter";
 import type { PaymentAdapter, PaymentResultViewModel } from "./types";
@@ -82,6 +83,8 @@ export function PaymentResultScreen({
       pkg?.id ?? booking.packageId,
       pkg?.destinationName,
     );
+    const breakdown = getBookingPaymentBreakdown(booking);
+
     return (
       <div className="payment-container payment-result-container">
         <div className="payment-result-header">
@@ -163,11 +166,50 @@ export function PaymentResultScreen({
                 {booking.participantCount} Orang
               </span>
             </div>
+          </div>
+
+          <div className="payment-summary-card__divider" role="separator" />
+
+          <div
+            className="payment-summary-card__facts"
+            aria-label="Rincian Pembayaran"
+          >
+            <div className="payment-summary-card__section-label">
+              Rincian Pembayaran
+            </div>
+
+            <div className="payment-fact-row">
+              <span className="payment-fact-label">Harga paket</span>
+              <span className="payment-fact-value">
+                {formatRupiah(breakdown.unitPrice)} / orang
+              </span>
+            </div>
+
+            <div className="payment-fact-row">
+              <span className="payment-fact-label">Jumlah peserta</span>
+              <span className="payment-fact-value">
+                {breakdown.participantCount} orang
+              </span>
+            </div>
+
+            <div className="payment-fact-row">
+              <span className="payment-fact-label">Subtotal paket</span>
+              <span className="payment-fact-value">
+                {formatRupiah(breakdown.subtotal)}
+              </span>
+            </div>
+
+            <div className="payment-fact-row">
+              <span className="payment-fact-label">Biaya layanan</span>
+              <span className="payment-fact-value">
+                {formatRupiah(breakdown.serviceFee)}
+              </span>
+            </div>
 
             <div className="payment-fact-row payment-fact-row--total">
-              <span className="payment-fact-total-label">Total Terbayar</span>
+              <span className="payment-fact-total-label">Total Pembayaran</span>
               <strong className="payment-fact-total-value">
-                Rp{booking.totalAmount.toLocaleString("id-ID")}
+                {formatRupiah(breakdown.total)}
               </strong>
             </div>
           </div>

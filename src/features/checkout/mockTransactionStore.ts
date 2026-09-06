@@ -1,3 +1,4 @@
+import { calculatePaymentBreakdown } from "./pricing";
 import type {
   BookingRecord,
   PaymentAttemptRecord,
@@ -461,6 +462,11 @@ export const mockTransactionStore = {
     const bookingId = `bk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const paymentAttemptId = `pay_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
+    const breakdown = calculatePaymentBreakdown(
+      input.unitPricePerPerson,
+      input.participantCount,
+    );
+
     const booking: BookingRecord = {
       bookingId,
       travelerId: input.travelerId,
@@ -468,7 +474,10 @@ export const mockTransactionStore = {
       sessionId: input.sessionId,
       participantCount: input.participantCount,
       unitPricePerPerson: input.unitPricePerPerson,
-      totalAmount: input.unitPricePerPerson * input.participantCount,
+      subtotal: breakdown.subtotal,
+      serviceFee: breakdown.serviceFee,
+      total: breakdown.total,
+      totalAmount: breakdown.total,
       status: "PENDING_PAYMENT",
       reservedQuantity: input.participantCount,
       bookedQuantity: 0,

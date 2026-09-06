@@ -521,6 +521,26 @@
   color: var(--color-stone-600);
 }
 
+.checkout-price-label {
+  color: var(--color-stone-600);
+}
+
+.checkout-price-val {
+  color: var(--color-stone-900);
+  font-weight: var(--font-weight-medium);
+}
+
+.checkout-price-row__subtotal-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.checkout-price-subtext {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+}
+
 .checkout-price-row--total {
   padding-top: var(--space-3);
   border-top: 1.5px solid var(--color-border-default);

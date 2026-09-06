@@ -4,6 +4,11 @@ import { Badge, Button, Checkbox, Skeleton } from "../../components/ui";
 import { CheckoutSummaryCard } from "./CheckoutSummaryCard";
 import { defaultCheckoutAdapter } from "./mockAdapter";
 import { ParticipantQuantity } from "./ParticipantQuantity";
+import {
+  calculatePaymentBreakdown,
+  formatRupiah,
+  TRAVELER_SERVICE_FEE,
+} from "./pricing";
 import type {
   CheckoutAdapter,
   CheckoutDraftState,
@@ -428,10 +433,10 @@ export function CheckoutScreen({
 
   const maxSelectableParticipants = session.remainingSlots ?? 99;
   const unitPrice = session.pricePerPerson; // EXACT SESSION PRICE ONLY
-  const totalAmount = unitPrice ? unitPrice * participantCount : 0;
-  const formattedTotalPrice = unitPrice
-    ? `Rp${totalAmount.toLocaleString("id-ID")}`
-    : "Rp-";
+  const breakdown = unitPrice
+    ? calculatePaymentBreakdown(unitPrice, participantCount)
+    : undefined;
+  const formattedTotalPrice = breakdown ? formatRupiah(breakdown.total) : "Rp-";
 
   // CTA disabled while participantCount > latest selectable max or price is missing
   const isSubmitDisabled =
@@ -616,17 +621,40 @@ export function CheckoutScreen({
             {/* Price Breakdown Card / Section */}
             <section
               className="checkout-price-card"
-              aria-label="Rincian harga pembayaran"
+              aria-label="Rincian Pembayaran"
             >
               <h2 className="checkout-price-card__title">Rincian Pembayaran</h2>
               <div className="checkout-price-list">
                 <div className="checkout-price-row">
-                  <span>Harga experience ({participantCount} peserta)</span>
-                  <span>
-                    {participantCount} ×{" "}
-                    {unitPrice
-                      ? `Rp${unitPrice.toLocaleString("id-ID")}`
-                      : "Rp-"}
+                  <span className="checkout-price-label">Harga paket</span>
+                  <span className="checkout-price-val">
+                    {unitPrice ? `${formatRupiah(unitPrice)} / orang` : "Rp-"}
+                  </span>
+                </div>
+                <div className="checkout-price-row">
+                  <span className="checkout-price-label">Jumlah peserta</span>
+                  <span className="checkout-price-val">
+                    {participantCount} orang
+                  </span>
+                </div>
+                <div className="checkout-price-row">
+                  <div className="checkout-price-row__subtotal-wrap">
+                    <span className="checkout-price-label">Subtotal paket</span>
+                    <span className="checkout-price-subtext">
+                      {participantCount} ×{" "}
+                      {unitPrice ? formatRupiah(unitPrice) : "Rp-"}
+                    </span>
+                  </div>
+                  <span className="checkout-price-val">
+                    {breakdown ? formatRupiah(breakdown.subtotal) : "Rp-"}
+                  </span>
+                </div>
+                <div className="checkout-price-row">
+                  <span className="checkout-price-label">Biaya layanan</span>
+                  <span className="checkout-price-val">
+                    {formatRupiah(
+                      breakdown ? breakdown.serviceFee : TRAVELER_SERVICE_FEE,
+                    )}
                   </span>
                 </div>
                 <div className="checkout-price-row checkout-price-row--total">
@@ -635,7 +663,7 @@ export function CheckoutScreen({
                       Total Pembayaran
                     </span>
                     <span className="checkout-price-row__total-subtitle">
-                      Total untuk {participantCount} peserta
+                      Sudah termasuk biaya layanan
                     </span>
                   </div>
                   <span className="checkout-price-total-val">

@@ -111,10 +111,15 @@ export function EoLoginScreen() {
               booking dari dashboard EO.
             </p>
 
-            <div className="eo-login-intro__features" aria-label="Fitur utama EO">
+            <div
+              className="eo-login-intro__features"
+              aria-label="Fitur utama EO"
+            >
               <div>
                 <strong>Insight traveler</strong>
-                <span>Lihat pola kebutuhan yang bisa dikembangkan menjadi paket.</span>
+                <span>
+                  Lihat pola kebutuhan yang bisa dikembangkan menjadi paket.
+                </span>
               </div>
               <div>
                 <strong>Paket & jadwal</strong>
@@ -122,7 +127,9 @@ export function EoLoginScreen() {
               </div>
               <div>
                 <strong>Booking</strong>
-                <span>Pantau peserta dan aktivitas perjalanan yang berjalan.</span>
+                <span>
+                  Pantau peserta dan aktivitas perjalanan yang berjalan.
+                </span>
               </div>
             </div>
           </div>
@@ -178,7 +185,10 @@ export function EoLoginScreen() {
 
               <div className="eo-login-field">
                 <div className="eo-login-label-row">
-                  <label htmlFor="eo-login-password" className="eo-login-label">
+                  <label
+                    htmlFor="eo-login-password"
+                    className="eo-login-label"
+                  >
                     Kata sandi
                   </label>
                   <button

@@ -1,5 +1,6 @@
 import type { AuthUser } from "../auth/types";
 import { mockContactVerificationStore } from "../contactVerification/mockContactVerificationStore";
+import { demoContactVerificationBypass } from "../demo/demoContactVerificationBypass";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
@@ -174,6 +175,9 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       phone: traveler?.phone,
       phoneRequired: true,
       phoneVerified: isPhoneVerified,
+      demoContactVerificationBypass: traveler
+        ? demoContactVerificationBypass.has(traveler.id, sessionId)
+        : false,
     };
 
     const activePendingPayment =
@@ -277,7 +281,11 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       phoneVerified: isPhoneVerified,
     };
 
-    if (contactReq.phoneRequired && !contactReq.phoneVerified) {
+    if (
+      contactReq.phoneRequired &&
+      !contactReq.phoneVerified &&
+      !demoContactVerificationBypass.has(traveler.id, input.sessionId)
+    ) {
       return {
         status: "CONTACT_VERIFICATION_REQUIRED",
         message: "Verifikasi nomor HP diperlukan sebelum membuat pesanan.",
@@ -419,6 +427,7 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
+    demoContactVerificationBypass.clear(traveler.id, input.sessionId);
     return {
       status: "SUCCESS",
       bookingId: txResult.booking.bookingId,

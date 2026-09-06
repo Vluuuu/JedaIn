@@ -4,6 +4,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import type { AuthUser } from "../auth/types";
 import { sessionStore } from "../onboarding/sessionStore";
 import { CheckoutScreen } from "./CheckoutScreen";
@@ -87,6 +88,16 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(view.textContent).toContain("Dewo Traveler");
     expect(view.textContent).toContain("08123456789");
     expect(view.textContent).toContain("Lanjut ke Pembayaran");
+    const images = view.querySelectorAll<HTMLImageElement>(
+      ".checkout-summary-card__thumb img",
+    );
+    expect(images).toHaveLength(2); // Mobile and desktop summary wrappers
+    for (const image of images) {
+      expect(image.getAttribute("src")).toBe(
+        getPackageVisual("slow_green_day", "Lereng Hijau Batu").svgDataUri,
+      );
+      expect(image.alt).toBe("Ilustrasi Sehari Pelan di Lereng Hijau");
+    }
   });
 
   it("2. unknown Session renders NOT_FOUND state", async () => {

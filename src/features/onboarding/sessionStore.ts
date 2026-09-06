@@ -1,4 +1,5 @@
 import type { AuthUser, OnboardingStatus } from "../auth/types";
+import { demoContactVerificationBypass } from "../demo/demoContactVerificationBypass";
 import type { QuizDraft } from "../quiz/types";
 import type { OnboardingState } from "./types";
 
@@ -39,6 +40,9 @@ export const sessionStore = {
   },
 
   setUser(user: AuthUser | null): void {
+    if (!user || currentSession.user?.id !== user.id) {
+      demoContactVerificationBypass.reset();
+    }
     if (!user) {
       currentSession = { ...defaultSession };
       return;
@@ -111,6 +115,7 @@ export const sessionStore = {
   },
 
   reset(): void {
+    demoContactVerificationBypass.reset();
     currentSession = { ...defaultSession };
   },
 };

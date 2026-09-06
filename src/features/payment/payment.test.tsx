@@ -4,6 +4,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import type { AuthUser } from "../auth/types";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { sessionStore } from "../onboarding/sessionStore";
@@ -109,6 +110,13 @@ describe("Payment & Result Feature (T13, T14, T15) Tests", () => {
     expect(container.textContent).toContain("Rp550.000");
     expect(container.textContent).toContain("Sisa Waktu Pembayaran");
     expect(container.textContent).toContain("Bayar Sekarang");
+    const image = container.querySelector<HTMLImageElement>(
+      ".payment-summary-card__thumb img",
+    );
+    expect(image?.getAttribute("src")).toBe(
+      getPackageVisual("slow_green_day", "Lereng Hijau Batu").svgDataUri,
+    );
+    expect(image?.alt).toBe("Ilustrasi Sehari Pelan di Lereng Hijau");
 
     // Unauthenticated traveler blocked
     sessionStore.setUser({
@@ -153,6 +161,18 @@ describe("Payment & Result Feature (T13, T14, T15) Tests", () => {
     expect(getPath()).toBe(`/payment/${bId}/result`);
     expect(container.textContent).toContain("Pembayaran Berhasil");
     expect(container.textContent).toContain("Siap untuk jedamu!");
+    const image = container.querySelector<HTMLImageElement>(
+      ".payment-summary-card__header--compact img",
+    );
+    expect(image?.getAttribute("src")).toBe(
+      getPackageVisual("slow_green_day", "Lereng Hijau Batu").svgDataUri,
+    );
+    expect(image?.alt).toBe("Ilustrasi Sehari Pelan di Lereng Hijau");
+    expect(
+      container
+        .querySelector(".payment-success-visual")
+        ?.closest(".payment-result-header"),
+    ).not.toBeNull();
 
     // Store state: Booking PAID, bookedQuantity 2, attempt SUCCEEDED
     const booking = mockTransactionStore.getBookingById(bId);
@@ -632,6 +652,9 @@ describe("Payment & Result Feature (T13, T14, T15) Tests", () => {
     expect(container.textContent).toContain("Pembayaran Belum Selesai");
     expect(container.textContent).not.toContain("Pembayaran Gagal");
     expect(container.textContent).toContain("Lanjutkan Pembayaran");
+    expect(
+      container.querySelector(".payment-summary-card__thumb img"),
+    ).toBeNull();
   });
 
   it("J. FAILED attempt + expiry → Booking EXPIRED, attempt EXPIRED, reservation released", () => {

@@ -30,12 +30,14 @@ export function CheckoutSummaryCard({
       aria-label="Ringkasan jadwal dan experience"
     >
       <div className="checkout-summary-card__body">
-        <div
-          className="checkout-summary-card__thumb"
-          style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
-          role="img"
-          aria-label={`Ilustrasi ${packageData.title}`}
-        />
+        <div className="checkout-summary-card__thumb">
+          <img
+            src={visual.svgDataUri}
+            alt={`Ilustrasi ${packageData.title}`}
+            width={800}
+            height={500}
+          />
+        </div>
 
         <div className="checkout-summary-card__header">
           <span className="checkout-summary-card__meta">

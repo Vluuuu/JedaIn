@@ -19,6 +19,7 @@ export interface CheckoutContactRequirement {
   phone?: string;
   phoneRequired: boolean;
   phoneVerified: boolean;
+  demoContactVerificationBypass?: boolean;
 }
 
 export interface PendingPaymentHandoff {

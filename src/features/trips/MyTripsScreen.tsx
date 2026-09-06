@@ -160,12 +160,14 @@ export function MyTripsScreen({
               activePendingTrip.package?.destinationName,
             );
             return (
-              <div
-                className="my-trips-pending-card__thumb"
-                style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
-                role="img"
-                aria-label={`Ilustrasi ${activePendingTrip.package?.title ?? activePendingTrip.booking.packageId}`}
-              />
+              <div className="my-trips-pending-card__thumb">
+                <img
+                  src={visual.svgDataUri}
+                  alt={`Ilustrasi ${activePendingTrip.package?.title ?? activePendingTrip.booking.packageId}`}
+                  width={800}
+                  height={500}
+                />
+              </div>
             );
           })()}
 
@@ -319,12 +321,15 @@ export function MyTripsScreen({
 
             return (
               <article key={booking.bookingId} className="my-trip-card">
-                <div
-                  className="my-trip-card__thumb"
-                  style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
-                  role="img"
-                  aria-label={`Ilustrasi ${pkg?.title ?? booking.packageId}`}
-                />
+                <div className="my-trip-card__thumb">
+                  <img
+                    src={visual.svgDataUri}
+                    alt={`Ilustrasi ${pkg?.title ?? booking.packageId}`}
+                    width={800}
+                    height={500}
+                    loading="lazy"
+                  />
+                </div>
 
                 <div className="my-trip-card__body">
                   <div className="my-trip-card__header">

@@ -41,6 +41,7 @@ export interface ContactVerificationViewModel {
 }
 
 export interface ContactVerificationAdapter {
+  readonly supportsDemoContactBypass?: boolean;
   getVerificationContext(sessionId: string): Promise<{
     sessionValid: boolean;
     travelerId?: string;

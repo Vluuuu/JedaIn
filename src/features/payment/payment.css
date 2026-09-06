@@ -147,11 +147,39 @@
 }
 
 .payment-summary-card__header {
+  display: grid;
+  grid-template-columns: clamp(6rem, 22vw, 8rem) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-stone-200);
+}
+
+.payment-summary-card__header--compact {
+  grid-template-columns: clamp(4.5rem, 20vw, 6rem) minmax(0, 1fr);
+}
+
+.payment-summary-card__thumb {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.payment-summary-card__thumb img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.payment-summary-card__identity {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--color-stone-200);
+  min-width: 0;
 }
 
 .payment-summary-card__title {

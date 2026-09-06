@@ -2537,11 +2537,34 @@
   gap: var(--space-4);
 }
 
+.eo-dest-card__header-info {
+  display: flex;
+  flex-direction: column;
+}
+
 .eo-dest-card__title {
   font-size: var(--font-size-heading-sm);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  margin: 0 0 var(--space-1);
+  margin: 0 0 var(--space-2);
+}
+
+.eo-dest-card__meta-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.eo-dest-card__guide-badge {
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-800);
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-weight-semibold);
 }
 
 .eo-dest-card__location {
@@ -2569,7 +2592,7 @@
 
 .eo-dest-card__guide {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
@@ -2577,11 +2600,6 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-default);
   font-size: var(--font-size-caption);
-}
-
-.eo-dest-card__guide-status {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-forest-800);
 }
 
 .eo-dest-card__capacity {
@@ -2695,24 +2713,30 @@
   gap: var(--space-4);
 }
 
+.eo-dest-detail-hero__title {
+  font-size: var(--font-size-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
 .eo-dest-detail-hero__badges {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .eo-dest-detail-hero__guide-badge {
   font-size: var(--font-size-caption);
   color: var(--color-forest-800);
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-pill);
   font-weight: var(--font-weight-semibold);
-}
-
-.eo-dest-detail-hero__title {
-  font-size: var(--font-size-heading-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0;
-  letter-spacing: var(--letter-spacing-tight);
 }
 
 .eo-dest-detail-hero__loc {
@@ -3006,7 +3030,25 @@
   font-size: var(--font-size-body-md);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  margin: 0 0 0.15rem;
+  margin: 0 0 var(--space-2);
+}
+
+.eo-builder-dest-card__badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.eo-builder-dest-card__guide-badge {
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-800);
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-weight-semibold);
 }
 
 .eo-builder-dest-card__loc {
@@ -3136,6 +3178,23 @@
   gap: var(--space-3);
   font-size: var(--font-size-body-sm);
   color: var(--color-text-secondary);
+}
+
+.eo-dest-inspect-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.eo-dest-inspect-guide-badge {
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-800);
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-weight-semibold);
 }
 
 .eo-dest-inspect-section strong {

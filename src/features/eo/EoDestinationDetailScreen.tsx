@@ -65,22 +65,24 @@ export function EoDestinationDetailScreen() {
         </div>
 
         <div className="eo-dest-detail-hero__content">
+          <h1 className="eo-dest-detail-hero__title">{destination.name}</h1>
+
           <div className="eo-dest-detail-hero__badges">
             <Badge
               tone={
                 destination.verificationLevel === "PLUS" ? "info" : "success"
               }
+              showSymbol={false}
             >
               {destination.verificationLevel === "PLUS"
                 ? "Terverifikasi Plus"
                 : "Terverifikasi Dasar"}
             </Badge>
             <span className="eo-dest-detail-hero__guide-badge">
-              🌿 Pemandu lokal tersedia
+              Pemandu lokal tersedia
             </span>
           </div>
 
-          <h1 className="eo-dest-detail-hero__title">{destination.name}</h1>
           <p className="eo-dest-detail-hero__loc">
             {destination.locationLabel}
           </p>

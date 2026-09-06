@@ -85,7 +85,9 @@ export function EoLoginScreen() {
             height="768"
           />
         </a>
-        <span className="eo-login-topbar__surface">Portal Event Organizer</span>
+        <span className="eo-login-topbar__surface">
+          Portal Event Organizer
+        </span>
       </header>
 
       <div className="eo-login-layout">

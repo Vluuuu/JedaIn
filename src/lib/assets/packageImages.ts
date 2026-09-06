@@ -384,10 +384,39 @@ export const DESTINATION_ID_VISUALS: Record<string, VisualAssetData> = {
   dest_hutan_trawas: DESTINATION_VISUALS["Hutan Bambu Trawas"],
 };
 
+const customImages = new Map<string, string>();
+
+export const customPackageImageStore = {
+  set(packageId: string, url: string): void {
+    if (!packageId || !url) return;
+    customImages.set(packageId, url);
+  },
+  get(packageId: string): string | undefined {
+    return customImages.get(packageId);
+  },
+  delete(packageId: string): void {
+    customImages.delete(packageId);
+  },
+  reset(): void {
+    customImages.clear();
+  },
+};
+
 export function getPackageVisual(
   packageId: string,
   destinationName?: string,
+  customImageUrl?: string,
 ): VisualAssetData {
+  const custom =
+    customImageUrl?.trim() || customPackageImageStore.get(packageId);
+  if (custom) {
+    return {
+      id: `custom_${packageId}`,
+      title: packageId,
+      svgDataUri: custom,
+      themeColor: "#285e3d",
+    };
+  }
   if (PACKAGE_VISUALS[packageId]) {
     return PACKAGE_VISUALS[packageId];
   }

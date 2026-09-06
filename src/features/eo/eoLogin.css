@@ -1,0 +1,366 @@
+/* Dedicated EO Workspace Login */
+/* Built with JedaIn Design Tokens: Forest Green, Warm Stone, Clean Hierarchy */
+
+.eo-login-layout {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-page);
+  padding: var(--space-8) var(--space-4);
+  box-sizing: border-box;
+}
+
+.eo-login-container {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  max-width: 960px;
+  width: 100%;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* Left Column: Visual Identity */
+.eo-login-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-8);
+  background: var(--color-bg-surface-subtle);
+  border-right: 1px solid var(--color-border-default);
+  gap: var(--space-6);
+}
+
+.eo-login-hero__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.eo-login-hero__logo {
+  width: 6.75rem;
+  height: auto;
+  aspect-ratio: 1407 / 768;
+  display: block;
+}
+
+.eo-login-hero__role {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-stone-300);
+  line-height: 1;
+}
+
+.eo-login-hero__visual {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-stone-200);
+  background: var(--color-stone-100);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-login-hero__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eo-login-hero__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.eo-login-hero__title {
+  margin: 0;
+  font-size: var(--font-size-heading-sm);
+  color: var(--color-stone-900);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.35;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.eo-login-hero__desc {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  line-height: 1.55;
+}
+
+/* Right Column: Login Panel */
+.eo-login-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-8);
+  gap: var(--space-5);
+  background: var(--color-bg-surface);
+}
+
+.eo-login-mobile-brand {
+  display: none;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.eo-login-mobile-brand__logo {
+  width: 6.25rem;
+  height: auto;
+  aspect-ratio: 1407 / 768;
+  display: block;
+}
+
+.eo-login-mobile-brand__tag {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-stone-300);
+  line-height: 1;
+}
+
+.eo-login-panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.eo-login-panel__title {
+  margin: 0;
+  font-size: var(--font-size-heading-md);
+  color: var(--color-stone-900);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1.25;
+}
+
+.eo-login-panel__subtitle {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  line-height: 1.5;
+}
+
+.eo-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eo-login-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.eo-login-label {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-700);
+}
+
+.eo-login-input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--color-stone-300);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-900);
+  background: var(--color-stone-0);
+  box-sizing: border-box;
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+.eo-login-input:focus {
+  outline: none;
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px var(--color-brand-primary-soft);
+}
+
+.eo-login-password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.eo-login-input--password {
+  padding-right: 5.5rem;
+}
+
+.eo-login-password-toggle {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-600);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.eo-login-password-toggle:hover {
+  color: var(--color-stone-900);
+}
+
+.eo-login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.eo-login-remember {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-700);
+  cursor: pointer;
+}
+
+.eo-login-remember__checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-brand-primary);
+  cursor: pointer;
+}
+
+.eo-login-forgot-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.eo-login-forgot-btn:hover {
+  color: var(--color-brand-primary-hover);
+}
+
+.eo-login-submit-btn {
+  width: 100%;
+  margin-top: var(--space-1);
+}
+
+.eo-login-separator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-1) 0;
+}
+
+.eo-login-separator__line {
+  flex: 1;
+  height: 1px;
+  background: var(--color-stone-200);
+}
+
+.eo-login-separator__text {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+  font-weight: var(--font-weight-medium);
+}
+
+.eo-login-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.eo-login-demo__hint {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-600);
+}
+
+.eo-login-demo__btn {
+  width: 100%;
+}
+
+.eo-login-alert {
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body-sm);
+}
+
+.eo-login-alert p {
+  margin: 0;
+}
+
+.eo-login-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-info-bg);
+  border: 1px solid var(--color-info-border);
+  color: var(--color-info-text);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-caption);
+}
+
+.eo-login-notice p {
+  margin: 0;
+}
+
+.eo-login-notice__close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--color-info-text);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 var(--space-1);
+}
+
+/* Responsive collapse */
+@media (max-width: 900px) {
+  .eo-login-container {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
+
+  .eo-login-hero {
+    display: none;
+  }
+
+  .eo-login-mobile-brand {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .eo-login-layout {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .eo-login-panel {
+    padding: var(--space-6) var(--space-4);
+  }
+}

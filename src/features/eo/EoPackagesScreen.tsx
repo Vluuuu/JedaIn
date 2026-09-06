@@ -374,8 +374,13 @@ export function EoPackagesScreen() {
               const destination = mockDestinationStore.getById(
                 pkg.destinationId,
               );
-              const visual = getPackageVisual(pkg.packageId, destination?.name);
-              const destinationImg = destination?.imageUrl || visual.svgDataUri;
+              const visual = getPackageVisual(
+                pkg.packageId,
+                destination?.name,
+                pkg.imageUrl,
+              );
+              const destinationImg =
+                pkg.imageUrl || destination?.imageUrl || visual.svgDataUri;
 
               return (
                 <article
@@ -383,11 +388,15 @@ export function EoPackagesScreen() {
                   className="eo-pkg-card"
                   aria-label={`Paket: ${pkg.title}`}
                 >
-                  {/* Visual Context: Source-backed destination image or visual asset */}
+                  {/* Visual Context: Custom package image, destination image, or visual asset */}
                   <div className="eo-pkg-card__media">
                     <img
                       src={destinationImg}
-                      alt={`Destinasi ${destination?.name ?? "paket"}`}
+                      alt={
+                        pkg.imageUrl
+                          ? `Foto ${pkg.title}`
+                          : `Destinasi ${destination?.name ?? "paket"}`
+                      }
                       className="eo-pkg-card__img"
                       loading="lazy"
                     />

@@ -3,9 +3,15 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, useLocation } from "react-router";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { App } from "../../App";
+import {
+  customPackageImageStore,
+  getPackageVisual,
+} from "../../lib/assets/packageImages";
+import { isEoSubdomain } from "../../lib/config/subdomain";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import { buildTravelerPackageFromEo } from "../marketplace/marketplaceAdapter";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
@@ -18,12 +24,14 @@ import { partnerSessionStore } from "./partnerSessionStore";
 import { EoInsightsScreen } from "./EoInsightsScreen";
 import { EoPackagesScreen } from "./EoPackagesScreen";
 import { EoPackageBuilderScreen } from "./EoPackageBuilderScreen";
+import { validatePackageImageFile } from "./packageImageValidation";
 import { EoPackageDetailScreen } from "./EoPackageDetailScreen";
 import { EoSessionsScreen } from "./EoSessionsScreen";
 import { EoBookingsScreen } from "./EoBookingsScreen";
 import { EoReviewsScreen } from "./EoReviewsScreen";
 import { EoApplicationStatusScreen } from "./EoApplicationStatusScreen";
 import { PartnerLoginScreen } from "./PartnerLoginScreen";
+import { EoLoginScreen } from "./EoLoginScreen";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -49,6 +57,7 @@ afterEach(async () => {
   mockEoPackageStore.reset();
   mockTransactionStore.reset();
   mockReviewStore.reset();
+  vi.unstubAllGlobals();
 });
 
 async function renderComponent(
@@ -2086,6 +2095,513 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(
         sessSpotlight?.querySelector(".eo-action-spotlight__btn-icon"),
       ).not.toBeNull();
+    });
+  });
+
+  describe("11. Phase B2: Dedicated EO Login & Package Image Pipeline (BS–CD)", () => {
+    it("BS. Dedicated EO login screen renders with canonical JedaIn logo, EO context, empty initial credentials, and without fake marketing badges", async () => {
+      const view = await renderComponent(createElement(EoLoginScreen));
+
+      // Canonical logo and identity
+      const logo = view.querySelector<HTMLImageElement>(".eo-login-hero__logo");
+      expect(logo).not.toBeNull();
+      expect(view.textContent).toContain("Event Organizer");
+      expect(view.textContent).toContain("Masuk ke JedaIn");
+      expect(view.textContent).toContain("Gunakan akun EO yang terdaftar.");
+      expect(view.textContent).toContain("Masuk");
+      expect(view.textContent).toContain("Coba akun demo");
+
+      // Initial credentials must be empty
+      const emailInput =
+        view.querySelector<HTMLInputElement>("#eo-login-email");
+      const pwdInput =
+        view.querySelector<HTMLInputElement>("#eo-login-password");
+      expect(emailInput?.value).toBe("");
+      expect(pwdInput?.value).toBe("");
+      expect(emailInput?.placeholder).toBe("nama@organizer.id");
+      expect(pwdInput?.placeholder).toBe("Masukkan kata sandi");
+
+      // Strictly prohibited elements (no fake marketing, no destination selectors)
+      expect(view.textContent).not.toContain("Portal Partner");
+      expect(view.textContent).not.toContain("Mitra Destinasi");
+      expect(view.textContent).not.toContain("Destinasi Approved");
+      expect(view.textContent).not.toContain("Pengelola Lereng Hijau");
+      expect(view.textContent).not.toContain("Akun Terverifikasi");
+      expect(view.textContent).not.toContain("BNSP Certified");
+      expect(view.textContent).not.toContain("✓ EO Workspace");
+      expect(view.querySelector('input[name="role"]')).toBeNull();
+      expect(view.querySelector('select[name="role"]')).toBeNull();
+    });
+
+    it("BT. 'Coba akun demo' establishes approved EO demo session (Jeda Alam Nusantara) and navigates to /partner/eo", async () => {
+      partnerSessionStore.logout();
+      expect(partnerSessionStore.get()).toBeNull();
+
+      function LocationProbe() {
+        const location = useLocation();
+        return <output data-testid="location">{location.pathname}</output>;
+      }
+
+      const view = await renderComponent(
+        createElement(
+          "div",
+          null,
+          createElement(EoLoginScreen),
+          createElement(LocationProbe),
+        ),
+        ["/partner/eo/login"],
+      );
+
+      const demoBtn = Array.from(view.querySelectorAll("button")).find((btn) =>
+        btn.textContent?.includes("Coba akun demo"),
+      );
+      expect(demoBtn).toBeDefined();
+
+      await act(async () => {
+        demoBtn!.click();
+      });
+
+      // Session established
+      const current = partnerSessionStore.get();
+      expect(current).not.toBeNull();
+      expect(current?.role).toBe("EO");
+      expect(current?.businessName).toBe("Jeda Alam Nusantara");
+      expect(current?.id).toBe("eo_jeda_alam");
+
+      // Navigated to /partner/eo
+      const locationOutput = view.querySelector('[data-testid="location"]');
+      expect(locationOutput?.textContent).toBe("/partner/eo");
+    });
+
+    it("BU. Real login form rejects unknown email or empty password without falling back to demo session", async () => {
+      partnerSessionStore.logout();
+
+      const view = await renderComponent(createElement(EoLoginScreen));
+
+      // 1. Password visibility toggle
+      const pwdInput =
+        view.querySelector<HTMLInputElement>("#eo-login-password")!;
+      expect(pwdInput.type).toBe("password");
+
+      const toggleBtn = view.querySelector<HTMLButtonElement>(
+        ".eo-login-password-toggle",
+      )!;
+      await act(async () => {
+        toggleBtn.click();
+      });
+      expect(pwdInput.type).toBe("text");
+
+      // 2. Forgot password notice
+      const forgotBtn = view.querySelector<HTMLButtonElement>(
+        ".eo-login-forgot-btn",
+      )!;
+      await act(async () => {
+        forgotBtn.click();
+      });
+      expect(view.textContent).toContain("Instruksi pemulihan kata sandi");
+
+      // 3. Submit empty email or empty password -> error, session remains null
+      const emailInput =
+        view.querySelector<HTMLInputElement>("#eo-login-email")!;
+      const form = view.querySelector<HTMLFormElement>("form")!;
+
+      // 3a. Empty email
+      await act(async () => {
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
+      });
+      expect(view.textContent).toContain("Email bisnis wajib diisi.");
+      expect(partnerSessionStore.get()).toBeNull();
+
+      // 3b. Empty password with email provided
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(emailInput, "partner@jedaalam.id");
+        emailInput.dispatchEvent(new Event("input", { bubbles: true }));
+        nativeSetter?.call(pwdInput, "");
+        pwdInput.dispatchEvent(new Event("input", { bubbles: true }));
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
+      });
+
+      expect(view.textContent).toContain("Kata sandi wajib diisi.");
+      expect(partnerSessionStore.get()).toBeNull();
+
+      // 4. Submit unknown email -> error, does NOT log in as demo
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(emailInput, "unknown-random@example.com");
+        emailInput.dispatchEvent(new Event("input", { bubbles: true }));
+        nativeSetter?.call(pwdInput, "anypassword");
+        pwdInput.dispatchEvent(new Event("input", { bubbles: true }));
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
+      });
+
+      expect(view.textContent).toContain(
+        "Email bisnis atau kata sandi belum terdaftar sebagai EO aktif.",
+      );
+      expect(partnerSessionStore.get()).toBeNull();
+
+      // 5. Submit valid approved EO credentials -> logs in successfully
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(emailInput, "partner@jedaalam.id");
+        emailInput.dispatchEvent(new Event("input", { bubbles: true }));
+        nativeSetter?.call(pwdInput, "password123");
+        pwdInput.dispatchEvent(new Event("input", { bubbles: true }));
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
+      });
+
+      expect(partnerSessionStore.get()?.role).toBe("EO");
+      expect(partnerSessionStore.get()?.id).toBe("eo_jeda_alam");
+    });
+
+    it("BV. Subdomain detection uses explicit allowlist and respects preview override", () => {
+      // Explicit allowlist
+      expect(isEoSubdomain("eo.jedain.biz.id")).toBe(true);
+      expect(isEoSubdomain("EO.JEDAIN.BIZ.ID")).toBe(true);
+      expect(isEoSubdomain("eo.localhost")).toBe(true);
+
+      // Disallowed hostnames (must not match generic eo. prefix)
+      expect(isEoSubdomain("jedain.biz.id")).toBe(false);
+      expect(isEoSubdomain("eo.example.com")).toBe(false);
+      expect(isEoSubdomain("not-eo.jedain.biz.id")).toBe(false);
+      expect(isEoSubdomain("www.jedain.biz.id")).toBe(false);
+      expect(isEoSubdomain("partner.jedain.biz.id")).toBe(false);
+      expect(isEoSubdomain("localhost")).toBe(false);
+
+      // Preview override via query param ?subdomain=eo
+      const originalLocation = window.location;
+      const windowRef = window as unknown as {
+        location: { hostname: string; search: string };
+      };
+      try {
+        windowRef.location = {
+          hostname: "preview-123.pages.dev",
+          search: "?subdomain=eo",
+        };
+        expect(isEoSubdomain()).toBe(true);
+      } finally {
+        windowRef.location = originalLocation;
+      }
+    });
+
+    it("BW. Main domain root (/) renders Traveler OpeningHero, not EO Login", async () => {
+      const view = await renderComponent(createElement(App), ["/"]);
+      expect(view.textContent).toContain("Temukan jeda");
+      expect(view.textContent).toContain("kamu butuhkan.");
+      expect(view.textContent).not.toContain("Masuk sebagai Event Organizer");
+    });
+
+    it("BX. Unauthenticated access to /partner/eo routes to login correctly", async () => {
+      partnerSessionStore.logout();
+
+      const view = await renderComponent(createElement(App), ["/partner/eo"]);
+      // On standard hostname in test, PartnerRouteGuard redirects to partner login
+      expect(view.textContent).toContain("Masuk ke Portal Partner");
+    });
+
+    it("BY. Package Builder Step 2 renders cover image upload dropzone and accepts file input", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const view = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new?destinationId=dest_lereng_hijau",
+      ]);
+
+      // Move from Step 1 to Step 2
+      const nextBtn = Array.from(view.querySelectorAll("button")).find((btn) =>
+        btn.textContent?.includes("Lanjut ke Langkah 2"),
+      )!;
+      await act(async () => {
+        nextBtn.click();
+      });
+
+      // Step 2 heading and image upload zone
+      expect(view.textContent).toContain("Foto Utama Experience");
+      expect(view.textContent).toContain(
+        "Tambahkan foto yang paling mewakili suasana perjalanan ini.",
+      );
+      expect(view.querySelector(".eo-builder-dropzone")).not.toBeNull();
+      expect(view.textContent).toContain("Unggah foto");
+
+      // Select image file via change event
+      const fileInput = view.querySelector<HTMLInputElement>(
+        ".eo-builder-file-input",
+      )!;
+      expect(fileInput).not.toBeNull();
+
+      // Trigger file change with a mock data URL directly
+      const mockDataUrl =
+        "data:image/svg+xml;utf8,<svg id='mock-preview'></svg>";
+      await act(async () => {
+        const file = new File(["mock content"], "preview.jpg", {
+          type: "image/jpeg",
+        });
+        class MockFileReader {
+          onload: ((event: { target: { result: string } }) => void) | null =
+            null;
+          readAsDataURL() {
+            this.onload?.({ target: { result: mockDataUrl } });
+          }
+        }
+        vi.stubGlobal(
+          "FileReader",
+          MockFileReader as unknown as typeof FileReader,
+        );
+
+        Object.defineProperty(fileInput, "files", {
+          value: [file],
+          configurable: true,
+        });
+        fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      // Preview renders
+      const previewImg = view.querySelector<HTMLImageElement>(
+        ".eo-builder-img-preview",
+      );
+      expect(previewImg).not.toBeNull();
+      expect(previewImg?.src).toBe(mockDataUrl);
+      expect(view.textContent).toContain("Ganti foto");
+      expect(view.textContent).toContain("Hapus");
+
+      // Test invalid upload does NOT overwrite existing image and displays natural error
+      const replaceInput = view.querySelector<HTMLInputElement>(
+        ".eo-builder-img-preview-actions .eo-builder-file-input",
+      )!;
+      expect(replaceInput).not.toBeNull();
+
+      await act(async () => {
+        const invalidSvgFile = new File(["<svg></svg>"], "logo.svg", {
+          type: "image/svg+xml",
+        });
+        Object.defineProperty(replaceInput, "files", {
+          value: [invalidSvgFile],
+          configurable: true,
+        });
+        replaceInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      // Existing preview image is preserved
+      expect(
+        view.querySelector<HTMLImageElement>(".eo-builder-img-preview")?.src,
+      ).toBe(mockDataUrl);
+      expect(view.textContent).toContain(
+        "Gunakan JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.",
+      );
+
+      // Test remove button
+      const removeBtn = Array.from(view.querySelectorAll("button")).find(
+        (b) => b.textContent === "Hapus",
+      )!;
+      await act(async () => {
+        removeBtn.click();
+      });
+
+      expect(view.querySelector(".eo-builder-img-preview")).toBeNull();
+      expect(view.querySelector(".eo-builder-dropzone")).not.toBeNull();
+    });
+
+    it("BY2. validatePackageImageFile strictly enforces allowed MIME types (JPG, PNG, WebP) and 5MB ceiling", () => {
+      // 1. Valid files
+      const validJpg = new File(["bytes"], "cover.jpg", { type: "image/jpeg" });
+      const validPng = new File(["bytes"], "cover.png", { type: "image/png" });
+      const validWebp = new File(["bytes"], "cover.webp", {
+        type: "image/webp",
+      });
+      expect(validatePackageImageFile(validJpg)).toEqual({ valid: true });
+      expect(validatePackageImageFile(validPng)).toEqual({ valid: true });
+      expect(validatePackageImageFile(validWebp)).toEqual({ valid: true });
+
+      // 2. Reject non-image
+      const pdfFile = new File(["bytes"], "doc.pdf", {
+        type: "application/pdf",
+      });
+      const textFile = new File(["bytes"], "doc.txt", { type: "text/plain" });
+      expect(validatePackageImageFile(pdfFile).valid).toBe(false);
+      expect(validatePackageImageFile(textFile).valid).toBe(false);
+
+      // 3. Reject SVG
+      const svgFile = new File(["<svg></svg>"], "icon.svg", {
+        type: "image/svg+xml",
+      });
+      const svgResult = validatePackageImageFile(svgFile);
+      expect(svgResult.valid).toBe(false);
+      expect(svgResult.error).toContain("Gunakan JPG, PNG, atau WebP");
+
+      // 4. Reject > 5 MB
+      const hugeFile = new File(["huge"], "huge.png", { type: "image/png" });
+      Object.defineProperty(hugeFile, "size", {
+        value: 5 * 1024 * 1024 + 1,
+      });
+      const sizeResult = validatePackageImageFile(hugeFile);
+      expect(sizeResult.valid).toBe(false);
+      expect(sizeResult.error).toContain("maksimal 5 MB");
+    });
+
+    it("BZ. Save draft preserves image reference, and reopening draft retains image", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const mockImage = "data:image/svg+xml;utf8,<svg id='draft-photo'></svg>";
+
+      const saveRes = mockEoPackageStore.saveDraft({
+        title: "Paket Mindful Fotografi",
+        shortSummary: "Pengalaman mindful fotografi di alam lereng pegunungan.",
+        destinationId: "dest_lereng_hijau",
+        durationLabel: "1 hari",
+        imageUrl: mockImage,
+        itinerary: [{ order: 1, title: "Sesi 1", description: "Foto pagi" }],
+        safetyNotes: ["Aman"],
+        pricing: {
+          destinationBaseCost: 125000,
+          eoMargin: 100000,
+          customerPrice: 225000,
+        },
+      });
+
+      expect(saveRes.success).toBe(true);
+      const pkgId = saveRes.package!.packageId;
+      expect(saveRes.package?.imageUrl).toBe(mockImage);
+
+      // Reopen draft via URL query param
+      const view = await renderComponent(createElement(App), [
+        `/partner/eo/packages/new?draftId=${pkgId}`,
+      ]);
+
+      // Move to Step 2
+      const nextBtn = Array.from(view.querySelectorAll("button")).find((btn) =>
+        btn.textContent?.includes("Lanjut ke Langkah 2"),
+      )!;
+      await act(async () => {
+        nextBtn.click();
+      });
+
+      // Preview renders image from reopened draft
+      const previewImg = view.querySelector<HTMLImageElement>(
+        ".eo-builder-img-preview",
+      );
+      expect(previewImg).not.toBeNull();
+      expect(previewImg?.src).toBe(mockImage);
+    });
+
+    it("CA. EO Package Detail and EO Package List render custom image when present", async () => {
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+      const customImg =
+        "data:image/svg+xml;utf8,<svg id='eo-detail-img'></svg>";
+
+      const saveRes = mockEoPackageStore.saveDraft({
+        title: "Paket Visual Khusus EO",
+        shortSummary:
+          "Pengalaman dengan foto utama custom yang sangat estetik.",
+        destinationId: "dest_lereng_hijau",
+        durationLabel: "1 hari",
+        imageUrl: customImg,
+        itinerary: [{ order: 1, title: "Aktivitas", description: "Mindful" }],
+        safetyNotes: ["Aman"],
+        pricing: {
+          destinationBaseCost: 125000,
+          eoMargin: 75000,
+          customerPrice: 200000,
+        },
+      });
+      const pkgId = saveRes.package!.packageId;
+
+      // 1. Package Detail renders custom image
+      const detailView = await renderComponent(createElement(App), [
+        `/partner/eo/packages/${pkgId}`,
+      ]);
+      const detailImg = detailView.querySelector<HTMLImageElement>(
+        ".eo-pkg-detail-header__visual img",
+      );
+      expect(detailImg).not.toBeNull();
+      expect(detailImg?.src).toBe(customImg);
+
+      // 2. Packages List renders custom image
+      const listView = await renderComponent(createElement(App), [
+        "/partner/eo/packages",
+      ]);
+      const card = Array.from(listView.querySelectorAll(".eo-pkg-card")).find(
+        (c) => c.textContent?.includes("Paket Visual Khusus EO"),
+      )!;
+      expect(card).toBeDefined();
+      const listImg = card.querySelector<HTMLImageElement>(".eo-pkg-card__img");
+      expect(listImg?.src).toBe(customImg);
+    });
+
+    it("CB. Traveler package visual pipeline prioritizes custom EO image and falls back when absent", () => {
+      // 1. Custom image registered
+      customPackageImageStore.set(
+        "pkg_with_custom",
+        "data:image/svg+xml;utf8,<svg id='custom-traveler'></svg>",
+      );
+      const customVisual = getPackageVisual(
+        "pkg_with_custom",
+        "Lereng Hijau Batu",
+      );
+      expect(customVisual.svgDataUri).toBe(
+        "data:image/svg+xml;utf8,<svg id='custom-traveler'></svg>",
+      );
+
+      // 2. Existing seeded package without custom image uses canonical fallback
+      const canonicalVisual = getPackageVisual(
+        "slow_green_day",
+        "Lereng Hijau Batu",
+      );
+      expect(canonicalVisual.id).toBe("slow_green_day");
+      expect(canonicalVisual.svgDataUri).toContain("url(%23sky)");
+
+      // 3. Unknown package uses destination fallback
+      const destFallbackVisual = getPackageVisual(
+        "unknown_package_xyz",
+        "Lereng Hijau Batu",
+      );
+      expect(destFallbackVisual.id).toBe("dest_batu");
+
+      // 4. Unknown package and destination uses neutral fallback
+      const neutralVisual = getPackageVisual(
+        "unknown_package_xyz",
+        "Unknown Destination",
+      );
+      expect(neutralVisual.id).toBe("neutral_jedain_placeholder");
+    });
+
+    it("CC. buildTravelerPackageFromEo forwards custom imageUrl to visualAsset", () => {
+      const eoPkg = {
+        ...mockEoPackageStore.getPackageById("slow_green_day")!,
+        imageUrl: "data:image/svg+xml;utf8,<svg id='custom-marketplace'></svg>",
+      };
+      const travelerPkg = buildTravelerPackageFromEo(eoPkg);
+      expect(travelerPkg).not.toBeNull();
+      expect(travelerPkg?.visualAsset).toBe(eoPkg.imageUrl);
+    });
+
+    it("CD. resetCompetitionDemoState resets custom package images", () => {
+      customPackageImageStore.set(
+        "test_reset_pkg",
+        "http://example.com/img.jpg",
+      );
+      expect(customPackageImageStore.get("test_reset_pkg")).toBe(
+        "http://example.com/img.jpg",
+      );
+
+      mockEoPackageStore.reset();
+      expect(customPackageImageStore.get("test_reset_pkg")).toBeUndefined();
     });
   });
 });

@@ -5,6 +5,7 @@ import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
+import { validatePackageImageFile } from "./packageImageValidation";
 import { partnerSessionStore } from "./partnerSessionStore";
 import type {
   DestinationRecord,
@@ -102,6 +103,10 @@ export function EoPackageBuilderScreen() {
   const [durationLabel, setDurationLabel] = useState<string>(
     initialDraft?.durationLabel ?? initialInsight?.durationLabel ?? "1 hari",
   );
+  const [imageUrl, setImageUrl] = useState<string | undefined>(
+    initialDraft?.imageUrl,
+  );
+  const [imageError, setImageError] = useState<string | undefined>();
   const [itinerary, setItinerary] = useState<EoItineraryItem[]>(
     initialDraft?.itinerary && initialDraft.itinerary.length > 0
       ? initialDraft.itinerary
@@ -208,6 +213,7 @@ export function EoPackageBuilderScreen() {
       shortSummary,
       valueProposition: shortSummary,
       destinationId: effectiveDestinationId,
+      imageUrl,
       insightId: selectedInsightId,
       durationLabel,
       itinerary,
@@ -223,6 +229,37 @@ export function EoPackageBuilderScreen() {
       setPackageId(res.package.packageId);
     }
     return res.package;
+  };
+
+  const processImageFile = (file: File) => {
+    const validation = validatePackageImageFile(file);
+    if (!validation.valid) {
+      setImageError(validation.error);
+      return;
+    }
+
+    setImageError(undefined);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result;
+      if (typeof result === "string") {
+        setImageUrl(result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processImageFile(file);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    processImageFile(file);
   };
 
   const handleNext = () => {
@@ -748,6 +785,108 @@ export function EoPackageBuilderScreen() {
             </select>
           </div>
 
+          {/* Cover Photo / Foto Utama Experience */}
+          <div className="eo-form-group">
+            <label className="eo-form-label">Foto Utama Experience</label>
+            <p
+              style={{
+                margin: "0 0 var(--space-2)",
+                fontSize: "var(--font-size-caption)",
+                color: "var(--color-text-secondary)",
+              }}
+            >
+              Tambahkan foto yang paling mewakili suasana perjalanan ini.
+            </p>
+
+            {imageUrl ? (
+              <div className="eo-builder-img-preview-card">
+                <div className="eo-builder-img-preview-wrap">
+                  <img
+                    src={imageUrl}
+                    alt="Preview foto utama experience"
+                    className="eo-builder-img-preview"
+                  />
+                </div>
+                <div className="eo-builder-img-preview-actions">
+                  <label className="eo-builder-upload-btn-label eo-builder-upload-btn-label--secondary">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="eo-builder-file-input"
+                      onChange={handleFileChange}
+                      aria-label="Ganti foto"
+                    />
+                    <span>Ganti foto</span>
+                  </label>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      setImageUrl(undefined);
+                      setImageError(undefined);
+                    }}
+                  >
+                    Hapus
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="eo-builder-dropzone"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+              >
+                <svg
+                  width="36"
+                  height="36"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="eo-builder-dropzone__icon"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+                <p className="eo-builder-dropzone__text">
+                  Seret dan lepas foto ke sini, atau klik tombol di bawah
+                </p>
+                <label className="eo-builder-upload-btn-label">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="eo-builder-file-input"
+                    onChange={handleFileChange}
+                    aria-label="Unggah foto"
+                  />
+                  <span>Unggah foto</span>
+                </label>
+                <span className="eo-builder-dropzone__hint">
+                  Gunakan JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.
+                </span>
+              </div>
+            )}
+
+            {imageError && (
+              <p
+                className="eo-builder-img-error"
+                role="alert"
+                style={{
+                  margin: "var(--space-2) 0 0",
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-danger-text)",
+                }}
+              >
+                {imageError}
+              </p>
+            )}
+          </div>
+
           <div
             style={{
               display: "flex",
@@ -1103,6 +1242,12 @@ export function EoPackageBuilderScreen() {
               >
                 {shortSummary || "Belum ada ringkasan pengalaman."}
               </p>
+
+              {imageUrl && (
+                <div className="eo-builder-review-thumb">
+                  <img src={imageUrl} alt={`Foto utama ${title || "paket"}`} />
+                </div>
+              )}
             </div>
 
             {/* Itinerary Preview */}

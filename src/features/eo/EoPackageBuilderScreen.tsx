@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { Badge, Button, Dialog } from "../../components/ui";
+import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
@@ -446,15 +447,15 @@ export function EoPackageBuilderScreen() {
                 >
                   {/* Media */}
                   <div className="eo-builder-dest-card__media">
-                    {dest.imageUrl ? (
-                      <img
-                        src={dest.imageUrl}
-                        alt={dest.name}
-                        className="eo-builder-dest-card__img"
-                      />
-                    ) : (
-                      <div className="eo-builder-dest-card__img-placeholder" />
-                    )}
+                    <img
+                      src={
+                        dest.imageUrl ||
+                        getDestinationVisual(dest.name).svgDataUri
+                      }
+                      alt={dest.name}
+                      className="eo-builder-dest-card__img"
+                      loading="lazy"
+                    />
                   </div>
 
                   {/* Body */}

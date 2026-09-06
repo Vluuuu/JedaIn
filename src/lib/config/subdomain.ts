@@ -3,6 +3,8 @@
  * Identifies whether the current request is served from the dedicated EO subdomain (eo.jedain.biz.id).
  * Supports search parameter override (?subdomain=eo) for preview environments.
  */
+const ALLOWED_EO_HOSTNAMES = new Set(["eo.jedain.biz.id", "eo.localhost"]);
+
 export function isEoSubdomain(hostname?: string): boolean {
   if (typeof window === "undefined" && !hostname) return false;
 
@@ -15,9 +17,5 @@ export function isEoSubdomain(hostname?: string): boolean {
     hostname ?? (typeof window !== "undefined" ? window.location.hostname : "")
   ).toLowerCase();
 
-  return (
-    host.startsWith("eo.") ||
-    host === "eo.jedain.biz.id" ||
-    host === "eo.localhost"
-  );
+  return ALLOWED_EO_HOSTNAMES.has(host);
 }

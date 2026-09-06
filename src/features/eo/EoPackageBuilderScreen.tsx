@@ -5,6 +5,7 @@ import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
+import { validatePackageImageFile } from "./packageImageValidation";
 import { partnerSessionStore } from "./partnerSessionStore";
 import type {
   DestinationRecord,
@@ -105,6 +106,7 @@ export function EoPackageBuilderScreen() {
   const [imageUrl, setImageUrl] = useState<string | undefined>(
     initialDraft?.imageUrl,
   );
+  const [imageError, setImageError] = useState<string | undefined>();
   const [itinerary, setItinerary] = useState<EoItineraryItem[]>(
     initialDraft?.itinerary && initialDraft.itinerary.length > 0
       ? initialDraft.itinerary
@@ -229,10 +231,14 @@ export function EoPackageBuilderScreen() {
     return res.package;
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processImageFile = (file: File) => {
+    const validation = validatePackageImageFile(file);
+    if (!validation.valid) {
+      setImageError(validation.error);
+      return;
+    }
 
+    setImageError(undefined);
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result;
@@ -243,19 +249,17 @@ export function EoPackageBuilderScreen() {
     reader.readAsDataURL(file);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processImageFile(file);
+  };
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result;
-      if (typeof result === "string") {
-        setImageUrl(result);
-      }
-    };
-    reader.readAsDataURL(file);
+    processImageFile(file);
   };
 
   const handleNext = () => {
@@ -807,7 +811,7 @@ export function EoPackageBuilderScreen() {
                   <label className="eo-builder-upload-btn-label eo-builder-upload-btn-label--secondary">
                     <input
                       type="file"
-                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      accept="image/jpeg,image/png,image/webp"
                       className="eo-builder-file-input"
                       onChange={handleFileChange}
                       aria-label="Ganti foto"
@@ -818,7 +822,10 @@ export function EoPackageBuilderScreen() {
                     type="button"
                     variant="danger"
                     size="sm"
-                    onClick={() => setImageUrl(undefined)}
+                    onClick={() => {
+                      setImageUrl(undefined);
+                      setImageError(undefined);
+                    }}
                   >
                     Hapus
                   </Button>
@@ -852,7 +859,7 @@ export function EoPackageBuilderScreen() {
                 <label className="eo-builder-upload-btn-label">
                   <input
                     type="file"
-                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    accept="image/jpeg,image/png,image/webp"
                     className="eo-builder-file-input"
                     onChange={handleFileChange}
                     aria-label="Unggah foto"
@@ -860,10 +867,23 @@ export function EoPackageBuilderScreen() {
                   <span>Unggah foto</span>
                 </label>
                 <span className="eo-builder-dropzone__hint">
-                  Format disarankan: JPG, PNG, atau WebP (rasio 16:10 atau
-                  16:9).
+                  Gunakan JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.
                 </span>
               </div>
+            )}
+
+            {imageError && (
+              <p
+                className="eo-builder-img-error"
+                role="alert"
+                style={{
+                  margin: "var(--space-2) 0 0",
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-danger-text)",
+                }}
+              >
+                {imageError}
+              </p>
             )}
           </div>
 

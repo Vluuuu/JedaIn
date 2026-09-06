@@ -24,6 +24,7 @@ import { partnerSessionStore } from "./partnerSessionStore";
 import { EoInsightsScreen } from "./EoInsightsScreen";
 import { EoPackagesScreen } from "./EoPackagesScreen";
 import { EoPackageBuilderScreen } from "./EoPackageBuilderScreen";
+import { validatePackageImageFile } from "./packageImageValidation";
 import { EoPackageDetailScreen } from "./EoPackageDetailScreen";
 import { EoSessionsScreen } from "./EoSessionsScreen";
 import { EoBookingsScreen } from "./EoBookingsScreen";
@@ -2157,12 +2158,12 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(locationOutput?.textContent).toBe("/partner/eo");
     });
 
-    it("BU. Real login form supports password visibility toggle, forgot password notice, and authentication", async () => {
+    it("BU. Real login form rejects unknown email or empty password without falling back to demo session", async () => {
       partnerSessionStore.logout();
 
       const view = await renderComponent(createElement(EoLoginScreen));
 
-      // Password visibility toggle
+      // 1. Password visibility toggle
       const pwdInput =
         view.querySelector<HTMLInputElement>("#eo-login-password")!;
       expect(pwdInput.type).toBe("password");
@@ -2175,7 +2176,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
       expect(pwdInput.type).toBe("text");
 
-      // Forgot password notice
+      // 2. Forgot password notice
       const forgotBtn = view.querySelector<HTMLButtonElement>(
         ".eo-login-forgot-btn",
       )!;
@@ -2184,25 +2185,93 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
       expect(view.textContent).toContain("Instruksi pemulihan kata sandi");
 
-      // Submit valid EO credentials
+      // 3. Submit empty password -> error, session remains null
+      const emailInput =
+        view.querySelector<HTMLInputElement>("#eo-login-email")!;
       const form = view.querySelector<HTMLFormElement>("form")!;
+
       await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(pwdInput, "");
+        pwdInput.dispatchEvent(new Event("input", { bubbles: true }));
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
+      });
+
+      expect(view.textContent).toContain("Kata sandi wajib diisi.");
+      expect(partnerSessionStore.get()).toBeNull();
+
+      // 4. Submit unknown email -> error, does NOT log in as demo
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(emailInput, "unknown-random@example.com");
+        emailInput.dispatchEvent(new Event("input", { bubbles: true }));
+        nativeSetter?.call(pwdInput, "anypassword");
+        pwdInput.dispatchEvent(new Event("input", { bubbles: true }));
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
+      });
+
+      expect(view.textContent).toContain(
+        "Email bisnis atau kata sandi belum terdaftar sebagai EO aktif.",
+      );
+      expect(partnerSessionStore.get()).toBeNull();
+
+      // 5. Submit valid approved EO credentials -> logs in successfully
+      await act(async () => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value",
+        )?.set;
+        nativeSetter?.call(emailInput, "partner@jedaalam.id");
+        emailInput.dispatchEvent(new Event("input", { bubbles: true }));
+        nativeSetter?.call(pwdInput, "password123");
+        pwdInput.dispatchEvent(new Event("input", { bubbles: true }));
         form.dispatchEvent(
           new Event("submit", { bubbles: true, cancelable: true }),
         );
       });
 
       expect(partnerSessionStore.get()?.role).toBe("EO");
+      expect(partnerSessionStore.get()?.id).toBe("eo_jeda_alam");
     });
 
-    it("BV. Subdomain detection accurately parses eo.jedain.biz.id while leaving main domain untouched", () => {
+    it("BV. Subdomain detection uses explicit allowlist and respects preview override", () => {
+      // Explicit allowlist
       expect(isEoSubdomain("eo.jedain.biz.id")).toBe(true);
-      expect(isEoSubdomain("eo.localhost")).toBe(true);
       expect(isEoSubdomain("EO.JEDAIN.BIZ.ID")).toBe(true);
+      expect(isEoSubdomain("eo.localhost")).toBe(true);
+
+      // Disallowed hostnames (must not match generic eo. prefix)
       expect(isEoSubdomain("jedain.biz.id")).toBe(false);
+      expect(isEoSubdomain("eo.example.com")).toBe(false);
+      expect(isEoSubdomain("not-eo.jedain.biz.id")).toBe(false);
       expect(isEoSubdomain("www.jedain.biz.id")).toBe(false);
       expect(isEoSubdomain("partner.jedain.biz.id")).toBe(false);
       expect(isEoSubdomain("localhost")).toBe(false);
+
+      // Preview override via query param ?subdomain=eo
+      const originalLocation = window.location;
+      const windowRef = window as unknown as {
+        location: { hostname: string; search: string };
+      };
+      try {
+        windowRef.location = {
+          hostname: "preview-123.pages.dev",
+          search: "?subdomain=eo",
+        };
+        expect(isEoSubdomain()).toBe(true);
+      } finally {
+        windowRef.location = originalLocation;
+      }
     });
 
     it("BW. Main domain root (/) renders Traveler OpeningHero, not EO Login", async () => {
@@ -2284,6 +2353,31 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("Ganti foto");
       expect(view.textContent).toContain("Hapus");
 
+      // Test invalid upload does NOT overwrite existing image and displays natural error
+      const replaceInput = view.querySelector<HTMLInputElement>(
+        ".eo-builder-img-preview-actions .eo-builder-file-input",
+      )!;
+      expect(replaceInput).not.toBeNull();
+
+      await act(async () => {
+        const invalidSvgFile = new File(["<svg></svg>"], "logo.svg", {
+          type: "image/svg+xml",
+        });
+        Object.defineProperty(replaceInput, "files", {
+          value: [invalidSvgFile],
+          configurable: true,
+        });
+        replaceInput.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      // Existing preview image is preserved
+      expect(
+        view.querySelector<HTMLImageElement>(".eo-builder-img-preview")?.src,
+      ).toBe(mockDataUrl);
+      expect(view.textContent).toContain(
+        "Gunakan JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.",
+      );
+
       // Test remove button
       const removeBtn = Array.from(view.querySelectorAll("button")).find(
         (b) => b.textContent === "Hapus",
@@ -2294,6 +2388,43 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       expect(view.querySelector(".eo-builder-img-preview")).toBeNull();
       expect(view.querySelector(".eo-builder-dropzone")).not.toBeNull();
+    });
+
+    it("BY2. validatePackageImageFile strictly enforces allowed MIME types (JPG, PNG, WebP) and 5MB ceiling", () => {
+      // 1. Valid files
+      const validJpg = new File(["bytes"], "cover.jpg", { type: "image/jpeg" });
+      const validPng = new File(["bytes"], "cover.png", { type: "image/png" });
+      const validWebp = new File(["bytes"], "cover.webp", {
+        type: "image/webp",
+      });
+      expect(validatePackageImageFile(validJpg)).toEqual({ valid: true });
+      expect(validatePackageImageFile(validPng)).toEqual({ valid: true });
+      expect(validatePackageImageFile(validWebp)).toEqual({ valid: true });
+
+      // 2. Reject non-image
+      const pdfFile = new File(["bytes"], "doc.pdf", {
+        type: "application/pdf",
+      });
+      const textFile = new File(["bytes"], "doc.txt", { type: "text/plain" });
+      expect(validatePackageImageFile(pdfFile).valid).toBe(false);
+      expect(validatePackageImageFile(textFile).valid).toBe(false);
+
+      // 3. Reject SVG
+      const svgFile = new File(["<svg></svg>"], "icon.svg", {
+        type: "image/svg+xml",
+      });
+      const svgResult = validatePackageImageFile(svgFile);
+      expect(svgResult.valid).toBe(false);
+      expect(svgResult.error).toContain("Gunakan JPG, PNG, atau WebP");
+
+      // 4. Reject > 5 MB
+      const hugeFile = new File(["huge"], "huge.png", { type: "image/png" });
+      Object.defineProperty(hugeFile, "size", {
+        value: 5 * 1024 * 1024 + 1,
+      });
+      const sizeResult = validatePackageImageFile(hugeFile);
+      expect(sizeResult.valid).toBe(false);
+      expect(sizeResult.error).toContain("maksimal 5 MB");
     });
 
     it("BZ. Save draft preserves image reference, and reopening draft retains image", async () => {

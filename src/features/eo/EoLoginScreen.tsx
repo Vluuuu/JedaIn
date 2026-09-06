@@ -28,7 +28,7 @@ export function EoLoginScreen() {
       return;
     }
 
-    if (!password) {
+    if (!password.trim()) {
       setErrorMessage("Kata sandi wajib diisi.");
       return;
     }
@@ -57,9 +57,9 @@ export function EoLoginScreen() {
       return;
     }
 
-    // Default fallback to approved EO session for test accounts
-    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-    navigate(fromPath);
+    setErrorMessage(
+      "Email bisnis atau kata sandi belum terdaftar sebagai EO aktif.",
+    );
   };
 
   const handleDemoLogin = () => {

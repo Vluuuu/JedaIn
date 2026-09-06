@@ -15,6 +15,7 @@ export * from "./EoOverviewScreen";
 export * from "./EoInsightsScreen";
 export * from "./EoPackagesScreen";
 export * from "./EoPackageBuilderScreen";
+export * from "./packageImageValidation";
 export * from "./EoPackageDetailScreen";
 export * from "./EoSessionsScreen";
 export * from "./EoBookingsScreen";

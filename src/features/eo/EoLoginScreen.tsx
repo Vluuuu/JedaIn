@@ -69,6 +69,7 @@ export function EoLoginScreen() {
     navigate("/partner/eo");
   };
 
+  // prettier-ignore
   return (
     <div className="eo-login-page">
       <header className="eo-login-topbar">

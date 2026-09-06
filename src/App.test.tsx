@@ -62,6 +62,19 @@ describe("App shell routing", () => {
     for (const label of tabLabels) expect(markup).toContain(`>${label}</span>`);
   });
 
+  it("renders dedicated EO login with form and demo access", () => {
+    for (const path of ["/partner/eo/login", "/eo/login"]) {
+      const markup = renderRoute(path);
+
+      expect(markup).toContain("EO Workspace");
+      expect(markup).toContain("Masuk sebagai Event Organizer");
+      expect(markup).toContain("Masuk ke EO Workspace");
+      expect(markup).toContain("Masuk sebagai EO Demo");
+      expect(markup).toContain("Jeda Alam Nusantara");
+      expect(markup).not.toContain("Mitra Destinasi");
+    }
+  });
+
   it("renders exact EO partner navigation labels and links", () => {
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
     const markup = renderRoute("/partner/eo");
@@ -124,6 +137,8 @@ describe("App shell routing", () => {
     "/onboarding/quiz",
     "/payment/booking-1",
     "/partner/login",
+    "/partner/eo/login",
+    "/eo/login",
     "/admin/login",
   ])("hides distracting navigation for %s", (path) => {
     const markup = renderRoute(path);

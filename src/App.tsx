@@ -96,6 +96,7 @@ export function App() {
         <Route path="login" element={<EoLoginScreen />} />
         <Route path="partner/login" element={<EoLoginScreen />} />
         <Route path="partner/eo/login" element={<EoLoginScreen />} />
+        <Route path="eo/login" element={<EoLoginScreen />} />
         <Route path="partner/application" element={<DistractionFreeShell />}>
           <Route index element={<PartnerApplicationStatusScreen />} />
         </Route>
@@ -277,6 +278,9 @@ export function App() {
         <Route index element={<PartnerLoginScreen />} />
       </Route>
       <Route path="partner/eo/login" element={<DistractionFreeShell />}>
+        <Route index element={<EoLoginScreen />} />
+      </Route>
+      <Route path="eo/login" element={<DistractionFreeShell />}>
         <Route index element={<EoLoginScreen />} />
       </Route>
       <Route path="partner/apply/eo" element={<DistractionFreeShell />}>

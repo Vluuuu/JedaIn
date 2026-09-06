@@ -156,6 +156,7 @@ export interface EoPackageRecord {
   shortSummary: string;
   valueProposition: string;
   destinationId: string;
+  imageUrl?: string;
   insightId?: string;
   durationLabel: string;
   suitableGroupTypes: string[];

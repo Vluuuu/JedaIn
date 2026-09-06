@@ -147,7 +147,7 @@ export function buildTravelerPackageFromEo(
     shortSummary: eoPkg.shortSummary || eoPkg.valueProposition,
     destinationName: dest.name,
     locationLabel: dest.locationLabel,
-    visualAsset: dest.imageUrl || "",
+    visualAsset: eoPkg.imageUrl || dest.imageUrl || "",
     status: "LIVE",
     verificationLevel: dest.verificationLevel,
     pricePerPerson: eoPkg.pricing.customerPrice,

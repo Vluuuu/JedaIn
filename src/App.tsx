@@ -1,4 +1,5 @@
-import { Link, Route, Routes } from "react-router";
+import { Link, Navigate, Route, Routes } from "react-router";
+import { isEoSubdomain } from "./lib/config/subdomain";
 import {
   DistractionFreeShell,
   PlaceholderPage,
@@ -44,6 +45,7 @@ import {
   EoDestinationDetailScreen,
   EoDestinationsScreen,
   EoInsightsScreen,
+  EoLoginScreen,
   EoOverviewScreen,
   EoPackageBuilderScreen,
   EoPackageDetailScreen,
@@ -87,6 +89,57 @@ const placeholderTravelerRoutes = [
 ] as const;
 
 export function App() {
+  if (isEoSubdomain()) {
+    return (
+      <Routes>
+        <Route path="/" element={<EoLoginScreen />} />
+        <Route path="login" element={<EoLoginScreen />} />
+        <Route path="partner/login" element={<EoLoginScreen />} />
+        <Route path="partner/eo/login" element={<EoLoginScreen />} />
+        <Route path="partner/application" element={<DistractionFreeShell />}>
+          <Route index element={<PartnerApplicationStatusScreen />} />
+        </Route>
+
+        <Route
+          path="partner/eo"
+          element={
+            <PartnerRouteGuard>
+              <WorkspaceShell
+                surface="partner"
+                title="EO Partner Workspace"
+                navigation={partnerEoNavigation}
+              />
+            </PartnerRouteGuard>
+          }
+        >
+          <Route index element={<EoOverviewScreen />} />
+          <Route path="insights" element={<EoInsightsScreen />} />
+          <Route path="packages" element={<EoPackagesScreen />} />
+          <Route path="packages/new" element={<EoPackageBuilderScreen />} />
+          <Route
+            path="packages/:packageId"
+            element={<EoPackageDetailScreen />}
+          />
+          <Route
+            path="packages/:packageId/sessions"
+            element={<EoSessionsScreen />}
+          />
+          <Route path="sessions" element={<EoSessionsScreen />} />
+          <Route path="bookings" element={<EoBookingsScreen />} />
+          <Route path="destinations" element={<EoDestinationsScreen />} />
+          <Route
+            path="destinations/:destinationId"
+            element={<EoDestinationDetailScreen />}
+          />
+          <Route path="reviews" element={<EoReviewsScreen />} />
+          <Route path="profile" element={<EoProfileScreen />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
       <Route element={<TravelerPublicShell variant="opening" />}>
@@ -222,6 +275,9 @@ export function App() {
       </Route>
       <Route path="partner/login" element={<DistractionFreeShell />}>
         <Route index element={<PartnerLoginScreen />} />
+      </Route>
+      <Route path="partner/eo/login" element={<DistractionFreeShell />}>
+        <Route index element={<EoLoginScreen />} />
       </Route>
       <Route path="partner/apply/eo" element={<DistractionFreeShell />}>
         <Route index element={<EoApplicationScreen />} />

@@ -1,3 +1,4 @@
+import { customPackageImageStore } from "../../lib/assets/packageImages";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
@@ -351,6 +352,7 @@ let sessions: EoSessionRecord[] = SEEDED_SESSIONS.map((s) => ({ ...s }));
 
 export const mockEoPackageStore = {
   reset(): void {
+    customPackageImageStore.reset();
     packages = [
       clonePackage(SEEDED_LIVE_PACKAGE),
       clonePackage(SEEDED_PENDING_PACKAGE),
@@ -454,6 +456,12 @@ export const mockEoPackageStore = {
       shortSummary: draft.shortSummary || "",
       valueProposition: draft.valueProposition || draft.shortSummary || "",
       destinationId: draft.destinationId || "",
+      imageUrl:
+        draft.imageUrl !== undefined
+          ? draft.imageUrl
+          : existingIndex >= 0
+            ? packages[existingIndex].imageUrl
+            : undefined,
       insightId: draft.insightId,
       durationLabel: draft.durationLabel || "1 hari",
       suitableGroupTypes: draft.suitableGroupTypes || [
@@ -496,6 +504,12 @@ export const mockEoPackageStore = {
       packages[existingIndex] = record;
     } else {
       packages.push(record);
+    }
+
+    if (record.imageUrl) {
+      customPackageImageStore.set(record.packageId, record.imageUrl);
+    } else {
+      customPackageImageStore.delete(record.packageId);
     }
 
     return { success: true, package: clonePackage(record) };

@@ -7,6 +7,7 @@ export * from "./mockEoPackageStore";
 export * from "./PartnerRouteGuard";
 export * from "./PartnerPortalLandingScreen";
 export * from "./PartnerLoginScreen";
+export * from "./EoLoginScreen";
 export * from "./EoApplicationScreen";
 export * from "./EoApplicationStatusScreen";
 export * from "./PartnerApplicationStatusScreen";

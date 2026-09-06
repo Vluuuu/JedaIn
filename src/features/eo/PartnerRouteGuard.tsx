@@ -1,5 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
+import { isEoSubdomain } from "../../lib/config/subdomain";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 
@@ -17,7 +18,7 @@ export function PartnerRouteGuard({ children }: PartnerRouteGuardProps) {
   if (isOperationalEo) {
     if (!partner) {
       return createElement(Navigate, {
-        to: "/partner/login",
+        to: isEoSubdomain() ? "/" : "/partner/login",
         state: { from: location.pathname },
         replace: true,
       });
@@ -28,7 +29,7 @@ export function PartnerRouteGuard({ children }: PartnerRouteGuardProps) {
 
     if (authoritativeStatus !== "APPROVED") {
       return createElement(Navigate, {
-        to: "/partner/application",
+        to: isEoSubdomain() ? "/" : "/partner/application",
         replace: true,
       });
     }

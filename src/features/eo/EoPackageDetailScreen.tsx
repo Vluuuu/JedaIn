@@ -92,14 +92,16 @@ export function EoPackageDetailScreen() {
 
       {/* 2. Detail Header: Title, Value Prop, Metadata & Actions */}
       <header className="eo-pkg-detail-header">
-        <div
-          className="eo-pkg-detail-header__visual"
-          style={{
-            backgroundImage: `url("${getPackageVisual(pkg.packageId, destination?.name).svgDataUri}")`,
-          }}
-          role="img"
-          aria-label={`Ilustrasi suasana ${pkg.title}`}
-        >
+        <div className="eo-pkg-detail-header__visual">
+          <img
+            src={
+              getPackageVisual(pkg.packageId, destination?.name, pkg.imageUrl)
+                .svgDataUri
+            }
+            alt={`Ilustrasi suasana ${pkg.title}`}
+            width={800}
+            height={500}
+          />
           <div
             className="eo-pkg-detail-header__visual-scrim"
             aria-hidden="true"

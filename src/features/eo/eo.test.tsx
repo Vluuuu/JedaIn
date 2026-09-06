@@ -2099,7 +2099,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
   });
 
   describe("11. Phase B2: Dedicated EO Login & Package Image Pipeline (BS–CD)", () => {
-    it("BS. Dedicated EO login screen renders with canonical JedaIn logo, EO context, and without fake marketing badges", async () => {
+    it("BS. Dedicated EO login screen renders with canonical JedaIn logo, EO context, empty initial credentials, and without fake marketing badges", async () => {
       const view = await renderComponent(createElement(EoLoginScreen));
 
       // Canonical logo and identity
@@ -2110,6 +2110,16 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("Gunakan akun EO yang terdaftar.");
       expect(view.textContent).toContain("Masuk");
       expect(view.textContent).toContain("Coba akun demo");
+
+      // Initial credentials must be empty
+      const emailInput =
+        view.querySelector<HTMLInputElement>("#eo-login-email");
+      const pwdInput =
+        view.querySelector<HTMLInputElement>("#eo-login-password");
+      expect(emailInput?.value).toBe("");
+      expect(pwdInput?.value).toBe("");
+      expect(emailInput?.placeholder).toBe("nama@organizer.id");
+      expect(pwdInput?.placeholder).toBe("Masukkan kata sandi");
 
       // Strictly prohibited elements (no fake marketing, no destination selectors)
       expect(view.textContent).not.toContain("Portal Partner");
@@ -2190,16 +2200,28 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
       expect(view.textContent).toContain("Instruksi pemulihan kata sandi");
 
-      // 3. Submit empty password -> error, session remains null
+      // 3. Submit empty email or empty password -> error, session remains null
       const emailInput =
         view.querySelector<HTMLInputElement>("#eo-login-email")!;
       const form = view.querySelector<HTMLFormElement>("form")!;
 
+      // 3a. Empty email
+      await act(async () => {
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
+      });
+      expect(view.textContent).toContain("Email bisnis wajib diisi.");
+      expect(partnerSessionStore.get()).toBeNull();
+
+      // 3b. Empty password with email provided
       await act(async () => {
         const nativeSetter = Object.getOwnPropertyDescriptor(
           window.HTMLInputElement.prototype,
           "value",
         )?.set;
+        nativeSetter?.call(emailInput, "partner@jedaalam.id");
+        emailInput.dispatchEvent(new Event("input", { bubbles: true }));
         nativeSetter?.call(pwdInput, "");
         pwdInput.dispatchEvent(new Event("input", { bubbles: true }));
         form.dispatchEvent(

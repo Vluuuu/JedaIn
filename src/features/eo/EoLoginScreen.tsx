@@ -13,8 +13,8 @@ export function EoLoginScreen() {
   const fromPath =
     (location.state as { from?: string } | null)?.from || "/partner/eo";
 
-  const [email, setEmail] = useState("partner@jedaalam.id");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [forgotPasswordNotice, setForgotPasswordNotice] = useState(false);
@@ -119,7 +119,6 @@ export function EoLoginScreen() {
           </div>
 
           <div className="eo-login-panel__header">
-            <span className="eo-login-panel__tag">Event Organizer</span>
             <h1 className="eo-login-panel__title">Masuk ke JedaIn</h1>
             <p className="eo-login-panel__subtitle">
               Gunakan akun EO yang terdaftar.

@@ -162,6 +162,13 @@ export function ContactVerificationScreen({
     setStep("PHONE_ENTRY");
   };
 
+  const handleSkipDemo = () => {
+    // Preserve current checkout / session context & matching draft without mutating verification records
+    navigate(`/checkout/${sessionId}`, {
+      state: isMatchingDraft ? { checkoutDraft } : undefined,
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="contact-verification-container" aria-busy="true">
@@ -246,6 +253,7 @@ export function ContactVerificationScreen({
         <PhoneEntryForm
           initialPhone={phone}
           onRequestOtp={handleRequestOtp}
+          onSkipDemo={handleSkipDemo}
           isSubmitting={isSubmitting || step === "REQUESTING_OTP"}
           isDisabled={isSubmitting || step === "REQUESTING_OTP"}
           error={step === "REQUEST_ERROR" ? errorMessage : undefined}
@@ -257,6 +265,7 @@ export function ContactVerificationScreen({
           onVerifyOtp={handleVerifyOtp}
           onResendOtp={() => handleRequestOtp(activeSession.phone)}
           onChangePhone={handleChangePhone}
+          onSkipDemo={handleSkipDemo}
           isSubmitting={isSubmitting || step === "VERIFYING_OTP"}
           isDisabled={isSubmitting || step === "VERIFYING_OTP"}
           error={step === "VERIFY_ERROR" ? errorMessage : undefined}

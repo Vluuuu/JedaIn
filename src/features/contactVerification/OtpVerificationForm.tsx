@@ -7,6 +7,7 @@ export interface OtpVerificationFormProps {
   onVerifyOtp: (code: string) => Promise<void>;
   onResendOtp: () => Promise<void>;
   onChangePhone: () => void;
+  onSkipDemo?: () => void;
   isSubmitting: boolean;
   isDisabled: boolean;
   error?: string;
@@ -23,6 +24,7 @@ export function OtpVerificationForm({
   onVerifyOtp,
   onResendOtp,
   onChangePhone,
+  onSkipDemo,
   isSubmitting,
   isDisabled,
   error,
@@ -121,17 +123,37 @@ export function OtpVerificationForm({
         )}
       </div>
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        loading={isSubmitting}
-        loadingLabel="Memverifikasi..."
-        disabled={isSubmitting}
-        className="contact-verification-submit-btn"
-      >
-        Verifikasi & Lanjut
-      </Button>
+      <div className="contact-verification-actions">
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          loading={isSubmitting}
+          loadingLabel="Memverifikasi..."
+          disabled={isSubmitting}
+          className="contact-verification-submit-btn"
+        >
+          Verifikasi &amp; Lanjut
+        </Button>
+
+        {onSkipDemo && (
+          <div className="contact-verification-demo-skip-wrap">
+            <Button
+              type="button"
+              variant="ghost"
+              size="md"
+              disabled={isSubmitting || isDisabled}
+              onClick={onSkipDemo}
+              className="contact-verification-demo-skip-btn"
+            >
+              Lewati untuk Demo
+            </Button>
+            <p className="contact-verification-demo-hint">
+              Untuk demo, verifikasi nomor dapat dilewati.
+            </p>
+          </div>
+        )}
+      </div>
     </form>
   );
 }

@@ -4,6 +4,7 @@ import { Button, TextField } from "../../components/ui";
 export interface PhoneEntryFormProps {
   initialPhone: string;
   onRequestOtp: (phone: string) => Promise<void>;
+  onSkipDemo?: () => void;
   isSubmitting: boolean;
   isDisabled: boolean;
   error?: string;
@@ -12,6 +13,7 @@ export interface PhoneEntryFormProps {
 export function PhoneEntryForm({
   initialPhone,
   onRequestOtp,
+  onSkipDemo,
   isSubmitting,
   isDisabled,
   error,
@@ -47,17 +49,37 @@ export function PhoneEntryForm({
         required
       />
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        loading={isSubmitting}
-        loadingLabel="Mengirim kode..."
-        disabled={isDisabled || !phone.trim()}
-        className="contact-verification-submit-btn"
-      >
-        Kirim Kode OTP
-      </Button>
+      <div className="contact-verification-actions">
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          loading={isSubmitting}
+          loadingLabel="Mengirim kode..."
+          disabled={isDisabled || !phone.trim()}
+          className="contact-verification-submit-btn"
+        >
+          Kirim Kode OTP
+        </Button>
+
+        {onSkipDemo && (
+          <div className="contact-verification-demo-skip-wrap">
+            <Button
+              type="button"
+              variant="ghost"
+              size="md"
+              disabled={isDisabled || isSubmitting}
+              onClick={onSkipDemo}
+              className="contact-verification-demo-skip-btn"
+            >
+              Lewati untuk Demo
+            </Button>
+            <p className="contact-verification-demo-hint">
+              Untuk demo, verifikasi nomor dapat dilewati.
+            </p>
+          </div>
+        )}
+      </div>
     </form>
   );
 }

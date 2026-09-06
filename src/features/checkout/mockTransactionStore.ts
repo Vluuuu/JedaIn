@@ -1,4 +1,7 @@
-import { calculatePaymentBreakdown } from "./pricing";
+import {
+  calculatePaymentBreakdown,
+  getBookingPaymentBreakdown,
+} from "./pricing";
 import type {
   BookingRecord,
   PaymentAttemptRecord,
@@ -112,10 +115,12 @@ export const mockTransactionStore = {
 
     if (!active) return undefined;
 
+    const breakdown = getBookingPaymentBreakdown(active);
+
     return {
       bookingId: active.bookingId,
       packageId: active.packageId,
-      amount: active.totalAmount,
+      amount: breakdown.total,
       expiresAt: active.paymentExpiresAt,
     };
   },

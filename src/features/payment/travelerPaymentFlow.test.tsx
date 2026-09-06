@@ -23,6 +23,7 @@ import type { PackageRecommendationSource } from "../recommendation/types";
 import { MockPaymentAdapter } from "./mockAdapter";
 import { PaymentResultScreen } from "./PaymentResultScreen";
 import { PaymentScreen } from "./PaymentScreen";
+import { PendingPaymentSummary } from "../pendingPayment/PendingPaymentSummary";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -164,6 +165,79 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
       expect(recordBreakdown.subtotal).toBe(800000);
       expect(recordBreakdown.serviceFee).toBe(7500);
       expect(recordBreakdown.total).toBe(807500);
+    });
+
+    it("legacy BookingRecord fallback resolves consistent breakdown without omitting service fee", () => {
+      const legacyBooking: Pick<
+        BookingRecord,
+        | "participantCount"
+        | "unitPricePerPerson"
+        | "totalAmount"
+        | "subtotal"
+        | "serviceFee"
+        | "total"
+      > = {
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        totalAmount: 550000,
+        subtotal: undefined,
+        serviceFee: undefined,
+        total: undefined,
+      };
+
+      const breakdown = getBookingPaymentBreakdown(legacyBooking);
+      expect(breakdown.subtotal).toBe(550000);
+      expect(breakdown.serviceFee).toBe(7500);
+      expect(breakdown.total).toBe(557500);
+      expect(breakdown.total).not.toBe(550000);
+    });
+
+    it("invariant assertion: breakdown.total === breakdown.subtotal + breakdown.serviceFee holds across cases", () => {
+      // 1. Booking baru - 1 peserta
+      const newBooking1 = calculatePaymentBreakdown(300000, 1);
+      expect(newBooking1.total).toBe(
+        newBooking1.subtotal + newBooking1.serviceFee,
+      );
+
+      // 2. Booking baru - beberapa peserta (contoh 2 peserta)
+      const newBooking2 = calculatePaymentBreakdown(400000, 2);
+      expect(newBooking2.total).toBe(
+        newBooking2.subtotal + newBooking2.serviceFee,
+      );
+
+      // 3. Booking legacy - 1 peserta
+      const legacyBooking1: Pick<
+        BookingRecord,
+        "participantCount" | "unitPricePerPerson" | "totalAmount"
+      > = {
+        participantCount: 1,
+        unitPricePerPerson: 300000,
+        totalAmount: 300000,
+      };
+      const breakdownLegacy1 = getBookingPaymentBreakdown(legacyBooking1);
+      expect(breakdownLegacy1.subtotal).toBe(300000);
+      expect(breakdownLegacy1.serviceFee).toBe(7500);
+      expect(breakdownLegacy1.total).toBe(307500);
+      expect(breakdownLegacy1.total).toBe(
+        breakdownLegacy1.subtotal + breakdownLegacy1.serviceFee,
+      );
+
+      // 4. Booking legacy - beberapa peserta (contoh 3 peserta)
+      const legacyBooking3: Pick<
+        BookingRecord,
+        "participantCount" | "unitPricePerPerson" | "totalAmount"
+      > = {
+        participantCount: 3,
+        unitPricePerPerson: 275000,
+        totalAmount: 825000,
+      };
+      const breakdownLegacy3 = getBookingPaymentBreakdown(legacyBooking3);
+      expect(breakdownLegacy3.subtotal).toBe(825000);
+      expect(breakdownLegacy3.serviceFee).toBe(7500);
+      expect(breakdownLegacy3.total).toBe(832500);
+      expect(breakdownLegacy3.total).toBe(
+        breakdownLegacy3.subtotal + breakdownLegacy3.serviceFee,
+      );
     });
   });
 
@@ -435,6 +509,129 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
       expect(container.textContent).toContain("Rp7.500");
       expect(container.textContent).toContain("Total Pembayaran");
       expect(container.textContent).toContain("Rp807.500");
+    });
+
+    it("9. Legacy booking fallback does not leak fee-less nominal in pending-payment handoff, Payment, or Payment Result", async () => {
+      const traveler: AuthUser = {
+        id: "usr_legacy_tester",
+        name: "Legacy User",
+        email: "legacy@example.com",
+        phone: "081234567890",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const legacyBookingRecord: BookingRecord = {
+        bookingId: "bk_legacy_test_1",
+        travelerId: traveler.id,
+        packageId: "pkg_sentul_400k",
+        sessionId: "ses_sentul_400k",
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        totalAmount: 550000, // Legacy without service fee
+        status: "PENDING_PAYMENT",
+        reservedQuantity: 2,
+        bookedQuantity: 0,
+        createdAt: new Date().toISOString(),
+        paymentExpiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+      };
+
+      mockTransactionStore.addDirectBooking(legacyBookingRecord, {
+        paymentAttemptId: "pay_legacy_1",
+        bookingId: "bk_legacy_test_1",
+        status: "PENDING",
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+      });
+
+      // 1. Pending payment handoff amount uses deterministic breakdown
+      const handoff = mockTransactionStore.getActivePendingPayment(traveler.id);
+      expect(handoff).toBeDefined();
+      expect(handoff?.amount).toBe(557500);
+      expect(handoff?.amount).not.toBe(550000);
+
+      // 2. PendingPaymentSummary presentation
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+
+      await act(async () => {
+        root.render(
+          createElement(PendingPaymentSummary, {
+            summary: {
+              booking: legacyBookingRecord,
+              package: testPackage400k,
+              session: testSession400k,
+              serverNow: new Date().toISOString(),
+              expiresAt: legacyBookingRecord.paymentExpiresAt,
+            },
+            secondsRemaining: 900,
+          }),
+        );
+      });
+
+      expect(container.textContent).toContain("Rp557.500");
+      expect(container.textContent).not.toContain("Rp550.000");
+
+      // 3. Payment Screen presentation
+      const paymentAdapter = new MockPaymentAdapter({
+        packages: [testPackage400k],
+        details: { pkg_sentul_400k: testDetail400k },
+      });
+
+      let currentPath = "";
+
+      await act(async () => {
+        root.render(
+          createElement(
+            MemoryRouter,
+            { initialEntries: ["/payment/bk_legacy_test_1"] },
+            createElement(LocationObserver, {
+              onLocation: (p) => {
+                currentPath = p;
+              },
+            }),
+            createElement(
+              Routes,
+              undefined,
+              createElement(Route, {
+                path: "/payment/:bookingId",
+                element: createElement(PaymentScreen, {
+                  adapter: paymentAdapter,
+                }),
+              }),
+              createElement(Route, {
+                path: "/payment/:bookingId/result",
+                element: createElement(PaymentResultScreen, {
+                  adapter: paymentAdapter,
+                }),
+              }),
+            ),
+          ),
+        );
+      });
+
+      expect(container.textContent).toContain("Rp557.500");
+      expect(container.textContent).toContain("Subtotal paket");
+      expect(container.textContent).toContain("Rp550.000");
+      expect(container.textContent).toContain("Biaya layanan");
+      expect(container.textContent).toContain("Rp7.500");
+      expect(container.textContent).toContain("Total Pembayaran");
+
+      // 4. Payment Result presentation
+      const payBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Bayar Sekarang"),
+      )!;
+      await act(async () => {
+        payBtn.click();
+      });
+
+      expect(currentPath).toBe("/payment/bk_legacy_test_1/result");
+      expect(container.textContent).toContain("Pembayaran Berhasil");
+      expect(container.textContent).toContain("Rp557.500");
+      expect(container.textContent).toContain("Subtotal paket");
+      expect(container.textContent).toContain("Rp550.000");
+      expect(container.textContent).toContain("Biaya layanan");
+      expect(container.textContent).toContain("Rp7.500");
     });
   });
 });

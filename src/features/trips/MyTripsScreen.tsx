@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
+import { formatRupiah, getBookingPaymentBreakdown } from "../checkout/pricing";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
 import { defaultTripsAdapter } from "./mockAdapter";
 import type {
@@ -199,9 +200,8 @@ export function MyTripsScreen({
                   Total Pembayaran
                 </span>
                 <strong className="my-trips-pending-card__amount-value">
-                  Rp
-                  {activePendingTrip.booking.totalAmount.toLocaleString(
-                    "id-ID",
+                  {formatRupiah(
+                    getBookingPaymentBreakdown(activePendingTrip.booking).total,
                   )}
                 </strong>
               </div>
@@ -399,7 +399,9 @@ export function MyTripsScreen({
                         •
                       </span>
                       <span>
-                        Rp{booking.totalAmount.toLocaleString("id-ID")}
+                        {formatRupiah(
+                          getBookingPaymentBreakdown(booking).total,
+                        )}
                       </span>
                     </div>
                   </div>

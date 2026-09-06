@@ -14,7 +14,6 @@ export function calculatePaymentBreakdown(
   unitPrice: number,
   participantCount: number,
 ): PaymentBreakdown {
-  // ponytail: static service fee of 7500 IDR per transaction; upgrade to dynamic policy engine if tiered pricing introduced
   const subtotal = unitPrice * participantCount;
   const serviceFee = TRAVELER_SERVICE_FEE;
   const total = subtotal + serviceFee;
@@ -42,7 +41,13 @@ export function getBookingPaymentBreakdown(
   const participantCount = booking.participantCount;
   const subtotal = booking.subtotal ?? unitPrice * participantCount;
   const serviceFee = booking.serviceFee ?? TRAVELER_SERVICE_FEE;
-  const total = booking.total ?? booking.totalAmount;
+  const total =
+    booking.total !== undefined &&
+    booking.serviceFee !== undefined &&
+    booking.total === subtotal + booking.serviceFee
+      ? booking.total
+      : subtotal + serviceFee;
+
   return {
     unitPrice,
     participantCount,

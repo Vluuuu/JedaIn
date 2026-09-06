@@ -446,6 +446,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           durationLabel: "1 hari",
           itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
           safetyNotes: ["Catatan keselamatan."],
+          guideSource: "DESTINATION",
           pricing: {
             destinationBaseCost: 125000,
             eoMargin: 150000,
@@ -1818,6 +1819,190 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "/partner/eo/sessions",
       ]);
       expect(viewGlobalSessions.textContent).not.toContain("Kembali ke Paket");
+    });
+
+    it("BO. Future ACTIVE + guideReady=false destination is excluded from both Directory and Builder", async () => {
+      // Inactive/pre-availability destination with guideReady = false
+      mockDestinationStore.upsertVerifiedDestination({
+        destinationId: "dest_future_noguide",
+        name: "Lembah Purba No Guide",
+        locationLabel: "Pasuruan Barat",
+        province: "Jawa Timur",
+        city: "Pasuruan",
+        verificationLevel: "BASIC",
+        guideReady: false, // Not ready!
+        baseCostPerPerson: 75000,
+        description: "Destinasi belum memiliki pemandu lokal.",
+        highlights: ["Hutan asri"],
+        capacityPerSession: 10,
+        status: "ACTIVE",
+      });
+
+      // 1. Selector check
+      const conceptEligible =
+        mockDestinationStore.getEligibleForEo("CONCEPT_ONLY");
+      const certifiedEligible =
+        mockDestinationStore.getEligibleForEo("CERTIFIED_GUIDE");
+      expect(
+        conceptEligible.some((d) => d.destinationId === "dest_future_noguide"),
+      ).toBe(false);
+      expect(
+        certifiedEligible.some(
+          (d) => d.destinationId === "dest_future_noguide",
+        ),
+      ).toBe(false);
+
+      // 2. Directory check
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const viewDir = await renderComponent(createElement(App), [
+        "/partner/eo/destinations",
+      ]);
+      expect(viewDir.textContent).not.toContain("Lembah Purba No Guide");
+
+      // 3. Builder Step 1 check
+      const viewBuilder = await renderComponent(createElement(App), [
+        "/partner/eo/packages/new",
+      ]);
+      expect(viewBuilder.textContent).not.toContain("Lembah Purba No Guide");
+    });
+
+    it("BP. Package guideSource is strictly validated: missing rejected, Concept Only locked, Certified Guide flexible", () => {
+      partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
+
+      // 1. Missing guideSource is rejected
+      const missingRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: undefined as unknown as "DESTINATION",
+        },
+        "CONCEPT_ONLY",
+      );
+      expect(missingRes.valid).toBe(false);
+      expect(missingRes.errors.some((e) => e.field === "guideSource")).toBe(
+        true,
+      );
+
+      // 2. Concept Only with DESTINATION passes
+      const conceptDestRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: "DESTINATION",
+        },
+        "CONCEPT_ONLY",
+      );
+      expect(conceptDestRes.valid).toBe(true);
+
+      // 3. Concept Only with EO fails
+      const conceptEoRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: "EO",
+        },
+        "CONCEPT_ONLY",
+      );
+      expect(conceptEoRes.valid).toBe(false);
+      expect(conceptEoRes.errors.some((e) => e.field === "guideSource")).toBe(
+        true,
+      );
+
+      // 4. Certified Guide with DESTINATION passes
+      const certDestRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: "DESTINATION",
+        },
+        "CERTIFIED_GUIDE",
+      );
+      expect(certDestRes.valid).toBe(true);
+
+      // 5. Certified Guide with EO passes
+      const certEoRes = validateEoPackage(
+        {
+          destinationId: "dest_lereng_hijau",
+          title: "Paket Uji Coba",
+          shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+          durationLabel: "1 hari",
+          itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+          safetyNotes: ["Aman"],
+          pricing: {
+            destinationBaseCost: 125000,
+            eoMargin: 75000,
+            customerPrice: 200000,
+          },
+          guideSource: "EO",
+        },
+        "CERTIFIED_GUIDE",
+      );
+      expect(certEoRes.valid).toBe(true);
+    });
+
+    it("BQ. Seeded LIVE and PENDING packages have valid DESTINATION guideSource and saveDraft persists guideSource", () => {
+      const livePkg = mockEoPackageStore.getPackageById("slow_green_day");
+      const pendingPkg = mockEoPackageStore.getPackageById(
+        "pkg_pacet_mindful_retreat",
+      );
+
+      expect(livePkg?.guideSource).toBe("DESTINATION");
+      expect(pendingPkg?.guideSource).toBe("DESTINATION");
+
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      const savedRes = mockEoPackageStore.saveDraft({
+        title: "Paket Pemandu EO",
+        shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
+        destinationId: "dest_lereng_hijau",
+        durationLabel: "1 hari",
+        itinerary: [{ order: 1, title: "Sesi", description: "Hening" }],
+        safetyNotes: ["Aman"],
+        guideSource: "EO",
+        pricing: {
+          destinationBaseCost: 125000,
+          eoMargin: 75000,
+          customerPrice: 200000,
+        },
+      });
+
+      expect(savedRes.success).toBe(true);
+      expect(savedRes.package?.guideSource).toBe("EO");
     });
   });
 });

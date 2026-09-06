@@ -473,7 +473,7 @@ Rule wajib divalidasi backend/store boundary, bukan hanya di antarmuka frontend.
 
 Builder menggunakan stepper minimum:
 
-1. Destination
+1. Destination & Guide Source
 2. Relevant Insight
 3. Itinerary
 4. Pricing
@@ -594,7 +594,7 @@ Untuk 1–2 pilot destination, tim internal melakukan verifikasi manual terhadap
 - kesesuaian klaim/foto,
 - kesiapan guide.
 
-## FR-3.4 Destination Status Model
+## FR-3.4 Destination Status Model & EO Availability — UPDATED FOR MVP
 
 Verification dimension:
 
@@ -603,15 +603,20 @@ Verification dimension:
 
 Guide dimension:
 
-- `guide_ready = false`
-- `guide_ready = true`
+- `guide_ready = false` (pre-availability / assessment / remediation state)
+- `guide_ready = true` (operational local destination guide verified)
 
-UI dapat menghasilkan badge:
+**Aturan Ketersediaan untuk EO (Locked):**
+Dalam MVP JedaIn, sebuah destinasi hanya dapat berstatus `ACTIVE` dan tersedia untuk perancangan paket EO (`EO-available`) apabila:
+1. Berstatus aktif (`status = ACTIVE`),
+2. Memiliki verifikasi `BASIC` atau `PLUS`, dan
+3. Memiliki pemandu lokal siap (`guide_ready = true`).
 
-- Terverifikasi Dasar
-- Terverifikasi Dasar + Siap sebagai Guide
-- Terverifikasi Plus
-- Terverifikasi Plus + Siap sebagai Guide
+Destinasi dengan `guide_ready = false` dapat tetap disimpan dalam data domain untuk keperluan internal asesmen atau perbaikan mitra destinasi, namun **tidak akan ditampilkan pada direktori destinasi EO maupun pilihan destinasi di Trip Builder**.
+
+Badge pada surface EO disederhanakan tanpa duplikasi:
+- Terverifikasi Dasar (Pemandu lokal tersedia)
+- Terverifikasi Plus (Pemandu lokal tersedia)
 
 ## FR-3.5 Failed Verification & Re-Apply
 

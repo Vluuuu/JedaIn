@@ -2099,35 +2099,31 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
   });
 
   describe("11. Phase B2: Dedicated EO Login & Package Image Pipeline (BS–CD)", () => {
-    it("BS. Dedicated EO login renders canonical JedaIn identity without generic badges, destination choices, or fake trust labels", async () => {
+    it("BS. Dedicated EO login screen renders with canonical JedaIn logo, EO context, and without fake marketing badges", async () => {
       const view = await renderComponent(createElement(EoLoginScreen));
 
-      expect(view.textContent).toContain("Portal Event Organizer");
-      expect(view.textContent).toContain(
-        "Kelola paket dan perjalanan JedaIn dari satu tempat.",
-      );
-      expect(view.textContent).toContain("Masuk ke akun EO");
-      expect(view.textContent).toContain("Buka akun demo");
-
-      const logo = view.querySelector<HTMLImageElement>(
-        ".eo-login-topbar__logo",
-      );
+      // Canonical logo and identity
+      const logo = view.querySelector<HTMLImageElement>(".eo-login-hero__logo");
       expect(logo).not.toBeNull();
-      expect(logo?.getAttribute("src")).toContain(".svg");
-      expect(logo?.getAttribute("alt")).toBe("JedaIn");
+      expect(view.textContent).toContain("Event Organizer");
+      expect(view.textContent).toContain("Masuk ke JedaIn");
+      expect(view.textContent).toContain("Gunakan akun EO yang terdaftar.");
+      expect(view.textContent).toContain("Masuk");
+      expect(view.textContent).toContain("Coba akun demo");
 
-      expect(view.textContent).not.toContain("EO Workspace");
-      expect(view.textContent).not.toContain("Akun Terverifikasi");
-      expect(view.textContent).not.toContain("BNSP Certified");
+      // Strictly prohibited elements (no fake marketing, no destination selectors)
       expect(view.textContent).not.toContain("Portal Partner");
       expect(view.textContent).not.toContain("Mitra Destinasi");
       expect(view.textContent).not.toContain("Destinasi Approved");
       expect(view.textContent).not.toContain("Pengelola Lereng Hijau");
+      expect(view.textContent).not.toContain("Akun Terverifikasi");
+      expect(view.textContent).not.toContain("BNSP Certified");
+      expect(view.textContent).not.toContain("✓ EO Workspace");
       expect(view.querySelector('input[name="role"]')).toBeNull();
       expect(view.querySelector('select[name="role"]')).toBeNull();
     });
 
-    it("BT. 'Buka akun demo' establishes approved EO demo session (Jeda Alam Nusantara) and navigates to /partner/eo", async () => {
+    it("BT. 'Coba akun demo' establishes approved EO demo session (Jeda Alam Nusantara) and navigates to /partner/eo", async () => {
       partnerSessionStore.logout();
       expect(partnerSessionStore.get()).toBeNull();
 
@@ -2147,7 +2143,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       );
 
       const demoBtn = Array.from(view.querySelectorAll("button")).find((btn) =>
-        btn.textContent?.includes("Buka akun demo"),
+        btn.textContent?.includes("Coba akun demo"),
       );
       expect(demoBtn).toBeDefined();
 
@@ -2287,7 +2283,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       const view = await renderComponent(createElement(App), ["/"]);
       expect(view.textContent).toContain("Temukan jeda");
       expect(view.textContent).toContain("kamu butuhkan.");
-      expect(view.textContent).not.toContain("Masuk ke akun EO");
+      expect(view.textContent).not.toContain("Masuk sebagai Event Organizer");
     });
 
     it("BX. Unauthenticated access to /partner/eo routes to login correctly", async () => {

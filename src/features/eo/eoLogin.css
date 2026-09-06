@@ -1,191 +1,166 @@
-.eo-login-page {
-  min-height: 100dvh;
-  background: var(--color-stone-50);
-  color: var(--color-stone-900);
-}
-
-.eo-login-topbar {
-  display: flex;
-  min-height: 4.75rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: 0 var(--space-6);
-  background: var(--color-stone-0);
-  border-bottom: 1px solid var(--color-stone-200);
-}
-
-.eo-login-topbar__brand {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  border-radius: var(--radius-sm);
-}
-
-.eo-login-topbar__brand:focus-visible {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
-}
-
-.eo-login-topbar__logo {
-  display: block;
-  width: 8rem;
-  height: auto;
-  aspect-ratio: 1407 / 768;
-}
-
-.eo-login-topbar__surface {
-  color: var(--color-stone-600);
-  font-size: var(--font-size-label-sm);
-  font-weight: var(--font-weight-semibold);
-}
+/* Dedicated EO Workspace Login */
+/* Built with JedaIn Design Tokens: Forest Green, Warm Stone, Clean Hierarchy */
 
 .eo-login-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(27rem, 0.92fr);
-  min-height: calc(100dvh - 4.75rem);
-}
-
-.eo-login-intro {
-  position: relative;
-  isolation: isolate;
+  min-height: 100dvh;
   display: flex;
-  min-height: 42rem;
-  overflow: hidden;
-  align-items: flex-end;
-  background: var(--color-forest-950);
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-page);
+  padding: var(--space-8) var(--space-4);
+  box-sizing: border-box;
 }
 
-.eo-login-intro__image,
-.eo-login-intro__scrim {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.eo-login-intro__image {
-  z-index: -3;
-  object-fit: cover;
-  object-position: center;
-  transform: scale(1.02);
-  filter: saturate(0.92) contrast(1.04);
-}
-
-.eo-login-intro__scrim {
-  z-index: -2;
-  background:
-    linear-gradient(
-      to top,
-      rgb(7 25 16 / 88%) 0%,
-      rgb(9 32 20 / 62%) 46%,
-      rgb(11 38 24 / 18%) 100%
-    ),
-    linear-gradient(to right, rgb(7 25 16 / 30%), transparent 64%);
-}
-
-.eo-login-intro__content {
-  width: min(100%, 48rem);
-  padding: clamp(2.25rem, 5vw, 5rem);
-  color: var(--color-sand-50);
-}
-
-.eo-login-intro__kicker {
-  margin: 0 0 var(--space-3);
-  color: rgb(244 239 230 / 76%);
-  font-size: var(--font-size-label-sm);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.eo-login-intro h1 {
-  max-width: 12ch;
-  margin: 0;
-  color: var(--color-sand-50);
-  font-size: clamp(2.4rem, 4.7vw, 4.8rem);
-  font-weight: 650;
-  letter-spacing: -0.045em;
-  line-height: 1.02;
-  text-wrap: balance;
-  text-shadow: 0 0.125rem 1.5rem rgb(4 18 11 / 34%);
-}
-
-.eo-login-intro__lead {
-  max-width: 38rem;
-  margin: var(--space-5) 0 0;
-  color: rgb(244 239 230 / 82%);
-  font-size: clamp(0.95rem, 1.35vw, 1.08rem);
-  line-height: 1.65;
-}
-
-.eo-login-intro__features {
+.eo-login-container {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1.15fr 1fr;
+  max-width: 960px;
+  width: 100%;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* Left Column: Visual Identity */
+.eo-login-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-8);
+  background: var(--color-bg-surface-subtle);
+  border-right: 1px solid var(--color-border-default);
+  gap: var(--space-6);
+}
+
+.eo-login-hero__brand {
+  display: flex;
+  align-items: center;
   gap: var(--space-3);
-  margin-top: var(--space-8);
-  padding-top: var(--space-5);
-  border-top: 1px solid rgb(255 255 255 / 18%);
 }
 
-.eo-login-intro__features div {
-  min-width: 0;
-}
-
-.eo-login-intro__features strong,
-.eo-login-intro__features span {
+.eo-login-hero__logo {
+  width: 6.75rem;
+  height: auto;
+  aspect-ratio: 1407 / 768;
   display: block;
 }
 
-.eo-login-intro__features strong {
-  margin-bottom: 0.35rem;
-  color: var(--color-sand-50);
-  font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-semibold);
-}
-
-.eo-login-intro__features span {
-  color: rgb(244 239 230 / 66%);
-  font-size: var(--font-size-caption);
-  line-height: 1.5;
-}
-
-.eo-login-auth {
-  display: grid;
-  place-items: center;
-  padding: clamp(2rem, 5vw, 4.5rem);
-  background: var(--color-stone-0);
-}
-
-.eo-login-auth__inner {
-  width: min(100%, 29rem);
-}
-
-.eo-login-auth__header {
-  margin-bottom: var(--space-6);
-}
-
-.eo-login-auth__eyebrow {
-  margin: 0 0 var(--space-2);
-  color: var(--color-brand-primary);
+.eo-login-hero__role {
   font-size: var(--font-size-label-sm);
   font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-stone-300);
+  line-height: 1;
 }
 
-.eo-login-auth__header h2 {
+.eo-login-hero__visual {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-stone-200);
+  background: var(--color-stone-100);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-login-hero__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eo-login-hero__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.eo-login-hero__title {
   margin: 0;
+  font-size: var(--font-size-heading-sm);
   color: var(--color-stone-900);
-  font-size: clamp(1.8rem, 3vw, 2.35rem);
   font-weight: var(--font-weight-bold);
-  letter-spacing: -0.035em;
-  line-height: 1.12;
+  line-height: 1.35;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-.eo-login-auth__header > p:last-child {
-  margin: var(--space-2) 0 0;
-  color: var(--color-stone-600);
+.eo-login-hero__desc {
+  margin: 0;
   font-size: var(--font-size-body-sm);
-  line-height: 1.6;
+  color: var(--color-stone-600);
+  line-height: 1.55;
+}
+
+/* Right Column: Login Panel */
+.eo-login-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-8);
+  gap: var(--space-5);
+  background: var(--color-bg-surface);
+}
+
+.eo-login-mobile-brand {
+  display: none;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.eo-login-mobile-brand__logo {
+  width: 6.25rem;
+  height: auto;
+  aspect-ratio: 1407 / 768;
+  display: block;
+}
+
+.eo-login-mobile-brand__tag {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-stone-300);
+  line-height: 1;
+}
+
+.eo-login-panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.eo-login-panel__tag {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-brand-primary);
+}
+
+.eo-login-panel__title {
+  margin: 0;
+  font-size: var(--font-size-heading-md);
+  color: var(--color-stone-900);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1.25;
+}
+
+.eo-login-panel__subtitle {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  line-height: 1.5;
 }
 
 .eo-login-form {
@@ -197,33 +172,25 @@
 .eo-login-field {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-}
-
-.eo-login-label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-1);
 }
 
 .eo-login-label {
-  color: var(--color-stone-700);
   font-size: var(--font-size-label-sm);
   font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-700);
 }
 
 .eo-login-input {
   width: 100%;
-  min-height: 3.125rem;
-  box-sizing: border-box;
-  padding: 0 var(--space-4);
-  color: var(--color-stone-900);
-  background: var(--color-stone-0);
+  min-height: 2.75rem;
+  padding: 0.625rem 0.875rem;
   border: 1px solid var(--color-stone-300);
   border-radius: var(--radius-md);
-  font: inherit;
   font-size: var(--font-size-body-sm);
+  color: var(--color-stone-900);
+  background: var(--color-stone-0);
+  box-sizing: border-box;
   transition:
     border-color var(--motion-fast) var(--ease-standard),
     box-shadow var(--motion-fast) var(--ease-standard);
@@ -232,62 +199,72 @@
 .eo-login-input:focus {
   outline: none;
   border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 3px
-    color-mix(in srgb, var(--color-brand-primary) 14%, transparent);
+  box-shadow: 0 0 0 3px var(--color-brand-primary-soft);
 }
 
 .eo-login-password-wrap {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .eo-login-input--password {
-  padding-right: 7rem;
-}
-
-.eo-login-password-toggle,
-.eo-login-forgot-btn {
-  color: var(--color-brand-primary);
-  background: transparent;
-  border: 0;
-  font: inherit;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
+  padding-right: 5.5rem;
 }
 
 .eo-login-password-toggle {
   position: absolute;
-  top: 50%;
-  right: var(--space-2);
-  transform: translateY(-50%);
-  padding: var(--space-2);
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-600);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
   border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-semibold);
 }
 
-.eo-login-forgot-btn {
-  padding: 0;
+.eo-login-password-toggle:hover {
+  color: var(--color-stone-900);
 }
 
-.eo-login-password-toggle:hover,
-.eo-login-forgot-btn:hover {
-  color: var(--color-brand-primary-hover);
+.eo-login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
 .eo-login-remember {
-  display: inline-flex;
-  width: fit-content;
+  display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-stone-600);
   font-size: var(--font-size-caption);
+  color: var(--color-stone-700);
   cursor: pointer;
 }
 
 .eo-login-remember__checkbox {
   width: 1rem;
   height: 1rem;
-  margin: 0;
   accent-color: var(--color-brand-primary);
+  cursor: pointer;
+}
+
+.eo-login-forgot-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.eo-login-forgot-btn:hover {
+  color: var(--color-brand-primary-hover);
 }
 
 .eo-login-submit-btn {
@@ -295,77 +272,52 @@
   margin-top: var(--space-1);
 }
 
-.eo-login-divider {
+.eo-login-separator {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin: var(--space-6) 0 var(--space-5);
-  color: var(--color-stone-500);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
+  margin: var(--space-1) 0;
 }
 
-.eo-login-divider > span:first-child,
-.eo-login-divider > span:last-child {
+.eo-login-separator__line {
   flex: 1;
   height: 1px;
   background: var(--color-stone-200);
 }
 
+.eo-login-separator__text {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+  font-weight: var(--font-weight-medium);
+}
+
 .eo-login-demo {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  background: var(--color-stone-50);
-  border: 1px solid var(--color-stone-200);
-  border-radius: var(--radius-lg);
-}
-
-.eo-login-demo h3 {
-  margin: 0;
-  color: var(--color-stone-900);
-  font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-bold);
-}
-
-.eo-login-demo p {
-  max-width: 28ch;
-  margin: 0.35rem 0 0;
-  color: var(--color-stone-600);
-  font-size: var(--font-size-caption);
-  line-height: 1.5;
-}
-
-.eo-login-demo-btn {
-  flex: 0 0 auto;
-}
-
-.eo-login-auth__footnote {
-  margin: var(--space-6) 0 0;
-  color: var(--color-stone-500);
-  font-size: var(--font-size-caption);
-  line-height: 1.5;
+  flex-direction: column;
+  gap: var(--space-2);
   text-align: center;
 }
 
-.eo-login-alert,
-.eo-login-notice {
-  margin-bottom: var(--space-4);
+.eo-login-demo__hint {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-600);
+}
+
+.eo-login-demo__btn {
+  width: 100%;
+}
+
+.eo-login-alert {
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
   padding: var(--space-3);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-sm);
 }
 
-.eo-login-alert {
-  color: var(--color-danger-text);
-  background: var(--color-danger-bg);
-  border: 1px solid var(--color-danger-border);
-}
-
-.eo-login-alert p,
-.eo-login-notice p {
+.eo-login-alert p {
   margin: 0;
 }
 
@@ -373,98 +325,50 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
-  color: var(--color-info-text);
   background: var(--color-info-bg);
   border: 1px solid var(--color-info-border);
+  color: var(--color-info-text);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-caption);
+}
+
+.eo-login-notice p {
+  margin: 0;
 }
 
 .eo-login-notice__close {
-  flex: 0 0 auto;
-  padding: 0 var(--space-1);
-  color: var(--color-info-text);
-  background: transparent;
-  border: 0;
+  background: none;
+  border: none;
   font-size: 1.25rem;
-  line-height: 1;
+  color: var(--color-info-text);
   cursor: pointer;
+  line-height: 1;
+  padding: 0 var(--space-1);
 }
 
-@media (max-width: 980px) {
-  .eo-login-layout {
+/* Responsive collapse */
+@media (max-width: 900px) {
+  .eo-login-container {
     grid-template-columns: 1fr;
+    max-width: 480px;
   }
 
-  .eo-login-intro {
-    min-height: 30rem;
+  .eo-login-hero {
+    display: none;
   }
 
-  .eo-login-intro__content {
-    width: 100%;
-  }
-
-  .eo-login-intro h1 {
-    max-width: 15ch;
-  }
-
-  .eo-login-auth {
-    min-height: auto;
+  .eo-login-mobile-brand {
+    display: flex;
   }
 }
 
-@media (max-width: 640px) {
-  .eo-login-topbar {
-    min-height: 4.25rem;
-    padding-inline: var(--space-4);
-  }
-
-  .eo-login-topbar__logo {
-    width: 6.75rem;
-  }
-
-  .eo-login-topbar__surface {
-    display: none;
-  }
-
+@media (max-width: 480px) {
   .eo-login-layout {
-    min-height: calc(100dvh - 4.25rem);
+    padding: var(--space-4) var(--space-3);
   }
 
-  .eo-login-intro {
-    min-height: 23rem;
-  }
-
-  .eo-login-intro__content {
+  .eo-login-panel {
     padding: var(--space-6) var(--space-4);
-  }
-
-  .eo-login-intro h1 {
-    max-width: 12ch;
-    font-size: clamp(2.1rem, 10vw, 3rem);
-  }
-
-  .eo-login-intro__lead {
-    margin-top: var(--space-3);
-  }
-
-  .eo-login-intro__features {
-    display: none;
-  }
-
-  .eo-login-auth {
-    padding: var(--space-8) var(--space-4);
-  }
-
-  .eo-login-demo {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .eo-login-demo p {
-    max-width: none;
-  }
-
-  .eo-login-demo-btn {
-    width: 100%;
   }
 }

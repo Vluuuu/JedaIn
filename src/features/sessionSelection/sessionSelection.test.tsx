@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { App } from "../../App";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { PackageSessionPreview } from "../packageDetail/types";
@@ -53,7 +54,7 @@ async function renderSessionSelection(
 }
 
 describe("SessionSelectionScreen Tests & Contracts", () => {
-  it("1. resolves known LIVE package sessions and renders header/compact package summary", async () => {
+  it("1. resolves known LIVE package sessions and renders header/compact package summary with semantic image", async () => {
     const view = await renderSessionSelection("slow_green_day");
 
     expect(view.textContent).toContain("Pilih Jadwal");
@@ -64,6 +65,37 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     expect(view.textContent).toContain("Sabtu, 19 September 2026");
     expect(view.textContent).toContain("Belum ada jadwal dipilih");
     expect(view.textContent).toContain("Lanjut Checkout");
+
+    const thumb = view.querySelector<HTMLDivElement>(
+      ".session-selection-pkg-thumb",
+    );
+    expect(thumb).not.toBeNull();
+    expect(thumb?.style.backgroundImage).toBe("");
+
+    const image = thumb?.querySelector<HTMLImageElement>("img");
+    expect(image).not.toBeNull();
+    expect(image?.getAttribute("src")).toBe(
+      getPackageVisual("slow_green_day", "Lereng Hijau Batu").svgDataUri,
+    );
+    expect(image?.alt).toBe("Ilustrasi Sehari Pelan di Lereng Hijau");
+  });
+
+  it("1b. renders semantic package image for light_mountain_explore without inline background-image", async () => {
+    const view = await renderSessionSelection("light_mountain_explore");
+
+    const thumb = view.querySelector<HTMLDivElement>(
+      ".session-selection-pkg-thumb",
+    );
+    expect(thumb).not.toBeNull();
+    expect(thumb?.style.backgroundImage).toBe("");
+
+    const image = thumb?.querySelector<HTMLImageElement>("img");
+    expect(image).not.toBeNull();
+    expect(image?.getAttribute("src")).toBe(
+      getPackageVisual("light_mountain_explore", "Taman Alam Prigen")
+        .svgDataUri,
+    );
+    expect(image?.alt).toBe("Ilustrasi Jelajah Santai Pegunungan");
   });
 
   it("2. unknown package renders NOT_FOUND state", async () => {

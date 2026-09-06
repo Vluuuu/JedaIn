@@ -92,6 +92,20 @@ export function TravelerLoginScreen({
     }
   };
 
+  const handleGuestEntry = () => {
+    if (isAnyLoading) return;
+    setAuthError(undefined);
+
+    const guestUser: AuthUser = {
+      id: `usr_demo_guest_${Date.now()}`,
+      name: "Tamu Jeda",
+      isNewUser: true,
+      onboardingStatus: "NOT_STARTED",
+    };
+
+    handleAuthSuccess(guestUser);
+  };
+
   const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isAnyLoading) return;
@@ -615,6 +629,27 @@ export function TravelerLoginScreen({
                   : "Continue with Google"}
               </span>
             </button>
+
+            {/* Demo Guest Entry (Prototype/Demo Shortcut) */}
+            <div className="auth-guest-section">
+              <div className="auth-guest-divider" role="separator">
+                <span className="auth-guest-divider__line" />
+                <span className="auth-guest-divider__text">atau</span>
+                <span className="auth-guest-divider__line" />
+              </div>
+
+              <button
+                type="button"
+                className="auth-guest-btn"
+                onClick={handleGuestEntry}
+                disabled={isAnyLoading}
+              >
+                <span>Lanjut sebagai Tamu</span>
+              </button>
+              <p className="auth-guest-hint">
+                Mode demo · preferensimu hanya digunakan untuk sesi ini
+              </p>
+            </div>
 
             {/* 9. Bottom switch prompt: "Don't have an account? Sign up" */}
             <div className="auth-bottom-switch">

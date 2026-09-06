@@ -159,14 +159,22 @@
 /* Visual Image Hero Area */
 .recommendation-hero-visual {
   position: relative;
+  overflow: hidden;
   width: 100%;
   min-height: 14.5rem;
-  background-size: cover;
-  background-position: center;
   display: flex;
   align-items: flex-end;
   padding: 1.25rem;
   box-sizing: border-box;
+}
+
+.recommendation-hero-visual > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 @media (min-width: 800px) {
@@ -179,6 +187,7 @@
 .recommendation-hero-visual__scrim {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.15) 0%,
@@ -479,17 +488,26 @@
   position: relative;
   width: 100%;
   height: 8rem;
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
   display: flex;
   align-items: flex-end;
   padding: 0.75rem;
   box-sizing: border-box;
 }
 
+.recommendation-alt-thumb > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .recommendation-alt-thumb__scrim {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(
     to bottom,
     transparent 0%,

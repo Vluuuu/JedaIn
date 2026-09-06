@@ -4,6 +4,7 @@ import { mockComplaintStore } from "../admin/mockComplaintStore";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { mockContactVerificationStore } from "../contactVerification/mockContactVerificationStore";
 import { mockOtpSessionStore } from "../contactVerification/mockOtpSessionStore";
+import { demoContactVerificationBypass } from "./demoContactVerificationBypass";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockApplicationStore } from "../eo/mockApplicationStore";
 import { mockDestinationStore } from "../eo/mockDestinationStore";
@@ -35,6 +36,7 @@ export function resetCompetitionDemoState(): void {
   mockTransactionStore.reset();
   mockContactVerificationStore.reset();
   mockOtpSessionStore.reset();
+  demoContactVerificationBypass.reset();
   mockReviewStore.reset();
 
   // 4. Reset Traveler session store

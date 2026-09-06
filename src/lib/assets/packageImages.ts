@@ -199,6 +199,45 @@ export const PACKAGE_VISUALS: Record<string, VisualAssetData> = {
     </svg>`,
   },
 
+  pkg_pacet_mindful_retreat: {
+    id: "pkg_pacet_mindful_retreat",
+    title: "Pagi Hening Tepi Sungai Pacet",
+    themeColor: "#285c91",
+    svgDataUri: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+      <defs>
+        <linearGradient id="pacetSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="%23D8EAF7"/>
+          <stop offset="60%" stop-color="%23EEF5FC"/>
+          <stop offset="100%" stop-color="%23F4F9EE"/>
+        </linearGradient>
+        <linearGradient id="pacetRiver" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="%237CAECB"/>
+          <stop offset="60%" stop-color="%233F779E"/>
+          <stop offset="100%" stop-color="%231E4D6E"/>
+        </linearGradient>
+        <linearGradient id="pacetPine" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="%23568972"/>
+          <stop offset="100%" stop-color="%2326533F"/>
+        </linearGradient>
+      </defs>
+      <rect width="800" height="500" fill="url(%23pacetSky)"/>
+      <circle cx="620" cy="150" r="70" fill="%23FFF6D1" opacity="0.8"/>
+      <!-- Soft Mountain Ridge -->
+      <path d="M0 260 Q180 180 380 250 Q580 190 800 240 L800 500 L0 500 Z" fill="url(%23pacetPine)" opacity="0.65"/>
+      <!-- Mid Pine Canopy -->
+      <path d="M0 310 Q260 240 520 310 L800 280 L800 500 L0 500 Z" fill="%231E4433"/>
+      <!-- Flowing Shallow Mountain River -->
+      <path d="M0 370 Q300 340 520 370 Q680 350 800 380 L800 500 L0 500 Z" fill="url(%23pacetRiver)"/>
+      <!-- Riverbank Pebbles and Stones -->
+      <ellipse cx="260" cy="420" rx="40" ry="16" fill="%237D8B84"/>
+      <ellipse cx="320" cy="440" rx="65" ry="22" fill="%235A6862"/>
+      <ellipse cx="440" cy="430" rx="55" ry="18" fill="%23687771"/>
+      <ellipse cx="580" cy="450" rx="80" ry="24" fill="%234C5852"/>
+      <!-- Ambient Reflections & Ripples -->
+      <path d="M120 410 Q280 395 480 405 M220 450 Q380 435 640 445" stroke="%23E4F4FD" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+    </svg>`,
+  },
+
   weekend_nature_reset: {
     id: "weekend_nature_reset",
     title: "Weekend Nature Reset",
@@ -301,6 +340,12 @@ export const DESTINATION_VISUALS: Record<string, VisualAssetData> = {
     themeColor: "#285c91",
     svgDataUri: PACKAGE_VISUALS.mindful_morning.svgDataUri,
   },
+  "Hutan Bambu Trawas": {
+    id: "dest_hutan_trawas",
+    title: "Hutan Bambu Trawas",
+    themeColor: "#285c91",
+    svgDataUri: PACKAGE_VISUALS.mindful_morning.svgDataUri,
+  },
   "Taman Alam Prigen": {
     id: "dest_prigen",
     title: "Taman Alam Prigen",
@@ -333,6 +378,12 @@ export const NEUTRAL_JEDAIN_VISUAL: VisualAssetData = {
   </svg>`,
 };
 
+export const DESTINATION_ID_VISUALS: Record<string, VisualAssetData> = {
+  dest_lereng_hijau: DESTINATION_VISUALS["Lereng Hijau Batu"],
+  dest_lembah_pacet: DESTINATION_VISUALS["Lembah Alam Pacet"],
+  dest_hutan_trawas: DESTINATION_VISUALS["Hutan Bambu Trawas"],
+};
+
 export function getPackageVisual(
   packageId: string,
   destinationName?: string,
@@ -346,6 +397,12 @@ export function getPackageVisual(
   return NEUTRAL_JEDAIN_VISUAL;
 }
 
-export function getDestinationVisual(destinationName: string): VisualAssetData {
-  return DESTINATION_VISUALS[destinationName] || NEUTRAL_JEDAIN_VISUAL;
+export function getDestinationVisual(destinationRef: string): VisualAssetData {
+  if (DESTINATION_VISUALS[destinationRef]) {
+    return DESTINATION_VISUALS[destinationRef];
+  }
+  if (DESTINATION_ID_VISUALS[destinationRef]) {
+    return DESTINATION_ID_VISUALS[destinationRef];
+  }
+  return NEUTRAL_JEDAIN_VISUAL;
 }

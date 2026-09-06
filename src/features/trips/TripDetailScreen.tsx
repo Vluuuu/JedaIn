@@ -248,12 +248,14 @@ export function TripDetailScreen({
 
       {/* 2. Hero & Experience Identity */}
       <header className="trip-detail-hero">
-        <div
-          className="trip-detail-hero__thumb"
-          style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
-          role="img"
-          aria-label={`Ilustrasi ${pkg?.title ?? booking.packageId}`}
-        />
+        <div className="trip-detail-hero__thumb">
+          <img
+            src={visual.svgDataUri}
+            alt={`Ilustrasi ${pkg?.title ?? booking.packageId}`}
+            width={800}
+            height={500}
+          />
+        </div>
 
         <div className="trip-detail-hero__body">
           <div className="trip-detail-status">

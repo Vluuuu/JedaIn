@@ -51,7 +51,7 @@ async function renderScreen(
 }
 
 describe("TravelerLoginScreen UI & Auth Flows", () => {
-  it("renders SIGN IN / SIGN UP tabs, Email, Password, and Google social login without Apple or Guest button", async () => {
+  it("renders SIGN IN / SIGN UP tabs, Email, Password, Google social login, and demo guest entry", async () => {
     const view = await renderScreen();
 
     // Check tabs
@@ -80,12 +80,37 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     expect(view.textContent).toContain("Continue with Google");
     expect(view.textContent).not.toContain("Apple");
     expect(view.textContent).not.toContain("Continue with Apple");
-    expect(view.textContent).not.toContain("Tamu");
-    expect(view.textContent).not.toContain("Guest");
+
+    // Check demo guest shortcut
+    expect(view.textContent).toContain("Lanjut sebagai Tamu");
+    expect(view.textContent).toContain(
+      "Mode demo · preferensimu hanya digunakan untuk sesi ini",
+    );
 
     // Check bottom prompt
     expect(view.textContent).toContain("Don't have an account?");
     expect(view.textContent).toContain("Sign up");
+  });
+
+  it("handles Demo Guest Entry and leads traveler to onboarding consent / preference flow", async () => {
+    const onSuccess = vi.fn();
+    const view = await renderScreen({ onSuccess });
+
+    const guestBtn = Array.from(view.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut sebagai Tamu"),
+    )!;
+    expect(guestBtn).not.toBeNull();
+
+    await act(() => guestBtn.click());
+
+    expect(onSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isNewUser: true,
+        name: "Tamu Jeda",
+        onboardingStatus: "NOT_STARTED",
+      }),
+      "/onboarding/consent",
+    );
   });
 
   it("handles Google OAuth success and triggers onboarding redirect for new user", async () => {

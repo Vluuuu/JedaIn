@@ -1,170 +1,218 @@
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
-import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
 
 export function EoDestinationsScreen() {
   const navigate = useNavigate();
-  const partner = partnerSessionStore.get();
-  const guideStatus = partner?.guideStatus ?? "CERTIFIED_GUIDE";
-  const destinations = mockDestinationStore.getAll();
+  // Authoritative EO-available destinations: ACTIVE + BASIC/PLUS + guideReady
+  const destinations = mockDestinationStore.getEligibleForEo();
 
-  const handleCreatePackage = (destinationId: string) => {
-    navigate(`/partner/eo/packages/new?destinationId=${destinationId}`);
-  };
+  const [searchQuery, setSearchQuery] = useState("");
+  const [levelFilter, setLevelFilter] = useState<"ALL" | "BASIC" | "PLUS">(
+    "ALL",
+  );
+
+  const filteredDestinations = useMemo(() => {
+    return destinations.filter((dest) => {
+      if (dest.status !== "ACTIVE") return false;
+
+      // Filter verification level
+      if (levelFilter !== "ALL" && dest.verificationLevel !== levelFilter) {
+        return false;
+      }
+
+      // Search matching name, city, locationLabel
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase().trim();
+        const matchesName = dest.name.toLowerCase().includes(query);
+        const matchesCity = dest.city.toLowerCase().includes(query);
+        const matchesLoc = dest.locationLabel.toLowerCase().includes(query);
+        if (!matchesName && !matchesCity && !matchesLoc) return false;
+      }
+
+      return true;
+    });
+  }, [destinations, levelFilter, searchQuery]);
 
   return (
-    <div className="eo-container">
-      <header className="eo-page-header">
-        <div>
-          <Badge tone="info">Direktori Destinasi Terverifikasi</Badge>
-          <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Destinasi Terverifikasi JedaIn
-          </h1>
-          <p className="eo-page-subtitle">
-            Pilihan lokasi alam dan ruang tenang yang telah melalui proses
-            kurasi standar BASIC / PLUS untuk dirancang menjadi paket wellness.
+    <div className="eo-destinations-container">
+      {/* 1. Header */}
+      <header className="eo-destinations-header">
+        <div className="eo-destinations-header__main">
+          <h1>Destinasi Terverifikasi</h1>
+          <p className="eo-destinations-header__subtitle">
+            Temukan mitra destinasi dan pelajari potensi aktivitasnya sebelum
+            merancang package.
           </p>
         </div>
       </header>
 
-      {/* Guide Readiness Information Alert */}
-      <div className="eo-alert eo-alert--info">
-        <strong>Ketentuan Kesiapan Pemandu (Guide Readiness):</strong>
-        <p style={{ margin: "var(--space-1) 0 0" }}>
-          Status Anda:{" "}
-          <strong>
-            {guideStatus === "CERTIFIED_GUIDE"
-              ? "Certified Guide"
-              : "Concept-Only"}
-          </strong>
-          .{" "}
-          {guideStatus === "CONCEPT_ONLY"
-            ? "Anda wajib memilih destinasi berstatus Guide Ready (memiliki pemandu lokal terlatih di lokasi)."
-            : "Anda dapat memilih seluruh destinasi terverifikasi BASIC maupun PLUS."}
-        </p>
+      {/* 2. Scalable Filter & Search Toolbar */}
+      <div className="eo-destinations-toolbar">
+        <div className="eo-destinations-search">
+          <input
+            type="search"
+            placeholder="Cari nama atau area destinasi…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="eo-destinations-search-input"
+            aria-label="Cari destinasi"
+          />
+        </div>
+
+        <div className="eo-destinations-filter-chips" role="tablist">
+          <button
+            type="button"
+            className={`eo-dest-chip ${levelFilter === "ALL" ? "eo-dest-chip--active" : ""}`}
+            onClick={() => setLevelFilter("ALL")}
+            role="tab"
+            aria-selected={levelFilter === "ALL"}
+          >
+            Semua
+          </button>
+          <button
+            type="button"
+            className={`eo-dest-chip ${levelFilter === "PLUS" ? "eo-dest-chip--active" : ""}`}
+            onClick={() => setLevelFilter("PLUS")}
+            role="tab"
+            aria-selected={levelFilter === "PLUS"}
+          >
+            Terverifikasi Plus
+          </button>
+          <button
+            type="button"
+            className={`eo-dest-chip ${levelFilter === "BASIC" ? "eo-dest-chip--active" : ""}`}
+            onClick={() => setLevelFilter("BASIC")}
+            role="tab"
+            aria-selected={levelFilter === "BASIC"}
+          >
+            Terverifikasi Dasar
+          </button>
+        </div>
       </div>
 
-      {/* Destination Cards Grid */}
+      {/* 3. Destination Cards Grid */}
       <section
         className="eo-destinations-grid"
         aria-label="Katalog destinasi mitra"
       >
-        {destinations.map((dest) => {
-          const isEligible =
-            guideStatus === "CERTIFIED_GUIDE" || dest.guideReady === true;
-
-          return (
-            <article
-              key={dest.destinationId}
-              className={`eo-destination-card ${!isEligible ? "eo-destination-card--disabled" : ""}`}
+        {filteredDestinations.length === 0 ? (
+          <div className="eo-destinations-empty">
+            <p>Tidak ada destinasi yang cocok dengan pencarian Anda.</p>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                setLevelFilter("ALL");
+              }}
             >
-              <div>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "var(--space-2)",
-                    marginBottom: "var(--space-2)",
-                  }}
-                >
-                  <Badge
-                    tone={
-                      dest.verificationLevel === "PLUS" ? "info" : "success"
-                    }
-                  >
-                    {dest.verificationLevel === "PLUS"
-                      ? "Verifikasi PLUS"
-                      : "Verifikasi BASIC"}
-                  </Badge>
-                  <Badge tone={dest.guideReady ? "success" : "neutral"}>
-                    {dest.guideReady ? "Guide Ready ✓" : "Tanpa Guide Lokal"}
-                  </Badge>
-                </div>
-
-                <h2
-                  style={{
-                    fontSize: "var(--font-size-heading-sm)",
-                    margin: "0 0 var(--space-1)",
-                    color: "var(--color-text-primary)",
-                  }}
-                >
-                  {dest.name}
-                </h2>
-                <p
-                  style={{
-                    fontSize: "var(--font-size-caption)",
-                    color: "var(--color-text-secondary)",
-                    margin: "0 0 var(--space-2)",
-                  }}
-                >
-                  {dest.locationLabel}
-                </p>
-                <p
-                  style={{
-                    fontSize: "var(--font-size-body-sm)",
-                    color: "var(--color-text-secondary)",
-                    margin: 0,
-                  }}
-                >
-                  {dest.description}
-                </p>
-
-                {dest.highlights && dest.highlights.length > 0 && (
-                  <ul
-                    style={{
-                      margin: "var(--space-3) 0 0",
-                      paddingLeft: "1.25rem",
-                      fontSize: "var(--font-size-caption)",
-                      color: "var(--color-text-secondary)",
-                    }}
-                  >
-                    {dest.highlights.map((h, i) => (
-                      <li key={i}>{h}</li>
-                    ))}
-                  </ul>
-                )}
+              Reset Filter
+            </Button>
+          </div>
+        ) : (
+          filteredDestinations.map((dest) => (
+            <article key={dest.destinationId} className="eo-dest-card">
+              {/* Media Thumb */}
+              <div className="eo-dest-card__media">
+                <img
+                  src={
+                    dest.imageUrl || getDestinationVisual(dest.name).svgDataUri
+                  }
+                  alt={dest.name}
+                  className="eo-dest-card__img"
+                  loading="lazy"
+                />
               </div>
 
-              <div
-                style={{
-                  borderTop: "1px solid var(--color-border-default)",
-                  paddingTop: "var(--space-3)",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <small style={{ color: "var(--color-text-muted)" }}>
-                    Modal Dasar:
-                  </small>
-                  <strong
-                    style={{
-                      display: "block",
-                      color: "var(--color-brand-primary)",
-                      fontSize: "var(--font-size-body-sm)",
-                    }}
-                  >
-                    Rp{dest.baseCostPerPerson.toLocaleString("id-ID")} / orang
-                  </strong>
+              {/* Body */}
+              <div className="eo-dest-card__body">
+                <div className="eo-dest-card__header-info">
+                  <h2 className="eo-dest-card__title">{dest.name}</h2>
+
+                  <div className="eo-dest-card__meta-badges">
+                    <Badge
+                      tone={
+                        dest.verificationLevel === "PLUS" ? "info" : "success"
+                      }
+                      showSymbol={false}
+                    >
+                      {dest.verificationLevel === "PLUS"
+                        ? "Terverifikasi Plus"
+                        : "Terverifikasi Dasar"}
+                    </Badge>
+                    <span className="eo-dest-card__guide-badge">
+                      Pemandu lokal tersedia
+                    </span>
+                  </div>
+
+                  <p className="eo-dest-card__location">{dest.locationLabel}</p>
+                  <p className="eo-dest-card__desc">{dest.description}</p>
+
+                  {/* Highlights / Activities */}
+                  {dest.highlights && dest.highlights.length > 0 && (
+                    <ul className="eo-dest-card__highlights">
+                      {dest.highlights.slice(0, 3).map((h, i) => (
+                        <li key={i}>{h}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
 
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="sm"
-                  disabled={!isEligible}
-                  onClick={() => handleCreatePackage(dest.destinationId)}
-                >
-                  {isEligible
-                    ? "Buat Paket di Sini &rarr;"
-                    : "Tidak Memenuhi Syarat Guide"}
-                </Button>
+                {/* Capacity info */}
+                <div className="eo-dest-card__guide">
+                  <span className="eo-dest-card__capacity">
+                    Kapasitas {dest.capacityPerSession} orang/sesi
+                  </span>
+                </div>
+
+                {/* Footer: Price & Actions */}
+                <div className="eo-dest-card__footer">
+                  <div className="eo-dest-card__pricing">
+                    <span className="eo-dest-card__price-label">
+                      Biaya dasar destinasi
+                    </span>
+                    <strong className="eo-dest-card__price-value">
+                      Rp{dest.baseCostPerPerson.toLocaleString("id-ID")}
+                      <small> / orang</small>
+                    </strong>
+                  </div>
+
+                  <div className="eo-dest-card__actions">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() =>
+                        navigate(
+                          `/partner/eo/destinations/${dest.destinationId}`,
+                        )
+                      }
+                    >
+                      Lihat Detail
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() =>
+                        navigate(
+                          `/partner/eo/packages/new?destinationId=${dest.destinationId}`,
+                        )
+                      }
+                    >
+                      Buat Paket
+                    </Button>
+                  </div>
+                </div>
               </div>
             </article>
-          );
-        })}
+          ))
+        )}
       </section>
     </div>
   );

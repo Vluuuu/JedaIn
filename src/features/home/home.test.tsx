@@ -5,6 +5,10 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { App } from "../../App";
+import {
+  getDestinationVisual,
+  getPackageVisual,
+} from "../../lib/assets/packageImages";
 import type { BookingRecord } from "../checkout/types";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { sessionStore } from "../onboarding/sessionStore";
@@ -106,6 +110,65 @@ describe("HomeScreen State Matrix & Module Composition", () => {
     // No transactional cards
     expect(view.textContent).not.toContain("Menunggu Pembayaran");
     expect(view.textContent).not.toContain("Trip Mendatang");
+  });
+
+  it("renders real images for every package, destination and personalized hero", async () => {
+    sessionStore.setUser({ id: "visual_qa", onboardingStatus: "COMPLETED" });
+    sessionStore.setQuizDraft(sampleQuiz);
+    const view = await renderHome();
+
+    const cards =
+      view.querySelectorAll<HTMLAnchorElement>(".home-package-card");
+    expect(cards.length).toBeGreaterThanOrEqual(4);
+    for (const card of cards) {
+      const id = card.getAttribute("href")!.split("/").at(-1)!;
+      const image = card.querySelector<HTMLImageElement>(
+        ".home-package-card__visual img",
+      );
+      expect(image?.getAttribute("src")).toBe(getPackageVisual(id).svgDataUri);
+      expect(image?.alt).toBe(
+        `Ilustrasi suasana ${card.querySelector("h3")!.textContent}`,
+      );
+      const badge = card.querySelector(
+        ".home-package-card__badges .ui-badge--success",
+      );
+      expect(badge).not.toBeNull();
+      expect(badge?.textContent).toContain("Terverifikasi");
+      expect(badge?.textContent).toContain("✓");
+    }
+
+    const destinations = view.querySelectorAll(".home-destination-card");
+    expect(destinations).toHaveLength(5);
+    for (const card of destinations) {
+      const name = card.querySelector("h3")!.textContent!;
+      const image = card.querySelector<HTMLImageElement>(
+        ".home-destination-card__visual img",
+      );
+      expect(image?.getAttribute("src")).toBe(
+        getDestinationVisual(name).svgDataUri,
+      );
+      expect(image?.alt).toBe(`Ilustrasi destinasi ${name}`);
+      const badge = card.querySelector(
+        ".home-destination-card__badge .ui-badge--success",
+      );
+      expect(badge).not.toBeNull();
+      expect(badge?.textContent).toContain("Terverifikasi");
+      expect(badge?.textContent).toContain("✓");
+    }
+
+    const hero = view.querySelector<HTMLImageElement>(
+      ".home-hero-card__visual img",
+    );
+    expect(hero?.getAttribute("src")).toBe(
+      getPackageVisual("slow_green_day").svgDataUri,
+    );
+    expect(hero?.getAttribute("fetchpriority")).toBe("high");
+    const heroTrustBadge = view.querySelector(
+      ".home-hero-card__visual-badges .ui-badge--success:nth-child(2)",
+    );
+    expect(heroTrustBadge).not.toBeNull();
+    expect(heroTrustBadge?.textContent).toContain("Terverifikasi");
+    expect(heroTrustBadge?.textContent).toContain("✓");
   });
 
   it("1b. FALLBACK: renders neutral 'Pilihan terdekat untukmu' and NOT 'Pilihan untukmu'", async () => {

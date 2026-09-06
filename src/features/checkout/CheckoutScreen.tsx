@@ -561,7 +561,9 @@ export function CheckoutScreen({
                     >
                       {contactRequirement?.phoneVerified
                         ? "Terverifikasi"
-                        : "Belum Verifikasi"}
+                        : contactRequirement?.demoContactVerificationBypass
+                          ? "Mode demo · Verifikasi dilewati"
+                          : "Belum Verifikasi"}
                     </Badge>
                   </div>
                 </div>

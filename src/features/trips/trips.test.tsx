@@ -4,6 +4,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import type { AuthUser } from "../auth/types";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { sessionStore } from "../onboarding/sessionStore";
@@ -137,6 +138,16 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(container.textContent).toContain("History (0)");
     expect(container.textContent).toContain("Lanjutkan Pembayaran");
     expect(container.textContent).toContain("Lihat Trip");
+    for (const selector of [
+      ".my-trips-pending-card__thumb img",
+      ".my-trip-card__thumb img",
+    ]) {
+      const image = container.querySelector<HTMLImageElement>(selector);
+      expect(image?.getAttribute("src")).toBe(
+        getPackageVisual("slow_green_day", "Lereng Hijau Batu").svgDataUri,
+      );
+      expect(image?.alt).toBe("Ilustrasi Sehari Pelan di Lereng Hijau");
+    }
 
     // Click Lanjutkan Pembayaran navigates to /payment/:bookingId
     const continueBtn = Array.from(container.querySelectorAll("button")).find(
@@ -175,6 +186,13 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(container.textContent).toContain("Penyelenggara & Kontak Trip");
     expect(container.textContent).not.toContain("Bayar Sekarang");
     expect(container.textContent).not.toContain("Penilaian Pengalaman");
+    const image = container.querySelector<HTMLImageElement>(
+      ".trip-detail-hero__thumb img",
+    );
+    expect(image?.getAttribute("src")).toBe(
+      getPackageVisual("slow_green_day", "Lereng Hijau Batu").svgDataUri,
+    );
+    expect(image?.alt).toBe("Ilustrasi Sehari Pelan di Lereng Hijau");
   });
 
   it("3. Completed Trip Detail (T18) shows two distinct review cards (Destination & EO/Guide)", async () => {
@@ -723,8 +741,15 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       expect(container.textContent).toContain("Penyelenggara Tanpa Akun EO");
       expect(container.textContent).not.toContain("Penanggung Jawab EO");
       expect(container.textContent).not.toContain("Hubungi EO");
-      // Does not crash
+      // Does not crash; missing package metadata uses the neutral image pipeline.
       expect(container.textContent).toContain("Informasi Trip");
+      const image = container.querySelector<HTMLImageElement>(
+        ".trip-detail-hero__thumb img",
+      );
+      expect(image?.getAttribute("src")).toBe(
+        getPackageVisual("pkg_no_eo_map").svgDataUri,
+      );
+      expect(image?.alt).toBe("Ilustrasi pkg_no_eo_map");
     });
 
     it("V6. Non-APPROVED EO application does not expose contact", async () => {

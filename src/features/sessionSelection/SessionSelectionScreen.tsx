@@ -350,12 +350,14 @@ export function SessionSelectionScreen({
             className="session-selection-pkg-summary"
             aria-label="Ringkasan paket"
           >
-            <div
-              className="session-selection-pkg-thumb"
-              style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
-              role="img"
-              aria-label={`Ilustrasi ${pkg.title}`}
-            />
+            <div className="session-selection-pkg-thumb">
+              <img
+                src={visual.svgDataUri}
+                alt={`Ilustrasi ${pkg.title}`}
+                width={800}
+                height={500}
+              />
+            </div>
             <div className="session-selection-pkg-info">
               <span className="session-selection-pkg-meta">
                 {pkg.destinationName} • {pkg.locationLabel}

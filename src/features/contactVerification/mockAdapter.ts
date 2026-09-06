@@ -31,6 +31,7 @@ export interface MockContactVerificationAdapterOptions {
 }
 
 export class MockContactVerificationAdapter implements ContactVerificationAdapter {
+  readonly supportsDemoContactBypass = true;
   private explicitPackages?: PackageRecommendationSource[];
   private explicitDetails?: Record<string, PackageDetailSource>;
   private delayMs: number;

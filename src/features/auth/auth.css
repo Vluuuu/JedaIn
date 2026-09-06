@@ -479,6 +479,86 @@
   outline-offset: 2px;
 }
 
+/* --------------------------------------------------------------------------
+   Demo Guest Entry (Prototype/Demo Shortcut)
+   Visually secondary to Sign In/Sign Up; calm translucent forest style
+   -------------------------------------------------------------------------- */
+.auth-guest-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.auth-guest-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1.125rem;
+  margin-bottom: 0.875rem;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.auth-guest-divider__line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.auth-guest-divider__text {
+  padding-inline: 0.25rem;
+  white-space: nowrap;
+}
+
+.auth-guest-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.625rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
+}
+
+.auth-guest-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+}
+
+.auth-guest-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-guest-btn:focus-visible {
+  outline: 2px solid var(--color-forest-400);
+  outline-offset: 2px;
+}
+
+.auth-guest-hint {
+  margin: 0.5rem 0 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
 /* 9. Bottom signup prompt: "Don't have an account? Sign up" */
 .auth-bottom-switch {
   margin-top: 1.125rem;

@@ -5,6 +5,7 @@ export type BadgeTone = "neutral" | "info" | "success" | "warning" | "danger";
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   tone?: BadgeTone;
+  showSymbol?: boolean;
   children: ReactNode;
 }
 
@@ -18,6 +19,7 @@ const toneSymbols: Record<BadgeTone, string> = {
 
 export function Badge({
   tone = "neutral",
+  showSymbol = true,
   children,
   className = "",
   ...props
@@ -27,9 +29,11 @@ export function Badge({
       className={`ui-badge ui-badge--${tone} ${className}`.trim()}
       {...props}
     >
-      <span className="ui-badge__symbol" aria-hidden="true">
-        {toneSymbols[tone]}
-      </span>
+      {showSymbol && (
+        <span className="ui-badge__symbol" aria-hidden="true">
+          {toneSymbols[tone]}
+        </span>
+      )}
       {children}
     </span>
   );

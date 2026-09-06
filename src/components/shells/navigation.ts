@@ -11,12 +11,6 @@ export const partnerEoNavigation = [
 
 export const partnerDestinationNavigation = [
   { to: "/partner/destination", label: "Overview" },
-  { to: "/partner/destination/profile", label: "Destination Profile" },
-  { to: "/partner/destination/verification", label: "Verification" },
-  { to: "/partner/destination/schedule", label: "Schedule" },
-  { to: "/partner/destination/capacity", label: "Capacity" },
-  { to: "/partner/destination/reviews", label: "Reviews" },
-  { to: "/partner/destination/profile-settings", label: "Profile" },
 ] as const;
 
 // Backward-compatible alias for existing generic partner navigation imports

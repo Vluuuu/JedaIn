@@ -15,7 +15,7 @@ export function validateEoPackage(
 ): EoValidationResult {
   const errors: EoValidationError[] = [];
 
-  // Step 1: Destination
+  // Step 1: Destination & Guide Source
   if (!pkg.destinationId) {
     errors.push({
       step: 1,
@@ -35,14 +35,33 @@ export function validateEoPackage(
         message:
           "Destinasi yang dipilih tidak terdaftar atau belum terverifikasi aktif.",
       });
-    } else if (eoGuideStatus === "CONCEPT_ONLY" && !dest.guideReady) {
+    } else if (!dest.guideReady) {
       errors.push({
         step: 1,
         field: "destinationId",
         message:
-          "EO dengan status Concept-Only hanya dapat memilih destinasi yang memiliki Guide Ready (pemandu lokal siap).",
+          "Destinasi yang dipilih wajib memiliki kesiapan pemandu lokal terverifikasi.",
       });
     }
+  }
+
+  // Guide Source validation rule (MVP locked)
+  // 1. guideSource is required
+  // 2. CONCEPT_ONLY must use DESTINATION
+  // 3. CERTIFIED_GUIDE may use DESTINATION or EO
+  if (!pkg.guideSource) {
+    errors.push({
+      step: 1,
+      field: "guideSource",
+      message: "Sumber kepemanduan wajib ditentukan (Destinasi atau EO).",
+    });
+  } else if (pkg.guideSource === "EO" && eoGuideStatus === "CONCEPT_ONLY") {
+    errors.push({
+      step: 1,
+      field: "guideSource",
+      message:
+        "EO dengan status Concept-Only wajib menggunakan pemandu lokal dari destinasi.",
+    });
   }
 
   // Step 2 & General info: Title, Summary & Duration
@@ -213,6 +232,7 @@ export const SEEDED_LIVE_PACKAGE: EoPackageRecord = {
     customerPrice: 275000,
   },
   guideStatus: "CERTIFIED_GUIDE",
+  guideSource: "DESTINATION",
   status: "LIVE",
   createdAt: "2026-08-01T08:00:00Z",
   updatedAt: "2026-08-05T10:00:00Z",
@@ -275,6 +295,7 @@ export const SEEDED_PENDING_PACKAGE: EoPackageRecord = {
     customerPrice: 260000,
   },
   guideStatus: "CERTIFIED_GUIDE",
+  guideSource: "DESTINATION",
   status: "PENDING_ADMIN_REVIEW",
   validationResult: { valid: true, errors: [] },
   submittedAt: "2026-08-28T09:00:00Z",
@@ -464,6 +485,7 @@ export const mockEoPackageStore = {
         customerPrice,
       },
       guideStatus: authorGuideStatus,
+      guideSource: draft.guideSource || "DESTINATION",
       status: "DRAFT",
       createdAt:
         existingIndex >= 0 ? packages[existingIndex].createdAt : nowIso,

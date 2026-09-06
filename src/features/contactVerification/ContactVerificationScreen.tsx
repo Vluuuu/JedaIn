@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import type { CheckoutDraftState } from "../checkout/types";
+import { demoContactVerificationBypass } from "../demo/demoContactVerificationBypass";
 import { sessionStore } from "../onboarding/sessionStore";
 import { defaultContactVerificationAdapter } from "./mockAdapter";
 import { OtpVerificationForm } from "./OtpVerificationForm";
@@ -162,6 +163,16 @@ export function ContactVerificationScreen({
     setStep("PHONE_ENTRY");
   };
 
+  const handleSkipDemo = () => {
+    const user = sessionStore.get().user;
+    if (!adapter.supportsDemoContactBypass || !user || !sessionId) return;
+    demoContactVerificationBypass.register(user.id, sessionId);
+    // Preserve current checkout / session context & matching draft without mutating verification records
+    navigate(`/checkout/${sessionId}`, {
+      state: isMatchingDraft ? { checkoutDraft } : undefined,
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="contact-verification-container" aria-busy="true">
@@ -246,6 +257,9 @@ export function ContactVerificationScreen({
         <PhoneEntryForm
           initialPhone={phone}
           onRequestOtp={handleRequestOtp}
+          onSkipDemo={
+            adapter.supportsDemoContactBypass ? handleSkipDemo : undefined
+          }
           isSubmitting={isSubmitting || step === "REQUESTING_OTP"}
           isDisabled={isSubmitting || step === "REQUESTING_OTP"}
           error={step === "REQUEST_ERROR" ? errorMessage : undefined}
@@ -257,6 +271,9 @@ export function ContactVerificationScreen({
           onVerifyOtp={handleVerifyOtp}
           onResendOtp={() => handleRequestOtp(activeSession.phone)}
           onChangePhone={handleChangePhone}
+          onSkipDemo={
+            adapter.supportsDemoContactBypass ? handleSkipDemo : undefined
+          }
           isSubmitting={isSubmitting || step === "VERIFYING_OTP"}
           isDisabled={isSubmitting || step === "VERIFYING_OTP"}
           error={step === "VERIFY_ERROR" ? errorMessage : undefined}

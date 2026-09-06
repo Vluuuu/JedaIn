@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { Badge } from "../../components/ui";
 import {
   LOGIN_ATMOSPHERE_VISUAL,
   getPackageVisual,
@@ -213,24 +214,29 @@ export function RecommendationResultScreen({
           className="recommendation-hero-card"
           aria-labelledby="top-package-title"
         >
-          <div
-            className="recommendation-hero-visual"
-            style={{ backgroundImage: `url("${topVisual.svgDataUri}")` }}
-            role="img"
-            aria-label={`Ilustrasi suasana ${topPkg.title}`}
-          >
-            <div className="recommendation-hero-visual__scrim" />
+          <div className="recommendation-hero-visual">
+            <img
+              src={topVisual.svgDataUri}
+              alt={`Ilustrasi suasana ${topPkg.title}`}
+              width={800}
+              height={500}
+              fetchPriority="high"
+            />
+            <div
+              className="recommendation-hero-visual__scrim"
+              aria-hidden="true"
+            />
             <div className="recommendation-hero-visual__overlay">
               <span
                 className={`recommendation-badge ${isFallback ? "recommendation-badge--fallback" : "recommendation-badge--matched"}`}
               >
                 {isFallback ? "Pilihan terdekat" : "Pilihan utama"}
               </span>
-              <span className="recommendation-badge recommendation-badge--neutral">
+              <Badge tone="success">
                 {topPkg.verificationLevel === "PLUS"
                   ? "Terverifikasi Plus"
                   : "Terverifikasi Dasar"}
-              </span>
+              </Badge>
             </div>
           </div>
 
@@ -377,14 +383,18 @@ export function RecommendationResultScreen({
                     }}
                     className="recommendation-alt-card"
                   >
-                    <div
-                      className="recommendation-alt-thumb"
-                      style={{
-                        backgroundImage: `url("${altVisual.svgDataUri}")`,
-                      }}
-                      aria-hidden="true"
-                    >
-                      <div className="recommendation-alt-thumb__scrim" />
+                    <div className="recommendation-alt-thumb">
+                      <img
+                        src={altVisual.svgDataUri}
+                        alt={`Ilustrasi suasana ${altPkg.title}`}
+                        width={800}
+                        height={500}
+                        loading="lazy"
+                      />
+                      <div
+                        className="recommendation-alt-thumb__scrim"
+                        aria-hidden="true"
+                      />
                       <span className="recommendation-alt-badge">
                         {altDuration}
                       </span>

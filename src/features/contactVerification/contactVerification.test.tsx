@@ -9,7 +9,9 @@ import type { AuthUser } from "../auth/types";
 import { CheckoutScreen } from "../checkout/CheckoutScreen";
 import { MockCheckoutAdapter } from "../checkout/mockAdapter";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import { demoContactVerificationBypass } from "../demo/demoContactVerificationBypass";
 import { sessionStore } from "../onboarding/sessionStore";
+import type { ContactVerificationAdapter } from "./types";
 import { ContactVerificationScreen } from "./ContactVerificationScreen";
 import { MockContactVerificationAdapter } from "./mockAdapter";
 import { mockContactVerificationStore } from "./mockContactVerificationStore";
@@ -44,7 +46,7 @@ function LocationObserver({
 
 async function renderContactVerification(
   sessionId = "ses_sgd_1",
-  props: { adapter?: MockContactVerificationAdapter } = {},
+  props: { adapter?: ContactVerificationAdapter } = {},
   initialEntries: string[] = [`/checkout/${sessionId}/contact`],
 ) {
   container = document.createElement("div");
@@ -1265,5 +1267,286 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       container.querySelector<HTMLInputElement>("#contact-otp-input")!;
     expect(otpInput.getAttribute("inputmode")).toBe("numeric");
     expect(otpInput.getAttribute("autocomplete")).toBe("one-time-code");
+  });
+
+  // DEMO SKIP (PROTOTYPE/DEMO SHORTCUT)
+  it("33. renders secondary 'Lewati untuk Demo' action with explanatory copy on phone entry and OTP entry", async () => {
+    sessionStore.setUser({
+      id: "usr_demo_skip_render",
+      phone: "08123456789",
+      onboardingStatus: "COMPLETED",
+    });
+
+    const { container } = await renderContactVerification("ses_sgd_1");
+
+    // Primary and secondary actions present in phone entry state
+    expect(container.textContent).toContain("Kirim Kode OTP");
+    const skipBtnPhone = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-demo-skip-btn",
+    );
+    expect(skipBtnPhone).not.toBeNull();
+    expect(skipBtnPhone?.textContent).toContain("Lewati untuk Demo");
+    expect(container.textContent).toContain(
+      "Untuk demo, verifikasi nomor dapat dilewati.",
+    );
+
+    // Transition to OTP state
+    const submitBtn = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-submit-btn",
+    )!;
+    await act(async () => {
+      submitBtn.click();
+    });
+
+    expect(container.textContent).toContain("Verifikasi & Lanjut");
+    const skipBtnOtp = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-demo-skip-btn",
+    );
+    expect(skipBtnOtp).not.toBeNull();
+    expect(skipBtnOtp?.textContent).toContain("Lewati untuk Demo");
+  });
+
+  it("34. demo skip completes the checkout roundtrip without verifying phone or inventing OTP records", async () => {
+    const traveler: AuthUser = {
+      id: "usr_demo_skip_flow",
+      name: "Demo Skip Traveler",
+      email: "demoskip@example.com",
+      phone: "08123456789",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    let currentPath = "";
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          MemoryRouter,
+          {
+            initialEntries: [
+              {
+                pathname: "/checkout/ses_sgd_1",
+                state: {
+                  checkoutDraft: {
+                    sessionId: "ses_sgd_1",
+                    participantCount: 2,
+                    policyAcknowledged: true,
+                    idempotencyKey: "k_demo_skip",
+                  },
+                },
+              },
+            ],
+          },
+          createElement(LocationObserver, {
+            onLocation: (p) => {
+              currentPath = p;
+            },
+          }),
+          createElement(Routes, undefined, [
+            createElement(Route, {
+              path: "/checkout/:sessionId",
+              element: createElement(CheckoutScreen),
+            }),
+            createElement(Route, {
+              path: "/checkout/:sessionId/contact",
+              element: createElement(ContactVerificationScreen),
+            }),
+            createElement(Route, {
+              path: "/payment/:bookingId",
+              element: createElement("div", undefined, "Payment Screen Target"),
+            }),
+          ]),
+        ),
+      );
+    });
+
+    expect(container.textContent).toContain("Belum Verifikasi");
+    await act(async () => {
+      Array.from(container.querySelectorAll("button"))
+        .find((b) => b.textContent?.includes("Lanjut ke Pembayaran"))!
+        .click();
+    });
+    expect(currentPath).toBe("/checkout/ses_sgd_1/contact");
+    expect(mockTransactionStore.getBookings()).toHaveLength(0);
+
+    const skipBtn = container.querySelector<HTMLButtonElement>(
+      ".contact-verification-demo-skip-btn",
+    )!;
+    expect(skipBtn).not.toBeNull();
+
+    await act(async () => {
+      skipBtn.click();
+    });
+
+    // 1. Returns traveler to same checkout route
+    expect(currentPath).toBe("/checkout/ses_sgd_1");
+
+    // 2. Preserves matching checkout draft
+    const restoredQty = container.querySelector("#participant-count-val");
+    expect(restoredQty?.textContent).toBe("2");
+    const restoredCb = container.querySelector<HTMLInputElement>(
+      "#cancellation-policy-ack",
+    )!;
+    expect(restoredCb.checked).toBe(true);
+
+    // 3. Does NOT mark phone as verified
+    expect(
+      mockContactVerificationStore.isPhoneVerified(
+        "usr_demo_skip_flow",
+        "08123456789",
+      ),
+    ).toBe(false);
+
+    // 4. Does NOT create fake OTP session records
+    expect(
+      mockOtpSessionStore.getActiveSession("usr_demo_skip_flow"),
+    ).toBeUndefined();
+
+    expect(container.textContent).toContain("Mode demo · Verifikasi dilewati");
+    expect(sessionStore.get().user).toEqual(traveler);
+    expect(mockTransactionStore.getBookings()).toHaveLength(0);
+    expect(mockTransactionStore.getPaymentAttempts()).toHaveLength(0);
+
+    await act(async () => {
+      Array.from(container.querySelectorAll("button"))
+        .find((b) => b.textContent?.includes("Lanjut ke Pembayaran"))!
+        .click();
+    });
+    expect(currentPath).toMatch(/^\/payment\/bk_/);
+    expect(container.textContent).toContain("Payment Screen Target");
+    expect(mockTransactionStore.getBookings()).toHaveLength(1);
+    expect(mockTransactionStore.getBookings()[0]).toMatchObject({
+      travelerId: traveler.id,
+      sessionId: "ses_sgd_1",
+      participantCount: 2,
+      status: "PENDING_PAYMENT",
+    });
+    expect(mockTransactionStore.getPaymentAttempts()).toHaveLength(1);
+    expect(mockTransactionStore.getPaymentAttempts()[0].bookingId).toBe(
+      mockTransactionStore.getBookings()[0].bookingId,
+    );
+    expect(demoContactVerificationBypass.has(traveler.id, "ses_sgd_1")).toBe(
+      false,
+    );
+    expect(
+      mockContactVerificationStore.getVerifiedPhone(traveler.id),
+    ).toBeUndefined();
+    expect(mockOtpSessionStore.getActiveSession(traveler.id)).toBeUndefined();
+  });
+
+  it("35. demo bypass is isolated by traveler and session and consumed only on success", async () => {
+    const traveler: AuthUser = {
+      id: "demo_scoped",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+    const adapter = new MockCheckoutAdapter();
+    const input = {
+      travelerId: traveler.id,
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      expectedUnitPricePerPerson: 275000,
+      cancellationPolicyAcknowledged: true,
+      idempotencyKey: "demo-scoped",
+    };
+    expect((await adapter.submitCheckout(input)).status).toBe(
+      "CONTACT_VERIFICATION_REQUIRED",
+    );
+    demoContactVerificationBypass.register(traveler.id, input.sessionId);
+    expect(
+      (await adapter.getCheckout(input.sessionId)).contactRequirement,
+    ).toMatchObject({
+      phoneVerified: false,
+      demoContactVerificationBypass: true,
+    });
+    expect(
+      (await adapter.submitCheckout({ ...input, sessionId: "ses_sgd_2" }))
+        .status,
+    ).toBe("CONTACT_VERIFICATION_REQUIRED");
+    const otherTraveler = new MockCheckoutAdapter({
+      travelerOverride: { ...traveler, id: "other" },
+    });
+    expect(
+      (await otherTraveler.submitCheckout({ ...input, travelerId: "other" }))
+        .status,
+    ).toBe("CONTACT_VERIFICATION_REQUIRED");
+    expect(
+      (
+        await adapter.submitCheckout({
+          ...input,
+          expectedUnitPricePerPerson: 1,
+        })
+      ).status,
+    ).toBe("PRICE_CHANGED");
+    expect(
+      demoContactVerificationBypass.has(traveler.id, input.sessionId),
+    ).toBe(true);
+    const result = await adapter.submitCheckout(input);
+    expect(result.status).toBe("SUCCESS");
+    expect(
+      demoContactVerificationBypass.has(traveler.id, input.sessionId),
+    ).toBe(false);
+    expect(await adapter.submitCheckout(input)).toEqual(result);
+    expect(mockTransactionStore.getBookings()).toHaveLength(1);
+    expect(mockTransactionStore.getPaymentAttempts()).toHaveLength(1);
+    expect(
+      mockContactVerificationStore.getVerifiedPhone(traveler.id),
+    ).toBeUndefined();
+  });
+
+  it("36. demo permission is reset with traveler logout, account change and demo reset", () => {
+    const traveler: AuthUser = {
+      id: "demo_reset",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+    demoContactVerificationBypass.register(traveler.id, "ses_sgd_1");
+    sessionStore.setUser({ ...traveler });
+    expect(demoContactVerificationBypass.has(traveler.id, "ses_sgd_1")).toBe(
+      true,
+    );
+    sessionStore.setUser(null);
+    expect(demoContactVerificationBypass.has(traveler.id, "ses_sgd_1")).toBe(
+      false,
+    );
+    demoContactVerificationBypass.register(traveler.id, "ses_sgd_1");
+    sessionStore.setUser({ ...traveler, id: "other" });
+    expect(demoContactVerificationBypass.has(traveler.id, "ses_sgd_1")).toBe(
+      false,
+    );
+    demoContactVerificationBypass.register("other", "ses_sgd_1");
+    sessionStore.reset();
+    expect(demoContactVerificationBypass.has("other", "ses_sgd_1")).toBe(false);
+  });
+
+  it("37. adapters without explicit demo capability do not expose skip", async () => {
+    const mock = new MockContactVerificationAdapter();
+    const adapter: ContactVerificationAdapter = {
+      getVerificationContext: mock.getVerificationContext.bind(mock),
+      requestOtp: mock.requestOtp.bind(mock),
+      verifyOtp: mock.verifyOtp.bind(mock),
+      invalidateOtpSession: mock.invalidateOtpSession.bind(mock),
+    };
+    sessionStore.setUser({
+      id: "non_demo",
+      phone: "08123456789",
+      onboardingStatus: "COMPLETED",
+    });
+    await renderContactVerification("ses_sgd_1", { adapter });
+    expect(
+      container.querySelector(".contact-verification-demo-skip-btn"),
+    ).toBeNull();
+    await act(async () => {
+      container
+        .querySelector<HTMLButtonElement>(".contact-verification-submit-btn")!
+        .click();
+    });
+    expect(container.querySelector("#contact-otp-input")).not.toBeNull();
+    expect(
+      container.querySelector(".contact-verification-demo-skip-btn"),
+    ).toBeNull();
   });
 });

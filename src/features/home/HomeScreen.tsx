@@ -179,22 +179,27 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
           </div>
         ) : recPkg && recItem ? (
           <div className="home-hero-card">
-            <div
-              className="home-hero-card__visual"
-              style={{
-                backgroundImage: `url("${getPackageVisual(recPkg.id, recPkg.destinationName).svgDataUri}")`,
-              }}
-              role="img"
-              aria-label={`Ilustrasi suasana ${recPkg.title}`}
-            >
-              <div className="home-hero-card__visual-scrim" />
+            <div className="home-hero-card__visual">
+              <img
+                src={
+                  getPackageVisual(recPkg.id, recPkg.destinationName).svgDataUri
+                }
+                alt={`Ilustrasi suasana ${recPkg.title}`}
+                width={800}
+                height={500}
+                fetchPriority="high"
+              />
+              <div
+                className="home-hero-card__visual-scrim"
+                aria-hidden="true"
+              />
               <div className="home-hero-card__visual-badges">
                 <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>
                   {recMode === "FALLBACK"
                     ? "Pilihan terdekat"
                     : "Pilihan utama"}
                 </Badge>
-                <Badge tone="neutral">
+                <Badge tone="success">
                   {recPkg.verificationLevel === "PLUS"
                     ? "Terverifikasi Plus"
                     : "Terverifikasi Dasar"}

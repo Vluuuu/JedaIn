@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Badge, Button } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
@@ -91,6 +92,20 @@ export function EoPackageDetailScreen() {
 
       {/* 2. Detail Header: Title, Value Prop, Metadata & Actions */}
       <header className="eo-pkg-detail-header">
+        <div
+          className="eo-pkg-detail-header__visual"
+          style={{
+            backgroundImage: `url("${getPackageVisual(pkg.packageId, destination?.name).svgDataUri}")`,
+          }}
+          role="img"
+          aria-label={`Ilustrasi suasana ${pkg.title}`}
+        >
+          <div
+            className="eo-pkg-detail-header__visual-scrim"
+            aria-hidden="true"
+          />
+        </div>
+
         <div className="eo-pkg-detail-header__main">
           <div className="eo-pkg-detail-header__meta">
             <Badge tone={getStatusBadgeTone(pkg.status)}>

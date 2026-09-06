@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { getHumanStatusLabel, getStatusBadgeTone } from "./packageHelpers";
@@ -244,7 +245,7 @@ export function EoPackagesScreen() {
 
   return (
     <div className="eo-packages-container">
-      {/* 1. Header */}
+      {/* 1. Header with Primary Action Spotlight */}
       <header className="eo-packages-header">
         <div className="eo-packages-header__main">
           <h1>Paket Experience</h1>
@@ -253,14 +254,39 @@ export function EoPackagesScreen() {
           </p>
         </div>
 
-        <Button
-          type="button"
-          variant="primary"
-          size="md"
-          onClick={() => navigate("/partner/eo/packages/new")}
+        {/* Primary Action Spotlight */}
+        <aside
+          className="eo-action-spotlight"
+          aria-label="Aksi utama paket experience"
         >
-          + Buat Paket Baru
-        </Button>
+          <div className="eo-action-spotlight__copy">
+            <span className="eo-action-spotlight__tag">Aksi Utama</span>
+            <p className="eo-action-spotlight__desc">
+              Mulai rancang experience baru untuk traveler.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="eo-action-spotlight__btn"
+            onClick={() => navigate("/partner/eo/packages/new")}
+            aria-label="Buat Paket Baru"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className="eo-action-spotlight__btn-icon"
+            >
+              <line x1="10" y1="4" x2="10" y2="16" />
+              <line x1="4" y1="10" x2="16" y2="10" />
+            </svg>
+            <span>Buat Paket Baru</span>
+          </button>
+        </aside>
       </header>
 
       {/* 2. Segmented Lifecycle Filter Navigation */}
@@ -348,7 +374,8 @@ export function EoPackagesScreen() {
               const destination = mockDestinationStore.getById(
                 pkg.destinationId,
               );
-              const destinationImg = destination?.imageUrl;
+              const visual = getPackageVisual(pkg.packageId, destination?.name);
+              const destinationImg = destination?.imageUrl || visual.svgDataUri;
 
               return (
                 <article
@@ -356,17 +383,14 @@ export function EoPackagesScreen() {
                   className="eo-pkg-card"
                   aria-label={`Paket: ${pkg.title}`}
                 >
-                  {/* Visual Context: Source-backed destination image */}
+                  {/* Visual Context: Source-backed destination image or visual asset */}
                   <div className="eo-pkg-card__media">
-                    {destinationImg ? (
-                      <img
-                        src={destinationImg}
-                        alt={`Destinasi ${destination?.name ?? "paket"}`}
-                        className="eo-pkg-card__img"
-                      />
-                    ) : (
-                      <div className="eo-pkg-card__img-placeholder" />
-                    )}
+                    <img
+                      src={destinationImg}
+                      alt={`Destinasi ${destination?.name ?? "paket"}`}
+                      className="eo-pkg-card__img"
+                      loading="lazy"
+                    />
                   </div>
 
                   {/* Main Context: Identity, Destination, Duration */}

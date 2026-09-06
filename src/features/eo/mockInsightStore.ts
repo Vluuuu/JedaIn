@@ -416,6 +416,11 @@ export function matchesPeriod(
     return eventDate >= "2026-09-01" && eventDate <= asOf;
   }
 
+  if (options.period === "THIS_YEAR") {
+    // Year starts 2026-01-01 to 2026-09-05 (covers all 2026 prototype data)
+    return eventDate >= "2026-01-01" && eventDate <= asOf;
+  }
+
   if (options.period === "CUSTOM") {
     const start = options.customRange?.startDate;
     const end = options.customRange?.endDate;

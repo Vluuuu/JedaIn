@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
 import { defaultPaymentAdapter } from "./mockAdapter";
 import type { PaymentAdapter, PaymentResultViewModel } from "./types";
@@ -77,6 +78,10 @@ export function PaymentResultScreen({
       : undefined;
 
   if (result.status === "SUCCESS") {
+    const visual = getPackageVisual(
+      pkg?.id ?? booking.packageId,
+      pkg?.destinationName,
+    );
     return (
       <div className="payment-container payment-result-container">
         <div className="payment-result-header">
@@ -110,15 +115,25 @@ export function PaymentResultScreen({
           className="payment-summary-card"
           aria-label="Informasi pesanan terkonfirmasi"
         >
-          <div className="payment-summary-card__header">
-            <h2 className="payment-summary-card__title">
-              {pkg?.title ?? booking.packageId}
-            </h2>
-            {pkg?.destinationName && (
-              <p className="payment-summary-card__meta">
-                {pkg.destinationName} • {pkg.locationLabel}
-              </p>
-            )}
+          <div className="payment-summary-card__header payment-summary-card__header--compact">
+            <div className="payment-summary-card__thumb">
+              <img
+                src={visual.svgDataUri}
+                alt={`Ilustrasi ${pkg?.title ?? booking.packageId}`}
+                width={800}
+                height={500}
+              />
+            </div>
+            <div className="payment-summary-card__identity">
+              <h2 className="payment-summary-card__title">
+                {pkg?.title ?? booking.packageId}
+              </h2>
+              {pkg?.destinationName && (
+                <p className="payment-summary-card__meta">
+                  {pkg.destinationName} • {pkg.locationLabel}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="payment-summary-card__facts">

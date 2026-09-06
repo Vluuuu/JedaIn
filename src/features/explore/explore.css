@@ -408,18 +408,27 @@
 
 .explore-package-card__visual {
   position: relative;
-  height: 12rem;
-  background-size: cover;
-  background-position: center;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
   padding: var(--space-3);
   display: flex;
   align-items: flex-end;
   box-sizing: border-box;
 }
 
+.explore-package-card__visual img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .explore-package-card__visual-scrim {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(
     to top,
     rgba(15, 33, 23, 0.75) 0%,

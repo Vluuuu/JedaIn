@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
 import { defaultPaymentAdapter } from "./mockAdapter";
 import type { PaymentAdapter, PaymentState, PaymentViewModel } from "./types";
@@ -212,6 +213,10 @@ export function PaymentScreen({
   }
 
   const { booking, package: pkg, session } = viewModel;
+  const visual = getPackageVisual(
+    pkg?.id ?? booking.packageId,
+    pkg?.destinationName,
+  );
   const sessionDateLabel =
     session?.startAt && session?.endAt
       ? formatSessionDateTimeRange(session.startAt, session.endAt).dateLabel
@@ -252,14 +257,24 @@ export function PaymentScreen({
       {/* Booking Summary Section */}
       <section className="payment-summary-card" aria-label="Informasi pesanan">
         <div className="payment-summary-card__header">
-          <h2 className="payment-summary-card__title">
-            {pkg?.title ?? booking.packageId}
-          </h2>
-          {pkg?.destinationName && (
-            <p className="payment-summary-card__meta">
-              {pkg.destinationName} • {pkg.locationLabel}
-            </p>
-          )}
+          <div className="payment-summary-card__thumb">
+            <img
+              src={visual.svgDataUri}
+              alt={`Ilustrasi ${pkg?.title ?? booking.packageId}`}
+              width={800}
+              height={500}
+            />
+          </div>
+          <div className="payment-summary-card__identity">
+            <h2 className="payment-summary-card__title">
+              {pkg?.title ?? booking.packageId}
+            </h2>
+            {pkg?.destinationName && (
+              <p className="payment-summary-card__meta">
+                {pkg.destinationName} • {pkg.locationLabel}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="payment-summary-card__facts">

@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { App } from "../../App";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { sessionStore } from "../onboarding/sessionStore";
 import { ExploreScreen } from "./ExploreScreen";
 import { MockExploreAdapter } from "./mockAdapter";
@@ -80,6 +81,36 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
     expect(view.textContent).toContain("Weekend Nature Reset");
     expect(view.textContent).toContain("Ruang Kreatif Desa");
     expect(view.textContent).toContain("Jelajah Santai Pegunungan");
+  });
+
+  it("renders each package image with its verification and rating overlays", async () => {
+    const view = await renderExplore();
+    const cards = view.querySelectorAll<HTMLAnchorElement>(
+      ".explore-package-card",
+    );
+    expect(cards).toHaveLength(5);
+    for (const card of cards) {
+      const id = card.getAttribute("href")!.split("/").at(-1)!;
+      const image = card.querySelector<HTMLImageElement>(
+        ".explore-package-card__visual img",
+      );
+      expect(image?.getAttribute("src")).toBe(getPackageVisual(id).svgDataUri);
+      expect(image?.alt).toBe(
+        `Ilustrasi suasana ${card.querySelector("h3")!.textContent}`,
+      );
+      expect(
+        card.querySelector(".explore-package-card__badges")?.textContent,
+      ).toContain("Terverifikasi");
+      const badge = card.querySelector(
+        ".explore-package-card__badges .ui-badge--success",
+      );
+      expect(badge).not.toBeNull();
+      expect(badge?.textContent).toContain("✓");
+      expect(badge?.textContent).toContain("Terverifikasi");
+      expect(
+        card.querySelector(".explore-package-card__rating-pill"),
+      ).not.toBeNull();
+    }
   });
 
   it("prefills search input and filters results when query URL param is present", async () => {

@@ -18,15 +18,17 @@ export function PackageCard({ packageData }: PackageCardProps) {
 
   return (
     <Link to={`/packages/${packageData.id}`} className="home-package-card">
-      <div
-        className="home-package-card__visual"
-        style={{ backgroundImage: `url("${visual.svgDataUri}")` }}
-        role="img"
-        aria-label={`Ilustrasi suasana ${packageData.title}`}
-      >
-        <div className="home-package-card__visual-scrim" />
+      <div className="home-package-card__visual">
+        <img
+          src={visual.svgDataUri}
+          alt={`Ilustrasi suasana ${packageData.title}`}
+          width={800}
+          height={500}
+          loading="lazy"
+        />
+        <div className="home-package-card__visual-scrim" aria-hidden="true" />
         <div className="home-package-card__badges">
-          <Badge tone="neutral">
+          <Badge tone="success">
             {packageData.verificationLevel === "PLUS"
               ? "Terverifikasi Plus"
               : "Terverifikasi Dasar"}

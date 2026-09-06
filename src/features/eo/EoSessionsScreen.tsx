@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
+import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Badge, Button } from "../../components/ui";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { partnerSessionStore } from "./partnerSessionStore";
@@ -32,6 +33,15 @@ export function EoSessionsScreen() {
   const [formError, setFormError] = useState<string | undefined>();
   const [refreshVersion, setRefreshVersion] = useState<number>(0);
 
+  const sessions = useMemo(() => {
+    if (isForeignPackage) return [];
+    if (selectedPackageId) {
+      return mockEoPackageStore.getSessionsByPackage(selectedPackageId);
+    }
+    return mockEoPackageStore.getSessionsByEo(eoId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPackageId, eoId, refreshVersion, isForeignPackage]);
+
   if (isForeignPackage) {
     return (
       <div className="eo-container">
@@ -43,24 +53,14 @@ export function EoSessionsScreen() {
           <p style={{ color: "var(--color-text-secondary)" }}>
             Paket ini tidak ditemukan atau bukan milik akun EO Anda.
           </p>
-          <Link
-            to="/partner/eo/packages"
-            style={{
-              color: "var(--color-brand-primary)",
-              fontWeight: 600,
-              fontSize: "var(--font-size-body-sm)",
-            }}
-          >
-            &larr; Kembali ke Daftar Paket
+          <Link to="/partner/eo/packages" className="eo-back-btn">
+            <ArrowLeftIcon className="eo-back-icon" />
+            <span>Kembali ke Daftar Paket</span>
           </Link>
         </div>
       </div>
     );
   }
-
-  const sessions = selectedPackageId
-    ? mockEoPackageStore.getSessionsByPackage(selectedPackageId)
-    : mockEoPackageStore.getSessionsByEo(eoId);
 
   const selectedPkg = allEoPackages.find(
     (p) => p.packageId === selectedPackageId,
@@ -106,6 +106,22 @@ export function EoSessionsScreen() {
 
   return (
     <div className="eo-container" data-version={refreshVersion}>
+      {/* Contextual back navigation only when opened for a specific package */}
+      {packageId && (
+        <nav
+          className="eo-pkg-detail-back-nav"
+          aria-label="Navigasi kembali ke paket"
+        >
+          <Link
+            to={`/partner/eo/packages/${packageId}`}
+            className="eo-pkg-detail-back-link"
+          >
+            <ArrowLeftIcon className="eo-pkg-detail-back-icon" />
+            <span>Kembali ke Paket</span>
+          </Link>
+        </nav>
+      )}
+
       <header className="eo-page-header">
         <div>
           <Badge tone="info">Manajemen Jadwal Keberangkatan</Badge>
@@ -149,11 +165,11 @@ export function EoSessionsScreen() {
             <select
               id="package-session-filter"
               className="eo-form-select"
-              style={{ maxWidth: "360px" }}
+              style={{ maxWidth: "350px" }}
               value={selectedPackageId}
               onChange={(e) => setSelectedPackageId(e.target.value)}
             >
-              <option value="">-- Semua Sesi EO --</option>
+              <option value="">Semua Paket Milik Saya</option>
               {allEoPackages.map((p) => (
                 <option key={p.packageId} value={p.packageId}>
                   {p.title} ({p.status})
@@ -164,8 +180,22 @@ export function EoSessionsScreen() {
         </div>
       )}
 
-      {/* Sessions Table */}
-      <section className="eo-section" aria-label="Daftar jadwal sesi">
+      {/* Sessions List */}
+      <section className="eo-section" aria-label="Daftar sesi">
+        <div className="eo-section-header">
+          <h2 className="eo-section-title">
+            Daftar Sesi ({selectedPkg ? selectedPkg.title : "Semua Sesi"})
+          </h2>
+          <span
+            style={{
+              fontSize: "var(--font-size-caption)",
+              color: "var(--color-text-secondary)",
+            }}
+          >
+            Total: {sessions.length} Sesi Terbuka / Terjadwal
+          </span>
+        </div>
+
         {sessions.length === 0 ? (
           <div
             style={{
@@ -174,7 +204,7 @@ export function EoSessionsScreen() {
               color: "var(--color-text-muted)",
             }}
           >
-            <p>Belum ada sesi jadwal yang dibuka untuk paket ini.</p>
+            <p>Belum ada jadwal sesi yang dibuat.</p>
             {eligiblePackages.length > 0 ? (
               <Button
                 type="button"
@@ -182,12 +212,17 @@ export function EoSessionsScreen() {
                 size="md"
                 onClick={() => setShowAddModal(true)}
               >
-                Buka Jadwal Pertama
+                Buka Sesi Pertama
               </Button>
             ) : (
-              <p style={{ fontSize: "var(--font-size-caption)" }}>
-                Hanya paket berstatus APPROVED atau LIVE yang dapat membuka
-                jadwal.
+              <p
+                style={{
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-warning-text)",
+                }}
+              >
+                Sesi hanya dapat dibuka untuk paket yang sudah disetujui
+                (APPROVED / LIVE).
               </p>
             )}
           </div>
@@ -196,144 +231,152 @@ export function EoSessionsScreen() {
             <table className="eo-table">
               <thead>
                 <tr>
-                  <th>Waktu Keberangkatan</th>
-                  <th>Paket</th>
+                  <th>Tanggal & Waktu</th>
                   <th>Kapasitas</th>
-                  <th>Sisa Slot</th>
-                  <th>Harga / Orang</th>
+                  <th>Slot Tersedia</th>
+                  <th>Harga Sesi</th>
                   <th>Status</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {sessions.map((s) => {
-                  const pkg = allEoPackages.find(
-                    (p) => p.packageId === s.packageId,
-                  );
-                  const startLabel = new Date(s.startAt).toLocaleString(
-                    "id-ID",
-                    {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    },
-                  );
-                  return (
-                    <tr key={s.sessionId}>
-                      <td>
-                        <strong>{startLabel} WIB</strong>
-                      </td>
-                      <td>{pkg?.title ?? s.packageId}</td>
-                      <td>{s.capacity} Orang</td>
-                      <td>
-                        <strong>{s.remainingSlots}</strong> / {s.capacity}
-                      </td>
-                      <td>Rp{s.pricePerPerson.toLocaleString("id-ID")}</td>
-                      <td>
-                        <Badge
-                          tone={
-                            s.status === "OPEN"
-                              ? "success"
-                              : s.status === "FULL"
-                                ? "warning"
-                                : "neutral"
+                {sessions.map((ses) => (
+                  <tr key={ses.sessionId}>
+                    <td>
+                      <strong>
+                        {new Date(ses.startAt).toLocaleDateString("id-ID", {
+                          weekday: "short",
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </strong>
+                      <div
+                        style={{
+                          fontSize: "var(--font-size-caption)",
+                          color: "var(--color-text-secondary)",
+                        }}
+                      >
+                        {new Date(ses.startAt).toLocaleTimeString("id-ID", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        -{" "}
+                        {new Date(ses.endAt).toLocaleTimeString("id-ID", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        WIB
+                      </div>
+                    </td>
+                    <td>{ses.capacity} orang</td>
+                    <td>
+                      <Badge
+                        tone={ses.remainingSlots === 0 ? "danger" : "info"}
+                      >
+                        {ses.remainingSlots} tersisa
+                      </Badge>
+                    </td>
+                    <td>Rp{ses.pricePerPerson.toLocaleString("id-ID")}</td>
+                    <td>
+                      <Badge
+                        tone={
+                          ses.status === "OPEN"
+                            ? "success"
+                            : ses.status === "FULL"
+                              ? "warning"
+                              : "neutral"
+                        }
+                      >
+                        {ses.status}
+                      </Badge>
+                    </td>
+                    <td>
+                      {ses.status === "OPEN" ? (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() =>
+                            handleToggleStatus(ses.sessionId, "CLOSED")
                           }
                         >
-                          {s.status}
-                        </Badge>
-                      </td>
-                      <td>
-                        <div style={{ display: "flex", gap: "var(--space-2)" }}>
-                          {s.status === "OPEN" && (
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              size="sm"
-                              onClick={() =>
-                                handleToggleStatus(s.sessionId, "CLOSED")
-                              }
-                            >
-                              Tutup Sesi
-                            </Button>
-                          )}
-                          {s.status === "CLOSED" && (
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              size="sm"
-                              onClick={() =>
-                                handleToggleStatus(s.sessionId, "OPEN")
-                              }
-                            >
-                              Buka Sesi
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                          Tutup Sesi
+                        </Button>
+                      ) : ses.status === "CLOSED" ? (
+                        <Button
+                          type="button"
+                          variant="primary"
+                          size="sm"
+                          onClick={() =>
+                            handleToggleStatus(ses.sessionId, "OPEN")
+                          }
+                        >
+                          Buka Sesi
+                        </Button>
+                      ) : (
+                        <span
+                          style={{
+                            fontSize: "var(--font-size-caption)",
+                            color: "var(--color-text-muted)",
+                          }}
+                        >
+                          Penuh
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         )}
       </section>
 
-      {/* Modal Buka Sesi Baru */}
+      {/* Add Session Modal / Dialog */}
       {showAddModal && (
-        <div
-          className="payment-modal-backdrop"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="session-modal-title"
-        >
-          <div className="payment-modal" style={{ maxWidth: "480px" }}>
-            <h2
-              id="session-modal-title"
-              style={{
-                margin: "0 0 var(--space-3)",
-                fontSize: "var(--font-size-heading-md)",
-              }}
-            >
-              Buka Jadwal Sesi Baru
-            </h2>
+        <div className="eo-modal-backdrop" role="dialog" aria-modal="true">
+          <div className="eo-modal">
+            <div className="eo-modal-header">
+              <h2 className="eo-modal-title">Buka Sesi Keberangkatan Baru</h2>
+              <button
+                type="button"
+                className="eo-modal-close"
+                onClick={() => setShowAddModal(false)}
+                aria-label="Tutup modal"
+              >
+                ✕
+              </button>
+            </div>
 
             {formError && (
               <div
                 className="eo-alert eo-alert--error"
-                style={{ marginBottom: "var(--space-3)" }}
+                style={{ margin: "var(--space-4)" }}
+                role="alert"
               >
                 {formError}
               </div>
             )}
 
-            <form
-              onSubmit={handleCreateSession}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-3)",
-              }}
-            >
+            <form onSubmit={handleCreateSession} className="eo-modal-body">
               <div className="eo-form-group">
-                <label className="eo-form-label">
-                  Paket Experience (Hanya APPROVED / LIVE):
+                <label
+                  htmlFor="session-package-select"
+                  className="eo-form-label"
+                >
+                  Paket Experience *
                 </label>
                 <select
+                  id="session-package-select"
                   required
                   className="eo-form-select"
                   value={selectedPackageId}
                   onChange={(e) => setSelectedPackageId(e.target.value)}
                 >
-                  <option value="" disabled>
-                    Pilih paket...
-                  </option>
                   {eligiblePackages.map((p) => (
                     <option key={p.packageId} value={p.packageId}>
-                      {p.title} (Rp
+                      {p.title} (Harga: Rp
                       {p.pricing.customerPrice.toLocaleString("id-ID")})
                     </option>
                   ))}
@@ -341,10 +384,11 @@ export function EoSessionsScreen() {
               </div>
 
               <div className="eo-form-group">
-                <label className="eo-form-label">
-                  Waktu Mulai Keberangkatan:
+                <label htmlFor="session-start-input" className="eo-form-label">
+                  Waktu Mulai Keberangkatan *
                 </label>
                 <input
+                  id="session-start-input"
                   type="datetime-local"
                   required
                   className="eo-form-input"
@@ -354,8 +398,11 @@ export function EoSessionsScreen() {
               </div>
 
               <div className="eo-form-group">
-                <label className="eo-form-label">Waktu Selesai:</label>
+                <label htmlFor="session-end-input" className="eo-form-label">
+                  Estimasi Waktu Selesai *
+                </label>
                 <input
+                  id="session-end-input"
                   type="datetime-local"
                   required
                   className="eo-form-input"
@@ -365,28 +412,22 @@ export function EoSessionsScreen() {
               </div>
 
               <div className="eo-form-group">
-                <label className="eo-form-label">
-                  Kapasitas Maksimal Peserta:
+                <label htmlFor="session-capacity" className="eo-form-label">
+                  Kapasitas Peserta (Maksimal) *
                 </label>
                 <input
+                  id="session-capacity"
                   type="number"
                   min={1}
-                  max={50}
+                  max={30}
                   required
                   className="eo-form-input"
                   value={capacity}
-                  onChange={(e) => setCapacity(Number(e.target.value) || 1)}
+                  onChange={(e) => setCapacity(Number(e.target.value) || 6)}
                 />
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "var(--space-2)",
-                  marginTop: "var(--space-3)",
-                }}
-              >
+              <div className="eo-modal-footer">
                 <Button
                   type="button"
                   variant="secondary"

@@ -66,11 +66,12 @@ describe("App shell routing", () => {
     for (const path of ["/partner/eo/login", "/eo/login"]) {
       const markup = renderRoute(path);
 
-      expect(markup).toContain("EO Workspace");
-      expect(markup).toContain("Masuk sebagai Event Organizer");
-      expect(markup).toContain("Masuk ke EO Workspace");
-      expect(markup).toContain("Masuk sebagai EO Demo");
+      expect(markup).toContain("Portal Event Organizer");
+      expect(markup).toContain("Kelola paket dan perjalanan JedaIn");
+      expect(markup).toContain("Masuk ke akun EO");
+      expect(markup).toContain("Buka akun demo");
       expect(markup).toContain("Jeda Alam Nusantara");
+      expect(markup).not.toContain("EO Workspace");
       expect(markup).not.toContain("Mitra Destinasi");
     }
   });

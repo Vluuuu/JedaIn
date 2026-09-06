@@ -1,19 +1,52 @@
-import { Link } from "react-router";
 import { Badge } from "../../components/ui";
-import { mockTransactionStore } from "../checkout/mockTransactionStore";
-import { mockEoPackageStore } from "../eo/mockEoPackageStore";
-import { mockReviewStore } from "../reviews/mockReviewStore";
+import { getDestinationVisual } from "../../lib/assets/packageImages";
+import type { EoSessionStatus } from "../eo/types";
+import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import {
-  getDestinationReviewTargetRef,
-  resolveAuthenticatedDestinationContext,
-} from "./destinationContext";
+  destinationSessionStatusLabels,
+  getDestinationOverviewData,
+} from "./destinationOverviewData";
 import "./destination.css";
+
+const dateFormatter = new Intl.DateTimeFormat("id-ID", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "Asia/Jakarta",
+});
+
+const timeFormatter = new Intl.DateTimeFormat("id-ID", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+  timeZone: "Asia/Jakarta",
+});
+
+const reviewDateFormatter = new Intl.DateTimeFormat("id-ID", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "Asia/Jakarta",
+});
+
+const statusTones: Record<
+  EoSessionStatus,
+  "success" | "warning" | "neutral" | "danger"
+> = {
+  OPEN: "success",
+  FULL: "warning",
+  CLOSED: "neutral",
+  CANCELLED: "danger",
+};
+
+const formatCurrency = (value: number) => `Rp${value.toLocaleString("id-ID")}`;
 
 export function DestinationOverviewScreen() {
   const context = resolveAuthenticatedDestinationContext();
   if (!context) {
     return (
-      <div className="dest-container" style={{ padding: "var(--space-8)" }}>
+      <div className="dest-container dest-unavailable">
         <div className="admin-alert admin-alert--warning">
           <h2>Data Destinasi Tidak Tersedia</h2>
           <p>
@@ -25,241 +58,363 @@ export function DestinationOverviewScreen() {
     );
   }
 
-  const { destination, partner } = context;
-  const destinationIdentityId = destination.destinationId;
-
-  // Find all packages using this destination
-  const allPackages = mockEoPackageStore.getAllPackages();
-  const venuePackages = allPackages.filter(
-    (p) => p.destinationId === destinationIdentityId,
-  );
-  const venuePackageIds = new Set(venuePackages.map((p) => p.packageId));
-
-  // Find all sessions using this venue
-  const allSessions = mockEoPackageStore.getAllSessions();
-  const venueSessions = allSessions.filter((s) =>
-    venuePackageIds.has(s.packageId),
-  );
-  const openSessions = venueSessions.filter((s) => s.status === "OPEN");
-
-  // Booked participants from shared transaction store
-  const allBookings = mockTransactionStore.getBookings();
-  const venueBookings = allBookings.filter(
-    (b) =>
-      venuePackageIds.has(b.packageId) &&
-      (b.status === "PAID" || b.status === "COMPLETED"),
-  );
-  const confirmedParticipants = venueBookings.reduce(
-    (sum, b) => sum + b.bookedQuantity,
-    0,
-  );
-
-  // Reviews for this destination using centralized resolver
-  const reviewTarget = getDestinationReviewTargetRef(destination);
-  const venueReviews = reviewTarget
-    ? mockReviewStore.getReviewsForDestination(reviewTarget)
-    : [];
-  const avgRating =
-    venueReviews.length > 0
-      ? (
-          venueReviews.reduce((sum, r) => sum + r.rating, 0) /
-          venueReviews.length
-        ).toFixed(1)
-      : undefined;
-
-  // Profile completeness calculation (6 core fields)
-  const checklist = [
-    Boolean(destination.name),
-    Boolean(destination.locationLabel),
-    Boolean(destination.description),
-    Boolean(destination.highlights && destination.highlights.length > 0),
-    Boolean(destination.baseCostPerPerson && destination.baseCostPerPerson > 0),
-    Boolean(
-      destination.capacityPerSession && destination.capacityPerSession > 0,
-    ),
-  ];
-  const completedItems = checklist.filter(Boolean).length;
-  const totalItems = checklist.length;
+  const { destination, partner, application } = context;
+  const data = getDestinationOverviewData(destination);
+  const verificationLabel =
+    destination.verificationLevel === "PLUS"
+      ? "Terverifikasi Plus"
+      : "Terverifikasi Dasar";
+  const visual = getDestinationVisual(destination.name);
 
   return (
-    <div className="dest-container">
-      <header className="dest-page-header">
-        <div>
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-2)",
-              alignItems: "center",
-              marginBottom: "var(--space-1)",
-            }}
-          >
-            <Badge tone="success">
-              Mitra Destinasi Terverifikasi ({destination.verificationLevel})
+    <div className="dest-container dest-overview">
+      <header className="dest-identity">
+        <div className="dest-identity__content">
+          <div className="dest-identity__heading">
+            <h1 className="dest-page-title">{destination.name}</h1>
+            <p className="dest-identity__location">
+              {destination.locationLabel}
+            </p>
+          </div>
+
+          <p className="dest-identity__manager">
+            <span>Pengelola</span>
+            <strong>
+              {application.managementName ??
+                partner.businessName ??
+                "Pengelola kawasan"}
+            </strong>
+          </p>
+
+          <div className="dest-identity__badges" aria-label="Status destinasi">
+            <Badge tone="success" showSymbol={false}>
+              {verificationLabel}
             </Badge>
-            <Badge tone={destination.guideReady ? "success" : "neutral"}>
-              {destination.guideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
+            <Badge tone="neutral" showSymbol={false}>
+              Pemandu lokal tersedia
             </Badge>
           </div>
-          <h1 className="dest-page-title">{destination.name}</h1>
-          <p className="dest-page-subtitle">
-            {destination.locationLabel} • Pengelola:{" "}
-            <strong>{partner.businessName ?? "Pengelola Kawasan"}</strong>
-          </p>
+        </div>
+
+        <div className="dest-identity__media" aria-hidden="true">
+          <img src={visual.svgDataUri} alt="" />
         </div>
       </header>
 
-      {/* KPI Stats Grid */}
       <section
-        className="dest-stats-grid"
-        aria-label="Ringkasan operasional venue"
+        className="dest-metric-band"
+        aria-label="Ringkasan operasional destinasi"
       >
-        <div className="dest-stat-card">
-          <span className="dest-stat-label">Sesi Jadwal Aktif</span>
-          <strong className="dest-stat-value">{openSessions.length}</strong>
-          <span className="dest-stat-desc">Dijadwalkan oleh mitra EO</span>
+        <div className="dest-metric-item">
+          <span className="dest-metric-label">Jadwal Mendatang</span>
+          <strong className="dest-metric-value">
+            {data.upcomingSessions.length}
+          </strong>
+          <span className="dest-metric-desc">Sesi di destinasi ini</span>
         </div>
 
-        <div className="dest-stat-card">
-          <span className="dest-stat-label">Peserta Terkonfirmasi</span>
-          <strong className="dest-stat-value">{confirmedParticipants}</strong>
-          <span className="dest-stat-desc">Total peserta terkonfirmasi</span>
+        <div className="dest-metric-item">
+          <span className="dest-metric-label">Peserta Terkonfirmasi</span>
+          <strong className="dest-metric-value">
+            {data.confirmedParticipants}
+          </strong>
+          <span className="dest-metric-desc">
+            Dari pembayaran terkonfirmasi
+          </span>
         </div>
 
-        <div className="dest-stat-card">
-          <span className="dest-stat-label">Kapasitas Maksimal Venue</span>
-          <strong className="dest-stat-value">
+        <div className="dest-metric-item">
+          <span className="dest-metric-label">Kapasitas per Sesi</span>
+          <strong className="dest-metric-value">
             {destination.capacityPerSession}
           </strong>
-          <span className="dest-stat-desc">Batas orang / sesi tenang</span>
+          <span className="dest-metric-desc">Orang per sesi</span>
         </div>
 
-        <div className="dest-stat-card">
-          <span className="dest-stat-label">Rating Ulasan Destinasi</span>
+        <div className="dest-metric-item">
+          <span className="dest-metric-label">Rating Destinasi</span>
           <strong
-            className="dest-stat-value"
-            style={{ color: "var(--color-sand-700)" }}
+            className={`dest-metric-value${data.averageRating ? "" : " dest-metric-value--empty"}`}
           >
-            {avgRating ? `★ ${avgRating}` : "—"}
+            {data.averageRating ? `${data.averageRating} / 5` : "Belum ada"}
           </strong>
-          <span className="dest-stat-desc">
-            {venueReviews.length > 0
-              ? `${venueReviews.length} ulasan traveler`
-              : "Belum ada ulasan"}
+          <span className="dest-metric-desc">
+            {data.reviews.length > 0
+              ? `${data.reviews.length} ulasan destinasi`
+              : "Belum ada ulasan traveler"}
           </span>
         </div>
       </section>
 
-      {/* Profile Completeness & Status Highlight */}
-      <section className="eo-banner-card" aria-label="Kelengkapan profil">
-        <div className="eo-banner-content">
-          <Badge tone="info">Kelengkapan Informasi Kawasan</Badge>
-          <h2 style={{ margin: "var(--space-1) 0" }}>
-            {completedItems}/{totalItems} Informasi Inti Lengkap
-          </h2>
-          <p style={{ margin: 0 }}>
-            Informasi inti profil destinasi tersedia dan telah divalidasi oleh
-            tim kurasi.
-          </p>
-        </div>
-        <Link
-          to="/partner/destination/profile"
-          style={{
-            color: "var(--color-brand-primary)",
-            fontWeight: 600,
-            fontSize: "var(--font-size-body-sm)",
-            textDecoration: "underline",
-          }}
-        >
-          Lihat Profil Lengkap &rarr;
-        </Link>
-      </section>
+      <div className="dest-readiness-layout">
+        <section className="dest-readiness" aria-labelledby="dest-status-title">
+          <div className="dest-section-heading">
+            <div>
+              <h2 id="dest-status-title">Status Destinasi</h2>
+              <p>
+                Kesiapan yang digunakan JedaIn untuk operasional pengalaman.
+              </p>
+            </div>
+            <span className="dest-readiness__completeness">
+              {data.profileCompletedItems}/{data.profileTotalItems} informasi
+              lengkap
+            </span>
+          </div>
 
-      {/* Upcoming Sessions Using Venue Table */}
-      <section className="eo-section" aria-label="Jadwal trip EO di lokasi">
-        <div className="eo-section-header">
+          <dl className="dest-readiness__facts">
+            <div>
+              <dt>Status Verifikasi</dt>
+              <dd>{verificationLabel}</dd>
+            </div>
+            <div>
+              <dt>Pemanduan Lokal</dt>
+              <dd>Pemandu lokal tersedia</dd>
+            </div>
+            <div>
+              <dt>Biaya Dasar</dt>
+              <dd>{formatCurrency(destination.baseCostPerPerson)} / orang</dd>
+            </div>
+            <div>
+              <dt>Kapasitas</dt>
+              <dd>{destination.capacityPerSession} orang / sesi</dd>
+            </div>
+          </dl>
+        </section>
+
+        <aside className="dest-partners" aria-labelledby="dest-partners-title">
+          <span className="dest-partners__label">Kolaborasi EO</span>
+          <h2 id="dest-partners-title">Pengalaman yang hadir di sini</h2>
+          {data.eoPartners.length > 0 ? (
+            <>
+              <strong className="dest-partners__count">
+                {data.eoPartners.length} EO aktif
+              </strong>
+              <ul className="dest-partners__list">
+                {data.eoPartners.map((eoName) => (
+                  <li key={eoName}>{eoName}</li>
+                ))}
+              </ul>
+              <p>
+                EO merancang experience, destinasi menyiapkan ruang dan
+                pemanduan, traveler hadir melalui sesi terjadwal.
+              </p>
+            </>
+          ) : (
+            <p className="dest-partners__empty">
+              Belum ada EO dengan jadwal mendatang di destinasi ini.
+            </p>
+          )}
+        </aside>
+      </div>
+
+      <section className="dest-sessions" aria-labelledby="dest-sessions-title">
+        <div className="dest-section-heading dest-section-heading--sessions">
           <div>
-            <h2 className="eo-section-title">Jadwal Sesi EO di Lokasi Anda</h2>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "var(--font-size-caption)",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              Pantau jadwal trip yang diselenggarakan oleh mitra EO di kawasan
-              Anda.
+            <h2 id="dest-sessions-title">Jadwal Keberangkatan Mendatang</h2>
+            <p>
+              Pantau experience dari EO yang akan berlangsung di destinasi ini.
             </p>
           </div>
-          <Link
-            to="/partner/destination/schedule"
-            style={{
-              fontSize: "var(--font-size-body-sm)",
-              color: "var(--color-brand-primary)",
-              fontWeight: 600,
-            }}
-          >
-            Lihat Jadwal Lengkap &rarr;
-          </Link>
+          <span className="dest-section-heading__summary">
+            Kapasitas operasional destinasi: {destination.capacityPerSession}
+            orang
+          </span>
         </div>
 
-        {venueSessions.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "var(--space-6)",
-              color: "var(--color-text-muted)",
-            }}
-          >
-            Belum ada sesi perjalanan EO yang dijadwalkan di lokasi ini.
+        {data.upcomingSessions.length === 0 ? (
+          <div className="dest-empty-state">
+            <strong>Belum ada jadwal keberangkatan mendatang.</strong>
+            <p>
+              Sesi akan muncul di sini saat EO menjadwalkan experience di
+              destinasi ini.
+            </p>
           </div>
         ) : (
-          <div className="eo-table-wrapper">
-            <table className="eo-table">
-              <thead>
-                <tr>
-                  <th>Paket Experience</th>
-                  <th>Penyelenggara (EO)</th>
-                  <th>Waktu Pelaksanaan</th>
-                  <th>Alokasi Peserta</th>
-                  <th>Status Sesi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {venueSessions.map((s) => {
-                  const pkg = venuePackages.find(
-                    (p) => p.packageId === s.packageId,
-                  );
-                  const dateLabel = new Date(s.startAt).toLocaleString(
-                    "id-ID",
-                    {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    },
-                  );
-                  return (
-                    <tr key={s.sessionId}>
-                      <td>
-                        <strong>{pkg?.title ?? s.packageId}</strong>
-                      </td>
-                      <td>{pkg?.eoDisplayName ?? s.eoId}</td>
-                      <td>{dateLabel} WIB</td>
-                      <td>{s.capacity} Orang</td>
-                      <td>
-                        <Badge
-                          tone={s.status === "OPEN" ? "success" : "neutral"}
-                        >
-                          {s.status}
-                        </Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="dest-session-list">
+            {data.upcomingSessions.map(
+              ({
+                session,
+                package: pkg,
+                confirmedParticipants,
+                operationalCapacity,
+                usagePercent,
+                exceedsDestinationCapacity,
+              }) => (
+                <article className="dest-session-row" key={session.sessionId}>
+                  <time
+                    className="dest-session-row__date"
+                    dateTime={session.startAt}
+                  >
+                    <strong>
+                      {dateFormatter.format(new Date(session.startAt))}
+                    </strong>
+                    <span>
+                      {timeFormatter.format(new Date(session.startAt))} -{" "}
+                      {timeFormatter.format(new Date(session.endAt))} WIB
+                    </span>
+                  </time>
+
+                  <div className="dest-session-row__experience">
+                    <h3>{pkg.title}</h3>
+                    <p>
+                      Diselenggarakan oleh <strong>{pkg.eoDisplayName}</strong>
+                    </p>
+                  </div>
+
+                  <div className="dest-session-row__capacity">
+                    <div className="dest-session-row__capacity-copy">
+                      <span>
+                        <strong>{confirmedParticipants}</strong> peserta
+                        terkonfirmasi
+                      </span>
+                      <span>{operationalCapacity} kapasitas operasional</span>
+                    </div>
+                    <progress
+                      max={operationalCapacity}
+                      value={Math.min(
+                        confirmedParticipants,
+                        operationalCapacity,
+                      )}
+                      aria-label={`${confirmedParticipants} dari ${operationalCapacity} kapasitas operasional destinasi`}
+                    />
+                    <span className="dest-session-row__capacity-note">
+                      {exceedsDestinationCapacity
+                        ? `Alokasi EO ${session.capacity} orang melebihi kapasitas destinasi.`
+                        : `${usagePercent}% kapasitas destinasi terisi`}
+                    </span>
+                  </div>
+
+                  <div className="dest-session-row__status">
+                    <Badge
+                      tone={statusTones[session.status]}
+                      showSymbol={false}
+                    >
+                      {destinationSessionStatusLabels[session.status]}
+                    </Badge>
+                    <span>Alokasi sesi {session.capacity} orang</span>
+                  </div>
+                </article>
+              ),
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="dest-profile" aria-labelledby="dest-profile-title">
+        <div className="dest-section-heading">
+          <div>
+            <h2 id="dest-profile-title">Profil Destinasi</h2>
+            <p>Informasi yang dipahami dan digunakan oleh EO serta JedaIn.</p>
+          </div>
+          <span className="dest-section-heading__summary">
+            {destination.city}, {destination.province}
+          </span>
+        </div>
+
+        <div className="dest-profile__grid">
+          <div className="dest-profile__about">
+            <h3>Tentang Destinasi</h3>
+            <p>{destination.description}</p>
+
+            {destination.availableActivities?.length ? (
+              <div className="dest-profile__group">
+                <h3>Aktivitas Tersedia</h3>
+                <ul className="dest-profile__tag-list">
+                  {destination.availableActivities.map((activity) => (
+                    <li key={activity}>{activity.replace(/&/g, "dan")}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {destination.localGuideSummary ? (
+              <div className="dest-profile__guide">
+                <h3>Pemanduan Lokal</h3>
+                <p>{destination.localGuideSummary}</p>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="dest-profile__operations">
+            {destination.facilities?.length ? (
+              <div className="dest-profile__group">
+                <h3>Fasilitas</h3>
+                <ul className="dest-profile__plain-list">
+                  {destination.facilities.map((facility) => (
+                    <li key={facility}>{facility}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {destination.operationalNotes?.length ? (
+              <div className="dest-profile__group">
+                <h3>Catatan Operasional</h3>
+                <ul className="dest-profile__plain-list">
+                  {destination.operationalNotes.map((note) => (
+                    <li key={note}>{note}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            <dl className="dest-profile__commercial">
+              <div>
+                <dt>Biaya dasar</dt>
+                <dd>{formatCurrency(destination.baseCostPerPerson)} / orang</dd>
+              </div>
+              <div>
+                <dt>Kapasitas destinasi</dt>
+                <dd>{destination.capacityPerSession} orang / sesi</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section className="dest-reviews" aria-labelledby="dest-reviews-title">
+        <div className="dest-section-heading">
+          <div>
+            <h2 id="dest-reviews-title">Ulasan Traveler</h2>
+            <p>
+              Penilaian khusus untuk kualitas destinasi, terpisah dari penilaian
+              EO dan pemandu.
+            </p>
+          </div>
+        </div>
+
+        {data.reviews.length === 0 ? (
+          <div className="dest-empty-state">
+            <strong>Belum ada ulasan destinasi.</strong>
+            <p>
+              Ulasan akan muncul setelah traveler menyelesaikan trip dan menilai
+              destinasi ini.
+            </p>
+          </div>
+        ) : (
+          <div className="dest-reviews__layout">
+            <div className="dest-reviews__summary">
+              <strong>{data.averageRating}</strong>
+              <span>/ 5</span>
+              <p>{data.reviews.length} ulasan destinasi</p>
+            </div>
+            <div className="dest-reviews__list">
+              {data.latestReviews.map((review) => (
+                <article className="dest-review-card" key={review.reviewId}>
+                  <div className="dest-review-card__meta">
+                    <strong aria-label={`${review.rating} dari 5 bintang`}>
+                      {review.rating} / 5
+                    </strong>
+                    <time dateTime={review.createdAt}>
+                      {reviewDateFormatter.format(new Date(review.createdAt))}
+                    </time>
+                  </div>
+                  <p>
+                    {review.comment ?? "Traveler tidak menambahkan komentar."}
+                  </p>
+                </article>
+              ))}
+            </div>
           </div>
         )}
       </section>

@@ -1711,14 +1711,64 @@
   margin: 0;
 }
 
-/* Prominent Create Package CTA */
-.eo-packages-create-btn {
+/* ==========================================================================
+   Primary Action Spotlight
+   Premium visual anchor that immediately draws focus to core creation CTAs
+   ========================================================================== */
+.eo-action-spotlight {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+.eo-action-spotlight:hover {
+  border-color: var(--color-forest-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.eo-action-spotlight__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.eo-action-spotlight__tag {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+  color: var(--color-forest-800);
+}
+
+.eo-action-spotlight__desc {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-forest-900);
+  font-weight: var(--font-weight-regular);
+  max-width: 32ch;
+  line-height: 1.35;
+}
+
+.eo-action-spotlight__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
   min-height: 3rem;
   padding: var(--space-3) var(--space-5);
+  font-family: inherit;
   font-size: var(--font-size-label-md);
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.01em;
@@ -1731,6 +1781,7 @@
     0 2px 4px rgba(18, 53, 36, 0.12);
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
   transition:
     background-color var(--motion-fast) var(--ease-standard),
     border-color var(--motion-fast) var(--ease-standard),
@@ -1738,7 +1789,7 @@
     transform var(--motion-fast) var(--ease-standard);
 }
 
-.eo-packages-create-btn:hover:not(:disabled) {
+.eo-action-spotlight__btn:hover:not(:disabled) {
   background: var(--color-forest-800);
   border-color: var(--color-forest-900);
   box-shadow:
@@ -1747,29 +1798,48 @@
   transform: translateY(-1px);
 }
 
-.eo-packages-create-btn:active:not(:disabled) {
+.eo-action-spotlight__btn:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow: var(--shadow-brand-sm);
 }
 
-.eo-packages-create-btn:focus-visible {
+.eo-action-spotlight__btn:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--focus-ring-offset);
 }
 
-.eo-packages-create-btn__icon {
+.eo-action-spotlight__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.eo-action-spotlight__btn-icon {
   width: 1.125rem;
   height: 1.125rem;
   flex-shrink: 0;
 }
 
-@media (max-width: 640px) {
-  .eo-packages-header {
+@media (max-width: 768px) {
+  .eo-packages-header,
+  .eo-page-header {
     flex-direction: column;
     align-items: stretch;
+    gap: var(--space-4);
   }
 
-  .eo-packages-create-btn {
+  .eo-action-spotlight {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-4);
+  }
+
+  .eo-action-spotlight__desc {
+    max-width: none;
+  }
+
+  .eo-action-spotlight__btn {
     width: 100%;
   }
 }

@@ -80,6 +80,9 @@ export interface BookingRecord {
   sessionId: string;
   participantCount: number;
   unitPricePerPerson: number;
+  subtotal?: number;
+  serviceFee?: number;
+  total?: number;
   totalAmount: number;
   status: BookingStatus;
   reservedQuantity: number;

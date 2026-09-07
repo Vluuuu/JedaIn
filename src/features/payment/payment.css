@@ -203,6 +203,12 @@
   gap: var(--space-3);
 }
 
+.payment-summary-card__divider {
+  height: 1px;
+  background-color: var(--color-stone-200);
+  margin: var(--space-1) 0;
+}
+
 .payment-summary-card__section-label {
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);

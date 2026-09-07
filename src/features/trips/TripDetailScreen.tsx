@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
+import { formatRupiah, getBookingPaymentBreakdown } from "../checkout/pricing";
 import { sessionStore } from "../onboarding/sessionStore";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
 import { defaultTripsAdapter } from "./mockAdapter";
@@ -455,7 +456,7 @@ export function TripDetailScreen({
           <div className="trip-detail-fact">
             <span className="trip-detail-fact__label">Total Pembayaran</span>
             <span className="trip-detail-fact__value trip-detail-fact__value--price">
-              Rp{booking.totalAmount.toLocaleString("id-ID")}
+              {formatRupiah(getBookingPaymentBreakdown(booking).total)}
             </span>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { getPackageVisual } from "../../lib/assets/packageImages";
+import { formatRupiah, getBookingPaymentBreakdown } from "../checkout/pricing";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
 import type { PendingPaymentSummaryModel } from "./types";
 
@@ -133,7 +134,7 @@ export function PendingPaymentSummary({
             Total Pembayaran
           </span>
           <strong className="pending-payment-fact-row__amount">
-            Rp{booking.totalAmount.toLocaleString("id-ID")}
+            {formatRupiah(getBookingPaymentBreakdown(booking).total)}
           </strong>
         </div>
       </div>

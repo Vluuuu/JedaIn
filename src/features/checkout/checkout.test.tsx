@@ -219,13 +219,22 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
 
     expect(view.textContent).toContain("Rp275.000 / orang");
     expect(view.textContent).not.toContain("Mulai dari Rp275.000");
-    expect(view.textContent).toContain("Total Pembayaran");
+    expect(view.textContent).toContain("Rincian Pembayaran");
+    expect(view.textContent).toContain("Subtotal paket");
     expect(view.textContent).toContain("Rp275.000");
+    expect(view.textContent).toContain("Biaya layanan");
+    expect(view.textContent).toContain("Rp7.500");
+    expect(view.textContent).toContain("Total Pembayaran");
+    expect(view.textContent).toContain("Rp282.500");
 
-    // No invented fees
+    // No forbidden terminology
     expect(view.textContent).not.toContain("service fee");
     expect(view.textContent).not.toContain("booking fee");
     expect(view.textContent).not.toContain("platform fee");
+    expect(view.textContent).not.toContain("admin fee");
+    expect(view.textContent).not.toContain("handling fee");
+    expect(view.textContent).not.toContain("platform surcharge");
+    expect(view.textContent).not.toContain("service charge");
     expect(view.textContent).not.toContain("Base Cost");
     expect(view.textContent).not.toContain("EO Margin");
   });

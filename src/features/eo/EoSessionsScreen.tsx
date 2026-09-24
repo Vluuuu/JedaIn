@@ -29,6 +29,11 @@ export function EoSessionsScreen() {
   const [startDate, setStartDate] = useState<string>("2026-09-26T08:00");
   const [endDate, setEndDate] = useState<string>("2026-09-26T14:00");
   const [capacity, setCapacity] = useState<number>(6);
+  const [operationalNote, setOperationalNote] = useState<string>("");
+  const [editingNoteSessionId, setEditingNoteSessionId] = useState<
+    string | null
+  >(null);
+  const [editingNoteText, setEditingNoteText] = useState<string>("");
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | undefined>();
   const [refreshVersion, setRefreshVersion] = useState<number>(0);
@@ -84,10 +89,12 @@ export function EoSessionsScreen() {
       endAt: endIso,
       capacity,
       pricePerPerson: selectedPkg?.pricing.customerPrice ?? 275000,
+      operationalNote: operationalNote.trim() || undefined,
     });
 
     if (res.success) {
       setShowAddModal(false);
+      setOperationalNote("");
       setRefreshVersion((v) => v + 1);
     } else {
       setFormError(res.message ?? "Gagal membuka sesi.");
@@ -102,6 +109,16 @@ export function EoSessionsScreen() {
     if (ok) {
       setRefreshVersion((v) => v + 1);
     }
+  };
+
+  const handleSaveSessionNote = (sessionId: string) => {
+    mockEoPackageStore.updateSessionOperationalNote(
+      sessionId,
+      editingNoteText.trim() || undefined,
+    );
+    setEditingNoteSessionId(null);
+    setEditingNoteText("");
+    setRefreshVersion((v) => v + 1);
   };
 
   return (
@@ -297,6 +314,59 @@ export function EoSessionsScreen() {
                         })}{" "}
                         WIB
                       </div>
+                      {ses.operationalNote && (
+                        <div
+                          style={{
+                            marginTop: "var(--space-2)",
+                            padding: "var(--space-2) var(--space-3)",
+                            background: "var(--color-bg-surface-subtle)",
+                            borderRadius: "var(--radius-sm)",
+                            borderLeft:
+                              "2.5px solid var(--color-brand-primary)",
+                            fontSize: "var(--font-size-caption)",
+                            maxWidth: "340px",
+                          }}
+                        >
+                          <strong
+                            style={{
+                              display: "block",
+                              color: "var(--color-text-primary)",
+                            }}
+                          >
+                            Catatan Operasional Terbaru:
+                          </strong>
+                          <p
+                            style={{
+                              margin: "0.2rem 0",
+                              color: "var(--color-text-secondary)",
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            {ses.operationalNote}
+                          </p>
+                          {ses.operationalNoteUpdatedAt && (
+                            <span
+                              style={{
+                                fontSize: "0.7rem",
+                                color: "var(--color-text-muted)",
+                              }}
+                            >
+                              Diperbarui:{" "}
+                              {new Date(
+                                ses.operationalNoteUpdatedAt,
+                              ).toLocaleString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                timeZone: "Asia/Jakarta",
+                              })}{" "}
+                              WIB
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td>{ses.capacity} orang</td>
                     <td>
@@ -321,37 +391,103 @@ export function EoSessionsScreen() {
                       </Badge>
                     </td>
                     <td>
-                      {ses.status === "OPEN" ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "var(--space-2)",
+                        }}
+                      >
+                        {ses.status === "OPEN" ? (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={() =>
+                              handleToggleStatus(ses.sessionId, "CLOSED")
+                            }
+                          >
+                            Tutup Sesi
+                          </Button>
+                        ) : ses.status === "CLOSED" ? (
+                          <Button
+                            type="button"
+                            variant="primary"
+                            size="sm"
+                            onClick={() =>
+                              handleToggleStatus(ses.sessionId, "OPEN")
+                            }
+                          >
+                            Buka Sesi
+                          </Button>
+                        ) : (
+                          <span
+                            style={{
+                              fontSize: "var(--font-size-caption)",
+                              color: "var(--color-text-muted)",
+                            }}
+                          >
+                            Penuh
+                          </span>
+                        )}
+
                         <Button
                           type="button"
-                          variant="secondary"
+                          variant="ghost"
                           size="sm"
-                          onClick={() =>
-                            handleToggleStatus(ses.sessionId, "CLOSED")
-                          }
-                        >
-                          Tutup Sesi
-                        </Button>
-                      ) : ses.status === "CLOSED" ? (
-                        <Button
-                          type="button"
-                          variant="primary"
-                          size="sm"
-                          onClick={() =>
-                            handleToggleStatus(ses.sessionId, "OPEN")
-                          }
-                        >
-                          Buka Sesi
-                        </Button>
-                      ) : (
-                        <span
-                          style={{
-                            fontSize: "var(--font-size-caption)",
-                            color: "var(--color-text-muted)",
+                          onClick={() => {
+                            if (editingNoteSessionId === ses.sessionId) {
+                              setEditingNoteSessionId(null);
+                              setEditingNoteText("");
+                            } else {
+                              setEditingNoteSessionId(ses.sessionId);
+                              setEditingNoteText(ses.operationalNote ?? "");
+                            }
                           }}
                         >
-                          Penuh
-                        </span>
+                          {editingNoteSessionId === ses.sessionId
+                            ? "Batal"
+                            : ses.operationalNote
+                              ? "Ubah Catatan"
+                              : "+ Catatan"}
+                        </Button>
+                      </div>
+
+                      {editingNoteSessionId === ses.sessionId && (
+                        <div
+                          style={{
+                            marginTop: "var(--space-2)",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "var(--space-1)",
+                          }}
+                        >
+                          <textarea
+                            rows={2}
+                            className="eo-form-textarea"
+                            style={{
+                              fontSize: "var(--font-size-caption)",
+                              padding: "var(--space-2)",
+                            }}
+                            value={editingNoteText}
+                            onChange={(e) => setEditingNoteText(e.target.value)}
+                            placeholder="Catatan informasi operasional sesi..."
+                          />
+                          <div
+                            style={{ display: "flex", gap: "var(--space-1)" }}
+                          >
+                            <Button
+                              type="button"
+                              variant="primary"
+                              size="sm"
+                              onClick={() =>
+                                handleSaveSessionNote(ses.sessionId)
+                              }
+                            >
+                              Simpan Catatan
+                            </Button>
+                          </div>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -454,6 +590,24 @@ export function EoSessionsScreen() {
                   value={capacity}
                   onChange={(e) => setCapacity(Number(e.target.value) || 6)}
                 />
+              </div>
+
+              <div className="eo-form-group">
+                <label htmlFor="session-op-note" className="eo-form-label">
+                  Catatan Operasional Terbaru (Opsional)
+                </label>
+                <textarea
+                  id="session-op-note"
+                  rows={2}
+                  className="eo-form-textarea"
+                  value={operationalNote}
+                  onChange={(e) => setOperationalNote(e.target.value)}
+                  placeholder="Contoh: Rute jalan kaki menggunakan jalur kebun teh sisi barat."
+                />
+                <span className="eo-form-helper">
+                  Catatan informasi terbaru untuk pelaksanaan sesi. Catatan ini
+                  tidak mengubah status atau aturan sesi.
+                </span>
               </div>
 
               <div className="eo-modal-footer">

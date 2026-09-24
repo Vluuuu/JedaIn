@@ -321,6 +321,9 @@ export const SEEDED_SESSIONS: EoSessionRecord[] = [
     pricePerPerson: 275000,
     status: "OPEN",
     createdAt: "2026-08-05T10:00:00Z",
+    operationalNote:
+      "Rute jalan kaki menggunakan jalur kebun teh sisi barat. Area saung bambu disiapkan untuk istirahat sesi hening.",
+    operationalNoteUpdatedAt: "2026-08-10T14:30:00Z",
   },
   {
     sessionId: "ses_sgd_2",
@@ -730,6 +733,7 @@ export const mockEoPackageStore = {
     endAt: string;
     capacity: number;
     pricePerPerson: number;
+    operationalNote?: string;
   }): { success: boolean; session?: EoSessionRecord; message?: string } {
     const actor = partnerSessionStore.get();
     if (!actor || actor.role !== "EO") {
@@ -769,6 +773,8 @@ export const mockEoPackageStore = {
       return { success: false, message: "Kapasitas peserta minimal 1 orang." };
     }
 
+    const nowIso = new Date().toISOString();
+    const cleanNote = input.operationalNote?.trim();
     const sessionId = `ses_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
     const session: EoSessionRecord = {
       sessionId,
@@ -780,7 +786,9 @@ export const mockEoPackageStore = {
       remainingSlots: input.capacity,
       pricePerPerson: input.pricePerPerson,
       status: "OPEN",
-      createdAt: new Date().toISOString(),
+      createdAt: nowIso,
+      operationalNote: cleanNote || undefined,
+      operationalNoteUpdatedAt: cleanNote ? nowIso : undefined,
     };
 
     sessions.push(session);
@@ -802,6 +810,29 @@ export const mockEoPackageStore = {
     );
     if (!s) return false;
     s.status = status;
+    return true;
+  },
+
+  updateSessionOperationalNote(
+    sessionId: string,
+    operationalNote?: string,
+  ): boolean {
+    const actor = partnerSessionStore.get();
+    if (!actor || actor.role !== "EO") return false;
+
+    const app = mockApplicationStore.getBySellerId(actor.id);
+    if (!app || app.status !== "APPROVED") return false;
+
+    const s = sessions.find(
+      (item) => item.sessionId === sessionId && item.eoId === actor.id,
+    );
+    if (!s) return false;
+
+    const cleanNote = operationalNote?.trim();
+    s.operationalNote = cleanNote || undefined;
+    s.operationalNoteUpdatedAt = cleanNote
+      ? new Date().toISOString()
+      : undefined;
     return true;
   },
 };

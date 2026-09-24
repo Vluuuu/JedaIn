@@ -194,4 +194,6 @@ export interface EoSessionRecord {
   pricePerPerson: number;
   status: EoSessionStatus;
   createdAt: string;
+  operationalNote?: string;
+  operationalNoteUpdatedAt?: string;
 }

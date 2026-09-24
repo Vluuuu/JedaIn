@@ -278,6 +278,60 @@ export function DestinationScheduleScreen() {
                                 </div>
                               </div>
 
+                              {s.operationalNote && (
+                                <div
+                                  style={{
+                                    padding: "var(--space-3) var(--space-4)",
+                                    background: "var(--color-bg-surface)",
+                                    borderLeft:
+                                      "3px solid var(--color-forest-700)",
+                                    borderRadius:
+                                      "0 var(--radius-md) var(--radius-md) 0",
+                                  }}
+                                >
+                                  <span
+                                    className="dest-session-summary-label"
+                                    style={{
+                                      fontWeight: 600,
+                                      color: "var(--color-forest-900)",
+                                    }}
+                                  >
+                                    Catatan Operasional Terbaru:
+                                  </span>
+                                  <p
+                                    style={{
+                                      margin: "var(--space-1) 0",
+                                      fontSize: "var(--font-size-body-sm)",
+                                      color: "var(--color-text-primary)",
+                                      lineHeight: 1.45,
+                                    }}
+                                  >
+                                    {s.operationalNote}
+                                  </p>
+                                  {s.operationalNoteUpdatedAt && (
+                                    <span
+                                      style={{
+                                        fontSize: "var(--font-size-caption)",
+                                        color: "var(--color-text-muted)",
+                                      }}
+                                    >
+                                      Diperbarui:{" "}
+                                      {new Date(
+                                        s.operationalNoteUpdatedAt,
+                                      ).toLocaleString("id-ID", {
+                                        day: "numeric",
+                                        month: "short",
+                                        year: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        timeZone: "Asia/Jakarta",
+                                      })}{" "}
+                                      WIB
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
                               {pkg?.itinerary && pkg.itinerary.length > 0 && (
                                 <div className="dest-session-summary-itinerary">
                                   <span className="dest-session-summary-label">

@@ -1,0 +1,44 @@
+name: Temporary PRD Formatter
+
+on:
+  push:
+    branches:
+      - docs/hology-prototype-prd-v1
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: docs/hology-prototype-prd-v1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format PRD
+        run: npx prettier --write PRD_HOLOGY_PROTOTYPE.md
+
+      - name: Commit formatted PRD
+        run: |
+          if git diff --quiet -- PRD_HOLOGY_PROTOTYPE.md; then
+            echo "No formatting changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add PRD_HOLOGY_PROTOTYPE.md
+          git commit -m "docs(prd): apply prettier formatting"
+          git push origin HEAD:docs/hology-prototype-prd-v1

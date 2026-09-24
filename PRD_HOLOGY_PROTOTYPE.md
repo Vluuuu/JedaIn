@@ -1144,32 +1144,50 @@ Criticality: MUST.
 
 ## 16.1 Package Price
 
-Current formula yang dipertahankan:
+Current package formula yang dipertahankan di prototype:
 
 Customer Package Price = Destination Base Cost + EO Margin
 
+Formula ini adalah harga paket sebelum traveler service fee.
+
 ## 16.2 Traveler Checkout Fee
 
-Current prototype checkout menambahkan fixed service fee Rp7.500 per transaksi.
+Current prototype checkout menambahkan fixed service fee Rp7.500 per transaksi booking.
 
-Current payment breakdown:
+Current traveler-facing payment breakdown:
 
 Subtotal = Unit Package Price × Participant Count
 
 Total = Subtotal + Rp7.500 Service Fee
 
-## 16.3 Product Interpretation
+Acceptance:
+- service fee muncul transparan sebelum pembayaran,
+- service fee dikenakan per booking/transaksi, bukan per participant,
+- checkout/payment/result menggunakan breakdown yang sama.
 
-Service fee Rp7.500 adalah **current prototype behavior**.
+Status: LIVE / VERIFIED.
 
-Ini belum otomatis mengunci model monetization komersial JedaIn.
+## 16.3 Canonical Business Model Narrative
 
-PRD lama yang menyatakan platform commission dipotong dari EO margin dicatat sebagai historical conflict.
+Berdasarkan **Draf PROPOSAL HOLOGY saat ini**, JedaIn memiliki dua sumber pendapatan pada setiap transaksi:
 
-Keputusan komersial final:
-OPEN / PRODUCT OWNER DECISION.
+1. **Platform commission sebesar 10% dari GMV**, dan
+2. **Service Fee flat Rp7.500 per transaksi booking**.
 
-Developer tidak boleh mengubah fee atau formula hanya berdasarkan discovery atau refactor teknis.
+Interpretasi yang harus dipakai agar proposal dan prototype konsisten:
+
+- commission 10% dihitung dari GMV sebagai economics/platform take rate,
+- commission **bukan** line item tambahan yang dibebankan ke Traveler pada checkout,
+- proposal menjelaskan EO tetap menerima margin bersih setelah potongan commission,
+- service fee Rp7.500 adalah fee Traveler yang ditampilkan transparan sebagai line item terpisah,
+- prototype Traveler saat ini hanya mensimulasikan traveler-facing checkout/payment breakdown,
+- prototype **tidak wajib** mensimulasikan payout/settlement EO atau pemotongan commission 10% di UI.
+
+Dengan demikian, tidak ada kebutuhan menambahkan line item "commission 10%" ke checkout Traveler.
+
+Developer tidak boleh mengubah formula package, service fee, atau membuat settlement EO baru tanpa task/requirement khusus.
+
+Status: BUSINESS NARRATIVE RESOLVED FOR COMPETITION PRD.
 
 ---
 
@@ -1558,50 +1576,58 @@ Jangan diprioritaskan kecuali tim secara eksplisit mengubah scope:
 
 ---
 
-# 28. Known Open Decisions
+# 28. Product Decisions dan Remaining Content Dependency
 
-## OPEN-01 — EO Applicant Default Guide Category
+## RESOLVED-01 — EO Applicant Guide Category Default
 
-Historical PRD menyebut new EO default `CONCEPT_ONLY`.
+Source comparison:
 
-Current implementation:
-`EoApplicationScreen` memulai new applicant dengan `CERTIFIED_GUIDE` sebagai selected default, sementara applicant tetap dapat memilih `CONCEPT_ONLY`.
+- historical PRD pernah menyebut new EO default `CONCEPT_ONLY`,
+- current `EoApplicationScreen` memulai form dengan `CERTIFIED_GUIDE` sebagai selected UI default,
+- Draf PROPOSAL saat ini menjelaskan dua status — `Certified Guide` dan `Concept Only` — tetapi **tidak menetapkan default product rule** untuk applicant baru.
 
-Status:
-TEAM DECISION REQUIRED jika behavior default ini ingin dikunci sebagai product rule.
+Canonical competition-prototype rule:
 
-Sampai keputusan dibuat:
-- jangan mengubah otomatis,
-- jangan menyebut salah satu default sebagai hasil discovery,
-- demo account Certified dan Concept-Only tetap boleh tersedia.
+- kedua kategori valid,
+- PRD **tidak mengunci default business rule** ke salah satu kategori,
+- selected default `CERTIFIED_GUIDE` pada current form diperlakukan sebagai **prototype UI convenience**, bukan kebijakan kelayakan EO,
+- demo account Certified dan Concept-Only tetap boleh tersedia,
+- eligibility package tetap mengikuti guide capability/source rules yang sudah ada.
 
-## OPEN-02 — Commercial Monetization Model
+Tidak ada code change yang diwajibkan dari keputusan dokumentasi ini.
 
-Current prototype:
-fixed traveler service fee Rp7.500 per transaction.
+Jika tim nanti ingin applicant benar-benar membuat pilihan eksplisit, blank/unselected placeholder dapat menjadi UX polish terpisah.
 
-Historical PRD:
-platform commission deductible dari EO margin.
+Status: RESOLVED FOR PRD SCOPE.
 
-Status:
-OPEN untuk business plan/commercial model.
-Prototype boleh mempertahankan behavior sekarang selama lomba.
+## RESOLVED-02 — Commercial Monetization Narrative
 
-Competition narrative guard:
-- proposal/pitch dan demo app tidak boleh menjelaskan dua model monetization sebagai satu rule yang sama,
-- sebelum final presentation, tim perlu memilih cara menjelaskan perbedaan antara current prototype fee dan monetization model bisnis,
-- tidak ada code change yang diwajibkan sampai tim mengambil keputusan produk.
+Draf PROPOSAL saat ini secara eksplisit menggunakan dua sumber pendapatan:
+
+- platform commission 10% dari GMV,
+- Service Fee flat Rp7.500 per booking.
+
+Canonical competition narrative:
+
+- harga package berasal dari Destination Base Cost + EO Margin,
+- commission 10% adalah economics platform dan tidak ditambahkan sebagai commission line item ke Traveler,
+- service fee Rp7.500 ditampilkan transparan kepada Traveler,
+- prototype checkout tidak perlu mensimulasikan settlement/payout EO.
+
+Ini membuat Bab IV proposal dan current Traveler checkout dapat dijelaskan secara konsisten tanpa perubahan code.
+
+Status: RESOLVED FOR COMPETITION PRD.
 
 ## OPEN-03 — Real Destination Photography
 
 Need:
-foto aktual bernilai untuk trust.
+foto aktual bernilai untuk trust dan judge-facing visual credibility.
 
 Dependency:
 asset dari tim/content owner.
 
 Status:
-CONTENT DECISION, bukan technical blocker.
+CONTENT DEPENDENCY, bukan technical blocker.
 
 ---
 
@@ -1710,13 +1736,15 @@ Sebelum PR #74 dijadikan canonical, tim perlu menyetujui:
 - [ ] Terminologi capacity / guide / operationalNote disetujui.
 - [ ] Current prototype service fee Rp7.500 boleh tetap ditampilkan.
 - [ ] Narasi monetization untuk proposal/pitch diputuskan atau minimal tidak kontradiktif.
-- [ ] OPEN-01 EO applicant default guide category disadari sebagai open decision.
+- [ ] EO applicant guide category dipahami: tidak ada product-level default yang dikunci; current CERTIFIED_GUIDE adalah UI convenience.
+- [ ] Monetization narrative dipahami: 10% GMV commission + Rp7.500 traveler service fee.
+- [ ] Prototype checkout tidak perlu menampilkan commission 10% sebagai Traveler line item.
 - [ ] Actual destination photo tetap content dependency, bukan blocker engineering.
 - [ ] Route map sesuai current implementation.
 - [ ] D1 + D2 tetap LIVE / VERIFIED pada baseline 4208ddd.
 - [ ] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
-Jika item business decision belum disepakati, PRD tetap boleh menyimpan item tersebut sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
+Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
 
 ---
 

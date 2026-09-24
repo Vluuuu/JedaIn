@@ -312,6 +312,12 @@ export function EoPackageDetailScreen() {
                   Harga traveler: Rp
                   {pkg.pricing.customerPrice.toLocaleString("id-ID")} / orang
                 </span>
+                {destination?.baseCostIncludes &&
+                  destination.baseCostIncludes.length > 0 && (
+                    <span className="eo-pkg-op-subtext">
+                      Termasuk: {destination.baseCostIncludes.join(", ")}
+                    </span>
+                  )}
               </div>
 
               <div className="eo-pkg-op-item">

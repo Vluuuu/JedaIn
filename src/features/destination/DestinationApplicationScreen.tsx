@@ -69,6 +69,12 @@ export function DestinationApplicationScreen() {
   const [baseCostPerPerson, setBaseCostPerPerson] = useState<number>(
     existingApp?.baseCostPerPerson ?? 100000,
   );
+  const [baseCostIncludesInput, setBaseCostIncludesInput] = useState(
+    existingApp?.baseCostIncludes?.join("\n") ?? "",
+  );
+  const [baseCostExcludesInput, setBaseCostExcludesInput] = useState(
+    existingApp?.baseCostExcludes?.join("\n") ?? "",
+  );
 
   const [guideReady, setGuideReady] = useState<boolean>(
     existingApp?.declaredGuideReady ?? false,
@@ -180,6 +186,16 @@ export function DestinationApplicationScreen() {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const splitCostIncludes = baseCostIncludesInput
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const splitCostExcludes = baseCostExcludesInput
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
     const res = mockDestinationPartnerService.submitApplication({
       partnerIdentityId: currentPartner.id,
       name,
@@ -199,6 +215,10 @@ export function DestinationApplicationScreen() {
       highlights: splitHighlights,
       capacityPerSession,
       baseCostPerPerson,
+      baseCostIncludes:
+        splitCostIncludes.length > 0 ? splitCostIncludes : undefined,
+      baseCostExcludes:
+        splitCostExcludes.length > 0 ? splitCostExcludes : undefined,
       guideReady,
       guideReadinessEvidence,
       agreedToSop,
@@ -624,9 +644,45 @@ export function DestinationApplicationScreen() {
                   }
                 />
                 <span className="eo-form-helper">
-                  Termasuk tiket masuk kawasan, kebersihan, dan fasilitas.
+                  Biaya modal dasar per orang untuk pemanfaatan destinasi.
                 </span>
               </div>
+            </div>
+
+            <div className="eo-form-group">
+              <label htmlFor="dest-cost-includes" className="eo-form-label">
+                Item Termasuk dalam Biaya Dasar (Opsional, pisahkan baris baru)
+              </label>
+              <textarea
+                id="dest-cost-includes"
+                rows={2}
+                className="eo-form-textarea"
+                value={baseCostIncludesInput}
+                onChange={(e) => setBaseCostIncludesInput(e.target.value)}
+                placeholder="Contoh:&#10;Tiket masuk kawasan&#10;Penggunaan saung istirahat"
+              />
+              <span className="eo-form-helper">
+                Layanan atau fasilitas kawasan yang sudah termasuk dalam biaya
+                dasar per orang.
+              </span>
+            </div>
+
+            <div className="eo-form-group">
+              <label htmlFor="dest-cost-excludes" className="eo-form-label">
+                Item Belum Termasuk dalam Biaya Dasar (Opsional, pisahkan baris
+                baru)
+              </label>
+              <textarea
+                id="dest-cost-excludes"
+                rows={2}
+                className="eo-form-textarea"
+                value={baseCostExcludesInput}
+                onChange={(e) => setBaseCostExcludesInput(e.target.value)}
+                placeholder="Contoh:&#10;Transportasi ke lokasi&#10;Konsumsi pribadi"
+              />
+              <span className="eo-form-helper">
+                Layanan yang tidak ditanggung oleh biaya dasar destinasi.
+              </span>
             </div>
 
             <div
@@ -831,6 +887,39 @@ export function DestinationApplicationScreen() {
                   Kapasitas Sesi: <strong>{capacityPerSession} Orang</strong>
                 </div>
               </div>
+
+              {(baseCostIncludesInput.trim() ||
+                baseCostExcludesInput.trim()) && (
+                <div
+                  style={{
+                    borderTop: "1px solid var(--color-border-default)",
+                    paddingTop: "var(--space-2)",
+                    fontSize: "var(--font-size-caption)",
+                    color: "var(--color-text-secondary)",
+                  }}
+                >
+                  {baseCostIncludesInput.trim() && (
+                    <div style={{ marginBottom: "var(--space-1)" }}>
+                      <strong>Termasuk Biaya Dasar:</strong>{" "}
+                      {baseCostIncludesInput
+                        .split("\n")
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                        .join(", ")}
+                    </div>
+                  )}
+                  {baseCostExcludesInput.trim() && (
+                    <div>
+                      <strong>Belum Termasuk:</strong>{" "}
+                      {baseCostExcludesInput
+                        .split("\n")
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                        .join(", ")}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

@@ -40,6 +40,15 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     ],
     localGuideSummary:
       "Pemandu lokal warga lereng terlatih memahami rute kebun teh dan sejarah konservasi perkebunan.",
+    baseCostIncludes: [
+      "Tiket masuk kawasan Lereng Hijau",
+      "Akses saung istirahat dan fasilitas umum",
+      "Pemandu lokal pendamping rute kebun",
+    ],
+    baseCostExcludes: [
+      "Transportasi menuju titik kumpul awal",
+      "Pengeluaran dan konsumsi pribadi",
+    ],
   },
   {
     destinationId: "dest_lembah_pacet",
@@ -80,6 +89,11 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     ],
     localGuideSummary:
       "Pemandu retreat lokal terakreditasi standar PLUS dengan pelatihan SOP darurat alam terbuka.",
+    baseCostIncludes: [
+      "Akses area konservasi Lembah Alam Pacet",
+      "Penggunaan paviliun hening & area tepi sungai",
+    ],
+    baseCostExcludes: ["Transportasi pribadi", "Konsumsi & belanja pribadi"],
   },
   {
     destinationId: "dest_hutan_trawas",
@@ -132,6 +146,12 @@ function cloneDestination(dest: DestinationRecord): DestinationRecord {
     facilities: dest.facilities ? [...dest.facilities] : undefined,
     operationalNotes: dest.operationalNotes
       ? [...dest.operationalNotes]
+      : undefined,
+    baseCostIncludes: dest.baseCostIncludes
+      ? [...dest.baseCostIncludes]
+      : undefined,
+    baseCostExcludes: dest.baseCostExcludes
+      ? [...dest.baseCostExcludes]
       : undefined,
   };
 }

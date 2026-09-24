@@ -30,6 +30,15 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
         "Saung santai dan fasilitas air bersih",
       ],
       capacityPerSession: 20,
+      baseCostIncludes: [
+        "Tiket masuk kawasan Lereng Hijau",
+        "Akses saung istirahat dan fasilitas umum",
+        "Pemandu lokal pendamping rute kebun",
+      ],
+      baseCostExcludes: [
+        "Transportasi menuju titik kumpul awal",
+        "Pengeluaran dan konsumsi pribadi",
+      ],
       declaredGuideReady: true,
       guideReadinessEvidence:
         "Tersedia 4 pemandu lokal terlatih dari kelompok tani binaan kawasan.",
@@ -127,6 +136,12 @@ function cloneVerificationApp(
   return {
     ...app,
     highlights: [...app.highlights],
+    baseCostIncludes: app.baseCostIncludes
+      ? [...app.baseCostIncludes]
+      : undefined,
+    baseCostExcludes: app.baseCostExcludes
+      ? [...app.baseCostExcludes]
+      : undefined,
     legalEntityDocument: app.legalEntityDocument
       ? { ...app.legalEntityDocument }
       : undefined,
@@ -206,6 +221,8 @@ export const mockDestinationVerificationStore = {
       status: "ATTACHED" | "VERIFIED";
     };
     baseCostPerPerson: number;
+    baseCostIncludes?: string[];
+    baseCostExcludes?: string[];
     description: string;
     highlights: string[];
     capacityPerSession: number;
@@ -309,6 +326,12 @@ export const mockDestinationVerificationStore = {
           }
         : undefined,
       baseCostPerPerson: input.baseCostPerPerson,
+      baseCostIncludes: input.baseCostIncludes
+        ? [...input.baseCostIncludes]
+        : undefined,
+      baseCostExcludes: input.baseCostExcludes
+        ? [...input.baseCostExcludes]
+        : undefined,
       description: input.description.trim(),
       highlights: [...input.highlights],
       capacityPerSession: input.capacityPerSession,
@@ -358,6 +381,12 @@ export const mockDestinationVerificationStore = {
       highlights: [...app.highlights],
       capacityPerSession: app.capacityPerSession,
       status: "ACTIVE",
+      baseCostIncludes: app.baseCostIncludes
+        ? [...app.baseCostIncludes]
+        : undefined,
+      baseCostExcludes: app.baseCostExcludes
+        ? [...app.baseCostExcludes]
+        : undefined,
     };
 
     const saved = mockDestinationStore.upsertVerifiedDestination(canonicalDest);

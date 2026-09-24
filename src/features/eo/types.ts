@@ -64,6 +64,8 @@ export interface DestinationRecord {
   facilities?: string[];
   operationalNotes?: string[];
   localGuideSummary?: string;
+  baseCostIncludes?: string[];
+  baseCostExcludes?: string[];
 }
 
 export type PackageGuideSource = "DESTINATION" | "EO";

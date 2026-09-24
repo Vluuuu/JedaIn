@@ -1153,6 +1153,24 @@ export function EoPackageBuilderScreen() {
               <strong>Rp{baseCost.toLocaleString("id-ID")}</strong>
             </div>
 
+            {selectedDestination?.baseCostIncludes &&
+              selectedDestination.baseCostIncludes.length > 0 && (
+                <div
+                  style={{
+                    fontSize: "var(--font-size-caption)",
+                    color: "var(--color-text-secondary)",
+                    padding: "var(--space-2) var(--space-3)",
+                    background: "var(--color-bg-surface-subtle)",
+                    borderRadius: "var(--radius-sm)",
+                    margin: "var(--space-1) 0 var(--space-2)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  <strong>Cakupan biaya dasar destinasi:</strong>{" "}
+                  {selectedDestination.baseCostIncludes.join(", ")}
+                </div>
+              )}
+
             <div className="eo-pricing-row">
               <span>Margin EO:</span>
               <strong>Rp{eoMargin.toLocaleString("id-ID")}</strong>
@@ -1488,6 +1506,18 @@ export function EoPackageBuilderScreen() {
                   </ul>
                 </div>
               )}
+
+              {inspectingDestination.baseCostIncludes &&
+                inspectingDestination.baseCostIncludes.length > 0 && (
+                  <div className="eo-dest-inspect-section">
+                    <strong>Termasuk Biaya Dasar:</strong>
+                    <ul>
+                      {inspectingDestination.baseCostIncludes.map((inc, i) => (
+                        <li key={i}>{inc}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
               <div className="eo-dest-inspect-footer">
                 <span>

@@ -133,6 +133,96 @@ export function DestinationProfileScreen() {
               {destination.capacityPerSession} Orang / sesi
             </strong>
           </div>
+
+          {((destination.baseCostIncludes &&
+            destination.baseCostIncludes.length > 0) ||
+            (destination.baseCostExcludes &&
+              destination.baseCostExcludes.length > 0)) && (
+            <div
+              style={{
+                gridColumn: "1 / -1",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "var(--space-3)",
+                padding: "var(--space-3)",
+                background: "var(--color-bg-surface-subtle)",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--color-border-default)",
+              }}
+            >
+              <div>
+                <small
+                  style={{
+                    color: "var(--color-text-muted)",
+                    display: "block",
+                    fontWeight: 600,
+                  }}
+                >
+                  Termasuk Biaya Dasar:
+                </small>
+                {destination.baseCostIncludes &&
+                destination.baseCostIncludes.length > 0 ? (
+                  <ul
+                    style={{
+                      margin: "var(--space-1) 0 0",
+                      paddingLeft: "var(--space-4)",
+                      fontSize: "var(--font-size-caption)",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {destination.baseCostIncludes.map((inc, i) => (
+                      <li key={i}>{inc}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: "var(--font-size-caption)",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    Tidak ada rincian spesifik
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <small
+                  style={{
+                    color: "var(--color-text-muted)",
+                    display: "block",
+                    fontWeight: 600,
+                  }}
+                >
+                  Belum Termasuk:
+                </small>
+                {destination.baseCostExcludes &&
+                destination.baseCostExcludes.length > 0 ? (
+                  <ul
+                    style={{
+                      margin: "var(--space-1) 0 0",
+                      paddingLeft: "var(--space-4)",
+                      fontSize: "var(--font-size-caption)",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {destination.baseCostExcludes.map((exc, i) => (
+                      <li key={i}>{exc}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: "var(--font-size-caption)",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    Tidak ada rincian spesifik
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div

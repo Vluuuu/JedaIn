@@ -32,6 +32,8 @@ export interface DestinationApplicationDraft {
   highlights: string[];
   capacityPerSession: number;
   baseCostPerPerson: number;
+  baseCostIncludes?: string[];
+  baseCostExcludes?: string[];
   guideReady: boolean;
   guideReadinessEvidence: string;
   agreedToSop: boolean;

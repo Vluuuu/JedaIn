@@ -57,6 +57,8 @@ export interface DestinationVerificationRecord {
     status: "ATTACHED" | "VERIFIED";
   };
   baseCostPerPerson: number;
+  baseCostIncludes?: string[];
+  baseCostExcludes?: string[];
   description: string;
   highlights: string[];
   capacityPerSession: number;

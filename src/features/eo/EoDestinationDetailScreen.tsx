@@ -182,6 +182,87 @@ export function EoDestinationDetailScreen() {
               </ul>
             </section>
           )}
+
+          {/* Cakupan Biaya Dasar Destinasi (P1-E01) */}
+          <section className="eo-dest-detail-card">
+            <h2 className="eo-dest-detail-card__title">
+              Cakupan Biaya Dasar Destinasi
+            </h2>
+            <p className="eo-dest-detail-card__hint">
+              Biaya dasar modal:{" "}
+              <strong>
+                Rp{destination.baseCostPerPerson.toLocaleString("id-ID")} /
+                orang
+              </strong>{" "}
+              (komponen biaya modal destinasi per peserta perjalanan).
+            </p>
+
+            {(destination.baseCostIncludes &&
+              destination.baseCostIncludes.length > 0) ||
+            (destination.baseCostExcludes &&
+              destination.baseCostExcludes.length > 0) ? (
+              <div
+                className="eo-pkg-provisions-grid"
+                style={{ marginTop: "var(--space-3)" }}
+              >
+                <div className="eo-pkg-provision-box">
+                  <strong className="eo-pkg-provision-title eo-pkg-provision-title--included">
+                    Termasuk Biaya Dasar:
+                  </strong>
+                  {destination.baseCostIncludes &&
+                  destination.baseCostIncludes.length > 0 ? (
+                    <ul className="eo-pkg-provision-list">
+                      {destination.baseCostIncludes.map((inc, i) => (
+                        <li key={i}>{inc}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: "var(--font-size-caption)",
+                        color: "var(--color-text-muted)",
+                      }}
+                    >
+                      Tidak ada rincian spesifik
+                    </span>
+                  )}
+                </div>
+
+                <div className="eo-pkg-provision-box">
+                  <strong className="eo-pkg-provision-title eo-pkg-provision-title--excluded">
+                    Belum Termasuk:
+                  </strong>
+                  {destination.baseCostExcludes &&
+                  destination.baseCostExcludes.length > 0 ? (
+                    <ul className="eo-pkg-provision-list">
+                      {destination.baseCostExcludes.map((exc, i) => (
+                        <li key={i}>{exc}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: "var(--font-size-caption)",
+                        color: "var(--color-text-muted)",
+                      }}
+                    >
+                      Tidak ada rincian spesifik
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p
+                style={{
+                  margin: "var(--space-2) 0 0",
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-text-muted)",
+                }}
+              >
+                Rincian cakupan biaya belum tersedia.
+              </p>
+            )}
+          </section>
         </div>
 
         {/* Side Column */}

@@ -31,6 +31,8 @@ export const mockDestinationPartnerService = {
       email: draft.email,
       legalEntityDoc: draft.legalEntityDoc,
       baseCostPerPerson: draft.baseCostPerPerson,
+      baseCostIncludes: draft.baseCostIncludes,
+      baseCostExcludes: draft.baseCostExcludes,
       description: draft.description,
       highlights: draft.highlights,
       capacityPerSession: draft.capacityPerSession,

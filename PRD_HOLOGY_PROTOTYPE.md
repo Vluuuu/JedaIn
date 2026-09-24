@@ -3,10 +3,10 @@
 **Nama Produk:** JedaIn  
 **Kompetisi:** HoloBiz — HOLOGY 9.0  
 **Dokumen:** Product Requirements Document untuk prototype lomba  
-**Versi:** 1.0 Candidate Canonical  
+**Versi:** 1.0 Canonical  
 **Tanggal:** 24 September 2026  
-**Status:** DRAFT UNTUK REVIEW TIM — belum menggantikan PRD.md lama sampai tim menyetujui dan merge  
-**Branch Dokumen:** docs/hology-prototype-prd-v1
+**Status:** APPROVED FOR CANONICAL MERGE — menjadi source of truth competition prototype setelah PR #74 di-merge  
+**Implementation Baseline:** 4208dddf2e86e607ed92b578c0102945b9ee903b
 
 > Dokumen ini merangkum requirement produk JedaIn berdasarkan prototype yang benar-benar sudah dibangun, evaluasi/discovery terbaru, dan kebutuhan demo kompetisi. Dokumen ini sengaja tidak mendefinisikan JedaIn sebagai aplikasi production-grade. Fokusnya adalah prototype yang stabil, jelas, dapat didemokan, dan konsisten untuk penjurian.
 
@@ -1776,26 +1776,26 @@ Setiap update sebaiknya menyebut:
 
 ---
 
-# 33. PRD Review Checklist Sebelum Merge
+# 33. PRD Canonicalization Checklist
 
-Sebelum PR #74 dijadikan canonical, tim perlu menyetujui:
+Checklist ini telah direview untuk canonical merge PR #74:
 
-- [ ] Prototype scope: competition prototype, bukan production app.
-- [ ] Guest/demo mode tetap diperbolehkan.
-- [ ] Traveler golden flow sesuai demo yang ingin ditunjukkan.
-- [ ] EO golden flow sesuai cara tim menjelaskan demand → package.
-- [ ] Mitra flow cukup untuk menunjukkan capacity/cost/operational context.
-- [ ] Admin flow cukup untuk menunjukkan trust/approval layer.
-- [ ] Terminologi capacity / guide / operationalNote disetujui.
-- [ ] Current prototype service fee Rp7.500 boleh tetap ditampilkan.
-- [ ] Narasi monetization untuk proposal/pitch diputuskan atau minimal tidak kontradiktif.
-- [ ] EO applicant guide category dipahami: tidak ada product-level default yang dikunci; current CERTIFIED_GUIDE adalah UI convenience.
-- [ ] Monetization narrative dipahami: 10% GMV commission + Rp7.500 traveler service fee.
-- [ ] Prototype checkout tidak perlu menampilkan commission 10% sebagai Traveler line item.
-- [ ] Actual destination photo tetap content dependency, bukan blocker engineering.
-- [ ] Route map sesuai current implementation.
-- [ ] D1 + D2 tetap LIVE / VERIFIED pada baseline 4208ddd.
-- [ ] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
+- [x] Prototype scope: competition prototype, bukan production app.
+- [x] Guest/demo mode tetap diperbolehkan.
+- [x] Traveler golden flow sesuai demo yang ingin ditunjukkan.
+- [x] EO golden flow sesuai cara tim menjelaskan demand → package.
+- [x] Mitra flow cukup untuk menunjukkan capacity/cost/operational context.
+- [x] Admin flow cukup untuk menunjukkan trust/approval layer.
+- [x] Terminologi capacity / guide / operationalNote disetujui.
+- [x] Current prototype service fee Rp7.500 boleh tetap ditampilkan.
+- [x] Narasi monetization untuk proposal/pitch diputuskan atau minimal tidak kontradiktif.
+- [x] EO applicant guide category dipahami: tidak ada product-level default yang dikunci; current CERTIFIED_GUIDE adalah UI convenience.
+- [x] Monetization narrative dipahami: 10% GMV commission + Rp7.500 traveler service fee.
+- [x] Prototype checkout tidak perlu menampilkan commission 10% sebagai Traveler line item.
+- [x] Actual destination photo tetap content dependency, bukan blocker engineering.
+- [x] Route map sesuai current implementation.
+- [x] D1 + D2 tetap LIVE / VERIFIED pada baseline 4208ddd.
+- [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
 

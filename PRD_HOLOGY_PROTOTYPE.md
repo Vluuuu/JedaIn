@@ -348,7 +348,7 @@ Catatan:
 - tidak menggunakan localStorage untuk persistence jangka panjang,
 - ini bukan production auth session.
 
-Status: IMPLEMENTED LOCAL, PENDING RELEASE — Batch D2 commit 4208ddd.
+Status: IMPLEMENTED LIVE / VERIFIED — Batch D2 commit 4208ddd.
 
 ## REQ-TRV-04 — Preference Quiz
 
@@ -462,7 +462,7 @@ Acceptance:
 
 Status:
 - logic IMPLEMENTED LIVE,
-- accessibility polish IMPLEMENTED LOCAL, PENDING RELEASE — Batch D1 commit 32d698f.
+- accessibility polish IMPLEMENTED LIVE / VERIFIED — Batch D1 commit 32d698f.
 
 ## REQ-TRV-10 — Checkout dan Payment Breakdown
 
@@ -810,7 +810,7 @@ Acceptance:
 
 Status:
 - core IMPLEMENTED LIVE,
-- spacing polish D1 PENDING RELEASE.
+- spacing polish D1 IMPLEMENTED LIVE / VERIFIED.
 
 ## REQ-MIT-04 — Schedule dan Kuota Sesi EO
 
@@ -825,7 +825,7 @@ Acceptance:
 
 Status:
 - semantic core IMPLEMENTED LIVE,
-- header consistency D1 PENDING RELEASE.
+- header consistency D1 IMPLEMENTED LIVE / VERIFIED.
 
 ## REQ-MIT-05 — Session Operational Summary
 
@@ -1234,7 +1234,7 @@ Batch D1 memperbaiki ParticipantQuantity semantics.
 
 Status:
 core IMPLEMENTED,
-D1 polish PENDING RELEASE.
+D1 polish IMPLEMENTED LIVE / VERIFIED.
 
 ---
 
@@ -1255,7 +1255,7 @@ Requirement:
 Priority:
 P2 / OPTIONAL PROTOTYPE POLISH.
 
-D3 tidak boleh dimulai sebelum D1/D2 memiliki checkpoint yang stabil jika tim mengikuti release plan saat ini.
+D1/D2 sudah memiliki production checkpoint yang stabil pada commit 4208ddd. D3 tetap optional dan hanya perlu dilakukan jika performance benar-benar mengganggu pengalaman demo.
 
 ---
 
@@ -1310,14 +1310,11 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Latest verified live baseline setelah release C3/payment integration:
-- 37 suites / 592 tests.
-
-Latest local development baseline setelah D1:
-- 38 suites / 595 tests.
-
-Latest local development baseline setelah D2:
-- 39 suites / 607 tests.
+Current verified live baseline setelah D1 + D2:
+- production commit: 4208dddf2e86e607ed92b578c0102945b9ee903b,
+- 39 suites / 607 tests,
+- GitHub Actions CI PASS,
+- live smoke test D1 + D2 PASS.
 
 Test count boleh bertambah.
 Existing test count tidak boleh turun tanpa alasan yang dijelaskan.
@@ -1326,7 +1323,7 @@ Existing test count tidak boleh turun tanpa alasan yang dijelaskan.
 
 # 26. Implementation Status Summary
 
-## LIVE pada baseline c72681f
+## LIVE pada baseline 4208ddd
 
 Implemented and verified:
 
@@ -1346,20 +1343,15 @@ Implemented and verified:
 - destination cost scope,
 - session operational note,
 - payment breakdown + fixed Rp7.500 service fee,
-- production demo smoke test on Traveler/EO/Mitra/payment.
-
-## LOCAL, PENDING PUSH/RELEASE
-
-Batch D1 — commit 32d698f:
 - capacity copy spacing,
 - Mitra schedule header "Kuota Sesi EO",
-- checkout quantity accessibility.
-
-Batch D2 — commit 4208ddd:
+- checkout quantity accessibility,
 - Traveler SessionState persistence using sessionStorage,
 - corruption fallback,
 - reset/logout storage clearing,
-- quiz draft refresh persistence.
+- quiz draft refresh persistence,
+- production demo smoke test on Traveler/EO/Mitra/payment,
+- D1 + D2 production smoke verification.
 
 ## PARTIAL
 

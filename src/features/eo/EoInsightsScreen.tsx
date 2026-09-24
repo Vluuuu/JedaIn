@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Button } from "../../components/ui";
-import { mockInsightStore } from "./mockInsightStore";
+import { mockInsightStore, PROTOTYPE_AS_OF_DATE } from "./mockInsightStore";
 import type { DemandFilterOptions, DemandPeriodPreset } from "./types";
 import "./eo.css";
 
@@ -83,6 +83,16 @@ export function EoInsightsScreen() {
     }
   };
 
+  const asOfDateFormatted = new Date(PROTOTYPE_AS_OF_DATE).toLocaleDateString(
+    "id-ID",
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "Asia/Jakarta",
+    },
+  );
+
   return (
     <div className="eo-demand-container">
       {/* 1. Header + Period Control + Aggregate Privacy Notice */}
@@ -162,11 +172,24 @@ export function EoInsightsScreen() {
           <span className="eo-demand-notice__icon" aria-hidden="true">
             ℹ
           </span>
-          <p className="eo-demand-notice__text">
-            {period === "ALL"
-              ? `Simulasi data agregat · ${totalResponses.toLocaleString("id-ID")} respons pada seluruh periode prototype. Tidak menampilkan data pribadi traveler.`
-              : `Simulasi data agregat · ${totalResponses.toLocaleString("id-ID")} respons pada periode ${getPeriodLabel(period)}. Tidak menampilkan data pribadi traveler.`}
-          </p>
+          <div className="eo-demand-notice__body">
+            <p className="eo-demand-notice__text">
+              {period === "ALL"
+                ? `Simulasi data agregat · ${totalResponses.toLocaleString("id-ID")} respons pada seluruh periode prototype. Tidak menampilkan data pribadi traveler.`
+                : `Simulasi data agregat · ${totalResponses.toLocaleString("id-ID")} respons pada periode ${getPeriodLabel(period)}. Tidak menampilkan data pribadi traveler.`}
+            </p>
+            <div className="eo-demand-meta-info">
+              <span className="eo-demand-meta-tag">
+                Data simulasi prototype ·{" "}
+                {totalResponses.toLocaleString("id-ID")} respons · acuan{" "}
+                {asOfDateFormatted}
+              </span>
+              <span className="eo-demand-meta-disclaimer">
+                Distribusi tiap dimensi ditampilkan secara terpisah dan tidak
+                otomatis menunjukkan kombinasi preferensi responden yang sama.
+              </span>
+            </div>
+          </div>
         </aside>
       </header>
 
@@ -460,11 +483,24 @@ export function EoInsightsScreen() {
           aria-label="Rincian pola permintaan traveler"
         >
           <div className="eo-demand-section__header">
-            <h2>Rincian Pola Permintaan</h2>
-            <p>
-              Lihat distribusi tiap dimensi secara terpisah untuk memahami
-              konteks demand.
-            </p>
+            <div>
+              <h2>Rincian Pola Permintaan</h2>
+              <p>
+                Lihat distribusi tiap dimensi secara terpisah untuk memahami
+                konteks demand.
+              </p>
+            </div>
+            <div className="eo-demand-rincian-disclaimer">
+              <span className="eo-demand-meta-tag">
+                Data simulasi prototype ·{" "}
+                {totalResponses.toLocaleString("id-ID")} respons · acuan{" "}
+                {asOfDateFormatted}
+              </span>
+              <p>
+                Distribusi tiap dimensi ditampilkan secara terpisah dan tidak
+                otomatis menunjukkan kombinasi preferensi responden yang sama.
+              </p>
+            </div>
           </div>
 
           {totalResponses === 0 ? (

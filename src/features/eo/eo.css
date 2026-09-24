@@ -984,27 +984,86 @@
 
 /* Prototype & Privacy Notice: quiet, small, clear */
 .eo-demand-notice {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--color-bg-surface-subtle);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  width: fit-content;
+  border-radius: var(--radius-lg);
+  max-width: 100%;
 }
 
 .eo-demand-notice__icon {
   color: var(--color-brand-primary);
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-bold);
-  line-height: 1;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.eo-demand-notice__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .eo-demand-notice__text {
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   margin: 0;
+  line-height: 1.4;
+}
+
+.eo-demand-meta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--color-border-default);
+}
+
+.eo-demand-meta-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-900);
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  border-radius: var(--radius-sm);
+  padding: 0.125rem 0.375rem;
+  width: fit-content;
+}
+
+.eo-demand-meta-disclaimer {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.eo-demand-rincian-disclaimer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  text-align: right;
+  max-width: 480px;
+}
+
+.eo-demand-rincian-disclaimer p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .eo-demand-rincian-disclaimer {
+    align-items: flex-start;
+    text-align: left;
+    margin-top: var(--space-2);
+  }
 }
 
 /* Top Signal Summary Band: Sinyal teratas per dimensi */
@@ -2317,6 +2376,67 @@
   margin: 0;
   padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--color-border-default);
+}
+
+/* Operational Summary (P1-E04) */
+.eo-pkg-op-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .eo-pkg-op-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+}
+
+.eo-pkg-op-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--space-3);
+  background: var(--color-bg-surface-subtle);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-default);
+}
+
+.eo-pkg-op-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.eo-pkg-op-value {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.eo-pkg-op-subtext {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
+.eo-pkg-op-notes {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface-subtle);
+  border-left: 3px solid var(--color-brand-primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.eo-pkg-op-notes-list {
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
 }
 
 /* Provisions (Included / Excluded) */

@@ -54,6 +54,17 @@ export function EoPackageDetailScreen() {
     (s) => s.status === "OPEN",
   ).length;
 
+  const formattedUpdatedAt = pkg.updatedAt
+    ? new Date(pkg.updatedAt).toLocaleString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Jakarta",
+      })
+    : undefined;
+
   const handlePublishLive = () => {
     setPublishError(null);
     setPublishMessage(null);
@@ -243,6 +254,98 @@ export function EoPackageDetailScreen() {
       <div className="eo-pkg-detail-grid">
         {/* MAIN COLUMN */}
         <div className="eo-pkg-detail-main">
+          {/* Ringkasan Operasional (P1-E04) */}
+          <section
+            className="eo-pkg-detail-section"
+            aria-labelledby="op-summary-heading"
+          >
+            <h2 id="op-summary-heading" className="eo-pkg-detail-section-title">
+              Ringkasan Operasional
+            </h2>
+            <div className="eo-pkg-op-grid">
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">Destinasi & Lokasi</span>
+                <strong className="eo-pkg-op-value">
+                  {destination
+                    ? `${destination.name}, ${destination.locationLabel}`
+                    : pkg.destinationId}
+                </strong>
+              </div>
+
+              {destination && (
+                <div className="eo-pkg-op-item">
+                  <span className="eo-pkg-op-label">
+                    Kapasitas umum destinasi per sesi
+                  </span>
+                  <strong className="eo-pkg-op-value">
+                    {destination.capacityPerSession} orang/sesi
+                  </strong>
+                  <span className="eo-pkg-op-subtext">
+                    Kapasitas umum destinasi per sesi, bukan alokasi kuota per
+                    sesi
+                  </span>
+                </div>
+              )}
+
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">Sumber Pemandu</span>
+                <strong className="eo-pkg-op-value">
+                  {pkg.guideSource === "DESTINATION"
+                    ? "Pemandu dari Destinasi"
+                    : "Pemandu dari EO (Certified Guide)"}
+                </strong>
+                {destination?.localGuideSummary &&
+                  pkg.guideSource === "DESTINATION" && (
+                    <span className="eo-pkg-op-subtext">
+                      Kesiapan lokal: {destination.localGuideSummary}
+                    </span>
+                  )}
+              </div>
+
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">Biaya Dasar Destinasi</span>
+                <strong className="eo-pkg-op-value">
+                  Rp{pkg.pricing.destinationBaseCost.toLocaleString("id-ID")} /
+                  orang
+                </strong>
+                <span className="eo-pkg-op-subtext">
+                  Harga traveler: Rp
+                  {pkg.pricing.customerPrice.toLocaleString("id-ID")} / orang
+                </span>
+              </div>
+
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">Alur & Durasi</span>
+                <strong className="eo-pkg-op-value">
+                  {pkg.itinerary.length} aktivitas · {pkg.durationLabel}
+                </strong>
+              </div>
+
+              {formattedUpdatedAt && (
+                <div className="eo-pkg-op-item">
+                  <span className="eo-pkg-op-label">Pembaruan Paket</span>
+                  <strong className="eo-pkg-op-value">
+                    {formattedUpdatedAt} WIB
+                  </strong>
+                </div>
+              )}
+            </div>
+
+            {destination?.operationalNotes &&
+              destination.operationalNotes.length > 0 && (
+                <div className="eo-pkg-op-notes">
+                  <span className="eo-pkg-op-label">
+                    Catatan Operasional Destinasi:
+                  </span>
+                  <ul className="eo-pkg-op-notes-list">
+                    {destination.operationalNotes.map((note, idx) => (
+                      <li key={idx}>{note}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+          </section>
+
           {/* Itinerary */}
           <section className="eo-pkg-detail-section">
             <h2 className="eo-pkg-detail-section-title">

@@ -1,10 +1,14 @@
-import { Badge } from "../../components/ui";
+import { Fragment, useState } from "react";
+import { Badge, Button } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
 export function DestinationScheduleScreen() {
+  const [expandedSessionId, setExpandedSessionId] = useState<string | null>(
+    null,
+  );
   const context = resolveAuthenticatedDestinationContext();
   if (!context) {
     return (
@@ -83,6 +87,7 @@ export function DestinationScheduleScreen() {
                   <th>Alokasi Kapasitas</th>
                   <th>Peserta Terkonfirmasi</th>
                   <th>Status Sesi</th>
+                  <th>Ringkasan</th>
                 </tr>
               </thead>
               <tbody>
@@ -112,57 +117,205 @@ export function DestinationScheduleScreen() {
                     },
                   );
 
+                  const isExpanded = expandedSessionId === s.sessionId;
+
                   return (
-                    <tr key={s.sessionId}>
-                      <td>
-                        <strong>{pkg?.title ?? s.packageId}</strong>
-                        <div
-                          style={{
-                            fontSize: "var(--font-size-caption)",
-                            color: "var(--color-text-secondary)",
-                          }}
-                        >
-                          Sesi: {s.sessionId}
-                        </div>
-                      </td>
-                      <td>{pkg?.eoDisplayName ?? s.eoId}</td>
-                      <td>{dateLabel} WIB</td>
-                      <td>
-                        {s.capacity} Orang
-                        <div
-                          style={{
-                            fontSize: "var(--font-size-caption)",
-                            color: "var(--color-text-muted)",
-                          }}
-                        >
-                          Kuota sesi EO
-                        </div>
-                      </td>
-                      <td>
-                        <strong>{confirmedCount}</strong> / {s.capacity} Orang
-                        <div
-                          style={{
-                            fontSize: "var(--font-size-caption)",
-                            color: "var(--color-text-muted)",
-                          }}
-                        >
-                          Peserta terkonfirmasi
-                        </div>
-                      </td>
-                      <td>
-                        <Badge
-                          tone={
-                            s.status === "OPEN"
-                              ? "success"
-                              : s.status === "FULL"
-                                ? "warning"
-                                : "neutral"
-                          }
-                        >
-                          {s.status}
-                        </Badge>
-                      </td>
-                    </tr>
+                    <Fragment key={s.sessionId}>
+                      <tr>
+                        <td>
+                          <strong>{pkg?.title ?? s.packageId}</strong>
+                          <div
+                            style={{
+                              fontSize: "var(--font-size-caption)",
+                              color: "var(--color-text-secondary)",
+                            }}
+                          >
+                            Sesi: {s.sessionId}
+                          </div>
+                        </td>
+                        <td>{pkg?.eoDisplayName ?? s.eoId}</td>
+                        <td>{dateLabel} WIB</td>
+                        <td>
+                          {s.capacity} Orang
+                          <div
+                            style={{
+                              fontSize: "var(--font-size-caption)",
+                              color: "var(--color-text-muted)",
+                            }}
+                          >
+                            Kuota sesi EO
+                          </div>
+                        </td>
+                        <td>
+                          <strong>{confirmedCount}</strong> / {s.capacity} Orang
+                          <div
+                            style={{
+                              fontSize: "var(--font-size-caption)",
+                              color: "var(--color-text-muted)",
+                            }}
+                          >
+                            Peserta terkonfirmasi
+                          </div>
+                        </td>
+                        <td>
+                          <Badge
+                            tone={
+                              s.status === "OPEN"
+                                ? "success"
+                                : s.status === "FULL"
+                                  ? "warning"
+                                  : "neutral"
+                            }
+                          >
+                            {s.status}
+                          </Badge>
+                        </td>
+                        <td>
+                          <Button
+                            type="button"
+                            variant={isExpanded ? "primary" : "secondary"}
+                            size="sm"
+                            onClick={() =>
+                              setExpandedSessionId(
+                                isExpanded ? null : s.sessionId,
+                              )
+                            }
+                            aria-expanded={isExpanded}
+                          >
+                            {isExpanded ? "Tutup" : "Lihat Ringkasan"}
+                          </Button>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr className="dest-session-summary-row">
+                          <td colSpan={7}>
+                            <div className="dest-session-summary-card">
+                              <div className="dest-session-summary-header">
+                                <strong className="dest-session-summary-title">
+                                  Ringkasan Operasional Sesi
+                                </strong>
+                                <span className="dest-session-summary-id">
+                                  ID Sesi: {s.sessionId}
+                                </span>
+                              </div>
+
+                              <div className="dest-session-summary-grid">
+                                <div className="dest-session-summary-item">
+                                  <span className="dest-session-summary-label">
+                                    Paket Experience
+                                  </span>
+                                  <strong className="dest-session-summary-val">
+                                    {pkg?.title ?? s.packageId}
+                                  </strong>
+                                </div>
+
+                                <div className="dest-session-summary-item">
+                                  <span className="dest-session-summary-label">
+                                    Penyelenggara (EO)
+                                  </span>
+                                  <strong className="dest-session-summary-val">
+                                    {pkg?.eoDisplayName ?? s.eoId}
+                                  </strong>
+                                </div>
+
+                                <div className="dest-session-summary-item">
+                                  <span className="dest-session-summary-label">
+                                    Waktu Pelaksanaan
+                                  </span>
+                                  <strong className="dest-session-summary-val">
+                                    {dateLabel} WIB
+                                  </strong>
+                                </div>
+
+                                <div className="dest-session-summary-item">
+                                  <span className="dest-session-summary-label">
+                                    Kuota Sesi EO
+                                  </span>
+                                  <strong className="dest-session-summary-val">
+                                    {s.capacity} Orang
+                                  </strong>
+                                  <span className="dest-session-summary-hint">
+                                    Kapasitas umum destinasi per sesi:{" "}
+                                    {destination.capacityPerSession} orang
+                                  </span>
+                                </div>
+
+                                <div className="dest-session-summary-item">
+                                  <span className="dest-session-summary-label">
+                                    Peserta Terkonfirmasi
+                                  </span>
+                                  <strong className="dest-session-summary-val">
+                                    {confirmedCount} Orang
+                                  </strong>
+                                  <span className="dest-session-summary-hint">
+                                    Sisa kuota sesi:{" "}
+                                    {Math.max(0, s.capacity - confirmedCount)}{" "}
+                                    orang
+                                  </span>
+                                </div>
+
+                                <div className="dest-session-summary-item">
+                                  <span className="dest-session-summary-label">
+                                    Status Sesi
+                                  </span>
+                                  <strong className="dest-session-summary-val">
+                                    {s.status}
+                                  </strong>
+                                </div>
+
+                                <div className="dest-session-summary-item">
+                                  <span className="dest-session-summary-label">
+                                    Sumber Pemandu Package
+                                  </span>
+                                  <strong className="dest-session-summary-val">
+                                    {pkg?.guideSource === "DESTINATION"
+                                      ? "Pemandu dari Destinasi"
+                                      : "Pemandu dari EO (Certified Guide)"}
+                                  </strong>
+                                  <span className="dest-session-summary-hint">
+                                    Pilihan sumber pemandu pada rancangan paket
+                                  </span>
+                                </div>
+                              </div>
+
+                              {pkg?.itinerary && pkg.itinerary.length > 0 && (
+                                <div className="dest-session-summary-itinerary">
+                                  <span className="dest-session-summary-label">
+                                    Rencana Aktivitas ({pkg.itinerary.length}{" "}
+                                    kegiatan):
+                                  </span>
+                                  <ol className="dest-session-summary-itinerary-list">
+                                    {pkg.itinerary.map((item) => (
+                                      <li key={item.order}>
+                                        <strong>{item.title}</strong>
+                                        {item.durationLabel &&
+                                          ` (${item.durationLabel})`}
+                                        {item.description &&
+                                          ` — ${item.description}`}
+                                      </li>
+                                    ))}
+                                  </ol>
+                                </div>
+                              )}
+
+                              {pkg?.safetyNotes &&
+                                pkg.safetyNotes.length > 0 && (
+                                  <div className="dest-session-summary-safety">
+                                    <span className="dest-session-summary-label">
+                                      Catatan Keselamatan & Persiapan:
+                                    </span>
+                                    <ul className="dest-session-summary-safety-list">
+                                      {pkg.safetyNotes.map((note, idx) => (
+                                        <li key={idx}>{note}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   );
                 })}
               </tbody>

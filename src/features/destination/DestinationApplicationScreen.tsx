@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
+import { generateUniqueDestinationPartnerId } from "./destinationContext";
 import { mockDestinationPartnerService } from "./mockDestinationPartnerService";
 import type { DestinationApplicationStep } from "./types";
 import "./destination.css";
@@ -19,7 +20,8 @@ const STEPS = [
 export function DestinationApplicationScreen() {
   const navigate = useNavigate();
   const partner = partnerSessionStore.get();
-  const isDestinationRole = partner?.role === "DESTINATION";
+  const [partnerRole, setPartnerRole] = useState(partner?.role);
+  const isDestinationRole = partnerRole === "DESTINATION";
 
   // Check if existing application exists for this partner (e.g. reapply)
   const existingApp =
@@ -79,6 +81,20 @@ export function DestinationApplicationScreen() {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleStartRegistration = () => {
+    const uniquePartnerId = generateUniqueDestinationPartnerId(
+      "mitra.destinasi@jedain.id",
+    );
+    partnerSessionStore.setPartner({
+      id: uniquePartnerId,
+      email: "mitra.destinasi@jedain.id",
+      name: "Mitra Destinasi Baru",
+      role: "DESTINATION",
+      businessName: "Pengelola Kawasan Destinasi",
+    });
+    setPartnerRole("DESTINATION");
+  };
+
   // Anonymous / Non-Destination user guard
   if (!isDestinationRole) {
     return (
@@ -101,15 +117,24 @@ export function DestinationApplicationScreen() {
               justifyContent: "center",
               gap: "var(--space-3)",
               marginTop: "var(--space-4)",
+              flexWrap: "wrap",
             }}
           >
             <Button
               type="button"
               variant="primary"
               size="md"
+              onClick={handleStartRegistration}
+            >
+              Daftar Destinasi Baru
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
               onClick={() => navigate("/partner/login")}
             >
-              Daftar / Masuk Akun Destinasi
+              Masuk Akun Destinasi
             </Button>
           </div>
         </div>
@@ -143,13 +168,20 @@ export function DestinationApplicationScreen() {
     }
 
     setIsSubmitting(true);
+    const currentPartner = partnerSessionStore.get();
+    if (!currentPartner || currentPartner.role !== "DESTINATION") {
+      setIsSubmitting(false);
+      setErrorMessage("Sesi partner destinasi tidak valid.");
+      return;
+    }
+
     const splitHighlights = highlightsInput
       .split("\n")
       .map((s) => s.trim())
       .filter(Boolean);
 
     const res = mockDestinationPartnerService.submitApplication({
-      partnerIdentityId: partner.id,
+      partnerIdentityId: currentPartner.id,
       name,
       locationLabel,
       province,

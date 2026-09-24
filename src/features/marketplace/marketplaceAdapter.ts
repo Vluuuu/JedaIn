@@ -1,3 +1,4 @@
+import { prototypeClock } from "../../lib/clock";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockApplicationStore } from "../eo/mockApplicationStore";
 import { mockDestinationStore } from "../eo/mockDestinationStore";
@@ -177,9 +178,13 @@ export function buildTravelerPackageDetailFromEo(
   if (!app || app.status !== "APPROVED") return null;
 
   const eoSessions = mockEoPackageStore.getSessionsByPackage(eoPkg.packageId);
+  const nowMs = prototypeClock.nowMs();
 
-  const upcomingSessionPreviews: PackageSessionPreview[] = eoSessions.map(
-    (s) => ({
+  const upcomingSessionPreviews: PackageSessionPreview[] = eoSessions
+    .filter(
+      (s) => s.status !== "CANCELLED" && new Date(s.startAt).getTime() > nowMs,
+    )
+    .map((s) => ({
       sessionId: s.sessionId,
       packageId: s.packageId,
       startAt: s.startAt,
@@ -187,8 +192,7 @@ export function buildTravelerPackageDetailFromEo(
       status: s.status,
       pricePerPerson: s.pricePerPerson,
       remainingSlots: s.remainingSlots,
-    }),
-  );
+    }));
 
   const organizerRef = resolveOrganizerReviewRef(eoPkg.eoId);
 
@@ -259,6 +263,7 @@ export function getCombinedPackageDetails(
 ): Record<string, PackageDetailSource> {
   const combined: Record<string, PackageDetailSource> = { ...fallbackDetails };
   const eoPackages = mockEoPackageStore.getAllPackages();
+  const nowMs = prototypeClock.nowMs();
 
   for (const eoPkg of eoPackages) {
     if (eoPkg.status === "LIVE") {
@@ -271,10 +276,14 @@ export function getCombinedPackageDetails(
         const eoSessions = mockEoPackageStore.getSessionsByPackage(
           eoPkg.packageId,
         );
-        if (eoSessions.length > 0) {
+        const filteredEoSessions = eoSessions.filter(
+          (s) =>
+            s.status !== "CANCELLED" && new Date(s.startAt).getTime() > nowMs,
+        );
+        if (filteredEoSessions.length > 0) {
           combined[eoPkg.packageId] = {
             ...combined[eoPkg.packageId],
-            upcomingSessionPreviews: eoSessions.map((s) => ({
+            upcomingSessionPreviews: filteredEoSessions.map((s) => ({
               sessionId: s.sessionId,
               packageId: s.packageId,
               startAt: s.startAt,

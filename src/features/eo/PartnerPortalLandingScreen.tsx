@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { resetCompetitionDemoState } from "../demo/demoReset";
+import { generateUniqueDestinationPartnerId } from "../destination/destinationContext";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
 
@@ -193,7 +194,21 @@ export function PartnerPortalLandingScreen() {
               type="button"
               variant="primary"
               size="md"
-              onClick={() => navigate("/partner/apply/destination")}
+              onClick={() => {
+                if (partnerSessionStore.get()?.role !== "DESTINATION") {
+                  const uniquePartnerId = generateUniqueDestinationPartnerId(
+                    "mitra.destinasi@jedain.id",
+                  );
+                  partnerSessionStore.setPartner({
+                    id: uniquePartnerId,
+                    email: "mitra.destinasi@jedain.id",
+                    name: "Mitra Destinasi Baru",
+                    role: "DESTINATION",
+                    businessName: "Pengelola Kawasan Destinasi",
+                  });
+                }
+                navigate("/partner/apply/destination");
+              }}
             >
               Daftar sebagai Destinasi
             </Button>

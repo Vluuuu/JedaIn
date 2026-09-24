@@ -1,3 +1,4 @@
+import { prototypeClock } from "../../lib/clock";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import {
   getCombinedCatalogPackages,
@@ -24,6 +25,7 @@ export interface MockSessionSelectionAdapterOptions {
   failValidationCount?: number;
   validationFailureOverride?: Record<string, ValidationFailureReason>;
   errorMessage?: string;
+  now?: () => Date;
 }
 
 export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
@@ -35,6 +37,7 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
   private failValidationCount: number;
   private validationFailureOverride: Record<string, ValidationFailureReason>;
   private errorMessage: string;
+  private now: () => Date;
 
   constructor(options: MockSessionSelectionAdapterOptions = {}) {
     this.explicitPackages = options.packages;
@@ -45,6 +48,7 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
     this.failValidationCount = options.failValidationCount ?? 0;
     this.validationFailureOverride = options.validationFailureOverride ?? {};
     this.errorMessage = options.errorMessage ?? "Jadwal belum bisa dimuat.";
+    this.now = options.now ?? (() => prototypeClock.now());
   }
 
   private resolvePackages(): PackageRecommendationSource[] {
@@ -119,9 +123,14 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
       rawSessions,
     );
 
-    // Filter out sessions that do not match packageId OR are CANCELLED
+    const nowMs = this.now().getTime();
+
+    // Filter out sessions that do not match packageId OR are CANCELLED OR are in the past
     const validSessions = effectiveSessions.filter(
-      (s) => s.packageId === packageId && s.status !== "CANCELLED",
+      (s) =>
+        s.packageId === packageId &&
+        s.status !== "CANCELLED" &&
+        new Date(s.startAt).getTime() > nowMs,
     );
 
     // Chronological sort
@@ -192,6 +201,15 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
         reason: "PACKAGE_MISMATCH",
         message:
           "Jadwal ini tidak sesuai dengan paket yang dipilih. Pilih jadwal lain.",
+      };
+    }
+
+    const nowMs = this.now().getTime();
+    if (new Date(targetSession.startAt).getTime() <= nowMs) {
+      return {
+        valid: false,
+        reason: "CLOSED",
+        message: "Jadwal ini baru saja tidak tersedia. Pilih jadwal lain.",
       };
     }
 

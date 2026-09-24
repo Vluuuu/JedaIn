@@ -1,3 +1,4 @@
+import { prototypeClock } from "../../lib/clock";
 import type { AuthUser } from "../auth/types";
 import { mockContactVerificationStore } from "../contactVerification/mockContactVerificationStore";
 import { demoContactVerificationBypass } from "../demo/demoContactVerificationBypass";
@@ -33,6 +34,7 @@ export interface MockCheckoutAdapterOptions {
   failLoadCount?: number;
   failSubmitCount?: number;
   errorMessage?: string;
+  now?: () => Date;
 }
 
 export class MockCheckoutAdapter implements CheckoutAdapter {
@@ -47,6 +49,7 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
   private failLoadCount: number;
   private failSubmitCount: number;
   private errorMessage: string;
+  private now: () => Date;
 
   constructor(options: MockCheckoutAdapterOptions = {}) {
     this.explicitPackages = options.packages;
@@ -60,6 +63,7 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
     this.failLoadCount = options.failLoadCount ?? 0;
     this.failSubmitCount = options.failSubmitCount ?? 0;
     this.errorMessage = options.errorMessage ?? "Checkout belum bisa dimuat.";
+    this.now = options.now ?? (() => prototypeClock.now());
   }
 
   private resolvePackages(): PackageRecommendationSource[] {
@@ -135,8 +139,14 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       remainingSlots: effectiveRemaining,
     };
 
-    // Check session status eligibility
-    if (foundSession.status !== "OPEN" || effectiveRemaining <= 0) {
+    const nowMs = this.now().getTime();
+
+    // Check session status eligibility and freshness
+    if (
+      foundSession.status !== "OPEN" ||
+      effectiveRemaining <= 0 ||
+      new Date(foundSession.startAt).getTime() <= nowMs
+    ) {
       return {
         state: "SESSION_UNAVAILABLE",
         package: foundPkg,
@@ -346,7 +356,11 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    if (foundSession.status !== "OPEN") {
+    const nowMs = this.now().getTime();
+    if (
+      foundSession.status !== "OPEN" ||
+      new Date(foundSession.startAt).getTime() <= nowMs
+    ) {
       return {
         status: "SESSION_UNAVAILABLE",
         message: "Jadwal ini baru saja tidak tersedia. Pilih jadwal lain.",

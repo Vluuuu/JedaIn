@@ -1,3 +1,4 @@
+import { prototypeClock } from "../../lib/clock";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
@@ -18,6 +19,7 @@ export interface MockPackageDetailAdapterOptions {
   delayMs?: number;
   failCount?: number;
   errorMessage?: string;
+  now?: () => Date;
 }
 
 export class MockPackageDetailAdapter implements PackageDetailAdapter {
@@ -27,6 +29,7 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
   private delayMs: number;
   private failCount: number;
   private errorMessage: string;
+  private now: () => Date;
 
   constructor(options: MockPackageDetailAdapterOptions = {}) {
     this.explicitPackages = options.packages;
@@ -36,6 +39,7 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
     this.failCount = options.failCount ?? 0;
     this.errorMessage =
       options.errorMessage ?? "Detail experience belum bisa dimuat.";
+    this.now = options.now ?? (() => prototypeClock.now());
   }
 
   private resolvePackages(): PackageRecommendationSource[] {
@@ -78,12 +82,16 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
       };
     }
 
+    const nowMs = this.now().getTime();
+
     // Sessions may be overridden in tests
     const allSessions =
       this.sessionOverrides[packageId] ?? detail.upcomingSessionPreviews ?? [];
 
-    // Filter out CANCELLED sessions (must not appear in upcoming preview)
-    const validSessions = allSessions.filter((s) => s.status !== "CANCELLED");
+    // Filter out CANCELLED sessions and past sessions (must not appear in upcoming preview)
+    const validSessions = allSessions.filter(
+      (s) => s.status !== "CANCELLED" && new Date(s.startAt).getTime() > nowMs,
+    );
 
     // Check if at least one upcoming session is OPEN
     const hasOpenSession = validSessions.some((s) => s.status === "OPEN");

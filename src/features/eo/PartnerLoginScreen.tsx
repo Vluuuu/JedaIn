@@ -254,6 +254,20 @@ export function PartnerLoginScreen() {
                 ? "/partner/apply/destination"
                 : "/partner/apply/eo"
             }
+            onClick={() => {
+              if (role === "DESTINATION") {
+                const targetEmail = email.trim() || "mitra.destinasi@jedain.id";
+                const uniquePartnerId =
+                  generateUniqueDestinationPartnerId(targetEmail);
+                partnerSessionStore.setPartner({
+                  id: uniquePartnerId,
+                  email: targetEmail,
+                  name: "Mitra Destinasi Baru",
+                  role: "DESTINATION",
+                  businessName: "Pengelola Kawasan Destinasi",
+                });
+              }
+            }}
             style={{ color: "var(--color-brand-primary)", fontWeight: 600 }}
           >
             {role === "DESTINATION"

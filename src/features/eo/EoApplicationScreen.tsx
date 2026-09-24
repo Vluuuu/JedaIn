@@ -13,41 +13,52 @@ export function EoApplicationScreen() {
     ? mockApplicationStore.getBySellerId(existingPartner.id)
     : undefined;
 
+  // Only prefill from existing application if the user is explicitly reapplying to a rejected/pending application.
+  // Approved demo accounts or new applicants must start with clean/blank application state.
+  const isExistingDraftOrRejected =
+    existingApp !== undefined &&
+    (existingApp.status === "REJECTED" ||
+      existingApp.status === "PENDING_REVIEW");
+
   const [businessName, setBusinessName] = useState(
-    existingApp?.businessName ?? existingPartner?.businessName ?? "",
+    isExistingDraftOrRejected ? existingApp.businessName : "",
   );
   const [contactPerson, setContactPerson] = useState(
-    existingApp?.contactPerson ?? existingPartner?.name ?? "",
+    isExistingDraftOrRejected ? existingApp.contactPerson : "",
   );
   const [email, setEmail] = useState(
-    existingApp?.email ?? existingPartner?.email ?? "organizer@wellness.id",
+    isExistingDraftOrRejected ? existingApp.email : "",
   );
-  const [phone, setPhone] = useState(existingApp?.phone ?? "081234567890");
-  const [city, setCity] = useState(existingApp?.city ?? "Batu / Malang");
-  const [province] = useState(existingApp?.province ?? "Jawa Timur");
+  const [phone, setPhone] = useState(
+    isExistingDraftOrRejected ? existingApp.phone : "",
+  );
+  const [city, setCity] = useState(
+    isExistingDraftOrRejected ? existingApp.city : "",
+  );
+  const [province] = useState(
+    isExistingDraftOrRejected ? existingApp.province : "Jawa Timur",
+  );
   const [experienceDescription, setExperienceDescription] = useState(
-    existingApp?.experienceDescription ??
-      "Berpengalaman menyelenggarakan open trip dan mindful walking tour di kawasan alam Jawa Timur.",
+    isExistingDraftOrRejected ? existingApp.experienceDescription : "",
   );
   const [portfolioLink, setPortfolioLink] = useState(
-    existingApp?.portfolioLink ?? "https://instagram.com/organizer_wellness",
+    isExistingDraftOrRejected ? (existingApp.portfolioLink ?? "") : "",
   );
   const [yearsOfOperation, setYearsOfOperation] = useState<number>(
-    existingApp?.yearsOfOperation ?? 2,
+    isExistingDraftOrRejected ? existingApp.yearsOfOperation : 1,
   );
   const [guideStatus, setGuideStatus] = useState<EoGuideStatus>(
-    existingApp?.guideStatus ??
-      existingPartner?.guideStatus ??
-      "CERTIFIED_GUIDE",
+    isExistingDraftOrRejected ? existingApp.guideStatus : "CERTIFIED_GUIDE",
   );
   const [certificateFileName, setCertificateFileName] = useState(
-    existingApp?.guideCertificateDoc?.name ??
-      "Sertifikat_Pemandu_BNSP_2026.pdf",
+    isExistingDraftOrRejected
+      ? (existingApp.guideCertificateDoc?.name ?? "")
+      : "",
   );
   const [insuranceFileName, setInsuranceFileName] = useState(
-    existingApp?.insuranceDoc?.name ?? "Polis_Asuransi_Perjalanan.pdf",
+    isExistingDraftOrRejected ? (existingApp.insuranceDoc?.name ?? "") : "",
   );
-  const [agreedToSop, setAgreedToSop] = useState(true);
+  const [agreedToSop, setAgreedToSop] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,7 +74,9 @@ export function EoApplicationScreen() {
     }
 
     setIsSubmitting(true);
-    const identityId = existingPartner?.id || `eo_${Date.now()}`;
+    const identityId = isExistingDraftOrRejected
+      ? existingApp.identityId
+      : `eo_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
     const res = mockApplicationStore.submitApplication({
       identityId,
@@ -74,12 +87,14 @@ export function EoApplicationScreen() {
       province,
       city,
       experienceDescription,
-      portfolioLink,
+      portfolioLink: portfolioLink.trim() || undefined,
       yearsOfOperation,
       guideStatus,
       guideCertificateFileName:
-        guideStatus === "CERTIFIED_GUIDE" ? certificateFileName : undefined,
-      insuranceFileName,
+        guideStatus === "CERTIFIED_GUIDE" && certificateFileName.trim()
+          ? certificateFileName.trim()
+          : undefined,
+      insuranceFileName: insuranceFileName.trim() || undefined,
       agreedToSop,
     });
 

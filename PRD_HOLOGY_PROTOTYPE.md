@@ -5,7 +5,8 @@
 **Dokumen:** Product Requirements Document untuk prototype lomba  
 **Versi:** 1.0 Canonical  
 **Tanggal:** 24 September 2026  
-**Status:** APPROVED FOR CANONICAL MERGE — menjadi source of truth competition prototype setelah PR #74 di-merge  
+**Status:** CANONICAL — source of truth competition prototype HOLOGY  
+**Canonicalized via:** PR #74 pada 24 September 2026  
 **Implementation Baseline:** 4208dddf2e86e607ed92b578c0102945b9ee903b
 
 > Dokumen ini merangkum requirement produk JedaIn berdasarkan prototype yang benar-benar sudah dibangun, evaluasi/discovery terbaru, dan kebutuhan demo kompetisi. Dokumen ini sengaja tidak mendefinisikan JedaIn sebagai aplikasi production-grade. Fokusnya adalah prototype yang stabil, jelas, dapat didemokan, dan konsisten untuk penjurian.

@@ -132,24 +132,28 @@ Target Traveler yang dibawa dari product/business context sebelumnya:
 Untuk competition prototype, kebutuhan yang harus terlihat di produk adalah:
 
 **Traveler**
+
 - menemukan pengalaman yang terasa relevan dengan kebutuhan jeda saat ini,
 - memahami apa yang akan dijalani sebelum booking,
 - mendapat kejelasan jadwal, meeting point/access, trust context, dan biaya,
 - tidak harus mengulang flow demo hanya karena refresh.
 
 **EO / Travel Organizer**
+
 - mendapat demand context yang membantu ideasi tanpa dianggap sebagai jaminan demand,
 - memahami kapasitas umum, cost scope, guide context, dan kondisi destinasi,
 - merancang package dan session dengan state yang jelas,
 - melihat booking dan operational context yang relevan.
 
 **Mitra Destinasi**
+
 - memahami perbedaan kapasitas umum destinasi dan kuota session EO,
 - mengetahui peserta terkonfirmasi tanpa membutuhkan PII Traveler,
 - melihat cost scope, guide readiness, schedule, dan operational summary,
 - menerima informasi session sebagai read-only bila authority berada di EO.
 
 **Admin / Tim Kurasi**
+
 - menunjukkan trust layer melalui review/verification/approval,
 - melihat state lintas role yang konsisten,
 - membantu juri memahami bahwa marketplace tidak berjalan tanpa governance/trust.
@@ -266,6 +270,7 @@ Istilah di bagian ini harus dipertahankan agar copy baru tidak menciptakan busin
 = general capacity context milik destinasi.
 
 Tidak otomatis berarti:
+
 - slot yang bisa dijual,
 - ketersediaan aktual,
 - kapasitas fisik absolut,
@@ -285,25 +290,30 @@ Tidak boleh dilabeli sebagai "slot tersedia" kecuali memang berasal dari remaini
 ## 6.2 Guide
 
 guideReady:
+
 - capability/readiness umum destinasi,
 - bukan identitas guide individual pada satu session.
 
 EO guideStatus:
+
 - capability/status EO,
 - bukan bukti guide individual sudah assigned.
 
 guideSource:
+
 - sumber pemandu untuk package: DESTINATION atau EO,
 - bukan pembagian keseluruhan tanggung jawab operasional.
 
 ## 6.3 Operational Note
 
 operationalNote:
+
 - catatan deskriptif session,
 - memiliki timestamp update,
 - dapat diedit EO dan dibaca Mitra pada prototype saat ini.
 
 operationalNote BUKAN:
+
 - approval,
 - destination consent,
 - readiness confirmation,
@@ -314,6 +324,7 @@ operationalNote BUKAN:
 ## 6.4 Demand Insight
 
 Demand Insight prototype:
+
 - data simulasi/directional,
 - membantu EO memahami arah konsep,
 - bukan market validation,
@@ -413,6 +424,7 @@ Requirement:
 - jika storage tidak tersedia, prototype fallback ke in-memory state.
 
 Catatan:
+
 - tidak menggunakan localStorage untuk persistence jangka panjang,
 - ini bukan production auth session.
 
@@ -423,6 +435,7 @@ Status: IMPLEMENTED LIVE / VERIFIED — Batch D2 commit 4208ddd.
 Quiz harus menangkap sinyal yang cukup untuk recommendation prototype.
 
 Existing preference dimensions mencakup:
+
 - intent,
 - aktivitas,
 - budget,
@@ -454,6 +467,7 @@ Status: IMPLEMENTED.
 ## REQ-TRV-06 — Home dan Explore
 
 Traveler harus dapat:
+
 - melihat package,
 - melihat upcoming trip/pending state bila ada,
 - mencari atau mengeksplor package,
@@ -493,6 +507,7 @@ Acceptance:
 - trust badge explanation tidak menjanjikan hal yang tidak dibuktikan.
 
 Status:
+
 - core detail IMPLEMENTED,
 - meeting point/access IMPLEMENTED,
 - media path IMPLEMENTED,
@@ -529,6 +544,7 @@ Acceptance:
 - visual stepper tetap sederhana.
 
 Status:
+
 - logic IMPLEMENTED LIVE,
 - accessibility polish IMPLEMENTED LIVE / VERIFIED — Batch D1 commit 32d698f.
 
@@ -540,6 +556,7 @@ Package unit price:
 Destination Base Cost + EO Margin.
 
 Checkout menampilkan:
+
 - unit/package price,
 - participant count,
 - subtotal,
@@ -585,6 +602,7 @@ Status: IMPLEMENTED.
 ## REQ-TRV-13 — My Trips dan Review
 
 Traveler dapat:
+
 - melihat trip,
 - membuka detail,
 - pada demo mensimulasikan completion bila control tersedia,
@@ -632,14 +650,17 @@ Partner Entry
 → Pending / Rejected / Approved
 
 Jika rejected:
+
 - existing application data boleh dipakai untuk re-apply sesuai behavior prototype,
 - rejection tidak membuat identity demo approved,
 - user tidak boleh memperoleh operational workspace hanya dari URL.
 
 Jika package belum approved:
+
 - package tidak boleh dipublikasikan sebagai LIVE.
 
 Jika session tidak valid/past/non-sellable:
+
 - session tidak boleh menjadi checkout path Traveler.
 
 ---
@@ -649,6 +670,7 @@ Jika session tidak valid/past/non-sellable:
 ## REQ-EO-01 — Partner Entry dan EO Demo
 
 Partner portal harus menyediakan jalur jelas untuk:
+
 - demo EO existing,
 - EO baru yang ingin apply.
 
@@ -673,11 +695,13 @@ Acceptance:
 Status: IMPLEMENTED LIVE.
 
 Open decision:
+
 - canonical default guide category untuk applicant baru masih perlu keputusan tim bila ingin dikunci di PRD ini.
 
 ## REQ-EO-03 — Demand Insight
 
 EO dapat melihat data prototype tentang:
+
 - preference themes,
 - budget,
 - duration,
@@ -696,6 +720,7 @@ Status: IMPLEMENTED LIVE.
 ## REQ-EO-04 — Destination Catalog dan Detail
 
 EO dapat melihat:
+
 - verification,
 - location,
 - general destination capacity,
@@ -718,6 +743,7 @@ Status: IMPLEMENTED.
 ## REQ-EO-05 — Destination Cost Scope
 
 Destination dapat menyediakan optional:
+
 - baseCostIncludes
 - baseCostExcludes
 
@@ -733,6 +759,7 @@ Status: IMPLEMENTED LIVE.
 ## REQ-EO-06 — Guide Source
 
 Package menyimpan guide source:
+
 - DESTINATION
 - EO
 
@@ -749,6 +776,7 @@ Status: IMPLEMENTED.
 Builder harus membantu EO merangkai package dari data yang sudah tersedia.
 
 Minimum flow:
+
 1. destination & guide source,
 2. insight context,
 3. itinerary,
@@ -769,6 +797,7 @@ Status: IMPLEMENTED.
 EO package detail harus memiliki read-only operational summary yang menyatukan data existing.
 
 Dapat mencakup jika tersedia:
+
 - destination,
 - location,
 - general capacity,
@@ -790,6 +819,7 @@ Status: IMPLEMENTED LIVE.
 Package yang memenuhi lifecycle existing dapat dipublikasikan dan dibuat session.
 
 Session minimum:
+
 - package,
 - start/end time,
 - capacity,
@@ -879,6 +909,7 @@ Status: IMPLEMENTED LIVE.
 ## REQ-MIT-02 — Destination Application
 
 Application dapat menangkap data prototype yang relevan seperti:
+
 - identity/contact,
 - location,
 - facilities,
@@ -911,6 +942,7 @@ Acceptance:
 - terminology mengikuti semantic guard.
 
 Status:
+
 - core IMPLEMENTED LIVE,
 - spacing polish D1 IMPLEMENTED LIVE / VERIFIED.
 
@@ -926,6 +958,7 @@ Acceptance:
 - table mobile boleh horizontal scroll di container.
 
 Status:
+
 - semantic core IMPLEMENTED LIVE,
 - header consistency D1 IMPLEMENTED LIVE / VERIFIED.
 
@@ -934,6 +967,7 @@ Status:
 Mitra dapat membuka ringkasan session yang mudah discan.
 
 Dapat menampilkan:
+
 - package,
 - EO,
 - date/time,
@@ -955,6 +989,7 @@ Status: IMPLEMENTED LIVE.
 ## REQ-MIT-06 — Destination Cost Scope
 
 Profile Mitra dapat menampilkan:
+
 - base cost,
 - termasuk biaya dasar,
 - belum termasuk.
@@ -1056,6 +1091,7 @@ Status: IMPLEMENTED.
 ## REQ-ADM-05 — Booking, Complaint, Trust, Audit
 
 Admin prototype dapat menunjukkan:
+
 - booking/payment visibility,
 - complaint surface,
 - trust signals,
@@ -1075,6 +1111,7 @@ Status: IMPLEMENTED.
 Paket yang belum sellable tidak boleh muncul sebagai Traveler package sellable.
 
 Acceptance:
+
 - non-LIVE/ineligible package tidak tampil sebagai sellable Traveler package,
 - approval Admin dan publication EO tetap dibedakan bila lifecycle existing membedakannya,
 - destination eligibility existing tetap dihormati.
@@ -1088,6 +1125,7 @@ EO session yang valid dapat muncul ke Traveler.
 Past/non-sellable session tidak boleh lolos checkout.
 
 Acceptance:
+
 - future sellable session dapat dipilih,
 - past/closed/cancelled/non-sellable session tidak membuat booking baru,
 - session.capacity tidak diganti dengan destination.capacityPerSession.
@@ -1100,6 +1138,7 @@ Criticality: MUST.
 Traveler, EO, Admin, dan Mitra harus membaca state transaksi/session yang konsisten dari prototype shared stores.
 
 Acceptance:
+
 - satu booking/payment tidak direplikasi menjadi record berbeda hanya untuk tiap role,
 - participant effect pada session berasal dari transaction/booking state yang sama,
 - perubahan quantity/payment mengikuti invariant checkout existing.
@@ -1114,6 +1153,7 @@ EO/Guide review tampil pada EO surface terkait.
 Admin trust boleh membaca aggregate signal dari record yang sama.
 
 Acceptance:
+
 - Destination review dan EO/Guide review tetap dua record/target berbeda,
 - review hanya muncul pada target yang benar,
 - empty review state tidak diisi fake rating/comment.
@@ -1126,11 +1166,13 @@ Criticality: SHOULD untuk demo singkat, MUST bila trust-loop review didemokan.
 Traveler internal/private data tidak boleh dipresentasikan ke partner bila tidak relevan.
 
 Secara khusus:
+
 - operationalNote internal session tidak ditampilkan pada Traveler,
 - Mitra tidak membutuhkan biodata lengkap peserta,
 - Demand Insight tidak menampilkan Traveler PII.
 
 Acceptance:
+
 - operationalNote EO/Mitra tidak bocor ke Traveler,
 - partner schedule/capacity cukup memakai participant aggregate,
 - Demand Insight tetap aggregate/simulated context tanpa identitas Traveler.
@@ -1161,6 +1203,7 @@ Subtotal = Unit Package Price × Participant Count
 Total = Subtotal + Rp7.500 Service Fee
 
 Acceptance:
+
 - service fee muncul transparan sebelum pembayaran,
 - service fee dikenakan per booking/transaksi, bukan per participant,
 - checkout/payment/result menggunakan breakdown yang sama.
@@ -1196,6 +1239,7 @@ Status: BUSINESS NARRATIVE RESOLVED FOR COMPETITION PRD.
 Prototype tidak membutuhkan database production.
 
 Current architecture boleh memakai:
+
 - TypeScript interfaces,
 - fixtures,
 - in-memory stores,
@@ -1224,6 +1268,7 @@ Minimum conceptual entities:
 ## 17.2 Important Fields Introduced/Clarified
 
 Destination:
+
 - capacityPerSession
 - baseCostPerPerson
 - baseCostIncludes optional
@@ -1233,6 +1278,7 @@ Destination:
 - operationalNotes
 
 Package:
+
 - destinationBaseCost
 - eoMargin
 - customerPrice
@@ -1244,12 +1290,14 @@ Package:
 - visualAsset/image source
 
 Session:
+
 - capacity
 - remainingSlots
 - operationalNote optional
 - operationalNoteUpdatedAt optional
 
 Traveler SessionState:
+
 - user
 - onboarding
 - quizDraft
@@ -1259,6 +1307,7 @@ Traveler SessionState:
 Fixture data adalah data prototype.
 
 Jangan menyatakan:
+
 - titik kumpul fixture sebagai informasi operasional nyata,
 - illustration sebagai foto aktual,
 - demand sample simulasi sebagai market validation,
@@ -1434,6 +1483,7 @@ D1 polish IMPLEMENTED LIVE / VERIFIED.
 Performance adalah prototype polish, bukan business blocker.
 
 Current audit:
+
 - bundle awal cukup besar karena eager imports,
 - Vite memberi large-chunk warning.
 
@@ -1502,6 +1552,7 @@ Sebelum commit besar dinyatakan siap:
 - build pass.
 
 Current verified live baseline setelah D1 + D2:
+
 - production commit: 4208dddf2e86e607ed92b578c0102945b9ee903b,
 - 39 suites / 607 tests,
 - GitHub Actions CI PASS,
@@ -1710,12 +1761,14 @@ PRD ini harus diperbarui bila:
 - implementation yang sudah dianggap canonical berubah secara material.
 
 PRD tidak perlu diperbarui untuk:
+
 - refactor internal tanpa behavior change,
 - rename private helper,
 - test-only implementation detail,
 - cosmetic polish yang tidak mengubah requirement.
 
 Setiap update sebaiknya menyebut:
+
 - tanggal,
 - requirement ID yang berubah,
 - alasan,
@@ -1762,4 +1815,3 @@ Definition of "matang" untuk tahap ini:
 - state lintas role dapat dipahami,
 - prototype jujur tentang simulasi dan keterbatasannya,
 - engineering proporsional terhadap tujuan lomba.
-

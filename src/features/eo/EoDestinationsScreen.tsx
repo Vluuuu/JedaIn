@@ -170,7 +170,7 @@ export function EoDestinationsScreen() {
                     orang/sesi
                   </span>
                   <span className="eo-dest-card__capacity-hint">
-                    Batas daya tampung lokasi venue, bukan kuota otomatis per
+                    Kapasitas umum destinasi per sesi, bukan kuota otomatis per
                     paket EO.
                   </span>
                 </div>

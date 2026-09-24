@@ -367,8 +367,8 @@ export function PackageDetailScreen({
             </strong>
             <p className="package-detail-trust-explanation__text">
               {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
-                ? "Penyelenggara memiliki lisensi/sertifikasi kepemanduan resmi. Penugasan individu pemandu disesuaikan pada pelaksanaan sesi."
-                : "Penyelenggara merancang konsep perjalanan dan bermitra dengan pemandu lokal di lokasi destinasi."}
+                ? "Certified Guide menunjukkan status kepemanduan berlisensi milik penyelenggara (EO). Status ini tidak menunjukkan pemandu individu tertentu untuk jadwal sesi."
+                : "Concept Organizer merancang konsep perjalanan dan bermitra dengan pemandu lokal di destinasi, bukan penugasan pemandu individu tertentu."}
             </p>
           </div>
           {detail.organizer.bioSummary && (

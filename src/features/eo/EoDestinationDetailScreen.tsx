@@ -204,17 +204,18 @@ export function EoDestinationDetailScreen() {
                 lineHeight: 1.4,
               }}
             >
-              Kesiapan merupakan fasilitas kepemanduan yang disiapkan pengelola
-              destinasi, bukan penugasan individu pemandu untuk jadwal tertentu.
+              Kesiapan pemandu lokal merupakan informasi kemampuan destinasi
+              secara umum, bukan penugasan pemandu individu untuk jadwal
+              tertentu.
             </p>
           </div>
 
           {/* Kapasitas & Operasional */}
           <div className="eo-dest-side-card">
-            <h3 className="eo-dest-side-title">Kapasitas Kawasan Destinasi</h3>
+            <h3 className="eo-dest-side-title">Kapasitas Destinasi</h3>
             <div className="eo-dest-spec-row">
               <span className="eo-dest-spec-label">
-                Daya tampung umum venue
+                Kapasitas umum destinasi
               </span>
               <strong className="eo-dest-spec-val">
                 {destination.capacityPerSession} orang/sesi
@@ -229,9 +230,8 @@ export function EoDestinationDetailScreen() {
                 lineHeight: 1.4,
               }}
             >
-              Batas kapasitas fisik yang dapat diterima pengelola lokasi per
-              sesi. Alokasi kuota paket aktual ditentukan saat EO membuka jadwal
-              sesi.
+              Kapasitas umum destinasi per sesi. Alokasi kuota paket aktual
+              ditentukan oleh EO saat membuka jadwal sesi.
             </p>
             <div className="eo-dest-spec-row">
               <span className="eo-dest-spec-label">Area / Kota</span>

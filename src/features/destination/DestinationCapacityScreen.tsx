@@ -108,12 +108,13 @@ export function DestinationCapacityScreen() {
               }}
             >
               Perbedaan konsep: (1) <strong>Batas Venue</strong> (
-              {baseVenueCapacity} orang) adalah daya tampung fisik kawasan; (2){" "}
-              <strong>Alokasi Kuota EO</strong> adalah kuota yang dibuka EO
-              untuk sesi tersebut; (3) <strong>Peserta Terkonfirmasi</strong>{" "}
-              adalah traveler yang telah menyelesaikan pembayaran. Sisa ruang
-              operasional menunjukkan ketersediaan fisik venue, bukan kuota
-              penjualan baru.
+              {baseVenueCapacity} orang) adalah kapasitas umum destinasi per
+              sesi; (2) <strong>Alokasi Kuota EO</strong> adalah kuota yang
+              dibuka EO untuk sesi tersebut; (3){" "}
+              <strong>Peserta Terkonfirmasi</strong> adalah traveler yang telah
+              menyelesaikan pembayaran. Sisa ruang operasional menunjukkan
+              selisih kapasitas umum destinasi terhadap peserta terkonfirmasi,
+              bukan ketersediaan kuota penjualan baru.
             </p>
           </div>
         </div>
@@ -200,7 +201,7 @@ export function DestinationCapacityScreen() {
                             color: "var(--color-text-muted)",
                           }}
                         >
-                          Daya tampung venue
+                          Kapasitas umum destinasi
                         </div>
                       </td>
                       <td>
@@ -222,7 +223,7 @@ export function DestinationCapacityScreen() {
                             color: "var(--color-text-muted)",
                           }}
                         >
-                          Booking terbayar
+                          Peserta terkonfirmasi
                         </div>
                       </td>
                       <td>
@@ -235,7 +236,7 @@ export function DestinationCapacityScreen() {
                             color: "var(--color-text-muted)",
                           }}
                         >
-                          Ruang fisik venue
+                          Selisih operasional
                         </div>
                       </td>
                     </tr>

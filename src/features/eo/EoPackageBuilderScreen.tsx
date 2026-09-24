@@ -652,9 +652,9 @@ export function EoPackageBuilderScreen() {
                 lineHeight: 1.4,
               }}
             >
-              Catatan: Sumber pemandu menentukan pihak penanggung jawab
-              kepemanduan di lapangan, bukan penugasan individu pemandu per
-              jadwal sesi.
+              Catatan: Pilihan ini menunjukkan sumber pemandu untuk package
+              (Destinasi atau EO), bukan penugasan pemandu individu pada sesi
+              tertentu.
             </p>
           </div>
 

@@ -39,10 +39,12 @@ JedaIn in this repository is currently a **competition prototype**, not a produc
 
 For every issue:
 
+- identify the relevant `REQ-*` IDs from `PRD_HOLOGY_PROTOTYPE.md`,
 - implement only the requested vertical slice,
 - do not add unrelated features,
 - do not rename canonical statuses,
 - do not invent unapproved business rules,
+- do not implement items marked `OPEN` as if they were decided,
 - do not refactor unrelated modules unless necessary for correctness,
 - if a dependency is missing, create the smallest clean abstraction required.
 

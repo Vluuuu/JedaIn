@@ -122,6 +122,56 @@ Traveler Need
 → Review / Trust Signal  
 → Insight baru
 
+## 3.2 Target Users dan Core Needs
+
+Target Traveler yang dibawa dari product/business context sebelumnya:
+
+- **Young Professional Burnout (24–32 tahun)** sebagai target primer.
+- **Mahasiswa / Fresh Graduate Self-Explorer (19–25 tahun)** sebagai target sekunder.
+
+Untuk competition prototype, kebutuhan yang harus terlihat di produk adalah:
+
+**Traveler**
+- menemukan pengalaman yang terasa relevan dengan kebutuhan jeda saat ini,
+- memahami apa yang akan dijalani sebelum booking,
+- mendapat kejelasan jadwal, meeting point/access, trust context, dan biaya,
+- tidak harus mengulang flow demo hanya karena refresh.
+
+**EO / Travel Organizer**
+- mendapat demand context yang membantu ideasi tanpa dianggap sebagai jaminan demand,
+- memahami kapasitas umum, cost scope, guide context, dan kondisi destinasi,
+- merancang package dan session dengan state yang jelas,
+- melihat booking dan operational context yang relevan.
+
+**Mitra Destinasi**
+- memahami perbedaan kapasitas umum destinasi dan kuota session EO,
+- mengetahui peserta terkonfirmasi tanpa membutuhkan PII Traveler,
+- melihat cost scope, guide readiness, schedule, dan operational summary,
+- menerima informasi session sebagai read-only bila authority berada di EO.
+
+**Admin / Tim Kurasi**
+- menunjukkan trust layer melalui review/verification/approval,
+- melihat state lintas role yang konsisten,
+- membantu juri memahami bahwa marketplace tidak berjalan tanpa governance/trust.
+
+## 3.3 Evidence Boundary
+
+PRD ini menggabungkan:
+
+- behavior yang benar-benar ada di prototype,
+- regression/smoke verification,
+- proposal/business context,
+- synthetic proxy discovery yang dipakai untuk mengarahkan UX improvement.
+
+Synthetic proxy discovery **bukan human/market validation**.
+
+Karena itu:
+
+- jangan menyatakan synthetic proxy interview sebagai bukti perilaku pengguna nyata,
+- jangan menyatakan Demand Insight prototype sebagai hasil market validation,
+- klaim pasar/segmentasi harus mengikuti sumber proposal/riset yang memang dimiliki tim,
+- requirement prototype boleh tetap memakai synthetic evidence sebagai design input selama wording-nya jujur.
+
 ---
 
 # 4. Competition Objective
@@ -185,6 +235,24 @@ Acceptance:
 - Demo helper boleh mengatur session prototype secara eksplisit.
 
 Status: IMPLEMENTED / regression guarded.
+
+## 5.3 Requirement Status Vocabulary
+
+Gunakan status berikut secara konsisten:
+
+- **LIVE / VERIFIED** — sudah ada di main, ter-deploy pada demo hosting, dan sudah diverifikasi pada flow terkait.
+- **IMPLEMENTED** — sudah ada di codebase, tetapi requirement ini tidak membutuhkan klaim production verification khusus.
+- **PARTIAL** — renderer/flow tersedia tetapi dependency konten/data belum lengkap.
+- **OPEN** — membutuhkan keputusan tim; developer tidak boleh mengunci sendiri.
+- **OUT OF SCOPE** — sengaja tidak dibangun untuk competition prototype.
+
+Demo criticality:
+
+- **MUST** — jika gagal, golden demo/value proposition utama terganggu.
+- **SHOULD** — meningkatkan clarity/trust/usability secara nyata.
+- **OPTIONAL** — polish yang hanya dikerjakan jika waktu dan risiko memungkinkan.
+
+Requirement yang terkait langsung dengan golden flow Traveler, EO, Mitra, Admin, payment, role isolation, dan shared state diperlakukan sebagai **MUST** kecuali ditulis lain.
 
 ---
 
@@ -555,6 +623,25 @@ Partner Entry
 → Update Session Operational Note  
 → Reviews / Profile
 
+## 9.1 EO Alternative / Exception Flow
+
+New applicant:
+Partner Entry  
+→ EO Application  
+→ Application Status  
+→ Pending / Rejected / Approved
+
+Jika rejected:
+- existing application data boleh dipakai untuk re-apply sesuai behavior prototype,
+- rejection tidak membuat identity demo approved,
+- user tidak boleh memperoleh operational workspace hanya dari URL.
+
+Jika package belum approved:
+- package tidak boleh dipublikasikan sebagai LIVE.
+
+Jika session tidak valid/past/non-sellable:
+- session tidak boleh menjadi checkout path Traveler.
+
 ---
 
 # 10. EO Functional Requirements
@@ -758,6 +845,21 @@ Partner Entry
 → Session Operational Summary  
 → Reviews / Settings
 
+## 11.1 Mitra Alternative / Exception Flow
+
+New destination applicant:
+Partner Entry  
+→ Destination Application  
+→ Application / Verification State  
+→ Approved operational workspace jika lifecycle existing mengizinkan
+
+Guard:
+
+- registration tidak boleh kembali ke entry gate yang sama tanpa next action,
+- unapproved/rejected identity tidak memperoleh operational authority hanya lewat direct URL,
+- Mitra tidak mempunyai approve/reject authority terhadap session EO hanya karena dapat membaca schedule,
+- missing cost scope/media/operational note harus menghasilkan neutral empty state, bukan data buatan.
+
 ---
 
 # 12. Mitra Destinasi Functional Requirements
@@ -895,6 +997,18 @@ Admin Login / Demo
 → Complaint / Trust  
 → Audit
 
+## 13.1 Admin Decision / Exception Flow
+
+Admin review dapat menghasilkan approval atau rejection sesuai lifecycle existing.
+
+Guard:
+
+- keputusan admin harus diterapkan pada record yang sama yang dibaca role terkait,
+- rejected/non-approved entity tidak boleh otomatis mendapat operational authority,
+- approved package tetap mengikuti publish lifecycle sebelum menjadi Traveler-sellable jika implementation membedakan APPROVED dan LIVE,
+- admin demo tidak boleh mengubah rule hanya agar golden demo lebih cepat,
+- stale/not-found review target harus gagal aman.
+
 ---
 
 # 14. Admin Functional Requirements
@@ -960,20 +1074,52 @@ Status: IMPLEMENTED.
 
 Paket yang belum sellable tidak boleh muncul sebagai Traveler package sellable.
 
+Acceptance:
+- non-LIVE/ineligible package tidak tampil sebagai sellable Traveler package,
+- approval Admin dan publication EO tetap dibedakan bila lifecycle existing membedakannya,
+- destination eligibility existing tetap dihormati.
+
+Status: IMPLEMENTED / regression guarded.  
+Criticality: MUST.
+
 ## REQ-XR-03 — Session Integrity
 
 EO session yang valid dapat muncul ke Traveler.
 Past/non-sellable session tidak boleh lolos checkout.
 
+Acceptance:
+- future sellable session dapat dipilih,
+- past/closed/cancelled/non-sellable session tidak membuat booking baru,
+- session.capacity tidak diganti dengan destination.capacityPerSession.
+
+Status: LIVE / VERIFIED.  
+Criticality: MUST.
+
 ## REQ-XR-04 — Booking Integrity
 
 Traveler, EO, Admin, dan Mitra harus membaca state transaksi/session yang konsisten dari prototype shared stores.
+
+Acceptance:
+- satu booking/payment tidak direplikasi menjadi record berbeda hanya untuk tiap role,
+- participant effect pada session berasal dari transaction/booking state yang sama,
+- perubahan quantity/payment mengikuti invariant checkout existing.
+
+Status: IMPLEMENTED / regression guarded.  
+Criticality: MUST.
 
 ## REQ-XR-05 — Review Propagation
 
 Destination review tampil pada Mitra surface terkait.
 EO/Guide review tampil pada EO surface terkait.
 Admin trust boleh membaca aggregate signal dari record yang sama.
+
+Acceptance:
+- Destination review dan EO/Guide review tetap dua record/target berbeda,
+- review hanya muncul pada target yang benar,
+- empty review state tidak diisi fake rating/comment.
+
+Status: IMPLEMENTED.  
+Criticality: SHOULD untuk demo singkat, MUST bila trust-loop review didemokan.
 
 ## REQ-XR-06 — Privacy
 
@@ -983,6 +1129,14 @@ Secara khusus:
 - operationalNote internal session tidak ditampilkan pada Traveler,
 - Mitra tidak membutuhkan biodata lengkap peserta,
 - Demand Insight tidak menampilkan Traveler PII.
+
+Acceptance:
+- operationalNote EO/Mitra tidak bocor ke Traveler,
+- partner schedule/capacity cukup memakai participant aggregate,
+- Demand Insight tetap aggregate/simulated context tanpa identitas Traveler.
+
+Status: LIVE / VERIFIED pada scope improvement terbaru.  
+Criticality: MUST.
 
 ---
 
@@ -1096,6 +1250,8 @@ Jangan menyatakan:
 
 # 18. Route / Screen Map
 
+Route map ini mengikuti route yang benar-benar tersedia pada current prototype. Tidak semua route wajib ditunjukkan saat demo.
+
 ## Traveler
 
 | Route | Purpose |
@@ -1113,19 +1269,31 @@ Jangan menyatakan:
 | /checkout/:sessionId/contact | Contact verification |
 | /checkout/:sessionId/pending-payment | Pending payment handling |
 | /payment/:bookingId | Payment simulation |
-| /payment/:bookingId/result | Result |
+| /payment/:bookingId/result | Payment result |
 | /trips | My Trips |
 | /trips/:bookingId | Trip detail |
-| /trips/:bookingId/review | Review |
+| /trips/:bookingId/review | Destination + EO/Guide review flow |
 | /profile | Profile |
+| /profile/settings | Profile settings / logout |
+| /profile/activity | Traveler activity |
 | /profile/preferences | Retake preference |
+| /profile/verify-phone | Profile phone verification |
+| /travelers/search | Prototype traveler discovery |
+| /travelers/:travelerId | Public traveler profile |
+| /travelers/:travelerId/followers | Followers |
+| /travelers/:travelerId/following | Following |
+| /complaints/new | Prototype complaint placeholder |
 
 ## Partner / EO
 
 | Route | Purpose |
 |---|---|
 | /partner | Partner entry |
+| /partner/login | Partner login |
+| /partner/eo/login | EO login alias |
+| /eo/login | EO login alias |
 | /partner/apply/eo | EO application |
+| /partner/application | Application status |
 | /partner/eo | EO overview |
 | /partner/eo/insights | Demand insight |
 | /partner/eo/destinations | Destination catalog |
@@ -1139,13 +1307,14 @@ Jangan menyatakan:
 | /partner/eo/reviews | EO reviews |
 | /partner/eo/profile | EO profile |
 
-EO subdomain may expose the same EO competition workspace.
+Pada EO subdomain, root/login aliases mengarahkan ke EO-oriented entry dan operational workspace tetap memakai route `/partner/eo/*`.
 
 ## Destination Partner
 
 | Route | Purpose |
 |---|---|
 | /partner/apply/destination | Destination application |
+| /partner/application | Shared application status |
 | /partner/destination | Overview |
 | /partner/destination/profile | Destination profile |
 | /partner/destination/verification | Verification badge/status |
@@ -1160,11 +1329,15 @@ EO subdomain may expose the same EO competition workspace.
 |---|---|
 | /admin/login | Admin entry |
 | /admin | Overview |
-| /admin/eo-approvals | EO review |
-| /admin/destination-verifications | Destination review |
-| /admin/package-approvals | Package review |
+| /admin/eo-approvals | EO review queue |
+| /admin/eo-approvals/:applicationId | EO application review |
+| /admin/destination-verifications | Destination review queue |
+| /admin/destination-verifications/:applicationId | Destination verification detail |
+| /admin/package-approvals | Package review queue |
+| /admin/package-approvals/:submissionId | Package review checklist |
 | /admin/bookings | Booking monitoring |
 | /admin/complaints | Complaint handling |
+| /admin/complaints/:complaintId | Complaint detail |
 | /admin/trust | Trust status |
 | /admin/audit | Audit activity |
 
@@ -1389,13 +1562,18 @@ Jangan diprioritaskan kecuali tim secara eksplisit mengubah scope:
 
 ## OPEN-01 — EO Applicant Default Guide Category
 
-Historical PRD menyebut new EO default CONCEPT_ONLY.
-Current implementation context pernah menunjukkan default/fallback yang berbeda.
+Historical PRD menyebut new EO default `CONCEPT_ONLY`.
+
+Current implementation:
+`EoApplicationScreen` memulai new applicant dengan `CERTIFIED_GUIDE` sebagai selected default, sementara applicant tetap dapat memilih `CONCEPT_ONLY`.
 
 Status:
-TEAM DECISION REQUIRED jika perlu dikunci.
+TEAM DECISION REQUIRED jika behavior default ini ingin dikunci sebagai product rule.
 
-Jangan mengubah otomatis dari discovery.
+Sampai keputusan dibuat:
+- jangan mengubah otomatis,
+- jangan menyebut salah satu default sebagai hasil discovery,
+- demo account Certified dan Concept-Only tetap boleh tersedia.
 
 ## OPEN-02 — Commercial Monetization Model
 
@@ -1408,6 +1586,11 @@ platform commission deductible dari EO margin.
 Status:
 OPEN untuk business plan/commercial model.
 Prototype boleh mempertahankan behavior sekarang selama lomba.
+
+Competition narrative guard:
+- proposal/pitch dan demo app tidak boleh menjelaskan dua model monetization sebagai satu rule yang sama,
+- sebelum final presentation, tim perlu memilih cara menjelaskan perbedaan antara current prototype fee dan monetization model bisnis,
+- tidak ada code change yang diwajibkan sampai tim mengambil keputusan produk.
 
 ## OPEN-03 — Real Destination Photography
 
@@ -1514,7 +1697,30 @@ Setiap update sebaiknya menyebut:
 
 ---
 
-# 33. Current Decision
+# 33. PRD Review Checklist Sebelum Merge
+
+Sebelum PR #74 dijadikan canonical, tim perlu menyetujui:
+
+- [ ] Prototype scope: competition prototype, bukan production app.
+- [ ] Guest/demo mode tetap diperbolehkan.
+- [ ] Traveler golden flow sesuai demo yang ingin ditunjukkan.
+- [ ] EO golden flow sesuai cara tim menjelaskan demand → package.
+- [ ] Mitra flow cukup untuk menunjukkan capacity/cost/operational context.
+- [ ] Admin flow cukup untuk menunjukkan trust/approval layer.
+- [ ] Terminologi capacity / guide / operationalNote disetujui.
+- [ ] Current prototype service fee Rp7.500 boleh tetap ditampilkan.
+- [ ] Narasi monetization untuk proposal/pitch diputuskan atau minimal tidak kontradiktif.
+- [ ] OPEN-01 EO applicant default guide category disadari sebagai open decision.
+- [ ] Actual destination photo tetap content dependency, bukan blocker engineering.
+- [ ] Route map sesuai current implementation.
+- [ ] D1 + D2 tetap LIVE / VERIFIED pada baseline 4208ddd.
+- [ ] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
+
+Jika item business decision belum disepakati, PRD tetap boleh menyimpan item tersebut sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
+
+---
+
+# 34. Current Decision
 
 JedaIn tetap dikembangkan sebagai **competition prototype yang matang**, bukan production platform.
 

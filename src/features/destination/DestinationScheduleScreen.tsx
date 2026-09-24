@@ -248,7 +248,7 @@ export function DestinationScheduleScreen() {
                                     {confirmedCount} Orang
                                   </strong>
                                   <span className="dest-session-summary-hint">
-                                    Sisa kuota sesi:{" "}
+                                    Selisih operasional:{" "}
                                     {Math.max(0, s.capacity - confirmedCount)}{" "}
                                     orang
                                   </span>

@@ -132,6 +132,7 @@ describe("Batch B2 — Operational Summary & Insight Context", () => {
         "Kapasitas umum destinasi per sesi: 20 orang",
       );
       expect(view.textContent).toContain("Peserta Terkonfirmasi");
+      expect(view.textContent).toContain("Selisih operasional: 6 orang");
 
       // Sumber pemandu without individual assignment claim
       expect(view.textContent).toContain("Sumber Pemandu Package");
@@ -175,7 +176,7 @@ describe("Batch B2 — Operational Summary & Insight Context", () => {
 
       // 2. Clear distribution boundary disclaimer
       expect(view.textContent).toContain(
-        "Distribusi tiap dimensi ditampilkan secara terpisah dan tidak otomatis menunjukkan kombinasi preferensi responden yang sama.",
+        "Distribusi tiap dimensi ditampilkan secara terpisah dan tidak menunjukkan irisan atau kombinasi preferensi antar-dimensi.",
       );
 
       // 3. Switch to Rincian tab and check disclaimer is also present there
@@ -192,7 +193,7 @@ describe("Batch B2 — Operational Summary & Insight Context", () => {
       expect(view.textContent).toContain("Rincian Pola Permintaan");
       expect(view.textContent).toContain("acuan 5 Sep 2026");
       expect(view.textContent).toContain(
-        "Distribusi tiap dimensi ditampilkan secara terpisah dan tidak otomatis menunjukkan kombinasi preferensi responden yang sama.",
+        "Distribusi tiap dimensi ditampilkan secara terpisah dan tidak menunjukkan irisan atau kombinasi preferensi antar-dimensi.",
       );
 
       // 4. No fabricated metrics (confidence score, purchase intent, market validation)

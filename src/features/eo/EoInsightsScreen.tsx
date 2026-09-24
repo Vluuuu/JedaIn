@@ -186,7 +186,7 @@ export function EoInsightsScreen() {
               </span>
               <span className="eo-demand-meta-disclaimer">
                 Distribusi tiap dimensi ditampilkan secara terpisah dan tidak
-                otomatis menunjukkan kombinasi preferensi responden yang sama.
+                menunjukkan irisan atau kombinasi preferensi antar-dimensi.
               </span>
             </div>
           </div>
@@ -498,7 +498,7 @@ export function EoInsightsScreen() {
               </span>
               <p>
                 Distribusi tiap dimensi ditampilkan secara terpisah dan tidak
-                otomatis menunjukkan kombinasi preferensi responden yang sama.
+                menunjukkan irisan atau kombinasi preferensi antar-dimensi.
               </p>
             </div>
           </div>

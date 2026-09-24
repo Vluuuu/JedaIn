@@ -607,6 +607,19 @@ export function EoPackageBuilderScreen() {
                     Pemanduan dilakukan oleh tim lokal yang disiapkan pihak
                     destinasi.
                   </p>
+                  {selectedDestination?.localGuideSummary && (
+                    <p
+                      style={{
+                        margin: "var(--space-2) 0 0",
+                        fontSize: "var(--font-size-caption)",
+                        color: "var(--color-text-secondary)",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Karakter pemandu: &ldquo;
+                      {selectedDestination.localGuideSummary}&rdquo;
+                    </p>
+                  )}
                 </label>
 
                 <label
@@ -631,6 +644,18 @@ export function EoPackageBuilderScreen() {
                 </label>
               </div>
             )}
+            <p
+              style={{
+                marginTop: "var(--space-3)",
+                fontSize: "var(--font-size-caption)",
+                color: "var(--color-text-secondary)",
+                lineHeight: 1.4,
+              }}
+            >
+              Catatan: Sumber pemandu menentukan pihak penanggung jawab
+              kepemanduan di lapangan, bukan penugasan individu pemandu per
+              jadwal sesi.
+            </p>
           </div>
 
           <div

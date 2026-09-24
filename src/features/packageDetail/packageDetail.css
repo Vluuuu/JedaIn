@@ -356,6 +356,28 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.package-detail-trust-explanation {
+  margin: var(--space-1) 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-stone-50);
+  border-left: 2.5px solid var(--color-forest-700);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: var(--font-size-caption);
+  line-height: 1.4;
+}
+
+.package-detail-trust-explanation__title {
+  display: block;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-900);
+  margin-bottom: 0.125rem;
+}
+
+.package-detail-trust-explanation__text {
+  margin: 0;
+  color: var(--color-stone-600);
+}
+
 .package-detail-inline-trust__icon {
   color: var(--color-forest-700);
   flex-shrink: 0;

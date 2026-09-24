@@ -214,11 +214,18 @@
 }
 
 .session-selection-legend {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-1);
   color: var(--color-stone-900);
   font-size: var(--font-size-heading-sm);
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--letter-spacing-tight);
+}
+
+.session-selection-legend-hint {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-600);
+  line-height: 1.45;
 }
 
 .session-selection-list {

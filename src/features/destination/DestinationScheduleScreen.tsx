@@ -52,6 +52,8 @@ export function DestinationScheduleScreen() {
           <p className="dest-page-subtitle">
             Daftar sesi perjalanan yang diselenggarakan oleh mitra Event
             Organizer di kawasan {destination?.name ?? "Anda"} (Read-Only).
+            Alokasi kuota per sesi merupakan kapasitas trip yang dibuka EO,
+            terpisah dari daya tampung umum venue.
           </p>
         </div>
       </header>
@@ -125,9 +127,27 @@ export function DestinationScheduleScreen() {
                       </td>
                       <td>{pkg?.eoDisplayName ?? s.eoId}</td>
                       <td>{dateLabel} WIB</td>
-                      <td>{s.capacity} Orang</td>
+                      <td>
+                        {s.capacity} Orang
+                        <div
+                          style={{
+                            fontSize: "var(--font-size-caption)",
+                            color: "var(--color-text-muted)",
+                          }}
+                        >
+                          Kuota sesi EO
+                        </div>
+                      </td>
                       <td>
                         <strong>{confirmedCount}</strong> / {s.capacity} Orang
+                        <div
+                          style={{
+                            fontSize: "var(--font-size-caption)",
+                            color: "var(--color-text-muted)",
+                          }}
+                        >
+                          Booking terbayar
+                        </div>
                       </td>
                       <td>
                         <Badge

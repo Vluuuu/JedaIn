@@ -105,7 +105,7 @@ export function SessionCard({
           {session.remainingSlots !== undefined &&
             session.remainingSlots > 0 && (
               <span className="session-card__slot-info">
-                Sisa {session.remainingSlots} slot
+                Sisa {session.remainingSlots} slot (kuota sesi)
               </span>
             )}
           {formattedPrice && (

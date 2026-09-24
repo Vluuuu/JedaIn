@@ -295,6 +295,10 @@ export function SessionSelectionScreen({
               <legend className="session-selection-legend">
                 Jadwal Keberangkatan
               </legend>
+              <p className="session-selection-legend-hint">
+                Slot yang tertera merupakan kuota peserta per sesi perjalanan,
+                terpisah dari kapasitas umum kawasan destinasi.
+              </p>
               <div className="session-selection-list">
                 {sessions.map((session) => (
                   <SessionCard

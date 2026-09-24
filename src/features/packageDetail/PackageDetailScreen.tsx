@@ -268,6 +268,18 @@ export function PackageDetailScreen({
               </span>
             </span>
           </div>
+          <div className="package-detail-trust-explanation">
+            <strong className="package-detail-trust-explanation__title">
+              {pkg.verificationLevel === "PLUS"
+                ? "Tentang Terverifikasi Plus:"
+                : "Tentang Terverifikasi Dasar:"}
+            </strong>
+            <p className="package-detail-trust-explanation__text">
+              {pkg.verificationLevel === "PLUS"
+                ? "Destinasi telah melalui verifikasi kelayakan fasilitas, legalitas pengelola, dan kurasi kenyamanan lanjutan oleh tim JedaIn."
+                : "Destinasi telah melalui verifikasi internal data pengelola dan kesiapan fasilitas dasar oleh JedaIn (bukan konfirmasi ketersediaan tanggal/sesi)."}
+            </p>
+          </div>
           <p className="package-detail-editorial-text">
             {detail.destinationDetail.overviewDescription}
           </p>
@@ -346,6 +358,18 @@ export function PackageDetailScreen({
                 )}
               </span>
             </div>
+          </div>
+          <div className="package-detail-trust-explanation">
+            <strong className="package-detail-trust-explanation__title">
+              {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
+                ? "Tentang Certified Guide:"
+                : "Tentang Concept Organizer:"}
+            </strong>
+            <p className="package-detail-trust-explanation__text">
+              {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
+                ? "Penyelenggara memiliki lisensi/sertifikasi kepemanduan resmi. Penugasan individu pemandu disesuaikan pada pelaksanaan sesi."
+                : "Penyelenggara merancang konsep perjalanan dan bermitra dengan pemandu lokal di lokasi destinasi."}
+            </p>
           </div>
           {detail.organizer.bioSummary && (
             <p className="package-detail-editorial-text">
@@ -567,6 +591,10 @@ export function PackageDetailScreen({
           >
             Jadwal Terdekat
           </h2>
+          <p className="package-detail-section__desc">
+            Slot yang tertera merupakan kuota peserta per sesi perjalanan,
+            terpisah dari kapasitas umum kawasan destinasi.
+          </p>
           {detail.upcomingSessionPreviews.length > 0 ? (
             <div className="package-detail-sessions-list">
               {detail.upcomingSessionPreviews.map((session) => {
@@ -608,7 +636,7 @@ export function PackageDetailScreen({
                     </div>
                     {session.remainingSlots !== undefined && (
                       <span className="package-detail-session-card__slots">
-                        Sisa {session.remainingSlots} slot
+                        Sisa {session.remainingSlots} slot (kuota sesi)
                       </span>
                     )}
                   </div>

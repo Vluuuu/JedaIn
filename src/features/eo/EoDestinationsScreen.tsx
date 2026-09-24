@@ -166,7 +166,12 @@ export function EoDestinationsScreen() {
                 {/* Capacity info */}
                 <div className="eo-dest-card__guide">
                   <span className="eo-dest-card__capacity">
-                    Kapasitas {dest.capacityPerSession} orang/sesi
+                    Kapasitas umum destinasi: {dest.capacityPerSession}{" "}
+                    orang/sesi
+                  </span>
+                  <span className="eo-dest-card__capacity-hint">
+                    Batas daya tampung lokasi venue, bukan kuota otomatis per
+                    paket EO.
                   </span>
                 </div>
 

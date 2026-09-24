@@ -196,17 +196,43 @@ export function EoDestinationDetailScreen() {
             <div className="eo-dest-side-badge-box">
               <span className="eo-dest-badge-ready">Pemandu Lokal Siap</span>
             </div>
+            <p
+              style={{
+                fontSize: "var(--font-size-caption)",
+                color: "var(--color-text-secondary)",
+                marginTop: "var(--space-2)",
+                lineHeight: 1.4,
+              }}
+            >
+              Kesiapan merupakan fasilitas kepemanduan yang disiapkan pengelola
+              destinasi, bukan penugasan individu pemandu untuk jadwal tertentu.
+            </p>
           </div>
 
           {/* Kapasitas & Operasional */}
           <div className="eo-dest-side-card">
-            <h3 className="eo-dest-side-title">Kapasitas Sesi</h3>
+            <h3 className="eo-dest-side-title">Kapasitas Kawasan Destinasi</h3>
             <div className="eo-dest-spec-row">
-              <span className="eo-dest-spec-label">Maksimal per sesi</span>
+              <span className="eo-dest-spec-label">
+                Daya tampung umum venue
+              </span>
               <strong className="eo-dest-spec-val">
-                {destination.capacityPerSession} peserta
+                {destination.capacityPerSession} orang/sesi
               </strong>
             </div>
+            <p
+              style={{
+                fontSize: "var(--font-size-caption)",
+                color: "var(--color-text-secondary)",
+                marginTop: "var(--space-2)",
+                marginBottom: "var(--space-2)",
+                lineHeight: 1.4,
+              }}
+            >
+              Batas kapasitas fisik yang dapat diterima pengelola lokasi per
+              sesi. Alokasi kuota paket aktual ditentukan saat EO membuka jadwal
+              sesi.
+            </p>
             <div className="eo-dest-spec-row">
               <span className="eo-dest-spec-label">Area / Kota</span>
               <span className="eo-dest-spec-val">

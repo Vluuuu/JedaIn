@@ -124,11 +124,11 @@ export function DestinationOverviewScreen() {
         </div>
 
         <div className="dest-metric-item">
-          <span className="dest-metric-label">Kapasitas per Sesi</span>
+          <span className="dest-metric-label">Kapasitas Umum Venue</span>
           <strong className="dest-metric-value">
             {destination.capacityPerSession}
           </strong>
-          <span className="dest-metric-desc">Orang per sesi</span>
+          <span className="dest-metric-desc">Daya tampung fisik per sesi</span>
         </div>
 
         <div className="dest-metric-item">
@@ -175,7 +175,7 @@ export function DestinationOverviewScreen() {
               <dd>{formatCurrency(destination.baseCostPerPerson)} / orang</dd>
             </div>
             <div>
-              <dt>Kapasitas</dt>
+              <dt>Kapasitas Umum Venue</dt>
               <dd>{destination.capacityPerSession} orang / sesi</dd>
             </div>
           </dl>

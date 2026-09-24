@@ -104,10 +104,16 @@ export function DestinationCapacityScreen() {
                 margin: 0,
                 fontSize: "var(--font-size-caption)",
                 color: "var(--color-text-secondary)",
+                lineHeight: 1.45,
               }}
             >
-              Kapasitas sesi diatur oleh EO saat membuka jadwal dan dibatasi
-              maksimal oleh kapasitas dasar venue ({baseVenueCapacity} orang).
+              Perbedaan konsep: (1) <strong>Batas Venue</strong> (
+              {baseVenueCapacity} orang) adalah daya tampung fisik kawasan; (2){" "}
+              <strong>Alokasi Kuota EO</strong> adalah kuota yang dibuka EO
+              untuk sesi tersebut; (3) <strong>Peserta Terkonfirmasi</strong>{" "}
+              adalah traveler yang telah menyelesaikan pembayaran. Sisa ruang
+              operasional menunjukkan ketersediaan fisik venue, bukan kuota
+              penjualan baru.
             </p>
           </div>
         </div>
@@ -186,17 +192,51 @@ export function DestinationCapacityScreen() {
                           EO: {pkg?.eoDisplayName ?? s.eoId}
                         </div>
                       </td>
-                      <td>{baseVenueCapacity} Orang</td>
+                      <td>
+                        <strong>{baseVenueCapacity}</strong> Orang
+                        <div
+                          style={{
+                            fontSize: "var(--font-size-caption)",
+                            color: "var(--color-text-muted)",
+                          }}
+                        >
+                          Daya tampung venue
+                        </div>
+                      </td>
                       <td>
                         <strong>{s.capacity}</strong> Orang
+                        <div
+                          style={{
+                            fontSize: "var(--font-size-caption)",
+                            color: "var(--color-text-muted)",
+                          }}
+                        >
+                          Kuota sesi EO
+                        </div>
                       </td>
                       <td>
                         <strong>{confirmedCount}</strong> Orang
+                        <div
+                          style={{
+                            fontSize: "var(--font-size-caption)",
+                            color: "var(--color-text-muted)",
+                          }}
+                        >
+                          Booking terbayar
+                        </div>
                       </td>
                       <td>
                         <Badge tone={headroom > 5 ? "success" : "warning"}>
                           Sisa {headroom} Orang
                         </Badge>
+                        <div
+                          style={{
+                            fontSize: "var(--font-size-caption)",
+                            color: "var(--color-text-muted)",
+                          }}
+                        >
+                          Ruang fisik venue
+                        </div>
                       </td>
                     </tr>
                   );

@@ -6,19 +6,22 @@ This repository is developed with human review and AI coding agents (including C
 
 Before implementing any product/UI task, read documents in this order:
 
-1. `PRD.md` — product/business requirements and canonical product rules.
-2. `docs/SYSTEM_FLOW.md` — user/system flow, state transitions, edge cases.
-3. `docs/WIREFRAME_SPEC.md` — per-screen purpose, CTA, state, navigation.
-4. `docs/UI_SPEC.md` — UI contracts, routes, component behavior, responsive rules.
-5. `docs/DESIGN_SYSTEM.md` — visual tokens, shared components, copy/tone baseline.
-6. The GitHub issue being implemented — task-specific scope and acceptance criteria.
+1. `PRD_HOLOGY_PROTOTYPE.md` — current competition-prototype requirements, canonical user flows, requirement IDs, semantic guards, and implementation status.
+2. `PRD.md` — legacy/historical product reference. Use only where it does not conflict with the competition-prototype PRD.
+3. `docs/SYSTEM_FLOW.md` — user/system flow, state transitions, and edge cases that remain relevant.
+4. `docs/WIREFRAME_SPEC.md` — per-screen purpose, CTA, state, navigation.
+5. `docs/UI_SPEC.md` — UI contracts, routes, component behavior, responsive rules.
+6. `docs/DESIGN_SYSTEM.md` — visual tokens, shared components, copy/tone baseline.
+7. The GitHub issue being implemented — task-specific scope and acceptance criteria.
 
 If documents conflict, higher items in the list win. Do not silently reconcile conflicts. Report the conflict in the PR/issue.
 
+JedaIn in this repository is currently a **competition prototype**, not a production application. Optimize for demo reliability, clarity, usability, and judge experience. Do not introduce production-grade infrastructure unless explicitly requested or clearly needed for the prototype.
+
 ## 2. Core Product Rules Agents Must Not Break
 
-- No traveler guest mode.
-- New traveler registers first, then completes mandatory consent + onboarding quiz.
+- Traveler guest/demo mode is allowed for the competition prototype and must not be removed merely because the legacy PRD disallowed it.
+- New traveler or guest-demo traveler completes mandatory consent + onboarding quiz before the personalized protected flow.
 - Latest quiz/current intent is the primary recommendation signal.
 - Recommendation MVP is rule-based, not ML/AI.
 - At most one active `PENDING_PAYMENT` per traveler.
@@ -29,17 +32,19 @@ If documents conflict, higher items in the list win. Do not silently reconcile c
 - Reviews are allowed only for `COMPLETED` bookings.
 - Venue review and EO/Guide review are separate records.
 - Traveler, Partner, and Admin are separate product surfaces, but may share identity/backend.
-- Business-critical validation must not exist only in the frontend.
+- Important prototype validation should live in shared domain/store boundaries where practical, not only in visual copy or one screen.
 - Material edits to a LIVE package require a new draft/version and re-approval.
 
 ## 3. Scope Discipline
 
 For every issue:
 
+- identify the relevant `REQ-*` IDs from `PRD_HOLOGY_PROTOTYPE.md`,
 - implement only the requested vertical slice,
 - do not add unrelated features,
 - do not rename canonical statuses,
 - do not invent unapproved business rules,
+- do not implement items marked `OPEN` as if they were decided,
 - do not refactor unrelated modules unless necessary for correctness,
 - if a dependency is missing, create the smallest clean abstraction required.
 
@@ -56,12 +61,15 @@ For every issue:
 
 ## 5. Backend/API Boundary
 
-If API contracts are not yet defined:
+This repository may intentionally use mock/in-memory architecture for the competition prototype.
+
+If API/backend contracts are not defined:
 
 - do not invent permanent endpoint structures as product truth,
-- create typed interfaces/adapters that can later be wired to the backend,
+- typed interfaces/adapters are preferred where they improve clarity,
 - keep mock data separate from UI components,
-- keep server-authoritative rules represented as server-returned state rather than recreated as frontend truth.
+- do not add a real backend/database/auth stack unless the task explicitly requires it,
+- treat production-grade infrastructure as out of scope unless it materially improves the competition demo.
 
 ## 6. Testing Expectations
 
@@ -113,4 +121,5 @@ An issue is done only when:
 - canonical state names are respected,
 - no new product assumptions were introduced,
 - tests/checks pass,
-- implementation remains consistent with the docs above.
+- implementation remains consistent with the docs above,
+- the competition demo remains stable and easy for judges/testers to understand.

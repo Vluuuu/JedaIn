@@ -84,7 +84,7 @@ export function DestinationScheduleScreen() {
                   <th>Paket Experience</th>
                   <th>Penyelenggara (EO)</th>
                   <th>Waktu Pelaksanaan</th>
-                  <th>Alokasi Kapasitas</th>
+                  <th>Kuota Sesi EO</th>
                   <th>Peserta Terkonfirmasi</th>
                   <th>Status Sesi</th>
                   <th>Ringkasan</th>

@@ -216,7 +216,7 @@ export function DestinationOverviewScreen() {
             </p>
           </div>
           <span className="dest-section-heading__summary">
-            Kapasitas operasional destinasi: {destination.capacityPerSession}
+            Kapasitas operasional destinasi: {destination.capacityPerSession}{" "}
             orang
           </span>
         </div>

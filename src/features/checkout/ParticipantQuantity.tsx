@@ -34,17 +34,22 @@ export function ParticipantQuantity({
       aria-label="Pengaturan jumlah peserta"
     >
       <div className="checkout-quantity-header">
-        <label
-          htmlFor="participant-count-val"
+        <span
+          id="participant-quantity-label"
           className="checkout-quantity-label"
         >
           Jumlah peserta
-        </label>
-        <span className="checkout-quantity-hint">
+        </span>
+        <span id="participant-quantity-hint" className="checkout-quantity-hint">
           Sesuai kapasitas yang tersedia
         </span>
       </div>
-      <div className="checkout-quantity-stepper">
+      <div
+        className="checkout-quantity-stepper"
+        role="group"
+        aria-labelledby="participant-quantity-label"
+        aria-describedby="participant-quantity-hint"
+      >
         <button
           type="button"
           className="checkout-quantity-btn"
@@ -69,7 +74,9 @@ export function ParticipantQuantity({
         <span
           id="participant-count-val"
           className="checkout-quantity-value"
+          role="status"
           aria-live="polite"
+          aria-atomic="true"
         >
           {value}
         </span>

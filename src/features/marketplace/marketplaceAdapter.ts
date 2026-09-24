@@ -210,6 +210,8 @@ export function buildTravelerPackageDetailFromEo(
     includedItems: [...eoPkg.includedItems],
     excludedItems: [...eoPkg.excludedItems],
     safetyNotes: [...eoPkg.safetyNotes],
+    meetingPointLabel: eoPkg.meetingPointLabel,
+    accessNotes: eoPkg.accessNotes ? [...eoPkg.accessNotes] : undefined,
     cancellationPolicySummary:
       "Kebijakan pembatalan spesifik belum tersedia pada prototype ini.",
     organizer: {

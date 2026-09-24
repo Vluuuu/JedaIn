@@ -409,7 +409,14 @@ export function getPackageVisual(
 ): VisualAssetData {
   const custom =
     customImageUrl?.trim() || customPackageImageStore.get(packageId);
-  if (custom) {
+  if (
+    custom &&
+    (customPackageImageStore.get(packageId) ||
+      custom.startsWith("data:") ||
+      custom.startsWith("http://") ||
+      custom.startsWith("https://") ||
+      custom.startsWith("blob:"))
+  ) {
     return {
       id: `custom_${packageId}`,
       title: packageId,
@@ -426,7 +433,25 @@ export function getPackageVisual(
   return NEUTRAL_JEDAIN_VISUAL;
 }
 
-export function getDestinationVisual(destinationRef: string): VisualAssetData {
+export function getDestinationVisual(
+  destinationRef: string,
+  customImageUrl?: string,
+): VisualAssetData {
+  const custom = customImageUrl?.trim();
+  if (
+    custom &&
+    (custom.startsWith("data:") ||
+      custom.startsWith("http://") ||
+      custom.startsWith("https://") ||
+      custom.startsWith("blob:"))
+  ) {
+    return {
+      id: `custom_${destinationRef}`,
+      title: destinationRef,
+      svgDataUri: custom,
+      themeColor: "#285e3d",
+    };
+  }
   if (DESTINATION_VISUALS[destinationRef]) {
     return DESTINATION_VISUALS[destinationRef];
   }

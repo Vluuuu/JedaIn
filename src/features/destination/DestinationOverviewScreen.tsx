@@ -64,7 +64,7 @@ export function DestinationOverviewScreen() {
     destination.verificationLevel === "PLUS"
       ? "Terverifikasi Plus"
       : "Terverifikasi Dasar";
-  const visual = getDestinationVisual(destination.name);
+  const visual = getDestinationVisual(destination.name, destination.imageUrl);
 
   return (
     <div className="dest-container dest-overview">

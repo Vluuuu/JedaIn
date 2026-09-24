@@ -51,6 +51,8 @@ export interface PackageDetailSource {
   includedItems: string[];
   excludedItems: string[];
   safetyNotes: string[];
+  meetingPointLabel?: string;
+  accessNotes?: string[];
   cancellationPolicySummary: string;
   organizer: PackageOrganizerProfile;
   destinationDetail: PackageDestinationDetail;

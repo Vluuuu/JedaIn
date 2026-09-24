@@ -230,7 +230,7 @@ export function SessionSelectionScreen({
   }
 
   const { package: pkg, sessions, hasSelectableSession } = viewModel;
-  const visual = getPackageVisual(pkg.id, pkg.destinationName);
+  const visual = getPackageVisual(pkg.id, pkg.destinationName, pkg.visualAsset);
 
   const selectedSession = sessions.find(
     (s) => s.sessionId === selectedSessionId,

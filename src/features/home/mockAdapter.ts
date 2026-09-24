@@ -120,6 +120,7 @@ export class MockHomeAdapter implements HomeAdapter {
           packageName: pkg?.title ?? latestPaid.packageId,
           tripDate: dateLabel,
           destinationLabel: pkg?.destinationName ?? "Destinasi Pilihan",
+          meetingOrDepartureSummary: detail?.meetingPointLabel,
         };
       }
     }

@@ -567,7 +567,65 @@ export function PackageDetailScreen({
           </section>
         )}
 
-        {/* 10. Cancellation & Refund Policy Summary */}
+        {/* 10. Travel Logistics & Meeting Point (P1-T02) */}
+        {(detail.meetingPointLabel ||
+          (detail.accessNotes && detail.accessNotes.length > 0)) && (
+          <section
+            className="package-detail-section"
+            aria-labelledby="logistics-heading"
+          >
+            <h2
+              id="logistics-heading"
+              className="package-detail-section__title"
+            >
+              Informasi Titik Kumpul & Akses
+            </h2>
+            <div className="package-detail-logistics-grid">
+              {detail.meetingPointLabel && (
+                <div className="package-detail-logistics-item">
+                  <span className="package-detail-logistics-label">
+                    Titik Kumpul
+                  </span>
+                  <strong className="package-detail-logistics-val">
+                    {detail.meetingPointLabel}
+                  </strong>
+                </div>
+              )}
+              <div className="package-detail-logistics-item">
+                <span className="package-detail-logistics-label">
+                  Lokasi Kawasan
+                </span>
+                <strong className="package-detail-logistics-val">
+                  {pkg.destinationName}, {pkg.locationLabel}
+                </strong>
+              </div>
+              <div className="package-detail-logistics-item">
+                <span className="package-detail-logistics-label">
+                  Waktu Keberangkatan
+                </span>
+                <span className="package-detail-logistics-val">
+                  Jam mengikuti jadwal keberangkatan yang dipilih saat memilih
+                  sesi.
+                </span>
+              </div>
+            </div>
+
+            {detail.accessNotes && detail.accessNotes.length > 0 && (
+              <div className="package-detail-logistics-notes">
+                <span className="package-detail-logistics-label">
+                  Catatan Akses Lokasi:
+                </span>
+                <ul className="package-detail-simple-list">
+                  {detail.accessNotes.map((note, idx) => (
+                    <li key={idx}>{note}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* 11. Cancellation & Refund Policy Summary */}
         <section
           className="package-detail-section"
           aria-labelledby="policy-heading"

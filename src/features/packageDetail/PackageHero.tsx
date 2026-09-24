@@ -7,7 +7,11 @@ export interface PackageHeroProps {
 }
 
 export function PackageHero({ packageData }: PackageHeroProps) {
-  const visual = getPackageVisual(packageData.id, packageData.destinationName);
+  const visual = getPackageVisual(
+    packageData.id,
+    packageData.destinationName,
+    packageData.visualAsset,
+  );
 
   return (
     <header className="package-detail-hero">

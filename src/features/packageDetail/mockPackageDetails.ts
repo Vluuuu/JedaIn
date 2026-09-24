@@ -58,6 +58,11 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Aktivitas berjalan santai dengan intensitas ringan dan jalur relatif datar.",
       "Ikuti arahan pemandu demi kenyamanan dan kelestarian perkebunan.",
     ],
+    meetingPointLabel: "Area titik kumpul Lereng Hijau Batu",
+    accessNotes: [
+      "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
+      "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
+    ],
     cancellationPolicySummary:
       "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
     organizer: {
@@ -154,6 +159,10 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Pakaian santai yang nyaman dan tidak masalah jika terkena percikan tanah liat (celemek disediakan).",
       "Aktivitas ramah anak-anak dan keluarga.",
     ],
+    meetingPointLabel: "Pendopo Desa Wisata Budaya",
+    accessNotes: [
+      "Akses jalan desa beraspal dan dapat dilalui kendaraan pribadi.",
+    ],
     cancellationPolicySummary:
       "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
     organizer: {
@@ -240,6 +249,8 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Disarankan membawa alas kaki yang nyaman untuk berjalan di jalur berbatu.",
       "Harap menjaga ketenangan selama sesi jalan hening berlangsung.",
     ],
+    meetingPointLabel: "Titik kumpul area gerbang Oase Hening Trawas",
+    accessNotes: ["Disarankan tiba 15 menit sebelum waktu mulai sesi."],
     cancellationPolicySummary:
       "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
     organizer: {

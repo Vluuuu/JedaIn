@@ -227,6 +227,11 @@ export const SEEDED_LIVE_PACKAGE: EoPackageRecord = {
     "Gunakan sepatu berjalan yang nyaman dan tidak licin.",
     "Bawa jaket atau pakaian hangat tipis.",
   ],
+  meetingPointLabel: "Area titik kumpul Lereng Hijau Batu",
+  accessNotes: [
+    "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
+    "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
+  ],
   pricing: {
     destinationBaseCost: 125000,
     eoMargin: 150000,
@@ -340,6 +345,7 @@ function clonePackage(pkg: EoPackageRecord): EoPackageRecord {
     includedItems: [...pkg.includedItems],
     excludedItems: [...pkg.excludedItems],
     safetyNotes: [...pkg.safetyNotes],
+    accessNotes: pkg.accessNotes ? [...pkg.accessNotes] : undefined,
     pricing: { ...pkg.pricing },
   };
 }

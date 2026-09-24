@@ -19,7 +19,7 @@ export function DestinationProfileScreen() {
   }
 
   const { destination } = context;
-  const visual = getDestinationVisual(destination.name);
+  const visual = getDestinationVisual(destination.name, destination.imageUrl);
 
   return (
     <div className="dest-container" style={{ maxWidth: "900px" }}>

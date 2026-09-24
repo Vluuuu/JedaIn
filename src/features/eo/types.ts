@@ -165,6 +165,8 @@ export interface EoPackageRecord {
   includedItems: string[];
   excludedItems: string[];
   safetyNotes: string[];
+  meetingPointLabel?: string;
+  accessNotes?: string[];
   pricing: EoPackagePricing;
   guideStatus: EoGuideStatus;
   guideSource: PackageGuideSource;

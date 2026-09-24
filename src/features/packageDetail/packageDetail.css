@@ -586,6 +586,49 @@
 /* --------------------------------------------------------------------------
    9. Safety and Policies
    -------------------------------------------------------------------------- */
+.package-detail-logistics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .package-detail-logistics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.package-detail-logistics-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--space-4);
+  background: var(--color-stone-50);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-lg);
+}
+
+.package-detail-logistics-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.package-detail-logistics-val {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-900);
+  line-height: 1.45;
+}
+
+.package-detail-logistics-notes {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
 .package-detail-simple-list {
   display: flex;
   flex-direction: column;

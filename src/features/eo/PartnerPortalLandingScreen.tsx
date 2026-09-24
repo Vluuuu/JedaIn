@@ -40,8 +40,8 @@ export function PartnerPortalLandingScreen() {
             Bermitra dengan JedaIn
           </h1>
           <p className="eo-page-subtitle">
-            Rancang pengalaman perjalanan mindful berbasis permintaan nyata
-            bersama destinasi terverifikasi.
+            Rancang pengalaman perjalanan mindful dengan sinyal kebutuhan
+            traveler bersama destinasi terverifikasi.
           </p>
         </div>
       </header>

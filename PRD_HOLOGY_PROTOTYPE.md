@@ -203,12 +203,12 @@ Prototype dianggap siap demo jika:
 
 # 5. Roles dan Access Model
 
-| Role | Primary Surface | Fungsi Utama |
-|---|---|---|
-| Traveler | /, /login, /home, /explore | discovery, recommendation, booking, trip |
-| EO | /partner, /partner/eo atau eo.jedain.biz.id | insight, package, sessions, bookings |
-| Mitra Destinasi | /partner/destination | destination operation, schedule, capacity |
-| Admin | /admin | verification, approval, trust, audit |
+| Role            | Primary Surface                             | Fungsi Utama                              |
+| --------------- | ------------------------------------------- | ----------------------------------------- |
+| Traveler        | /, /login, /home, /explore                  | discovery, recommendation, booking, trip  |
+| EO              | /partner, /partner/eo atau eo.jedain.biz.id | insight, package, sessions, bookings      |
+| Mitra Destinasi | /partner/destination                        | destination operation, schedule, capacity |
+| Admin           | /admin                                      | verification, approval, trust, audit      |
 
 ## 5.1 Demo Access
 
@@ -1272,92 +1272,92 @@ Route map ini mengikuti route yang benar-benar tersedia pada current prototype. 
 
 ## Traveler
 
-| Route | Purpose |
-|---|---|
-| / | Landing |
-| /login | Traveler login / guest |
-| /onboarding/consent | Consent |
-| /onboarding/quiz | Preference quiz |
-| /onboarding/result | Recommendation |
-| /home | Personalized home |
-| /explore | Catalog/explore |
-| /packages/:packageId | Package detail |
-| /packages/:packageId/sessions | Session selection |
-| /checkout/:sessionId | Checkout |
-| /checkout/:sessionId/contact | Contact verification |
-| /checkout/:sessionId/pending-payment | Pending payment handling |
-| /payment/:bookingId | Payment simulation |
-| /payment/:bookingId/result | Payment result |
-| /trips | My Trips |
-| /trips/:bookingId | Trip detail |
-| /trips/:bookingId/review | Destination + EO/Guide review flow |
-| /profile | Profile |
-| /profile/settings | Profile settings / logout |
-| /profile/activity | Traveler activity |
-| /profile/preferences | Retake preference |
-| /profile/verify-phone | Profile phone verification |
-| /travelers/search | Prototype traveler discovery |
-| /travelers/:travelerId | Public traveler profile |
-| /travelers/:travelerId/followers | Followers |
-| /travelers/:travelerId/following | Following |
-| /complaints/new | Prototype complaint placeholder |
+| Route                                | Purpose                            |
+| ------------------------------------ | ---------------------------------- |
+| /                                    | Landing                            |
+| /login                               | Traveler login / guest             |
+| /onboarding/consent                  | Consent                            |
+| /onboarding/quiz                     | Preference quiz                    |
+| /onboarding/result                   | Recommendation                     |
+| /home                                | Personalized home                  |
+| /explore                             | Catalog/explore                    |
+| /packages/:packageId                 | Package detail                     |
+| /packages/:packageId/sessions        | Session selection                  |
+| /checkout/:sessionId                 | Checkout                           |
+| /checkout/:sessionId/contact         | Contact verification               |
+| /checkout/:sessionId/pending-payment | Pending payment handling           |
+| /payment/:bookingId                  | Payment simulation                 |
+| /payment/:bookingId/result           | Payment result                     |
+| /trips                               | My Trips                           |
+| /trips/:bookingId                    | Trip detail                        |
+| /trips/:bookingId/review             | Destination + EO/Guide review flow |
+| /profile                             | Profile                            |
+| /profile/settings                    | Profile settings / logout          |
+| /profile/activity                    | Traveler activity                  |
+| /profile/preferences                 | Retake preference                  |
+| /profile/verify-phone                | Profile phone verification         |
+| /travelers/search                    | Prototype traveler discovery       |
+| /travelers/:travelerId               | Public traveler profile            |
+| /travelers/:travelerId/followers     | Followers                          |
+| /travelers/:travelerId/following     | Following                          |
+| /complaints/new                      | Prototype complaint placeholder    |
 
 ## Partner / EO
 
-| Route | Purpose |
-|---|---|
-| /partner | Partner entry |
-| /partner/login | Partner login |
-| /partner/eo/login | EO login alias |
-| /eo/login | EO login alias |
-| /partner/apply/eo | EO application |
-| /partner/application | Application status |
-| /partner/eo | EO overview |
-| /partner/eo/insights | Demand insight |
-| /partner/eo/destinations | Destination catalog |
-| /partner/eo/destinations/:destinationId | Destination detail |
-| /partner/eo/packages | Package list |
-| /partner/eo/packages/new | Package builder |
-| /partner/eo/packages/:packageId | Package detail |
+| Route                                    | Purpose                    |
+| ---------------------------------------- | -------------------------- |
+| /partner                                 | Partner entry              |
+| /partner/login                           | Partner login              |
+| /partner/eo/login                        | EO login alias             |
+| /eo/login                                | EO login alias             |
+| /partner/apply/eo                        | EO application             |
+| /partner/application                     | Application status         |
+| /partner/eo                              | EO overview                |
+| /partner/eo/insights                     | Demand insight             |
+| /partner/eo/destinations                 | Destination catalog        |
+| /partner/eo/destinations/:destinationId  | Destination detail         |
+| /partner/eo/packages                     | Package list               |
+| /partner/eo/packages/new                 | Package builder            |
+| /partner/eo/packages/:packageId          | Package detail             |
 | /partner/eo/packages/:packageId/sessions | Package session management |
-| /partner/eo/sessions | Session management |
-| /partner/eo/bookings | Booking view |
-| /partner/eo/reviews | EO reviews |
-| /partner/eo/profile | EO profile |
+| /partner/eo/sessions                     | Session management         |
+| /partner/eo/bookings                     | Booking view               |
+| /partner/eo/reviews                      | EO reviews                 |
+| /partner/eo/profile                      | EO profile                 |
 
 Pada EO subdomain, root/login aliases mengarahkan ke EO-oriented entry dan operational workspace tetap memakai route `/partner/eo/*`.
 
 ## Destination Partner
 
-| Route | Purpose |
-|---|---|
-| /partner/apply/destination | Destination application |
-| /partner/application | Shared application status |
-| /partner/destination | Overview |
-| /partner/destination/profile | Destination profile |
-| /partner/destination/verification | Verification badge/status |
-| /partner/destination/schedule | EO schedule |
-| /partner/destination/capacity | Capacity view |
-| /partner/destination/reviews | Destination reviews |
-| /partner/destination/profile-settings | Settings |
+| Route                                 | Purpose                   |
+| ------------------------------------- | ------------------------- |
+| /partner/apply/destination            | Destination application   |
+| /partner/application                  | Shared application status |
+| /partner/destination                  | Overview                  |
+| /partner/destination/profile          | Destination profile       |
+| /partner/destination/verification     | Verification badge/status |
+| /partner/destination/schedule         | EO schedule               |
+| /partner/destination/capacity         | Capacity view             |
+| /partner/destination/reviews          | Destination reviews       |
+| /partner/destination/profile-settings | Settings                  |
 
 ## Admin
 
-| Route | Purpose |
-|---|---|
-| /admin/login | Admin entry |
-| /admin | Overview |
-| /admin/eo-approvals | EO review queue |
-| /admin/eo-approvals/:applicationId | EO application review |
-| /admin/destination-verifications | Destination review queue |
+| Route                                           | Purpose                         |
+| ----------------------------------------------- | ------------------------------- |
+| /admin/login                                    | Admin entry                     |
+| /admin                                          | Overview                        |
+| /admin/eo-approvals                             | EO review queue                 |
+| /admin/eo-approvals/:applicationId              | EO application review           |
+| /admin/destination-verifications                | Destination review queue        |
 | /admin/destination-verifications/:applicationId | Destination verification detail |
-| /admin/package-approvals | Package review queue |
-| /admin/package-approvals/:submissionId | Package review checklist |
-| /admin/bookings | Booking monitoring |
-| /admin/complaints | Complaint handling |
-| /admin/complaints/:complaintId | Complaint detail |
-| /admin/trust | Trust status |
-| /admin/audit | Audit activity |
+| /admin/package-approvals                        | Package review queue            |
+| /admin/package-approvals/:submissionId          | Package review checklist        |
+| /admin/bookings                                 | Booking monitoring              |
+| /admin/complaints                               | Complaint handling              |
+| /admin/complaints/:complaintId                  | Complaint detail                |
+| /admin/trust                                    | Trust status                    |
+| /admin/audit                                    | Audit activity                  |
 
 ---
 
@@ -1633,23 +1633,23 @@ CONTENT DEPENDENCY, bukan technical blocker.
 
 # 29. Requirements Traceability — Discovery Improvement to Product Requirement
 
-| Improvement | Canonical Requirement |
-|---|---|
-| Past session filtering | REQ-TRV-08 |
-| EO application hygiene | REQ-EO-01 / REQ-EO-02 |
-| Destination registration loop | REQ-MIT-01 |
-| Session slot clarity | REQ-TRV-08 |
-| Trust badge explanation | REQ-TRV-07 |
-| Capacity context | Section 6 + REQ-EO-04 + REQ-MIT-03/04 |
-| Guide context | Section 6 + REQ-EO-06 |
-| EO operational summary | REQ-EO-08 |
-| Mitra operational summary | REQ-MIT-05 |
-| Demand insight context | REQ-EO-03 |
-| Meeting point/access | REQ-TRV-07 |
-| Destination cost scope | REQ-EO-05 + REQ-MIT-06 |
-| Session operational note | REQ-EO-10 + REQ-MIT-05 |
-| D1 accessibility/copy | REQ-TRV-09 + REQ-MIT-03/04 + Section 21 |
-| D2 session persistence | REQ-TRV-03 |
+| Improvement                   | Canonical Requirement                   |
+| ----------------------------- | --------------------------------------- |
+| Past session filtering        | REQ-TRV-08                              |
+| EO application hygiene        | REQ-EO-01 / REQ-EO-02                   |
+| Destination registration loop | REQ-MIT-01                              |
+| Session slot clarity          | REQ-TRV-08                              |
+| Trust badge explanation       | REQ-TRV-07                              |
+| Capacity context              | Section 6 + REQ-EO-04 + REQ-MIT-03/04   |
+| Guide context                 | Section 6 + REQ-EO-06                   |
+| EO operational summary        | REQ-EO-08                               |
+| Mitra operational summary     | REQ-MIT-05                              |
+| Demand insight context        | REQ-EO-03                               |
+| Meeting point/access          | REQ-TRV-07                              |
+| Destination cost scope        | REQ-EO-05 + REQ-MIT-06                  |
+| Session operational note      | REQ-EO-10 + REQ-MIT-05                  |
+| D1 accessibility/copy         | REQ-TRV-09 + REQ-MIT-03/04 + Section 21 |
+| D2 session persistence        | REQ-TRV-03                              |
 
 ---
 

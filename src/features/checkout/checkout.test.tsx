@@ -1143,16 +1143,32 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       });
 
       // Assertions:
+      // 0. Default state & copy truthfulness
+      expect(policyCheckbox.checked).toBe(false);
+      expect(container.textContent).not.toContain(
+        "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
+      );
+      expect(container.textContent).toContain(
+        "Pada prototype ini, kebijakan pembatalan dan refund belum menetapkan batas waktu atau persentase pengembalian dana.",
+      );
+      expect(container.textContent).toContain(
+        "Saya memahami bahwa ketentuan pembatalan & refund pada prototype ini belum merupakan kebijakan operasional final.",
+      );
+      expect(container.textContent).not.toContain("H-7");
+      expect(container.textContent).not.toContain("H-3");
+      expect(container.textContent).not.toContain("50%");
+      expect(container.textContent).not.toContain("100%");
+
       // 1. Stayed on checkout
       expect(currentPath).toBe("/checkout/ses_sgd_1");
 
       // 2. Inline validation error is visible adjacent to checkbox
       expect(container.textContent).toContain(
-        "Setujui kebijakan pembatalan & refund untuk melanjutkan.",
+        "Konfirmasi pemahaman kebijakan pembatalan & refund prototype untuk melanjutkan.",
       );
       const errorMsg = container.querySelector('[role="alert"]')!;
       expect(errorMsg.textContent).toContain(
-        "Setujui kebijakan pembatalan & refund untuk melanjutkan.",
+        "Konfirmasi pemahaman kebijakan pembatalan & refund prototype untuk melanjutkan.",
       );
 
       // 3. Checkbox received focus
@@ -1170,7 +1186,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
 
       expect(policyCheckbox.checked).toBe(true);
       expect(container.textContent).not.toContain(
-        "Setujui kebijakan pembatalan & refund untuk melanjutkan.",
+        "Konfirmasi pemahaman kebijakan pembatalan & refund prototype untuk melanjutkan.",
       );
     });
 

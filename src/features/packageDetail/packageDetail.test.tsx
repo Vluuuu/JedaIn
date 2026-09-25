@@ -207,13 +207,17 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     expect(view.textContent).not.toContain("Transportasi termasuk");
   });
 
-  it("13. cancellation/refund policy does not fabricate concrete percentages or deadlines", async () => {
+  it("13. cancellation/refund policy does not fabricate concrete percentages or deadlines and clarifies prototype terms", async () => {
     const view = await renderPackageDetail("slow_green_day");
     expect(view.textContent).toContain("Kebijakan Pembatalan & Refund");
-    expect(view.textContent).toContain(
+    expect(view.textContent).not.toContain(
       "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
     );
+    expect(view.textContent).toContain(
+      "Pada prototype ini, kebijakan pembatalan dan refund belum menetapkan batas waktu atau persentase pengembalian dana. Ketentuan operasional final akan ditetapkan sebelum transaksi nyata.",
+    );
     expect(view.textContent).not.toContain("H-7");
+    expect(view.textContent).not.toContain("H-3");
     expect(view.textContent).not.toContain("50%");
     expect(view.textContent).not.toContain("100% refund");
   });
@@ -531,6 +535,29 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     )!;
     expect(ctaBtn.disabled).toBe(true);
     expect(view.textContent).toContain("Belum ada jadwal tersedia");
+  });
+
+  it("24. seeded package review and rating are explicitly identified as prototype sample preview separate from destination/eo reviews", async () => {
+    const view = await renderPackageDetail("slow_green_day");
+
+    // Seeded review section heading
+    expect(view.textContent).toContain("Contoh Ulasan Paket");
+    expect(view.textContent).not.toContain("Ulasan Traveler");
+
+    // Helper text explaining prototype preview and separation from post-trip reviews
+    expect(view.textContent).toContain(
+      "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket.",
+    );
+    expect(view.textContent).toContain(
+      "Ulasan Destinasi dan EO/Guide pascatrip dicatat terpisah.",
+    );
+
+    // Rating labeled explicitly as sample rating
+    expect(view.textContent).toContain("Rating paket contoh: 4.8 / 5.0");
+
+    // Seeded review excerpt content still present
+    expect(view.textContent).toContain("Sarah M.");
+    expect(view.textContent).toContain("Sangat menenangkan");
   });
 
   it("J. formats date and time deterministically in Asia/Jakarta (WIB) for real canonical fixtures (same-day and cross-date 2D1N)", async () => {

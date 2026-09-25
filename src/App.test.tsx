@@ -86,23 +86,48 @@ describe("App shell routing", () => {
     expect(markup).not.toContain("Destination Profile");
   });
 
-  it("exposes only the single Destination overview navigation while keeping EO navigation untouched", () => {
+  it("exposes all canonical Destination operational navigation items while keeping EO navigation untouched", () => {
     partnerSessionStore.loginAsDemoDestination();
     const markup = renderRoute("/partner/destination");
 
     expect(partnerDestinationNavigation).toEqual([
       { to: "/partner/destination", label: "Overview" },
+      {
+        to: "/partner/destination/profile",
+        label: "Destination Profile",
+      },
+      {
+        to: "/partner/destination/verification",
+        label: "Verification",
+      },
+      {
+        to: "/partner/destination/schedule",
+        label: "Schedule",
+      },
+      {
+        to: "/partner/destination/capacity",
+        label: "Capacity",
+      },
+      {
+        to: "/partner/destination/reviews",
+        label: "Reviews",
+      },
+      {
+        to: "/partner/destination/profile-settings",
+        label: "Profile",
+      },
     ]);
-    expect(markup).toContain('href="/partner/destination"');
-    expect(markup).toContain(">Overview</span>");
-    expect(markup).not.toContain("Destination Profile");
-    expect(markup).not.toContain(">Verification</span>");
-    expect(markup).not.toContain(">Schedule</span>");
-    expect(markup).not.toContain(">Capacity</span>");
-    expect(markup).not.toContain(">Reviews</span>");
+
+    for (const item of partnerDestinationNavigation) {
+      expect(markup).toContain(`href="${item.to}"`);
+      expect(markup).toContain(`>${item.label}</span>`);
+    }
+
     expect(markup).not.toContain(">Insights</span>");
     expect(markup).not.toContain(">Packages</span>");
+    expect(markup).not.toContain(">Sessions</span>");
     expect(markup).not.toContain(">Bookings</span>");
+    expect(markup).not.toContain(">Destinations</span>");
 
     expect(partnerEoNavigation.map((item) => item.label)).toEqual([
       "Overview",
@@ -115,6 +140,23 @@ describe("App shell routing", () => {
       "Profile",
     ]);
   });
+
+  it.each([
+    "/partner/destination/schedule",
+    "/partner/destination/capacity",
+    "/partner/destination/reviews",
+  ])(
+    "renders destination operational route %s for approved destination demo session",
+    (route) => {
+      partnerSessionStore.loginAsDemoDestination();
+      const markup = renderRoute(route);
+
+      expect(markup).toContain("workspace-shell");
+      expect(markup).toContain("Destination Partner");
+      expect(markup).not.toContain(">Insights</span>");
+      expect(markup).not.toContain(">Packages</span>");
+    },
+  );
 
   it("renders exact Admin navigation labels matching source-of-truth", () => {
     adminSessionStore.loginAsDemoAdmin();

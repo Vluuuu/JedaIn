@@ -84,7 +84,9 @@ export function PackageHero({ packageData }: PackageHeroProps) {
       <div className="package-detail-gallery">
         <div className="package-detail-gallery__heading-row">
           <div>
-            <span className="package-detail-gallery__eyebrow">\n              Galeri suasana\n            </span>
+            <span className="package-detail-gallery__eyebrow">
+              Galeri suasana
+            </span>
             <h2
               id="package-gallery-heading"
               className="package-detail-gallery__title"

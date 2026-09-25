@@ -27,12 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Debug PRD formatter diff
-        run: |
-          npx prettier --write PRD_HOLOGY_PROTOTYPE.md
-          git diff -- PRD_HOLOGY_PROTOTYPE.md
-          exit 1
-
       - name: Check formatting
         run: npm run format:check
 

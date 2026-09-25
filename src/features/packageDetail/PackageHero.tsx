@@ -84,7 +84,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
       <div className="package-detail-gallery">
         <div className="package-detail-gallery__heading-row">
           <div>
-            <span className="package-detail-gallery__eyebrow">Galeri suasana</span>
+            <span className="package-detail-gallery__eyebrow">\n              Galeri suasana\n            </span>
             <h2
               id="package-gallery-heading"
               className="package-detail-gallery__title"
@@ -117,7 +117,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
                   isActive ? " package-detail-gallery__thumb--active" : ""
                 }`}
                 aria-pressed={isActive}
-                aria-label={`Tampilkan ${view.label.toLowerCase()} ${packageData.title}`}
+                aria-label={`Tampilkan ${view.label.toLowerCase()} ${\n                  packageData.title\n                }`}
                 onClick={() => setActiveViewIndex(index)}
               >
                 <span className="package-detail-gallery__thumb-media">

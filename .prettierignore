@@ -3,7 +3,6 @@ node_modules
 package-lock.json
 AGENTS.md
 PRD.md
-PRD_HOLOGY_PROTOTYPE.md
 docs/
 .remember/
 .playwright-mcp/

@@ -1251,14 +1251,6 @@ export function EoPackageBuilderScreen() {
                 JedaIn.
               </p>
             </div>
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={() => setShowTravelerPreview(true)}
-            >
-              Preview sebagai Traveler
-            </Button>
           </div>
 
           {/* Package Preview Sheet */}
@@ -1622,7 +1614,7 @@ export function EoPackageBuilderScreen() {
               <div className="eo-builder-traveler-preview__hero">
                 <img
                   src={imageUrl}
-                  alt={`Foto utama ${title || "paket"}`}
+                  alt={`Visual utama ${title || "paket"}`}
                   className="eo-builder-traveler-preview__img"
                 />
               </div>
@@ -1735,7 +1727,7 @@ export function EoPackageBuilderScreen() {
             )}
 
             <p className="eo-builder-traveler-preview__footer-note">
-              Preview ini menampilkan draft sebelum review Admin dan belum
+              Preview ini menampilkan draf sebelum review Admin dan belum
               berarti package telah disetujui atau LIVE.
             </p>
           </div>

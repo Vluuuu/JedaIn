@@ -62,7 +62,7 @@ async function renderPackageBuilder(
 }
 
 describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
-  it("1. Step 5 exposes 'Preview sebagai Traveler' button", async () => {
+  it("1. Step 5 exposes 'Preview sebagai Traveler' button in action bar without duplicate in header", async () => {
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
     const view = await renderPackageBuilder();
 
@@ -76,7 +76,13 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
       step5Button!.click();
     });
 
-    // Verify 'Preview sebagai Traveler' button is exposed on Step 5
+    // Verify header does not contain duplicate preview button
+    const headerBtn = view
+      .querySelector(".eo-section-header")
+      ?.querySelector("button");
+    expect(headerBtn).toBeNull();
+
+    // Verify 'Preview sebagai Traveler' button is exposed in action bar beside submit button
     const previewBtn = Array.from(
       view.querySelectorAll<HTMLButtonElement>("button"),
     ).find((btn) => btn.textContent?.includes("Preview sebagai Traveler"));
@@ -175,7 +181,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
 
     // 6. Footer note
     expect(dialog.textContent).toContain(
-      "Preview ini menampilkan draft sebelum review Admin dan belum berarti package telah disetujui atau LIVE.",
+      "Preview ini menampilkan draf sebelum review Admin dan belum berarti package telah disetujui atau LIVE.",
     );
   });
 
@@ -307,6 +313,8 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     );
     expect(imgEl).not.toBeNull();
     expect(imgEl?.src).toBe("https://example.com/test-photo.jpg");
+    expect(imgEl?.alt).toBe("Visual utama Jeda Sejenak di Lembah Teduh");
+    expect(imgEl?.alt).not.toContain("Foto utama");
     expect(dialogWithImg.textContent).not.toContain(
       "Visual utama belum ditambahkan.",
     );

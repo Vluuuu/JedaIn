@@ -714,8 +714,12 @@ export function PackageDetailScreen({
           aria-labelledby="reviews-heading"
         >
           <h2 id="reviews-heading" className="package-detail-section__title">
-            Ulasan Traveler
+            Contoh Ulasan Paket
           </h2>
+          <p className="package-detail-section__desc">
+            Data contoh pada prototype untuk menggambarkan tampilan ulasan
+            paket. Ulasan Destinasi dan EO/Guide pascatrip dicatat terpisah.
+          </p>
           <div className="package-detail-reviews-summary">
             <svg
               width="16"
@@ -729,7 +733,7 @@ export function PackageDetailScreen({
             </svg>
             <span>
               {pkg.rating !== undefined && pkg.rating !== null
-                ? `${pkg.rating.toFixed(1)} / 5.0`
+                ? `Rating paket contoh: ${pkg.rating.toFixed(1)} / 5.0`
                 : "Belum ada rating"}
             </span>
           </div>

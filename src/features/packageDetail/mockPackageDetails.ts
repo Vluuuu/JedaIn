@@ -1,5 +1,8 @@
 import type { PackageDetailSource } from "./types";
 
+export const PROTOTYPE_CANCELLATION_POLICY_SUMMARY =
+  "Pada prototype ini, kebijakan pembatalan dan refund belum menetapkan batas waktu atau persentase pengembalian dana. Ketentuan operasional final akan ditetapkan sebelum transaksi nyata.";
+
 /**
  * Centralized fictional competition prototype detail metadata for all current 5 LIVE packages.
  * Compliant with PRD, SYSTEM_FLOW, WIREFRAME_SPEC, and PACKAGE_DETAIL_CONTRACT.
@@ -63,8 +66,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
       "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
     ],
-    cancellationPolicySummary:
-      "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
+    cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_lereng_batu",
       displayName: "Jeda Alam Nusantara",
@@ -163,8 +165,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
     accessNotes: [
       "Akses jalan desa beraspal dan dapat dilalui kendaraan pribadi.",
     ],
-    cancellationPolicySummary:
-      "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
+    cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_desa_budaya",
       displayName: "Ruang Rupa Desa",
@@ -251,8 +252,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
     ],
     meetingPointLabel: "Titik kumpul area gerbang Oase Hening Trawas",
     accessNotes: ["Disarankan tiba 15 menit sebelum waktu mulai sesi."],
-    cancellationPolicySummary:
-      "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
+    cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_mindful_life",
       displayName: "Mindful Living Project",
@@ -342,8 +342,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Bawa botol minum pribadi dan pelindung matahari (topi/tabir surya).",
       "Jalur memiliki tanjakan landai hingga sedang, cocok untuk yang ingin bergerak aktif.",
     ],
-    cancellationPolicySummary:
-      "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
+    cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_jejak_alam",
       displayName: "Jejak Langkah Pasuruan",
@@ -432,8 +431,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Bawa pakaian tebal dan jaket karena suhu malam di Pacet bisa cukup dingin.",
       "Perhatikan langkah saat berjalan di dekat aliran sungai berbatu.",
     ],
-    cancellationPolicySummary:
-      "Detail ketentuan pembatalan dan refund akan ditampilkan kembali saat checkout sebelum konfirmasi pembayaran.",
+    cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_pacet_retreat",
       displayName: "Lembah Teduh Retreats",

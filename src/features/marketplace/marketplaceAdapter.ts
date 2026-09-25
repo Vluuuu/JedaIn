@@ -6,7 +6,10 @@ import { mockEoPackageStore } from "../eo/mockEoPackageStore";
 import { mockInsightStore } from "../eo/mockInsightStore";
 import type { DemandIntent, EoPackageRecord } from "../eo/types";
 import { resolveOrganizerReviewRef } from "../identity/identityResolvers";
-import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
+import {
+  MOCK_PACKAGE_DETAILS,
+  PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
+} from "../packageDetail/mockPackageDetails";
 import type {
   PackageDetailSource,
   PackageSessionPreview,
@@ -212,8 +215,7 @@ export function buildTravelerPackageDetailFromEo(
     safetyNotes: [...eoPkg.safetyNotes],
     meetingPointLabel: eoPkg.meetingPointLabel,
     accessNotes: eoPkg.accessNotes ? [...eoPkg.accessNotes] : undefined,
-    cancellationPolicySummary:
-      "Kebijakan pembatalan spesifik belum tersedia pada prototype ini.",
+    cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: organizerRef,
       displayName:

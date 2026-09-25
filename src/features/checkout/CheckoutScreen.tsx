@@ -108,7 +108,7 @@ export function CheckoutScreen({
 
     if (!policyAcknowledged) {
       setPolicyError(
-        "Setujui kebijakan pembatalan & refund untuk melanjutkan.",
+        "Konfirmasi pemahaman kebijakan pembatalan & refund prototype untuk melanjutkan.",
       );
       const checkboxEl = document.getElementById("cancellation-policy-ack");
       if (checkboxEl) {
@@ -592,7 +592,7 @@ export function CheckoutScreen({
                   <div className="checkout-policy-wrapper">
                     <Checkbox
                       id="cancellation-policy-ack"
-                      label="Saya sudah membaca ringkasan kebijakan pembatalan & refund."
+                      label="Saya memahami bahwa ketentuan pembatalan & refund pada prototype ini belum merupakan kebijakan operasional final."
                       checked={policyAcknowledged}
                       onChange={(e) => {
                         setPolicyAcknowledged(e.target.checked);

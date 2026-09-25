@@ -600,23 +600,35 @@ Acceptance:
 
 Status: IMPLEMENTED.
 
-## REQ-TRV-13 — My Trips dan Review
+## REQ-TRV-13 — My Trips, Post-Booking Trip Brief, dan Review
 
 Traveler dapat:
 
 - melihat trip,
 - membuka detail,
+- melihat post-booking Trip Brief yang menggunakan source data existing,
 - pada demo mensimulasikan completion bila control tersedia,
 - memberi Destination review,
 - memberi EO/Guide review.
 
+Trip Brief dapat menampilkan, ketika source data tersedia:
+
+- waktu keberangkatan dari session booking,
+- meeting point,
+- destination/location context,
+- access notes.
+
 Acceptance:
 
+- Trip Brief tidak mengarang meeting point, koordinat, transport, atau informasi operasional baru,
+- jika meeting point belum tersedia, fallback harus netral dan hanya menyatakan data belum dicantumkan,
+- internal `operationalNote` tidak boleh diekspos ke Traveler,
+- safety/preparation notes existing tidak perlu diduplikasi jika sudah tampil pada Trip Detail,
 - review hanya terkait booking/trip yang eligible menurut prototype,
 - Destination dan EO review tetap terpisah,
 - review dapat terlihat pada surface partner terkait.
 
-Status: IMPLEMENTED.
+Status: IMPLEMENTED LIVE — diperkuat pada F3.1 / PR #80.
 
 ---
 
@@ -1552,12 +1564,18 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified live baseline setelah D1 + D2:
+Current verified competition baseline setelah F3.1:
 
-- production commit: 4208dddf2e86e607ed92b578c0102945b9ee903b,
-- 39 suites / 607 tests,
-- GitHub Actions CI PASS,
-- live smoke test D1 + D2 PASS.
+- current main commit: 01b517fbdd94d10586fb4ad113d334f754e588cb,
+- 43 suites / 627 tests,
+- format check PASS,
+- lint PASS,
+- typecheck PASS,
+- tests PASS,
+- production build PASS,
+- PR #79 Package Gallery dan PR #80 Post-Booking Trip Brief sudah merged.
+
+Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
 Test count boleh bertambah.
 Existing test count tidak boleh turun tanpa alasan yang dijelaskan.
@@ -1582,6 +1600,8 @@ Implemented and verified:
 - Mitra session operational summary,
 - Demand Insight context/disclaimer,
 - Traveler meeting point/access,
+- Traveler Package Detail gallery dengan prototype-safe visual views (F3.0 / PR #79),
+- Traveler post-booking Trip Brief pada Trip Detail (F3.1 / PR #80),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1698,6 +1718,8 @@ CONTENT DEPENDENCY, bukan technical blocker.
 | Mitra operational summary     | REQ-MIT-05                              |
 | Demand insight context        | REQ-EO-03                               |
 | Meeting point/access          | REQ-TRV-07                              |
+| Package Detail gallery        | REQ-TRV-07 + media semantics            |
+| Post-booking Trip Brief       | REQ-TRV-13 + REQ-TRV-07                 |
 | Destination cost scope        | REQ-EO-05 + REQ-MIT-06                  |
 | Session operational note      | REQ-EO-10 + REQ-MIT-05                  |
 | D1 accessibility/copy         | REQ-TRV-09 + REQ-MIT-03/04 + Section 21 |
@@ -1721,7 +1743,7 @@ Untuk demo utama, tim dapat memakai sequence:
 10. Traveler checkout dengan participant quantity.
 11. Checkout menunjukkan subtotal + service fee + total.
 12. Payment simulation selesai.
-13. Booking/trip terlihat pada Traveler.
+13. Booking/trip terlihat pada Traveler, termasuk Trip Brief berisi departure time, meeting point/location context, dan access notes bila source data tersedia.
 14. EO/Admin/Mitra memperlihatkan state terkait jika diperlukan.
 15. Mitra menunjukkan kapasitas umum, kuota sesi EO, peserta terkonfirmasi, dan operational summary.
 16. EO menunjukkan operational note yang sama dibaca Mitra.
@@ -1795,7 +1817,10 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] Prototype checkout tidak perlu menampilkan commission 10% sebagai Traveler line item.
 - [x] Actual destination photo tetap content dependency, bukan blocker engineering.
 - [x] Route map sesuai current implementation.
-- [x] D1 + D2 tetap LIVE / VERIFIED pada baseline 4208ddd.
+- [x] D1 + D2 tetap terjaga.
+- [x] F3.0 Traveler Package Gallery merged melalui PR #79 tanpa business-rule change.
+- [x] F3.1 Traveler Post-Booking Trip Brief merged melalui PR #80 tanpa business-rule change.
+- [x] Current canonical app baseline: 01b517fbdd94d10586fb4ad113d334f754e588cb dengan 43 suites / 627 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
@@ -1816,3 +1841,61 @@ Definition of "matang" untuk tahap ini:
 - state lintas role dapat dipahami,
 - prototype jujur tentang simulasi dan keterbatasannya,
 - engineering proporsional terhadap tujuan lomba.
+
+
+---
+
+# 35. F3 — Cross-Role Experience Clarity Revision Log
+
+Tanggal: 25 September 2026.
+
+Scope F3 tetap berada di bawah feature-freeze exception: judge-critical UX clarity dengan scope kecil dan tanpa perubahan business model.
+
+## F3.0 — Traveler Package Detail Gallery
+
+PR: #79  
+Merge commit: `9369830a47a5d852ad7ec11aa6cd1e626e4b39b0`
+
+Perubahan canonical:
+
+- Package Detail memiliki gallery suasana dengan tiga selectable visual views.
+- Gallery memakai existing prototype visual source.
+- Copy eksplisit menyatakan visual prototype bukan dokumentasi kondisi aktual destinasi.
+- Home dan Explore tetap single-cover.
+- Tidak ada backend/media-upload architecture baru.
+
+Requirement impact:
+
+- memperkuat traveler-facing media clarity pada package detail,
+- tidak mengubah pricing, trust authority, package lifecycle, capacity, payment, atau review semantics.
+
+## F3.1 — Traveler Post-Booking Trip Brief
+
+PR: #80  
+Merge commit: `01b517fbdd94d10586fb4ad113d334f754e588cb`
+
+Perubahan canonical:
+
+- Traveler Trip Detail menampilkan section `Informasi Keberangkatan`.
+- Data berasal dari source existing: session date/time, meeting point, destination/location context, dan access notes.
+- Jika meeting point tidak tersedia, copy canonical bersifat netral: `Belum dicantumkan pada detail experience.`
+- Access notes di-omit ketika tidak tersedia.
+- Safety/preparation notes existing tetap berada pada `Sebelum Berangkat` agar tidak diduplikasi.
+- Internal `operationalNote` tetap tidak pernah ditampilkan pada Traveler.
+
+Quality gate setelah F3.1:
+
+- 43 test suites,
+- 627 tests PASS,
+- format PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS.
+
+Business rule impact:
+
+- NONE.
+- Package Price tetap Destination Base Cost + EO Margin.
+- Traveler Service Fee tetap Rp7.500 / booking.
+- Platform Commission tetap 10% GMV dan bukan Traveler line item.
+- Tidak ada perubahan role authority, refund policy, payment simulation boundary, atau cross-role persistence architecture.

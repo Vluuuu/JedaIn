@@ -117,7 +117,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
                   isActive ? " package-detail-gallery__thumb--active" : ""
                 }`}
                 aria-pressed={isActive}
-                aria-label={`Tampilkan ${view.label.toLowerCase()} ${\n                  packageData.title\n                }`}
+                aria-label={`Tampilkan ${view.label.toLowerCase()}`}
                 onClick={() => setActiveViewIndex(index)}
               >
                 <span className="package-detail-gallery__thumb-media">

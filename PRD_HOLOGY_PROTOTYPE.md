@@ -1842,7 +1842,6 @@ Definition of "matang" untuk tahap ini:
 - prototype jujur tentang simulasi dan keterbatasannya,
 - engineering proporsional terhadap tujuan lomba.
 
-
 ---
 
 # 35. F3 — Cross-Role Experience Clarity Revision Log

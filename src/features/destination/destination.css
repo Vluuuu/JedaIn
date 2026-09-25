@@ -284,6 +284,7 @@
   align-items: stretch;
 }
 
+.dest-quick-actions,
 .dest-readiness,
 .dest-sessions,
 .dest-profile,
@@ -294,12 +295,86 @@
   box-shadow: var(--shadow-xs);
 }
 
+.dest-quick-actions,
 .dest-readiness,
 .dest-sessions,
 .dest-profile,
 .dest-reviews,
 .dest-partners {
   padding: var(--space-5);
+}
+
+/* Quick Actions surface on Destination Overview */
+.dest-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.dest-quick-actions__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+@media (max-width: 640px) {
+  .dest-quick-actions__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dest-quick-action-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--space-4);
+  background: var(--color-stone-50);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+  min-height: 2.75rem; /* Touch target >= 44px */
+}
+
+.dest-quick-action-card:hover {
+  background: var(--color-stone-0);
+  border-color: var(--color-forest-400);
+  box-shadow: var(--shadow-xs);
+}
+
+.dest-quick-action-card:focus-visible {
+  outline: 2px solid var(--color-forest-700);
+  outline-offset: 2px;
+}
+
+.dest-quick-action-card__label {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forest-800);
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dest-quick-action-card__label::after {
+  content: "→";
+  font-weight: var(--font-weight-normal);
+  color: var(--color-forest-600);
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.dest-quick-action-card:hover .dest-quick-action-card__label::after {
+  transform: translateX(3px);
+}
+
+.dest-quick-action-card__desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
 }
 
 .dest-section-heading {
@@ -852,6 +927,7 @@
     border-top: 1px solid var(--color-border-default);
   }
 
+  .dest-quick-actions,
   .dest-readiness,
   .dest-sessions,
   .dest-profile,

@@ -3658,3 +3658,208 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* --------------------------------------------------------------------------
+   EO Builder: Step 5 Traveler-Facing Draft Preview Modal
+   -------------------------------------------------------------------------- */
+.eo-builder-traveler-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eo-builder-traveler-preview__draft-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-caption);
+  color: var(--color-warning-text);
+}
+
+.eo-builder-traveler-preview__draft-tag {
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--color-stone-0);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--color-warning-border);
+  flex-shrink: 0;
+}
+
+.eo-builder-traveler-preview__draft-desc {
+  font-size: var(--font-size-caption);
+  line-height: 1.4;
+}
+
+.eo-builder-traveler-preview__hero {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-stone-100);
+  border: 1px solid var(--color-border-default);
+}
+
+.eo-builder-traveler-preview__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eo-builder-traveler-preview__img-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  background: var(--color-stone-50);
+  border: 1px dashed var(--color-stone-300);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--color-stone-500);
+  font-size: var(--font-size-body-sm);
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.eo-builder-traveler-preview__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.eo-builder-traveler-preview__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-600);
+}
+
+.eo-builder-traveler-preview__title {
+  font-size: var(--font-size-heading-md);
+  line-height: 1.3;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0;
+}
+
+.eo-builder-traveler-preview__summary {
+  font-size: var(--font-size-body-sm);
+  line-height: 1.5;
+  color: var(--color-stone-600);
+  margin: 0;
+}
+
+.eo-builder-traveler-preview__price-box {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default);
+}
+
+.eo-builder-traveler-preview__price-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+  margin-right: var(--space-2);
+}
+
+.eo-builder-traveler-preview__price-amount {
+  font-size: var(--font-size-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forest-700);
+}
+
+.eo-builder-traveler-preview__price-unit {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-500);
+}
+
+.eo-builder-traveler-preview__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.eo-builder-traveler-preview__section-title {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0;
+}
+
+.eo-builder-traveler-preview__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.eo-builder-traveler-preview__timeline-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--space-3);
+  background: var(--color-stone-0);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+}
+
+.eo-builder-traveler-preview__timeline-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.eo-builder-traveler-preview__timeline-title {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-stone-900);
+  margin: 0;
+}
+
+.eo-builder-traveler-preview__timeline-duration {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+}
+
+.eo-builder-traveler-preview__timeline-desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-600);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.eo-builder-traveler-preview__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+  line-height: 1.5;
+}
+
+.eo-builder-traveler-preview__footer-note {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+  font-style: italic;
+  margin: var(--space-2) 0 0;
+  text-align: center;
+  line-height: 1.4;
+}

@@ -498,7 +498,7 @@ export function TripDetailScreen({
               <div className="trip-detail-brief-card">
                 <span className="trip-detail-brief-label">Titik Kumpul</span>
                 <span className="trip-detail-brief-val trip-detail-brief-val--neutral">
-                  Akan dikonfirmasi oleh penyelenggara
+                  Belum dicantumkan pada detail experience.
                 </span>
               </div>
             )}

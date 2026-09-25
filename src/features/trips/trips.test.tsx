@@ -1100,7 +1100,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       // Neutral fallback for meeting point when absent
       expect(container.textContent).toContain("Titik Kumpul");
       expect(container.textContent).toContain(
-        "Akan dikonfirmasi oleh penyelenggara",
+        "Belum dicantumkan pada detail experience.",
       );
 
       // Access notes omitted when absent - never fabricate directions

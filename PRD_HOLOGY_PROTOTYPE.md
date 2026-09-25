@@ -1712,26 +1712,26 @@ CONTENT DEPENDENCY, bukan technical blocker.
 
 # 29. Requirements Traceability — Discovery Improvement to Product Requirement
 
-| Improvement                   | Canonical Requirement                   |
-| ----------------------------- | --------------------------------------- |
-| Past session filtering        | REQ-TRV-08                              |
-| EO application hygiene        | REQ-EO-01 / REQ-EO-02                   |
-| Destination registration loop | REQ-MIT-01                              |
-| Session slot clarity          | REQ-TRV-08                              |
-| Trust badge explanation       | REQ-TRV-07                              |
-| Capacity context              | Section 6 + REQ-EO-04 + REQ-MIT-03/04   |
-| Guide context                 | Section 6 + REQ-EO-06                   |
-| EO operational summary        | REQ-EO-08                               |
-| Mitra operational summary     | REQ-MIT-05                              |
-| Demand insight context        | REQ-EO-03                               |
-| Meeting point/access          | REQ-TRV-07                              |
-| Package Detail gallery        | REQ-TRV-07 + media semantics            |
-| Post-booking Trip Brief       | REQ-TRV-13 + REQ-TRV-07                 |
-| EO Traveler-facing draft preview | REQ-EO-07                            |
-| Destination cost scope        | REQ-EO-05 + REQ-MIT-06                  |
-| Session operational note      | REQ-EO-10 + REQ-MIT-05                  |
-| D1 accessibility/copy         | REQ-TRV-09 + REQ-MIT-03/04 + Section 21 |
-| D2 session persistence        | REQ-TRV-03                              |
+| Improvement                      | Canonical Requirement                   |
+| -------------------------------- | --------------------------------------- |
+| Past session filtering           | REQ-TRV-08                              |
+| EO application hygiene           | REQ-EO-01 / REQ-EO-02                   |
+| Destination registration loop    | REQ-MIT-01                              |
+| Session slot clarity             | REQ-TRV-08                              |
+| Trust badge explanation          | REQ-TRV-07                              |
+| Capacity context                 | Section 6 + REQ-EO-04 + REQ-MIT-03/04   |
+| Guide context                    | Section 6 + REQ-EO-06                   |
+| EO operational summary           | REQ-EO-08                               |
+| Mitra operational summary        | REQ-MIT-05                              |
+| Demand insight context           | REQ-EO-03                               |
+| Meeting point/access             | REQ-TRV-07                              |
+| Package Detail gallery           | REQ-TRV-07 + media semantics            |
+| Post-booking Trip Brief          | REQ-TRV-13 + REQ-TRV-07                 |
+| EO Traveler-facing draft preview | REQ-EO-07                               |
+| Destination cost scope           | REQ-EO-05 + REQ-MIT-06                  |
+| Session operational note         | REQ-EO-10 + REQ-MIT-05                  |
+| D1 accessibility/copy            | REQ-TRV-09 + REQ-MIT-03/04 + Section 21 |
+| D2 session persistence           | REQ-TRV-03                              |
 
 ---
 
@@ -1940,4 +1940,3 @@ Business rule impact:
 - Platform Commission tetap 10% GMV dan bukan Traveler line item.
 - Admin tetap package approval authority.
 - APPROVED tetap tidak sama dengan LIVE; publish tetap tindakan EO.
-

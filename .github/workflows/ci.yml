@@ -27,12 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Debug formatter diff
-        run: |
-          npx prettier --write src/features/packageDetail/PackageHero.tsx src/features/packageDetail/packageDetail.css
-          git diff -- src/features/packageDetail/PackageHero.tsx src/features/packageDetail/packageDetail.css
-          exit 1
-
       - name: Check formatting
         run: npm run format:check
 

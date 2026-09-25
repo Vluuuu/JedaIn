@@ -961,11 +961,11 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
 
       const beforeSecondSession = getDestinationOverviewData(
         destination,
-        Date.parse("2026-09-15T00:00:00+07:00"),
+        Date.parse("2026-10-15T00:00:00+07:00"),
       );
       const afterAllSessions = getDestinationOverviewData(
         destination,
-        Date.parse("2026-09-20T00:00:00+07:00"),
+        Date.parse("2026-10-20T00:00:00+07:00"),
       );
 
       expect(beforeSecondSession.upcomingSessions).toHaveLength(1);

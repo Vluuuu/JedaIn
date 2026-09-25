@@ -681,7 +681,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         bookingId: "bk_session_date_check",
         travelerId: "usr_traveler_date",
         packageId: "slow_green_day",
-        sessionId: "ses_sgd_1", // 12 Sep 2026
+        sessionId: "ses_sgd_1", // 10 Okt 2026
         participantCount: 2,
         unitPricePerPerson: 275000,
         totalAmount: 550000,
@@ -711,7 +711,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       const view = await renderComponent(createElement(EoBookingsScreen));
 
       expect(view.textContent).toContain("bk_session_date_check");
-      expect(view.textContent).toContain("12 Sep 2026");
+      expect(view.textContent).toContain("10 Okt 2026");
       expect(view.textContent).not.toContain("bk_foreign_pkg");
     });
   });

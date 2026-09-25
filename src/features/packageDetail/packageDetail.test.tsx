@@ -222,8 +222,8 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     const view = await renderPackageDetail("slow_green_day");
     const sessionCards = view.querySelectorAll(".package-detail-session-card");
     expect(sessionCards.length).toBe(2);
-    expect(sessionCards[0].textContent).toContain("12 September 2026");
-    expect(sessionCards[1].textContent).toContain("19 September 2026");
+    expect(sessionCards[0].textContent).toContain("10 Oktober 2026");
+    expect(sessionCards[1].textContent).toContain("17 Oktober 2026");
   });
 
   it("15 & 16. OPEN session enables 'Pilih Jadwal' and routes to /packages/:packageId/sessions", async () => {
@@ -536,18 +536,18 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
   it("J. formats date and time deterministically in Asia/Jakarta (WIB) for real canonical fixtures (same-day and cross-date 2D1N)", async () => {
     // slow_green_day canonical fixture: same-day 08:00 - 14:00 WIB
     const viewSgd = await renderPackageDetail("slow_green_day");
-    expect(viewSgd.textContent).toContain("Sabtu, 12 September 2026");
+    expect(viewSgd.textContent).toContain("Sabtu, 10 Oktober 2026");
     expect(viewSgd.textContent).toContain("08.00 - 14.00 WIB");
 
     // mindful_morning canonical fixture: same-day 06:30 - 10:00 WIB
     const viewMm = await renderPackageDetail("mindful_morning");
-    expect(viewMm.textContent).toContain("Minggu, 13 September 2026");
+    expect(viewMm.textContent).toContain("Minggu, 11 Oktober 2026");
     expect(viewMm.textContent).toContain("06.30 - 10.00 WIB");
 
     // weekend_nature_reset canonical fixture: cross-date 2D1N showing both local dates & times
     const viewWnr = await renderPackageDetail("weekend_nature_reset");
-    expect(viewWnr.textContent).toContain("Sabtu, 26 September 2026");
-    expect(viewWnr.textContent).toContain("Minggu, 27 September 2026");
+    expect(viewWnr.textContent).toContain("Sabtu, 24 Oktober 2026");
+    expect(viewWnr.textContent).toContain("Minggu, 25 Oktober 2026");
     expect(viewWnr.textContent).toContain("14.00 WIB");
     expect(viewWnr.textContent).toContain("11.00 WIB");
     expect(viewWnr.textContent).not.toContain("14.00 - 11.00 WIB");

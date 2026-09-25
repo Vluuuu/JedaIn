@@ -17,6 +17,12 @@ describe("Landing OpeningHero & SwipeJourneyControl", () => {
     expect(markup).toContain("Temukan jeda");
     expect(markup).toContain("yang benar-benar");
     expect(markup).toContain("kamu butuhkan.");
+    expect(markup).toContain(
+      "Wellness experience terkurasi dari destinasi lokal terverifikasi",
+    );
+    expect(markup).toContain("disesuaikan dengan kebutuhan jedamu.");
+    expect(markup).toContain("Mulai Cari Jedamu");
+    expect(markup).toContain('class="opening-hero__primary-action"');
     expect(markup).toContain('class="swipe-control"');
   });
 

@@ -24,20 +24,24 @@ Bagian ini adalah urutan presentasi yang direkomendasikan ketika waktu juri terb
 
 ### A. Traveler — personalisasi sampai keputusan booking
 
-1. Buka `/login`.
-2. Klik **Lanjut sebagai Tamu**.
-3. Tunjukkan Consent → Quiz → Recommendation.
-4. Masuk ke satu Package Detail dan tunjukkan:
+1. Buka `/` dan tunjukkan opening proposition:
+   - **Temukan jeda yang benar-benar kamu butuhkan**
+   - supporting copy tentang wellness experience terkurasi + destinasi lokal terverifikasi
+   - CTA **Mulai Cari Jedamu**
+2. Lanjut ke `/login` melalui CTA tersebut.
+3. Klik **Lanjut sebagai Tamu**.
+4. Tunjukkan Consent → Quiz → Recommendation.
+5. Masuk ke satu Package Detail dan tunjukkan:
    - alasan pengalaman relevan,
    - trust/verification context,
    - meeting point/access jika tersedia,
    - upcoming session,
    - harga.
-5. Buka Checkout dan tunjukkan bahwa:
+6. Buka Checkout dan tunjukkan bahwa:
    - quantity mengubah subtotal,
    - **Service Fee Rp7.500** tampil transparan,
    - total = subtotal + service fee.
-6. Jelaskan singkat bahwa payment adalah simulasi prototype.
+7. Jelaskan singkat bahwa payment adalah simulasi prototype.
 
 ### B. EO — dari insight ke experience
 

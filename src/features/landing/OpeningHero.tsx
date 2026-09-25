@@ -55,6 +55,13 @@ export function OpeningHero() {
           <span>yang benar-benar</span>
           <span>kamu butuhkan.</span>
         </h1>
+        <p className="opening-hero__support">
+          Wellness experience terkurasi dari destinasi lokal terverifikasi,
+          disesuaikan dengan kebutuhan jedamu.
+        </p>
+        <Link to="/login" className="opening-hero__primary-action">
+          Mulai Cari Jedamu
+        </Link>
       </div>
 
       <div className="opening-hero__control-wrap">

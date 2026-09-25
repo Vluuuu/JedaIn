@@ -1232,3 +1232,61 @@
   min-height: 2.75rem;
   min-width: 8rem;
 }
+
+/* --------------------------------------------------------------------------
+   Trip Brief: Informasi Keberangkatan
+   -------------------------------------------------------------------------- */
+.trip-detail-brief-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .trip-detail-brief-grid {
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+.trip-detail-brief-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--space-4);
+  background: var(--color-stone-50);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-lg);
+}
+
+.trip-detail-brief-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trip-detail-brief-val {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-900);
+  line-height: 1.45;
+}
+
+.trip-detail-brief-val--neutral {
+  color: var(--color-stone-600);
+  font-style: italic;
+}
+
+.trip-detail-brief-notes {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.trip-detail-brief-notes__label {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-stone-800);
+}

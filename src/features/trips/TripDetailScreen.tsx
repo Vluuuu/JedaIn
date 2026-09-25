@@ -462,7 +462,79 @@ export function TripDetailScreen({
         </div>
       </section>
 
-      {/* 5. Post-Purchase EO Contact & Organizer Profile */}
+      {/* 5. Informasi Keberangkatan (Trip Brief) */}
+      {(sessionDateLabel ||
+        detail?.meetingPointLabel ||
+        pkg?.destinationName ||
+        (detail?.accessNotes && detail.accessNotes.length > 0)) && (
+        <section
+          className="trip-detail-section"
+          aria-labelledby="trip-brief-heading"
+        >
+          <h2 id="trip-brief-heading" className="trip-detail-section__title">
+            Informasi Keberangkatan
+          </h2>
+
+          <div className="trip-detail-brief-grid">
+            {sessionDateLabel && (
+              <div className="trip-detail-brief-card">
+                <span className="trip-detail-brief-label">
+                  Waktu Keberangkatan
+                </span>
+                <strong className="trip-detail-brief-val">
+                  {sessionDateLabel}
+                </strong>
+              </div>
+            )}
+
+            {detail?.meetingPointLabel ? (
+              <div className="trip-detail-brief-card">
+                <span className="trip-detail-brief-label">Titik Kumpul</span>
+                <strong className="trip-detail-brief-val">
+                  {detail.meetingPointLabel}
+                </strong>
+              </div>
+            ) : (
+              <div className="trip-detail-brief-card">
+                <span className="trip-detail-brief-label">Titik Kumpul</span>
+                <span className="trip-detail-brief-val trip-detail-brief-val--neutral">
+                  Belum dicantumkan pada detail experience.
+                </span>
+              </div>
+            )}
+
+            {pkg?.destinationName && (
+              <div className="trip-detail-brief-card">
+                <span className="trip-detail-brief-label">Lokasi Kawasan</span>
+                <strong className="trip-detail-brief-val">
+                  {pkg.destinationName}
+                  {pkg.locationLabel ? ` • ${pkg.locationLabel}` : ""}
+                </strong>
+              </div>
+            )}
+          </div>
+
+          {detail?.accessNotes && detail.accessNotes.length > 0 && (
+            <div className="trip-detail-brief-notes">
+              <span className="trip-detail-brief-notes__label">
+                Catatan Akses Lokasi
+              </span>
+              <ul className="trip-detail-list">
+                {detail.accessNotes.map((note, idx) => (
+                  <li key={idx} className="trip-detail-list-item">
+                    <span className="trip-detail-list-icon" aria-hidden="true">
+                      •
+                    </span>
+                    <span>{note}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* 6. Post-Purchase EO Contact & Organizer Profile */}
       {detail && (
         <section
           className="trip-detail-section"
@@ -594,7 +666,7 @@ export function TripDetailScreen({
         </section>
       )}
 
-      {/* 6. Highlights */}
+      {/* 7. Highlights */}
       {detail?.highlights && detail.highlights.length > 0 && (
         <section className="trip-detail-section" aria-label="Aktivitas utama">
           <h2 className="trip-detail-section__title">Aktivitas Utama</h2>
@@ -611,7 +683,7 @@ export function TripDetailScreen({
         </section>
       )}
 
-      {/* 7. Itinerary Timeline */}
+      {/* 8. Itinerary Timeline */}
       {detail?.itinerary && detail.itinerary.length > 0 && (
         <section
           className="trip-detail-section"
@@ -650,7 +722,7 @@ export function TripDetailScreen({
         </section>
       )}
 
-      {/* 8. Inclusions & Exclusions */}
+      {/* 9. Inclusions & Exclusions */}
       {detail && (
         <section
           className="trip-detail-section"
@@ -700,7 +772,7 @@ export function TripDetailScreen({
         </section>
       )}
 
-      {/* 9. Safety Notes / Sebelum Berangkat */}
+      {/* 10. Safety Notes / Sebelum Berangkat */}
       {detail?.safetyNotes && detail.safetyNotes.length > 0 && (
         <section
           className="trip-detail-section"
@@ -720,7 +792,7 @@ export function TripDetailScreen({
         </section>
       )}
 
-      {/* 10. Cancellation Policy */}
+      {/* 11. Cancellation Policy */}
       {detail?.cancellationPolicySummary && (
         <section
           className="trip-detail-section"
@@ -733,7 +805,7 @@ export function TripDetailScreen({
         </section>
       )}
 
-      {/* 11. Discreet Prototype Demo Trip Completion Disclosure (PAID Only) */}
+      {/* 12. Discreet Prototype Demo Trip Completion Disclosure (PAID Only) */}
       {isPaid && (
         <details
           className="trip-detail-demo-disclosure"

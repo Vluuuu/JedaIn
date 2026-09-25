@@ -145,8 +145,8 @@ export function PackageHero({ packageData }: PackageHeroProps) {
         </div>
 
         <p className="package-detail-gallery__note">
-          Visual suasana pada prototype untuk memberi gambaran experience,
-          bukan dokumentasi kondisi aktual destinasi.
+          Visual suasana pada prototype untuk memberi gambaran experience, bukan
+          dokumentasi kondisi aktual destinasi.
         </p>
       </div>
     </section>

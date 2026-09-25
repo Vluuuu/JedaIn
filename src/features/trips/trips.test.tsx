@@ -1006,5 +1006,220 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       expect(container.textContent).toContain("Trip Terkonfirmasi");
       expect(container.textContent).not.toContain("Trip belum bisa dimuat.");
     });
+
+    it("Z1. meeting point renders when provided in source-backed package detail", async () => {
+      const traveler: AuthUser = {
+        id: "usr_brief_meeting_point",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 2,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_brief_mp",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+      // Informasi Keberangkatan section exists
+      expect(container.textContent).toContain("Informasi Keberangkatan");
+
+      // Meeting point rendered from source fixture
+      expect(container.textContent).toContain("Titik Kumpul");
+      expect(container.textContent).toContain(
+        "Area titik kumpul Lereng Hijau Batu",
+      );
+
+      // Departure time & location rendered in brief
+      expect(container.textContent).toContain("Waktu Keberangkatan");
+      expect(container.textContent).toContain("10 Oktober 2026");
+      expect(container.textContent).toContain("Lereng Hijau Batu");
+    });
+
+    it("Z2. access notes render when provided in source-backed package detail", async () => {
+      const traveler: AuthUser = {
+        id: "usr_brief_access_notes",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_brief_an",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+      expect(container.textContent).toContain("Catatan Akses Lokasi");
+      expect(container.textContent).toContain(
+        "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
+      );
+      expect(container.textContent).toContain(
+        "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
+      );
+    });
+
+    it("Z3. missing logistics do not fabricate information or fake transportation/coordinates", async () => {
+      const traveler: AuthUser = {
+        id: "usr_brief_missing_logistics",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      // light_mountain_explore has no meetingPointLabel and no accessNotes
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "light_mountain_explore",
+        sessionId: "ses_lme_1",
+        participantCount: 1,
+        unitPricePerPerson: 325000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_brief_missing",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+      expect(container.textContent).toContain("Informasi Keberangkatan");
+
+      // Neutral fallback for meeting point when absent
+      expect(container.textContent).toContain("Titik Kumpul");
+      expect(container.textContent).toContain(
+        "Akan dikonfirmasi oleh penyelenggara",
+      );
+
+      // Access notes omitted when absent - never fabricate directions
+      expect(container.textContent).not.toContain("Catatan Akses Lokasi");
+
+      // Critical guards: no maps, no coordinates, no fabricated transport
+      expect(container.textContent).not.toContain("maps.google.com");
+      expect(container.textContent).not.toContain("google.com/maps");
+      expect(container.textContent).not.toContain("Antar jemput");
+      expect(container.textContent).not.toContain("Shuttle");
+      expect(container.querySelector("iframe")).toBeNull();
+      expect(container.querySelector("a[href*='maps']")).toBeNull();
+    });
+
+    it("Z4. internal operationalNote never appears on Traveler trip detail", async () => {
+      const traveler: AuthUser = {
+        id: "usr_brief_op_note",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const secretNote = "SECRET_OPERATIONAL_NOTE_FOR_EO_DESTINATION_ONLY";
+      const customDetails = {
+        pkg_with_secret: {
+          packageId: "pkg_with_secret",
+          valueProposition: "Value prop",
+          highlights: ["Highlight 1"],
+          itinerary: [],
+          includedItems: ["Item 1"],
+          excludedItems: [],
+          safetyNotes: ["Safety 1"],
+          cancellationPolicySummary: "Policy",
+          meetingPointLabel: "Gerbang Utama",
+          accessNotes: ["Akses jalan aspal"],
+          // Simulate internal operationalNote leaking into detail or session
+          operationalNote: secretNote,
+          organizer: {
+            id: "org_secret",
+            displayName: "EO Secret",
+            guideStatus: "CERTIFIED_GUIDE" as const,
+          },
+          destinationDetail: {
+            overviewDescription: "Destinasi Secret",
+          },
+          upcomingSessionPreviews: [
+            {
+              sessionId: "ses_secret_1",
+              packageId: "pkg_with_secret",
+              startAt: "2026-10-15T08:00:00+07:00",
+              endAt: "2026-10-15T12:00:00+07:00",
+              status: "OPEN" as const,
+              remainingSlots: 5,
+              pricePerPerson: 250000,
+              operationalNote: secretNote,
+            } as unknown as import("../packageDetail/types").PackageSessionPreview,
+          ],
+        } as unknown as import("../packageDetail/types").PackageDetailSource,
+      };
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "pkg_with_secret",
+        sessionId: "ses_secret_1",
+        participantCount: 1,
+        unitPricePerPerson: 250000,
+        capacitySnapshot: 5,
+        idempotencyKey: "k_brief_sec",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      const adapter = new MockTripsAdapter({ details: customDetails });
+      const { container } = await renderMyTrips({ adapter }, [`/trips/${bId}`]);
+
+      expect(container.textContent).toContain("Informasi Keberangkatan");
+      expect(container.textContent).toContain("Gerbang Utama");
+      // Must NOT contain internal operational note
+      expect(container.textContent).not.toContain(secretNote);
+      expect(container.textContent).not.toContain("operationalNote");
+      expect(container.textContent).not.toContain("Catatan Operasional");
+    });
+
+    it("Z5. existing Trip Detail review and payment flow behavior remains unchanged", async () => {
+      const traveler: AuthUser = {
+        id: "usr_brief_flow_check",
+        onboardingStatus: "COMPLETED",
+      };
+      sessionStore.setUser(traveler);
+
+      const tx = mockTransactionStore.createTransaction({
+        travelerId: traveler.id,
+        packageId: "slow_green_day",
+        sessionId: "ses_sgd_1",
+        participantCount: 1,
+        unitPricePerPerson: 275000,
+        capacitySnapshot: 6,
+        idempotencyKey: "k_brief_flow",
+      });
+      const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+      mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+      const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+      // All existing sections remain intact
+      expect(container.textContent).toContain("Trip Terkonfirmasi");
+      expect(container.textContent).toContain("Informasi Trip");
+      expect(container.textContent).toContain("Informasi Keberangkatan");
+      expect(container.textContent).toContain("Penyelenggara & Kontak Trip");
+      expect(container.textContent).toContain("Aktivitas Utama");
+      expect(container.textContent).toContain("Rencana Perjalanan (Itinerary)");
+      expect(container.textContent).toContain("Termasuk dalam Paket");
+      expect(container.textContent).toContain("Tidak Termasuk");
+      expect(container.textContent).toContain("Sebelum Berangkat");
+      expect(container.textContent).toContain("Kebijakan Pembatalan");
+      expect(container.textContent).toContain("Simulasikan Trip Selesai");
+
+      // Pricing & totals remain unchanged
+      expect(container.textContent).toContain("Rp282.500"); // 275000 + 7500 fee
+      expect(container.textContent).not.toContain("Komisi");
+    });
   });
 });

@@ -796,14 +796,20 @@ Minimum flow:
 4. pricing,
 5. review/submit.
 
+Pada Step 5, EO dapat membuka Traveler-facing draft preview yang bersifat read-only sebelum submit Admin review.
+
 Acceptance:
 
 - relevant destination facts tetap visible,
 - pricing tidak menyembunyikan base-cost context,
 - form tidak mengarang operational confirmation,
+- Traveler-facing preview hanya memakai current in-memory draft/source-backed fields,
+- preview tidak mengubah store, step, submission state, approval state, publish state, atau lifecycle package,
+- preview tidak menampilkan EO Margin, platform commission, checkout Service Fee, fake review/rating/session, transactional CTA, atau internal operationalNote,
+- unknown/mock image tidak disebut actual photo,
 - submission tetap mengikuti lifecycle existing.
 
-Status: IMPLEMENTED.
+Status: IMPLEMENTED LIVE — diperkuat pada F3.2 / PR #81.
 
 ## REQ-EO-08 — Operational Summary
 
@@ -1564,16 +1570,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F3.1:
+Current verified competition baseline setelah F3.2:
 
-- current main commit: 01b517fbdd94d10586fb4ad113d334f754e588cb,
-- 43 suites / 627 tests,
+- current app feature commit: f9a067514713753f7063a08e7889dfa50da921c3,
+- 44 suites / 633 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery dan PR #80 Post-Booking Trip Brief sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, dan PR #81 EO Traveler-Facing Draft Preview sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1602,6 +1608,7 @@ Implemented and verified:
 - Traveler meeting point/access,
 - Traveler Package Detail gallery dengan prototype-safe visual views (F3.0 / PR #79),
 - Traveler post-booking Trip Brief pada Trip Detail (F3.1 / PR #80),
+- EO Traveler-facing draft preview pada Package Builder Step 5 (F3.2 / PR #81),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1720,6 +1727,7 @@ CONTENT DEPENDENCY, bukan technical blocker.
 | Meeting point/access          | REQ-TRV-07                              |
 | Package Detail gallery        | REQ-TRV-07 + media semantics            |
 | Post-booking Trip Brief       | REQ-TRV-13 + REQ-TRV-07                 |
+| EO Traveler-facing draft preview | REQ-EO-07                            |
 | Destination cost scope        | REQ-EO-05 + REQ-MIT-06                  |
 | Session operational note      | REQ-EO-10 + REQ-MIT-05                  |
 | D1 accessibility/copy         | REQ-TRV-09 + REQ-MIT-03/04 + Section 21 |
@@ -1820,7 +1828,8 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] D1 + D2 tetap terjaga.
 - [x] F3.0 Traveler Package Gallery merged melalui PR #79 tanpa business-rule change.
 - [x] F3.1 Traveler Post-Booking Trip Brief merged melalui PR #80 tanpa business-rule change.
-- [x] Current canonical app baseline: 01b517fbdd94d10586fb4ad113d334f754e588cb dengan 43 suites / 627 tests PASS.
+- [x] F3.2 EO Traveler-Facing Draft Preview merged melalui PR #81 tanpa business-rule change.
+- [x] Current canonical app baseline: f9a067514713753f7063a08e7889dfa50da921c3 dengan 44 suites / 633 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
@@ -1898,3 +1907,37 @@ Business rule impact:
 - Traveler Service Fee tetap Rp7.500 / booking.
 - Platform Commission tetap 10% GMV dan bukan Traveler line item.
 - Tidak ada perubahan role authority, refund policy, payment simulation boundary, atau cross-role persistence architecture.
+
+## F3.2 — EO Traveler-Facing Draft Preview
+
+PR: #81  
+Merge commit: `f9a067514713753f7063a08e7889dfa50da921c3`
+
+Perubahan canonical:
+
+- EO Package Builder Step 5 memiliki action `Preview sebagai Traveler`.
+- Preview bersifat read-only dan memakai current in-memory Builder state.
+- Preview dapat menampilkan visual utama bila tersedia, title, destination/location, duration, short summary, customer price, itinerary, dan safety notes yang source-backed.
+- Jika visual belum tersedia, UI memakai neutral placeholder dan tidak mengarang foto destinasi.
+- Preview tidak menampilkan EO Margin, platform commission, checkout Service Fee Rp7.500, fake LIVE/Approved state, fake reviews/ratings, fake session availability, booking/checkout/payment CTA, atau internal `operationalNote`.
+- Included/excluded, meeting point, dan access notes tidak ditambahkan bila Builder belum memiliki authoritative current-state fields untuk itu.
+- Membuka/menutup preview tidak menyimpan draft baru, submit, publish, mengubah step, atau memutasi lifecycle package.
+
+Quality gate setelah F3.2:
+
+- 44 test suites,
+- 633 tests PASS,
+- format PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS.
+
+Business rule impact:
+
+- NONE.
+- Package Price tetap Destination Base Cost + EO Margin.
+- Traveler Service Fee tetap Rp7.500 / booking dan hanya checkout-level line item.
+- Platform Commission tetap 10% GMV dan bukan Traveler line item.
+- Admin tetap package approval authority.
+- APPROVED tetap tidak sama dengan LIVE; publish tetap tindakan EO.
+

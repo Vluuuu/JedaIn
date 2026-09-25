@@ -171,7 +171,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     });
 
     const view = await renderCheckout("ses_sgd_2");
-    expect(view.textContent).toContain("19 September 2026");
+    expect(view.textContent).toContain("17 Oktober 2026");
   });
 
   it("5. participant quantity defaults to 1, updates price, and does NOT mutate remainingSlots", async () => {

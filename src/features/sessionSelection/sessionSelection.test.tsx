@@ -61,8 +61,8 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
     expect(view.textContent).toContain("Mulai dari Rp275.000 / orang");
     expect(view.textContent).toContain("Jadwal Keberangkatan");
-    expect(view.textContent).toContain("Sabtu, 12 September 2026");
-    expect(view.textContent).toContain("Sabtu, 19 September 2026");
+    expect(view.textContent).toContain("Sabtu, 10 Oktober 2026");
+    expect(view.textContent).toContain("Sabtu, 17 Oktober 2026");
     expect(view.textContent).toContain("Belum ada jadwal dipilih");
     expect(view.textContent).toContain("Lanjut Checkout");
 
@@ -729,7 +729,7 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
   it("H. cross-date 2D1N session renders both dates correctly without fabricating 2D1N label", async () => {
     const view = await renderSessionSelection("weekend_nature_reset");
     expect(view.textContent).toContain(
-      "Sabtu, 26 September 2026 • 14.00 WIB → Minggu, 27 September 2026 • 11.00 WIB",
+      "Sabtu, 24 Oktober 2026 • 14.00 WIB → Minggu, 25 Oktober 2026 • 11.00 WIB",
     );
     expect(view.textContent).not.toContain("2 Hari 1 Malam");
   });

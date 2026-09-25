@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { Badge, Button, Dialog } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
@@ -140,6 +140,17 @@ export function EoPackageBuilderScreen() {
     [],
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const validationAlertRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (validationErrors.length > 0 && validationAlertRef.current) {
+      validationAlertRef.current.scrollIntoView?.({
+        behavior: "smooth",
+        block: "start",
+      });
+      validationAlertRef.current.focus?.();
+    }
+  }, [validationErrors]);
 
   const filteredEligibleDestinations = eligibleDestinations.filter((dest) => {
     if (
@@ -375,7 +386,13 @@ export function EoPackageBuilderScreen() {
 
       {/* Validation Error Banner */}
       {validationErrors.length > 0 && (
-        <div className="eo-alert eo-alert--error" role="alert">
+        <div
+          ref={validationAlertRef}
+          tabIndex={-1}
+          className="eo-alert eo-alert--error"
+          role="alert"
+          style={{ outline: "none" }}
+        >
           <strong style={{ fontSize: "var(--font-size-body-md)" }}>
             Paket belum memenuhi standar kurasi ({validationErrors.length}{" "}
             kendala ditemukan):

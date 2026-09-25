@@ -51,33 +51,41 @@ async function renderScreen(
 }
 
 describe("TravelerLoginScreen UI & Auth Flows", () => {
-  it("renders SIGN IN / SIGN UP tabs, Email, Password, Google social login, and demo guest entry", async () => {
+  it("renders Masuk / Daftar tabs, Email, Kata Sandi, Google social login, and demo guest entry", async () => {
     const view = await renderScreen();
 
     // Check tabs
     expect(view.querySelector("#tab-sign-in")).not.toBeNull();
     expect(view.querySelector("#tab-sign-up")).not.toBeNull();
-    expect(view.textContent).toContain("SIGN IN");
-    expect(view.textContent).toContain("SIGN UP");
+    expect(view.textContent).toContain("Masuk");
+    expect(view.textContent).toContain("Daftar");
+
+    // Assert prominent old English judge-facing copy is ABSENT
+    expect(view.textContent).not.toContain("SIGN IN");
+    expect(view.textContent).not.toContain("SIGN UP");
+    expect(view.textContent).not.toContain("Forgot password?");
+    expect(view.textContent).not.toContain("Continue with Google");
+    expect(view.textContent).not.toContain("Don't have an account?");
 
     // Check fields
     expect(view.querySelector('input[name="email"]')).not.toBeNull();
     expect(view.querySelector('input[name="password"]')).not.toBeNull();
+    expect(view.textContent).toContain("Kata Sandi");
 
     // Check forgot password action
     expect(view.querySelector(".auth-forgot-link")).not.toBeNull();
     expect(view.querySelector(".auth-forgot-link")?.textContent).toBe(
-      "Forgot password?",
+      "Lupa kata sandi?",
     );
 
     // Check primary button & divider
     expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
-      "SIGN IN",
+      "Masuk ke Akun",
     );
-    expect(view.textContent).toContain("or continue with");
+    expect(view.textContent).toContain("atau lanjutkan dengan");
 
     // Check social login: Google only, NO Apple
-    expect(view.textContent).toContain("Continue with Google");
+    expect(view.textContent).toContain("Masuk dengan Google");
     expect(view.textContent).not.toContain("Apple");
     expect(view.textContent).not.toContain("Continue with Apple");
 
@@ -88,8 +96,13 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     );
 
     // Check bottom prompt
-    expect(view.textContent).toContain("Don't have an account?");
-    expect(view.textContent).toContain("Sign up");
+    expect(view.textContent).toContain("Belum punya akun?");
+    expect(view.textContent).toContain("Daftar sekarang");
+
+    // Check footer links
+    expect(view.textContent).toContain("Syarat & Ketentuan");
+    expect(view.textContent).toContain("Kebijakan Privasi");
+    expect(view.textContent).toContain("Portal Mitra & EO");
   });
 
   it("handles Demo Guest Entry and leads traveler to onboarding consent / preference flow", async () => {
@@ -121,7 +134,7 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
 
     const view = await renderScreen({ adapter, onSuccess });
     const googleBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Continue with Google"),
+      b.textContent?.includes("Masuk dengan Google"),
     )!;
 
     await act(() => googleBtn.click());
@@ -140,7 +153,7 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
 
     const view = await renderScreen({ adapter, onSuccess });
     const googleBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Continue with Google"),
+      b.textContent?.includes("Masuk dengan Google"),
     )!;
 
     await act(() => googleBtn.click());
@@ -158,13 +171,13 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
 
     const view = await renderScreen({ adapter });
     const googleBtn = Array.from(view.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Continue with Google"),
+      b.textContent?.includes("Masuk dengan Google"),
     )!;
 
     await act(() => googleBtn.click());
 
     expect(view.querySelector('[role="alert"]')).toBeNull();
-    expect(view.textContent).not.toContain("Failed to sign in with Google");
+    expect(view.textContent).not.toContain("Gagal masuk dengan Google");
   });
 
   it("executes email and password sign in flow successfully", async () => {
@@ -241,7 +254,7 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     expect(errorAlert?.textContent).toContain("Invalid email or password.");
   });
 
-  it("toggles between SIGN IN and SIGN UP tabs and updates UI copy accordingly", async () => {
+  it("toggles between Masuk and Daftar tabs and updates UI copy accordingly", async () => {
     const view = await renderScreen();
 
     const signInTab = view.querySelector<HTMLButtonElement>("#tab-sign-in")!;
@@ -250,26 +263,26 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     expect(signInTab.getAttribute("aria-selected")).toBe("true");
     expect(signUpTab.getAttribute("aria-selected")).toBe("false");
     expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
-      "SIGN IN",
+      "Masuk ke Akun",
     );
     expect(view.querySelector(".auth-forgot-link")).not.toBeNull();
-    expect(view.textContent).toContain("Don't have an account?");
+    expect(view.textContent).toContain("Belum punya akun?");
 
-    // Click SIGN UP
+    // Click Daftar
     await act(() => signUpTab.click());
 
     expect(signInTab.getAttribute("aria-selected")).toBe("false");
     expect(signUpTab.getAttribute("aria-selected")).toBe("true");
     expect(view.querySelector('input[name="name"]')).not.toBeNull();
     expect(view.querySelector('input[name="confirmPassword"]')).not.toBeNull();
-    expect(view.textContent).toContain("Confirm your password");
+    expect(view.textContent).toContain("Konfirmasi Kata Sandi");
     expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
-      "SIGN UP",
+      "Daftar Akun Baru",
     );
     expect(view.querySelector(".auth-forgot-link")).toBeNull();
-    expect(view.textContent).toContain("Already have an account? Sign in");
+    expect(view.textContent).toContain("Sudah punya akun? Masuk");
 
-    // Click bottom switch link to switch back to SIGN IN
+    // Click bottom switch link to switch back to Masuk
     const switchBtn = view.querySelector<HTMLButtonElement>(
       ".auth-switch-action",
     )!;
@@ -280,7 +293,7 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     expect(view.querySelector('input[name="name"]')).toBeNull();
     expect(view.querySelector('input[name="confirmPassword"]')).toBeNull();
     expect(view.querySelector('button[type="submit"]')?.textContent).toBe(
-      "SIGN IN",
+      "Masuk ke Akun",
     );
   });
 
@@ -336,7 +349,7 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     });
 
     expect(view.querySelector('[role="alert"]')?.textContent).toContain(
-      "Password and Confirm Password do not match",
+      "Kata sandi dan konfirmasi kata sandi tidak cocok",
     );
     expect(onSuccess).not.toHaveBeenCalled();
 
@@ -378,7 +391,39 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     await act(() => forgotLink.click());
 
     expect(view.querySelector("dialog[open]")).not.toBeNull();
-    expect(view.textContent).toContain("Password recovery functionality");
+    expect(view.textContent).toContain(
+      "Fitur pemulihan kata sandi belum diaktifkan",
+    );
+  });
+
+  it("opens Terms & Conditions modal and Privacy Policy modal with localized Indonesian copy", async () => {
+    const view = await renderScreen();
+
+    const termsBtn = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".auth-sub-link"),
+    ).find((b) => b.textContent?.includes("Syarat & Ketentuan"))!;
+    expect(termsBtn).toBeDefined();
+    await act(() => termsBtn.click());
+    expect(view.querySelector("dialog[open]")).not.toBeNull();
+    expect(view.textContent).toContain(
+      "Syarat & Ketentuan lengkap belum menjadi bagian dari prototipe",
+    );
+
+    const closeBtn = Array.from(view.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "Tutup",
+    )!;
+    await act(() => closeBtn.click());
+    expect(view.querySelector("dialog[open]")).toBeNull();
+
+    const privacyBtn = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".auth-sub-link"),
+    ).find((b) => b.textContent?.includes("Kebijakan Privasi"))!;
+    expect(privacyBtn).toBeDefined();
+    await act(() => privacyBtn.click());
+    expect(view.querySelector("dialog[open]")).not.toBeNull();
+    expect(view.textContent).toContain(
+      "data preferensi digunakan untuk mendukung alur rekomendasi",
+    );
   });
 
   it("toggles password visibility with eye icon button", async () => {

@@ -86,7 +86,9 @@ export function TravelerLoginScreen({
       } else {
         setAuthState("ERROR");
         setAuthError(
-          err instanceof Error ? err.message : "Failed to sign in with Google.",
+          err instanceof Error
+            ? err.message
+            : "Gagal masuk dengan Google. Coba lagi.",
         );
       }
     }
@@ -133,7 +135,7 @@ export function TravelerLoginScreen({
     ).trim();
 
     if (tabMode === "SIGN_UP" && formPassword !== formConfirmPassword) {
-      setAuthError("Password and Confirm Password do not match.");
+      setAuthError("Kata sandi dan konfirmasi kata sandi tidak cocok.");
       return;
     }
 
@@ -182,8 +184,8 @@ export function TravelerLoginScreen({
         err instanceof Error
           ? err.message
           : tabMode === "SIGN_IN"
-            ? "Sign in failed. Please check your credentials."
-            : "Sign up failed. Please check your details.",
+            ? "Gagal masuk. Periksa email dan kata sandi."
+            : "Gagal mendaftar. Periksa data yang kamu masukkan.",
       );
     }
   };
@@ -233,7 +235,7 @@ export function TravelerLoginScreen({
         </header>
 
         {/* Centered Floating Dark Forest Glass Card */}
-        <main className="auth-card" aria-label="Sign in to JedaIn">
+        <main className="auth-card" aria-label="Masuk ke JedaIn">
           {/* 1. Small JedaIn brand mark / symbol */}
           <div className="auth-card__brand">
             <Link to="/" aria-label="JedaIn Brand Mark">
@@ -273,7 +275,7 @@ export function TravelerLoginScreen({
           <div
             className="auth-tabs"
             role="tablist"
-            aria-label="Authentication mode"
+            aria-label="Mode autentikasi"
           >
             <button
               type="button"
@@ -284,7 +286,7 @@ export function TravelerLoginScreen({
               className={`auth-tab ${tabMode === "SIGN_IN" ? "auth-tab--active" : ""}`}
               onClick={() => handleTabChange("SIGN_IN")}
             >
-              <span>SIGN IN</span>
+              <span>Masuk</span>
             </button>
             <button
               type="button"
@@ -295,7 +297,7 @@ export function TravelerLoginScreen({
               className={`auth-tab ${tabMode === "SIGN_UP" ? "auth-tab--active" : ""}`}
               onClick={() => handleTabChange("SIGN_UP")}
             >
-              <span>SIGN UP</span>
+              <span>Daftar</span>
             </button>
           </div>
 
@@ -319,15 +321,15 @@ export function TravelerLoginScreen({
               onSubmit={handleSubmitForm}
               aria-label={
                 tabMode === "SIGN_IN"
-                  ? "Sign in with Email"
-                  : "Sign up with Email"
+                  ? "Masuk dengan Email"
+                  : "Daftar dengan Email"
               }
             >
               {/* Name Input (Sign Up only) */}
               {tabMode === "SIGN_UP" && (
                 <div className="auth-field">
                   <label className="auth-label" htmlFor="auth-name">
-                    Name
+                    Nama Lengkap
                   </label>
                   <div className="auth-input-wrap">
                     <span className="auth-input-icon" aria-hidden="true">
@@ -350,7 +352,7 @@ export function TravelerLoginScreen({
                       type="text"
                       name="name"
                       autoComplete="name"
-                      placeholder="Your Name"
+                      placeholder="Nama lengkap Anda"
                       className="auth-input"
                       value={name}
                       onChange={(e) => {
@@ -405,7 +407,7 @@ export function TravelerLoginScreen({
               {/* 4. Password Input */}
               <div className="auth-field">
                 <label className="auth-label" htmlFor="auth-password">
-                  Password
+                  Kata Sandi
                 </label>
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon" aria-hidden="true">
@@ -447,7 +449,9 @@ export function TravelerLoginScreen({
                     className="auth-password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={
-                      showPassword ? "Hide password" : "Show password"
+                      showPassword
+                        ? "Sembunyikan kata sandi"
+                        : "Tampilkan kata sandi"
                     }
                     tabIndex={-1}
                   >
@@ -493,7 +497,7 @@ export function TravelerLoginScreen({
                       className="auth-forgot-link"
                       onClick={() => setModalState("forgot_password")}
                     >
-                      Forgot password?
+                      Lupa kata sandi?
                     </button>
                   </div>
                 )}
@@ -503,7 +507,7 @@ export function TravelerLoginScreen({
               {tabMode === "SIGN_UP" && (
                 <div className="auth-field">
                   <label className="auth-label" htmlFor="auth-confirm-password">
-                    Confirm your password
+                    Konfirmasi Kata Sandi
                   </label>
                   <div className="auth-input-wrap">
                     <span className="auth-input-icon" aria-hidden="true">
@@ -551,8 +555,8 @@ export function TravelerLoginScreen({
                       }
                       aria-label={
                         showConfirmPassword
-                          ? "Hide confirm password"
-                          : "Show confirm password"
+                          ? "Sembunyikan konfirmasi kata sandi"
+                          : "Tampilkan konfirmasi kata sandi"
                       }
                       tabIndex={-1}
                     >
@@ -600,10 +604,10 @@ export function TravelerLoginScreen({
               >
                 <span>
                   {activeMethod === "PASSWORD"
-                    ? "PROCESSING..."
+                    ? "Memproses..."
                     : tabMode === "SIGN_IN"
-                      ? "SIGN IN"
-                      : "SIGN UP"}
+                      ? "Masuk ke Akun"
+                      : "Daftar Akun Baru"}
                 </span>
               </button>
             </form>
@@ -611,7 +615,7 @@ export function TravelerLoginScreen({
             {/* 7. "or continue with" divider */}
             <div className="auth-divider" role="separator">
               <span className="auth-divider__line" />
-              <span className="auth-divider__text">or continue with</span>
+              <span className="auth-divider__text">atau lanjutkan dengan</span>
               <span className="auth-divider__line" />
             </div>
 
@@ -625,8 +629,8 @@ export function TravelerLoginScreen({
               <GoogleIcon />
               <span>
                 {activeMethod === "GOOGLE"
-                  ? "Connecting..."
-                  : "Continue with Google"}
+                  ? "Menghubungkan..."
+                  : "Masuk dengan Google"}
               </span>
             </button>
 
@@ -655,7 +659,7 @@ export function TravelerLoginScreen({
             <div className="auth-bottom-switch">
               {tabMode === "SIGN_IN" ? (
                 <p>
-                  Don't have an account?{" "}
+                  Belum punya akun?{" "}
                   <button
                     type="button"
                     className="auth-switch-action"
@@ -664,12 +668,12 @@ export function TravelerLoginScreen({
                       setAuthError(undefined);
                     }}
                   >
-                    Sign up
+                    Daftar sekarang
                   </button>
                 </p>
               ) : (
                 <p>
-                  Already have an account?{" "}
+                  Sudah punya akun?{" "}
                   <button
                     type="button"
                     className="auth-switch-action"
@@ -678,7 +682,7 @@ export function TravelerLoginScreen({
                       setAuthError(undefined);
                     }}
                   >
-                    Sign in
+                    Masuk
                   </button>
                 </p>
               )}
@@ -694,7 +698,7 @@ export function TravelerLoginScreen({
               className="auth-sub-link"
               onClick={() => setModalState("terms")}
             >
-              Terms &amp; Conditions
+              Syarat &amp; Ketentuan
             </button>
             <span className="auth-sub-dot">•</span>
             <button
@@ -702,11 +706,11 @@ export function TravelerLoginScreen({
               className="auth-sub-link"
               onClick={() => setModalState("privacy")}
             >
-              Privacy Policy
+              Kebijakan Privasi
             </button>
           </div>
           <Link to="/partner" className="auth-sub-partner">
-            Partner Portal &rarr;
+            Portal Mitra &amp; EO &rarr;
           </Link>
         </footer>
       </div>
@@ -714,8 +718,8 @@ export function TravelerLoginScreen({
       {/* Forgot Password Dialog */}
       <Dialog
         open={modalState === "forgot_password"}
-        title="Forgot password?"
-        description="Password reset for JedaIn account"
+        title="Lupa Kata Sandi?"
+        description="Pemulihan akses akun JedaIn"
         onClose={() => setModalState(null)}
         actions={
           <Button
@@ -723,22 +727,22 @@ export function TravelerLoginScreen({
             size="sm"
             onClick={() => setModalState(null)}
           >
-            Close
+            Tutup
           </Button>
         }
       >
         <p className="auth-dialog-text">
-          Password recovery functionality is a placeholder prototype in this
-          demo. For assistance or mock access, please continue with Google or
-          enter any valid email and password.
+          Fitur pemulihan kata sandi belum diaktifkan pada prototipe kompetisi
+          ini. Untuk mencoba alur JedaIn, gunakan &ldquo;Lanjut sebagai
+          Tamu&rdquo; atau &ldquo;Masuk dengan Google&rdquo;.
         </p>
       </Dialog>
 
       {/* Terms & Conditions Dialog */}
       <Dialog
         open={modalState === "terms"}
-        title="Terms & Conditions"
-        description="JedaIn terms of service and usage guidelines"
+        title="Syarat & Ketentuan"
+        description="Informasi penggunaan prototipe JedaIn"
         onClose={() => setModalState(null)}
         actions={
           <Button
@@ -746,22 +750,23 @@ export function TravelerLoginScreen({
             size="sm"
             onClick={() => setModalState(null)}
           >
-            Close
+            Tutup
           </Button>
         }
       >
         <p className="auth-dialog-text">
-          Full Terms &amp; Conditions documentation will be finalized prior to
-          production release. By using JedaIn, you agree to mindful and
-          respectful travel practices.
+          Syarat &amp; Ketentuan lengkap belum menjadi bagian dari prototipe
+          kompetisi ini. Dengan mencoba JedaIn, pengguna diharapkan mengikuti
+          prinsip perjalanan yang mindful, bertanggung jawab, dan menghormati
+          ketentuan penyelenggara pengalaman.
         </p>
       </Dialog>
 
       {/* Privacy Policy Dialog */}
       <Dialog
         open={modalState === "privacy"}
-        title="Privacy Policy"
-        description="Personal data management and privacy commitments"
+        title="Kebijakan Privasi"
+        description="Informasi penggunaan data pada prototipe"
         onClose={() => setModalState(null)}
         actions={
           <Button
@@ -769,13 +774,15 @@ export function TravelerLoginScreen({
             size="sm"
             onClick={() => setModalState(null)}
           >
-            Close
+            Tutup
           </Button>
         }
       >
         <p className="auth-dialog-text">
-          JedaIn respects your privacy and personal data. Detailed data
-          processing agreements will be provided prior to production launch.
+          Pada prototipe ini, data preferensi digunakan untuk mendukung alur
+          rekomendasi dan demonstrasi insight agregat. Implementasi pengelolaan
+          data untuk penggunaan production tidak termasuk dalam scope prototipe
+          kompetisi.
         </p>
       </Dialog>
     </div>

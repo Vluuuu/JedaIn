@@ -218,7 +218,7 @@
 }
 
 .package-detail-gallery__thumb:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-forest-600) 30%, transparent);
+  outline: 3px solid\n    color-mix(in srgb, var(--color-forest-600) 30%, transparent);
   outline-offset: 2px;
 }
 

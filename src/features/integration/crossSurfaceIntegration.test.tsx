@@ -411,8 +411,8 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
       // 6. EO Creates OPEN Session on the SAME package
       const sessionRes = mockEoPackageStore.createSession({
         packageId: goldenPackageId,
-        startAt: "2026-09-26T08:00:00+07:00",
-        endAt: "2026-09-26T14:00:00+07:00",
+        startAt: "2026-10-25T08:00:00+07:00",
+        endAt: "2026-10-25T14:00:00+07:00",
         capacity: 6,
         pricePerPerson: 275000,
       });

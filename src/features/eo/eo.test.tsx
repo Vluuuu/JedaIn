@@ -833,8 +833,8 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // Add a non-OPEN session (e.g. CLOSED)
       const createRes = mockEoPackageStore.createSession({
         packageId: "slow_green_day",
-        startAt: "2026-09-05T08:00:00+07:00",
-        endAt: "2026-09-05T14:00:00+07:00",
+        startAt: "2026-10-25T08:00:00+07:00",
+        endAt: "2026-10-25T14:00:00+07:00",
         capacity: 6,
         pricePerPerson: 275000,
       });
@@ -1657,13 +1657,27 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
   });
 
   describe("11. Phase B2: Destination Discovery, Guide Source & Builder Step 1 (BG–BQ)", () => {
-    it("BG. All active verified destinations in MVP provide local guide capability", () => {
+    it("BG. Destination eligibility requires ACTIVE, BASIC/PLUS, and guideReady=true", () => {
       const allDests = mockDestinationStore.getAll();
       expect(allDests.length).toBeGreaterThan(0);
-      for (const dest of allDests) {
-        if (dest.status === "ACTIVE") {
-          expect(dest.guideReady).toBe(true);
-        }
+
+      // dest_hutan_trawas is ACTIVE, BASIC, but guideReady=false per Admin verification
+      const trawas = allDests.find(
+        (d) => d.destinationId === "dest_hutan_trawas",
+      );
+      expect(trawas).toBeDefined();
+      expect(trawas?.status).toBe("ACTIVE");
+      expect(trawas?.verificationLevel).toBe("BASIC");
+      expect(trawas?.guideReady).toBe(false);
+
+      // getEligibleForEo only returns destinations with guideReady=true
+      const eligible = mockDestinationStore.getEligibleForEo();
+      expect(
+        eligible.some((d) => d.destinationId === "dest_hutan_trawas"),
+      ).toBe(false);
+      for (const dest of eligible) {
+        expect(dest.status).toBe("ACTIVE");
+        expect(dest.guideReady).toBe(true);
       }
     });
 
@@ -1688,10 +1702,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("Terverifikasi Plus");
       expect(view.textContent).toContain("Terverifikasi Dasar");
 
-      // Destination cards
+      // Destination cards: eligible guide-ready destinations are listed
       expect(view.textContent).toContain("Lereng Hijau Batu");
       expect(view.textContent).toContain("Lembah Alam Pacet");
-      expect(view.textContent).toContain("Hutan Bambu Trawas");
+      // Ineligible guideReady=false destination is not listed
+      expect(view.textContent).not.toContain("Hutan Bambu Trawas");
       expect(view.textContent).toContain("Pemandu lokal tersedia");
       expect(view.textContent).not.toContain("Guide Ready ✓");
       expect(view.textContent).not.toContain("✓ Guide Ready ✓");
@@ -1804,13 +1819,13 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "/partner/eo/packages/new",
       ]);
 
-      // Click "Lihat Detail" on dest_hutan_trawas card
-      const trawasCard = Array.from(
+      // Click "Lihat Detail" on dest_lembah_pacet card
+      const pacetCard = Array.from(
         view.querySelectorAll(".eo-builder-dest-card"),
-      ).find((c) => c.textContent?.includes("Hutan Bambu Trawas"))!;
-      expect(trawasCard).toBeDefined();
+      ).find((c) => c.textContent?.includes("Lembah Alam Pacet"))!;
+      expect(pacetCard).toBeDefined();
 
-      const inspectBtn = Array.from(trawasCard.querySelectorAll("button")).find(
+      const inspectBtn = Array.from(pacetCard.querySelectorAll("button")).find(
         (b) => b.textContent?.includes("Lihat Detail"),
       )!;
       expect(inspectBtn).toBeDefined();
@@ -1820,9 +1835,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
 
       // Dialog opens showing details
-      expect(view.textContent).toContain("Kawasan hutan bambu hening");
-      // Trawas card is not yet marked selected
-      expect(trawasCard.textContent).toContain("Pilih");
+      expect(view.textContent).toContain("Lembah hutan pinus berhawa sejuk");
+      // Pacet card is not yet marked selected
+      expect(pacetCard.textContent).toContain("Pilih");
     });
 
     it("BN. Package sessions screen shows contextual back button when packageId is in route, but global sessions does not", async () => {

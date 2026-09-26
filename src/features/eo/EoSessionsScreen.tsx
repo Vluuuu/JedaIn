@@ -6,6 +6,18 @@ import { mockEoPackageStore } from "./mockEoPackageStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
 
+function getFutureDefaultDateTimes() {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const yyyy = tomorrow.getFullYear();
+  const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+  const dd = String(tomorrow.getDate()).padStart(2, "0");
+  return {
+    start: `${yyyy}-${mm}-${dd}T08:00`,
+    end: `${yyyy}-${mm}-${dd}T14:00`,
+  };
+}
+
 export function EoSessionsScreen() {
   const { packageId } = useParams<{ packageId?: string }>();
   const partner = partnerSessionStore.get();
@@ -26,8 +38,12 @@ export function EoSessionsScreen() {
       ? packageId
       : (eligiblePackages[0]?.packageId ?? ""),
   );
-  const [startDate, setStartDate] = useState<string>("2026-09-26T08:00");
-  const [endDate, setEndDate] = useState<string>("2026-09-26T14:00");
+  const [startDate, setStartDate] = useState<string>(
+    () => getFutureDefaultDateTimes().start,
+  );
+  const [endDate, setEndDate] = useState<string>(
+    () => getFutureDefaultDateTimes().end,
+  );
   const [capacity, setCapacity] = useState<number>(6);
   const [operationalNote, setOperationalNote] = useState<string>("");
   const [editingNoteSessionId, setEditingNoteSessionId] = useState<
@@ -71,6 +87,14 @@ export function EoSessionsScreen() {
     (p) => p.packageId === selectedPackageId,
   );
 
+  const openAddModal = () => {
+    const defaults = getFutureDefaultDateTimes();
+    setStartDate(defaults.start);
+    setEndDate(defaults.end);
+    setFormError(undefined);
+    setShowAddModal(true);
+  };
+
   const handleCreateSession = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(undefined);
@@ -80,8 +104,15 @@ export function EoSessionsScreen() {
       return;
     }
 
-    const startIso = new Date(startDate).toISOString();
-    const endIso = new Date(endDate).toISOString();
+    const startMs = Date.parse(startDate);
+    const endMs = Date.parse(endDate);
+    if (Number.isNaN(startMs) || Number.isNaN(endMs)) {
+      setFormError("Format tanggal dan waktu sesi tidak valid.");
+      return;
+    }
+
+    const startIso = new Date(startMs).toISOString();
+    const endIso = new Date(endMs).toISOString();
 
     const res = mockEoPackageStore.createSession({
       packageId: selectedPackageId,
@@ -95,6 +126,9 @@ export function EoSessionsScreen() {
     if (res.success) {
       setShowAddModal(false);
       setOperationalNote("");
+      const defaults = getFutureDefaultDateTimes();
+      setStartDate(defaults.start);
+      setEndDate(defaults.end);
       setRefreshVersion((v) => v + 1);
     } else {
       setFormError(res.message ?? "Gagal membuka sesi.");
@@ -166,7 +200,7 @@ export function EoSessionsScreen() {
             type="button"
             className="eo-action-spotlight__btn"
             disabled={eligiblePackages.length === 0}
-            onClick={() => setShowAddModal(true)}
+            onClick={openAddModal}
             aria-label="Buka Sesi Baru"
           >
             <svg
@@ -256,7 +290,7 @@ export function EoSessionsScreen() {
                 type="button"
                 variant="secondary"
                 size="md"
-                onClick={() => setShowAddModal(true)}
+                onClick={openAddModal}
               >
                 Buka Sesi Pertama
               </Button>

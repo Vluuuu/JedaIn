@@ -112,9 +112,9 @@ export function DestinationCapacityScreen() {
               sesi; (2) <strong>Alokasi Kuota EO</strong> adalah kuota yang
               dibuka EO untuk sesi tersebut; (3){" "}
               <strong>Peserta Terkonfirmasi</strong> adalah traveler yang telah
-              menyelesaikan pembayaran. Sisa ruang operasional menunjukkan
-              selisih kapasitas umum destinasi terhadap peserta terkonfirmasi,
-              bukan ketersediaan kuota penjualan baru.
+              menyelesaikan pembayaran. Selisih operasional menunjukkan selisih
+              kapasitas umum destinasi terhadap peserta terkonfirmasi, bukan
+              ketersediaan kuota penjualan baru.
             </p>
           </div>
         </div>
@@ -139,7 +139,7 @@ export function DestinationCapacityScreen() {
                   <th>Batas Venue</th>
                   <th>Alokasi Kuota EO</th>
                   <th>Peserta Terkonfirmasi</th>
-                  <th>Sisa Ruang Operasional</th>
+                  <th>Selisih Operasional</th>
                 </tr>
               </thead>
               <tbody>
@@ -227,8 +227,8 @@ export function DestinationCapacityScreen() {
                         </div>
                       </td>
                       <td>
-                        <Badge tone={headroom > 5 ? "success" : "warning"}>
-                          Sisa {headroom} Orang
+                        <Badge tone="neutral">
+                          Selisih operasional: {headroom} orang
                         </Badge>
                         <div
                           style={{
@@ -236,7 +236,7 @@ export function DestinationCapacityScreen() {
                             color: "var(--color-text-muted)",
                           }}
                         >
-                          Selisih operasional
+                          Bukan kuota penjualan baru
                         </div>
                       </td>
                     </tr>

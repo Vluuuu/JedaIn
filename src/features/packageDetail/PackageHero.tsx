@@ -74,7 +74,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
             </svg>
             <span>
               {packageData.rating !== undefined && packageData.rating !== null
-                ? packageData.rating.toFixed(1)
+                ? `${packageData.rating.toFixed(1)}${packageData.ratingProvenance === "SAMPLE" ? " (contoh)" : ""}`
                 : "Belum ada rating"}
             </span>
           </span>

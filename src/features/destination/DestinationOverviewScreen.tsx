@@ -306,7 +306,6 @@ export function DestinationOverviewScreen() {
                 session,
                 package: pkg,
                 confirmedParticipants,
-                operationalCapacity,
                 usagePercent,
                 exceedsDestinationCapacity,
               }) => (
@@ -337,20 +336,17 @@ export function DestinationOverviewScreen() {
                         <strong>{confirmedParticipants}</strong> peserta
                         terkonfirmasi
                       </span>
-                      <span>{operationalCapacity} kapasitas operasional</span>
+                      <span>Kuota Sesi EO: {session.capacity} orang</span>
                     </div>
                     <progress
-                      max={operationalCapacity}
-                      value={Math.min(
-                        confirmedParticipants,
-                        operationalCapacity,
-                      )}
-                      aria-label={`${confirmedParticipants} dari ${operationalCapacity} kapasitas operasional destinasi`}
+                      max={session.capacity}
+                      value={Math.min(confirmedParticipants, session.capacity)}
+                      aria-label={`${confirmedParticipants} dari ${session.capacity} kuota sesi EO terisi`}
                     />
                     <span className="dest-session-row__capacity-note">
                       {exceedsDestinationCapacity
-                        ? `Alokasi EO ${session.capacity} orang melebihi kapasitas destinasi.`
-                        : `${usagePercent}% kapasitas destinasi terisi`}
+                        ? `Alokasi EO ${session.capacity} orang melebihi kapasitas umum destinasi (${destination.capacityPerSession} orang).`
+                        : `${usagePercent}% Kuota Sesi EO terisi`}
                     </span>
                   </div>
 

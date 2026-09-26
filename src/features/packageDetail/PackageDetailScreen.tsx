@@ -714,11 +714,14 @@ export function PackageDetailScreen({
           aria-labelledby="reviews-heading"
         >
           <h2 id="reviews-heading" className="package-detail-section__title">
-            Contoh Ulasan Paket
+            {pkg.ratingProvenance === "SAMPLE"
+              ? "Contoh Ulasan Paket"
+              : "Ulasan Pascatrip"}
           </h2>
           <p className="package-detail-section__desc">
-            Data contoh pada prototype untuk menggambarkan tampilan ulasan
-            paket. Ulasan Destinasi dan EO/Guide pascatrip dicatat terpisah.
+            {pkg.ratingProvenance === "SAMPLE"
+              ? "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket. Ulasan Destinasi dan EO/Guide pascatrip dicatat terpisah."
+              : "Ulasan pascatrip dari traveler yang telah menyelesaikan perjalanan. Ulasan Destinasi dan EO/Guide dicatat terpisah."}
           </p>
           <div className="package-detail-reviews-summary">
             <svg
@@ -733,7 +736,9 @@ export function PackageDetailScreen({
             </svg>
             <span>
               {pkg.rating !== undefined && pkg.rating !== null
-                ? `Rating paket contoh: ${pkg.rating.toFixed(1)} / 5.0`
+                ? pkg.ratingProvenance === "SAMPLE"
+                  ? `Rating paket contoh: ${pkg.rating.toFixed(1)} / 5.0`
+                  : `Rating paket: ${pkg.rating.toFixed(1)} / 5.0`
                 : "Belum ada rating"}
             </span>
           </div>

@@ -218,8 +218,26 @@ export function EoPackageDetailScreen() {
                   year: "numeric",
                 })
               : "hari ini"}
-            . Setelah disetujui Admin, status akan menjadi Disetujui dan kamu
-            dapat membuka jadwal sesi penjualan.
+            . Setelah disetujui Admin, status paket menjadi Disetujui
+            (APPROVED). Kamu dapat menyiapkan jadwal sesi, namun paket belum
+            tampil di Marketplace hingga kamu memilih "Publish ke Marketplace"
+            untuk menjadikannya LIVE.
+          </p>
+        </section>
+      )}
+
+      {pkg.status === "APPROVED" && (
+        <section
+          className="eo-alert eo-alert--info"
+          aria-label="Status paket disetujui"
+        >
+          <strong>Paket Disetujui Kurator (Belum Live)</strong>
+          <p>
+            Kurasi Admin telah selesai dan paket berstatus Disetujui. Paket
+            belum tampil atau dapat dipesan di Marketplace Traveler. Klik
+            "Publish ke Marketplace" untuk menjadikannya LIVE. Kamu juga dapat
+            menggunakan "Atur Jadwal Sesi" untuk menyiapkan jadwal keberangkatan
+            sebelum atau sesudah publikasi.
           </p>
         </section>
       )}

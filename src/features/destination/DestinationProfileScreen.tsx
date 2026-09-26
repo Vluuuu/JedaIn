@@ -68,9 +68,9 @@ export function DestinationProfileScreen() {
       <div className="admin-alert admin-alert--info">
         <strong>Ketentuan Perubahan Informasi Destinasi:</strong>
         <p style={{ margin: "var(--space-1) 0 0" }}>
-          Perubahan pada modal dasar, nama lokasi, atau batas kapasitas venue
-          memerlukan verifikasi ulang oleh Tim Kurator Admin JedaIn demi menjaga
-          integritas paket yang sedang aktif.
+          Perubahan informasi inti destinasi dapat memerlukan peninjauan ulang
+          oleh Tim Kurator Admin JedaIn. Aturan field dan proses final belum
+          dikunci dalam prototype.
         </p>
       </div>
 

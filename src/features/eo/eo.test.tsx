@@ -815,11 +815,13 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       const view = await renderComponent(createElement(App), ["/partner/eo"]);
 
-      expect(view.textContent).toContain("Peluang dari Traveler");
+      expect(view.textContent).toContain("Peluang dari Kebutuhan Traveler");
       expect(view.textContent).toContain(
         "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
       );
-      expect(view.textContent).toContain("312 traveler");
+      expect(view.textContent).toContain("312 respons simulasi");
+      expect(view.textContent).toContain("Data simulasi prototype");
+      expect(view.textContent).not.toContain("312 traveler");
 
       const heroLink = view.querySelector<HTMLAnchorElement>(
         'a[href*="/partner/eo/packages/new?insightId=ins_nature_batu_1d"]',

@@ -27,6 +27,7 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
     suitableGroupTypes: ["SOLO", "PARTNER", "FRIENDS"],
     suitableGroupSizeBands: ["ONE", "TWO", "THREE_TO_FOUR"],
     rating: 4.85,
+    ratingProvenance: "SAMPLE",
     popularityRank: 95,
   },
   {
@@ -47,6 +48,7 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
     suitableGroupTypes: ["PARTNER", "FRIENDS", "FAMILY"],
     suitableGroupSizeBands: ["TWO", "THREE_TO_FOUR", "FIVE_PLUS"],
     rating: 4.75,
+    ratingProvenance: "SAMPLE",
     popularityRank: 88,
   },
   {
@@ -67,6 +69,7 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
     suitableGroupTypes: ["SOLO", "PARTNER", "FRIENDS"],
     suitableGroupSizeBands: ["ONE", "TWO", "THREE_TO_FOUR"],
     rating: 4.9,
+    ratingProvenance: "SAMPLE",
     popularityRank: 92,
   },
   {
@@ -87,6 +90,7 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
     suitableGroupTypes: ["PARTNER", "FRIENDS", "FAMILY"],
     suitableGroupSizeBands: ["TWO", "THREE_TO_FOUR", "FIVE_PLUS"],
     rating: 4.8,
+    ratingProvenance: "SAMPLE",
     popularityRank: 86,
   },
   {
@@ -111,6 +115,7 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
     suitableGroupTypes: ["PARTNER", "FRIENDS", "FAMILY"],
     suitableGroupSizeBands: ["TWO", "THREE_TO_FOUR", "FIVE_PLUS"],
     rating: 4.88,
+    ratingProvenance: "SAMPLE",
     popularityRank: 90,
   },
 ];

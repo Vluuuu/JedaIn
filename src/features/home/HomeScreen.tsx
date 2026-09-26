@@ -134,7 +134,6 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
       {/* 1. Greeting / App Header context */}
       <header className="home-greeting-row">
         <div className="home-greeting-content">
-          <div className="home-greeting-brand-chip">JedaIn Traveler</div>
           <h1 className="home-greeting-title">{greetingText}</h1>
           <p className="home-greeting-subtitle">
             Mau jeda seperti apa hari ini?

@@ -100,6 +100,9 @@ describe("HomeScreen State Matrix & Module Composition", () => {
     const view = await renderHome();
 
     expect(view.textContent).toContain("Halo, Dewo");
+    expect(view.textContent).toContain("Mau jeda seperti apa hari ini?");
+    expect(view.textContent).not.toContain("JedaIn Traveler");
+    expect(view.querySelector(".home-greeting-brand-chip")).toBeNull();
     expect(view.textContent).toContain("Pilihan untukmu");
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
     expect(view.textContent).toContain("Eksplorasi Berdasarkan Suasana");

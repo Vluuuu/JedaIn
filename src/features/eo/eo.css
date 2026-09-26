@@ -658,6 +658,15 @@
   font-size: var(--font-size-caption);
 }
 
+.eo-overview-demand-hero__simulation-tag {
+  font-size: var(--font-size-caption);
+  color: var(--color-forest-200);
+  letter-spacing: normal;
+  text-transform: none;
+  font-weight: var(--font-weight-normal);
+  margin-left: auto;
+}
+
 .eo-overview-demand-hero__headline {
   display: flex;
   flex-direction: column;

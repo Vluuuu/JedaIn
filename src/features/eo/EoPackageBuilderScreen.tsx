@@ -98,10 +98,7 @@ export function EoPackageBuilderScreen() {
       (initialInsight ? `Jeda Mindful: ${initialInsight.intentLabel}` : ""),
   );
   const [shortSummary, setShortSummary] = useState<string>(
-    initialDraft?.shortSummary ??
-      initialDraft?.valueProposition ??
-      initialInsight?.unmetDemandDescription ??
-      "",
+    initialDraft?.shortSummary ?? initialDraft?.valueProposition ?? "",
   );
   const [durationLabel, setDurationLabel] = useState<string>(
     initialDraft?.durationLabel ?? initialInsight?.durationLabel ?? "1 hari",

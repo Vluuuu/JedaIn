@@ -223,9 +223,13 @@ export function EoOverviewScreen() {
           aria-label="Peluang dari kebutuhan traveler"
         >
           <div className="eo-overview-demand-hero__eyebrow">
-            <span>Peluang dari Traveler</span>
+            <span>Peluang dari Kebutuhan Traveler</span>
             <span className="eo-overview-demand-hero__eyebrow-badge">
-              {topInsight.travelerDemandCount} traveler
+              {topInsight.travelerDemandCount} respons simulasi
+            </span>
+            <span className="eo-overview-demand-hero__simulation-tag">
+              Data simulasi prototype · Sinyal directional, bukan market
+              validation
             </span>
           </div>
 

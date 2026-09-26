@@ -162,6 +162,7 @@ export function buildTravelerPackageFromEo(
     suitableGroupTypes: mapGroupTypes(eoPkg.suitableGroupTypes),
     suitableGroupSizeBands: [],
     rating: actualRating,
+    ratingProvenance: actualRating !== null ? "POST_TRIP" : null,
     popularityRank: null,
   };
 }

@@ -951,7 +951,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
       expect(view.textContent).toContain("Jeda Alam Nusantara");
       expect(view.querySelectorAll(".dest-session-row")).toHaveLength(2);
-      expect(view.textContent).toContain("6 kapasitas operasional");
+      expect(view.textContent).toContain("Kuota Sesi EO: 6 orang");
+      expect(view.textContent).toContain("0% Kuota Sesi EO terisi");
+      expect(view.textContent).not.toContain("kapasitas destinasi terisi");
       expect(view.textContent).toContain("Walking tour kebun teh lereng bukit");
       expect(view.textContent).toContain("Saung istirahat bambu");
       expect(view.textContent).toContain(

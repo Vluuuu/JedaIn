@@ -13,6 +13,8 @@ export type PackageStatus =
 
 export type VerificationLevel = "BASIC" | "PLUS";
 
+export type RatingProvenance = "SAMPLE" | "POST_TRIP" | null;
+
 export interface PackageRecommendationSource {
   id: string;
   title: string;
@@ -30,6 +32,7 @@ export interface PackageRecommendationSource {
   suitableGroupTypes: GroupType[];
   suitableGroupSizeBands: GroupSizeBand[];
   rating?: number | null;
+  ratingProvenance?: RatingProvenance;
   popularityRank?: number | null;
 }
 

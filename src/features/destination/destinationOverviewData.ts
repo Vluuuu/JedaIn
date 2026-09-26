@@ -84,12 +84,10 @@ export function getDestinationOverviewData(
           confirmedParticipants,
           operationalCapacity,
           usagePercent:
-            operationalCapacity > 0
+            session.capacity > 0
               ? Math.min(
                   100,
-                  Math.round(
-                    (confirmedParticipants / operationalCapacity) * 100,
-                  ),
+                  Math.round((confirmedParticipants / session.capacity) * 100),
                 )
               : 0,
           exceedsDestinationCapacity:

@@ -152,8 +152,8 @@ export function TripReviewScreen({
           {isDestination ? "Nilai Destinasi" : "Nilai EO / Guide"}
         </h1>
         <p className="review-subtitle">
-          Berikan evaluasi objektif untuk <strong>{context.targetName}</strong>{" "}
-          ({context.packageName}).
+          Bagikan penilaianmu untuk <strong>{context.targetName}</strong> (
+          {context.packageName}).
         </p>
       </header>
 

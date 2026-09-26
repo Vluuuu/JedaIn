@@ -880,6 +880,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       );
 
       expect(view.textContent).toContain("Ulasan & Rating Destinasi");
+      expect(view.textContent).not.toContain("Ulasan objektif");
+      expect(view.textContent).not.toContain("Ulasan pengalaman nyata");
+      expect(view.textContent).toContain("Ulasan pascatrip yang tercatat");
       expect(view.textContent).toContain("★ 4.5"); // (5 + 4) / 2 = 4.5
       expect(view.textContent).toContain(
         "Kawasan kebun teh sangat asri dan sejuk.",

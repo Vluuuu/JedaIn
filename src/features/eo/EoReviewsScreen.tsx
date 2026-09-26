@@ -26,7 +26,7 @@ export function EoReviewsScreen() {
             Ulasan & Rating Kepemanduan
           </h1>
           <p className="eo-page-subtitle">
-            Ulasan objektif terpisah untuk pendampingan, pelayanan, dan
+            Ulasan traveler terpisah untuk pendampingan, pelayanan, dan
             kejelasan alur trip dari traveler yang telah menyelesaikan
             perjalanan.
           </p>

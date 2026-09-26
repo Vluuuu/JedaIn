@@ -212,51 +212,6 @@
   }
 }
 
-.traveler-app-header__notification-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  min-width: 2.75rem;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  border-radius: var(--radius-md);
-  color: var(--color-stone-600);
-  cursor: pointer;
-  transition:
-    color var(--motion-fast) var(--ease-standard),
-    background-color var(--motion-fast) var(--ease-standard);
-}
-
-.traveler-app-header__notification-btn:hover {
-  color: var(--color-stone-900);
-  background: var(--color-stone-100);
-}
-
-.traveler-app-header__notification-btn:focus-visible {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
-}
-
-.traveler-app-header__bell-icon {
-  flex-shrink: 0;
-}
-
-.traveler-app-header__notification-dot {
-  position: absolute;
-  top: 0.625rem;
-  right: 0.625rem;
-  width: 0.4375rem;
-  height: 0.4375rem;
-  background: var(--color-danger-solid);
-  border-radius: var(--radius-pill);
-  box-shadow: 0 0 0 1.5px var(--color-bg-surface);
-  flex-shrink: 0;
-}
-
 .traveler-app-content {
   width: min(100%, 75rem);
   margin-inline: auto;

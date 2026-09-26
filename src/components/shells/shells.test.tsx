@@ -270,58 +270,46 @@ describe("responsive workspace navigation semantics", () => {
   });
 });
 
-describe("TravelerAppShell notification affordance", () => {
-  it("renders bell button with proper accessible label and no dot when no unread", async () => {
+describe("TravelerAppShell clean header layout", () => {
+  it("renders canonical brand logo and does not render inert notification button", async () => {
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
     await act(() =>
       root.render(
-        createElement(
-          MemoryRouter,
-          undefined,
-          createElement(TravelerAppShell, {
-            hasUnreadNotification: false,
-          }),
-        ),
+        createElement(MemoryRouter, undefined, createElement(TravelerAppShell)),
       ),
     );
 
-    const btn = container.querySelector<HTMLButtonElement>(
-      ".traveler-app-header__notification-btn",
-    );
-    expect(btn).not.toBeNull();
-    expect(btn?.getAttribute("aria-label")).toBe("Notifikasi");
+    const brand = container.querySelector(".traveler-app-brand");
+    expect(brand).not.toBeNull();
+    expect(container.querySelector(".traveler-app-logo")).not.toBeNull();
+
+    // Inert notification button removed
+    expect(
+      container.querySelector(".traveler-app-header__notification-btn"),
+    ).toBeNull();
+    expect(
+      container.querySelector(".traveler-app-header__bell-icon"),
+    ).toBeNull();
     expect(
       container.querySelector(".traveler-app-header__notification-dot"),
     ).toBeNull();
   });
 
-  it("renders bell button with unread label and red dot when has unread", async () => {
+  it("preserves Home, Explore, My Trips, and Profile in bottom navigation", async () => {
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
     await act(() =>
       root.render(
-        createElement(
-          MemoryRouter,
-          undefined,
-          createElement(TravelerAppShell, {
-            hasUnreadNotification: true,
-          }),
-        ),
+        createElement(MemoryRouter, undefined, createElement(TravelerAppShell)),
       ),
     );
 
-    const btn = container.querySelector<HTMLButtonElement>(
-      ".traveler-app-header__notification-btn",
-    );
-    expect(btn).not.toBeNull();
-    expect(btn?.getAttribute("aria-label")).toBe(
-      "Notifikasi, ada notifikasi baru",
-    );
-    expect(
-      container.querySelector(".traveler-app-header__notification-dot"),
-    ).not.toBeNull();
+    const bottomNavLinks = container.querySelectorAll(".traveler-bottom-nav a");
+    expect(bottomNavLinks).toHaveLength(4);
+    const hrefs = Array.from(bottomNavLinks).map((a) => a.getAttribute("href"));
+    expect(hrefs).toEqual(["/home", "/explore", "/trips", "/profile"]);
   });
 });

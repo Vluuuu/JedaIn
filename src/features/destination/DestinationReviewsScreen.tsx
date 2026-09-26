@@ -50,8 +50,8 @@ export function DestinationReviewsScreen() {
             Ulasan & Rating Destinasi
           </h1>
           <p className="dest-page-subtitle">
-            Ulasan objektif terpisah dari traveler khusus mengenai keindahan
-            alam, ketenangan, kebersihan, dan fasilitas kawasan Anda.
+            Ulasan traveler terpisah mengenai keindahan alam, ketenangan,
+            kebersihan, dan fasilitas kawasan Anda.
           </p>
         </div>
       </header>
@@ -74,7 +74,7 @@ export function DestinationReviewsScreen() {
         <div className="dest-stat-card">
           <span className="dest-stat-label">Total Ulasan Terverifikasi</span>
           <strong className="dest-stat-value">{venueReviews.length}</strong>
-          <span className="dest-stat-desc">Ulasan pengalaman nyata</span>
+          <span className="dest-stat-desc">Ulasan pascatrip yang tercatat</span>
         </div>
       </section>
 

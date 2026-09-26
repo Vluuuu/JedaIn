@@ -350,4 +350,22 @@ describe("Reviews Feature (T19 & T20) Tests", () => {
     );
     expect(mockReviewStore.getReviewsForBooking(bId).length).toBe(2);
   });
+
+  it("X. review screen copy uses neutral traveler-authored phrasing without objectivity claims", async () => {
+    const traveler: AuthUser = {
+      id: "usr_copy_truth",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+    const bId = `bk_demo_completed_${traveler.id}`;
+
+    const { container } = await renderReview(bId, "destination");
+
+    // Must NOT contain claims of objectivity
+    expect(container.textContent).not.toContain("evaluasi objektif");
+    expect(container.textContent).not.toContain("objektif");
+
+    // Contains traveler-authored phrasing
+    expect(container.textContent).toContain("Bagikan penilaianmu untuk");
+  });
 });

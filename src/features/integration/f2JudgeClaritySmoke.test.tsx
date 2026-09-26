@@ -223,6 +223,8 @@ describe("F2 Judge Clarity Manual Smoke Automated Checks", () => {
       );
     });
     expect(container.textContent).toContain("Ulasan & Rating Destinasi");
+    expect(container.textContent).not.toContain("Ulasan objektif");
+    expect(container.textContent).not.toContain("Ulasan pengalaman nyata");
     expect(container.textContent).not.toContain("@example.com");
     expect(container.textContent).not.toContain("Setujui");
     expect(container.textContent).not.toContain("Tolak");

@@ -540,6 +540,10 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       const view = await renderComponent(createElement(EoReviewsScreen));
 
       expect(view.textContent).toContain("★ 5.0");
+      expect(view.textContent).not.toContain("Ulasan objektif");
+      expect(view.textContent).toContain(
+        "Ulasan traveler terpisah untuk pendampingan",
+      );
       expect(view.textContent).toContain(
         "Pendampingan guide luar biasa tenang.",
       );

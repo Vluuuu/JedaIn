@@ -389,9 +389,11 @@ Requirements:
 - Guest mode diperbolehkan untuk competition prototype.
 - Guest tetap mengikuti onboarding requirement seperti traveler baru.
 - Guest mode tidak boleh diinterpretasikan sebagai production authentication design.
-- CTA harus jelas dan tidak membuat juri terjebak.
+- landing memakai swipe-up "Geser ke atas untuk memulai" sebagai primary start interaction menuju /login,
+- top-right "Masuk" tetap tersedia sebagai jalur login langsung,
+- redundant CTA yang menduplikasi start interaction tidak diperlukan bila swipe control sudah jelas.
 
-Status: IMPLEMENTED LIVE.
+Status: IMPLEMENTED LIVE — final landing cleanup diperkuat pada PR #94.
 
 ## REQ-TRV-02 — Consent dan Mandatory Onboarding
 
@@ -1617,16 +1619,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F4.3:
+Current verified competition baseline setelah Final Live-User UX Cleanup:
 
-- current app feature commit: b0b1122a25ee403ab8923c28838c291410ba5faf,
+- current app feature commit: d0f3da9914f2fa5ae5a025faf66a029f08654c7c,
 - 48 suites / 679 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, dan PR #92 Final Semantic Truthfulness Hardening sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, PR #92 Final Semantic Truthfulness Hardening, dan PR #94 Final Live-User UX Cleanup sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1661,6 +1663,7 @@ Implemented and verified:
 - Traveler transaction ledger same-tab refresh persistence menggunakan sessionStorage (F4.1 / PR #88),
 - future-only EO Session temporal guard + destination guide-ready governance consistency (F4.2 / PR #90),
 - sample-vs-post-trip rating provenance, Demand Insight disclosure/Builder isolation, APPROVED-vs-LIVE guidance, Mitra capacity semantic truthfulness, dan conditional re-review copy (F4.3 / PR #92),
+- final live-user UX cleanup: redundant landing CTA dihapus sehingga swipe-up menjadi primary start interaction, dan redundant Home "JedaIn Traveler" chip dihapus (PR #94),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1886,9 +1889,10 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] F4.1 Traveler Transaction Session Persistence merged melalui PR #88 tanpa business-rule change.
 - [x] F4.2 Session & Destination Governance Integrity merged melalui PR #90 tanpa business-rule change.
 - [x] F4.3 Final Semantic Truthfulness Hardening merged melalui PR #92 tanpa business-rule change.
+- [x] Final Live-User UX Cleanup merged melalui PR #94 tanpa flow/business-rule change.
 - [x] Guest Demo tetap diperbolehkan sebagai prototype Traveler identity untuk mendemonstrasikan booking → completion → Destination review + EO/Guide review.
 - [x] Accepted findings dari Traveler / EO / Mitra / Admin-Judge simulation sudah ditutup sampai F4.3.
-- [x] Current canonical app baseline: b0b1122a25ee403ab8923c28838c291410ba5faf dengan 48 suites / 679 tests PASS.
+- [x] Current canonical app baseline: d0f3da9914f2fa5ae5a025faf66a029f08654c7c dengan 48 suites / 679 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
@@ -2215,3 +2219,42 @@ Final freeze decision:
 - Development tidak dibuka lagi untuk wishlist atau generic production features.
 - Perubahan setelah ini hanya jika final rehearsal menemukan regression/P0 demo blocker atau factual contradiction yang nyata.
 - Fokus berikutnya: end-to-end golden rehearsal, judge/demo checklist, dan final live sanity check.
+
+## Final Live-User UX Cleanup
+
+PR: #94  
+Merge commit: `d0f3da9914f2fa5ae5a025faf66a029f08654c7c`
+
+Source:
+
+- direct final live-user testing setelah F4.3 hardening.
+
+Perubahan:
+
+- CTA landing `Mulai Cari Jedamu` dihapus karena menduplikasi fungsi swipe-up yang sudah menjadi primary start interaction.
+- `SwipeJourneyControl` tetap menuju `/login` dengan interaction `Geser ke atas untuk memulai`.
+- Top-right `Masuk` tetap tersedia sebagai jalur login langsung.
+- Home chip `JedaIn Traveler` dihapus agar greeting dimulai langsung dari `Halo, <name>` dan terasa lebih natural.
+- Dead CSS untuk CTA dan Home chip ikut dibersihkan.
+- Focused regression assertions memastikan kedua elemen tidak kembali muncul.
+
+Quality gate:
+
+- 48 test suites,
+- 679 tests PASS,
+- format PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS,
+- Cloudflare Pages preview PASS.
+
+Business / flow impact:
+
+- NONE.
+- Tidak ada perubahan onboarding, Guest Demo, recommendation, booking, payment, review, pricing, role authority, atau lifecycle.
+- Cleanup ini adalah direct user-tested UI polish, bukan feature expansion.
+
+Freeze status:
+
+- App kembali ke HARD FEATURE FREEZE setelah cleanup.
+- Perubahan berikutnya hanya jika rehearsal menemukan regression/P0 demo blocker atau factual contradiction nyata.

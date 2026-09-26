@@ -1841,7 +1841,8 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] F3.0 Traveler Package Gallery merged melalui PR #79 tanpa business-rule change.
 - [x] F3.1 Traveler Post-Booking Trip Brief merged melalui PR #80 tanpa business-rule change.
 - [x] F3.2 EO Traveler-Facing Draft Preview merged melalui PR #81 tanpa business-rule change.
-- [x] Current canonical app baseline: f9a067514713753f7063a08e7889dfa50da921c3 dengan 44 suites / 633 tests PASS.
+- [x] F3.3 Mitra Destination Overview Quick Actions merged melalui PR #83 tanpa business-rule change.
+- [x] Current canonical app baseline: 0c2a0cd0a588f7c2708e9450e17bd3a36b64b0f1 dengan 45 suites / 638 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.

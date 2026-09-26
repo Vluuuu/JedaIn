@@ -176,7 +176,6 @@ export class MockProfileAdapter implements ProfileAdapter {
     }
 
     sessionStore.reset();
-    mockTransactionStore.reset();
   }
 }
 

@@ -145,14 +145,14 @@ function validateAndNormalizeBooking(data: unknown): BookingRecord | null {
   if (!isValidIsoDate(b.createdAt)) return null;
   if (!isValidIsoDate(b.paymentExpiresAt)) return null;
 
-  if (b.paidAt !== undefined) {
+  if (status === "PAID") {
     if (!isValidIsoDate(b.paidAt)) return null;
-    if (status !== "PAID" && status !== "COMPLETED") return null;
-  }
-
-  if (b.completedAt !== undefined) {
+    if (b.completedAt !== undefined) return null;
+  } else if (status === "COMPLETED") {
+    if (!isValidIsoDate(b.paidAt)) return null;
     if (!isValidIsoDate(b.completedAt)) return null;
-    if (status !== "COMPLETED") return null;
+  } else {
+    if (b.paidAt !== undefined || b.completedAt !== undefined) return null;
   }
 
   const subtotal =
@@ -301,6 +301,18 @@ function validateAndNormalizeTransactions(data: unknown): {
     attemptsMap.set(valid.paymentAttemptId, valid);
   }
 
+  // Cross-entity coherence: every PAID or COMPLETED booking MUST have a matching SUCCEEDED attempt
+  for (const booking of validBookings) {
+    if (booking.status === "PAID" || booking.status === "COMPLETED") {
+      const matchingAttempt = validPaymentAttempts.find(
+        (p) => p.bookingId === booking.bookingId && p.status === "SUCCEEDED",
+      );
+      if (!matchingAttempt) {
+        return null;
+      }
+    }
+  }
+
   const newIdempotencyMap = new Map<string, IdempotencyRecord>();
   if (Array.isArray(candidate.idempotency)) {
     for (const item of candidate.idempotency) {
@@ -318,6 +330,9 @@ function validateAndNormalizeTransactions(data: unknown): {
       const payment = attemptsMap.get(rec.paymentAttemptId);
       if (!booking || !payment) continue;
 
+      // Invariant: payment attempt must belong to the referenced booking
+      if (payment.bookingId !== booking.bookingId) continue;
+
       if (
         !rec.input ||
         typeof rec.input !== "object" ||
@@ -327,20 +342,20 @@ function validateAndNormalizeTransactions(data: unknown): {
       }
       const inp = rec.input as Record<string, unknown>;
       if (
-        typeof inp.travelerId !== "string" ||
-        typeof inp.sessionId !== "string" ||
-        typeof inp.participantCount !== "number" ||
-        typeof inp.unitPricePerPerson !== "number"
+        inp.travelerId !== booking.travelerId ||
+        inp.sessionId !== booking.sessionId ||
+        inp.participantCount !== booking.participantCount ||
+        inp.unitPricePerPerson !== booking.unitPricePerPerson
       ) {
         continue;
       }
 
       newIdempotencyMap.set(rec.key, {
         input: {
-          travelerId: inp.travelerId,
-          sessionId: inp.sessionId,
-          participantCount: inp.participantCount,
-          unitPricePerPerson: inp.unitPricePerPerson,
+          travelerId: booking.travelerId,
+          sessionId: booking.sessionId,
+          participantCount: booking.participantCount,
+          unitPricePerPerson: booking.unitPricePerPerson,
         },
         booking,
         payment,

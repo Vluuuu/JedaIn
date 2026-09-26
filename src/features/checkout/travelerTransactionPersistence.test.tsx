@@ -202,7 +202,7 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
     expect(attempt?.status).toBe("SUCCEEDED");
   });
 
-  it("4. a demo-completed Booking survives hydration as COMPLETED with completedAt intact", () => {
+  it("4. a demo-completed Booking survives hydration as COMPLETED with paidAt and completedAt intact", () => {
     sessionStore.setUser(traveler);
 
     const tx = mockTransactionStore.createTransaction({
@@ -234,6 +234,7 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
     expect(restored?.status).toBe("COMPLETED");
     expect(restored?.bookedQuantity).toBe(1);
     expect(restored?.reservedQuantity).toBe(0);
+    expect(restored?.paidAt).toBeDefined();
     expect(restored?.completedAt).toBeDefined();
   });
 
@@ -418,8 +419,8 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
   });
 
   it("10. structurally invalid status/state fails safely without fabricating paid/completed bookings", () => {
-    // Inject invalid record: status MAGIC_PAID
-    const invalidPayload = {
+    // 10a. Invalid status MAGIC_PAID
+    const invalidStatusPayload = {
       version: 1,
       bookings: [
         {
@@ -430,11 +431,12 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
           participantCount: 1,
           unitPricePerPerson: 275000,
           totalAmount: 275000,
-          status: "MAGIC_PAID", // Invalid status!
+          status: "MAGIC_PAID",
           reservedQuantity: 0,
           bookedQuantity: 1,
           createdAt: new Date().toISOString(),
           paymentExpiresAt: new Date().toISOString(),
+          paidAt: new Date().toISOString(),
         },
       ],
       paymentAttempts: [],
@@ -442,42 +444,194 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
 
     window.sessionStorage.setItem(
       TRAVELER_TRANSACTIONS_STORAGE_KEY,
-      JSON.stringify(invalidPayload),
+      JSON.stringify(invalidStatusPayload),
     );
-
     mockTransactionStore.hydrateFromStorage();
     expect(mockTransactionStore.getBookings()).toHaveLength(0);
     expect(
       window.sessionStorage.getItem(TRAVELER_TRANSACTIONS_STORAGE_KEY),
     ).toBeNull();
 
-    // Inject incoherent booking: PENDING_PAYMENT with bookedQuantity > 0
-    const incoherentPayload = {
+    // 10b. Persisted PAID booking with NO matching PaymentAttempt -> rejected
+    const paidNoAttemptPayload = {
       version: 1,
       bookings: [
         {
-          bookingId: "bk_incoherent",
+          bookingId: "bk_paid_no_attempt",
           travelerId: "usr_attacker",
           packageId: "slow_green_day",
           sessionId: "ses_sgd_1",
           participantCount: 1,
           unitPricePerPerson: 275000,
           totalAmount: 275000,
-          status: "PENDING_PAYMENT",
-          reservedQuantity: 1,
-          bookedQuantity: 1, // Incoherent! Cannot be booked while pending
+          status: "PAID",
+          reservedQuantity: 0,
+          bookedQuantity: 1,
           createdAt: new Date().toISOString(),
           paymentExpiresAt: new Date().toISOString(),
+          paidAt: new Date().toISOString(),
         },
       ],
-      paymentAttempts: [],
+      paymentAttempts: [], // Missing attempt!
     };
 
     window.sessionStorage.setItem(
       TRAVELER_TRANSACTIONS_STORAGE_KEY,
-      JSON.stringify(incoherentPayload),
+      JSON.stringify(paidNoAttemptPayload),
     );
+    mockTransactionStore.hydrateFromStorage();
+    expect(mockTransactionStore.getBookings()).toHaveLength(0);
+    expect(
+      window.sessionStorage.getItem(TRAVELER_TRANSACTIONS_STORAGE_KEY),
+    ).toBeNull();
 
+    // 10c. Persisted PAID booking with missing paidAt -> rejected
+    const paidMissingTimestampPayload = {
+      version: 1,
+      bookings: [
+        {
+          bookingId: "bk_paid_no_time",
+          travelerId: "usr_attacker",
+          packageId: "slow_green_day",
+          sessionId: "ses_sgd_1",
+          participantCount: 1,
+          unitPricePerPerson: 275000,
+          totalAmount: 275000,
+          status: "PAID",
+          reservedQuantity: 0,
+          bookedQuantity: 1,
+          createdAt: new Date().toISOString(),
+          paymentExpiresAt: new Date().toISOString(),
+          // missing paidAt!
+        },
+      ],
+      paymentAttempts: [
+        {
+          paymentAttemptId: "pay_att_1",
+          bookingId: "bk_paid_no_time",
+          status: "SUCCEEDED",
+          expiresAt: new Date().toISOString(),
+        },
+      ],
+    };
+
+    window.sessionStorage.setItem(
+      TRAVELER_TRANSACTIONS_STORAGE_KEY,
+      JSON.stringify(paidMissingTimestampPayload),
+    );
+    mockTransactionStore.hydrateFromStorage();
+    expect(mockTransactionStore.getBookings()).toHaveLength(0);
+
+    // 10d. Persisted COMPLETED booking with no SUCCEEDED matching attempt -> rejected
+    const completedPendingAttemptPayload = {
+      version: 1,
+      bookings: [
+        {
+          bookingId: "bk_comp_pending_att",
+          travelerId: "usr_attacker",
+          packageId: "slow_green_day",
+          sessionId: "ses_sgd_1",
+          participantCount: 1,
+          unitPricePerPerson: 275000,
+          totalAmount: 275000,
+          status: "COMPLETED",
+          reservedQuantity: 0,
+          bookedQuantity: 1,
+          createdAt: new Date().toISOString(),
+          paymentExpiresAt: new Date().toISOString(),
+          paidAt: new Date().toISOString(),
+          completedAt: new Date().toISOString(),
+        },
+      ],
+      paymentAttempts: [
+        {
+          paymentAttemptId: "pay_att_2",
+          bookingId: "bk_comp_pending_att",
+          status: "PENDING", // Incoherent! Completed booking cannot have PENDING attempt
+          expiresAt: new Date().toISOString(),
+        },
+      ],
+    };
+
+    window.sessionStorage.setItem(
+      TRAVELER_TRANSACTIONS_STORAGE_KEY,
+      JSON.stringify(completedPendingAttemptPayload),
+    );
+    mockTransactionStore.hydrateFromStorage();
+    expect(mockTransactionStore.getBookings()).toHaveLength(0);
+
+    // 10e. Persisted COMPLETED booking missing completedAt -> rejected
+    const completedMissingDatePayload = {
+      version: 1,
+      bookings: [
+        {
+          bookingId: "bk_comp_no_date",
+          travelerId: "usr_attacker",
+          packageId: "slow_green_day",
+          sessionId: "ses_sgd_1",
+          participantCount: 1,
+          unitPricePerPerson: 275000,
+          totalAmount: 275000,
+          status: "COMPLETED",
+          reservedQuantity: 0,
+          bookedQuantity: 1,
+          createdAt: new Date().toISOString(),
+          paymentExpiresAt: new Date().toISOString(),
+          paidAt: new Date().toISOString(),
+          // missing completedAt!
+        },
+      ],
+      paymentAttempts: [
+        {
+          paymentAttemptId: "pay_att_3",
+          bookingId: "bk_comp_no_date",
+          status: "SUCCEEDED",
+          expiresAt: new Date().toISOString(),
+        },
+      ],
+    };
+
+    window.sessionStorage.setItem(
+      TRAVELER_TRANSACTIONS_STORAGE_KEY,
+      JSON.stringify(completedMissingDatePayload),
+    );
+    mockTransactionStore.hydrateFromStorage();
+    expect(mockTransactionStore.getBookings()).toHaveLength(0);
+
+    // 10f. Persisted PAID/COMPLETED booking with payment attempt belonging to another booking -> rejected
+    const mismatchedBookingAttemptPayload = {
+      version: 1,
+      bookings: [
+        {
+          bookingId: "bk_paid_real",
+          travelerId: "usr_attacker",
+          packageId: "slow_green_day",
+          sessionId: "ses_sgd_1",
+          participantCount: 1,
+          unitPricePerPerson: 275000,
+          totalAmount: 275000,
+          status: "PAID",
+          reservedQuantity: 0,
+          bookedQuantity: 1,
+          createdAt: new Date().toISOString(),
+          paymentExpiresAt: new Date().toISOString(),
+          paidAt: new Date().toISOString(),
+        },
+      ],
+      paymentAttempts: [
+        {
+          paymentAttemptId: "pay_att_other",
+          bookingId: "bk_other_booking", // Mismatched bookingId!
+          status: "SUCCEEDED",
+          expiresAt: new Date().toISOString(),
+        },
+      ],
+    };
+
+    window.sessionStorage.setItem(
+      TRAVELER_TRANSACTIONS_STORAGE_KEY,
+      JSON.stringify(mismatchedBookingAttemptPayload),
+    );
     mockTransactionStore.hydrateFromStorage();
     expect(mockTransactionStore.getBookings()).toHaveLength(0);
   });
@@ -516,48 +670,75 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
     }).not.toThrow();
   });
 
-  it("12. reset clears persisted transaction data and MockProfileAdapter.logout resets store", async () => {
-    sessionStore.setUser(traveler);
+  it("12. explicit reset clears shared transaction data, but normal Traveler logout does NOT delete shared ledger", async () => {
+    const travelerA: AuthUser = {
+      id: "usr_alice_12",
+      name: "Alice",
+      onboardingStatus: "COMPLETED",
+    };
+    const travelerB: AuthUser = {
+      id: "usr_bob_12",
+      name: "Bob",
+      onboardingStatus: "COMPLETED",
+    };
 
-    mockTransactionStore.createTransaction({
-      travelerId: traveler.id,
+    // 1. Traveler A creates and pays booking
+    sessionStore.setUser(travelerA);
+    const txA = mockTransactionStore.createTransaction({
+      travelerId: travelerA.id,
       packageId: "slow_green_day",
       sessionId: "ses_sgd_1",
       participantCount: 1,
       unitPricePerPerson: 275000,
       capacitySnapshot: 6,
-      idempotencyKey: "k_reset_12",
+      idempotencyKey: "k_alice_12",
     });
+    expect(txA.success).toBe(true);
+    if (!txA.success) return;
+
+    const bId = txA.booking.bookingId;
+    mockTransactionStore.executePaymentSuccess({ bookingId: bId });
 
     expect(
       window.sessionStorage.getItem(TRAVELER_TRANSACTIONS_STORAGE_KEY),
     ).not.toBeNull();
 
-    // Calling reset clears memory AND sessionStorage
-    mockTransactionStore.reset();
-    expect(mockTransactionStore.getBookings()).toHaveLength(0);
-    expect(
-      window.sessionStorage.getItem(TRAVELER_TRANSACTIONS_STORAGE_KEY),
-    ).toBeNull();
-
-    // Re-create transaction and test MockProfileAdapter.logout()
-    mockTransactionStore.createTransaction({
-      travelerId: traveler.id,
-      packageId: "slow_green_day",
-      sessionId: "ses_sgd_1",
-      participantCount: 1,
-      unitPricePerPerson: 275000,
-      capacitySnapshot: 6,
-      idempotencyKey: "k_reset_12_logout",
-    });
-    expect(
-      window.sessionStorage.getItem(TRAVELER_TRANSACTIONS_STORAGE_KEY),
-    ).not.toBeNull();
-
+    // 2. Normal Traveler logout via MockProfileAdapter (simulating settings screen)
     const profileAdapter = new MockProfileAdapter();
     await profileAdapter.logout();
 
+    // Traveler session is cleared
     expect(sessionStore.get().user).toBeNull();
+
+    // Authoritative shared transaction ledger still contains the booking in memory and storage!
+    expect(mockTransactionStore.getBookings()).toHaveLength(1);
+    expect(mockTransactionStore.getBookingById(bId)?.status).toBe("PAID");
+    expect(
+      window.sessionStorage.getItem(TRAVELER_TRANSACTIONS_STORAGE_KEY),
+    ).not.toBeNull();
+
+    // 3. Traveler B logs in
+    sessionStore.setUser(travelerB);
+
+    // Traveler B cannot read Traveler A's Payment Result / Trip Detail / My Trips
+    const paymentAdapter = new MockPaymentAdapter();
+    const resultB = await paymentAdapter.getPaymentResult(bId);
+    expect(resultB.status).toBe("NOT_FOUND");
+
+    const tripsAdapter = new MockTripsAdapter();
+    const myTripsB = await tripsAdapter.getMyTrips();
+    expect(
+      myTripsB.upcomingTrips.some((t) => t.booking.bookingId === bId),
+    ).toBe(false);
+
+    const tripDetailB = await tripsAdapter.getTripDetail(bId);
+    expect(tripDetailB).toBeNull();
+
+    // Shared ledger itself remains intact
+    expect(mockTransactionStore.getBookings()).toHaveLength(1);
+
+    // 4. Explicit mockTransactionStore.reset() (e.g. demo reset) clears memory and storage
+    mockTransactionStore.reset();
     expect(mockTransactionStore.getBookings()).toHaveLength(0);
     expect(
       window.sessionStorage.getItem(TRAVELER_TRANSACTIONS_STORAGE_KEY),
@@ -646,7 +827,7 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
     }
   });
 
-  it("15. existing payment idempotency replay remains green after hydration", () => {
+  it("15. existing payment idempotency replay remains green after hydration and incoherent entries are skipped", () => {
     sessionStore.setUser(traveler);
 
     const input = {
@@ -687,5 +868,97 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
     if (!conflictTx.success) {
       expect(conflictTx.reason).toBe("IDEMPOTENCY_CONFLICT");
     }
+  });
+
+  it("16. incoherent persisted idempotency entries (mismatched paymentAttempt or inputs) are skipped during hydration", () => {
+    const validBooking = {
+      bookingId: "bk_idemp_coherent",
+      travelerId: "usr_coherent",
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      totalAmount: 275000,
+      status: "PENDING_PAYMENT" as const,
+      reservedQuantity: 1,
+      bookedQuantity: 0,
+      createdAt: new Date().toISOString(),
+      paymentExpiresAt: new Date().toISOString(),
+    };
+
+    const validAttempt = {
+      paymentAttemptId: "pay_idemp_coherent",
+      bookingId: "bk_idemp_coherent",
+      status: "PENDING" as const,
+      expiresAt: new Date().toISOString(),
+    };
+
+    const payloadWithIncoherentIdempotency = {
+      version: 1,
+      bookings: [validBooking],
+      paymentAttempts: [validAttempt],
+      idempotency: [
+        // Incoherent entry 1: paymentAttempt belongs to another booking
+        {
+          key: "k_incoherent_1",
+          input: {
+            travelerId: "usr_coherent",
+            sessionId: "ses_sgd_1",
+            participantCount: 1,
+            unitPricePerPerson: 275000,
+          },
+          bookingId: "bk_idemp_coherent",
+          paymentAttemptId: "pay_different_attempt",
+        },
+        // Incoherent entry 2: input mismatch (participantCount: 5 vs booking.participantCount: 1)
+        {
+          key: "k_incoherent_2",
+          input: {
+            travelerId: "usr_coherent",
+            sessionId: "ses_sgd_1",
+            participantCount: 5,
+            unitPricePerPerson: 275000,
+          },
+          bookingId: "bk_idemp_coherent",
+          paymentAttemptId: "pay_idemp_coherent",
+        },
+        // Coherent entry
+        {
+          key: "k_coherent_valid",
+          input: {
+            travelerId: "usr_coherent",
+            sessionId: "ses_sgd_1",
+            participantCount: 1,
+            unitPricePerPerson: 275000,
+          },
+          bookingId: "bk_idemp_coherent",
+          paymentAttemptId: "pay_idemp_coherent",
+        },
+      ],
+    };
+
+    window.sessionStorage.setItem(
+      TRAVELER_TRANSACTIONS_STORAGE_KEY,
+      JSON.stringify(payloadWithIncoherentIdempotency),
+    );
+
+    mockTransactionStore.hydrateFromStorage();
+    expect(mockTransactionStore.getBookings()).toHaveLength(1);
+
+    // k_incoherent_1 was skipped
+    expect(
+      mockTransactionStore.getIdempotentTransaction("k_incoherent_1"),
+    ).toBeUndefined();
+
+    // k_incoherent_2 was skipped
+    expect(
+      mockTransactionStore.getIdempotentTransaction("k_incoherent_2"),
+    ).toBeUndefined();
+
+    // k_coherent_valid was restored
+    const coherent =
+      mockTransactionStore.getIdempotentTransaction("k_coherent_valid");
+    expect(coherent).toBeDefined();
+    expect(coherent?.result?.booking.bookingId).toBe("bk_idemp_coherent");
   });
 });

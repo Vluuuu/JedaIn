@@ -505,7 +505,9 @@ Acceptance:
 - transport/access note tidak boleh dikarang,
 - actual photo diprioritaskan jika tersedia,
 - fallback illustration harus jujur,
-- trust badge explanation tidak menjanjikan hal yang tidak dibuktikan.
+- trust badge explanation tidak menjanjikan hal yang tidak dibuktikan,
+- seeded/sample package rating yang tampil ke Traveler diberi provenance/label contoh sebelum dipakai sebagai social proof,
+- runtime post-trip rating tidak dilabeli sebagai contoh.
 
 Status:
 
@@ -627,9 +629,10 @@ Acceptance:
 - review hanya terkait booking/trip yang eligible menurut prototype,
 - Destination dan EO review tetap terpisah,
 - review dapat terlihat pada surface partner terkait,
-- review copy diposisikan sebagai penilaian traveler dan tidak diklaim sebagai penilaian objektif atau bukti pengalaman production nyata.
+- review copy diposisikan sebagai penilaian traveler dan tidak diklaim sebagai penilaian objektif atau bukti pengalaman production nyata,
+- Guest Demo tetap boleh menjadi prototype Traveler identity untuk mendemonstrasikan completion → Destination review → EO/Guide review; ini bukan requirement production authentication.
 
-Status: IMPLEMENTED LIVE — diperkuat pada F3.1 / PR #80.
+Status: IMPLEMENTED LIVE — diperkuat pada F3.1 / PR #80 dan diklarifikasi kembali setelah final role simulation.
 
 ---
 
@@ -727,9 +730,11 @@ Acceptance:
 - jelas bahwa data adalah simulasi prototype,
 - reference date/sample context tampil,
 - distribusi dimensi tidak dinarasikan sebagai intersection,
-- tidak menambahkan confidence/intent score tanpa data.
+- tidak menambahkan confidence/intent score tanpa data,
+- EO Overview tidak menarasikan count simulasi sebagai traveler nyata/traction; count memakai wording respons simulasi,
+- simulated unmet-demand description tetap internal sebagai creative context dan tidak otomatis menjadi Traveler-facing package summary.
 
-Status: IMPLEMENTED LIVE.
+Status: IMPLEMENTED LIVE — disclosure dan Builder isolation diperkuat pada F4.3 / PR #92.
 
 ## REQ-EO-04 — Destination Catalog dan Detail
 
@@ -808,6 +813,8 @@ Acceptance:
 - preview tidak mengubah store, step, submission state, approval state, publish state, atau lifecycle package,
 - preview tidak menampilkan EO Margin, platform commission, checkout Service Fee, fake review/rating/session, transactional CTA, atau internal operationalNote,
 - unknown/mock image tidak disebut actual photo,
+- new draft dari Demand Insight boleh mempertahankan Insight context tetapi Traveler-facing short summary tidak diisi otomatis dari simulated unmet-demand description,
+- existing saved draft summary tetap dipertahankan,
 - submission tetap mengikuti lifecycle existing.
 
 Status: IMPLEMENTED LIVE — diperkuat pada F3.2 / PR #81.
@@ -970,6 +977,8 @@ Overview dapat menyediakan Akses Cepat read-only menuju route canonical:
 Acceptance:
 
 - tidak membuat general capacity tampak sebagai slot yang bisa dijual,
+- progress session-level memakai Peserta Terkonfirmasi terhadap Kuota Sesi EO, bukan terhadap Kapasitas Umum Destinasi,
+- Kapasitas Umum Destinasi tetap venue context terpisah,
 - Quick Actions hanya navigasi/read-only dan tidak memberi authority baru atas session/package EO,
 - wording action tidak mengimplikasikan approve, edit quota, atau supervisory authority,
 - traveler review tidak diklaim sebagai data objektif,
@@ -991,12 +1000,14 @@ Acceptance:
 - session quota dilabeli "Kuota Sesi EO",
 - confirmed participants terpisah,
 - derived difference jika ada menggunakan "Selisih Operasional",
+- derived difference tidak memakai wording "Sisa X Orang" atau tone yang mengesankan sellable availability,
 - table mobile boleh horizontal scroll di container.
 
 Status:
 
 - semantic core IMPLEMENTED LIVE,
-- header consistency D1 IMPLEMENTED LIVE / VERIFIED.
+- header consistency D1 IMPLEMENTED LIVE / VERIFIED,
+- sellable-inventory ambiguity diperkuat pada F4.3 / PR #92.
 
 ## REQ-MIT-05 — Session Operational Summary
 
@@ -1606,16 +1617,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F4.2:
+Current verified competition baseline setelah F4.3:
 
-- current app feature commit: c41547ef9217af267c36131d1ab54283e8f8fba9,
-- 47 suites / 668 tests,
+- current app feature commit: b0b1122a25ee403ab8923c28838c291410ba5faf,
+- 48 suites / 679 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, dan PR #90 Session & Destination Governance Integrity sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, dan PR #92 Final Semantic Truthfulness Hardening sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1649,6 +1660,7 @@ Implemented and verified:
 - final review truthfulness copy + Traveler shell dead-affordance cleanup (F3.4 / PR #86),
 - Traveler transaction ledger same-tab refresh persistence menggunakan sessionStorage (F4.1 / PR #88),
 - future-only EO Session temporal guard + destination guide-ready governance consistency (F4.2 / PR #90),
+- sample-vs-post-trip rating provenance, Demand Insight disclosure/Builder isolation, APPROVED-vs-LIVE guidance, Mitra capacity semantic truthfulness, dan conditional re-review copy (F4.3 / PR #92),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1873,7 +1885,10 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] F3.4 Final Trust & Interaction Cleanup merged melalui PR #86 tanpa business-rule change.
 - [x] F4.1 Traveler Transaction Session Persistence merged melalui PR #88 tanpa business-rule change.
 - [x] F4.2 Session & Destination Governance Integrity merged melalui PR #90 tanpa business-rule change.
-- [x] Current canonical app baseline: c41547ef9217af267c36131d1ab54283e8f8fba9 dengan 47 suites / 668 tests PASS.
+- [x] F4.3 Final Semantic Truthfulness Hardening merged melalui PR #92 tanpa business-rule change.
+- [x] Guest Demo tetap diperbolehkan sebagai prototype Traveler identity untuk mendemonstrasikan booking → completion → Destination review + EO/Guide review.
+- [x] Accepted findings dari Traveler / EO / Mitra / Admin-Judge simulation sudah ditutup sampai F4.3.
+- [x] Current canonical app baseline: b0b1122a25ee403ab8923c28838c291410ba5faf dengan 48 suites / 679 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
@@ -2145,3 +2160,58 @@ Feature-freeze status:
 
 - F4.2 adalah targeted judge-critical P1 hardening dari EO/Admin-Judge simulations.
 - Accepted semantic findings yang tersisa ditangani pada F4.3; selain itu feature freeze tetap berlaku.
+
+## F4.3 — Final Semantic Truthfulness Hardening
+
+PR: #92  
+Merge commit: `b0b1122a25ee403ab8923c28838c291410ba5faf`
+
+Findings addressed:
+
+- TR-03: seeded/sample package rating muncul di early Traveler surfaces tanpa provenance yang cukup jelas.
+- EO-F02: Demand Insight simulated dapat terbaca sebagai real demand dan unmet-demand copy dapat auto-leak ke Traveler-facing summary.
+- EO-F03: package guidance belum cukup jelas membedakan `APPROVED` dari marketplace `LIVE`.
+- MIT-01: session progress/capacity wording dapat membuat Kuota Sesi EO terbaca sebagai Kapasitas Umum Destinasi atau sellable inventory.
+- MIT-02: Destination Profile sebelumnya mengunci re-verification policy yang sebenarnya belum final.
+
+Perubahan canonical:
+
+- Traveler package read model membawa explicit rating provenance: `SAMPLE`, `POST_TRIP`, atau no-rating state.
+- Lima seeded package canonical memakai provenance `SAMPLE`; Explore dan Package Detail hero menampilkan label `(contoh)`.
+- Dynamic LIVE EO package yang memiliki runtime post-trip rating memakai provenance `POST_TRIP` dan tidak dilabeli contoh.
+- Package Detail review heading/rating copy mengikuti provenance dan tidak mengklaim objectivity.
+- EO Overview Demand Opportunity menampilkan `respons simulasi` + visible disclosure bahwa data adalah prototype directional signal, bukan market validation.
+- New Builder draft dari Insight tetap menyimpan Insight context tetapi tidak auto-prefill Traveler-facing `shortSummary` dari `unmetDemandDescription`.
+- Existing authored/saved draft summary tetap dipertahankan.
+- PENDING dan APPROVED package guidance menjelaskan lifecycle `APPROVED → EO Publish → LIVE`; Session tetap boleh disiapkan pada `APPROVED`.
+- Mitra Overview session progress memakai `Peserta Terkonfirmasi / Kuota Sesi EO`; Kapasitas Umum Destinasi tetap venue context terpisah.
+- Capacity screen mengganti `Sisa X Orang` menjadi neutral `Selisih operasional` dan menegaskan bahwa angka tersebut bukan kuota penjualan baru.
+- Destination Profile mengganti policy absolut `memerlukan verifikasi ulang` dengan conditional `dapat memerlukan peninjauan ulang`; tidak ada workflow/policy baru yang dibuat.
+- Guest Demo review flow tetap dipertahankan sebagai prototype capability untuk menunjukkan end-to-end review loop.
+
+Quality gate setelah F4.3:
+
+- 48 test suites,
+- 679 tests PASS,
+- format PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS,
+- Cloudflare Pages preview PASS.
+
+Business / authority impact:
+
+- NONE.
+- Package Price tetap Destination Base Cost + EO Margin.
+- Traveler Service Fee tetap Rp7.500 per booking.
+- Platform Commission tetap 10% GMV dan bukan Traveler checkout line item.
+- Tidak ada perubahan payment/refund semantics, F4.1 transaction persistence, F4.2 Session temporal guard, review target separation, Admin approval authority, EO publish authority, atau Mitra read-only authority.
+- Tidak ada production auth/KYC, re-verification workflow, inventory engine, notification system, backend, atau cross-tab persistence baru.
+
+Final freeze decision:
+
+- F4.3 menutup seluruh accepted findings dari Traveler, EO, Mitra, dan Admin/Judge adversarial simulations.
+- App kembali ke HARD FEATURE FREEZE.
+- Development tidak dibuka lagi untuk wishlist atau generic production features.
+- Perubahan setelah ini hanya jika final rehearsal menemukan regression/P0 demo blocker atau factual contradiction yang nyata.
+- Fokus berikutnya: end-to-end golden rehearsal, judge/demo checklist, dan final live sanity check.

@@ -954,16 +954,27 @@ Mitra dashboard harus membedakan:
 - peserta terkonfirmasi,
 - jadwal/session mendatang.
 
+Overview dapat menyediakan Akses Cepat read-only menuju route canonical:
+
+- Schedule,
+- Capacity,
+- Destination Profile,
+- Reviews.
+
 Acceptance:
 
 - tidak membuat general capacity tampak sebagai slot yang bisa dijual,
+- Quick Actions hanya navigasi/read-only dan tidak memberi authority baru atas session/package EO,
+- wording action tidak mengimplikasikan approve, edit quota, atau supervisory authority,
+- traveler review tidak diklaim sebagai data objektif,
 - spacing/copy harus terbaca jelas,
 - terminology mengikuti semantic guard.
 
 Status:
 
 - core IMPLEMENTED LIVE,
-- spacing polish D1 IMPLEMENTED LIVE / VERIFIED.
+- spacing polish D1 IMPLEMENTED LIVE / VERIFIED,
+- Quick Actions F3.3 IMPLEMENTED LIVE / PR #83.
 
 ## REQ-MIT-04 — Schedule dan Kuota Sesi EO
 
@@ -1570,16 +1581,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F3.2:
+Current verified competition baseline setelah F3.3:
 
-- current app feature commit: f9a067514713753f7063a08e7889dfa50da921c3,
-- 44 suites / 633 tests,
+- current app feature commit: 0c2a0cd0a588f7c2708e9450e17bd3a36b64b0f1,
+- 45 suites / 638 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, dan PR #81 EO Traveler-Facing Draft Preview sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, dan PR #83 Mitra Destination Overview Quick Actions sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1609,6 +1620,7 @@ Implemented and verified:
 - Traveler Package Detail gallery dengan prototype-safe visual views (F3.0 / PR #79),
 - Traveler post-booking Trip Brief pada Trip Detail (F3.1 / PR #80),
 - EO Traveler-facing draft preview pada Package Builder Step 5 (F3.2 / PR #81),
+- Mitra Destination Overview Quick Actions read-only (F3.3 / PR #83),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1940,3 +1952,40 @@ Business rule impact:
 - Platform Commission tetap 10% GMV dan bukan Traveler line item.
 - Admin tetap package approval authority.
 - APPROVED tetap tidak sama dengan LIVE; publish tetap tindakan EO.
+
+## F3.3 — Mitra Destination Overview Quick Actions
+
+PR: #83  
+Merge commit: `0c2a0cd0a588f7c2708e9450e17bd3a36b64b0f1`
+
+Perubahan canonical:
+
+- Destination Overview memiliki section `Akses Cepat` langsung setelah metric band.
+- Quick Actions menuju route canonical:
+  - `/partner/destination/schedule` — `Lihat Jadwal`,
+  - `/partner/destination/capacity` — `Lihat Rincian Kapasitas`,
+  - `/partner/destination/profile` — `Lihat Profil Destinasi`,
+  - `/partner/destination/reviews` — `Lihat Semua Ulasan`.
+- Seluruh action menggunakan client-side navigation dan bersifat read-only.
+- Copy capacity menggunakan wording netral `Konteks daya tampung venue dan alokasi sesi EO`.
+- Review copy tidak mengklaim traveler review sebagai objektif.
+- Quick Actions tetap tersedia ketika upcoming sessions atau reviews kosong.
+- Existing Overview metrics, schedule preview, profile summary, review preview, capacity semantics, dan participant semantics tetap tidak berubah.
+
+Quality gate setelah F3.3:
+
+- 45 test suites,
+- 638 tests PASS,
+- format PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS.
+
+Business rule impact:
+
+- NONE.
+- Mitra tidak mendapat approve/reject authority terhadap package atau session EO.
+- `Kapasitas Umum Destinasi` tetap general venue context, bukan sellable availability.
+- `Peserta Terkonfirmasi` tetap booking-derived participant aggregate.
+- Tidak ada perubahan pricing, payment, refund, lifecycle, atau cross-role state architecture.
+

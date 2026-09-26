@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { Badge } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import type { EoSessionStatus } from "../eo/types";
@@ -143,6 +144,69 @@ export function DestinationOverviewScreen() {
               ? `${data.reviews.length} ulasan destinasi`
               : "Belum ada ulasan traveler"}
           </span>
+        </div>
+      </section>
+
+      <section
+        className="dest-quick-actions"
+        aria-labelledby="dest-quick-actions-title"
+      >
+        <div className="dest-section-heading">
+          <div>
+            <h2 id="dest-quick-actions-title">Akses Cepat</h2>
+            <p>
+              Buka rincian operasional destinasi tanpa mengubah kewenangan sesi
+              EO.
+            </p>
+          </div>
+        </div>
+
+        <div className="dest-quick-actions__grid">
+          <Link
+            to="/partner/destination/schedule"
+            className="dest-quick-action-card"
+          >
+            <span className="dest-quick-action-card__label">Lihat Jadwal</span>
+            <span className="dest-quick-action-card__desc">
+              Pantau jadwal sesi perjalanan mendatang di lokasi
+            </span>
+          </Link>
+
+          <Link
+            to="/partner/destination/capacity"
+            className="dest-quick-action-card"
+          >
+            <span className="dest-quick-action-card__label">
+              Lihat Rincian Kapasitas
+            </span>
+            <span className="dest-quick-action-card__desc">
+              Konteks daya tampung venue dan alokasi sesi EO
+            </span>
+          </Link>
+
+          <Link
+            to="/partner/destination/profile"
+            className="dest-quick-action-card"
+          >
+            <span className="dest-quick-action-card__label">
+              Lihat Profil Destinasi
+            </span>
+            <span className="dest-quick-action-card__desc">
+              Kelengkapan fasilitas, aktivitas, dan data kawasan
+            </span>
+          </Link>
+
+          <Link
+            to="/partner/destination/reviews"
+            className="dest-quick-action-card"
+          >
+            <span className="dest-quick-action-card__label">
+              Lihat Semua Ulasan
+            </span>
+            <span className="dest-quick-action-card__desc">
+              Ulasan traveler khusus kualitas kawasan
+            </span>
+          </Link>
         </div>
       </section>
 

@@ -4,13 +4,18 @@ import {
 } from "./pricing";
 import type {
   BookingRecord,
+  BookingStatus,
   PaymentAttemptRecord,
+  PaymentAttemptStatus,
   PendingPaymentHandoff,
 } from "./types";
 
 export const CHECKOUT_MVP_CONFIG = {
   paymentTimeoutMinutes: 15,
 };
+
+export const TRAVELER_TRANSACTIONS_STORAGE_KEY =
+  "jedain.traveler.transactions.v1";
 
 interface IdempotencyRecord {
   input: {
@@ -23,18 +28,459 @@ interface IdempotencyRecord {
   payment: PaymentAttemptRecord;
 }
 
-let bookings: BookingRecord[] = [];
-let paymentAttempts: PaymentAttemptRecord[] = [];
-const idempotencyMap = new Map<string, IdempotencyRecord>();
+interface PersistedIdempotencyEntry {
+  key: string;
+  input: {
+    travelerId: string;
+    sessionId: string;
+    participantCount: number;
+    unitPricePerPerson: number;
+  };
+  bookingId: string;
+  paymentAttemptId: string;
+}
+
+interface PersistedTransactionState {
+  version: 1;
+  bookings: BookingRecord[];
+  paymentAttempts: PaymentAttemptRecord[];
+  idempotency?: PersistedIdempotencyEntry[];
+}
+
+const VALID_BOOKING_STATUSES: Set<string> = new Set([
+  "PENDING_PAYMENT",
+  "PAID",
+  "COMPLETED",
+  "CANCELLED",
+  "EXPIRED",
+]);
+
+const VALID_PAYMENT_STATUSES: Set<string> = new Set([
+  "PENDING",
+  "VERIFYING",
+  "SUCCEEDED",
+  "FAILED",
+  "CANCELLED",
+  "EXPIRED",
+]);
+
+function getSessionStorage(): Storage | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.sessionStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function isValidIsoDate(val: unknown): val is string {
+  if (typeof val !== "string" || !val.trim()) return false;
+  const timestamp = Date.parse(val);
+  return !Number.isNaN(timestamp);
+}
+
+function validateAndNormalizeBooking(data: unknown): BookingRecord | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  const b = data as Record<string, unknown>;
+
+  if (typeof b.bookingId !== "string" || !b.bookingId.trim()) return null;
+  if (typeof b.travelerId !== "string" || !b.travelerId.trim()) return null;
+  if (typeof b.packageId !== "string" || !b.packageId.trim()) return null;
+  if (typeof b.sessionId !== "string" || !b.sessionId.trim()) return null;
+
+  if (
+    typeof b.participantCount !== "number" ||
+    !Number.isInteger(b.participantCount) ||
+    b.participantCount <= 0
+  ) {
+    return null;
+  }
+
+  if (
+    typeof b.unitPricePerPerson !== "number" ||
+    !Number.isFinite(b.unitPricePerPerson) ||
+    b.unitPricePerPerson < 0
+  ) {
+    return null;
+  }
+
+  if (
+    typeof b.totalAmount !== "number" ||
+    !Number.isFinite(b.totalAmount) ||
+    b.totalAmount < 0
+  ) {
+    return null;
+  }
+
+  if (typeof b.status !== "string" || !VALID_BOOKING_STATUSES.has(b.status)) {
+    return null;
+  }
+  const status = b.status as BookingStatus;
+
+  if (
+    typeof b.reservedQuantity !== "number" ||
+    !Number.isInteger(b.reservedQuantity) ||
+    b.reservedQuantity < 0
+  ) {
+    return null;
+  }
+
+  if (
+    typeof b.bookedQuantity !== "number" ||
+    !Number.isInteger(b.bookedQuantity) ||
+    b.bookedQuantity < 0
+  ) {
+    return null;
+  }
+
+  // Coherence guards between status and quantities
+  if (status === "PENDING_PAYMENT") {
+    if (b.bookedQuantity !== 0 || b.reservedQuantity <= 0) return null;
+  } else if (status === "PAID" || status === "COMPLETED") {
+    if (b.reservedQuantity !== 0 || b.bookedQuantity <= 0) return null;
+  } else if (status === "CANCELLED" || status === "EXPIRED") {
+    if (b.reservedQuantity !== 0 || b.bookedQuantity !== 0) return null;
+  }
+
+  if (!isValidIsoDate(b.createdAt)) return null;
+  if (!isValidIsoDate(b.paymentExpiresAt)) return null;
+
+  if (status === "PAID") {
+    if (!isValidIsoDate(b.paidAt)) return null;
+    if (b.completedAt !== undefined) return null;
+  } else if (status === "COMPLETED") {
+    if (!isValidIsoDate(b.paidAt)) return null;
+    if (!isValidIsoDate(b.completedAt)) return null;
+  } else {
+    if (b.paidAt !== undefined || b.completedAt !== undefined) return null;
+  }
+
+  const subtotal =
+    typeof b.subtotal === "number" &&
+    Number.isFinite(b.subtotal) &&
+    b.subtotal >= 0
+      ? b.subtotal
+      : undefined;
+  const serviceFee =
+    typeof b.serviceFee === "number" &&
+    Number.isFinite(b.serviceFee) &&
+    b.serviceFee >= 0
+      ? b.serviceFee
+      : undefined;
+  const total =
+    typeof b.total === "number" && Number.isFinite(b.total) && b.total >= 0
+      ? b.total
+      : undefined;
+
+  return {
+    bookingId: b.bookingId,
+    travelerId: b.travelerId,
+    packageId: b.packageId,
+    sessionId: b.sessionId,
+    participantCount: b.participantCount,
+    unitPricePerPerson: b.unitPricePerPerson,
+    subtotal,
+    serviceFee,
+    total,
+    totalAmount: b.totalAmount,
+    status,
+    reservedQuantity: b.reservedQuantity,
+    bookedQuantity: b.bookedQuantity,
+    createdAt: b.createdAt,
+    paymentExpiresAt: b.paymentExpiresAt,
+    paidAt: b.paidAt as string | undefined,
+    completedAt: b.completedAt as string | undefined,
+  };
+}
+
+function validateAndNormalizePaymentAttempt(
+  data: unknown,
+  bookingsMap: Map<string, BookingRecord>,
+): PaymentAttemptRecord | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  const p = data as Record<string, unknown>;
+
+  if (typeof p.paymentAttemptId !== "string" || !p.paymentAttemptId.trim())
+    return null;
+  if (typeof p.bookingId !== "string" || !p.bookingId.trim()) return null;
+
+  const matchingBooking = bookingsMap.get(p.bookingId);
+  if (!matchingBooking) return null;
+
+  if (typeof p.status !== "string" || !VALID_PAYMENT_STATUSES.has(p.status)) {
+    return null;
+  }
+  const status = p.status as PaymentAttemptStatus;
+
+  if (!isValidIsoDate(p.expiresAt)) return null;
+  if (p.updatedAt !== undefined && !isValidIsoDate(p.updatedAt)) return null;
+
+  // Cross-entity coherence
+  if (status === "SUCCEEDED") {
+    if (
+      matchingBooking.status !== "PAID" &&
+      matchingBooking.status !== "COMPLETED"
+    ) {
+      return null;
+    }
+  }
+  if (
+    matchingBooking.status === "PAID" ||
+    matchingBooking.status === "COMPLETED"
+  ) {
+    if (status !== "SUCCEEDED") return null;
+  }
+  if (matchingBooking.status === "PENDING_PAYMENT") {
+    if (
+      status === "SUCCEEDED" ||
+      status === "CANCELLED" ||
+      status === "EXPIRED"
+    ) {
+      return null;
+    }
+  }
+  if (matchingBooking.status === "CANCELLED") {
+    if (
+      status === "SUCCEEDED" ||
+      status === "PENDING" ||
+      status === "VERIFYING"
+    ) {
+      return null;
+    }
+  }
+  if (matchingBooking.status === "EXPIRED") {
+    if (
+      status === "SUCCEEDED" ||
+      status === "PENDING" ||
+      status === "VERIFYING"
+    ) {
+      return null;
+    }
+  }
+
+  return {
+    paymentAttemptId: p.paymentAttemptId,
+    bookingId: p.bookingId,
+    status,
+    expiresAt: p.expiresAt,
+    updatedAt: p.updatedAt as string | undefined,
+  };
+}
+
+function validateAndNormalizeTransactions(data: unknown): {
+  bookings: BookingRecord[];
+  paymentAttempts: PaymentAttemptRecord[];
+  idempotencyMap: Map<string, IdempotencyRecord>;
+} | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  const candidate = data as Record<string, unknown>;
+
+  if (candidate.version !== 1) return null;
+  if (!Array.isArray(candidate.bookings)) return null;
+  if (!Array.isArray(candidate.paymentAttempts)) return null;
+
+  const validBookings: BookingRecord[] = [];
+  const bookingsMap = new Map<string, BookingRecord>();
+
+  for (const item of candidate.bookings) {
+    const valid = validateAndNormalizeBooking(item);
+    if (!valid) return null;
+    if (bookingsMap.has(valid.bookingId)) return null;
+    validBookings.push(valid);
+    bookingsMap.set(valid.bookingId, valid);
+  }
+
+  const validPaymentAttempts: PaymentAttemptRecord[] = [];
+  const attemptsMap = new Map<string, PaymentAttemptRecord>();
+
+  for (const item of candidate.paymentAttempts) {
+    const valid = validateAndNormalizePaymentAttempt(item, bookingsMap);
+    if (!valid) return null;
+    if (attemptsMap.has(valid.paymentAttemptId)) return null;
+    validPaymentAttempts.push(valid);
+    attemptsMap.set(valid.paymentAttemptId, valid);
+  }
+
+  // Cross-entity coherence: every PAID or COMPLETED booking MUST have a matching SUCCEEDED attempt
+  for (const booking of validBookings) {
+    if (booking.status === "PAID" || booking.status === "COMPLETED") {
+      const matchingAttempt = validPaymentAttempts.find(
+        (p) => p.bookingId === booking.bookingId && p.status === "SUCCEEDED",
+      );
+      if (!matchingAttempt) {
+        return null;
+      }
+    }
+  }
+
+  const newIdempotencyMap = new Map<string, IdempotencyRecord>();
+  if (Array.isArray(candidate.idempotency)) {
+    for (const item of candidate.idempotency) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+      const rec = item as Record<string, unknown>;
+      if (typeof rec.key !== "string" || !rec.key.trim()) continue;
+      if (
+        typeof rec.bookingId !== "string" ||
+        typeof rec.paymentAttemptId !== "string"
+      ) {
+        continue;
+      }
+
+      const booking = bookingsMap.get(rec.bookingId);
+      const payment = attemptsMap.get(rec.paymentAttemptId);
+      if (!booking || !payment) continue;
+
+      // Invariant: payment attempt must belong to the referenced booking
+      if (payment.bookingId !== booking.bookingId) continue;
+
+      if (
+        !rec.input ||
+        typeof rec.input !== "object" ||
+        Array.isArray(rec.input)
+      ) {
+        continue;
+      }
+      const inp = rec.input as Record<string, unknown>;
+      if (
+        inp.travelerId !== booking.travelerId ||
+        inp.sessionId !== booking.sessionId ||
+        inp.participantCount !== booking.participantCount ||
+        inp.unitPricePerPerson !== booking.unitPricePerPerson
+      ) {
+        continue;
+      }
+
+      newIdempotencyMap.set(rec.key, {
+        input: {
+          travelerId: booking.travelerId,
+          sessionId: booking.sessionId,
+          participantCount: booking.participantCount,
+          unitPricePerPerson: booking.unitPricePerPerson,
+        },
+        booking,
+        payment,
+      });
+    }
+  }
+
+  return {
+    bookings: validBookings,
+    paymentAttempts: validPaymentAttempts,
+    idempotencyMap: newIdempotencyMap,
+  };
+}
+
+function loadPersistedTransactions(): {
+  bookings: BookingRecord[];
+  paymentAttempts: PaymentAttemptRecord[];
+  idempotencyMap: Map<string, IdempotencyRecord>;
+} {
+  const storage = getSessionStorage();
+  if (!storage) {
+    return { bookings: [], paymentAttempts: [], idempotencyMap: new Map() };
+  }
+
+  try {
+    const raw = storage.getItem(TRAVELER_TRANSACTIONS_STORAGE_KEY);
+    if (!raw) {
+      return { bookings: [], paymentAttempts: [], idempotencyMap: new Map() };
+    }
+
+    const parsed = JSON.parse(raw);
+    const validated = validateAndNormalizeTransactions(parsed);
+    if (!validated) {
+      try {
+        storage.removeItem(TRAVELER_TRANSACTIONS_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+      return { bookings: [], paymentAttempts: [], idempotencyMap: new Map() };
+    }
+    return validated;
+  } catch {
+    try {
+      storage.removeItem(TRAVELER_TRANSACTIONS_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    return { bookings: [], paymentAttempts: [], idempotencyMap: new Map() };
+  }
+}
+
+function persistCurrentTransactions(): void {
+  const storage = getSessionStorage();
+  if (!storage) return;
+
+  try {
+    if (bookings.length === 0 && paymentAttempts.length === 0) {
+      storage.removeItem(TRAVELER_TRANSACTIONS_STORAGE_KEY);
+      return;
+    }
+
+    const idempotencyEntries: PersistedIdempotencyEntry[] = [];
+    for (const [key, record] of idempotencyMap.entries()) {
+      idempotencyEntries.push({
+        key,
+        input: { ...record.input },
+        bookingId: record.booking.bookingId,
+        paymentAttemptId: record.payment.paymentAttemptId,
+      });
+    }
+
+    const payload: PersistedTransactionState = {
+      version: 1,
+      bookings: bookings.map((b) => ({ ...b })),
+      paymentAttempts: paymentAttempts.map((p) => ({ ...p })),
+      idempotency: idempotencyEntries,
+    };
+
+    storage.setItem(TRAVELER_TRANSACTIONS_STORAGE_KEY, JSON.stringify(payload));
+  } catch {
+    // Gracefully ignore storage write failures (quota exceeded, security error, etc.)
+  }
+}
+
+function clearPersistedTransactions(): void {
+  const storage = getSessionStorage();
+  if (!storage) return;
+
+  try {
+    storage.removeItem(TRAVELER_TRANSACTIONS_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+const initialTransactions = loadPersistedTransactions();
+let bookings: BookingRecord[] = initialTransactions.bookings;
+let paymentAttempts: PaymentAttemptRecord[] =
+  initialTransactions.paymentAttempts;
+let idempotencyMap: Map<string, IdempotencyRecord> =
+  initialTransactions.idempotencyMap;
 
 export const mockTransactionStore = {
   reset(): void {
     bookings = [];
     paymentAttempts = [];
     idempotencyMap.clear();
+    clearPersistedTransactions();
+  },
+
+  clearMemoryForTesting(): void {
+    bookings = [];
+    paymentAttempts = [];
+    idempotencyMap.clear();
+  },
+
+  hydrateFromStorage(): void {
+    const loaded = loadPersistedTransactions();
+    bookings = loaded.bookings;
+    paymentAttempts = loaded.paymentAttempts;
+    idempotencyMap = loaded.idempotencyMap;
   },
 
   reconcileExpiredPendingPayments(nowMs: number = Date.now()): void {
+    let mutated = false;
     for (const booking of bookings) {
       if (booking.status === "PENDING_PAYMENT") {
         const expTime = new Date(booking.paymentExpiresAt).getTime();
@@ -53,8 +499,12 @@ export const mockTransactionStore = {
           if (attempt) {
             attempt.status = "EXPIRED";
           }
+          mutated = true;
         }
       }
+    }
+    if (mutated) {
+      persistCurrentTransactions();
     }
   },
 
@@ -197,6 +647,7 @@ export const mockTransactionStore = {
       booking.reservedQuantity = 0;
       booking.bookedQuantity = 0;
       attempt.status = "EXPIRED";
+      persistCurrentTransactions();
       return { success: false, reason: "EXPIRED", booking };
     }
 
@@ -208,6 +659,8 @@ export const mockTransactionStore = {
 
     attempt.status = "SUCCEEDED";
     attempt.updatedAt = new Date(nowMs).toISOString();
+
+    persistCurrentTransactions();
 
     return { success: true, booking };
   },
@@ -246,11 +699,14 @@ export const mockTransactionStore = {
       booking.reservedQuantity = 0;
       booking.bookedQuantity = 0;
       attempt.status = "EXPIRED";
+      persistCurrentTransactions();
       return { success: false, reason: "EXPIRED", booking };
     }
 
     attempt.status = "FAILED";
     attempt.updatedAt = new Date(nowMs).toISOString();
+
+    persistCurrentTransactions();
 
     return { success: true, booking };
   },
@@ -307,6 +763,7 @@ export const mockTransactionStore = {
         (p) => p.bookingId === booking.bookingId,
       );
       if (attempt) attempt.status = "EXPIRED";
+      persistCurrentTransactions();
       return { success: false, reason: "EXPIRED", booking };
     }
 
@@ -321,6 +778,8 @@ export const mockTransactionStore = {
     if (attempt) {
       attempt.status = "CANCELLED";
     }
+
+    persistCurrentTransactions();
 
     return { success: true, booking };
   },
@@ -358,6 +817,8 @@ export const mockTransactionStore = {
 
     booking.status = "COMPLETED";
     booking.completedAt = new Date(nowMs).toISOString();
+
+    persistCurrentTransactions();
 
     return { success: true, booking };
   },
@@ -513,6 +974,8 @@ export const mockTransactionStore = {
 
     idempotencyMap.set(input.idempotencyKey, { ...record });
 
+    persistCurrentTransactions();
+
     return { success: true, booking, payment };
   },
 
@@ -525,5 +988,6 @@ export const mockTransactionStore = {
     if (payment) {
       paymentAttempts.push({ ...payment });
     }
+    persistCurrentTransactions();
   },
 };

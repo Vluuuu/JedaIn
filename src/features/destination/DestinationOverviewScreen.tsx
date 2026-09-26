@@ -92,7 +92,9 @@ export function DestinationOverviewScreen() {
               {verificationLabel}
             </Badge>
             <Badge tone="neutral" showSymbol={false}>
-              Pemandu lokal tersedia
+              {destination.guideReady
+                ? "Pemandu lokal tersedia"
+                : "Pemandu lokal belum tersedia"}
             </Badge>
           </div>
         </div>
@@ -232,7 +234,11 @@ export function DestinationOverviewScreen() {
             </div>
             <div>
               <dt>Pemanduan Lokal</dt>
-              <dd>Pemandu lokal tersedia</dd>
+              <dd>
+                {destination.guideReady
+                  ? "Pemandu lokal tersedia"
+                  : "Pemandu lokal belum tersedia"}
+              </dd>
             </div>
             <div>
               <dt>Biaya Dasar</dt>

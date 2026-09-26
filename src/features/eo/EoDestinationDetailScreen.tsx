@@ -32,7 +32,14 @@ export function EoDestinationDetailScreen() {
     );
   }
 
+  const isEligible =
+    destination.status === "ACTIVE" &&
+    (destination.verificationLevel === "BASIC" ||
+      destination.verificationLevel === "PLUS") &&
+    destination.guideReady === true;
+
   const handleCreatePackage = () => {
+    if (!isEligible) return;
     navigate(
       `/partner/eo/packages/new?destinationId=${destination.destinationId}`,
     );
@@ -78,9 +85,15 @@ export function EoDestinationDetailScreen() {
                 ? "Terverifikasi Plus"
                 : "Terverifikasi Dasar"}
             </Badge>
-            <span className="eo-dest-detail-hero__guide-badge">
-              Pemandu lokal tersedia
-            </span>
+            {destination.guideReady ? (
+              <span className="eo-dest-detail-hero__guide-badge">
+                Pemandu lokal tersedia
+              </span>
+            ) : (
+              <span className="eo-dest-detail-hero__guide-badge eo-dest-detail-hero__guide-badge--not-ready">
+                Pemandu lokal belum tersedia
+              </span>
+            )}
           </div>
 
           <p className="eo-dest-detail-hero__loc">
@@ -98,14 +111,20 @@ export function EoDestinationDetailScreen() {
               </strong>
             </div>
 
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={handleCreatePackage}
-            >
-              Buat Paket dengan Destinasi Ini &rarr;
-            </Button>
+            {isEligible ? (
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleCreatePackage}
+              >
+                Buat Paket dengan Destinasi Ini &rarr;
+              </Button>
+            ) : (
+              <Button type="button" variant="secondary" size="md" disabled>
+                Belum Memenuhi Syarat Paket
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -272,10 +291,18 @@ export function EoDestinationDetailScreen() {
             <h3 className="eo-dest-side-title">Pemanduan Lokal</h3>
             <p className="eo-dest-side-text">
               {destination.localGuideSummary ??
-                "Mitra destinasi menyediakan pemandu lokal terlatih untuk mendampingi alur trip di lokasi."}
+                (destination.guideReady
+                  ? "Mitra destinasi menyediakan pemandu lokal terlatih untuk mendampingi alur trip di lokasi."
+                  : "Destinasi belum memiliki pemandu lokal resmi terverifikasi di lokasi.")}
             </p>
             <div className="eo-dest-side-badge-box">
-              <span className="eo-dest-badge-ready">Pemandu Lokal Siap</span>
+              {destination.guideReady ? (
+                <span className="eo-dest-badge-ready">Pemandu Lokal Siap</span>
+              ) : (
+                <span className="eo-dest-badge-not-ready">
+                  Pemandu Lokal Belum Siap
+                </span>
+              )}
             </div>
             <p
               style={{
@@ -285,9 +312,9 @@ export function EoDestinationDetailScreen() {
                 lineHeight: 1.4,
               }}
             >
-              Kesiapan pemandu lokal merupakan informasi kemampuan destinasi
-              secara umum, bukan penugasan pemandu individu untuk jadwal
-              tertentu.
+              {destination.guideReady
+                ? "Kesiapan pemandu lokal merupakan informasi kemampuan destinasi secara umum, bukan penugasan pemandu individu untuk jadwal tertentu."
+                : "Kesiapan pemandu lokal belum terverifikasi untuk destinasi ini, sehingga belum dapat digunakan dalam perancangan paket EO."}
             </p>
           </div>
 
@@ -323,21 +350,34 @@ export function EoDestinationDetailScreen() {
           </div>
 
           {/* Action Card */}
-          <div className="eo-dest-side-cta-card">
-            <h3 className="eo-dest-side-cta-title">Siap merancang paket?</h3>
-            <p className="eo-dest-side-cta-desc">
-              Buka Trip Builder dengan destinasi ini sebagai dasar alur
-              pengalaman.
-            </p>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={handleCreatePackage}
-            >
-              Buat Paket Sekarang
-            </Button>
-          </div>
+          {isEligible ? (
+            <div className="eo-dest-side-cta-card">
+              <h3 className="eo-dest-side-cta-title">Siap merancang paket?</h3>
+              <p className="eo-dest-side-cta-desc">
+                Buka Trip Builder dengan destinasi ini sebagai dasar alur
+                pengalaman.
+              </p>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleCreatePackage}
+              >
+                Buat Paket Sekarang
+              </Button>
+            </div>
+          ) : (
+            <div className="eo-dest-side-cta-card eo-dest-side-cta-card--disabled">
+              <h3 className="eo-dest-side-cta-title">Belum Dapat Dipilih</h3>
+              <p className="eo-dest-side-cta-desc">
+                Destinasi ini belum memiliki kesiapan pemandu lokal
+                terverifikasi sehingga belum memenuhi syarat pembuatan paket EO.
+              </p>
+              <Button type="button" variant="secondary" size="md" disabled>
+                Tidak Dapat Dibuat Paket
+              </Button>
+            </div>
+          )}
         </aside>
       </div>
     </div>

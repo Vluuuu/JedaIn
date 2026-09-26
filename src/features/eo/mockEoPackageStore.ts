@@ -734,6 +734,7 @@ export const mockEoPackageStore = {
     capacity: number;
     pricePerPerson: number;
     operationalNote?: string;
+    nowMs?: number;
   }): { success: boolean; session?: EoSessionRecord; message?: string } {
     const actor = partnerSessionStore.get();
     if (!actor || actor.role !== "EO") {
@@ -773,15 +774,42 @@ export const mockEoPackageStore = {
       return { success: false, message: "Kapasitas peserta minimal 1 orang." };
     }
 
-    const nowIso = new Date().toISOString();
+    // Temporal validation (EO-F01)
+    const nowMs = input.nowMs ?? Date.now();
+    const startMs = Date.parse(input.startAt);
+    const endMs = Date.parse(input.endAt);
+
+    if (Number.isNaN(startMs) || Number.isNaN(endMs)) {
+      return {
+        success: false,
+        message: "Format tanggal dan waktu sesi tidak valid.",
+      };
+    }
+
+    if (startMs <= nowMs) {
+      return {
+        success: false,
+        message:
+          "Waktu mulai sesi harus di masa depan (tidak boleh di masa lalu atau waktu sekarang).",
+      };
+    }
+
+    if (endMs <= startMs) {
+      return {
+        success: false,
+        message: "Waktu selesai sesi harus setelah waktu mulai.",
+      };
+    }
+
+    const nowIso = new Date(nowMs).toISOString();
     const cleanNote = input.operationalNote?.trim();
     const sessionId = `ses_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
     const session: EoSessionRecord = {
       sessionId,
       packageId: input.packageId,
       eoId: pkg.eoId,
-      startAt: input.startAt,
-      endAt: input.endAt,
+      startAt: new Date(startMs).toISOString(),
+      endAt: new Date(endMs).toISOString(),
       capacity: input.capacity,
       remainingSlots: input.capacity,
       pricePerPerson: input.pricePerPerson,
@@ -798,6 +826,7 @@ export const mockEoPackageStore = {
   updateSessionStatus(
     sessionId: string,
     status: "OPEN" | "FULL" | "CLOSED" | "CANCELLED",
+    nowMs?: number,
   ): boolean {
     const actor = partnerSessionStore.get();
     if (!actor || actor.role !== "EO") return false;
@@ -809,6 +838,16 @@ export const mockEoPackageStore = {
       (item) => item.sessionId === sessionId && item.eoId === actor.id,
     );
     if (!s) return false;
+
+    // Past session must not be reopened (EO-F01)
+    if (status === "OPEN") {
+      const currentNowMs = nowMs ?? Date.now();
+      const startMs = Date.parse(s.startAt);
+      if (Number.isNaN(startMs) || startMs <= currentNowMs) {
+        return false;
+      }
+    }
+
     s.status = status;
     return true;
   },

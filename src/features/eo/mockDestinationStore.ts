@@ -102,14 +102,14 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     province: "Jawa Timur",
     city: "Pasuruan",
     verificationLevel: "BASIC",
-    guideReady: true,
+    guideReady: false,
     baseCostPerPerson: 95000,
     description:
-      "Kawasan hutan bambu hening untuk kontemplasi tenang dan jalan santai. Didukung pemandu lokal desa wisata yang siap memandu alur perjalanan.",
+      "Kawasan hutan bambu hening untuk kontemplasi tenang dan jalan santai mandiri di bawah naungan rumpun bambu alami.",
     highlights: [
       "Suasana sangat hening dan sejuk alami",
       "Spot meditasi dan lorong bambu teduh",
-      "Pemandu lokal desa wisata siap mendampingi",
+      "Jalur setapak kanopi bambu yang tenang",
     ],
     capacityPerSession: 12,
     imageUrl:
@@ -132,7 +132,7 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
       "Kapasitas per sesi dibatasi maksimal 12 orang demi menjaga kekhidmatan hening.",
     ],
     localGuideSummary:
-      "Pemandu desa wisata Trawas siap memandu alur jalan dan etika menjaga keheningan ekosistem bambu.",
+      "Belum memiliki pemandu lokal resmi di lokasi. Pengunjung menikmati kawasan secara mandiri.",
   },
 ];
 

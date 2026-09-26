@@ -76,7 +76,7 @@ export function AdminTrustStatusScreen() {
       entityType: "DESTINATION",
       name: d.name,
       locationOrBusiness: d.locationLabel,
-      verificationLevelOrGuideStatus: `Verifikasi ${d.verificationLevel} ${d.guideReady ? "(Guide Ready ✓)" : ""}`,
+      verificationLevelOrGuideStatus: `Verifikasi ${d.verificationLevel}${d.guideReady ? " (Guide Ready ✓)" : ""}`,
       reviewAverage: avgRating,
       reviewCount: reviews.length,
       complaintCount: complaints.length,

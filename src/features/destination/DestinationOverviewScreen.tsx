@@ -180,7 +180,7 @@ export function DestinationOverviewScreen() {
               Lihat Rincian Kapasitas
             </span>
             <span className="dest-quick-action-card__desc">
-              Pengawasan daya tampung venue dan alokasi sesi EO
+              Konteks daya tampung venue dan alokasi sesi EO
             </span>
           </Link>
 
@@ -204,7 +204,7 @@ export function DestinationOverviewScreen() {
               Lihat Semua Ulasan
             </span>
             <span className="dest-quick-action-card__desc">
-              Ulasan objektif traveler khusus kualitas kawasan
+              Ulasan traveler khusus kualitas kawasan
             </span>
           </Link>
         </div>

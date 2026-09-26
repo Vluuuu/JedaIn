@@ -157,6 +157,12 @@ describe("F3.3 — Mitra Destination Overview Quick Actions", () => {
     expect(text).not.toContain("Kelola Sesi EO");
     expect(text).not.toContain("Atur kuota");
     expect(text).not.toContain("Konfirmasi sesi");
+    expect(text).not.toContain("Pengawasan daya tampung");
+    expect(text).not.toContain("Ulasan objektif");
+
+    // Informational context copy
+    expect(text).toContain("Konteks daya tampung venue dan alokasi sesi EO");
+    expect(text).toContain("Ulasan traveler khusus kualitas kawasan");
   });
 
   it("6. existing Overview semantics and preview sections remain intact and unchanged", async () => {

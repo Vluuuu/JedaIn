@@ -39,21 +39,6 @@
   text-align: left;
 }
 
-.home-greeting-brand-chip {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  color: var(--color-forest-700);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: var(--color-forest-50);
-  border: 1px solid var(--color-forest-100);
-  padding: 0.1875rem 0.5rem;
-  border-radius: var(--radius-pill);
-}
-
 .home-greeting-title {
   margin: 0;
   color: var(--color-stone-900);

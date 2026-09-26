@@ -21,8 +21,8 @@ describe("Landing OpeningHero & SwipeJourneyControl", () => {
       "Wellness experience terkurasi dari destinasi lokal terverifikasi",
     );
     expect(markup).toContain("disesuaikan dengan kebutuhan jedamu.");
-    expect(markup).toContain("Mulai Cari Jedamu");
-    expect(markup).toContain('class="opening-hero__primary-action"');
+    expect(markup).not.toContain("Mulai Cari Jedamu");
+    expect(markup).not.toContain("opening-hero__primary-action");
     expect(markup).toContain('class="swipe-control"');
   });
 

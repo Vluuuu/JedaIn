@@ -2036,4 +2036,3 @@ Feature-freeze decision:
 - F3.4 menutup batch F3.
 - Setelah F3.4, default mode kembali ke feature freeze.
 - Coding baru hanya dilakukan bila simulasi role/judge menemukan P0 blocker, factual correction, atau judge-critical P1 yang kecil dan evidence-backed.
-

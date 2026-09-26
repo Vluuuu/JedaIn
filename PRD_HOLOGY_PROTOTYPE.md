@@ -2090,4 +2090,3 @@ Feature-freeze status:
 
 - F4.1 adalah targeted judge-critical P1 reopening dari feature freeze berdasarkan external Traveler simulation.
 - Di luar accepted final-hardening findings, feature freeze tetap berlaku.
-

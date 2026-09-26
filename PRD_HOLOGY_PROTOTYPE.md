@@ -1284,7 +1284,7 @@ Current architecture boleh memakai:
 - module-level state,
 - React state,
 - data URI media untuk demo tertentu,
-- sessionStorage untuk temporary Traveler session.
+- sessionStorage untuk temporary Traveler session dan same-tab Traveler transaction ledger.
 
 ## 17.1 Key Product Entities
 
@@ -1339,6 +1339,14 @@ Traveler SessionState:
 - user
 - onboarding
 - quizDraft
+
+Traveler Transaction Session State:
+
+- booking records,
+- payment attempt records,
+- idempotency linkage yang dibutuhkan untuk replay invariant,
+- persisted hanya pada sessionStorage per browser tab/session,
+- bukan production database, bukan cross-tab synchronization.
 
 ## 17.3 Data Honesty
 
@@ -1589,16 +1597,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F3.4:
+Current verified competition baseline setelah F4.1:
 
-- current app feature commit: 399f869e380df628c5c30040383d319ee0e275b1,
-- 45 suites / 639 tests,
+- current app feature commit: 68da872cf3f7c12f75241ba41f1df1fab95984a7,
+- 46 suites / 655 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, dan PR #86 Final Trust & Interaction Cleanup sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, dan PR #88 Traveler Transaction Session Persistence sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1630,6 +1638,7 @@ Implemented and verified:
 - EO Traveler-facing draft preview pada Package Builder Step 5 (F3.2 / PR #81),
 - Mitra Destination Overview Quick Actions read-only (F3.3 / PR #83),
 - final review truthfulness copy + Traveler shell dead-affordance cleanup (F3.4 / PR #86),
+- Traveler transaction ledger same-tab refresh persistence menggunakan sessionStorage (F4.1 / PR #88),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1852,7 +1861,8 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] F3.2 EO Traveler-Facing Draft Preview merged melalui PR #81 tanpa business-rule change.
 - [x] F3.3 Mitra Destination Overview Quick Actions merged melalui PR #83 tanpa business-rule change.
 - [x] F3.4 Final Trust & Interaction Cleanup merged melalui PR #86 tanpa business-rule change.
-- [x] Current canonical app baseline: 399f869e380df628c5c30040383d319ee0e275b1 dengan 45 suites / 639 tests PASS.
+- [x] F4.1 Traveler Transaction Session Persistence merged melalui PR #88 tanpa business-rule change.
+- [x] Current canonical app baseline: 68da872cf3f7c12f75241ba41f1df1fab95984a7 dengan 46 suites / 655 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
@@ -2036,3 +2046,47 @@ Feature-freeze decision:
 - F3.4 menutup batch F3.
 - Setelah F3.4, default mode kembali ke feature freeze.
 - Coding baru hanya dilakukan bila simulasi role/judge menemukan P0 blocker, factual correction, atau judge-critical P1 yang kecil dan evidence-backed.
+
+## F4.1 — Traveler Transaction Session Persistence
+
+PR: #88  
+Merge commit: `68da872cf3f7c12f75241ba41f1df1fab95984a7`
+
+Finding addressed:
+
+- TR-01 dari Traveler adversarial simulation: Payment Result dan Trip Detail kehilangan transaksi baru setelah normal browser refresh.
+
+Perubahan canonical:
+
+- `mockTransactionStore` tetap authoritative shared booking/payment ledger.
+- Booking, PaymentAttempt, dan idempotency linkage yang diperlukan untuk replay invariant dipersist ke versioned `sessionStorage` key per browser tab/session.
+- Same-tab refresh dapat memulihkan pending payment, successful payment result, My Trips, dan Trip Detail untuk booking yang sama.
+- `paymentExpiresAt` tetap authoritative; refresh tidak memulai ulang countdown.
+- Expired pending payment tetap direkonsiliasi menjadi `EXPIRED` dan reservation dilepas.
+- `PAID` / `COMPLETED` persisted state hanya valid bila memiliki matching `PaymentAttempt` berstatus `SUCCEEDED` serta timestamp lifecycle yang koheren.
+- Malformed atau incoherent persisted payload ditolak secara aman dan tidak boleh memfabrikasi successful payment/trip.
+- Restored idempotency linkage wajib cocok dengan booking/payment yang sama dan input booking canonical.
+- Traveler logout hanya menghapus Traveler session/auth state; logout tidak menghapus shared authoritative transaction ledger.
+- Ownership checks tetap mencegah Traveler lain membaca booking yang bukan miliknya.
+- Explicit competition/demo reset tetap dapat membersihkan transaction ledger.
+
+Quality gate setelah F4.1:
+
+- 46 test suites,
+- 655 tests PASS,
+- format PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS,
+- Cloudflare Pages preview PASS.
+
+Business / architecture impact:
+
+- Tidak ada perubahan Package Price, Destination Base Cost, EO Margin, Traveler Service Fee Rp7.500, Platform Commission 10% GMV, refund semantics, payment simulation semantics, review eligibility, atau role authority.
+- Tidak ada `localStorage`, IndexedDB, BroadcastChannel, backend/database, atau cross-tab synchronization.
+- F4.1 tidak menyelesaikan seluruh cross-role hard-reload constraint; scope hanya same-tab Traveler transaction recovery yang dibutuhkan oleh explicit Traveler contracts.
+
+Feature-freeze status:
+
+- F4.1 adalah targeted judge-critical P1 reopening dari feature freeze berdasarkan external Traveler simulation.
+- Di luar accepted final-hardening findings, feature freeze tetap berlaku.

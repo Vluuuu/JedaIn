@@ -626,7 +626,8 @@ Acceptance:
 - safety/preparation notes existing tidak perlu diduplikasi jika sudah tampil pada Trip Detail,
 - review hanya terkait booking/trip yang eligible menurut prototype,
 - Destination dan EO review tetap terpisah,
-- review dapat terlihat pada surface partner terkait.
+- review dapat terlihat pada surface partner terkait,
+- review copy diposisikan sebagai penilaian traveler dan tidak diklaim sebagai penilaian objektif atau bukti pengalaman production nyata.
 
 Status: IMPLEMENTED LIVE — diperkuat pada F3.1 / PR #80.
 
@@ -875,9 +876,10 @@ Acceptance:
 
 - shared booking harus merujuk transaksi yang sama,
 - EO tidak melihat data role lain yang tidak diperlukan,
-- review target tetap sesuai EO/guide context.
+- review target tetap sesuai EO/guide context,
+- review copy tidak mengklaim opini traveler sebagai objektif.
 
-Status: IMPLEMENTED.
+Status: IMPLEMENTED LIVE — review copy diperkuat pada F3.4 / PR #86.
 
 ---
 
@@ -1047,7 +1049,13 @@ Status: PARTIAL — renderer ready, actual photography belum tersedia.
 
 Mitra dapat melihat review yang terkait destinasi dan mengakses setting/profile surface existing.
 
-Status: IMPLEMENTED.
+Acceptance:
+
+- review tetap berasal dari target destinasi yang benar,
+- copy tidak menyebut opini traveler sebagai objektif,
+- copy tidak mengklaim pengalaman production nyata; wording pascatrip/tercatat lebih aman untuk prototype.
+
+Status: IMPLEMENTED LIVE — review copy diperkuat pada F3.4 / PR #86.
 
 ---
 
@@ -1581,16 +1589,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F3.3:
+Current verified competition baseline setelah F3.4:
 
-- current app feature commit: 0c2a0cd0a588f7c2708e9450e17bd3a36b64b0f1,
-- 45 suites / 638 tests,
+- current app feature commit: 399f869e380df628c5c30040383d319ee0e275b1,
+- 45 suites / 639 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, dan PR #83 Mitra Destination Overview Quick Actions sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, dan PR #86 Final Trust & Interaction Cleanup sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1621,6 +1629,7 @@ Implemented and verified:
 - Traveler post-booking Trip Brief pada Trip Detail (F3.1 / PR #80),
 - EO Traveler-facing draft preview pada Package Builder Step 5 (F3.2 / PR #81),
 - Mitra Destination Overview Quick Actions read-only (F3.3 / PR #83),
+- final review truthfulness copy + Traveler shell dead-affordance cleanup (F3.4 / PR #86),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1842,7 +1851,8 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] F3.1 Traveler Post-Booking Trip Brief merged melalui PR #80 tanpa business-rule change.
 - [x] F3.2 EO Traveler-Facing Draft Preview merged melalui PR #81 tanpa business-rule change.
 - [x] F3.3 Mitra Destination Overview Quick Actions merged melalui PR #83 tanpa business-rule change.
-- [x] Current canonical app baseline: 0c2a0cd0a588f7c2708e9450e17bd3a36b64b0f1 dengan 45 suites / 638 tests PASS.
+- [x] F3.4 Final Trust & Interaction Cleanup merged melalui PR #86 tanpa business-rule change.
+- [x] Current canonical app baseline: 399f869e380df628c5c30040383d319ee0e275b1 dengan 45 suites / 639 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
@@ -1868,7 +1878,7 @@ Definition of "matang" untuk tahap ini:
 
 # 35. F3 — Cross-Role Experience Clarity Revision Log
 
-Tanggal: 25 September 2026.
+Tanggal revision log: 25–26 September 2026.
 
 Scope F3 tetap berada di bawah feature-freeze exception: judge-critical UX clarity dengan scope kecil dan tanpa perubahan business model.
 
@@ -1989,3 +1999,41 @@ Business rule impact:
 - `Kapasitas Umum Destinasi` tetap general venue context, bukan sellable availability.
 - `Peserta Terkonfirmasi` tetap booking-derived participant aggregate.
 - Tidak ada perubahan pricing, payment, refund, lifecycle, atau cross-role state architecture.
+
+## F3.4 — Final Trust & Interaction Cleanup
+
+PR: #86  
+Merge commit: `399f869e380df628c5c30040383d319ee0e275b1`
+
+Perubahan canonical:
+
+- Traveler review form menggunakan traveler-authored wording `Bagikan penilaianmu...` dan tidak lagi menyebut evaluasi sebagai objektif.
+- EO Reviews tidak lagi menyebut traveler review sebagai objektif.
+- Destination Reviews tidak lagi menggunakan klaim `Ulasan objektif` atau `Ulasan pengalaman nyata`; helper menggunakan wording pascatrip/tercatat.
+- Review eligibility tetap terikat pada authenticated Traveler, booking milik Traveler, dan status `COMPLETED`.
+- Destination review dan EO/Guide review tetap dua target/record terpisah.
+- Traveler notification bell yang inert dihapus dari app shell karena tidak memiliki action, route, atau source-backed notification state.
+- Tidak ada notification route/store/push/email/SMS infrastructure yang ditambahkan.
+- Home, Explore, My Trips, dan Profile bottom navigation tetap tidak berubah.
+
+Quality gate setelah F3.4:
+
+- 45 test suites,
+- 639 tests PASS,
+- format PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS,
+- Cloudflare Pages preview PASS.
+
+Business rule impact:
+
+- NONE.
+- Package Price, Traveler Service Fee Rp7.500, Platform Commission 10% GMV, payment simulation, refund semantics, role authority, approval/publish lifecycle, capacity semantics, dan cross-role state architecture tidak berubah.
+
+Feature-freeze decision:
+
+- F3.4 menutup batch F3.
+- Setelah F3.4, default mode kembali ke feature freeze.
+- Coding baru hanya dilakukan bila simulasi role/judge menemukan P0 blocker, factual correction, atau judge-critical P1 yang kecil dan evidence-backed.
+

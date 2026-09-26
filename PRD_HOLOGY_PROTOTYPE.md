@@ -1988,4 +1988,3 @@ Business rule impact:
 - `Kapasitas Umum Destinasi` tetap general venue context, bukan sellable availability.
 - `Peserta Terkonfirmasi` tetap booking-derived participant aggregate.
 - Tidak ada perubahan pricing, payment, refund, lifecycle, atau cross-role state architecture.
-

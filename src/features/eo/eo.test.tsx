@@ -830,13 +830,22 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
     it("AO2. Non-OPEN sessions do not appear in Upcoming Sessions preview but KPI remains aligned", async () => {
       partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
-      // Add a non-OPEN session (e.g. CLOSED)
+      // Add a non-OPEN session (e.g. CLOSED) with clock-safe future timestamps
+      const testClockNow = Date.now();
+      const futureStart = new Date(
+        testClockNow + 7 * 24 * 3600 * 1000,
+      ).toISOString();
+      const futureEnd = new Date(
+        testClockNow + 7 * 24 * 3600 * 1000 + 6 * 3600 * 1000,
+      ).toISOString();
+
       const createRes = mockEoPackageStore.createSession({
         packageId: "slow_green_day",
-        startAt: "2026-10-25T08:00:00+07:00",
-        endAt: "2026-10-25T14:00:00+07:00",
+        startAt: futureStart,
+        endAt: futureEnd,
         capacity: 6,
         pricePerPerson: 275000,
+        nowMs: testClockNow,
       });
       expect(createRes.success).toBe(true);
 

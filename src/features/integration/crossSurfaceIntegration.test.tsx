@@ -31,6 +31,7 @@ import { getPackageVisual } from "../../lib/assets/packageImages";
 import { defaultReviewAdapter } from "../reviews/mockAdapter";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { sessionStore } from "../onboarding/sessionStore";
+import { prototypeClock } from "../../lib/clock";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -408,13 +409,21 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
       expect(publishRes.success).toBe(true);
       expect(publishRes.package?.status).toBe("LIVE");
 
-      // 6. EO Creates OPEN Session on the SAME package
+      // 6. EO Creates OPEN Session on the SAME package with clock-safe future timestamps
+      const testClockNow = Math.max(Date.now(), prototypeClock.nowMs());
+      const sessionStart = new Date(
+        testClockNow + 7 * 24 * 3600 * 1000,
+      ).toISOString();
+      const sessionEnd = new Date(
+        testClockNow + 7 * 24 * 3600 * 1000 + 6 * 3600 * 1000,
+      ).toISOString();
       const sessionRes = mockEoPackageStore.createSession({
         packageId: goldenPackageId,
-        startAt: "2026-10-25T08:00:00+07:00",
-        endAt: "2026-10-25T14:00:00+07:00",
+        startAt: sessionStart,
+        endAt: sessionEnd,
         capacity: 6,
         pricePerPerson: 275000,
+        nowMs: testClockNow,
       });
       expect(sessionRes.success).toBe(true);
       const goldenSessionId = sessionRes.session!.sessionId;

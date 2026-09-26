@@ -57,7 +57,7 @@ async function renderComponent(
 }
 
 describe("F4.2 — Part A: EO Session Temporal Integrity (EO-F01)", () => {
-  const baseNow = new Date("2026-10-01T10:00:00.000Z").getTime();
+  const baseNow = Date.now();
 
   it("1 & 2. createSession rejects startAt in the past and startAt equal to now", () => {
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");

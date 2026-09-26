@@ -849,11 +849,15 @@ Session minimum:
 
 Acceptance:
 
+- `createSession` menolak timestamp invalid, `startAt <= now`, dan `endAt <= startAt`,
+- Session yang start time-nya sudah lewat tidak dapat dibuka ulang menjadi `OPEN`,
+- future Session tetap dapat disiapkan untuk package `APPROVED` atau `LIVE`,
+- `APPROVED` tetap bukan `LIVE`; publication EO tetap state terpisah,
 - past session tidak menjadi sellable Traveler session,
 - session lifecycle existing dipertahankan,
 - tidak menambah destination approval workflow baru hanya untuk prototype improvement.
 
-Status: IMPLEMENTED.
+Status: IMPLEMENTED LIVE — temporal integrity diperkuat pada F4.2 / PR #90.
 
 ## REQ-EO-10 — Session Operational Note
 
@@ -1110,10 +1114,13 @@ Admin dapat melihat destination application dan verification context.
 Acceptance:
 
 - approved destination mapping menghasilkan canonical destination sesuai flow existing,
+- canonical `guideReady` harus konsisten dengan hasil verification Admin `approvedGuideReady`,
+- BASIC/PLUS verification dan Guide Ready tetap dua dimensi terpisah,
+- destination `guideReady=false` tetap dapat ACTIVE/BASIC tetapi tidak boleh diklaim guide-ready atau menjadi EO-eligible destination,
 - cost-scope fields optional dapat diteruskan,
 - lifecycle tidak berubah karena discovery polish.
 
-Status: IMPLEMENTED.
+Status: IMPLEMENTED LIVE — destination guide-ready consistency diperkuat pada F4.2 / PR #90.
 
 ## REQ-ADM-04 — Package Review
 
@@ -1165,10 +1172,12 @@ Past/non-sellable session tidak boleh lolos checkout.
 Acceptance:
 
 - future sellable session dapat dipilih,
+- session creation menolak start time yang sudah lewat/now dan end time yang tidak valid,
+- Session lampau tidak dapat diubah kembali menjadi `OPEN`,
 - past/closed/cancelled/non-sellable session tidak membuat booking baru,
 - session.capacity tidak diganti dengan destination.capacityPerSession.
 
-Status: LIVE / VERIFIED.  
+Status: LIVE / VERIFIED — domain guard diperkuat pada F4.2 / PR #90.  
 Criticality: MUST.
 
 ## REQ-XR-04 — Booking Integrity
@@ -1597,16 +1606,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F4.1:
+Current verified competition baseline setelah F4.2:
 
-- current app feature commit: 68da872cf3f7c12f75241ba41f1df1fab95984a7,
-- 46 suites / 655 tests,
+- current app feature commit: c41547ef9217af267c36131d1ab54283e8f8fba9,
+- 47 suites / 668 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, dan PR #88 Traveler Transaction Session Persistence sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, dan PR #90 Session & Destination Governance Integrity sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1639,6 +1648,7 @@ Implemented and verified:
 - Mitra Destination Overview Quick Actions read-only (F3.3 / PR #83),
 - final review truthfulness copy + Traveler shell dead-affordance cleanup (F3.4 / PR #86),
 - Traveler transaction ledger same-tab refresh persistence menggunakan sessionStorage (F4.1 / PR #88),
+- future-only EO Session temporal guard + destination guide-ready governance consistency (F4.2 / PR #90),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1862,7 +1872,8 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] F3.3 Mitra Destination Overview Quick Actions merged melalui PR #83 tanpa business-rule change.
 - [x] F3.4 Final Trust & Interaction Cleanup merged melalui PR #86 tanpa business-rule change.
 - [x] F4.1 Traveler Transaction Session Persistence merged melalui PR #88 tanpa business-rule change.
-- [x] Current canonical app baseline: 68da872cf3f7c12f75241ba41f1df1fab95984a7 dengan 46 suites / 655 tests PASS.
+- [x] F4.2 Session & Destination Governance Integrity merged melalui PR #90 tanpa business-rule change.
+- [x] Current canonical app baseline: c41547ef9217af267c36131d1ab54283e8f8fba9 dengan 47 suites / 668 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
@@ -2090,3 +2101,47 @@ Feature-freeze status:
 
 - F4.1 adalah targeted judge-critical P1 reopening dari feature freeze berdasarkan external Traveler simulation.
 - Di luar accepted final-hardening findings, feature freeze tetap berlaku.
+
+## F4.2 — Session & Destination Governance Integrity
+
+PR: #90  
+Merge commit: `c41547ef9217af267c36131d1ab54283e8f8fba9`
+
+Findings addressed:
+
+- EO-F01: EO dapat membuat/reopen Session `OPEN` dengan waktu mulai yang sudah lewat.
+- ADM-F01: Hutan Bambu Trawas memiliki `approvedGuideReady=false` pada Admin verification tetapi canonical destination sebelumnya `guideReady=true`.
+
+Perubahan canonical:
+
+- `mockEoPackageStore.createSession` menolak timestamp invalid, `startAt <= now`, dan `endAt <= startAt`.
+- `updateSessionStatus(..., "OPEN")` menolak Session yang start time-nya sudah lewat.
+- UI EO Session memakai future-safe datetime default yang berasal dari waktu browser, bukan hard-coded competition date.
+- Package `APPROVED` maupun `LIVE` tetap dapat menyiapkan future Session; `APPROVED` tetap tidak berarti marketplace `LIVE`.
+- `dest_hutan_trawas` tetap `ACTIVE` + `BASIC`, tetapi canonical `guideReady=false` sesuai Admin verification.
+- Copy yang mengklaim kesiapan pemandu pada Hutan Bambu dihapus/diturunkan menjadi not-ready factual context.
+- Existing EO eligibility tetap membutuhkan `ACTIVE` + BASIC/PLUS + `guideReady=true`; Hutan Bambu tidak lagi EO-eligible selama `guideReady=false`.
+- Direct EO destination detail untuk destination yang tidak eligible tetap dapat dibaca sebagai context, tetapi tidak menawarkan active create-package CTA.
+- Admin Trust dan Mitra surfaces membaca Guide Ready dari canonical destination yang sama dan tidak lagi mengklaim Hutan Bambu Guide Ready.
+- Test temporal yang berhasil dibuat calendar-safe agar tidak kedaluwarsa karena tanggal tetap.
+
+Quality gate setelah F4.2:
+
+- 47 test suites,
+- 668 tests PASS,
+- format PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS,
+- Cloudflare Pages preview PASS.
+
+Business / authority impact:
+
+- NONE.
+- Tidak ada perubahan Package Price, Destination Base Cost, EO Margin, Traveler Service Fee Rp7.500, Platform Commission 10% GMV, payment/refund semantics, F4.1 transaction persistence, review semantics, atau role authority.
+- Tidak ada guide roster/assignment engine, destination approval workflow baru, backend, atau cross-tab persistence.
+
+Feature-freeze status:
+
+- F4.2 adalah targeted judge-critical P1 hardening dari EO/Admin-Judge simulations.
+- Accepted semantic findings yang tersisa ditangani pada F4.3; selain itu feature freeze tetap berlaku.

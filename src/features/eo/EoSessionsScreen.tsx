@@ -261,7 +261,10 @@ export function EoSessionsScreen() {
               onClick={() => setSelectedPackageId("")}
               aria-pressed={selectedPackageId === ""}
             >
-              <span className="eo-session-package-card__all-icon" aria-hidden="true">
+              <span
+                className="eo-session-package-card__all-icon"
+                aria-hidden="true"
+              >
                 ≡
               </span>
               <span className="eo-session-package-card__content">
@@ -271,7 +274,9 @@ export function EoSessionsScreen() {
             </button>
 
             {allEoPackages.map((pkg) => {
-              const destination = mockDestinationStore.getById(pkg.destinationId);
+              const destination = mockDestinationStore.getById(
+                pkg.destinationId,
+              );
               const visual = getDestinationVisual(
                 destination?.name ?? pkg.title,
                 destination?.imageUrl,

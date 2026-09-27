@@ -58,7 +58,7 @@ export function EoPackageBuilderScreen() {
 
   // Authoritative initial destination: preselect only if the candidate is in eligibleDestinations
   const candidateDestinationId =
-    initialDraft?.destinationId || initialDestinationId || "";
+    initialDestinationId || initialDraft?.destinationId || "";
   const isCandidateEligible = eligibleDestinations.some(
     (d) => d.destinationId === candidateDestinationId,
   );

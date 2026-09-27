@@ -623,7 +623,7 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
       expect(trustView.textContent).toContain("Jeda Alam Nusantara");
       expect(trustView.textContent).toContain("Lereng Hijau Batu");
       expect(trustView.textContent).toContain("Lembah Alam Pacet");
-      expect(trustView.textContent).toContain("Hutan Bambu Trawas");
+      expect(trustView.textContent).not.toContain("Hutan Bambu Trawas");
       expect(trustView.textContent).not.toContain("Trust Score 95%");
 
       // Audit activity screen

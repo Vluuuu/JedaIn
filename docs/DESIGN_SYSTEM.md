@@ -465,20 +465,17 @@ Partner/Admin:
 
 # 12. Badge & Status System
 
-## 12.1 Verification Badge
+## 12.1 Verification & Trust Treatment
 
-Use forest/success semantic style.
+Destination verification is an internal Admin gate, not a public BASIC/PLUS badge tier.
 
-Examples:
+For Traveler, EO, and Mitra surfaces:
+- do not show `Terverifikasi Dasar` or `Terverifikasi Plus` badges;
+- do not stack a second `Guide Ready` badge;
+- when trust context is useful, use plain explanatory copy such as `Destinasi ini telah melalui proses verifikasi JedaIn.`;
+- guide availability is ordinary profile/operational information.
 
-```text
-Terverifikasi Dasar
-Terverifikasi Plus
-Siap sebagai Guide
-Certified Guide
-```
-
-Badges require tooltip/help text when terminology may be unclear to traveler.
+EO certification may still be shown when it is directly relevant to guide-source selection, but it is not a destination trust tier.
 
 ## 12.2 Workflow Status Badge
 
@@ -514,8 +511,7 @@ Minimum anatomy:
 3. package title
 4. location + duration
 5. price
-6. verification badge
-7. rating if available
+6. rating if available
 
 Variants:
 

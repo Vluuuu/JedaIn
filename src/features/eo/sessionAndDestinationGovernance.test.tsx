@@ -326,154 +326,49 @@ describe("F4.2 — Part A: EO Session Temporal Integrity (EO-F01)", () => {
   });
 });
 
-describe("F4.2 — Part B: Destination Governance Consistency (ADM-F01)", () => {
-  it("1. dest_app_trawas_bambu verification application remains APPROVED, BASIC, approvedGuideReady=false", () => {
+describe("Destination verification requires local guide", () => {
+  it("1. legacy Trawas application is rejected and canonical destination is inactive", () => {
     const app = mockDestinationVerificationStore.getById(
       "dest_app_trawas_bambu",
     );
     expect(app).toBeDefined();
-    expect(app?.status).toBe("APPROVED");
-    expect(app?.approvedLevel).toBe("BASIC");
-    expect(app?.approvedGuideReady).toBe(false);
+    expect(app?.status).toBe("REJECTED");
     expect(app?.declaredGuideReady).toBe(false);
-    expect(app?.guideReadinessEvidence).toContain(
-      "Belum memiliki pemandu lokal resmi",
-    );
-  });
+    expect(app?.rejectionReason).toContain("mewajibkan pemandu lokal");
 
-  it("2 & 3. canonical dest_hutan_trawas is ACTIVE, BASIC, guideReady=false without guide ready claims", () => {
     const dest = mockDestinationStore.getById("dest_hutan_trawas");
     expect(dest).toBeDefined();
-    expect(dest?.status).toBe("ACTIVE");
-    expect(dest?.verificationLevel).toBe("BASIC");
+    expect(dest?.status).toBe("INACTIVE");
     expect(dest?.guideReady).toBe(false);
-
-    // Verify no guide-ready claims in description, highlights, or localGuideSummary
-    expect(dest?.description).not.toContain("siap memandu");
-    expect(dest?.description).not.toContain("Didukung pemandu");
-    for (const h of dest?.highlights ?? []) {
-      expect(h).not.toContain("siap mendampingi");
-      expect(h).not.toContain("Pemandu lokal desa wisata");
-    }
-    expect(dest?.localGuideSummary).not.toContain("siap memandu");
-    expect(dest?.localGuideSummary).toContain(
-      "Belum memiliki pemandu lokal resmi",
-    );
   });
 
-  it("4. Admin Trust includes Hutan Bambu but does NOT display Guide Ready for it", async () => {
+  it("2. Admin Trust only lists active verified destinations with clean single-status copy", async () => {
     adminSessionStore.loginAsDemoAdmin();
 
     const view = await renderComponent(createElement(AdminTrustStatusScreen));
-    expect(view.textContent).toContain("Hutan Bambu Trawas");
-
-    // Find the row for Hutan Bambu Trawas
-    const rows = Array.from(view.querySelectorAll("tr"));
-    const trawasRow = rows.find((r) =>
-      r.textContent?.includes("Hutan Bambu Trawas"),
-    )!;
-    expect(trawasRow).toBeDefined();
-
-    // Verification column shows Verifikasi BASIC without Guide Ready checkmark
-    expect(trawasRow.textContent).toContain("Verifikasi BASIC");
-    expect(trawasRow.textContent).not.toContain("Guide Ready ✓");
-
-    // Lereng Hijau row (which is guideReady: true) still displays Guide Ready
-    const lerengRow = rows.find((r) =>
-      r.textContent?.includes("Lereng Hijau Batu"),
-    )!;
-    expect(lerengRow.textContent).toContain("Guide Ready ✓");
-  });
-
-  it("5 & 6 & 7. mockDestinationStore.getEligibleForEo() excludes dest_hutan_trawas while retaining guide-ready destinations and newly approved destinations", () => {
-    const eligible = mockDestinationStore.getEligibleForEo();
-
-    // Hutan Bambu is excluded because guideReady is false
-    expect(eligible.some((d) => d.destinationId === "dest_hutan_trawas")).toBe(
-      false,
-    );
-
-    // Other guide-ready destinations remain available
-    expect(eligible.some((d) => d.destinationId === "dest_lereng_hijau")).toBe(
-      true,
-    );
-    expect(eligible.some((d) => d.destinationId === "dest_lembah_pacet")).toBe(
-      true,
-    );
-
-    // If an application with guideReady=true is newly approved by Admin, it enters eligibility
-    mockDestinationStore.upsertVerifiedDestination({
-      destinationId: "dest_new_approved",
-      name: "Destinasi Baru Guide Siap",
-      locationLabel: "Batu",
-      province: "Jawa Timur",
-      city: "Batu",
-      verificationLevel: "BASIC",
-      guideReady: true,
-      baseCostPerPerson: 100000,
-      description: "Destinasi baru dengan guide.",
-      highlights: ["Pemandu siap"],
-      capacityPerSession: 20,
-      status: "ACTIVE",
-    });
-
-    const eligibleAfter = mockDestinationStore.getEligibleForEo();
-    expect(
-      eligibleAfter.some((d) => d.destinationId === "dest_new_approved"),
-    ).toBe(true);
-  });
-
-  it("8. EO Destination Directory no longer lists Hutan Bambu as an eligible destination", async () => {
-    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-
-    const view = await renderComponent(createElement(EoDestinationsScreen));
-    expect(view.textContent).toContain("Lereng Hijau Batu");
-    expect(view.textContent).toContain("Lembah Alam Pacet");
     expect(view.textContent).not.toContain("Hutan Bambu Trawas");
+
+    const rows = Array.from(view.querySelectorAll("tr"));
+    const lerengRow = rows.find((row) =>
+      row.textContent?.includes("Lereng Hijau Batu"),
+    );
+    expect(lerengRow).toBeDefined();
+    expect(lerengRow?.textContent).toContain("Terverifikasi Dasar");
+    expect(lerengRow?.textContent).not.toContain("Guide Ready");
   });
 
-  it("9. Direct EO Destination Detail for Hutan Bambu shows not-ready context and disables create-package CTA", async () => {
-    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+  it("3. EO discovery and Builder exclude destinations that have no local guide", async () => {
+    partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
 
-    const view = await renderComponent(
-      createElement(
-        Routes,
-        undefined,
-        createElement(Route, {
-          path: "/partner/eo/destinations/:destinationId",
-          element: createElement(EoDestinationDetailScreen),
-        }),
-      ),
-      ["/partner/eo/destinations/dest_hutan_trawas"],
+    const directoryView = await renderComponent(
+      createElement(EoDestinationsScreen),
     );
+    expect(directoryView.textContent).toContain("Lereng Hijau Batu");
+    expect(directoryView.textContent).toContain("Lembah Alam Pacet");
+    expect(directoryView.textContent).not.toContain("Hutan Bambu Trawas");
+    expect(directoryView.textContent).not.toContain("Guide Ready");
 
-    expect(view.textContent).toContain("Hutan Bambu Trawas");
-
-    // Must NOT claim local guide is ready
-    expect(view.textContent).not.toContain("Pemandu lokal tersedia");
-    expect(view.textContent).not.toContain("Pemandu Lokal Siap");
-
-    // Shows truthful not-ready status
-    expect(view.textContent).toContain("Pemandu lokal belum tersedia");
-    expect(view.textContent).toContain("Pemandu Lokal Belum Siap");
-    expect(view.textContent).toContain("Belum memiliki pemandu lokal resmi");
-
-    // Create-package CTA is disabled / not active
-    expect(view.textContent).not.toContain("Buat Paket dengan Destinasi Ini →");
-    expect(view.textContent).not.toContain("Buat Paket Sekarang");
-    expect(view.textContent).toContain("Belum Memenuhi Syarat Paket");
-    expect(view.textContent).toContain("Tidak Dapat Dibuat Paket");
-
-    const disabledBtns = Array.from(view.querySelectorAll("button")).filter(
-      (b) => b.disabled,
-    );
-    expect(disabledBtns.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("10. Builder query parameter with ineligible destinationId does NOT preselect it", async () => {
-    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-
-    const view = await renderComponent(
+    const builderView = await renderComponent(
       createElement(
         Routes,
         undefined,
@@ -484,50 +379,35 @@ describe("F4.2 — Part B: Destination Governance Consistency (ADM-F01)", () => 
       ),
       ["/partner/eo/packages/new?destinationId=dest_hutan_trawas"],
     );
-
-    // Hutan Bambu card is not rendered in eligible list
-    expect(view.textContent).not.toContain("Hutan Bambu Trawas");
-
-    // Stepper stays at Step 1 and selected destination is not Hutan Bambu
-    const selectedBadge = view.querySelector(".eo-builder-dest-card--selected");
-    expect(selectedBadge).toBeNull();
+    expect(builderView.textContent).not.toContain("Hutan Bambu Trawas");
+    expect(
+      builderView.querySelector(".eo-builder-dest-card--selected"),
+    ).toBeNull();
   });
 
-  it("11. Mitra/Admin inspection of the canonical Destination still works truthfully", async () => {
-    partnerSessionStore.setPartner({
-      id: "dest_partner_trawas_bambu",
-      email: "partner@trawas.id",
-      name: "Pengelola Trawas",
-      role: "DESTINATION",
-      businessName: "Pengelola Bambu Trawas",
-      destinationIdentityId: "dest_hutan_trawas",
-    });
+  it("4. Mitra destination surfaces present verification as one status", async () => {
+    partnerSessionStore.loginAsDemoDestination();
 
-    // 1. Mitra Destination Overview
-    const overviewView = await renderComponent(
+    const overview = await renderComponent(
       createElement(DestinationOverviewScreen),
     );
-    expect(overviewView.textContent).toContain("Hutan Bambu Trawas");
-    expect(overviewView.textContent).toContain("Terverifikasi Dasar");
-    expect(overviewView.textContent).toContain("Pemandu lokal belum tersedia");
-    expect(overviewView.textContent).not.toContain("Pemandu lokal tersedia");
+    expect(overview.textContent).toContain("Terverifikasi Dasar");
+    expect(overview.textContent).not.toContain("Guide Ready");
 
-    // 2. Mitra Destination Profile
-    const profileView = await renderComponent(
+    const profile = await renderComponent(
       createElement(DestinationProfileScreen),
     );
-    expect(profileView.textContent).toContain("Hutan Bambu Trawas");
-    expect(profileView.textContent).toContain("Terverifikasi BASIC");
-    expect(profileView.textContent).toContain("Tanpa Guide Lokal");
-    expect(profileView.textContent).not.toContain("Guide Ready ✓");
+    expect(profile.textContent).toContain("Terverifikasi Dasar");
+    expect(profile.textContent).not.toContain("Tanpa Guide Lokal");
 
-    // 3. Mitra Destination Verification Badges
-    const badgeView = await renderComponent(
+    const verification = await renderComponent(
       createElement(DestinationVerificationBadgeScreen),
     );
-    expect(badgeView.textContent).toContain("Terverifikasi Dasar (BASIC)");
-    expect(badgeView.textContent).toContain("Tanpa Guide Lokal");
-    expect(badgeView.textContent).toContain("Belum Memiliki Pemandu Lokal");
+    expect(verification.textContent).toContain("Status Verifikasi Destinasi");
+    expect(verification.textContent).toContain(
+      "Pemandu lokal adalah bagian dari syarat verifikasi destinasi",
+    );
+    expect(verification.textContent).not.toContain("Dimensi 2");
   });
 });
 

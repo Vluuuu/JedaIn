@@ -1803,9 +1803,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       ]);
 
       expect(viewConcept.textContent).toContain("Pemandu dari Destinasi");
-      expect(viewConcept.textContent).toContain(
-        "Disiapkan Mitra Destinasi",
-      );
+      expect(viewConcept.textContent).toContain("Disiapkan Mitra Destinasi");
       expect(viewConcept.textContent).toContain(
         "Kamu fokus merancang experience. Pemanduan akan disiapkan oleh mitra destinasi terverifikasi di lokasi.",
       );
@@ -1887,9 +1885,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         status: "ACTIVE",
       });
 
-      expect(
-        mockDestinationStore.getById("dest_future_noguide")?.status,
-      ).toBe("INACTIVE");
+      expect(mockDestinationStore.getById("dest_future_noguide")?.status).toBe(
+        "INACTIVE",
+      );
 
       // 1. Selector check
       const conceptEligible =

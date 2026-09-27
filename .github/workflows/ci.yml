@@ -27,28 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Format destination cleanup files for audit
-        run: |
-          npx prettier --write \
-            src/features/admin/AdminDestinationVerificationDetailScreen.tsx \
-            src/features/admin/AdminTrustStatusScreen.tsx \
-            src/features/admin/mockDestinationVerificationStore.ts \
-            src/features/destination/destination.css \
-            src/features/destination/DestinationVerificationBadgeScreen.tsx \
-            src/features/destination/mockDestinationPartnerService.ts
-          for f in \
-            src/features/admin/AdminDestinationVerificationDetailScreen.tsx \
-            src/features/admin/AdminTrustStatusScreen.tsx \
-            src/features/admin/mockDestinationVerificationStore.ts \
-            src/features/destination/destination.css \
-            src/features/destination/DestinationVerificationBadgeScreen.tsx \
-            src/features/destination/mockDestinationPartnerService.ts
-          do
-            echo "FORMATTED_FILE:$f"
-            base64 -w 0 "$f"
-            echo
-          done
-
       - name: Check formatting
         run: npm run format:check
 

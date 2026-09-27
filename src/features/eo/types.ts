@@ -49,11 +49,14 @@ export type DestinationVerificationLevel = "BASIC" | "PLUS";
 export type DestinationMediaProvenance =
   "PROTOTYPE_ILLUSTRATION" | "DESTINATION_SOURCE";
 
+export type DestinationMediaCategory = "DESTINATION" | "FACILITY";
+
 export interface DestinationMediaItem {
   mediaId: string;
   url: string;
   label: string;
   provenance: DestinationMediaProvenance;
+  category?: DestinationMediaCategory;
 }
 
 export interface DestinationRecord {
@@ -65,6 +68,7 @@ export interface DestinationRecord {
   verificationLevel: DestinationVerificationLevel;
   guideReady: boolean;
   baseCostPerPerson: number;
+  localGuideFeePerPerson?: number;
   description: string;
   highlights: string[];
   capacityPerSession: number;
@@ -146,6 +150,7 @@ export interface EoItineraryItem {
 
 export interface EoPackagePricing {
   destinationBaseCost: number;
+  localGuideFee: number;
   eoMargin: number;
   customerPrice: number;
 }
@@ -170,6 +175,7 @@ export interface EoPackageRecord {
   valueProposition: string;
   destinationId: string;
   imageUrl?: string;
+  imageUrls?: string[];
   insightId?: string;
   durationLabel: string;
   suitableGroupTypes: string[];

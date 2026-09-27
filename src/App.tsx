@@ -107,7 +107,7 @@ export function App() {
             <PartnerRouteGuard>
               <WorkspaceShell
                 surface="partner"
-                title="EO Partner Workspace"
+                title="Travel Organizer Workspace"
                 navigation={partnerEoNavigation}
               />
             </PartnerRouteGuard>
@@ -331,7 +331,7 @@ export function App() {
           <PartnerRouteGuard>
             <WorkspaceShell
               surface="partner"
-              title="EO Partner Workspace"
+              title="Travel Organizer Workspace"
               navigation={partnerEoNavigation}
             />
           </PartnerRouteGuard>

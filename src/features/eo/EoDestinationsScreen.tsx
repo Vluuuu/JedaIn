@@ -117,7 +117,7 @@ export function EoDestinationsScreen() {
                   </span>
                   <span className="eo-dest-card__capacity-hint">
                     Kapasitas umum destinasi per sesi, bukan kuota otomatis per
-                    paket EO.
+                    paket Travel Organizer.
                   </span>
                 </div>
 

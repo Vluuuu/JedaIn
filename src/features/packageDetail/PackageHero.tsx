@@ -162,7 +162,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
 
         <p className="package-detail-gallery__note">
           {isPackageGallery
-            ? "Media package dipilih EO. Visual prototype dalam galeri tetap merupakan ilustrasi, bukan foto kondisi aktual destinasi."
+            ? "Media package dipilih Travel Organizer. Visual prototype dalam galeri tetap merupakan ilustrasi, bukan foto kondisi aktual destinasi."
             : "Satu ilustrasi prototype ditampilkan dalam beberapa crop untuk memberi gambaran suasana, bukan foto kondisi aktual destinasi."}
         </p>
       </div>

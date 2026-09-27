@@ -55,7 +55,7 @@ describe("F2 Judge Clarity Manual Smoke Automated Checks", () => {
 
     expect(container.textContent).toContain("Contoh Ulasan Paket");
     expect(container.textContent).toContain(
-      "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket. Ulasan Destinasi dan EO/Guide pascatrip dicatat terpisah.",
+      "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket. Ulasan Destinasi dan Travel Organizer pascatrip dicatat terpisah.",
     );
     expect(container.textContent).toContain("Rating paket contoh: 4.8 / 5.0");
     expect(container.textContent).toContain(

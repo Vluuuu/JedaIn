@@ -149,7 +149,7 @@ export class MockReviewAdapter implements ReviewAdapter {
       if (!detail.organizer?.id || !detail.organizer.id.trim()) {
         return {
           success: false,
-          message: "Target ulasan penyelenggara (EO) tidak valid.",
+          message: "Target ulasan Travel Organizer tidak valid.",
         };
       }
     }

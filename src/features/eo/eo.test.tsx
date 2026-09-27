@@ -91,7 +91,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       expect(view.textContent).toContain("Sedang Dalam Proses Kurasi");
       expect(view.textContent).not.toContain("Setujui & Buka Dashboard");
-      expect(view.textContent).toContain("Lihat Workspace EO Demo (Approved)");
+      expect(view.textContent).toContain(
+        "Lihat Workspace Travel Organizer Demo (Approved)",
+      );
     });
 
     it("B. separate approved demo identity can open workspace", async () => {
@@ -118,7 +120,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       const view = await renderComponent(createElement(App), ["/partner/eo"]);
 
-      expect(view.textContent).toContain("Status Pengajuan Mitra EO");
+      expect(view.textContent).toContain(
+        "Status Pengajuan Mitra Travel Organizer",
+      );
       expect(view.textContent).toContain("Perlu Perbaikan");
     });
 
@@ -196,7 +200,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       );
 
       expect(view.textContent).toContain("Paket Tidak Ditemukan");
-      expect(view.textContent).toContain("bukan milik akun EO Anda");
+      expect(view.textContent).toContain(
+        "bukan milik akun Travel Organizer Anda",
+      );
     });
 
     it("F. EO B cannot load EO A draftId in builder", async () => {
@@ -208,7 +214,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       );
 
       expect(view.textContent).toContain("Akses Ditolak");
-      expect(view.textContent).toContain("bukan milik akun EO Anda");
+      expect(view.textContent).toContain(
+        "bukan milik akun Travel Organizer Anda",
+      );
     });
 
     it("G. authenticated EO B saveDraft on EO A package fails even if caller supplies forged eoId", () => {
@@ -1658,7 +1666,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       // Accurate pricing terminology
       expect(view.textContent).toContain("Biaya dasar destinasi");
-      expect(view.textContent).toContain("Margin EO");
+      expect(view.textContent).toContain("Margin Travel Organizer");
       expect(view.textContent).toContain("Harga traveler");
       expect(view.textContent).toContain("Rp125.000");
       expect(view.textContent).toContain("Rp150.000");
@@ -1826,7 +1834,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       expect(viewCertified.textContent).toContain("Pemandu dari Destinasi");
       expect(viewCertified.textContent).toContain(
-        "Pemandu dari EO (Certified Guide)",
+        "Pemandu dari Travel Organizer (Certified Guide)",
       );
     });
 
@@ -2148,9 +2156,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // Canonical logo and identity
       const logo = view.querySelector<HTMLImageElement>(".eo-login-hero__logo");
       expect(logo).not.toBeNull();
-      expect(view.textContent).toContain("Event Organizer");
+      expect(view.textContent).toContain("Travel Organizer");
       expect(view.textContent).toContain("Masuk ke JedaIn");
-      expect(view.textContent).toContain("Gunakan akun EO yang terdaftar.");
+      expect(view.textContent).toContain(
+        "Gunakan akun Travel Organizer yang terdaftar.",
+      );
       expect(view.textContent).toContain("Masuk");
       expect(view.textContent).toContain("Coba akun demo");
 
@@ -2378,7 +2388,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("Media Experience");
       expect(view.textContent).toContain("Tentukan satu sebagai cover paket.");
       expect(view.querySelector(".eo-builder-dropzone")).not.toBeNull();
-      expect(view.textContent).toContain("Tambah foto milik EO");
+      expect(view.textContent).toContain("Tambah foto milik Travel Organizer");
 
       // Select image file via change event
       const fileInput = view.querySelector<HTMLInputElement>(

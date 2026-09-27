@@ -325,8 +325,8 @@ export function TripDetailScreen({
           <div className="trip-detail-section__header">
             <h2 className="trip-detail-section__title">Penilaian Pengalaman</h2>
             <p className="trip-detail-section__subtitle">
-              Beri penilaian terpisah untuk destinasi dan penyelenggara (EO)
-              setelah perjalanan selesai.
+              Beri penilaian terpisah untuk destinasi dan penyelenggara (Travel
+              Organizer) setelah perjalanan selesai.
             </p>
           </div>
 
@@ -378,9 +378,11 @@ export function TripDetailScreen({
             {/* 2. EO / Guide Review Item */}
             <div className="trip-detail-review-item">
               <div className="trip-detail-review-item__info">
-                <div className="trip-detail-review-item__type">EO / Guide</div>
+                <div className="trip-detail-review-item__type">
+                  Travel Organizer
+                </div>
                 <h3 className="trip-detail-review-item__title">
-                  Nilai EO / Guide
+                  Nilai Travel Organizer
                 </h3>
                 <p className="trip-detail-review-item__target">
                   {detail?.organizer.displayName ?? "Penyelenggara Perjalanan"}
@@ -411,7 +413,7 @@ export function TripDetailScreen({
                       navigate(`/trips/${booking.bookingId}/review?target=eo`)
                     }
                   >
-                    Beri Nilai EO / Guide
+                    Beri Nilai Travel Organizer
                   </Button>
                 )}
               </div>
@@ -641,7 +643,7 @@ export function TripDetailScreen({
                     <div className="trip-detail-contact-card__body">
                       <div className="trip-detail-contact-person">
                         <span className="trip-detail-contact-person__label">
-                          Penanggung Jawab EO
+                          Penanggung Jawab Travel Organizer
                         </span>
                         <strong className="trip-detail-contact-person__name">
                           {organizerContact.contactPerson}
@@ -707,7 +709,7 @@ export function TripDetailScreen({
                           href={`tel:${organizerContact.phone}`}
                           className="ui-button ui-button--secondary ui-button--md trip-detail-contact-cta"
                         >
-                          Hubungi EO
+                          Hubungi Travel Organizer
                         </a>
                       </div>
                     )}
@@ -881,7 +883,8 @@ export function TripDetailScreen({
           <div className="trip-detail-demo-body">
             <p className="trip-detail-demo-desc">
               Klik tombol di bawah untuk memajukan status pesanan menjadi
-              COMPLETED agar dapat menguji alur ulasan destinasi dan EO.
+              COMPLETED agar dapat menguji alur ulasan destinasi dan Travel
+              Organizer.
             </p>
             <Button
               type="button"

@@ -950,7 +950,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).toContain("Batu / Malang Raya");
       expect(view.textContent).toContain("Pokdarwis Lereng Hijau");
       expect(view.textContent).not.toContain("Terverifikasi Dasar");
-      expect(view.textContent).toContain("Profil destinasi siap digunakan EO");
+      expect(view.textContent).toContain(
+        "Profil destinasi siap digunakan Travel Organizer",
+      );
       expect(view.textContent).toContain("Status: Aktif");
       expect(view.textContent).not.toContain("Guide Ready ✓");
       expect(view.textContent).not.toContain("Non-Guide Ready");
@@ -967,8 +969,12 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
       expect(view.textContent).toContain("Jeda Alam Nusantara");
       expect(view.querySelectorAll(".dest-session-row")).toHaveLength(2);
-      expect(view.textContent).toContain("Kuota Sesi EO: 6 orang");
-      expect(view.textContent).toContain("0% Kuota Sesi EO terisi");
+      expect(view.textContent).toContain(
+        "Kuota Sesi Travel Organizer: 6 orang",
+      );
+      expect(view.textContent).toContain(
+        "0% Kuota Sesi Travel Organizer terisi",
+      );
       expect(view.textContent).not.toContain("kapasitas destinasi terisi");
       expect(view.textContent).toContain("Walking tour kebun teh lereng bukit");
       expect(view.textContent).toContain("Saung istirahat bambu");

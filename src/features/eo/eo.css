@@ -4573,3 +4573,35 @@
   margin: 0;
   font-weight: var(--font-weight-semibold);
 }
+
+/* Step 3 Logistics & Itinerary Subgroups */
+.eo-builder-subgroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-3);
+}
+
+.eo-builder-subgroup__title {
+  margin: 0;
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.eo-builder-subgroup__desc {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .eo-builder-subgroup > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}

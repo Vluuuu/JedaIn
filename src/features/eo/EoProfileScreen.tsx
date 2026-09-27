@@ -15,7 +15,7 @@ export function EoProfileScreen() {
         <div>
           <Badge tone="success">Identitas Terverifikasi</Badge>
           <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Profil Mitra Event Organizer
+            Profil Mitra Travel Organizer
           </h1>
           <p className="eo-page-subtitle">
             Informasi entitas bisnis dan detail operasional kemitraan.
@@ -24,7 +24,7 @@ export function EoProfileScreen() {
       </header>
 
       <section className="eo-section">
-        <h2 className="eo-section-title">Informasi Profil EO</h2>
+        <h2 className="eo-section-title">Informasi Profil Travel Organizer</h2>
 
         <div
           style={{

@@ -132,7 +132,7 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
       const view = await renderComponent(createElement(AdminEoApprovalsScreen));
 
       expect(view.textContent).toContain(
-        "Antrean Aplikasi Mitra Event Organizer",
+        "Antrean Aplikasi Mitra Travel Organizer",
       );
       expect(view.textContent).toContain("Lestari Wellness Journey");
       expect(view.textContent).toContain("Maya Safira");

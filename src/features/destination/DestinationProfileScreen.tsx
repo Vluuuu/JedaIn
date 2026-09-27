@@ -172,8 +172,8 @@ export function DestinationProfileScreen() {
         <div>
           <h1 className="dest-page-title">Profil Kawasan Destinasi</h1>
           <p className="dest-page-subtitle">
-            Kelola informasi yang digunakan EO untuk memahami destinasi dan
-            merancang package experience.
+            Kelola informasi yang digunakan Travel Organizer untuk memahami
+            destinasi dan merancang package experience.
           </p>
         </div>
       </header>
@@ -207,8 +207,8 @@ export function DestinationProfileScreen() {
             </h2>
             <p className="dest-media-gallery__desc">
               Tambahkan sebanyak yang dibutuhkan untuk memberi gambaran suasana
-              kawasan kepada EO. Visual prototype bawaan tetap diberi label
-              jelas.
+              kawasan kepada Travel Organizer. Visual prototype bawaan tetap
+              diberi label jelas.
             </p>
           </div>
           <span className="dest-media-gallery__count">
@@ -252,8 +252,8 @@ export function DestinationProfileScreen() {
               Foto Fasilitas
             </h2>
             <p className="dest-media-gallery__desc">
-              Tambahkan foto untuk fasilitas yang sudah tercatat agar EO
-              mendapat gambaran yang lebih jelas.
+              Tambahkan foto untuk fasilitas yang sudah tercatat agar Travel
+              Organizer mendapat gambaran yang lebih jelas.
             </p>
           </div>
           <span className="dest-media-gallery__count">
@@ -384,8 +384,8 @@ export function DestinationProfileScreen() {
             <div>
               <h3>Tentang Destinasi</h3>
               <p>
-                Deskripsi ini membantu EO memahami karakter lokasi sebelum
-                menyusun experience.
+                Deskripsi ini membantu Travel Organizer memahami karakter lokasi
+                sebelum menyusun experience.
               </p>
             </div>
           </div>
@@ -449,8 +449,8 @@ export function DestinationProfileScreen() {
             <div>
               <h3>Tarif Pemandu Lokal</h3>
               <p>
-                Tarif ini digunakan EO pada skema harga ketika memilih pemandu
-                dari destinasi.
+                Tarif ini digunakan Travel Organizer pada skema harga ketika
+                memilih pemandu dari destinasi.
               </p>
             </div>
           </div>

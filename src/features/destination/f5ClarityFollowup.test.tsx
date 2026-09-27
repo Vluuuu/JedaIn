@@ -93,9 +93,11 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
 
     // 3. Status Mitra is not a large redundant hero card, but subtle Status: Aktif
     expect(view.textContent).toContain("Status: Aktif");
-    expect(view.textContent).toContain("Profil destinasi siap digunakan EO");
     expect(view.textContent).toContain(
-      "Informasi ini menjadi acuan EO saat memilih destinasi dan merancang experience.",
+      "Profil destinasi siap digunakan Travel Organizer",
+    );
+    expect(view.textContent).toContain(
+      "Informasi ini menjadi acuan Travel Organizer saat memilih destinasi dan merancang experience.",
     );
     expect(view.textContent).not.toContain(
       "Aktif sebagai Mitra Destinasi JedaIn",
@@ -395,7 +397,7 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
 
     // 25. Itinerary autofills from sampleActivities
     const step3 = steps.find((btn) =>
-      btn.textContent?.includes("Rencana Itinerary"),
+      btn.textContent?.includes("Perjalanan & Itinerary"),
     )!;
     await act(async () => step3.click());
     const itineraryItems = view.querySelectorAll(".eo-itinerary-item");
@@ -475,7 +477,7 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
     );
 
     const step3 = steps.find((btn) =>
-      btn.textContent?.includes("Rencana Itinerary"),
+      btn.textContent?.includes("Perjalanan & Itinerary"),
     )!;
     await act(async () => step3.click());
     const activityTitles = Array.from(

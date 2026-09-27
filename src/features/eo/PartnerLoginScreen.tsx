@@ -212,7 +212,7 @@ export function PartnerLoginScreen() {
             }}
           >
             <option value="DESTINATION">Pengelola Destinasi Lokal</option>
-            <option value="EO">Event Organizer (EO / Tour Guide)</option>
+            <option value="EO">Travel Organizer</option>
           </select>
         </div>
 

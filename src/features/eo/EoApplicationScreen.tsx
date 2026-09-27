@@ -125,9 +125,9 @@ export function EoApplicationScreen() {
     >
       <header className="eo-page-header">
         <div>
-          <Badge tone="info">Formulir Kemitraan EO</Badge>
+          <Badge tone="info">Formulir Kemitraan Travel Organizer</Badge>
           <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Pengajuan Mitra Event Organizer (EO)
+            Pengajuan Mitra Travel Organizer
           </h1>
           <p className="eo-page-subtitle">
             Daftarkan entitas atau komunitasmu untuk mulai merancang wellness
@@ -168,7 +168,7 @@ export function EoApplicationScreen() {
 
           <div className="eo-form-group">
             <label htmlFor="eo-business-name" className="eo-form-label">
-              Nama Usaha / Komunitas EO *
+              Nama Usaha / Komunitas Travel Organizer *
             </label>
             <input
               id="eo-business-name"
@@ -281,7 +281,7 @@ export function EoApplicationScreen() {
 
           <div className="eo-form-group">
             <label htmlFor="eo-guide-status" className="eo-form-label">
-              Kapabilitas Pemanduan EO (Opsional)
+              Kapabilitas Pemanduan Travel Organizer (Opsional)
             </label>
             <select
               id="eo-guide-status"
@@ -293,12 +293,12 @@ export function EoApplicationScreen() {
                 Fokus sebagai perancang experience
               </option>
               <option value="CERTIFIED_GUIDE">
-                EO juga memiliki sertifikasi pemanduan
+                Travel Organizer juga memiliki sertifikasi pemanduan
               </option>
             </select>
             <span className="eo-form-helper">
-              Sertifikasi pemanduan bukan syarat menjadi EO. Semua destinasi
-              terverifikasi JedaIn sudah wajib memiliki pemandu lokal.
+              Sertifikasi pemanduan bukan syarat menjadi Travel Organizer. Semua
+              destinasi terverifikasi JedaIn sudah wajib memiliki pemandu lokal.
             </span>
           </div>
 

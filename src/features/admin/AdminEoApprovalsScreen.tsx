@@ -26,7 +26,7 @@ export function AdminEoApprovalsScreen() {
             className="admin-page-title"
             style={{ marginTop: "var(--space-2)" }}
           >
-            Antrean Aplikasi Mitra Event Organizer (EO)
+            Antrean Aplikasi Mitra Travel Organizer
           </h1>
           <p className="admin-page-subtitle">
             Verifikasi kompetensi pemandu, portofolio pengalaman, dan kepatuhan
@@ -75,7 +75,10 @@ export function AdminEoApprovalsScreen() {
       </div>
 
       {/* Applications Table */}
-      <section className="admin-section" aria-label="Tabel aplikasi EO">
+      <section
+        className="admin-section"
+        aria-label="Tabel aplikasi Travel Organizer"
+      >
         {filteredApps.length === 0 ? (
           <div
             style={{
@@ -84,7 +87,7 @@ export function AdminEoApprovalsScreen() {
               color: "var(--color-text-muted)",
             }}
           >
-            <p>Tidak ada pengajuan mitra EO pada status ini.</p>
+            <p>Tidak ada pengajuan mitra Travel Organizer pada status ini.</p>
           </div>
         ) : (
           <div className="admin-table-wrapper">

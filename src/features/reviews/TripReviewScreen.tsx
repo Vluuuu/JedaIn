@@ -136,7 +136,7 @@ export function TripReviewScreen({
   const isDestination = targetType === "DESTINATION";
   const ctaLabel = isDestination
     ? "Kirim Penilaian Destinasi"
-    : "Kirim Penilaian EO";
+    : "Kirim Penilaian Travel Organizer";
 
   return (
     <div className="review-container">
@@ -149,7 +149,7 @@ export function TripReviewScreen({
 
       <header className="review-header">
         <h1 className="review-title">
-          {isDestination ? "Nilai Destinasi" : "Nilai EO / Guide"}
+          {isDestination ? "Nilai Destinasi" : "Nilai Travel Organizer"}
         </h1>
         <p className="review-subtitle">
           Bagikan penilaianmu untuk <strong>{context.targetName}</strong> (

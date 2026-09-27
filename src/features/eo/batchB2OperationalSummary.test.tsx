@@ -122,11 +122,11 @@ describe("Batch B2 — Operational Summary & Insight Context", () => {
       expect(view.textContent).toContain("ID Sesi: ses_sgd_1");
       expect(view.textContent).toContain("Paket Experience");
       expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
-      expect(view.textContent).toContain("Penyelenggara (EO)");
+      expect(view.textContent).toContain("Penyelenggara (Travel Organizer)");
       expect(view.textContent).toContain("Jeda Alam Nusantara");
 
       // Clear separation of session quota and general destination capacity
-      expect(view.textContent).toContain("Kuota Sesi EO");
+      expect(view.textContent).toContain("Kuota Sesi Travel Organizer");
       expect(view.textContent).toContain("6 Orang");
       expect(view.textContent).toContain(
         "Kapasitas umum destinasi per sesi: 20 orang",

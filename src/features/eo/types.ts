@@ -186,6 +186,9 @@ export interface EoPackageRecord {
   excludedItems: string[];
   safetyNotes: string[];
   meetingPointLabel?: string;
+  departureTimeLabel?: string;
+  outboundTransport?: string;
+  returnTransport?: string;
   accessNotes?: string[];
   pricing: EoPackagePricing;
   guideStatus: EoGuideStatus;

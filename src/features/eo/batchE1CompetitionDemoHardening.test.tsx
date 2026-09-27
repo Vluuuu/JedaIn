@@ -49,8 +49,8 @@ describe("Batch E1 — Competition Demo Hardening", () => {
     await renderPartnerPortal();
 
     const text = container.textContent ?? "";
-    expect(text).toContain("Masuk sebagai EO Demo (Certified)");
-    expect(text).toContain("Masuk sebagai EO Demo (Concept)");
+    expect(text).toContain("Masuk sebagai Travel Organizer Demo (Certified)");
+    expect(text).toContain("Masuk sebagai Travel Organizer Demo (Concept)");
     expect(text).toContain("Masuk sebagai Mitra Destinasi Demo");
     expect(text).toContain("Reset Demo State");
   });

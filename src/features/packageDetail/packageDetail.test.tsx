@@ -603,7 +603,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
       "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket.",
     );
     expect(view.textContent).toContain(
-      "Ulasan Destinasi dan EO/Guide pascatrip dicatat terpisah.",
+      "Ulasan Destinasi dan Travel Organizer pascatrip dicatat terpisah.",
     );
 
     // Rating labeled explicitly as sample rating

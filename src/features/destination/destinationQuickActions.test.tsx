@@ -57,7 +57,7 @@ describe("F3.3 — Mitra Destination Overview Quick Actions", () => {
     // Section heading and supporting copy
     expect(quickActionsSection?.textContent).toContain("Akses Cepat");
     expect(quickActionsSection?.textContent).toContain(
-      "Buka rincian operasional destinasi tanpa mengubah kewenangan sesi EO.",
+      "Buka rincian operasional destinasi tanpa mengubah kewenangan sesi Travel Organizer.",
     );
   });
 
@@ -170,7 +170,9 @@ describe("F3.3 — Mitra Destination Overview Quick Actions", () => {
     expect(text).not.toContain("Ulasan objektif");
 
     // Informational context copy
-    expect(text).toContain("Konteks daya tampung venue dan alokasi sesi EO");
+    expect(text).toContain(
+      "Konteks daya tampung venue dan alokasi sesi Travel Organizer",
+    );
     expect(text).toContain("Ulasan traveler khusus kualitas kawasan");
   });
 
@@ -193,7 +195,7 @@ describe("F3.3 — Mitra Destination Overview Quick Actions", () => {
     expect(view.textContent).not.toContain("Terverifikasi Dasar");
 
     // Collaboration context
-    expect(view.textContent).toContain("Kolaborasi EO");
+    expect(view.textContent).toContain("Kolaborasi Travel Organizer");
 
     // Upcoming sessions preview
     expect(view.textContent).toContain("Jadwal Keberangkatan Mendatang");

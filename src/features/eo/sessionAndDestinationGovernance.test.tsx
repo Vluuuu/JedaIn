@@ -428,7 +428,7 @@ describe("Destination verification requires local guide", () => {
 
     expect(view.textContent).toContain("Hutan Bambu Trawas");
     expect(view.textContent).toContain(
-      "belum memenuhi syarat pembuatan paket EO",
+      "belum memenuhi syarat pembuatan paket Travel Organizer",
     );
     expect(view.textContent).not.toContain("Terverifikasi Dasar");
     expect(view.textContent).toContain("Belum Memenuhi Syarat Paket");

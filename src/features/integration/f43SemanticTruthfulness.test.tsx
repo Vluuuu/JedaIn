@@ -398,11 +398,15 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       // 20. Overview no longer says 'kapasitas destinasi terisi'
       expect(view.textContent).not.toContain("kapasitas destinasi terisi");
 
-      // 21. Clearly labels Kuota Sesi EO
-      expect(view.textContent).toContain("Kuota Sesi EO: 6 orang");
+      // 21. Clearly labels Kuota Sesi Travel Organizer
+      expect(view.textContent).toContain(
+        "Kuota Sesi Travel Organizer: 6 orang",
+      );
 
-      // 22. Progress percentage corresponds to EO Session quota
-      expect(view.textContent).toContain("0% Kuota Sesi EO terisi");
+      // 22. Progress percentage corresponds to Travel Organizer Session quota
+      expect(view.textContent).toContain(
+        "0% Kuota Sesi Travel Organizer terisi",
+      );
 
       // 23. General Destination capacity remains separately visible as venue context
       expect(view.textContent).toContain(

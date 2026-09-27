@@ -92,7 +92,7 @@ export function EoDestinationDetailScreen() {
           <p>
             {isEligible
               ? "Destinasi ini telah melalui proses verifikasi JedaIn."
-              : "Destinasi belum tersedia untuk perancangan paket EO."}
+              : "Destinasi belum tersedia untuk perancangan paket Travel Organizer."}
           </p>
 
           <p className="eo-dest-detail-hero__loc">
@@ -203,7 +203,7 @@ export function EoDestinationDetailScreen() {
                 <h2>Foto Fasilitas</h2>
                 <p>
                   Foto fasilitas yang tercatat di destinasi ini untuk gambaran
-                  operasional EO.
+                  operasional Travel Organizer.
                 </p>
               </div>
               <span>{facMedia.length} foto</span>
@@ -346,8 +346,9 @@ export function EoDestinationDetailScreen() {
                 Catatan Operasional
               </h2>
               <p className="eo-dest-detail-card__hint">
-                Catatan ini bersifat deskriptif untuk membantu perencanaan EO,
-                bukan sertifikasi keselamatan atau persetujuan operasional.
+                Catatan ini bersifat deskriptif untuk membantu perencanaan
+                Travel Organizer, bukan sertifikasi keselamatan atau persetujuan
+                operasional.
               </p>
               <ul className="eo-dest-detail-bullet-list">
                 {destination.operationalNotes.map((note, i) => (
@@ -460,7 +461,7 @@ export function EoDestinationDetailScreen() {
             >
               {destination.guideReady
                 ? "Kesiapan pemandu lokal merupakan informasi kemampuan destinasi secara umum, bukan penugasan pemandu individu untuk jadwal tertentu."
-                : "Kesiapan pemandu lokal belum terverifikasi untuk destinasi ini, sehingga belum dapat digunakan dalam perancangan paket EO."}
+                : "Kesiapan pemandu lokal belum terverifikasi untuk destinasi ini, sehingga belum dapat digunakan dalam perancangan paket Travel Organizer."}
             </p>
           </div>
 
@@ -485,7 +486,7 @@ export function EoDestinationDetailScreen() {
               }}
             >
               Kapasitas umum destinasi per sesi. Alokasi kuota paket aktual
-              ditentukan oleh EO saat membuka jadwal sesi.
+              ditentukan oleh Travel Organizer saat membuka jadwal sesi.
             </p>
             <div className="eo-dest-spec-row">
               <span className="eo-dest-spec-label">Area / Kota</span>
@@ -519,7 +520,8 @@ export function EoDestinationDetailScreen() {
               <h3 className="eo-dest-side-cta-title">Belum Dapat Dipilih</h3>
               <p className="eo-dest-side-cta-desc">
                 Destinasi ini belum memiliki kesiapan pemandu lokal
-                terverifikasi sehingga belum memenuhi syarat pembuatan paket EO.
+                terverifikasi sehingga belum memenuhi syarat pembuatan paket
+                Travel Organizer.
               </p>
               <Button type="button" variant="secondary" size="md" disabled>
                 Tidak Dapat Dibuat Paket

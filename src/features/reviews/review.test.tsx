@@ -129,8 +129,8 @@ describe("Reviews Feature (T19 & T20) Tests", () => {
     const bId = `bk_demo_completed_${traveler.id}`;
     const { container, getPath } = await renderReview(bId, "eo");
 
-    expect(container.textContent).toContain("Nilai EO / Guide");
-    expect(container.textContent).toContain("Kirim Penilaian EO");
+    expect(container.textContent).toContain("Nilai Travel Organizer");
+    expect(container.textContent).toContain("Kirim Penilaian Travel Organizer");
 
     // Select star rating (e.g. 4)
     const star4Btn = Array.from(
@@ -141,7 +141,7 @@ describe("Reviews Feature (T19 & T20) Tests", () => {
     });
 
     const submitBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Kirim Penilaian EO"),
+      (b) => b.textContent?.includes("Kirim Penilaian Travel Organizer"),
     )!;
 
     await act(async () => {

@@ -118,7 +118,7 @@ describe("Batch C2 — Destination Cost Scope Clarity (P1-E01)", () => {
       "Biaya Dasar Destinasi (Lereng Hijau Batu):",
     );
     expect(view.textContent).toContain("Rp125.000");
-    expect(view.textContent).toContain("Margin EO:");
+    expect(view.textContent).toContain("Margin Travel Organizer:");
     expect(view.textContent).toContain("Rp150.000");
     expect(view.textContent).toContain("Rp300.000 / orang");
 

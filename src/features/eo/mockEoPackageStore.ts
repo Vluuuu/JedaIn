@@ -237,6 +237,10 @@ export const SEEDED_LIVE_PACKAGE: EoPackageRecord = {
     "Bawa jaket atau pakaian hangat tipis.",
   ],
   meetingPointLabel: "Area titik kumpul Lereng Hijau Batu",
+  departureTimeLabel: "Peserta berkumpul 30 menit sebelum jadwal sesi dimulai",
+  outboundTransport: "Transportasi mandiri menuju titik kumpul kawasan lereng",
+  returnTransport:
+    "Kembali mandiri dari titik kumpul kawasan setelah kegiatan selesai",
   accessNotes: [
     "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
     "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
@@ -304,6 +308,13 @@ export const SEEDED_PENDING_PACKAGE: EoPackageRecord = {
   safetyNotes: [
     "Kenakan pakaian santai yang nyaman.",
     "Hati-hati saat melangkah di bebatuan tepi sungai.",
+  ],
+  meetingPointLabel: "Pendopo Utama Lembah Alam Pacet",
+  departureTimeLabel: "Berkumpul 15 menit sebelum kegiatan dimulai",
+  outboundTransport: "Shuttle Travel Organizer dari titik kumpul Pacet",
+  returnTransport: "Shuttle kembali ke titik kumpul Pacet setelah sesi selesai",
+  accessNotes: [
+    "Dapat diakses mobil dan motor, area parkir luas di gerbang utama.",
   ],
   pricing: {
     destinationBaseCost: 160000,
@@ -517,6 +528,36 @@ export const mockEoPackageStore = {
               "Kenakan alas kaki yang nyaman.",
               "Patuhi arahan pemandu selama kegiatan.",
             ],
+      meetingPointLabel:
+        draft.meetingPointLabel !== undefined
+          ? draft.meetingPointLabel
+          : existingIndex >= 0
+            ? packages[existingIndex].meetingPointLabel
+            : undefined,
+      departureTimeLabel:
+        draft.departureTimeLabel !== undefined
+          ? draft.departureTimeLabel
+          : existingIndex >= 0
+            ? packages[existingIndex].departureTimeLabel
+            : undefined,
+      outboundTransport:
+        draft.outboundTransport !== undefined
+          ? draft.outboundTransport
+          : existingIndex >= 0
+            ? packages[existingIndex].outboundTransport
+            : undefined,
+      returnTransport:
+        draft.returnTransport !== undefined
+          ? draft.returnTransport
+          : existingIndex >= 0
+            ? packages[existingIndex].returnTransport
+            : undefined,
+      accessNotes:
+        draft.accessNotes !== undefined
+          ? draft.accessNotes
+          : existingIndex >= 0
+            ? packages[existingIndex].accessNotes
+            : undefined,
       pricing: {
         destinationBaseCost: baseCost,
         localGuideFee,

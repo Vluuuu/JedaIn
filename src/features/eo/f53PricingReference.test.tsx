@@ -128,7 +128,7 @@ describe("F5.3 — Demand-Assisted Pricing Reference", () => {
 
     expect(panel.textContent).toContain("Rentang budget paling banyak dipilih");
     expect(panel.textContent).toContain(
-      "tidak mengubah Margin EO secara otomatis",
+      "tidak mengubah Margin Travel Organizer secara otomatis",
     );
     expect(panel.textContent).toContain(
       "bukan sebagai harga terbaik atau jaminan konversi",

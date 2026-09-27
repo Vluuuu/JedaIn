@@ -62,6 +62,11 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Ikuti arahan pemandu demi kenyamanan dan kelestarian perkebunan.",
     ],
     meetingPointLabel: "Area titik kumpul Lereng Hijau Batu",
+    departureTimeLabel: "30 menit sebelum jadwal sesi dimulai",
+    outboundTransport:
+      "Transportasi mandiri menuju titik kumpul kawasan lereng",
+    returnTransport:
+      "Kembali mandiri dari titik kumpul kawasan setelah kegiatan selesai",
     accessNotes: [
       "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
       "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
@@ -71,7 +76,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       id: "org_lereng_batu",
       displayName: "Jeda Alam Nusantara",
       guideStatus: "CERTIFIED_GUIDE",
-      roleDescription: "Event Organizer Komunitas Wellness Lokal",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Merancang pengalaman perjalanan berbasis kesadaran penuh dan kearifan alam lokal di Jawa Timur.",
     },

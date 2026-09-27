@@ -27,7 +27,9 @@ export function EoApplicationStatusScreen() {
 
   const businessName = isDestination
     ? (destApp?.name ?? partner?.businessName ?? "Destinasi Mitra")
-    : (eoApp?.businessName ?? partner?.businessName ?? "EO Partner");
+    : (eoApp?.businessName ??
+      partner?.businessName ??
+      "Travel Organizer Partner");
 
   const rejectionReason = isDestination
     ? (destApp?.rejectionReason ?? "Alasan verifikasi belum tersedia.")
@@ -85,7 +87,9 @@ export function EoApplicationStatusScreen() {
           </Badge>
           <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
             Status{" "}
-            {isDestination ? "Verifikasi Destinasi" : "Pengajuan Mitra EO"}
+            {isDestination
+              ? "Verifikasi Destinasi"
+              : "Pengajuan Mitra Travel Organizer"}
           </h1>
           <p className="eo-page-subtitle">
             Entitas: <strong>{businessName}</strong>
@@ -263,7 +267,7 @@ export function EoApplicationStatusScreen() {
             >
               {isDestination
                 ? "Lihat Workspace Destinasi Demo (Approved)"
-                : "Lihat Workspace EO Demo (Approved)"}
+                : "Lihat Workspace Travel Organizer Demo (Approved)"}
             </Button>
           </div>
 

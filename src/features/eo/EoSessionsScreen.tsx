@@ -74,7 +74,8 @@ export function EoSessionsScreen() {
         >
           <h2>Akses Ditolak</h2>
           <p style={{ color: "var(--color-text-secondary)" }}>
-            Paket ini tidak ditemukan atau bukan milik akun EO Anda.
+            Paket ini tidak ditemukan atau bukan milik akun Travel Organizer
+            Anda.
           </p>
           <Link to="/partner/eo/packages" className="eo-back-btn">
             <ArrowLeftIcon className="eo-back-icon" />
@@ -269,7 +270,7 @@ export function EoSessionsScreen() {
               </span>
               <span className="eo-session-package-card__content">
                 <strong>Semua Sesi</strong>
-                <span>Lihat seluruh jadwal milik EO</span>
+                <span>Lihat seluruh jadwal milik Travel Organizer</span>
               </span>
             </button>
 

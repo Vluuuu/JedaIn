@@ -1182,3 +1182,68 @@
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-semibold);
 }
+
+/* Dual Trust Identity: Destinasi & Travel Organizer */
+.package-detail-trust-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .package-detail-trust-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.package-detail-trust-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.package-detail-trust-card__badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-700);
+  background: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-1);
+}
+
+.package-detail-trust-card__name {
+  margin: 0;
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.package-detail-trust-card__claim {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+.package-detail-trust-card__rating {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest-800);
+}
+
+.package-detail-trust-card__rating--empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: normal;
+  font-style: italic;
+}

@@ -151,6 +151,7 @@ export function PackageDetailScreen({
     detail,
     hasOpenSession,
     organizerReviewSummary,
+    destinationReviewSummary,
   } = viewModel;
   const durationLabel =
     QUIZ_DURATION_OPTIONS.find((d) => d.value === pkg.durationType)?.label ??
@@ -195,6 +196,66 @@ export function PackageDetailScreen({
           </div>
 
           <p className="package-detail-value-prop">{detail.valueProposition}</p>
+        </section>
+
+        {/* Dual Trust Identity: Destinasi & Travel Organizer */}
+        <section
+          className="package-detail-trust-cards"
+          aria-label="Identitas Destinasi dan Travel Organizer"
+        >
+          {/* Destinasi */}
+          <div className="package-detail-trust-card">
+            <span className="package-detail-trust-card__badge">Destinasi</span>
+            <h3 className="package-detail-trust-card__name">
+              {pkg.destinationName}
+            </h3>
+            <p className="package-detail-trust-card__claim">
+              Destinasi ini telah melalui proses verifikasi JedaIn.
+            </p>
+            <div className="package-detail-trust-card__rating">
+              {destinationReviewSummary ? (
+                <span>
+                  ★{" "}
+                  {destinationReviewSummary.averageRating
+                    .toFixed(1)
+                    .replace(".", ",")}{" "}
+                  · {destinationReviewSummary.reviewCount} ulasan destinasi
+                </span>
+              ) : (
+                <span className="package-detail-trust-card__rating--empty">
+                  Belum ada ulasan destinasi.
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Travel Organizer */}
+          <div className="package-detail-trust-card">
+            <span className="package-detail-trust-card__badge">
+              Travel Organizer
+            </span>
+            <h3 className="package-detail-trust-card__name">
+              {detail.organizer.displayName}
+            </h3>
+            <p className="package-detail-trust-card__claim">
+              Travel Organizer JedaIn
+            </p>
+            <div className="package-detail-trust-card__rating">
+              {organizerReviewSummary ? (
+                <span>
+                  ★{" "}
+                  {organizerReviewSummary.averageRating
+                    .toFixed(1)
+                    .replace(".", ",")}{" "}
+                  · {organizerReviewSummary.reviewCount} ulasan pascatrip
+                </span>
+              ) : (
+                <span className="package-detail-trust-card__rating--empty">
+                  Belum ada ulasan pascatrip.
+                </span>
+              )}
+            </div>
+          </div>
         </section>
 
         {/* 3. Optional Personalized Match Explanation */}
@@ -506,7 +567,7 @@ export function PackageDetailScreen({
                   </strong>
                   <p className="package-detail-trust-explanation__text">
                     {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
-                      ? "Certified Guide menunjukkan status kepemanduan berlisensi milik penyelenggara (EO). Status ini tidak menunjukkan pemandu individu tertentu untuk jadwal sesi."
+                      ? "Certified Guide menunjukkan status kepemanduan berlisensi milik penyelenggara (Travel Organizer). Status ini tidak menunjukkan pemandu individu tertentu untuk jadwal sesi."
                       : "Concept Organizer merancang konsep perjalanan dan bermitra dengan pemandu lokal di destinasi, bukan penugasan pemandu individu tertentu."}
                   </p>
                 </div>
@@ -717,8 +778,10 @@ export function PackageDetailScreen({
                 </section>
               )}
 
-              {/* 10. Travel Logistics & Meeting Point (P1-T02) */}
+              {/* 10. Travel Logistics & Meeting Point */}
               {(detail.meetingPointLabel ||
+                detail.outboundTransport ||
+                detail.returnTransport ||
                 (detail.accessNotes && detail.accessNotes.length > 0)) && (
                 <section
                   className="package-detail-section"
@@ -751,13 +814,33 @@ export function PackageDetailScreen({
                     </div>
                     <div className="package-detail-logistics-item">
                       <span className="package-detail-logistics-label">
-                        Waktu Keberangkatan
+                        Waktu Kumpul / Keberangkatan
                       </span>
                       <span className="package-detail-logistics-val">
-                        Jam mengikuti jadwal keberangkatan yang dipilih saat
-                        memilih sesi.
+                        {detail.departureTimeLabel ||
+                          "Jam mengikuti jadwal keberangkatan yang dipilih saat memilih sesi."}
                       </span>
                     </div>
+                    {detail.outboundTransport && (
+                      <div className="package-detail-logistics-item">
+                        <span className="package-detail-logistics-label">
+                          Transportasi Menuju Destinasi
+                        </span>
+                        <span className="package-detail-logistics-val">
+                          {detail.outboundTransport}
+                        </span>
+                      </div>
+                    )}
+                    {detail.returnTransport && (
+                      <div className="package-detail-logistics-item">
+                        <span className="package-detail-logistics-label">
+                          Transportasi Kembali
+                        </span>
+                        <span className="package-detail-logistics-val">
+                          {detail.returnTransport}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {detail.accessNotes && detail.accessNotes.length > 0 && (
@@ -826,8 +909,8 @@ export function PackageDetailScreen({
                 </h2>
                 <p className="package-detail-section__desc">
                   {pkg.ratingProvenance === "SAMPLE"
-                    ? "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket. Ulasan Destinasi dan EO/Guide pascatrip dicatat terpisah."
-                    : "Ulasan pascatrip dari traveler yang telah menyelesaikan perjalanan. Ulasan Destinasi dan EO/Guide dicatat terpisah."}
+                    ? "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket. Ulasan Destinasi dan Travel Organizer pascatrip dicatat terpisah."
+                    : "Ulasan pascatrip dari traveler yang telah menyelesaikan perjalanan. Ulasan Destinasi dan Travel Organizer dicatat terpisah."}
                 </p>
                 <div className="package-detail-reviews-summary">
                   <svg

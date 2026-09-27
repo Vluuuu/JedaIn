@@ -469,13 +469,13 @@ Partner/Admin:
 
 Destination verification is an internal Admin gate, not a public BASIC/PLUS badge tier.
 
-For Traveler, EO, and Mitra surfaces:
+For Traveler, Travel Organizer, and Mitra surfaces:
 - do not show `Terverifikasi Dasar` or `Terverifikasi Plus` badges;
 - do not stack a second `Guide Ready` badge;
 - when trust context is useful, use plain explanatory copy such as `Destinasi ini telah melalui proses verifikasi JedaIn.`;
 - guide availability is ordinary profile/operational information.
 
-EO certification may still be shown when it is directly relevant to guide-source selection, but it is not a destination trust tier.
+Travel Organizer certification may still be shown when it is directly relevant to guide-source selection, but it is not a destination trust tier.
 
 ## 12.2 Workflow Status Badge
 
@@ -592,7 +592,7 @@ Group related items; avoid >10 top-level entries.
 Use in:
 
 - onboarding quiz progress,
-- EO application,
+- Travel Organizer application,
 - destination application,
 - Trip Builder.
 

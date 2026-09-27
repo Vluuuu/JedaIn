@@ -201,7 +201,7 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
 
     expect(view.textContent).toContain("Pilih dari galeri destinasi");
     expect(view.textContent).toContain(
-      "Pilihan galeri dapat digabung dengan foto milik EO sendiri.",
+      "Pilihan galeri dapat digabung dengan foto milik Travel Organizer sendiri.",
     );
 
     const options = view.querySelectorAll<HTMLButtonElement>(
@@ -474,11 +474,11 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
     );
     const step3 = steps.find((button) =>
-      button.textContent?.includes("Rencana Itinerary"),
+      button.textContent?.includes("Perjalanan & Itinerary"),
     )!;
     expect(step3.querySelector(".eo-step-badge")?.textContent).toBe("3");
     expect(step3.textContent?.match(/3/g)).toHaveLength(1);
-    expect(step3.textContent).not.toContain("3. Rencana Itinerary");
+    expect(step3.textContent).not.toContain("3. Perjalanan & Itinerary");
 
     await act(async () => steps[1].click());
     const titleInput = view.querySelector<HTMLInputElement>(

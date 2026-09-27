@@ -220,14 +220,19 @@ export function buildTravelerPackageDetailFromEo(
     excludedItems: [...eoPkg.excludedItems],
     safetyNotes: [...eoPkg.safetyNotes],
     meetingPointLabel: eoPkg.meetingPointLabel,
+    departureTimeLabel: eoPkg.departureTimeLabel,
+    outboundTransport: eoPkg.outboundTransport,
+    returnTransport: eoPkg.returnTransport,
     accessNotes: eoPkg.accessNotes ? [...eoPkg.accessNotes] : undefined,
     cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: organizerRef,
       displayName:
-        eoPkg.eoDisplayName || app.businessName || "Mitra EO Terverifikasi",
+        eoPkg.eoDisplayName ||
+        app.businessName ||
+        "Mitra Travel Organizer Terverifikasi",
       guideStatus: eoPkg.guideStatus,
-      roleDescription: "Event Organizer Komunitas Wellness Terverifikasi",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         app.experienceDescription ||
         "Penyelenggara perjalanan mindful terverifikasi JedaIn.",

@@ -128,7 +128,7 @@ export function AdminTrustStatusScreen() {
           </h1>
           <p className="admin-page-subtitle">
             Inspeksi sinyal kepatuhan, rating pengalaman nyata, dan catatan
-            aduan seluruh mitra EO dan destinasi.
+            aduan seluruh mitra Travel Organizer dan destinasi.
           </p>
         </div>
       </header>
@@ -145,7 +145,7 @@ export function AdminTrustStatusScreen() {
             {t === "ALL"
               ? "Semua Mitra"
               : t === "EO"
-                ? "Event Organizer"
+                ? "Travel Organizer"
                 : "Destinasi"}
           </button>
         ))}
@@ -185,7 +185,9 @@ export function AdminTrustStatusScreen() {
                   </td>
                   <td>
                     <Badge tone={item.entityType === "EO" ? "info" : "neutral"}>
-                      {item.entityType}
+                      {item.entityType === "EO"
+                        ? "Travel Organizer"
+                        : "Destinasi"}
                     </Badge>
                   </td>
                   <td>{item.locationOrBusiness}</td>

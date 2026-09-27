@@ -100,7 +100,7 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
       guideReadinessEvidence: "Belum memiliki pemandu lokal resmi di lokasi.",
       submittedAt: "2026-08-15T09:00:00Z",
       status: "REJECTED",
-        rejectionReason:
+      rejectionReason:
         "Pemandu lokal wajib tersedia sebelum destinasi dapat diverifikasi JedaIn.",
       reviewedAt: "2026-08-16T11:00:00Z",
     },
@@ -358,9 +358,11 @@ export const mockDestinationVerificationStore = {
     return { success: true, application: cloneVerificationApp(application) };
   },
 
-  approveApplication(
-    applicationId: string,
-  ): { success: boolean; destination?: DestinationRecord; message?: string } {
+  approveApplication(applicationId: string): {
+    success: boolean;
+    destination?: DestinationRecord;
+    message?: string;
+  } {
     const app = verificationApps.find((a) => a.applicationId === applicationId);
     if (!app || app.status !== "PENDING_REVIEW") {
       return {

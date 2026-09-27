@@ -934,16 +934,18 @@ Traveler Need
 
 # 14. Immediate Next Action
 
-**Next coding batch: F5.1 — Traveler Buyer Experience.**
+**Next action: final rehearsal / regression-only verification.**
 
-Before coding F5.1:
+F5.1–F5.4 are implemented and merged. Do not open another feature batch by default.
 
-1. inspect the full current `PackageDetailScreen` + `TripDetailScreen`;
-2. map information into **primary vs secondary** hierarchy;
-3. keep all source-backed content;
-4. resolve OD-01 only if the organizer trust block requires the exact identity policy;
-5. produce a focused coding-agent prompt;
-6. do not touch F5.2–F5.4 in the same PR.
+During final rehearsal:
+
+1. run the current golden flow across Traveler → EO → Admin → Mitra;
+2. verify the existing source-backed F5 surfaces rather than adding new capability;
+3. patch only concrete regression, factual contradiction, or judge-critical P1 friction;
+4. keep OD-01 open and OD-02 / OD-03 on hold unless the team explicitly locks those decisions;
+5. keep 360° deferred unless a truthful suitable asset is provided;
+6. after rehearsal, return to hard feature freeze if no blocker is found.
 
 ---
 
@@ -951,13 +953,14 @@ Before coding F5.1:
 
 | Batch / Decision | Status |
 |---|---|
-| F5.1 Traveler Buyer Experience | **NEXT** |
-| F5.2 EO Destination Discovery & Builder Clarity | **PLANNED** |
-| F5.3 Demand-Assisted Pricing Reference | **PLANNED** |
-| F5.4 Destination Media & optional 360 | **PLANNED / ASSET-DEPENDENT** |
+| F5.1 Traveler Buyer Experience | **MERGED — PR #97** |
+| F5.2 EO Destination Discovery & Builder Clarity | **MERGED — PR #99** |
+| F5.3 Demand-Assisted Pricing Reference | **MERGED — PR #101** |
+| F5.4 Destination Media & Package Visual Choice | **MERGED — PR #102** |
+| 360° destination view | **DEFERRED / ASSET-DEPENDENT** |
 | OD-01 Organizer identity disclosure | **OPEN** |
 | OD-02 Verification requires guide | **HOLD** |
 | OD-03 Separate destination guide fee | **HOLD** |
 | Partner registration-page issue | **OPEN — needs exact problem statement** |
 
-**Planning conclusion:** F5 reopens development only for evidence-backed usability gaps found through direct prototype usage. It does not reopen the product for broad feature expansion.
+**Planning conclusion:** F5.1–F5.4 are complete. Development returns to regression-only final rehearsal / hard feature freeze; broad feature expansion remains out of scope.

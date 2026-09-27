@@ -301,7 +301,7 @@ export function EoApplicationScreen() {
             <span className="eo-form-helper">
               {guideStatus === "CERTIFIED_GUIDE"
                 ? "Dapat merancang paket di seluruh destinasi terverifikasi BASIC maupun PLUS."
-                : "Hanya dapat memilih destinasi yang memiliki pemandu lokal terlatih di lokasi (Guide Ready)."}
+                : "Dapat merancang paket di destinasi terverifikasi dengan pemandu lokal yang disiapkan pihak destinasi."}
             </span>
           </div>
 

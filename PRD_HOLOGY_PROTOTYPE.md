@@ -290,19 +290,26 @@ Tidak boleh dilabeli sebagai "slot tersedia" kecuali memang berasal dari remaini
 
 ## 6.2 Guide
 
-guideReady:
+Local-guide readiness pada destinasi:
 
-- capability/readiness umum destinasi,
+- merupakan syarat verifikasi destinasi JedaIn;
+- setiap destination `APPROVED + ACTIVE` wajib memiliki pemandu lokal yang siap;
+- bukan lencana trust kedua yang berdiri sendiri;
 - bukan identitas guide individual pada satu session.
 
-EO guideStatus:
+`guideReady` tetap dapat dipakai sebagai field internal/compatibility, tetapi `false` hanya valid untuk record rejected/inactive/remediation, bukan destinasi aktif terverifikasi.
 
-- capability/status EO,
+EO `guideStatus`:
+
+- kapabilitas/status EO dan bersifat optional terhadap akses katalog destinasi;
+- `CONCEPT_ONLY` dan `CERTIFIED_GUIDE` melihat katalog destinasi verified yang sama;
 - bukan bukti guide individual sudah assigned.
 
-guideSource:
+`guideSource`:
 
-- sumber pemandu untuk package: DESTINATION atau EO,
+- sumber pemandu untuk package: DESTINATION atau EO;
+- `CONCEPT_ONLY` menggunakan pemandu destinasi;
+- EO bersertifikat dapat memilih sumber EO bila package model mendukungnya;
 - bukan pembagian keseluruhan tanggung jawab operasional.
 
 ## 6.3 Operational Note
@@ -1583,7 +1590,14 @@ Requirement:
 - jangan membangun media backend production hanya untuk lomba,
 - video tidak mandatory.
 
-Status: PARTIAL / CONTENT DEPENDENCY.
+Status: IMPLEMENTED FOR PROTOTYPE / ACTUAL PHOTOGRAPHY REMAINS CONTENT DEPENDENCY.
+
+Current prototype:
+- destination gallery tersedia dengan provenance;
+- Mitra Destinasi dapat menambah/hapus visual miliknya sendiri melalui authenticated prototype command boundary;
+- EO dapat memilih visual destinasi sebagai package cover atau upload visual package sendiri;
+- prototype illustrations tetap dilabeli dan tidak boleh disebut foto aktual;
+- 360° tetap deferred / tidak diimplementasikan.
 
 ---
 
@@ -1619,16 +1633,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F5.4 Destination Media & Package Visual Choice:
+Current verified competition baseline setelah Destination Verification & Gallery Cleanup:
 
-- current app feature commit: 115bdc265d589efb19bce0479d388a2e5fd2c0ce,
+- current app feature commit: 4ebde672a5be0d33c567aba4ad2a66d0af436056,
 - 50 suites / 696 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, PR #92 Final Semantic Truthfulness Hardening, PR #94 Final Live-User UX Cleanup, PR #97 F5.1 Traveler Buyer Experience, PR #99 F5.2 EO Destination Discovery & Builder Clarity, PR #101 F5.3 Demand-Assisted Pricing Reference, dan PR #102 F5.4 Destination Media & Package Visual Choice sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, PR #92 Final Semantic Truthfulness Hardening, PR #94 Final Live-User UX Cleanup, PR #97 F5.1 Traveler Buyer Experience, PR #99 F5.2 EO Destination Discovery & Builder Clarity, PR #101 F5.3 Demand-Assisted Pricing Reference, PR #102 F5.4 Destination Media & Package Visual Choice, dan PR #105 Destination Verification & Gallery Cleanup sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1895,7 +1909,8 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] Final Live-User UX Cleanup merged melalui PR #94 tanpa flow/business-rule change.
 - [x] Guest Demo tetap diperbolehkan sebagai prototype Traveler identity untuk mendemonstrasikan booking → completion → Destination review + EO/Guide review.
 - [x] Accepted findings dari Traveler / EO / Mitra / Admin-Judge simulation sudah ditutup sampai F4.3.
-- [x] Current canonical app baseline: 115bdc265d589efb19bce0479d388a2e5fd2c0ce dengan 50 suites / 696 tests PASS.
+- [x] Unified destination verification + Mitra gallery management merged melalui PR #105: guide wajib untuk verified destination, EO guide certification optional, no 360°.
+- [x] Current canonical app baseline: 4ebde672a5be0d33c567aba4ad2a66d0af436056 dengan 50 suites / 696 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.
@@ -2167,6 +2182,9 @@ Feature-freeze status:
 
 - F4.2 adalah targeted judge-critical P1 hardening dari EO/Admin-Judge simulations.
 - Accepted semantic findings yang tersisa ditangani pada F4.3; selain itu feature freeze tetap berlaku.
+
+**Superseded governance note — 27 September 2026 / PR #105:**  
+Keputusan tim terbaru mengubah rule setelah histori F4.2 di atas. Destinasi tanpa pemandu lokal tidak lagi boleh tetap menjadi `ACTIVE + BASIC/PLUS`. Local-guide readiness sekarang merupakan syarat verifikasi; record tanpa guide menjadi rejected/inactive/remediation dan tidak boleh diklaim sebagai terverifikasi.
 
 ## F4.3 — Final Semantic Truthfulness Hardening
 

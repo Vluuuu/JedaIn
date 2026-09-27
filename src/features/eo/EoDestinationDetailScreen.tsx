@@ -95,13 +95,19 @@ export function EoDestinationDetailScreen() {
           <div className="eo-dest-detail-hero__badges">
             <Badge
               tone={
-                destination.verificationLevel === "PLUS" ? "info" : "success"
+                isEligible
+                  ? destination.verificationLevel === "PLUS"
+                    ? "info"
+                    : "success"
+                  : "neutral"
               }
               showSymbol={false}
             >
-              {destination.verificationLevel === "PLUS"
-                ? "Terverifikasi Plus"
-                : "Terverifikasi Dasar"}
+              {isEligible
+                ? destination.verificationLevel === "PLUS"
+                  ? "Terverifikasi Plus"
+                  : "Terverifikasi Dasar"
+                : "Belum memenuhi syarat verifikasi"}
             </Badge>
           </div>
 
@@ -181,9 +187,11 @@ export function EoDestinationDetailScreen() {
         <div className="eo-dest-decision-fact">
           <span>Status verifikasi</span>
           <strong>
-            {destination.verificationLevel === "PLUS"
-              ? "Terverifikasi Plus"
-              : "Terverifikasi Dasar"}
+            {isEligible
+              ? destination.verificationLevel === "PLUS"
+                ? "Terverifikasi Plus"
+                : "Terverifikasi Dasar"
+              : "Belum terverifikasi"}
           </strong>
         </div>
         <div className="eo-dest-decision-fact">

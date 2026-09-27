@@ -450,7 +450,7 @@ export function EoPackageBuilderScreen() {
           <div className="eo-section-header">
             <div>
               <h2 className="eo-section-title">
-                Langkah 1: Pilih Destinasi & Status Pemanduan
+                Langkah 1: Pilih Destinasi & Pemandu
               </h2>
               <p
                 style={{
@@ -573,7 +573,7 @@ export function EoPackageBuilderScreen() {
                             ? "Terverifikasi Plus"
                             : "Terverifikasi Dasar"}
                         </Badge>
-                        <span className="eo-builder-dest-card__guide-badge">
+                        <span className="eo-builder-dest-card__guide-note">
                           Pemandu lokal tersedia
                         </span>
                       </div>
@@ -644,7 +644,9 @@ export function EoPackageBuilderScreen() {
               <div className="eo-builder-guide-card eo-builder-guide-card--locked">
                 <div className="eo-builder-guide-card__header">
                   <strong>Pemandu dari Destinasi</strong>
-                  <Badge tone="success">Tersedia melalui mitra destinasi</Badge>
+                  <span className="eo-builder-guide-availability">
+                    Disiapkan Mitra Destinasi
+                  </span>
                 </div>
                 <p className="eo-builder-guide-card__desc">
                   Kamu fokus merancang experience. Pemanduan akan disiapkan oleh

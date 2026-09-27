@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Badge, Button } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
-import { mockDestinationStore } from "../eo/mockDestinationStore";
+import { mockDestinationPartnerService } from "./mockDestinationPartnerService";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
@@ -49,15 +49,12 @@ export function DestinationProfileScreen() {
 
       const cleanName =
         file.name.replace(/\.[^/.]+$/, "").trim() || "Visual destinasi";
-      const result = mockDestinationStore.addMediaItem(
-        destination.destinationId,
-        {
+      const result = mockDestinationPartnerService.addGalleryMedia({
           mediaId: `media_${destination.destinationId}_${Date.now()}`,
           url: reader.result,
           label: cleanName,
           provenance: "DESTINATION_SOURCE",
-        },
-      );
+        });
 
       if (!result.success) {
         setGalleryError(result.message ?? "Visual belum bisa ditambahkan.");
@@ -74,10 +71,7 @@ export function DestinationProfileScreen() {
 
   const handleRemoveMedia = (mediaId: string) => {
     setGalleryError(undefined);
-    const result = mockDestinationStore.removeMediaItem(
-      destination.destinationId,
-      mediaId,
-    );
+    const result = mockDestinationPartnerService.removeGalleryMedia(mediaId);
     if (!result.success) {
       setGalleryError(result.message ?? "Visual belum bisa dihapus.");
       return;

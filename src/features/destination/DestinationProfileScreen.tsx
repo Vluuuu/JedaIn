@@ -64,6 +64,46 @@ export function DestinationProfileScreen() {
         />
       </div>
 
+      {destination.mediaGallery && destination.mediaGallery.length > 0 && (
+        <section
+          className="dest-media-gallery"
+          aria-labelledby="destination-media-gallery-heading"
+        >
+          <div className="dest-media-gallery__header">
+            <div>
+              <h2
+                id="destination-media-gallery-heading"
+                className="dest-media-gallery__title"
+              >
+                Galeri Destinasi
+              </h2>
+              <p className="dest-media-gallery__desc">
+                Visual ini adalah representasi prototype untuk membantu
+                konteks destinasi, bukan dokumentasi kondisi aktual.
+              </p>
+            </div>
+            <span className="dest-media-gallery__count">
+              {destination.mediaGallery.length} visual
+            </span>
+          </div>
+          <div className="dest-media-gallery__grid">
+            {destination.mediaGallery.map((media) => (
+              <figure key={media.mediaId} className="dest-media-gallery__item">
+                <img src={media.url} alt={media.label} />
+                <figcaption>
+                  <strong>{media.label}</strong>
+                  <span>
+                    {media.provenance === "PROTOTYPE_ILLUSTRATION"
+                      ? "Visual prototype"
+                      : "Media destinasi"}
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Critical Edit Policy Notice */}
       <div className="admin-alert admin-alert--info">
         <strong>Ketentuan Perubahan Informasi Destinasi:</strong>

@@ -480,7 +480,7 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
     await act(async () => step3.click());
     const activityTitles = Array.from(
       view.querySelectorAll<HTMLInputElement>(
-        ".eo-itinerary-item input[type=\"text\"]",
+        '.eo-itinerary-item input[type="text"]',
       ),
     ).map((input) => input.value);
     expect(activityTitles.some((value) => value.trim().length > 0)).toBe(true);

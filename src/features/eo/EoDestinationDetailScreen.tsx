@@ -103,15 +103,6 @@ export function EoDestinationDetailScreen() {
                 ? "Terverifikasi Plus"
                 : "Terverifikasi Dasar"}
             </Badge>
-            {destination.guideReady ? (
-              <span className="eo-dest-detail-hero__guide-badge">
-                Pemandu lokal tersedia
-              </span>
-            ) : (
-              <span className="eo-dest-detail-hero__guide-badge eo-dest-detail-hero__guide-badge--not-ready">
-                Pemandu lokal belum tersedia
-              </span>
-            )}
           </div>
 
           <p className="eo-dest-detail-hero__loc">
@@ -196,10 +187,8 @@ export function EoDestinationDetailScreen() {
           </strong>
         </div>
         <div className="eo-dest-decision-fact">
-          <span>Kesiapan pemandu</span>
-          <strong>
-            {destination.guideReady ? "Pemandu lokal siap" : "Belum siap"}
-          </strong>
+          <span>Pemandu lokal</span>
+          <strong>Tersedia sebagai bagian dari standar verifikasi</strong>
         </div>
         <div className="eo-dest-decision-fact">
           <span>Kapasitas umum destinasi</span>

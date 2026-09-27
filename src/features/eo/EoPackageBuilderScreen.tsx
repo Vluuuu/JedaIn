@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { Badge, Button, Dialog } from "../../components/ui";
+import { Badge, Button } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
@@ -58,7 +58,7 @@ export function EoPackageBuilderScreen() {
 
   // Authoritative initial destination: preselect only if the candidate is in eligibleDestinations
   const candidateDestinationId =
-    initialDraft?.destinationId ?? initialDestinationId ?? "";
+    initialDraft?.destinationId || initialDestinationId || "";
   const isCandidateEligible = eligibleDestinations.some(
     (d) => d.destinationId === candidateDestinationId,
   );
@@ -74,11 +74,16 @@ export function EoPackageBuilderScreen() {
   const [destLevelFilter, setDestLevelFilter] = useState<
     "ALL" | "BASIC" | "PLUS"
   >("ALL");
+  const [destLocationFilter, setDestLocationFilter] = useState<string>("ALL");
 
-  // Step 1: Destination Inspect Dialog / Modal
-  const [inspectingDestination, setInspectingDestination] = useState<
-    DestinationRecord | undefined
-  >(undefined);
+  const destinationLocationOptions = Array.from(
+    new Map(
+      eligibleDestinations.map((dest) => [
+        dest.city,
+        { value: dest.city, label: `${dest.city}, ${dest.province}` },
+      ]),
+    ).values(),
+  ).sort((a, b) => a.label.localeCompare(b.label, "id-ID"));
 
   // Step 5: Traveler-Facing Draft Preview Dialog
   const [showTravelerPreview, setShowTravelerPreview] = useState(false);
@@ -157,6 +162,9 @@ export function EoPackageBuilderScreen() {
       destLevelFilter !== "ALL" &&
       dest.verificationLevel !== destLevelFilter
     ) {
+      return false;
+    }
+    if (destLocationFilter !== "ALL" && dest.city !== destLocationFilter) {
       return false;
     }
     if (destSearchQuery.trim()) {
@@ -447,14 +455,35 @@ export function EoPackageBuilderScreen() {
 
           {/* Destination Search & Filter */}
           <div className="eo-builder-dest-toolbar">
-            <input
-              type="search"
-              placeholder="Cari nama atau area destinasi…"
-              value={destSearchQuery}
-              onChange={(e) => setDestSearchQuery(e.target.value)}
-              className="eo-builder-dest-search"
-              aria-label="Cari destinasi dalam perancang paket"
-            />
+            <div className="eo-builder-dest-toolbar__search-group">
+              <input
+                type="search"
+                placeholder="Cari nama atau area destinasi…"
+                value={destSearchQuery}
+                onChange={(e) => setDestSearchQuery(e.target.value)}
+                className="eo-builder-dest-search"
+                aria-label="Cari destinasi dalam perancang paket"
+              />
+              <label
+                htmlFor="destination-location-filter"
+                className="eo-builder-dest-location-label"
+              >
+                Lokasi
+              </label>
+              <select
+                id="destination-location-filter"
+                className="eo-form-select eo-builder-dest-location-select"
+                value={destLocationFilter}
+                onChange={(e) => setDestLocationFilter(e.target.value)}
+              >
+                <option value="ALL">Semua Lokasi</option>
+                {destinationLocationOptions.map((location) => (
+                  <option key={location.value} value={location.value}>
+                    {location.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="eo-builder-dest-chips" role="tablist">
               <button
                 type="button"
@@ -562,10 +591,19 @@ export function EoPackageBuilderScreen() {
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setInspectingDestination(dest);
+                          const savedPkg = saveCurrentDraft();
+                          const params = new URLSearchParams({
+                            from: "builder",
+                          });
+                          if (savedPkg?.packageId) {
+                            params.set("draftId", savedPkg.packageId);
+                          }
+                          navigate(
+                            `/partner/eo/destinations/${dest.destinationId}?${params.toString()}`,
+                          );
                         }}
                       >
-                        Lihat Detail
+                        Lihat Detail Destinasi
                       </Button>
                       <Button
                         type="button"
@@ -796,8 +834,12 @@ export function EoPackageBuilderScreen() {
 
           <div className="eo-form-group">
             <label htmlFor="package-summary" className="eo-form-label">
-              Ringkasan Nilai & Janji Pengalaman (Value Proposition) *
+              Ringkasan Pengalaman *
             </label>
+            <span className="eo-form-helper">
+              Jelaskan dalam 1–2 kalimat pengalaman utama yang akan didapat
+              Traveler. Hindari mengulang itinerary.
+            </span>
             <textarea
               id="package-summary"
               rows={3}
@@ -805,7 +847,7 @@ export function EoPackageBuilderScreen() {
               className="eo-form-textarea"
               value={shortSummary}
               onChange={(e) => setShortSummary(e.target.value)}
-              placeholder="Jelaskan suasana jeda, ketenangan, dan apa yang dirasakan traveler selama perjalanan..."
+              placeholder="Contoh: Nikmati jeda sehari di lereng hijau dengan jalan santai, teh lokal, dan sesi refleksi ringan."
             />
           </div>
 
@@ -1456,126 +1498,6 @@ export function EoPackageBuilderScreen() {
             </div>
           </div>
         </section>
-      )}
-
-      {/* Inspection Modal / Drawer for Destination in Step 1 */}
-      {inspectingDestination && (
-        <Dialog
-          open={Boolean(inspectingDestination)}
-          title={inspectingDestination.name}
-          description={inspectingDestination.locationLabel}
-          onClose={() => setInspectingDestination(undefined)}
-          actions={
-            <div style={{ display: "flex", gap: "var(--space-2)" }}>
-              <Button
-                type="button"
-                variant="secondary"
-                size="md"
-                onClick={() => setInspectingDestination(undefined)}
-              >
-                Tutup
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                onClick={() => {
-                  setSelectedDestinationId(inspectingDestination.destinationId);
-                  setInspectingDestination(undefined);
-                }}
-              >
-                Pilih Destinasi Ini
-              </Button>
-            </div>
-          }
-        >
-          <div className="eo-dest-inspect-dialog">
-            {inspectingDestination.imageUrl && (
-              <div className="eo-dest-inspect-media">
-                <img
-                  src={inspectingDestination.imageUrl}
-                  alt={inspectingDestination.name}
-                  className="eo-dest-inspect-img"
-                />
-              </div>
-            )}
-
-            <div className="eo-dest-inspect-body">
-              <div className="eo-dest-inspect-badges">
-                <Badge
-                  tone={
-                    inspectingDestination.verificationLevel === "PLUS"
-                      ? "info"
-                      : "success"
-                  }
-                  showSymbol={false}
-                >
-                  {inspectingDestination.verificationLevel === "PLUS"
-                    ? "Terverifikasi Plus"
-                    : "Terverifikasi Dasar"}
-                </Badge>
-                <span className="eo-dest-inspect-guide-badge">
-                  Pemandu lokal tersedia
-                </span>
-              </div>
-
-              <p>{inspectingDestination.description}</p>
-
-              {inspectingDestination.availableActivities && (
-                <div className="eo-dest-inspect-section">
-                  <strong>Aktivitas yang Tersedia:</strong>
-                  <ul>
-                    {inspectingDestination.availableActivities.map((act, i) => (
-                      <li key={i}>{act}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {inspectingDestination.facilities && (
-                <div className="eo-dest-inspect-section">
-                  <strong>Fasilitas:</strong>
-                  <ul>
-                    {inspectingDestination.facilities.map((fac, i) => (
-                      <li key={i}>{fac}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {inspectingDestination.baseCostIncludes &&
-                inspectingDestination.baseCostIncludes.length > 0 && (
-                  <div className="eo-dest-inspect-section">
-                    <strong>Termasuk Biaya Dasar:</strong>
-                    <ul>
-                      {inspectingDestination.baseCostIncludes.map((inc, i) => (
-                        <li key={i}>{inc}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-              <div className="eo-dest-inspect-footer">
-                <span>
-                  Biaya dasar destinasi:{" "}
-                  <strong>
-                    Rp
-                    {inspectingDestination.baseCostPerPerson.toLocaleString(
-                      "id-ID",
-                    )}{" "}
-                    / orang
-                  </strong>
-                </span>
-                <span>
-                  Kapasitas:{" "}
-                  <strong>
-                    {inspectingDestination.capacityPerSession} orang
-                  </strong>
-                </span>
-              </div>
-            </div>
-          </div>
-        </Dialog>
       )}
 
       {/* Traveler-Facing Draft Preview Dialog (Step 5) */}

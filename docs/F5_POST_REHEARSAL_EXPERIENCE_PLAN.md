@@ -3,7 +3,7 @@
 **Status:** IMPLEMENTED — F5.1–F5.4 MERGED / FINAL REHEARSAL NEXT  
 **Date:** 27 September 2026  
 **Source:** Internal team review + direct live prototype usage after F4.3 and Final Live-User UX Cleanup  
-**Current app feature baseline:** `115bdc265d589efb19bce0479d388a2e5fd2c0ce`  
+**Current app feature baseline:** `4ebde672a5be0d33c567aba4ad2a66d0af436056`  
 **Current main incl. synchronized docs:** pending this documentation sync  
 **Quality baseline:** 50 test suites / 696 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
 
@@ -103,7 +103,7 @@ A change is justified only when it helps Traveler, EO, or Mitra:
 | Finding | Interpretation | Decision | Batch |
 |---|---|---|---|
 | Remove “Deskripsi Ketenangan Kawasan” wording | Current label is overly artificial; destination description can use neutral wording | **COPY POLISH** | F5.2 |
-| Destination verification should require guide availability | This can mean two different rules and would change current governance | **OPEN / HOLD** | Decision needed |
+| Destination verification should require guide availability | Team decision locked on 27 Sep: local-guide readiness is part of destination verification, not a second independent badge | **RESOLVED / IMPLEMENTED** | PR #105 |
 | Destination gallery should exist | Destination currently has only a single optional image path; richer visual source would help EO decision-making | **DEVELOP** | F5.4 |
 | EO should be able to choose destination image or add own package image | Fits package creation if provenance remains truthful | **DEVELOP** | F5.4 |
 | 360° destination view | Useful visual demo only if truthful panorama/360 asset exists | **OPTIONAL / ASSET-DEPENDENT** | F5.4 optional |
@@ -179,31 +179,31 @@ Cons:
 
 ---
 
-## OD-02 — Does destination verification require `guideReady=true`?
+## OD-02 — Destination verification requires a local guide — RESOLVED
 
-Current canonical rule:
+**Decision locked on 27 September 2026.**
 
-- verification level and guide readiness are separate;
-- destination may be `ACTIVE + BASIC/PLUS + guideReady=false`;
-- EO eligibility requires `ACTIVE + BASIC/PLUS + guideReady=true`;
-- therefore a verified destination can exist while temporarily not eligible for EO package creation.
+Canonical rule after PR #105:
 
-The meeting note “verifikasi wajib ada pemandu” may mean:
+- a destination cannot become verified unless a local guide is available and readiness evidence is present;
+- initial successful verification produces **Terverifikasi Dasar (BASIC)**;
+- `PLUS` remains a later trust-lifecycle level;
+- local-guide readiness is part of destination verification and must not be presented as a second independent trust badge;
+- a no-guide destination may remain as an internal/rejected/remediation record, but it is not an active verified destination and is not EO-selectable;
+- `dest_hutan_trawas` is therefore REJECTED / INACTIVE in the canonical prototype baseline;
+- EO guide certification remains optional; both Concept-Only and Certified EO see the same verified-destination catalog;
+- package `guideSource` may still distinguish whether trip pemanduan comes from the destination or a certified EO where the existing package model supports it.
 
-### Interpretation A — Keep current rule
+Implementation:
 
-Verification is allowed without guide readiness, but EO use is blocked until guide ready.
+- Admin has one destination approval action;
+- approval fails when local-guide readiness/evidence is missing;
+- Destination, EO, and Admin trust surfaces use human labels such as `Terverifikasi Dasar`, `Terverifikasi Plus`, or `Belum Terverifikasi`;
+- stacked labels such as `BASIC + Guide Ready` are removed.
 
-### Interpretation B — Change governance rule
-
-Destination cannot become verified until guide readiness is approved.
-
-Interpretation B changes Admin/Destination governance and must not be implemented accidentally.
-
-**Status: HOLD.**
+**Status: RESOLVED / IMPLEMENTED — PR #105.**
 
 ---
-
 ## OD-03 — Destination guide fee
 
 Current canonical package pricing:
@@ -959,7 +959,7 @@ During final rehearsal:
 | F5.4 Destination Media & Package Visual Choice | **MERGED — PR #102** |
 | 360° destination view | **DEFERRED / ASSET-DEPENDENT** |
 | OD-01 Organizer identity disclosure | **OPEN** |
-| OD-02 Verification requires guide | **HOLD** |
+| OD-02 Verification requires guide | **RESOLVED / MERGED — PR #105** |
 | OD-03 Separate destination guide fee | **HOLD** |
 | Partner registration-page issue | **OPEN — needs exact problem statement** |
 

@@ -409,6 +409,7 @@ describe("Destination verification requires local guide", () => {
     );
     expect(verification.textContent).not.toContain("Dimensi 2");
   });
+
   it("5. direct EO detail never calls an inactive no-guide destination verified", async () => {
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
@@ -447,10 +448,9 @@ describe("Destination verification requires local guide", () => {
   });
 
   it("7. approving a guide-ready application creates an active canonical destination with guide included", () => {
-    const result =
-      mockDestinationVerificationStore.approveApplication(
-        "dest_app_coban_rondo",
-      );
+    const result = mockDestinationVerificationStore.approveApplication(
+      "dest_app_coban_rondo",
+    );
 
     expect(result.success).toBe(true);
     expect(result.destination?.status).toBe("ACTIVE");

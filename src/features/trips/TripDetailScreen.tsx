@@ -247,6 +247,12 @@ export function TripDetailScreen({
         </Link>
       </div>
 
+      <div className="trip-detail-context" aria-label="Konteks halaman">
+        <span className="trip-detail-context__label">
+          {isCompleted ? "Perjalanan Selesai" : "Detail Perjalanan"}
+        </span>
+      </div>
+
       {/* 2. Hero & Experience Identity */}
       <header className="trip-detail-hero">
         <div className="trip-detail-hero__thumb">
@@ -414,6 +420,33 @@ export function TripDetailScreen({
         </section>
       )}
 
+      <section
+        className="trip-detail-primary-summary"
+        aria-label="Ringkasan perjalanan utama"
+      >
+        <div className="trip-detail-primary-summary__item">
+          <span className="trip-detail-primary-summary__label">Tanggal perjalanan</span>
+          <strong className="trip-detail-primary-summary__value">
+            {sessionDateLabel ?? "Jadwal belum tersedia"}
+          </strong>
+        </div>
+        <div className="trip-detail-primary-summary__item">
+          <span className="trip-detail-primary-summary__label">Titik kumpul</span>
+          <strong className="trip-detail-primary-summary__value">
+            {detail?.meetingPointLabel ??
+              "Belum dicantumkan pada detail experience."}
+          </strong>
+        </div>
+      </section>
+
+      <details className="trip-detail-disclosure">
+        <summary className="trip-detail-disclosure__summary">
+          <span>Lihat Detail Perjalanan</span>
+          <span className="trip-detail-disclosure__hint">
+            Pesanan, kontak, itinerary & kebijakan
+          </span>
+        </summary>
+        <div className="trip-detail-disclosure__body">
       {/* 4. Trip Essentials */}
       <section
         className="trip-detail-section"
@@ -804,6 +837,9 @@ export function TripDetailScreen({
           </p>
         </section>
       )}
+
+        </div>
+      </details>
 
       {/* 12. Discreet Prototype Demo Trip Completion Disclosure (PAID Only) */}
       {isPaid && (

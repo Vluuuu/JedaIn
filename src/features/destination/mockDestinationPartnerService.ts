@@ -84,6 +84,17 @@ export const mockDestinationPartnerService = {
       };
     }
 
+    if (
+      input.category === "FACILITY" &&
+      !context.destination.facilities?.includes(input.facilityLabel!.trim())
+    ) {
+      return {
+        success: false,
+        message:
+          "Fasilitas yang dipilih tidak terdaftar pada profil destinasi.",
+      };
+    }
+
     const mediaData = input.url.match(
       /^data:image\/(?:jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/,
     );

@@ -5,6 +5,8 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { DestinationProfileScreen } from "../destination/DestinationProfileScreen";
+import { mockDestinationPartnerService } from "../destination/mockDestinationPartnerService";
+import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { EoDestinationDetailScreen } from "./EoDestinationDetailScreen";
 import { EoPackageBuilderScreen } from "./EoPackageBuilderScreen";
 import { mockDestinationStore } from "./mockDestinationStore";
@@ -22,6 +24,7 @@ afterEach(async () => {
   await act(() => root?.unmount());
   container?.remove();
   mockDestinationStore.reset();
+  mockDestinationVerificationStore.reset();
   mockEoPackageStore.reset();
   partnerSessionStore.reset();
 });
@@ -86,7 +89,8 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     );
 
     expect(view.textContent).toContain("Galeri Destinasi");
-    expect(view.textContent).toContain("bukan dokumentasi kondisi aktual");
+    expect(view.textContent).toContain("bukan foto kondisi aktual");
+    expect(view.textContent).toContain("Tambah Visual");
     expect(view.querySelectorAll(".dest-media-gallery__item")).toHaveLength(3);
     expect(view.textContent).toContain("Visual prototype");
     expect(view.textContent).not.toContain("Preview 360");
@@ -161,5 +165,50 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
       mockDestinationStore.getById("dest_lereng_hijau")!.mediaGallery!;
     expect(galleryAfter).toEqual(galleryBefore);
     expect(view.textContent).not.toContain("360");
+  });
+
+
+  it("5. Mitra gallery mutation is authority-checked and removable media stays source-labeled", () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+    const denied = mockDestinationPartnerService.addGalleryMedia({
+      mediaId: "media_eo_forbidden",
+      url: "data:image/png;base64,AA==",
+      label: "EO forbidden",
+      provenance: "DESTINATION_SOURCE",
+    });
+    expect(denied.success).toBe(false);
+    expect(denied.message).toContain("Hanya dapat dikelola oleh Mitra");
+
+    partnerSessionStore.loginAsDemoDestination();
+
+    const added = mockDestinationPartnerService.addGalleryMedia({
+      mediaId: "media_mitra_added",
+      url: "data:image/png;base64,AA==",
+      label: "Visual kebun teh",
+      provenance: "DESTINATION_SOURCE",
+    });
+    expect(added.success).toBe(true);
+    expect(
+      mockDestinationStore
+        .getById("dest_lereng_hijau")
+        ?.mediaGallery?.some((media) => media.mediaId === "media_mitra_added"),
+    ).toBe(true);
+
+    const removed =
+      mockDestinationPartnerService.removeGalleryMedia("media_mitra_added");
+    expect(removed.success).toBe(true);
+    expect(
+      mockDestinationStore
+        .getById("dest_lereng_hijau")
+        ?.mediaGallery?.some((media) => media.mediaId === "media_mitra_added"),
+    ).toBe(false);
+
+    const cannotRemovePrototype =
+      mockDestinationPartnerService.removeGalleryMedia("media_lereng_primary");
+    expect(cannotRemovePrototype.success).toBe(false);
+    expect(cannotRemovePrototype.message).toContain(
+      "Visual bawaan prototype tidak dapat dihapus",
+    );
   });
 });

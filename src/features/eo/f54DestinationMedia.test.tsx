@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { DestinationProfileScreen } from "../destination/DestinationProfileScreen";
+import { mockDestinationPartnerService } from "../destination/mockDestinationPartnerService";
 import { EoDestinationDetailScreen } from "./EoDestinationDetailScreen";
 import { EoPackageBuilderScreen } from "./EoPackageBuilderScreen";
 import { mockDestinationStore } from "./mockDestinationStore";
@@ -90,6 +91,48 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     expect(view.querySelectorAll(".dest-media-gallery__item")).toHaveLength(3);
     expect(view.textContent).toContain("Visual prototype");
     expect(view.textContent).not.toContain("Preview 360");
+  });
+
+  it("2b. Mitra can add and remove its own gallery media while prototype visuals stay protected", async () => {
+    partnerSessionStore.loginAsDemoDestination();
+
+    const view = await renderRoute(
+      createElement(DestinationProfileScreen),
+      "/partner/destination/profile",
+      "/partner/destination/profile",
+    );
+
+    expect(
+      view.querySelector<HTMLInputElement>(
+        'input[aria-label="Tambah visual destinasi"]',
+      ),
+    ).not.toBeNull();
+    expect(view.textContent).toContain("Tambah visual");
+
+    const added = mockDestinationPartnerService.addGalleryMedia({
+      url: "data:image/png;base64,ZmFrZQ==",
+      label: "Foto kebun dari mitra",
+    });
+    expect(added.success).toBe(true);
+    expect(added.media?.provenance).toBe("DESTINATION_SOURCE");
+
+    const afterAdd =
+      mockDestinationStore.getById("dest_lereng_hijau")!.mediaGallery!;
+    expect(afterAdd).toHaveLength(4);
+    expect(afterAdd.at(-1)?.label).toBe("Foto kebun dari mitra");
+
+    const protectedRemove = mockDestinationPartnerService.removeGalleryMedia(
+      "media_lereng_primary",
+    );
+    expect(protectedRemove.success).toBe(false);
+
+    const removed = mockDestinationPartnerService.removeGalleryMedia(
+      added.media!.mediaId,
+    );
+    expect(removed.success).toBe(true);
+    expect(
+      mockDestinationStore.getById("dest_lereng_hijau")!.mediaGallery,
+    ).toHaveLength(3);
   });
 
   it("3. EO destination detail exposes the same gallery as decision context", async () => {

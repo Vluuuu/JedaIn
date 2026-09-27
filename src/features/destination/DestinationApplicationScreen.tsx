@@ -13,7 +13,7 @@ const STEPS = [
   { step: 2, label: "2. Lokasi Wilayah" },
   { step: 3, label: "3. Fasilitas & Aktivitas" },
   { step: 4, label: "4. Kapasitas & Modal" },
-  { step: 5, label: "5. Kesiapan Pemandu" },
+  { step: 5, label: "5. Pemandu Lokal" },
   { step: 6, label: "6. Tinjau & Submit" },
 ] as const;
 
@@ -704,7 +704,7 @@ export function DestinationApplicationScreen() {
                 size="md"
                 onClick={handleNext}
               >
-                Lanjut ke Langkah 5: Kesiapan Pemandu &rarr;
+                Lanjut ke Langkah 5: Pemandu Lokal &rarr;
               </Button>
             </div>
           </fieldset>

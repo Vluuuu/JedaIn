@@ -219,4 +219,4 @@ Sebelum masuk ruang demo:
 5. Jalankan **Reset Demo State** sebelum rehearsal terakhir.
 
 Verified implementation baseline untuk rehearsal saat ini:
-`115bdc265d589efb19bce0479d388a2e5fd2c0ce` — F5.1–F5.4 merged, 50 test files / 696 tests PASS; format/lint/typecheck/build PASS.
+`0e9cc960d172ddd2ebd691b79faa9df2d20ebe4b` — F5.1–F5.4 + unified destination verification/gallery cleanup merged, 50 test files / 696 tests PASS; format/lint/typecheck/build PASS.

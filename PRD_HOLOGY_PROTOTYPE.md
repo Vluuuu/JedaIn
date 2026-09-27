@@ -1127,13 +1127,15 @@ Admin dapat melihat destination application dan verification context.
 Acceptance:
 
 - approved destination mapping menghasilkan canonical destination sesuai flow existing,
-- canonical `guideReady` harus konsisten dengan hasil verification Admin `approvedGuideReady`,
-- BASIC/PLUS verification dan Guide Ready tetap dua dimensi terpisah,
-- destination `guideReady=false` tetap dapat ACTIVE/BASIC tetapi tidak boleh diklaim guide-ready atau menjadi EO-eligible destination,
-- cost-scope fields optional dapat diteruskan,
-- lifecycle tidak berubah karena discovery polish.
+- pemandu lokal + bukti kesiapan pemandu adalah syarat wajib sebelum Admin dapat menyetujui destinasi,
+- initial approval menghasilkan `BASIC` dan canonical `guideReady=true`,
+- `PLUS` tetap berasal dari trust lifecycle lanjutan,
+- `guideReady=false` hanya boleh menjadi state internal pre-verification/remediation dan tidak boleh `ACTIVE` sebagai destinasi terverifikasi,
+- UI menampilkan satu status verifikasi manusiawi; kesiapan pemandu dijelaskan sebagai syarat/fakta, bukan lencana verifikasi kedua,
+- EO `CONCEPT_ONLY` tetap dapat membangun package menggunakan pemandu lokal dari destinasi terverifikasi,
+- cost-scope fields optional dapat diteruskan.
 
-Status: IMPLEMENTED LIVE — destination guide-ready consistency diperkuat pada F4.2 / PR #90.
+Status: IMPLEMENTED LIVE — rule F4.2 disupersede oleh keputusan F6 mandatory-guide pada 27 September 2026.
 
 ## REQ-ADM-04 — Package Review
 
@@ -2261,3 +2263,28 @@ Freeze status:
 
 - App kembali ke HARD FEATURE FREEZE setelah cleanup.
 - Perubahan berikutnya hanya jika rehearsal menemukan regression/P0 demo blocker atau factual contradiction nyata.
+
+
+## F6 — Destination Verification & Media Cleanup
+
+Decision date: 27 September 2026.
+
+Perubahan canonical:
+
+- destination verification now requires a local guide; Admin cannot approve a destination without reviewed guide-readiness evidence;
+- initial destination approval remains BASIC; PLUS remains a later trust-lifecycle level;
+- `guideReady=false` records may remain only as inactive assessment/remediation data and are not represented as verified active destinations;
+- destination verification UI no longer presents `BASIC/PLUS` and `Guide Ready` as two independent badge dimensions;
+- EO Concept-Only remains valid because guidance may be supplied by the verified destination;
+- Mitra Destinasi can add/remove its own gallery visuals through an authority-checked prototype path; seeded prototype visuals remain protected;
+- EO may consume/select destination gallery media for package cover but cannot mutate destination media;
+- 360° remains deferred;
+- guide-fee pricing remains unresolved and is not changed by F6.
+
+Business-rule impact:
+
+- Destination verification governance changes as explicitly decided by the team.
+- Package Price remains Destination Base Cost + EO Margin.
+- Traveler Service Fee remains Rp7.500 / booking.
+- Platform Commission remains 10% GMV.
+- Booking/payment/review lifecycle and role authority outside destination media governance remain unchanged.

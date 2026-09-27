@@ -145,7 +145,7 @@ export function EoDestinationsScreen() {
                         ? "Terverifikasi Plus"
                         : "Terverifikasi Dasar"}
                     </Badge>
-                    <span className="eo-dest-card__guide-badge">
+                    <span className="eo-dest-card__guide-note">
                       Pemandu lokal tersedia
                     </span>
                   </div>

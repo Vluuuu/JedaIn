@@ -18,7 +18,7 @@ Destination Partner must complete the three-sided JedaIn story without becoming 
 
 Locked story:
 
-`Partner Entry → Destination Application → Admin Verification → BASIC / BASIC + guide_ready → Destination Workspace → Venue Profile → Verification → EO Session Schedule → Capacity Visibility → Venue Reviews → Profile`
+`Partner Entry → Destination Application → Admin Verification → BASIC (guide required) → Destination Workspace → Venue Profile → Verification → EO Session Schedule → Capacity Visibility → Venue Reviews → Profile`
 
 Cross-surface proof:
 
@@ -194,7 +194,7 @@ Locked stepper from source:
 2 Location
 3 Facilities & Activities
 4 Capacity & Base Cost
-5 Guide Readiness
+5 Local Guide Evidence
 6 Review & Submit
 ```
 
@@ -246,46 +246,40 @@ Locked initial Admin outcomes:
 
 ```text
 Reject + reason
-Approve BASIC
-Approve BASIC + guide_ready
+Approve Destination
 ```
 
-Initial approval must NEVER grant `PLUS`.
+Approval is only available when local-guide readiness is declared and supported by review evidence. Initial approval must NEVER grant `PLUS`.
 
 Successful approval:
 
 - verification application → `APPROVED`,
 - `approvedLevel = BASIC`,
-- `approvedGuideReady = true|false`,
+- `approvedGuideReady = true`,
 - canonical `mockDestinationStore` upserted once,
-- canonical destination `status = ACTIVE`,
+- canonical destination `status = ACTIVE` and `guideReady = true`,
 - same Destination Partner identity becomes eligible for `/partner/destination/*`,
 - EO Builder reads the newly approved destination through the existing canonical destination eligibility source.
 
 ---
 
-## 11. Destination Status Dimensions — DP04/DP07
+## 11. Destination Verification Status — DP04/DP07
 
-Display separately:
+The destination has one operational verification concept:
 
 ```text
-verificationLevel = BASIC | PLUS
-guideReady = true | false
+Terverifikasi Dasar | Terverifikasi Plus
 ```
 
-Do not collapse them into one opaque application state.
+Local-guide readiness is a required verification condition and an operational fact, not an independent badge dimension.
 
-Proposal-safe labels may combine them visually:
+Rules:
 
-- Terverifikasi Dasar
-- Terverifikasi Dasar + Siap sebagai Guide
-- Terverifikasi Plus
-- Terverifikasi Plus + Siap sebagai Guide
-
-But combination is presentation only.
-
-For this sprint, `PLUS` may be displayed for existing seeded canonical destinations. Destination Partner cannot self-promote to PLUS.
-
+- no local guide → application cannot be approved;
+- initial approval → BASIC + `guideReady=true`;
+- PLUS may be displayed only when existing trust lifecycle grants it;
+- `guideReady=false` may exist only as internal assessment/remediation data;
+- consumer-facing UI must not render combinations such as `BASIC + Guide Ready ✓`.
 ---
 
 ## 12. Destination Overview — DP05
@@ -514,7 +508,7 @@ Trust cross-surface demo:
 ```text
 Destination Pending Application
 → Admin Destination Verification Queue
-→ Approve BASIC + guide_ready
+→ Approve Destination (local guide required)
 → same Destination Partner identity becomes operational
 → canonical destination appears in EO eligibility source.
 ```
@@ -544,15 +538,15 @@ Admin Reject with specific reason
 - new Destination application submission creates exactly one shared `PENDING_REVIEW` record,
 - Admin queue sees the same record,
 - duplicate submit creates no duplicate,
-- Admin approve BASIC opens same identity workspace,
-- Admin approve BASIC + guide_ready opens same identity workspace and EO eligibility includes destination,
+- Admin approval requires local-guide evidence and opens the same identity workspace,
+- approved destination enters EO eligibility with `guideReady=true`,
 - initial approval never PLUS,
 - Admin rejection reason is visible exactly to Destination Partner,
 - rejected reapply uses same identity/application.
 
 ### Profile / verification
 
-- verificationLevel and guideReady display independently,
+- verification is displayed as one human status; guide readiness is explained as a required operational fact,
 - Destination Partner cannot self-change verification/guideReady,
 - canonical profile fields come from shared destination store,
 - runtime profile snapshot cannot mutate store by reference.

@@ -4494,3 +4494,16 @@
     flex-direction: column;
   }
 }
+
+/* F6 humanized destination guide metadata */
+.eo-dest-card__guide-note,
+.eo-builder-dest-card__guide-note,
+.eo-builder-guide-availability {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.eo-builder-guide-availability {
+  margin-left: auto;
+}

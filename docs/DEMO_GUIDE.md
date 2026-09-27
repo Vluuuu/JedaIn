@@ -63,13 +63,15 @@ Bagian ini adalah urutan presentasi yang direkomendasikan ketika waktu juri terb
 
 1. Kembali ke `/partner`.
 2. Klik **Masuk sebagai Mitra Destinasi Demo**.
-3. Tunjukkan `/partner/destination/schedule`.
-4. Bedakan:
+3. Tunjukkan **Status Verifikasi Destinasi** dan jelaskan bahwa pemandu lokal adalah syarat wajib verifikasi, bukan badge kedua.
+4. Buka **Profil Kawasan Destinasi** dan tunjukkan bahwa Mitra dapat menambah visual ke **Galeri Destinasi**; visual prototype tetap diberi provenance yang jelas.
+5. Tunjukkan `/partner/destination/schedule`.
+6. Bedakan:
    - **Kapasitas umum destinasi per sesi**,
    - **Kuota Sesi EO**,
    - **Peserta Terkonfirmasi**,
    - **Selisih Operasional** bila tampil.
-5. Tunjukkan operational note sebagai informasi read-only, bukan approval.
+7. Tunjukkan operational note sebagai informasi read-only, bukan approval.
 
 ### D. Admin — trust layer
 
@@ -190,7 +192,7 @@ Untuk mengulang seluruh simulasi dari awal tanpa meninggalkan sampah data:
 - **OTP:** Kode demo `111111` adalah shortcut prototype; tidak ada SMS production.
 - **Demand Insight:** Data bersifat simulated/directional untuk mendemokan workflow EO; bukan human/market validation dan bukan proyeksi penjualan.
 - **Penyelesaian Trip:** Disediakan tombol simulasi eksplisit (*"Prototype Demo: Simulasikan Trip Selesai"*) karena automasi batch job kronologis di luar cakupan prototype.
-- **Media:** Destination gallery dan package visual choice tersedia dengan provenance yang jelas. Asset fotografi aktual tetap content dependency; visual prototype/fallback tidak boleh disebut foto aktual. 360° belum diimplementasikan.
+- **Media:** Mitra Destinasi dapat menambah visual gallery prototype, EO dapat memilih visual destinasi untuk cover package, dan provenance tetap jelas. Asset fotografi aktual tetap content dependency; visual prototype/fallback tidak boleh disebut foto aktual. 360° belum diimplementasikan.
 - **Session Traveler:** State onboarding/quiz disimpan sementara via `sessionStorage` agar refresh tidak memaksa pengulangan demo; ini bukan production auth.
 - **Performance:** Optimasi bundle lanjutan bersifat optional selama app tetap responsif pada perangkat demo.
 

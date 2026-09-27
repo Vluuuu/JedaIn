@@ -29,8 +29,8 @@ export function AdminDestinationVerificationsScreen() {
             Antrean Verifikasi Destinasi Lokal
           </h1>
           <p className="admin-page-subtitle">
-            Tinjau kesiapan lokasi alam, ketenangan lingkungan, fasilitas SOP,
-            dan ketersediaan pemandu lokal (Guide Ready).
+            Tinjau kelayakan lokasi, fasilitas, SOP, dan bukti pemandu lokal.
+            Pemandu lokal wajib tersedia sebelum destinasi dapat disetujui.
           </p>
         </div>
       </header>
@@ -54,7 +54,7 @@ export function AdminDestinationVerificationsScreen() {
               st === "PENDING_REVIEW"
                 ? "Menunggu Review"
                 : st === "APPROVED"
-                  ? "Terverifikasi (BASIC)"
+                  ? "Terverifikasi Dasar"
                   : st === "REJECTED"
                     ? "Ditolak"
                     : "Semua";
@@ -97,7 +97,7 @@ export function AdminDestinationVerificationsScreen() {
                   <th>Nama Destinasi</th>
                   <th>Lokasi / Wilayah</th>
                   <th>Modal Dasar / Orang</th>
-                  <th>Kesiapan Pemandu Lokal</th>
+                  <th>Bukti Pemandu Lokal</th>
                   <th>Tanggal Pengajuan</th>
                   <th>Status</th>
                   <th>Aksi</th>

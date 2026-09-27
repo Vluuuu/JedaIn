@@ -179,29 +179,21 @@ Cons:
 
 ---
 
-## OD-02 — Does destination verification require `guideReady=true`?
+## OD-02 — Destination verification requires a local guide
 
-Current canonical rule:
+**Decision locked on 27 September 2026.**
 
-- verification level and guide readiness are separate;
-- destination may be `ACTIVE + BASIC/PLUS + guideReady=false`;
-- EO eligibility requires `ACTIVE + BASIC/PLUS + guideReady=true`;
-- therefore a verified destination can exist while temporarily not eligible for EO package creation.
+Canonical rule:
 
-The meeting note “verifikasi wajib ada pemandu” may mean:
+- a destination cannot become operationally verified unless a local guide is available and guide-readiness evidence is reviewed;
+- initial approval produces `BASIC` verification and `guideReady=true`;
+- `PLUS` remains a later trust-lifecycle level;
+- `guideReady=false` may exist only as internal pre-verification / remediation data and must not be represented as an active verified destination;
+- destination UI must not present verification and guide readiness as two independent consumer-facing badges/dimensions;
+- EO `CONCEPT_ONLY` remains valid because the guide may be supplied by the verified destination;
+- EO `CERTIFIED_GUIDE` may continue to use the existing package guide-source choice where supported.
 
-### Interpretation A — Keep current rule
-
-Verification is allowed without guide readiness, but EO use is blocked until guide ready.
-
-### Interpretation B — Change governance rule
-
-Destination cannot become verified until guide readiness is approved.
-
-Interpretation B changes Admin/Destination governance and must not be implemented accidentally.
-
-**Status: HOLD.**
-
+**Status: LOCKED / IMPLEMENTED IN F6.**
 ---
 
 ## OD-03 — Destination guide fee
@@ -943,7 +935,7 @@ During final rehearsal:
 1. run the current golden flow across Traveler → EO → Admin → Mitra;
 2. verify the existing source-backed F5 surfaces rather than adding new capability;
 3. patch only concrete regression, factual contradiction, or judge-critical P1 friction;
-4. keep OD-01 open and OD-02 / OD-03 on hold unless the team explicitly locks those decisions;
+4. keep OD-01 open and OD-03 on hold; OD-02 is now locked: verified destinations require a local guide;
 5. keep 360° deferred unless a truthful suitable asset is provided;
 6. after rehearsal, return to hard feature freeze if no blocker is found.
 
@@ -959,7 +951,7 @@ During final rehearsal:
 | F5.4 Destination Media & Package Visual Choice | **MERGED — PR #102** |
 | 360° destination view | **DEFERRED / ASSET-DEPENDENT** |
 | OD-01 Organizer identity disclosure | **OPEN** |
-| OD-02 Verification requires guide | **HOLD** |
+| OD-02 Verification requires guide | **LOCKED / IMPLEMENTED — F6** |
 | OD-03 Separate destination guide fee | **HOLD** |
 | Partner registration-page issue | **OPEN — needs exact problem statement** |
 

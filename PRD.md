@@ -594,29 +594,31 @@ Untuk 1–2 pilot destination, tim internal melakukan verifikasi manual terhadap
 - kesesuaian klaim/foto,
 - kesiapan guide.
 
-## FR-3.4 Destination Status Model & EO Availability — UPDATED FOR MVP
+## FR-3.4 Destination Verification & EO Availability — LOCKED
 
-Verification dimension:
+Level verifikasi:
 
-- `BASIC`
-- `PLUS`
+- `BASIC` — verifikasi awal JedaIn,
+- `PLUS` — level lanjutan melalui trust lifecycle.
 
-Guide dimension:
+**Pemandu lokal adalah syarat verifikasi, bukan dimensi lencana terpisah.**
 
-- `guide_ready = false` (pre-availability / assessment / remediation state)
-- `guide_ready = true` (operational local destination guide verified)
+Dalam MVP JedaIn, destinasi hanya dapat menjadi canonical operational destination bila:
 
-**Aturan Ketersediaan untuk EO (Locked):**
-Dalam MVP JedaIn, sebuah destinasi hanya dapat berstatus `ACTIVE` dan tersedia untuk perancangan paket EO (`EO-available`) apabila:
-1. Berstatus aktif (`status = ACTIVE`),
-2. Memiliki verifikasi `BASIC` atau `PLUS`, dan
-3. Memiliki pemandu lokal siap (`guide_ready = true`).
+1. pengajuan lolos kurasi Admin,
+2. pemandu lokal tersedia,
+3. bukti kesiapan pemandu telah ditinjau,
+4. canonical record aktif dengan `guide_ready = true`.
 
-Destinasi dengan `guide_ready = false` dapat tetap disimpan dalam data domain untuk keperluan internal asesmen atau perbaikan mitra destinasi, namun **tidak akan ditampilkan pada direktori destinasi EO maupun pilihan destinasi di Trip Builder**.
+`guide_ready = false` hanya boleh disimpan sebagai state internal pre-verification / remediation dan tidak boleh direpresentasikan sebagai `ACTIVE` verified destination.
 
-Badge pada surface EO disederhanakan tanpa duplikasi:
-- Terverifikasi Dasar (Pemandu lokal tersedia)
-- Terverifikasi Plus (Pemandu lokal tersedia)
+Surface pengguna menampilkan satu status utama:
+- `Terverifikasi Dasar`, atau
+- `Terverifikasi Plus`.
+
+Ketersediaan pemandu dapat dijelaskan sebagai fakta operasional, tetapi tidak dipresentasikan sebagai badge verifikasi kedua.
+
+EO `CONCEPT_ONLY` tidak wajib memiliki guide sendiri karena pemanduan dapat disiapkan oleh destinasi terverifikasi. EO `CERTIFIED_GUIDE` tetap dapat menggunakan pilihan sumber pemandu yang sudah ada pada package.
 
 ## FR-3.5 Failed Verification & Re-Apply
 

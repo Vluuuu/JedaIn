@@ -1672,12 +1672,12 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       const allDests = mockDestinationStore.getAll();
       expect(allDests.length).toBeGreaterThan(0);
 
-      // dest_hutan_trawas is ACTIVE, BASIC, but guideReady=false per Admin verification
+      // dest_hutan_trawas is retained only as INACTIVE assessment data because guideReady=false
       const trawas = allDests.find(
         (d) => d.destinationId === "dest_hutan_trawas",
       );
       expect(trawas).toBeDefined();
-      expect(trawas?.status).toBe("ACTIVE");
+      expect(trawas?.status).toBe("INACTIVE");
       expect(trawas?.verificationLevel).toBe("BASIC");
       expect(trawas?.guideReady).toBe(false);
 
@@ -1784,7 +1784,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       // Step 1 title
       expect(view.textContent).toContain(
-        "Langkah 1: Pilih Destinasi & Status Pemanduan",
+        "Langkah 1: Pilih Destinasi & Pemandu",
       );
 
       // Selected card has Terpilih indicator
@@ -1803,9 +1803,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       ]);
 
       expect(viewConcept.textContent).toContain("Pemandu dari Destinasi");
-      expect(viewConcept.textContent).toContain(
-        "Tersedia melalui mitra destinasi",
-      );
+      expect(viewConcept.textContent).toContain("Disiapkan Mitra Destinasi");
       expect(viewConcept.textContent).toContain(
         "Kamu fokus merancang experience. Pemanduan akan disiapkan oleh mitra destinasi terverifikasi di lokasi.",
       );
@@ -1886,6 +1884,10 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         capacityPerSession: 10,
         status: "ACTIVE",
       });
+
+      expect(mockDestinationStore.getById("dest_future_noguide")?.status).toBe(
+        "INACTIVE",
+      );
 
       // 1. Selector check
       const conceptEligible =

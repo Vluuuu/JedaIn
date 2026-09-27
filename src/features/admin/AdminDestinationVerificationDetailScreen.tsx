@@ -285,9 +285,9 @@ export function AdminDestinationVerificationDetailScreen() {
               color: "var(--color-text-secondary)",
             }}
           >
-            Persetujuan awal memberikan status <strong>Terverifikasi Dasar</strong>.
-            Ketersediaan pemandu lokal adalah syarat verifikasi, bukan keputusan
-            atau lencana terpisah.
+            Persetujuan awal memberikan status{" "}
+            <strong>Terverifikasi Dasar</strong>. Ketersediaan pemandu lokal
+            adalah syarat verifikasi, bukan keputusan atau lencana terpisah.
           </p>
 
           <div className="eo-form-group">

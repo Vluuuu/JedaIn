@@ -210,27 +210,26 @@ Later Destination Partner sprint must submit into this same store rather than cr
 
 ## 11. Destination Verification Decision — A06
 
-Wireframe locks initial decisions to:
+Current canonical decision after PR #105:
 
 - Reject + reason
-- Approve BASIC
-- Approve BASIC + `guide_ready`
+- Approve as `Terverifikasi Dasar (BASIC)` **only when local-guide readiness is present and evidenced**
 
 `PLUS` is not an initial-application approval result; PLUS belongs to later trust lifecycle.
 
 Rules:
 
-- only pending verification applications may be decided,
-- reject requires specific reason,
-- approval creates/updates the canonical destination directory through one authoritative store helper,
-- initial verification level is `BASIC`,
-- `guideReady` is explicit true/false based on chosen Admin decision and reviewed prototype evidence,
-- do not silently create `PLUS` on first approval,
-- every decision requires audit reason/note and creates one audit event,
+- only pending verification applications may be decided;
+- reject requires a specific reason;
+- local-guide availability/evidence is mandatory for approval;
+- approval creates/updates the canonical destination directory through one authoritative store helper;
+- initial verification level is `BASIC`; approval always creates an active canonical destination with local-guide readiness;
+- there is no separate `Approve BASIC without guide` outcome;
+- do not silently create `PLUS` on first approval;
+- every decision requires audit reason/note and creates one audit event;
 - duplicate approval/reject attempts are deterministic and do not duplicate canonical destinations.
 
-This is the bridge required for the next Destination Partner sprint.
-
+Local-guide readiness remains available in domain data for validation/compatibility, but it is part of the destination verification requirement rather than a second independent trust badge.
 ## 12. Package Approval Queue — A07
 
 Read directly from `mockEoPackageStore`.
@@ -501,8 +500,9 @@ Use high-value integration tests, not one test per sentence.
 ### Destination Verification
 
 - pending seeded application appears,
-- approve BASIC creates/updates canonical destination once,
-- approve BASIC + guide_ready sets guideReady true,
+- approve BASIC with valid local-guide evidence creates/updates canonical destination once,
+- approval always produces an active canonical destination with local-guide readiness,
+- destination without local-guide readiness cannot be approved,
 - reject reason persists,
 - initial approval never grants PLUS,
 - duplicate decision is idempotent.
@@ -551,7 +551,7 @@ Also smoke:
 
 - EO rejection with exact reason,
 - Package rejection with exact reason,
-- Destination verification: Approve BASIC + guide_ready,
+- Destination verification: approve BASIC only after local-guide readiness is evidenced,
 - invalid/stale decision recovery,
 - audit event for each successful manual decision.
 

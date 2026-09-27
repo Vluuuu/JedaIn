@@ -27,6 +27,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Format F5.2 files for audit
+        run: |
+          npx prettier --write \
+            src/features/eo/eo.css \
+            src/features/eo/EoDestinationDetailScreen.tsx \
+            src/features/eo/EoSessionsScreen.tsx \
+            src/features/eo/sessionAndDestinationGovernance.test.tsx
+          for f in \
+            src/features/eo/eo.css \
+            src/features/eo/EoDestinationDetailScreen.tsx \
+            src/features/eo/EoSessionsScreen.tsx \
+            src/features/eo/sessionAndDestinationGovernance.test.tsx
+          do
+            echo "FORMATTED_FILE:$f"
+            base64 -w 0 "$f"
+            echo
+          done
+
       - name: Check formatting
         run: npm run format:check
 

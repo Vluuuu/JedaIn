@@ -616,6 +616,15 @@ describe("F5.2 — EO Destination Discovery & Builder Clarity", () => {
 
     const view = await renderComponent(createElement(EoPackageBuilderScreen));
 
+    const stepTwoButton = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
+    ).find((button) => button.textContent?.includes("2. Sinyal Insight"))!;
+    expect(stepTwoButton).not.toBeNull();
+
+    await act(async () => {
+      stepTwoButton.click();
+    });
+
     expect(view.textContent).toContain("Ringkasan Pengalaman");
     expect(view.textContent).toContain(
       "Jelaskan dalam 1–2 kalimat pengalaman utama yang akan didapat Traveler",

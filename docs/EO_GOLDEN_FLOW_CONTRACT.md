@@ -224,15 +224,20 @@ EO can select only an active verified destination:
 - verification `BASIC`, or
 - verification `PLUS`.
 
-### Locked MVP Guide Model:
-Every active verified destination available to EO in MVP provides local destination guide capability (`guideReady = true`). Destination records with `guideReady = false` (pre-availability/remediation) are strictly excluded from EO discovery and Trip Builder. Destination eligibility is uniform across all EO guide statuses.
+### Locked MVP Guide Model — Updated 27 Sep 2026
+
+Local-guide readiness is part of destination verification. Every active verified destination available to EO therefore has local destination guide capability (`guideReady = true`).
+
+A destination record with `guideReady = false` is a rejected/inactive/remediation record, **not** an active verified destination, and is excluded from EO discovery and Trip Builder.
+
+Destination eligibility is uniform across EO guide statuses. EO certification is optional and does not unlock a broader destination catalog.
 
 Package explicitly stores its guide source:
 - `guideSource: "DESTINATION" | "EO"` (required)
 
 Rules:
-- EO `CONCEPT_ONLY` → must use `guideSource = DESTINATION`.
-- EO `CERTIFIED_GUIDE` → may choose `guideSource = DESTINATION` or `guideSource = EO`.
+- EO `CONCEPT_ONLY` → uses `guideSource = DESTINATION`;
+- EO `CERTIFIED_GUIDE` → may use `guideSource = DESTINATION` or `guideSource = EO`.
 
 This rule is enforced at builder submit/validation boundary and stored on `EoPackageRecord`. Packages without a valid `guideSource` fail validation.
 

@@ -336,7 +336,8 @@ export function AdminDestinationVerificationDetailScreen() {
                     color: "var(--color-danger-text)",
                   }}
                 >
-                  Pengajuan tidak dapat disetujui sebelum pemandu lokal tersedia.
+                  Pengajuan tidak dapat disetujui sebelum pemandu lokal
+                  tersedia.
                 </p>
               )}
             </div>

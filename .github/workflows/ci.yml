@@ -27,6 +27,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Format F6 PRD for audit
+        run: |
+          npx prettier --write PRD_HOLOGY_PROTOTYPE.md
+          echo "FORMATTED_FILE:PRD_HOLOGY_PROTOTYPE.md"
+          base64 -w 0 PRD_HOLOGY_PROTOTYPE.md
+          echo
+
       - name: Check formatting
         run: npm run format:check
 

@@ -1580,6 +1580,12 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.dest-profile-feedback--error {
+  color: var(--color-danger-text);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+}
+
 .dest-profile-active-fee {
   margin: var(--space-1) 0 0;
   font-size: var(--font-size-caption);

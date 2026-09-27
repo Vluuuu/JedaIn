@@ -13,7 +13,9 @@ export function DestinationProfileScreen() {
   const [descriptionSuccess, setDescriptionSuccess] = useState<
     string | undefined
   >();
-  const [descriptionError, setDescriptionError] = useState<string | undefined>();
+  const [descriptionError, setDescriptionError] = useState<
+    string | undefined
+  >();
   const [guideFeeSuccess, setGuideFeeSuccess] = useState<string | undefined>();
   const [guideFeeError, setGuideFeeError] = useState<string | undefined>();
 

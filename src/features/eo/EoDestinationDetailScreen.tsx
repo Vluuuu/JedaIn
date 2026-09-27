@@ -147,6 +147,42 @@ export function EoDestinationDetailScreen() {
         </div>
       </header>
 
+      {destination.mediaGallery && destination.mediaGallery.length > 0 && (
+        <section
+          className="eo-dest-media-gallery"
+          aria-labelledby="eo-destination-media-heading"
+        >
+          <div className="eo-dest-media-gallery__header">
+            <div>
+              <h2 id="eo-destination-media-heading">Galeri Visual Destinasi</h2>
+              <p>
+                Pilih visual ini sebagai referensi package. Visual berlabel
+                prototype bukan foto kondisi aktual destinasi.
+              </p>
+            </div>
+            <span>{destination.mediaGallery.length} visual</span>
+          </div>
+          <div className="eo-dest-media-gallery__grid">
+            {destination.mediaGallery.map((media) => (
+              <figure
+                key={media.mediaId}
+                className="eo-dest-media-gallery__item"
+              >
+                <img src={media.url} alt={media.label} />
+                <figcaption>
+                  <strong>{media.label}</strong>
+                  <span>
+                    {media.provenance === "PROTOTYPE_ILLUSTRATION"
+                      ? "Visual prototype"
+                      : "Media destinasi"}
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section
         className="eo-dest-decision-facts"
         aria-label="Ringkasan keputusan destinasi"

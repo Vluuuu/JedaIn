@@ -451,23 +451,29 @@ Recommended interaction:
 
 ## FR-2.5 Select Destination & Guide Source — UPDATED FOR MVP
 
-EO hanya dapat memilih destination dengan verification level:
+EO hanya dapat memilih destinasi yang telah terverifikasi dan aktif:
 
-- `BASIC`, atau
-- `PLUS`.
+- `Terverifikasi Dasar (BASIC)`, atau
+- `Terverifikasi Plus (PLUS)`.
 
-**MVP Product Rule (Locked):**
-Setiap Destinasi Terverifikasi (`ACTIVE` dengan verification `BASIC`/`PLUS`) yang tersedia untuk perancangan paket EO wajib menyediakan akses pemandu lokal (`guideReady = true`).
+**MVP Product Rule (Locked 27 Sep 2026):**
 
-Package menyimpan sumber kepemanduan secara eksplisit (`guideSource`):
-- `DESTINATION`: Pemanduan disediakan oleh pemandu lokal dari pihak destinasi.
-- `EO`: Pemanduan dipimpin langsung oleh EO yang memiliki sertifikasi kepemanduan (`CERTIFIED_GUIDE`).
+Ketersediaan pemandu lokal adalah bagian dari syarat verifikasi destinasi. Karena itu, seluruh destinasi aktif yang tampil pada direktori/Builder EO sudah memiliki pemandu lokal yang siap di lokasi.
+
+Sertifikasi pemanduan EO **bukan syarat** untuk menggunakan katalog destinasi. EO `CONCEPT_ONLY` dan `CERTIFIED_GUIDE` melihat katalog destinasi terverifikasi yang sama.
+
+Package tetap dapat menyimpan sumber kepemanduan secara eksplisit (`guideSource`):
+
+- `DESTINATION`: pemanduan menggunakan pemandu lokal dari destinasi;
+- `EO`: pemanduan dipimpin EO yang memang memiliki sertifikasi kepemanduan (`CERTIFIED_GUIDE`).
 
 Aturan validasi:
-- EO dengan status `CONCEPT_ONLY` wajib memilih `guideSource = DESTINATION`.
-- EO dengan status `CERTIFIED_GUIDE` dapat memilih `guideSource = DESTINATION` atau `guideSource = EO`.
 
-Rule wajib divalidasi backend/store boundary, bukan hanya di antarmuka frontend.
+- `CONCEPT_ONLY` menggunakan `guideSource = DESTINATION`;
+- `CERTIFIED_GUIDE` dapat menggunakan `guideSource = DESTINATION` atau `guideSource = EO`;
+- destinasi tanpa pemandu lokal tidak dapat menjadi destinasi aktif terverifikasi dan tidak muncul pada pilihan EO.
+
+Rule wajib divalidasi store boundary, bukan hanya di antarmuka frontend.
 
 ## FR-2.6 Trip Builder
 
@@ -551,6 +557,8 @@ Status:
 
 EO baru default `CONCEPT_ONLY`.
 
+Status ini adalah kapabilitas EO, bukan syarat agar EO dapat memakai destinasi terverifikasi. Semua destinasi terverifikasi aktif sudah menyediakan pemandu lokal.
+
 Upgrade:
 
 - rating/minimum trip memicu eligibility,
@@ -594,30 +602,29 @@ Untuk 1–2 pilot destination, tim internal melakukan verifikasi manual terhadap
 - kesesuaian klaim/foto,
 - kesiapan guide.
 
-## FR-3.4 Destination Status Model & EO Availability — UPDATED FOR MVP
+## FR-3.4 Destination Verification & EO Availability — UPDATED 27 SEP 2026
 
-Verification dimension:
+Verification level:
 
-- `BASIC`
-- `PLUS`
+- `BASIC` = Terverifikasi Dasar;
+- `PLUS` = Terverifikasi Plus melalui trust lifecycle lanjutan.
 
-Guide dimension:
+**Rule verifikasi yang dikunci:**
 
-- `guide_ready = false` (pre-availability / assessment / remediation state)
-- `guide_ready = true` (operational local destination guide verified)
+1. Destinasi wajib memiliki pemandu lokal yang siap di lokasi sebelum dapat disetujui Admin.
+2. Bukti/keterangan kesiapan pemandu menjadi bagian dari pengajuan dan review verifikasi.
+3. Approval awal selalu menghasilkan `BASIC`; `PLUS` tidak diberikan pada approval pertama.
+4. Kesiapan pemandu lokal bukan dimensi badge kedua. Surface pengguna cukup menampilkan status verifikasi utama, sementara informasi pemandu dapat tampil sebagai fakta operasional.
+5. Destinasi tanpa pemandu dapat disimpan sebagai record rejected/remediation/inactive, tetapi **bukan** destinasi terverifikasi aktif dan tidak tersedia untuk EO.
+6. `dest_hutan_trawas` pada baseline prototype adalah contoh record REJECTED / INACTIVE karena belum memiliki pemandu lokal.
 
-**Aturan Ketersediaan untuk EO (Locked):**
-Dalam MVP JedaIn, sebuah destinasi hanya dapat berstatus `ACTIVE` dan tersedia untuk perancangan paket EO (`EO-available`) apabila:
-1. Berstatus aktif (`status = ACTIVE`),
-2. Memiliki verifikasi `BASIC` atau `PLUS`, dan
-3. Memiliki pemandu lokal siap (`guide_ready = true`).
+Badge utama:
 
-Destinasi dengan `guide_ready = false` dapat tetap disimpan dalam data domain untuk keperluan internal asesmen atau perbaikan mitra destinasi, namun **tidak akan ditampilkan pada direktori destinasi EO maupun pilihan destinasi di Trip Builder**.
+- `Terverifikasi Dasar`
+- `Terverifikasi Plus`
+- `Belum Terverifikasi` untuk direct informational context yang belum memenuhi syarat.
 
-Badge pada surface EO disederhanakan tanpa duplikasi:
-- Terverifikasi Dasar (Pemandu lokal tersedia)
-- Terverifikasi Plus (Pemandu lokal tersedia)
-
+`guideReady` tetap boleh ada sebagai field internal/compatibility untuk menjelaskan kesiapan pemandu dan validasi package lama, tetapi pada destination yang `APPROVED + ACTIVE` nilainya wajib `true`.
 ## FR-3.5 Failed Verification & Re-Apply
 
 Mitra yang gagal mendapat alasan spesifik dan dapat re-apply setelah memperbaiki kekurangan.

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { Badge, Button, Dialog } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";

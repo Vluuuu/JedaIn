@@ -4312,3 +4312,186 @@
     padding-inline: var(--space-4);
   }
 }
+
+
+/* F5.4 Destination media gallery */
+.eo-dest-media-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+}
+
+.eo-dest-media-gallery__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.eo-dest-media-gallery__header h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-heading-sm);
+}
+
+.eo-dest-media-gallery__header p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: 1.45;
+  max-width: 62ch;
+}
+
+.eo-dest-media-gallery__header > span {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.eo-dest-media-gallery__grid,
+.eo-builder-destination-media__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.eo-dest-media-gallery__item {
+  margin: 0;
+  overflow: hidden;
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+}
+
+.eo-dest-media-gallery__item img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.eo-dest-media-gallery__item figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--space-3);
+}
+
+.eo-dest-media-gallery__item strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-caption);
+}
+
+.eo-dest-media-gallery__item span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+.eo-builder-destination-media {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+}
+
+.eo-builder-destination-media__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.eo-builder-destination-media__header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.eo-builder-destination-media__header strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body-sm);
+}
+
+.eo-builder-destination-media__header span,
+.eo-builder-destination-media__or {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: 1.4;
+}
+
+.eo-builder-destination-media__option {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.eo-builder-destination-media__option:hover {
+  border-color: var(--color-forest-300);
+}
+
+.eo-builder-destination-media__option:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.eo-builder-destination-media__option--selected {
+  border-color: var(--color-forest-700);
+  box-shadow: 0 0 0 1px var(--color-forest-700);
+}
+
+.eo-builder-destination-media__option img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.eo-builder-destination-media__option > span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--space-2) var(--space-3);
+}
+
+.eo-builder-destination-media__option strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-caption);
+}
+
+.eo-builder-destination-media__option small {
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
+.eo-builder-destination-media__or {
+  margin: 0;
+}
+
+@media (max-width: 48rem) {
+  .eo-dest-media-gallery__grid,
+  .eo-builder-destination-media__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .eo-dest-media-gallery__header,
+  .eo-builder-destination-media__header {
+    flex-direction: column;
+  }
+}

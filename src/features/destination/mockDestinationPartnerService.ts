@@ -1,4 +1,5 @@
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
+import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
 import type { DestinationMediaItem, DestinationRecord } from "../eo/types";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";

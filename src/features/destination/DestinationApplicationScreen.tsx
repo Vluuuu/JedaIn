@@ -76,9 +76,7 @@ export function DestinationApplicationScreen() {
     existingApp?.baseCostExcludes?.join("\n") ?? "",
   );
 
-  const [guideReady, setGuideReady] = useState<boolean>(
-    existingApp?.declaredGuideReady ?? false,
-  );
+  const guideReady = true;
   const [guideReadinessEvidence, setGuideReadinessEvidence] = useState(
     existingApp?.guideReadinessEvidence ?? "",
   );
@@ -732,39 +730,16 @@ export function DestinationApplicationScreen() {
                 color: "var(--color-text-primary)",
               }}
             >
-              5. Kesiapan Pemandu Lokal (Guide Readiness)
+              5. Pemandu Lokal
             </legend>
 
-            <div>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--space-3)",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  id="dest-guide-ready-cb"
-                  checked={guideReady}
-                  onChange={(e) => setGuideReady(e.target.checked)}
-                  style={{ width: "1.25rem", height: "1.25rem" }}
-                />
-                <strong style={{ fontSize: "var(--font-size-body-md)" }}>
-                  Destinasi Memiliki Pemandu Lokal Siap Ditempatkan (Guide
-                  Ready)
-                </strong>
-              </label>
-              <p
-                style={{
-                  margin: "var(--space-1) 0 0",
-                  fontSize: "var(--font-size-caption)",
-                  color: "var(--color-text-secondary)",
-                }}
-              >
-                Centang jika pengelola memiliki warga binaan yang terlatih
-                memandu rute untuk EO berkategori Concept-Only.
+            <div className="dest-guide-requirement">
+              <strong>Pemandu lokal wajib tersedia</strong>
+              <p>
+                Verifikasi destinasi hanya dapat diajukan jika pengelola sudah
+                memiliki pemandu lokal yang siap mendampingi perjalanan.
+                EO bertipe Concept-Only dapat menggunakan pemandu dari
+                destinasi.
               </p>
             </div>
 
@@ -779,7 +754,7 @@ export function DestinationApplicationScreen() {
                 className="eo-form-textarea"
                 value={guideReadinessEvidence}
                 onChange={(e) => setGuideReadinessEvidence(e.target.value)}
-                placeholder="Ceritakan ketersediaan pemandu lokal di lokasi..."
+                placeholder="Contoh: jumlah pemandu lokal, pelatihan yang pernah diikuti, dan kesiapan mendampingi rute..."
               />
             </div>
 
@@ -845,9 +820,10 @@ export function DestinationApplicationScreen() {
               }}
             >
               <div>
-                <Badge tone={guideReady ? "success" : "neutral"}>
-                  {guideReady ? "Guide Ready ✓" : "Tanpa Guide Lokal"}
-                </Badge>
+                <p className="dest-application-review-status">
+                  <strong>Pemandu lokal:</strong> tersedia dan akan diverifikasi
+                  bersama pengajuan destinasi.
+                </p>
                 <h3
                   style={{
                     margin: "var(--space-2) 0 var(--space-1)",

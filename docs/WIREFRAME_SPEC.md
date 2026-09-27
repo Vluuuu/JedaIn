@@ -1150,7 +1150,7 @@ Stepper: `1 Destination / 2 Insight / 3 Itinerary / 4 Pricing / 5 Review`
 
 - name
 - verification level
-- guide-ready badge
+- local-guide availability as plain metadata
 - base cost
 - capacity
 - location
@@ -1158,13 +1158,11 @@ Stepper: `1 Destination / 2 Insight / 3 Itinerary / 4 Pricing / 5 Review`
 
 ### Role-based filter
 
-If EO `CONCEPT_ONLY`:
+All EO-visible destinations are already verified with a local guide.
 
-Only `verified + guide_ready` available.
+For EO `CONCEPT_ONLY`, guidance comes from the destination:
 
-Explain why unavailable destinations are hidden/disabled:
-
-> Statusmu saat ini Concept Only, jadi package harus menggunakan destinasi dengan guide lokal yang siap.
+> Kamu dapat merancang experience; pemandu lokal disiapkan oleh mitra destinasi terverifikasi.
 
 ### Primary CTA
 
@@ -1494,7 +1492,7 @@ Stepper:
 2. Location
 3. Facilities & Activities
 4. Capacity & Base Cost
-5. Guide Readiness
+5. Local Guide Evidence
 6. Review & Submit
 
 Primary CTA:
@@ -1511,8 +1509,10 @@ States:
 
 - pending field/manual verification
 - rejected + specific reason
-- BASIC verified
-- guide readiness status
+- Terverifikasi Dasar
+- Terverifikasi Plus when granted later through trust lifecycle
+
+Local guide is a prerequisite for approval, not a separate status badge.
 
 CTA rejected:
 
@@ -1526,8 +1526,8 @@ CTA rejected:
 
 Widgets:
 
-- verification badge
-- guide-ready status
+- verification status
+- local-guide operational fact
 - upcoming sessions using venue
 - upcoming visitor capacity
 - latest rating
@@ -1549,12 +1549,12 @@ Operational profile fields; edits to verified-critical fields may require re-rev
 
 **Priority:** Must
 
-Explain separately:
+Explain one verification status:
 
-- Verification Level: BASIC / PLUS
-- Guide Capability: ready / not ready
+- Terverifikasi Dasar
+- Terverifikasi Plus
 
-Avoid representing them as one opaque backend state.
+State clearly that a local guide is required before verification can be approved. Do not render a separate `Guide Ready` badge.
 
 ---
 
@@ -1702,10 +1702,9 @@ Sections:
 Decision:
 
 - Reject + reason
-- Approve BASIC
-- Approve BASIC + guide_ready
+- Approve Destination
 
-PLUS status comes from later trust lifecycle, not initial application.
+Approval requires reviewed local-guide evidence and creates BASIC verification. PLUS status comes from later trust lifecycle, not initial application.
 
 ---
 

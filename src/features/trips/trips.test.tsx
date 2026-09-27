@@ -244,9 +244,9 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     );
     expect(disclosure).not.toBeNull();
     expect(disclosure?.open).toBe(false);
-    expect(
-      disclosure?.querySelector("summary")?.textContent,
-    ).toContain("Lihat Detail Perjalanan");
+    expect(disclosure?.querySelector("summary")?.textContent).toContain(
+      "Lihat Detail Perjalanan",
+    );
 
     const telLink = container.querySelector(
       'a[href="tel:081234567890"]',
@@ -255,9 +255,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(disclosure?.contains(telLink)).toBe(true);
     expect(disclosure?.textContent).toContain("Informasi Trip");
     expect(disclosure?.textContent).toContain("Penyelenggara & Kontak Trip");
-    expect(disclosure?.textContent).toContain(
-      "Rencana Perjalanan (Itinerary)",
-    );
+    expect(disclosure?.textContent).toContain("Rencana Perjalanan (Itinerary)");
     expect(disclosure?.textContent).toContain("Termasuk dalam Paket");
     expect(disclosure?.textContent).toContain("Sebelum Berangkat");
     expect(disclosure?.textContent).toContain("Kebijakan Pembatalan");
@@ -287,9 +285,9 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(
       Boolean(
         reviews &&
-          disclosure &&
-          reviews.compareDocumentPosition(disclosure) &
-            Node.DOCUMENT_POSITION_FOLLOWING,
+        disclosure &&
+        reviews.compareDocumentPosition(disclosure) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
       ),
     ).toBe(true);
 

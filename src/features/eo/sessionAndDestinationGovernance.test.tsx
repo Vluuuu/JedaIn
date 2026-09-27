@@ -409,6 +409,54 @@ describe("Destination verification requires local guide", () => {
     );
     expect(verification.textContent).not.toContain("Dimensi 2");
   });
+  it("5. direct EO detail never calls an inactive no-guide destination verified", async () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+    const view = await renderComponent(
+      createElement(
+        Routes,
+        undefined,
+        createElement(Route, {
+          path: "/partner/eo/destinations/:destinationId",
+          element: createElement(EoDestinationDetailScreen),
+        }),
+      ),
+      ["/partner/eo/destinations/dest_hutan_trawas"],
+    );
+
+    expect(view.textContent).toContain("Hutan Bambu Trawas");
+    expect(view.textContent).toContain("Belum Terverifikasi");
+    expect(view.textContent).not.toContain("Terverifikasi Dasar");
+    expect(view.textContent).toContain("Belum Memenuhi Syarat Paket");
+  });
+
+  it("6. EO guide certification does not change the verified destination catalog", () => {
+    const conceptIds = mockDestinationStore
+      .getEligibleForEo("CONCEPT_ONLY")
+      .map((destination) => destination.destinationId)
+      .sort();
+    const certifiedIds = mockDestinationStore
+      .getEligibleForEo("CERTIFIED_GUIDE")
+      .map((destination) => destination.destinationId)
+      .sort();
+
+    expect(conceptIds).toEqual(certifiedIds);
+    expect(conceptIds).toContain("dest_lereng_hijau");
+    expect(conceptIds).toContain("dest_lembah_pacet");
+    expect(conceptIds).not.toContain("dest_hutan_trawas");
+  });
+
+  it("7. approving a guide-ready application creates an active canonical destination with guide included", () => {
+    const result =
+      mockDestinationVerificationStore.approveApplication(
+        "dest_app_coban_rondo",
+      );
+
+    expect(result.success).toBe(true);
+    expect(result.destination?.status).toBe("ACTIVE");
+    expect(result.destination?.verificationLevel).toBe("BASIC");
+    expect(result.destination?.guideReady).toBe(true);
+  });
 });
 
 describe("F5.2 — EO Destination Discovery & Builder Clarity", () => {

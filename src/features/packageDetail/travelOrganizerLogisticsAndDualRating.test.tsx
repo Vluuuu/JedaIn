@@ -16,7 +16,10 @@ import type { AuthUser } from "../auth/types";
 import { AdminPackageReviewChecklistScreen } from "../admin/AdminPackageReviewChecklistScreen";
 import { adminSessionStore } from "../admin/adminSessionStore";
 import { MockPackageDetailAdapter } from "./mockAdapter";
-import { PROTOTYPE_CANCELLATION_POLICY_SUMMARY } from "./mockPackageDetails";
+import {
+  MOCK_PACKAGE_DETAILS,
+  PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
+} from "./mockPackageDetails";
 import type { PackageDetailSource } from "./types";
 import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
 import type { PackageRecommendationSource } from "../recommendation/types";
@@ -498,5 +501,100 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
     expect(view.textContent).toContain(
       "Transportasi PP dari titik kumpul Pacet",
     );
+  });
+
+  it("10. All static LIVE package fixtures have complete, non-contradictory logistics arrangements", () => {
+    const staticLivePackageIds = [
+      "slow_green_day",
+      "creative_village_halfday",
+      "mindful_morning",
+      "light_mountain_explore",
+      "weekend_nature_reset",
+    ];
+
+    for (const pkgId of staticLivePackageIds) {
+      const detail = MOCK_PACKAGE_DETAILS[pkgId];
+      expect(detail).toBeDefined();
+
+      // 1. meetingPointLabel
+      expect(detail.meetingPointLabel).toBeDefined();
+      expect(detail.meetingPointLabel!.trim().length).toBeGreaterThan(0);
+
+      // 2. departureTimeLabel
+      expect(detail.departureTimeLabel).toBeDefined();
+      expect(detail.departureTimeLabel!.trim().length).toBeGreaterThan(0);
+
+      // 3. outboundTransport
+      expect(detail.outboundTransport).toBeDefined();
+      expect(detail.outboundTransport!.trim().length).toBeGreaterThan(0);
+
+      // 4. returnTransport
+      expect(detail.returnTransport).toBeDefined();
+      expect(detail.returnTransport!.trim().length).toBeGreaterThan(0);
+
+      // 5. Package scope does NOT declare round-trip transport excluded
+      expect(detail.excludedItems).not.toContain("Transportasi pulang-pergi");
+      expect(detail.excludedItems).not.toContain("Transportasi menuju lokasi");
+      expect(detail.excludedItems).not.toContain("Transportasi menuju desa");
+
+      // 6. includedItems represents transport from meeting point as benefit
+      expect(
+        detail.includedItems.some((item) =>
+          item.toLowerCase().includes("transportasi pp"),
+        ),
+      ).toBe(true);
+
+      // 7. excludedItems explains transport of participants to the initial meeting point
+      expect(
+        detail.excludedItems.some(
+          (item) =>
+            item.toLowerCase().includes("titik kumpul") ||
+            item.toLowerCase().includes("titik kumpul awal"),
+        ),
+      ).toBe(true);
+    }
+
+    // 8. Specific assertions for mindful_morning (Oase Hening Trawas)
+    const mmDetail = MOCK_PACKAGE_DETAILS["mindful_morning"];
+    expect(mmDetail.excludedItems).not.toContain("Transportasi menuju lokasi");
+    expect(mmDetail.includedItems).toContain(
+      "Transportasi PP dari titik kumpul Surabaya",
+    );
+
+    // 9. Specific assertions for weekend_nature_reset
+    const wnrDetail = MOCK_PACKAGE_DETAILS["weekend_nature_reset"];
+    expect(wnrDetail.excludedItems).not.toContain("Transportasi pulang-pergi");
+    expect(wnrDetail.includedItems).toContain(
+      "Transportasi PP dari titik kumpul Surabaya",
+    );
+  });
+
+  it("11. Traveler Package Detail for Oase Hening Trawas renders Travel Organizer outbound and return transport", async () => {
+    const view = await renderRoute(
+      createElement(PackageDetailScreen),
+      "/packages/:packageId",
+      "/packages/mindful_morning",
+    );
+
+    expect(view.textContent).toContain("Informasi Titik Kumpul & Akses");
+    expect(view.textContent).toContain(
+      "Area keberangkatan Stasiun Surabaya Gubeng",
+    );
+    expect(view.textContent).toContain("Waktu Kumpul / Keberangkatan");
+    expect(view.textContent).toContain(
+      "Peserta berkumpul pukul 05.15 WIB sebelum keberangkatan.",
+    );
+    expect(view.textContent).toContain("Transportasi Menuju Destinasi");
+    expect(view.textContent).toContain(
+      "Shuttle Travel Organizer dari titik kumpul Surabaya menuju Oase Hening Trawas.",
+    );
+    expect(view.textContent).toContain("Transportasi Kembali");
+    expect(view.textContent).toContain(
+      "Shuttle kembali ke titik kumpul Surabaya setelah kegiatan selesai.",
+    );
+    expect(view.textContent).toContain(
+      "Transportasi PP dari titik kumpul Surabaya",
+    );
+    expect(view.textContent).not.toContain("Transportasi menuju lokasi");
   });
 });

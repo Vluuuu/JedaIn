@@ -13,6 +13,8 @@ import { MockTripsAdapter } from "./mockAdapter";
 import { MyTripsScreen } from "./MyTripsScreen";
 import { TripDetailScreen } from "./TripDetailScreen";
 import type { TripsAdapter } from "./types";
+import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
+import { getCombinedPackageDetails } from "../marketplace/marketplaceAdapter";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -1166,7 +1168,21 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       };
       sessionStore.setUser(traveler);
 
-      // light_mountain_explore has no meetingPointLabel and no accessNotes
+      // Package with explicitly omitted meetingPointLabel and accessNotes
+      const customAdapter = new MockTripsAdapter({
+        details: {
+          ...getCombinedPackageDetails(),
+          light_mountain_explore: {
+            ...MOCK_PACKAGE_DETAILS["light_mountain_explore"],
+            meetingPointLabel: undefined,
+            accessNotes: undefined,
+            includedItems: ["Tiket masuk"],
+            outboundTransport: undefined,
+            returnTransport: undefined,
+          },
+        },
+      });
+
       const tx = mockTransactionStore.createTransaction({
         travelerId: traveler.id,
         packageId: "light_mountain_explore",
@@ -1179,7 +1195,9 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
       mockTransactionStore.executePaymentSuccess({ bookingId: bId });
 
-      const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+      const { container } = await renderMyTrips({ adapter: customAdapter }, [
+        `/trips/${bId}`,
+      ]);
 
       expect(container.textContent).toContain("Informasi Keberangkatan");
 

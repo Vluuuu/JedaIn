@@ -158,17 +158,27 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul Malang",
       "Bahan tanah liat dan peralatan workshop lengkap",
       "Bimbingan langsung perajin desa",
       "Karya kerajinan yang dibuat dapat dibawa pulang",
       "Kudapan dan minuman herbal tradisional",
     ],
-    excludedItems: ["Transportasi menuju desa", "Pengeluaran pribadi tambahan"],
+    excludedItems: [
+      "Transportasi peserta menuju titik kumpul awal",
+      "Pengeluaran pribadi tambahan",
+    ],
     safetyNotes: [
       "Pakaian santai yang nyaman dan tidak masalah jika terkena percikan tanah liat (celemek disediakan).",
       "Aktivitas ramah anak-anak dan keluarga.",
     ],
-    meetingPointLabel: "Pendopo Desa Wisata Budaya",
+    meetingPointLabel: "Pendopo Alun-Alun Kota Malang",
+    departureTimeLabel:
+      "Peserta berkumpul pukul 08.15 WIB sebelum keberangkatan.",
+    outboundTransport:
+      "Shuttle minibus Travel Organizer dari titik kumpul Malang menuju desa wisata.",
+    returnTransport:
+      "Shuttle kembali ke titik kumpul Malang setelah kegiatan selesai.",
     accessNotes: [
       "Akses jalan desa beraspal dan dapat dilalui kendaraan pribadi.",
     ],
@@ -177,7 +187,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       id: "org_desa_budaya",
       displayName: "Ruang Rupa Desa",
       guideStatus: "CONCEPT_ONLY",
-      roleDescription: "Pengelola Workshop Budaya & Komunitas",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Menjembatani wisatawan dengan kearifan tangan perajin lokal di desa-desa Jawa Timur.",
     },
@@ -248,23 +258,35 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul Surabaya",
       "Akses area Oase Hening Trawas",
       "Pemandu sesi meditasi dan jalan hening",
       "Sarapan pagi sehat dan minuman hangat",
     ],
-    excludedItems: ["Transportasi menuju lokasi", "Kebutuhan pribadi tambahan"],
+    excludedItems: [
+      "Transportasi peserta menuju titik kumpul awal",
+      "Kebutuhan pribadi tambahan",
+    ],
     safetyNotes: [
       "Disarankan membawa alas kaki yang nyaman untuk berjalan di jalur berbatu.",
       "Harap menjaga ketenangan selama sesi jalan hening berlangsung.",
     ],
-    meetingPointLabel: "Titik kumpul area gerbang Oase Hening Trawas",
-    accessNotes: ["Disarankan tiba 15 menit sebelum waktu mulai sesi."],
+    meetingPointLabel: "Area keberangkatan Stasiun Surabaya Gubeng",
+    departureTimeLabel:
+      "Peserta berkumpul pukul 05.15 WIB sebelum keberangkatan.",
+    outboundTransport:
+      "Shuttle Travel Organizer dari titik kumpul Surabaya menuju Oase Hening Trawas.",
+    returnTransport:
+      "Shuttle kembali ke titik kumpul Surabaya setelah kegiatan selesai.",
+    accessNotes: [
+      "Perjalanan darat estimasi 1 jam 15 menit melalui jalur tol Surabaya–Mojokerto.",
+    ],
     cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_mindful_life",
       displayName: "Mindful Living Project",
       guideStatus: "CERTIFIED_GUIDE",
-      roleDescription: "Fasilitator Wellness & Mindfulness",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Menghadirkan ruang jeda dan latihan mindfulness yang ramah pemula di alam terbuka.",
     },
@@ -335,13 +357,14 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul Surabaya",
       "Tiket masuk kawasan Taman Alam Prigen",
       "Pemandu trek lokal berpengalaman",
       "Santap siang dan air mineral selama perjalanan",
       "Pertolongan pertama standar pendampingan",
     ],
     excludedItems: [
-      "Transportasi menuju titik kumpul",
+      "Transportasi peserta menuju titik kumpul awal",
       "Perlengkapan trekking pribadi",
     ],
     safetyNotes: [
@@ -349,12 +372,20 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Bawa botol minum pribadi dan pelindung matahari (topi/tabir surya).",
       "Jalur memiliki tanjakan landai hingga sedang, cocok untuk yang ingin bergerak aktif.",
     ],
+    meetingPointLabel: "Rest Area KM 26 Tol Surabaya–Gempol",
+    departureTimeLabel:
+      "Peserta berkumpul pukul 06.30 WIB sebelum keberangkatan.",
+    outboundTransport:
+      "Minibus Travel Organizer dari titik kumpul menuju kaki gunung Prigen.",
+    returnTransport:
+      "Minibus kembali ke titik kumpul setelah seluruh rangkaian jelajah selesai.",
+    accessNotes: ["Jalur pegunungan beraspal hingga titik pos awal briefing."],
     cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_jejak_alam",
       displayName: "Jejak Langkah Pasuruan",
       guideStatus: "CERTIFIED_GUIDE",
-      roleDescription: "Komunitas Pemandu Alam Terbuka",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Fokus mendampingi petualangan alam ringan yang aman dan ramah bagi pemula.",
     },
@@ -425,25 +456,36 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul Surabaya",
       "Akomodasi 1 malam di pondok kayu Lembah Alam Pacet",
       "Makan malam dan sarapan pagi lokal",
       "Fasilitator pendamping kegiatan",
       "Tiket masuk kawasan wisata lembah",
     ],
     excludedItems: [
-      "Transportasi pulang-pergi",
+      "Transportasi peserta menuju titik kumpul awal",
       "Belanja pribadi dan makanan di luar jadwal",
     ],
     safetyNotes: [
       "Bawa pakaian tebal dan jaket karena suhu malam di Pacet bisa cukup dingin.",
       "Perhatikan langkah saat berjalan di dekat aliran sungai berbatu.",
     ],
+    meetingPointLabel:
+      "Terminal Purabaya (Bungurasih) Shelter Keberangkatan Khusus",
+    departureTimeLabel: "Peserta berkumpul Hari 1 pukul 13.00 WIB.",
+    outboundTransport:
+      "Armada van Travel Organizer dari Surabaya menuju pondok Lembah Alam Pacet.",
+    returnTransport:
+      "Armada van kembali mengantar peserta ke Terminal Purabaya di Hari 2 siang.",
+    accessNotes: [
+      "Jalur pegunungan Pacet beraspal mulus dengan estimasi tempuh 1,5 jam.",
+    ],
     cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_pacet_retreat",
       displayName: "Lembah Teduh Retreats",
       guideStatus: "CERTIFIED_GUIDE",
-      roleDescription: "Spesialis Penginapan & Retret Alam",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Menyediakan ruang peristirahatan akhir pekan yang hangat, tenang, dan dekat dengan alam.",
     },

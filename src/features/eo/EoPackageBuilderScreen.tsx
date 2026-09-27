@@ -110,9 +110,15 @@ export function EoPackageBuilderScreen() {
   const [insightAppliedMessage, setInsightAppliedMessage] = useState<boolean>(
     Boolean(initialDraft?.insightId || initialInsightId),
   );
-  const [title, setTitle] = useState<string>(initialDraft?.title ?? "");
+  const [title, setTitle] = useState<string>(
+    initialDraft?.title ?? initialInsight?.title ?? "",
+  );
   const [shortSummary, setShortSummary] = useState<string>(
-    initialDraft?.shortSummary ?? initialDraft?.valueProposition ?? "",
+    initialDraft?.shortSummary ??
+      initialDraft?.valueProposition ??
+      (initialInsight
+        ? `Experience untuk traveler yang mencari ${initialInsight.intentLabel}, dengan fokus pada ${initialInsight.recommendedFocus.join(", ")} di area ${initialInsight.targetArea}.`
+        : ""),
   );
   const [durationLabel, setDurationLabel] = useState<string>(
     initialDraft?.durationLabel ?? initialInsight?.durationLabel ?? "1 hari",
@@ -152,24 +158,34 @@ export function EoPackageBuilderScreen() {
   const [itinerary, setItinerary] = useState<EoItineraryItem[]>(
     initialDraft?.itinerary && initialDraft.itinerary.length > 0
       ? initialDraft.itinerary
-      : [
-          {
-            order: 1,
-            title: "Pagi - Titik Kumpul & Sambutan Teh",
+      : initialInsight?.sampleActivities?.length
+        ? initialInsight.sampleActivities.map((activity, index) => ({
+            order: index + 1,
+            title: activity,
             description:
-              "Tiba di lokasi, perkenalan hangat dengan pemandu, dan menikmati seduhan teh herbal hangat.",
-            timeOfDayLabel: "Pagi",
+              "Aktivitas referensi dari Demand Insight. Sesuaikan detail pelaksanaan dengan destinasi dan konsep EO.",
+            timeOfDayLabel:
+              index === 0 ? "Pagi" : index === 1 ? "Siang" : "Sore",
             durationLabel: "1 jam",
-          },
-          {
-            order: 2,
-            title: "Menjelajah Jalur Alami & Sesi Hening",
-            description:
-              "Berjalan santai menyusuri keindahan alam lokasi dipandu dengan jeda napas ringan untuk merilekskan pikiran.",
-            timeOfDayLabel: "Siang",
-            durationLabel: "2 jam",
-          },
-        ],
+          }))
+        : [
+            {
+              order: 1,
+              title: "Pagi - Titik Kumpul & Sambutan Teh",
+              description:
+                "Tiba di lokasi, perkenalan hangat dengan pemandu, dan menikmati seduhan teh herbal hangat.",
+              timeOfDayLabel: "Pagi",
+              durationLabel: "1 jam",
+            },
+            {
+              order: 2,
+              title: "Menjelajah Jalur Alami & Sesi Hening",
+              description:
+                "Berjalan santai menyusuri keindahan alam lokasi dipandu dengan jeda napas ringan untuk merilekskan pikiran.",
+              timeOfDayLabel: "Siang",
+              durationLabel: "2 jam",
+            },
+          ],
   );
   const [safetyNotes, setSafetyNotes] = useState<string>(
     initialDraft?.safetyNotes?.join("\n") ??

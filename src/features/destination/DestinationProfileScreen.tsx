@@ -13,7 +13,9 @@ export function DestinationProfileScreen() {
   const [descriptionSuccess, setDescriptionSuccess] = useState<
     string | undefined
   >();
+  const [descriptionError, setDescriptionError] = useState<string | undefined>();
   const [guideFeeSuccess, setGuideFeeSuccess] = useState<string | undefined>();
+  const [guideFeeError, setGuideFeeError] = useState<string | undefined>();
 
   const context = resolveAuthenticatedDestinationContext();
   const [descriptionDraft, setDescriptionDraft] = useState(
@@ -121,6 +123,7 @@ export function DestinationProfileScreen() {
   const handleGuideFeeChange = (val: string) => {
     setProfileError(undefined);
     setGuideFeeSuccess(undefined);
+    setGuideFeeError(undefined);
     const digits = val.replace(/[^0-9]/g, "");
     const num = digits ? parseInt(digits, 10) : 0;
     setGuideFeeDraft(num);
@@ -391,6 +394,7 @@ export function DestinationProfileScreen() {
             onChange={(event) => {
               setProfileError(undefined);
               setDescriptionSuccess(undefined);
+              setDescriptionError(undefined);
               setDescriptionDraft(event.target.value);
             }}
             aria-label="Edit deskripsi destinasi"
@@ -403,12 +407,13 @@ export function DestinationProfileScreen() {
               onClick={() => {
                 setProfileError(undefined);
                 setDescriptionSuccess(undefined);
+                setDescriptionError(undefined);
                 const result =
                   mockDestinationPartnerService.updateDescription(
                     descriptionDraft,
                   );
                 if (!result.success) {
-                  setProfileError(result.message);
+                  setDescriptionError(result.message);
                   return;
                 }
                 setDescriptionSuccess("Deskripsi berhasil disimpan");
@@ -423,6 +428,14 @@ export function DestinationProfileScreen() {
                 role="status"
               >
                 ✓ {descriptionSuccess}
+              </span>
+            )}
+            {descriptionError && (
+              <span
+                className="dest-profile-feedback dest-profile-feedback--error"
+                role="alert"
+              >
+                {descriptionError}
               </span>
             )}
           </div>
@@ -463,12 +476,13 @@ export function DestinationProfileScreen() {
                 onClick={() => {
                   setProfileError(undefined);
                   setGuideFeeSuccess(undefined);
+                  setGuideFeeError(undefined);
                   const result =
                     mockDestinationPartnerService.updateLocalGuideFee(
                       guideFeeDraft,
                     );
                   if (!result.success) {
-                    setProfileError(result.message);
+                    setGuideFeeError(result.message);
                     return;
                   }
                   setGuideFeeSuccess("Tarif pemandu berhasil disimpan");
@@ -483,6 +497,14 @@ export function DestinationProfileScreen() {
                   role="status"
                 >
                   ✓ {guideFeeSuccess}
+                </span>
+              )}
+              {guideFeeError && (
+                <span
+                  className="dest-profile-feedback dest-profile-feedback--error"
+                  role="alert"
+                >
+                  {guideFeeError}
                 </span>
               )}
             </div>

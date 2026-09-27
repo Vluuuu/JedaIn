@@ -64,9 +64,7 @@ describe("P1 EO Package Builder Validation Visibility & Focus Regression", () =>
     const view = await renderPackageBuilder();
 
     // Verify initially at Step 1
-    expect(view.textContent).toContain(
-      "Langkah 1: Pilih Destinasi & Pemandu",
-    );
+    expect(view.textContent).toContain("Langkah 1: Pilih Destinasi & Pemandu");
 
     // Jump directly to Step 5 (Tinjau & Submit)
     const step5Button = Array.from(

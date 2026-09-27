@@ -228,10 +228,11 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const badgeView = await renderComponent(
         createElement(DestinationVerificationBadgeScreen),
       );
-      expect(badgeView.textContent).toContain("Terverifikasi Dasar (BASIC)");
+      expect(badgeView.textContent).toContain("Terverifikasi Dasar");
       expect(badgeView.textContent).toContain(
-        "Siap sebagai Pemandu (Guide Ready)",
+        "Pemandu lokal adalah bagian dari syarat verifikasi destinasi",
       );
+      expect(badgeView.textContent).not.toContain("Dimensi 2");
 
       // Schedule
       const schedView = await renderComponent(
@@ -346,7 +347,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(res4.success).toBe(false);
     });
 
-    it("C2. declaredGuideReady=false with non-empty evidence persists false and is preserved on reapply", () => {
+    it("C2. destination without a local guide cannot be submitted for verification", () => {
       partnerSessionStore.setPartner({
         id: "dest_partner_guide_decl",
         email: "decl@test.id",
@@ -374,11 +375,13 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         agreedToSop: true,
       });
 
-      expect(res.success).toBe(true);
-      const app = mockDestinationVerificationStore.getByPartnerId(
-        "dest_partner_guide_decl",
-      );
-      expect(app?.declaredGuideReady).toBe(false);
+      expect(res.success).toBe(false);
+      expect(res.message).toContain("wajib memiliki pemandu lokal");
+      expect(
+        mockDestinationVerificationStore.getByPartnerId(
+          "dest_partner_guide_decl",
+        ),
+      ).toBeUndefined();
     });
 
     it("C3. two new destinations with same name get unique destinationIdentityIds and never collide with canonical", () => {
@@ -569,7 +572,6 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       adminSessionStore.loginAsDemoAdmin();
       mockAdminDecisionService.approveDestinationVerification(
         subRes.applicationId!,
-        true,
         "Approved",
       );
 
@@ -713,8 +715,8 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         createElement(DestinationVerificationStatusScreen),
       );
       expect(view.textContent).toContain("Destinasi Terverifikasi");
-      expect(view.textContent).toContain("Level: BASIC");
-      expect(view.textContent).toContain("Guide Ready ✓");
+      expect(view.textContent).toContain("Terverifikasi Dasar");
+      expect(view.textContent).not.toContain("Guide Ready");
     });
 
     it("P & Q. pending and rejected show exact shared state and Admin rejection reason", async () => {

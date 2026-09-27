@@ -194,8 +194,11 @@ export function AdminPackageReviewChecklistScreen() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Level: {destination?.verificationLevel ?? "Tidak Valid"} • Guide
-                Ready: {destination?.guideReady ? "Ya" : "Tidak"}
+                {destination
+                  ? destination.verificationLevel === "PLUS"
+                    ? "Terverifikasi Plus · pemandu lokal tersedia"
+                    : "Terverifikasi Dasar · pemandu lokal tersedia"
+                  : "Status verifikasi tidak valid"}
               </p>
             </div>
           </div>

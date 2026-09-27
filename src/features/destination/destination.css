@@ -1184,6 +1184,36 @@
   gap: var(--space-3);
 }
 
+.dest-media-gallery__upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.9rem;
+  color: var(--color-stone-0);
+  background: var(--color-brand-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.dest-media-gallery__upload-button:hover {
+  background: var(--color-brand-primary-hover);
+}
+
+.dest-media-gallery__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .dest-media-gallery__upload-hint,
 .dest-media-gallery__empty {
   color: var(--color-text-muted);

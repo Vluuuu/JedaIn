@@ -155,6 +155,10 @@ export function PackageDetailScreen({
 
   return (
     <div className="package-detail-container">
+      <div className="package-detail-context" aria-label="Konteks halaman">
+        <span className="package-detail-context__label">Detail Experience</span>
+      </div>
+
       {/* 1. Hero Media */}
       <PackageHero packageData={pkg} />
 
@@ -171,6 +175,24 @@ export function PackageDetailScreen({
             <span>{pkg.locationLabel}</span>
             <span>•</span>
             <span>{durationLabel}</span>
+          </div>
+
+          <div className="package-detail-rating-line" aria-label="Kepercayaan dan rating paket">
+            <span className="package-detail-rating-line__trust">
+              {pkg.verificationLevel === "PLUS"
+                ? "Terverifikasi Plus"
+                : "Terverifikasi Dasar"}
+            </span>
+            <span className="package-detail-rating-line__separator" aria-hidden="true">
+              •
+            </span>
+            <span>
+              {pkg.rating !== undefined && pkg.rating !== null
+                ? pkg.ratingProvenance === "SAMPLE"
+                  ? `★ ${pkg.rating.toFixed(1)} · contoh prototype`
+                  : `★ ${pkg.rating.toFixed(1)} · ulasan pascatrip`
+                : "Belum ada rating"}
+            </span>
           </div>
 
           <h1 id="package-title" className="package-detail-title">
@@ -227,6 +249,124 @@ export function PackageDetailScreen({
           </section>
         )}
 
+        {/* 6. Experience Highlights */}
+        {detail.highlights.length > 0 && (
+          <section
+            className="package-detail-section"
+            aria-labelledby="highlights-heading"
+          >
+            <h2
+              id="highlights-heading"
+              className="package-detail-section__title"
+            >
+              Highlight Pengalaman
+            </h2>
+            <ul className="package-detail-highlights-list">
+              {detail.highlights.map((item, idx) => (
+                <li key={idx} className="package-detail-highlight-item">
+                  <span
+                    className="package-detail-highlight-bullet"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+
+        {/* 11. Upcoming Sessions Preview */}
+        <section
+          className="package-detail-section"
+          aria-labelledby="sessions-preview-heading"
+        >
+          <h2
+            id="sessions-preview-heading"
+            className="package-detail-section__title"
+          >
+            Jadwal Terdekat
+          </h2>
+          <p className="package-detail-section__desc">
+            Slot yang tertera merupakan kuota peserta per sesi perjalanan,
+            terpisah dari kapasitas umum kawasan destinasi.
+          </p>
+          {detail.upcomingSessionPreviews.length > 0 ? (
+            <div className="package-detail-sessions-list">
+              {detail.upcomingSessionPreviews.map((session) => {
+                const { dateLabel } = formatSessionDateTimeRange(
+                  session.startAt,
+                  session.endAt,
+                );
+
+                return (
+                  <div
+                    key={session.sessionId}
+                    className="package-detail-session-card"
+                  >
+                    <div className="package-detail-session-card__header">
+                      <div>
+                        <span className="package-detail-session-card__date">
+                          {dateLabel}
+                        </span>
+                      </div>
+                      <span
+                        className={`package-detail-session-card__status${
+                          session.status === "OPEN"
+                            ? " package-detail-session-card__status--open"
+                            : ""
+                        }`}
+                      >
+                        <span
+                          className="package-detail-session-card__status-dot"
+                          aria-hidden="true"
+                        />
+                        <span>
+                          {session.status === "OPEN"
+                            ? "Tersedia"
+                            : session.status === "FULL"
+                              ? "Penuh"
+                              : "Ditutup"}
+                        </span>
+                      </span>
+                    </div>
+                    {session.remainingSlots !== undefined && (
+                      <span className="package-detail-session-card__slots">
+                        Sisa {session.remainingSlots} slot (kuota sesi)
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="package-detail-no-session-notice">
+              <p>Belum ada jadwal terdekat yang dibuka untuk paket ini.</p>
+            </div>
+          )}
+        </section>
+
+
+        <div className="package-detail-secondary" aria-label="Detail tambahan experience">
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Tentang destinasi & penyelenggara</span>
+              <span className="package-detail-disclosure__hint">Lihat detail</span>
+            </summary>
+            <div className="package-detail-disclosure__body">
         {/* 4. Destination & Location Trust Section */}
         <section
           className="package-detail-section"
@@ -397,45 +537,15 @@ export function PackageDetailScreen({
           </p>
         </section>
 
-        {/* 6. Experience Highlights */}
-        {detail.highlights.length > 0 && (
-          <section
-            className="package-detail-section"
-            aria-labelledby="highlights-heading"
-          >
-            <h2
-              id="highlights-heading"
-              className="package-detail-section__title"
-            >
-              Highlight Pengalaman
-            </h2>
-            <ul className="package-detail-highlights-list">
-              {detail.highlights.map((item, idx) => (
-                <li key={idx} className="package-detail-highlight-item">
-                  <span
-                    className="package-detail-highlight-bullet"
-                    aria-hidden="true"
-                  >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+            </div>
+          </details>
 
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Rencana perjalanan</span>
+              <span className="package-detail-disclosure__hint">Lihat itinerary</span>
+            </summary>
+            <div className="package-detail-disclosure__body">
         {/* 7. Itinerary */}
         {detail.itinerary.length > 0 && (
           <section
@@ -481,6 +591,15 @@ export function PackageDetailScreen({
           </section>
         )}
 
+            </div>
+          </details>
+
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Yang kamu dapatkan</span>
+              <span className="package-detail-disclosure__hint">Lihat fasilitas</span>
+            </summary>
+            <div className="package-detail-disclosure__body">
         {/* 8. What's Included / Excluded */}
         <section
           className="package-detail-section"
@@ -550,6 +669,15 @@ export function PackageDetailScreen({
           </div>
         </section>
 
+            </div>
+          </details>
+
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Persiapan, titik kumpul & akses</span>
+              <span className="package-detail-disclosure__hint">Lihat detail</span>
+            </summary>
+            <div className="package-detail-disclosure__body">
         {/* 9. Safety & Basic Notes */}
         {detail.safetyNotes.length > 0 && (
           <section
@@ -625,6 +753,15 @@ export function PackageDetailScreen({
           </section>
         )}
 
+            </div>
+          </details>
+
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Kebijakan pembatalan</span>
+              <span className="package-detail-disclosure__hint">Lihat kebijakan</span>
+            </summary>
+            <div className="package-detail-disclosure__body">
         {/* 11. Cancellation & Refund Policy Summary */}
         <section
           className="package-detail-section"
@@ -638,76 +775,15 @@ export function PackageDetailScreen({
           </p>
         </section>
 
-        {/* 11. Upcoming Sessions Preview */}
-        <section
-          className="package-detail-section"
-          aria-labelledby="sessions-preview-heading"
-        >
-          <h2
-            id="sessions-preview-heading"
-            className="package-detail-section__title"
-          >
-            Jadwal Terdekat
-          </h2>
-          <p className="package-detail-section__desc">
-            Slot yang tertera merupakan kuota peserta per sesi perjalanan,
-            terpisah dari kapasitas umum kawasan destinasi.
-          </p>
-          {detail.upcomingSessionPreviews.length > 0 ? (
-            <div className="package-detail-sessions-list">
-              {detail.upcomingSessionPreviews.map((session) => {
-                const { dateLabel } = formatSessionDateTimeRange(
-                  session.startAt,
-                  session.endAt,
-                );
-
-                return (
-                  <div
-                    key={session.sessionId}
-                    className="package-detail-session-card"
-                  >
-                    <div className="package-detail-session-card__header">
-                      <div>
-                        <span className="package-detail-session-card__date">
-                          {dateLabel}
-                        </span>
-                      </div>
-                      <span
-                        className={`package-detail-session-card__status${
-                          session.status === "OPEN"
-                            ? " package-detail-session-card__status--open"
-                            : ""
-                        }`}
-                      >
-                        <span
-                          className="package-detail-session-card__status-dot"
-                          aria-hidden="true"
-                        />
-                        <span>
-                          {session.status === "OPEN"
-                            ? "Tersedia"
-                            : session.status === "FULL"
-                              ? "Penuh"
-                              : "Ditutup"}
-                        </span>
-                      </span>
-                    </div>
-                    {session.remainingSlots !== undefined && (
-                      <span className="package-detail-session-card__slots">
-                        Sisa {session.remainingSlots} slot (kuota sesi)
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
             </div>
-          ) : (
-            <div className="package-detail-no-session-notice">
-              <p>Belum ada jadwal terdekat yang dibuka untuk paket ini.</p>
-            </div>
-          )}
-        </section>
+          </details>
 
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Ulasan & rating</span>
+              <span className="package-detail-disclosure__hint">Lihat ulasan</span>
+            </summary>
+            <div className="package-detail-disclosure__body">
         {/* 12. Reviews Preview */}
         <section
           className="package-detail-section"
@@ -762,6 +838,9 @@ export function PackageDetailScreen({
             </p>
           )}
         </section>
+            </div>
+          </details>
+        </div>
       </div>
 
       {/* 13. Sticky Progression CTA */}

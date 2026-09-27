@@ -337,9 +337,7 @@ describe("F6 — Destination Verification Requires Local Guide", () => {
     expect(app?.approvedLevel).toBeUndefined();
     expect(app?.approvedGuideReady).toBeUndefined();
     expect(app?.declaredGuideReady).toBe(false);
-    expect(app?.rejectionReason).toContain(
-      "Pemandu lokal wajib tersedia",
-    );
+    expect(app?.rejectionReason).toContain("Pemandu lokal wajib tersedia");
   });
 
   it("2. no-guide canonical record is retained only as inactive assessment data", () => {
@@ -432,9 +430,7 @@ describe("F6 — Destination Verification Requires Local Guide", () => {
     const overviewView = await renderComponent(
       createElement(DestinationOverviewScreen),
     );
-    expect(overviewView.textContent).toContain(
-      "Data Destinasi Tidak Tersedia",
-    );
+    expect(overviewView.textContent).toContain("Data Destinasi Tidak Tersedia");
 
     const profileView = await renderComponent(
       createElement(DestinationProfileScreen),

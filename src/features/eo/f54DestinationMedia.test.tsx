@@ -167,7 +167,6 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     expect(view.textContent).not.toContain("360");
   });
 
-
   it("5. Mitra gallery mutation is authority-checked and removable media stays source-labeled", () => {
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 

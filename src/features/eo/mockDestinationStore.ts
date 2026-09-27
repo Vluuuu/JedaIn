@@ -329,7 +329,6 @@ export const mockDestinationStore = {
     };
   },
 
-
   /**
    * Authoritative EO-available destination selector:
    * Only returns destinations that are ACTIVE, verified (BASIC or PLUS),

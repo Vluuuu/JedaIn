@@ -194,7 +194,7 @@ Locked stepper from source:
 2 Location
 3 Facilities & Activities
 4 Capacity & Base Cost
-5 Guide Readiness
+5 Pemandu Lokal
 6 Review & Submit
 ```
 
@@ -217,6 +217,8 @@ Submission must:
 - create/update exactly one application for that identity,
 - bind the application to one stable canonical destination identity,
 - validate required fields,
+- require local-guide readiness evidence,
+- reject submission when no local guide is available,
 - be idempotent on repeated submit,
 - transition into `PENDING_REVIEW`,
 - never self-approve,
@@ -242,60 +244,58 @@ Repeated submit while already `PENDING_REVIEW` or `APPROVED` must not create a d
 
 Destination approval remains an Admin command.
 
-Locked initial Admin outcomes:
+Locked initial Admin outcomes after PR #105:
 
 ```text
 Reject + reason
-Approve BASIC
-Approve BASIC + guide_ready
+Approve → Terverifikasi Dasar (BASIC)
 ```
 
-Initial approval must NEVER grant `PLUS`.
+Approval is available only when local-guide readiness/evidence is present. Initial approval must NEVER grant `PLUS`.
 
 Successful approval:
 
 - verification application → `APPROVED`,
 - `approvedLevel = BASIC`,
-- `approvedGuideReady = true|false`,
+- local-guide readiness is locked true for the approved canonical destination,
 - canonical `mockDestinationStore` upserted once,
 - canonical destination `status = ACTIVE`,
 - same Destination Partner identity becomes eligible for `/partner/destination/*`,
 - EO Builder reads the newly approved destination through the existing canonical destination eligibility source.
 
+A destination without a ready local guide is rejected or remains in remediation; it does not become an active verified destination.
+
 ---
 
-## 11. Destination Status Dimensions — DP04/DP07
+## 11. Destination Verification Status — DP04/DP07
 
-Display separately:
+User-facing verification is one trust status:
 
 ```text
-verificationLevel = BASIC | PLUS
-guideReady = true | false
+Terverifikasi Dasar
+Terverifikasi Plus
+Belum Terverifikasi
 ```
 
-Do not collapse them into one opaque application state.
+Local-guide readiness is a mandatory component of destination verification, not an independent badge/dimension.
 
-Proposal-safe labels may combine them visually:
+Domain compatibility fields such as `guideReady` may remain, but:
 
-- Terverifikasi Dasar
-- Terverifikasi Dasar + Siap sebagai Guide
-- Terverifikasi Plus
-- Terverifikasi Plus + Siap sebagai Guide
+- every `APPROVED + ACTIVE` destination must have `guideReady = true`,
+- `guideReady = false` is only valid for rejected/inactive/remediation records,
+- EO and Mitra surfaces must not stack labels such as `BASIC + Guide Ready`.
 
-But combination is presentation only.
-
-For this sprint, `PLUS` may be displayed for existing seeded canonical destinations. Destination Partner cannot self-promote to PLUS.
+`PLUS` may be displayed for existing seeded canonical destinations and later trust-lifecycle outcomes. Destination Partner cannot self-promote to PLUS.
 
 ---
-
 ## 12. Destination Overview — DP05
 
 Overview must derive from shared stores, not component-local numbers.
 
 Minimum widgets:
 
-- verification level,
-- guide-ready state,
+- verification status,
+- local-guide availability as an operational fact where useful,
 - upcoming sessions using this venue,
 - expected/confirmed visitor count from shared booking/capacity data,
 - latest/average venue rating when reviews exist,
@@ -324,14 +324,14 @@ Show the canonical operational destination profile:
 - highlights/facilities,
 - base cost,
 - base capacity,
-- verification level,
-- guide-ready state.
+- verification status,
+- local-guide information.
 
 Exact re-review rules for verified-critical fields are PENDING in source.
 
 Competition lock:
 
-- verified-critical fields such as destination identity/location, base cost, base capacity, verification level, and guide readiness are not silently changed from the operational page,
+- verified-critical fields such as destination identity/location, base cost, base capacity, verification level, and local-guide readiness are not silently changed from the operational page,
 - non-critical descriptive content may be edited if implemented through an authenticated Destination Partner command boundary,
 - if a verified-critical edit affordance is shown, label it as requiring re-verification; do not directly mutate published authoritative values in this sprint.
 

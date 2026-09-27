@@ -11,6 +11,7 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     verificationLevel: "BASIC",
     guideReady: true,
     baseCostPerPerson: 125000,
+    localGuideFeePerPerson: 25000,
     description:
       "Kawasan perkebunan teh dan lereng bukit berkabut yang tenang, terkelola secara lestari bersama warga lokal. Memiliki pemandu lokal terlatih di lokasi.",
     highlights: [
@@ -27,18 +28,21 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
         url: PACKAGE_VISUALS.slow_green_day.svgDataUri,
         label: "Ilustrasi suasana lereng hijau",
         provenance: "PROTOTYPE_ILLUSTRATION",
+        category: "DESTINATION",
       },
       {
         mediaId: "media_lereng_trail",
         url: PACKAGE_VISUALS.light_mountain_explore.svgDataUri,
         label: "Ilustrasi jalur alam",
         provenance: "PROTOTYPE_ILLUSTRATION",
+        category: "DESTINATION",
       },
       {
         mediaId: "media_lereng_morning",
         url: PACKAGE_VISUALS.mindful_morning.svgDataUri,
         label: "Ilustrasi suasana pagi",
         provenance: "PROTOTYPE_ILLUSTRATION",
+        category: "DESTINATION",
       },
     ],
     status: "ACTIVE",
@@ -80,8 +84,9 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     verificationLevel: "PLUS",
     guideReady: true,
     baseCostPerPerson: 160000,
+    localGuideFeePerPerson: 30000,
     description:
-      "Lembah hutan pinus berhawa sejuk dengan aliran sungai jernih dan area mindfulness outdoor. Diverifikasi standar PLUS dengan SOP keselamatan lengkap.",
+      "Lembah hutan pinus berhawa sejuk dengan aliran sungai jernih dan area mindfulness outdoor, didukung SOP keselamatan kawasan.",
     highlights: [
       "Sungai alami dangkal untuk terapi suara air",
       "Kawasan bebas bising dan fasilitas retreat",
@@ -96,18 +101,21 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
         url: PACKAGE_VISUALS.weekend_nature_reset.svgDataUri,
         label: "Ilustrasi lembah retreat",
         provenance: "PROTOTYPE_ILLUSTRATION",
+        category: "DESTINATION",
       },
       {
         mediaId: "media_pacet_river",
         url: PACKAGE_VISUALS.pkg_pacet_mindful_retreat.svgDataUri,
         label: "Ilustrasi tepian sungai",
         provenance: "PROTOTYPE_ILLUSTRATION",
+        category: "DESTINATION",
       },
       {
         mediaId: "media_pacet_morning",
         url: PACKAGE_VISUALS.mindful_morning.svgDataUri,
         label: "Ilustrasi suasana pagi",
         provenance: "PROTOTYPE_ILLUSTRATION",
+        category: "DESTINATION",
       },
     ],
     status: "ACTIVE",
@@ -129,7 +137,7 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
       "Debit air sungai dipantau harian dengan batas aman debit terverifikasi tim pengelola.",
     ],
     localGuideSummary:
-      "Pemandu retreat lokal terakreditasi standar PLUS dengan pelatihan SOP darurat alam terbuka.",
+      "Pemandu retreat lokal telah mengikuti pelatihan SOP darurat alam terbuka.",
     baseCostIncludes: [
       "Akses area konservasi Lembah Alam Pacet",
       "Penggunaan paviliun hening & area tepi sungai",
@@ -145,6 +153,7 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     verificationLevel: "BASIC",
     guideReady: false,
     baseCostPerPerson: 95000,
+    localGuideFeePerPerson: 0,
     description:
       "Kawasan hutan bambu hening untuk kontemplasi tenang dan jalan santai mandiri di bawah naungan rumpun bambu alami.",
     highlights: [
@@ -161,18 +170,21 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
         url: PACKAGE_VISUALS.mindful_morning.svgDataUri,
         label: "Ilustrasi suasana hutan teduh",
         provenance: "PROTOTYPE_ILLUSTRATION",
+        category: "DESTINATION",
       },
       {
         mediaId: "media_trawas_trail",
         url: PACKAGE_VISUALS.light_mountain_explore.svgDataUri,
         label: "Ilustrasi jalur teduh",
         provenance: "PROTOTYPE_ILLUSTRATION",
+        category: "DESTINATION",
       },
       {
         mediaId: "media_trawas_reflection",
         url: PACKAGE_VISUALS.creative_village_halfday.svgDataUri,
         label: "Ilustrasi ruang aktivitas lokal",
         provenance: "PROTOTYPE_ILLUSTRATION",
+        category: "DESTINATION",
       },
     ],
     status: "INACTIVE",
@@ -266,24 +278,50 @@ export const mockDestinationStore = {
     return cloneDestination(destinations[existingIndex]);
   },
 
+  updateDescription(
+    destinationId: string,
+    description: string,
+  ): DestinationRecord | undefined {
+    const existingIndex = destinations.findIndex(
+      (d) => d.destinationId === destinationId,
+    );
+    if (existingIndex < 0) return undefined;
+
+    destinations[existingIndex] = {
+      ...destinations[existingIndex],
+      description: description.trim(),
+    };
+    return cloneDestination(destinations[existingIndex]);
+  },
+
+  updateLocalGuideFee(
+    destinationId: string,
+    localGuideFeePerPerson: number,
+  ): DestinationRecord | undefined {
+    const existingIndex = destinations.findIndex(
+      (d) => d.destinationId === destinationId,
+    );
+    if (existingIndex < 0) return undefined;
+
+    destinations[existingIndex] = {
+      ...destinations[existingIndex],
+      localGuideFeePerPerson: Math.max(0, Math.round(localGuideFeePerPerson)),
+    };
+    return cloneDestination(destinations[existingIndex]);
+  },
+
   /**
    * Authoritative EO-available destination selector:
-   * Only returns destinations that are ACTIVE, verified (BASIC or PLUS),
-   * and have local guide capability (guideReady === true).
-   * Identical rule for BOTH CONCEPT_ONLY and CERTIFIED_GUIDE.
+   * Only returns destinations that are ACTIVE and have local guide capability.
+   * Verification happens before a destination becomes ACTIVE; public BASIC/PLUS
+   * tiers are intentionally not part of EO selection UX.
    */
   getEligibleForEo(
     guideStatus?: "CONCEPT_ONLY" | "CERTIFIED_GUIDE",
   ): readonly DestinationRecord[] {
     void guideStatus; // Uniform eligibility in MVP: all EO-available destinations have local guide capability
     return destinations
-      .filter((d) => {
-        if (d.status !== "ACTIVE") return false;
-        if (d.verificationLevel !== "BASIC" && d.verificationLevel !== "PLUS") {
-          return false;
-        }
-        return d.guideReady === true;
-      })
+      .filter((d) => d.status === "ACTIVE" && d.guideReady === true)
       .map((d) => cloneDestination(d));
   },
 };

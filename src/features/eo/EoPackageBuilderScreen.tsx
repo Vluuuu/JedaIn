@@ -55,6 +55,15 @@ export function EoPackageBuilderScreen() {
   const eligibleDestinations =
     mockDestinationStore.getEligibleForEo(guideStatus);
   const allInsights = mockInsightStore.getAllInsights();
+  const pricingBudgetDistribution = mockInsightStore.getBudgetDistribution({
+    period: "ALL",
+  });
+  const pricingReferenceTotalResponses = mockInsightStore.getTotalResponses({
+    period: "ALL",
+  });
+  const topPricingBudget = [...pricingBudgetDistribution].sort(
+    (a, b) => b.percentage - a.percentage,
+  )[0];
 
   // Authoritative initial destination: preselect only if the candidate is in eligibleDestinations
   const candidateDestinationId =
@@ -84,6 +93,9 @@ export function EoPackageBuilderScreen() {
       ]),
     ).values(),
   ).sort((a, b) => a.label.localeCompare(b.label, "id-ID"));
+
+  // Step 4: Optional demand-assisted pricing reference
+  const [showPricingReference, setShowPricingReference] = useState(false);
 
   // Step 5: Traveler-Facing Draft Preview Dialog
   const [showTravelerPreview, setShowTravelerPreview] = useState(false);
@@ -1196,6 +1208,101 @@ export function EoPackageBuilderScreen() {
               Mencakup layanan pengalaman, fasilitas pendukung, koordinasi sesi,
               dan konsumsi.
             </span>
+          </div>
+
+          <div className="eo-pricing-reference">
+            <button
+              type="button"
+              className="eo-pricing-reference__toggle"
+              aria-expanded={showPricingReference}
+              aria-controls="eo-pricing-reference-panel"
+              onClick={() => setShowPricingReference((current) => !current)}
+            >
+              <span>
+                <strong>Referensi Harga dari Sinyal Traveler</strong>
+                <span>
+                  Lihat distribusi budget dari data simulasi prototype sebagai
+                  bahan pertimbangan.
+                </span>
+              </span>
+              <span aria-hidden="true">
+                {showPricingReference ? "−" : "+"}
+              </span>
+            </button>
+
+            {showPricingReference && (
+              <div
+                id="eo-pricing-reference-panel"
+                className="eo-pricing-reference__panel"
+              >
+                <div className="eo-pricing-reference__meta">
+                  <Badge tone="info">Data simulasi prototype</Badge>
+                  <span>
+                    {pricingReferenceTotalResponses.toLocaleString("id-ID")}{" "}
+                    respons simulasi
+                  </span>
+                </div>
+
+                {selectedInsight ? (
+                  <div className="eo-pricing-reference__insight">
+                    <span>Rentang budget pada insight terpilih</span>
+                    <strong>{selectedInsight.preferredBudgetRange}</strong>
+                    <small>{selectedInsight.title}</small>
+                  </div>
+                ) : (
+                  <p className="eo-pricing-reference__context">
+                    Belum ada insight khusus yang dipilih. Distribusi berikut
+                    menggunakan seluruh respons simulasi prototype.
+                  </p>
+                )}
+
+                {topPricingBudget && (
+                  <div className="eo-pricing-reference__headline">
+                    <span>Rentang budget paling banyak dipilih</span>
+                    <strong>{topPricingBudget.label}</strong>
+                    <span>
+                      {topPricingBudget.percentage}% respons simulasi (
+                      {topPricingBudget.count.toLocaleString("id-ID")} respons)
+                    </span>
+                  </div>
+                )}
+
+                <div
+                  className="eo-pricing-reference__distribution"
+                  aria-label="Distribusi budget respons simulasi"
+                >
+                  {pricingBudgetDistribution.map((budget) => (
+                    <div
+                      key={budget.id}
+                      className="eo-pricing-reference__row"
+                    >
+                      <div className="eo-pricing-reference__row-copy">
+                        <span>{budget.label}</span>
+                        <strong>{budget.percentage}%</strong>
+                      </div>
+                      <div
+                        className="eo-pricing-reference__track"
+                        aria-hidden="true"
+                      >
+                        <span
+                          className="eo-pricing-reference__fill"
+                          style={{ width: `${budget.percentage}%` }}
+                        />
+                      </div>
+                      <small>
+                        {budget.count.toLocaleString("id-ID")} respons simulasi
+                      </small>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="eo-pricing-reference__disclaimer">
+                  Referensi ini bersifat opsional dan tidak mengubah Margin EO
+                  secara otomatis. Gunakan sebagai sinyal arah pricing, bukan
+                  sebagai harga terbaik atau jaminan konversi.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Pricing Breakdown Card */}

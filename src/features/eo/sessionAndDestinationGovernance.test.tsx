@@ -531,7 +531,6 @@ describe("F4.2 — Part B: Destination Governance Consistency (ADM-F01)", () => 
   });
 });
 
-
 describe("F5.2 — EO Destination Discovery & Builder Clarity", () => {
   it("1. Builder exposes explicit location filter without bypassing EO destination eligibility", async () => {
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
@@ -664,9 +663,7 @@ describe("F5.2 — EO Destination Discovery & Builder Clarity", () => {
   it("5. Mitra Destination Profile uses neutral destination wording", async () => {
     partnerSessionStore.loginAsDemoDestination();
 
-    const view = await renderComponent(
-      createElement(DestinationProfileScreen),
-    );
+    const view = await renderComponent(createElement(DestinationProfileScreen));
 
     expect(view.textContent).toContain("Tentang Destinasi:");
     expect(view.textContent).not.toContain("Deskripsi Ketenangan Kawasan");

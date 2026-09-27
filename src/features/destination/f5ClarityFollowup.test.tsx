@@ -299,6 +299,17 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
     });
     expect(noFac.success).toBe(false);
 
+    const unknownFacility = mockDestinationPartnerService.addGalleryMedia({
+      url: SAMPLE_BASE64_PNG,
+      label: "Foto fasilitas tidak terdaftar",
+      category: "FACILITY",
+      facilityLabel: "Kolam renang fiktif",
+    });
+    expect(unknownFacility.success).toBe(false);
+    expect(unknownFacility.message).toContain(
+      "tidak terdaftar pada profil destinasi",
+    );
+
     // Valid upload with facilityLabel
     const added1 = mockDestinationPartnerService.addGalleryMedia({
       url: SAMPLE_BASE64_PNG,
@@ -433,5 +444,48 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
     )!;
     await act(async () => step4.click());
     expect(view.textContent).toContain("Rentang budget pada insight terpilih");
+  });
+
+  it("33. entering Builder from an insight link applies the same editable autofill immediately", async () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+    const view = await renderRoute(
+      createElement(EoPackageBuilderScreen),
+      "/partner/eo/packages/new",
+      "/partner/eo/packages/new?destinationId=dest_lereng_hijau&insightId=ins_nature_batu_1d",
+    );
+
+    const steps = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
+    );
+    const step2 = steps.find((btn) =>
+      btn.textContent?.includes("Sinyal Insight"),
+    )!;
+    await act(async () => step2.click());
+
+    expect(view.textContent).toContain("Arahan yang diterapkan");
+    expect(view.textContent).toContain("Arahan diterapkan ke draft");
+
+    const titleInput = view.querySelector<HTMLInputElement>("#package-title")!;
+    const summaryInput =
+      view.querySelector<HTMLTextAreaElement>("#package-summary")!;
+    expect(titleInput.value.trim().length).toBeGreaterThan(5);
+    expect(summaryInput.value).toContain(
+      "Experience untuk traveler yang mencari",
+    );
+
+    const step3 = steps.find((btn) =>
+      btn.textContent?.includes("Rencana Itinerary"),
+    )!;
+    await act(async () => step3.click());
+    const activityTitles = Array.from(
+      view.querySelectorAll<HTMLInputElement>(
+        ".eo-itinerary-item input[type=\"text\"]",
+      ),
+    ).map((input) => input.value);
+    expect(activityTitles.some((value) => value.trim().length > 0)).toBe(true);
+    expect(view.textContent).toContain(
+      "Aktivitas referensi dari Demand Insight",
+    );
   });
 });

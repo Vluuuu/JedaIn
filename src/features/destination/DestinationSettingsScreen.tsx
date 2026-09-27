@@ -85,9 +85,7 @@ export function DestinationSettingsScreen() {
             >
               Kawasan Destinasi Terkait:
             </small>
-            <Badge tone="success">
-              {destination.name} ({destination.verificationLevel})
-            </Badge>
+            <strong>{destination.name}</strong>
           </div>
         </div>
       </section>

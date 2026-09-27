@@ -61,10 +61,6 @@ export function DestinationOverviewScreen() {
 
   const { destination, partner, application } = context;
   const data = getDestinationOverviewData(destination);
-  const verificationLabel =
-    destination.verificationLevel === "PLUS"
-      ? "Terverifikasi Plus"
-      : "Terverifikasi Dasar";
   const visual = getDestinationVisual(destination.name, destination.imageUrl);
 
   return (
@@ -86,12 +82,6 @@ export function DestinationOverviewScreen() {
                 "Pengelola kawasan"}
             </strong>
           </p>
-
-          <div className="dest-identity__badges" aria-label="Status destinasi">
-            <Badge tone="success" showSymbol={false}>
-              {verificationLabel}
-            </Badge>
-          </div>
         </div>
 
         <div className="dest-identity__media" aria-hidden="true">
@@ -216,16 +206,27 @@ export function DestinationOverviewScreen() {
                 Kesiapan yang digunakan JedaIn untuk operasional pengalaman.
               </p>
             </div>
-            <span className="dest-readiness__completeness">
-              {data.profileCompletedItems}/{data.profileTotalItems} informasi
-              lengkap
-            </span>
+            <details className="dest-readiness__completeness">
+              <summary>
+                {data.profileCompletedItems === data.profileTotalItems
+                  ? "Informasi profil lengkap"
+                  : `${data.profileCompletedItems}/${data.profileTotalItems} informasi inti lengkap`}{" "}
+                · Lihat 9 informasi inti
+              </summary>
+              <ul>
+                {data.profileChecklist.map((item) => (
+                  <li key={item.label}>
+                    {item.complete ? "✓" : "Belum lengkap"} {item.label}
+                  </li>
+                ))}
+              </ul>
+            </details>
           </div>
 
           <dl className="dest-readiness__facts">
             <div>
-              <dt>Status Verifikasi</dt>
-              <dd>{verificationLabel}</dd>
+              <dt>Status Mitra</dt>
+              <dd>Aktif sebagai Mitra Destinasi JedaIn</dd>
             </div>
             <div>
               <dt>Pemandu Lokal</dt>
@@ -234,6 +235,13 @@ export function DestinationOverviewScreen() {
             <div>
               <dt>Biaya Dasar</dt>
               <dd>{formatCurrency(destination.baseCostPerPerson)} / orang</dd>
+            </div>
+            <div>
+              <dt>Tarif Pemandu Lokal</dt>
+              <dd>
+                {formatCurrency(destination.localGuideFeePerPerson ?? 0)} /
+                orang
+              </dd>
             </div>
             <div>
               <dt>Kapasitas Umum Destinasi</dt>

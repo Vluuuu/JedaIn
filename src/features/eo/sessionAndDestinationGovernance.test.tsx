@@ -183,6 +183,7 @@ describe("F4.2 — Part A: EO Session Temporal Integrity (EO-F01)", () => {
       safetyNotes: ["Patuhi aturan."],
       pricing: {
         destinationBaseCost: 125000,
+        localGuideFee: 0,
         eoMargin: 150000,
         customerPrice: 275000,
       },
@@ -353,7 +354,7 @@ describe("Destination verification requires local guide", () => {
       row.textContent?.includes("Lereng Hijau Batu"),
     );
     expect(lerengRow).toBeDefined();
-    expect(lerengRow?.textContent).toContain("Terverifikasi Dasar");
+    expect(lerengRow?.textContent).not.toContain("Terverifikasi Dasar");
     expect(lerengRow?.textContent).not.toContain("Guide Ready");
   });
 
@@ -391,13 +392,13 @@ describe("Destination verification requires local guide", () => {
     const overview = await renderComponent(
       createElement(DestinationOverviewScreen),
     );
-    expect(overview.textContent).toContain("Terverifikasi Dasar");
+    expect(overview.textContent).not.toContain("Terverifikasi Dasar");
     expect(overview.textContent).not.toContain("Guide Ready");
 
     const profile = await renderComponent(
       createElement(DestinationProfileScreen),
     );
-    expect(profile.textContent).toContain("Terverifikasi Dasar");
+    expect(profile.textContent).not.toContain("Terverifikasi Dasar");
     expect(profile.textContent).not.toContain("Tanpa Guide Lokal");
 
     const verification = await renderComponent(
@@ -426,7 +427,9 @@ describe("Destination verification requires local guide", () => {
     );
 
     expect(view.textContent).toContain("Hutan Bambu Trawas");
-    expect(view.textContent).toContain("Belum Terverifikasi");
+    expect(view.textContent).toContain(
+      "belum memenuhi syarat pembuatan paket EO",
+    );
     expect(view.textContent).not.toContain("Terverifikasi Dasar");
     expect(view.textContent).toContain("Belum Memenuhi Syarat Paket");
   });
@@ -546,7 +549,7 @@ describe("F5.2 — EO Destination Discovery & Builder Clarity", () => {
 
     const stepTwoButton = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((button) => button.textContent?.includes("2. Sinyal Insight"))!;
+    ).find((button) => button.textContent?.includes("Sinyal Insight"))!;
     expect(stepTwoButton).not.toBeNull();
 
     await act(async () => {
@@ -602,7 +605,7 @@ describe("F5.2 — EO Destination Discovery & Builder Clarity", () => {
 
     const view = await renderComponent(createElement(DestinationProfileScreen));
 
-    expect(view.textContent).toContain("Tentang Destinasi:");
+    expect(view.textContent).toContain("Tentang Destinasi");
     expect(view.textContent).not.toContain("Deskripsi Ketenangan Kawasan");
   });
 });

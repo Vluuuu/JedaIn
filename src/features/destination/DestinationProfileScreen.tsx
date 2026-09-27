@@ -10,6 +10,12 @@ export function DestinationProfileScreen() {
   const [, setProfileVersion] = useState(0);
   const [profileError, setProfileError] = useState<string | undefined>();
   const context = resolveAuthenticatedDestinationContext();
+  const [descriptionDraft, setDescriptionDraft] = useState(
+    context?.destination.description ?? "",
+  );
+  const [guideFeeDraft, setGuideFeeDraft] = useState(
+    context?.destination.localGuideFeePerPerson ?? 0,
+  );
 
   if (!context) {
     return (
@@ -26,19 +32,14 @@ export function DestinationProfileScreen() {
 
   const { destination } = context;
   const visual = getDestinationVisual(destination.name, destination.imageUrl);
-  const [descriptionDraft, setDescriptionDraft] = useState(
-    destination.description,
-  );
-  const [guideFeeDraft, setGuideFeeDraft] = useState(
-    destination.localGuideFeePerPerson ?? 0,
-  );
   const destinationMedia =
     destination.mediaGallery?.filter(
       (media) => (media.category ?? "DESTINATION") === "DESTINATION",
     ) ?? [];
   const facilityMedia =
-    destination.mediaGallery?.filter((media) => media.category === "FACILITY") ??
-    [];
+    destination.mediaGallery?.filter(
+      (media) => media.category === "FACILITY",
+    ) ?? [];
 
   const handleUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -273,8 +274,8 @@ export function DestinationProfileScreen() {
             <div>
               <h3>Tentang Destinasi</h3>
               <p>
-                Deskripsi ini dibaca EO saat mengevaluasi destinasi dan
-                menyusun package.
+                Deskripsi ini dibaca EO saat mengevaluasi destinasi dan menyusun
+                package.
               </p>
             </div>
           </div>

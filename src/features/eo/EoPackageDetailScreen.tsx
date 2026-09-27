@@ -452,6 +452,14 @@ export function EoPackageDetailScreen() {
                 </strong>
               </div>
               <div className="eo-pkg-price-row">
+                <span className="eo-pkg-price-label">Pemandu destinasi</span>
+                <strong className="eo-pkg-price-val">
+                  {pkg.guideSource === "DESTINATION"
+                    ? `Rp${pkg.pricing.localGuideFee.toLocaleString("id-ID")}`
+                    : "Tidak digunakan"}
+                </strong>
+              </div>
+              <div className="eo-pkg-price-row">
                 <span className="eo-pkg-price-label">Margin EO</span>
                 <strong className="eo-pkg-price-val">
                   Rp{pkg.pricing.eoMargin.toLocaleString("id-ID")}

@@ -143,9 +143,8 @@ describe("RecommendationResultScreen UI States and Interactions", () => {
     const trustBadge = view.querySelector(
       ".recommendation-hero-visual .ui-badge--success",
     );
-    expect(trustBadge).not.toBeNull();
-    expect(trustBadge?.textContent).toContain("Terverifikasi Dasar");
-    expect(trustBadge?.textContent).toContain("✓");
+    expect(trustBadge).toBeNull();
+    expect(view.textContent).not.toContain("Terverifikasi Dasar");
   });
 
   it("renders Terverifikasi Plus when package verificationLevel is PLUS", async () => {
@@ -164,9 +163,8 @@ describe("RecommendationResultScreen UI States and Interactions", () => {
     const trustBadge = view.querySelector(
       ".recommendation-hero-visual .ui-badge--success",
     );
-    expect(trustBadge).not.toBeNull();
-    expect(trustBadge?.textContent).toContain("Terverifikasi Plus");
-    expect(trustBadge?.textContent).toContain("✓");
+    expect(trustBadge).toBeNull();
+    expect(view.textContent).not.toContain("Terverifikasi Plus");
   });
 
   it("23. renders fallback state with locked copy and neutral 'Kenapa ini mendekati?' heading", async () => {

@@ -1,5 +1,9 @@
 # JedaIn — UI Specification
 
+## Kontrak UI aktif: final Destination dan EO (27 September 2026)
+
+Tidak ada badge/filter BASIC/PLUS atau Guide Ready di permukaan produk. Halaman status pengajuan boleh menjelaskan `Disetujui`/`Aktif` dan konteks verifikasi JedaIn dengan teks biasa. Overview Mitra menampilkan sembilan informasi inti yang bisa dibuka, bukan skor kualitas. Profil Mitra mengizinkan edit deskripsi (trim, minimal 20 karakter), tarif pemandu Rp/orang, dan upload terpisah foto destinasi/fasilitas tanpa batas jumlah (JPG/PNG/WebP, maksimal 5 MB per file); visual prototype bawaan tidak dapat dihapus. Builder EO menampilkan biaya dasar, tarif pemandu, dan formula harga; memilih banyak media dan satu cover; serta stepper dengan angka hanya pada badge. Tombol insight `Pakai sebagai arahan` menampilkan konteks, tanpa menimpa title/summary. Traveler Package Hero memakai galeri media pilihan EO. Kontrak tier dan satu foto di bagian lama digantikan oleh keputusan ini. 360° tidak dibuat.
+
 **Version:** 0.1  
 **Date:** 30 Agustus 2026  
 **Product Source of Truth:** [`../PRD.md`](../PRD.md)  
@@ -1037,7 +1041,7 @@ verification_level: BASIC | PLUS
 guide_ready: true (required for verified destinations)
 ```
 
-UI renders one `Terverifikasi Dasar` or `Terverifikasi Plus` badge. Guide availability may appear as ordinary profile detail.
+UI menampilkan status pengajuan/aktif sebagai teks biasa. `verification_level` di atas hanya field legacy internal; tidak ada badge BASIC/PLUS.
 
 ## Schedule
 

@@ -1,5 +1,9 @@
 # JedaIn — EO Golden Flow Competition Contract
 
+## Keputusan final Builder EO (27 September 2026)
+
+EO hanya dapat memilih destinasi `ACTIVE` dengan pemandu lokal siap; tidak ada filter atau badge BASIC/PLUS. Detail destinasi menampilkan deskripsi, aktivitas, fasilitas, foto destinasi/fasilitas, kapasitas, biaya dasar dan cakupannya, tarif pemandu lokal, serta catatan operasional. Harga package per orang = biaya dasar + margin EO + tarif pemandu lokal bila `guideSource=DESTINATION`; bila pemandu EO dipilih, komponen itu Rp0. Service fee Traveler Rp7.500/booking tetap checkout terpisah dan komisi 10% GMV tidak berubah. EO memilih banyak media destinasi dan foto sendiri serta satu cover, disimpan sebagai `imageUrls` dan `imageUrl`. Insight simulasi hanya creative brief: `Pakai sebagai arahan` menyimpan `insightId`, menampilkan konteks dan referensi harga, tanpa menimpa teks EO. Stepper menampilkan angka sekali di badge. Status `APPROVED` package tetap berbeda dari `LIVE`. Kontrak lama tentang tier/satu foto/rumus harga sederhana digantikan bagian ini. 360° ditunda.
+
 **Status:** LOCKED FOR COMPETITION MVP
 **Date:** 1 September 2026
 **Scope:** EO01–EO18 / Phase 5 EO Partner Core
@@ -219,10 +223,7 @@ Do not make the Admin sprint parse JSX/local forms to discover submissions.
 
 ## 10. Destination Directory for Builder & Guide Source Model
 
-EO can select only an active verified destination:
-
-- verification `BASIC`, or
-- verification `PLUS`.
+EO can select only a canonical `ACTIVE` destination with `guideReady = true`. Legacy verification levels do not filter eligibility.
 
 ### Locked MVP Guide Model:
 Every active verified destination available to EO in MVP provides local destination guide capability (`guideReady = true`). Destination records with `guideReady = false` (pre-availability/remediation) are strictly excluded from EO discovery and Trip Builder. Destination eligibility is uniform across all EO guide statuses.

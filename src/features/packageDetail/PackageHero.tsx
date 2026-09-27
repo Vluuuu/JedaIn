@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Badge } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import type { PackageRecommendationSource } from "../recommendation/types";
 
@@ -32,7 +31,29 @@ export function PackageHero({ packageData }: PackageHeroProps) {
     packageData.visualAsset,
   );
   const [activeViewIndex, setActiveViewIndex] = useState(0);
-  const activeView = PROTOTYPE_GALLERY_VIEWS[activeViewIndex];
+  const packageImages = packageData.visualAssets?.length
+    ? [
+        ...new Set(
+          [packageData.visualAsset, ...packageData.visualAssets].filter(
+            Boolean,
+          ),
+        ),
+      ]
+    : [];
+  const isPackageGallery = packageImages.length > 0;
+  const views = isPackageGallery
+    ? packageImages.map((url, index) => ({
+        label: index === 0 ? "Cover package" : `Media package ${index + 1}`,
+        url,
+        scale: 1,
+        transformOrigin: "center center",
+      }))
+    : PROTOTYPE_GALLERY_VIEWS.map((view) => ({
+        ...view,
+        url: visual.svgDataUri,
+      }));
+  const safeIndex = Math.min(activeViewIndex, views.length - 1);
+  const activeView = views[safeIndex];
 
   return (
     <section
@@ -42,10 +63,10 @@ export function PackageHero({ packageData }: PackageHeroProps) {
       <header className="package-detail-hero">
         <img
           className="package-detail-hero__visual"
-          src={visual.svgDataUri}
-          alt={`Ilustrasi suasana ${packageData.title}`}
+          src={activeView.url}
+          alt={`${isPackageGallery ? "Visual package" : "Ilustrasi suasana"} ${packageData.title}`}
           role="img"
-          aria-label={`Ilustrasi suasana ${packageData.title}`}
+          aria-label={`${isPackageGallery ? "Visual package" : "Ilustrasi suasana"} ${packageData.title}`}
           width={800}
           height={500}
           fetchPriority="high"
@@ -56,11 +77,6 @@ export function PackageHero({ packageData }: PackageHeroProps) {
         />
         <div className="package-detail-hero__visual-scrim" aria-hidden="true" />
         <div className="package-detail-hero__badges">
-          <Badge tone="success" className="package-detail-hero__trust-badge">
-            {packageData.verificationLevel === "PLUS"
-              ? "Terverifikasi Plus"
-              : "Terverifikasi Dasar"}
-          </Badge>
           <span className="package-detail-hero__rating-pill">
             <svg
               width="12"
@@ -99,7 +115,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
             aria-live="polite"
             aria-atomic="true"
           >
-            {activeViewIndex + 1}/{PROTOTYPE_GALLERY_VIEWS.length}
+            {safeIndex + 1}/{views.length}
           </span>
         </div>
 
@@ -108,12 +124,12 @@ export function PackageHero({ packageData }: PackageHeroProps) {
           role="group"
           aria-label="Pilihan visual suasana experience"
         >
-          {PROTOTYPE_GALLERY_VIEWS.map((view, index) => {
-            const isActive = index === activeViewIndex;
+          {views.map((view, index) => {
+            const isActive = index === safeIndex;
 
             return (
               <button
-                key={view.label}
+                key={`${view.url}-${index}`}
                 type="button"
                 className={`package-detail-gallery__thumb${
                   isActive ? " package-detail-gallery__thumb--active" : ""
@@ -124,7 +140,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
               >
                 <span className="package-detail-gallery__thumb-media">
                   <img
-                    src={visual.svgDataUri}
+                    src={view.url}
                     alt=""
                     aria-hidden="true"
                     width={240}
@@ -145,8 +161,9 @@ export function PackageHero({ packageData }: PackageHeroProps) {
         </div>
 
         <p className="package-detail-gallery__note">
-          Visual suasana pada prototype untuk memberi gambaran experience, bukan
-          dokumentasi kondisi aktual destinasi.
+          {isPackageGallery
+            ? "Media package dipilih EO. Visual prototype dalam galeri tetap merupakan ilustrasi, bukan foto kondisi aktual destinasi."
+            : "Satu ilustrasi prototype ditampilkan dalam beberapa crop untuk memberi gambaran suasana, bukan foto kondisi aktual destinasi."}
         </p>
       </div>
     </section>

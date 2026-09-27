@@ -214,7 +214,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       // Navigate to Step 2 (Sinyal Insight)
       const step2Btn = Array.from(
         view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-      ).find((b) => b.textContent?.includes("2. Sinyal Insight"))!;
+      ).find((b) => b.textContent?.includes("Sinyal Insight"))!;
       await act(async () => {
         step2Btn.click();
       });
@@ -223,13 +223,13 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       expect(view.textContent).toContain(
         "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
       );
-      expect(view.textContent).toContain("Terpilih ✓");
+      expect(view.textContent).toContain("Dipakai sebagai arahan ✓");
 
       // Title concept hint may be present
       const titleInput = view.querySelector<HTMLInputElement>(
         'input[placeholder*="Sehari Pelan di Lereng Hijau"]',
       )!;
-      expect(titleInput.value).toContain("Jeda Mindful: Dekat dengan alam");
+      expect(titleInput.value).toBe("");
 
       // Short summary / value proposition must NOT be auto-filled with the unmet demand description
       const summaryInput =
@@ -242,7 +242,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       // Jump to Step 5 and open Traveler preview
       const step5Btn = Array.from(
         view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-      ).find((b) => b.textContent?.includes("5. Tinjau & Submit"))!;
+      ).find((b) => b.textContent?.includes("Tinjau & Submit"))!;
       await act(async () => {
         step5Btn.click();
       });
@@ -289,7 +289,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
 
       const step2Btn = Array.from(
         view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-      ).find((b) => b.textContent?.includes("2. Sinyal Insight"))!;
+      ).find((b) => b.textContent?.includes("Sinyal Insight"))!;
       await act(async () => {
         step2Btn.click();
       });
@@ -438,12 +438,8 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       );
 
       // 28. Uses conditional wording
-      expect(view.textContent).toContain(
-        "Perubahan informasi inti destinasi dapat memerlukan peninjauan ulang oleh Tim Kurator Admin JedaIn.",
-      );
-      expect(view.textContent).toContain(
-        "Aturan field dan proses final belum dikunci dalam prototype.",
-      );
+      expect(view.textContent).toContain("Simpan deskripsi");
+      expect(view.textContent).not.toContain("memerlukan verifikasi ulang");
     });
   });
 });

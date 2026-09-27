@@ -119,7 +119,7 @@ describe("F1 Regression: Future Session Availability & Stale-Session Protection"
       sessionId: "ses_sgd_1",
       travelerId: "usr_f1_test",
       participantCount: 1,
-      expectedUnitPricePerPerson: 275000,
+      expectedUnitPricePerPerson: 300000,
       cancellationPolicyAcknowledged: true,
       idempotencyKey: "idemp_f1_valid_test",
     });
@@ -156,7 +156,7 @@ describe("F1 Regression: Future Session Availability & Stale-Session Protection"
       sessionId: "ses_past_submit_test",
       travelerId: "usr_f1_past_test",
       participantCount: 1,
-      expectedUnitPricePerPerson: 275000,
+      expectedUnitPricePerPerson: 300000,
       cancellationPolicyAcknowledged: true,
       idempotencyKey: "idemp_f1_past_test",
     });

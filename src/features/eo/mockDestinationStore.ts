@@ -68,7 +68,6 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
     baseCostIncludes: [
       "Tiket masuk kawasan Lereng Hijau",
       "Akses saung istirahat dan fasilitas umum",
-      "Pemandu lokal pendamping rute kebun",
     ],
     baseCostExcludes: [
       "Transportasi menuju titik kumpul awal",

@@ -102,6 +102,7 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
         destinationId: "dest_lereng_hijau",
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 100000,
           customerPrice: 225000,
         },
@@ -159,6 +160,7 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
         destinationId: "dest_lereng_hijau",
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 100000,
           customerPrice: 225000,
         },
@@ -245,6 +247,7 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
         safetyNotes: ["Aman"],
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 100000,
           customerPrice: 225000,
         },
@@ -363,6 +366,7 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
         safetyNotes: ["Gunakan sepatu nyaman."],
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 150000,
           customerPrice: 275000,
         },

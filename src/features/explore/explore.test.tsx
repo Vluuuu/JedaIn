@@ -98,15 +98,12 @@ describe("ExploreScreen UI, URL State & Interaction", () => {
       expect(image?.alt).toBe(
         `Ilustrasi suasana ${card.querySelector("h3")!.textContent}`,
       );
-      expect(
-        card.querySelector(".explore-package-card__badges")?.textContent,
-      ).toContain("Terverifikasi");
+      expect(card.textContent).not.toContain("Terverifikasi Dasar");
+      expect(card.textContent).not.toContain("Terverifikasi Plus");
       const badge = card.querySelector(
         ".explore-package-card__badges .ui-badge--success",
       );
-      expect(badge).not.toBeNull();
-      expect(badge?.textContent).toContain("✓");
-      expect(badge?.textContent).toContain("Terverifikasi");
+      expect(badge).toBeNull();
       expect(
         card.querySelector(".explore-package-card__rating-pill"),
       ).not.toBeNull();

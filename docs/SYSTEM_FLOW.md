@@ -1,5 +1,9 @@
 # JedaIn — System Flow
 
+## Alur aktif prototype: verifikasi, media, dan harga (27 September 2026)
+
+Application destinasi → review Admin → `APPROVED` atau `REJECTED`; persetujuan dengan bukti pemandu lokal mengaktifkan destinasi kanonikal. EO hanya melihat destinasi `ACTIVE` dan `guideReady=true`, tanpa filter BASIC/PLUS. Mitra boleh mengubah deskripsi dan tarif pemandu Rp/orang serta menambah foto destinasi/fasilitas; perubahan ini dibaca EO dalam runtime yang sama. Builder menerima beberapa foto destinasi dan foto EO, menyimpan cover dan koleksi media. Harga per orang memasukkan tarif pemandu destinasi hanya saat `guideSource=DESTINATION`; service fee Traveler tetap terpisah di checkout. Pemilihan insight hanya menyimpan arahan/konteks yang terlihat, tidak mengisi konten kreatif EO secara diam-diam. Alur BASIC/PLUS di bawah adalah riwayat sebelum keputusan ini. 360° ditunda.
+
 **Version:** 0.1
 **Date:** 30 Agustus 2026
 **Source of Truth:** [`../PRD.md`](../PRD.md)
@@ -501,7 +505,7 @@ flowchart TD
     L -- Fail --> M[Specific Reason]
     M --> E
 
-    L -- Pass, including local guide evidence --> N[Verification Level BASIC, guide_ready = true]
+    L -- Pass, including local guide evidence --> N[APPROVED, ACTIVE destination, guide_ready = true]
     N --> R[Destination Dashboard]
 
     C -- Yes --> R
@@ -578,7 +582,7 @@ flowchart TD
     D --> E[Guide Readiness]
     E --> F{Pass?}
     F -- No --> G[Reject + Specific Reason]
-    F -- Yes, with local guide evidence --> H[Set BASIC Verification and guide_ready = true]
+    F -- Yes, with local guide evidence --> H[Approve application and activate destination with guide_ready = true]
 ```
 
 ---

@@ -192,7 +192,7 @@ describe("Batch C1 — Media Source Consistency & Traveler Logistics", () => {
       expect(view.textContent).toContain("Galeri suasana");
       expect(view.textContent).toContain("Lihat gambaran pengalaman");
       expect(view.textContent).toContain(
-        "Visual suasana pada prototype untuk memberi gambaran experience, bukan dokumentasi kondisi aktual destinasi.",
+        "Satu ilustrasi prototype ditampilkan dalam beberapa crop untuk memberi gambaran suasana, bukan foto kondisi aktual destinasi.",
       );
 
       const galleryButtons = view.querySelectorAll<HTMLButtonElement>(

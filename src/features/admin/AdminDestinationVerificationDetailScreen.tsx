@@ -285,9 +285,8 @@ export function AdminDestinationVerificationDetailScreen() {
               color: "var(--color-text-secondary)",
             }}
           >
-            Persetujuan awal memberikan status{" "}
-            <strong>Terverifikasi Dasar</strong>. Ketersediaan pemandu lokal
-            adalah syarat verifikasi, bukan keputusan atau lencana terpisah.
+            Persetujuan membuat destinasi aktif setelah kesiapan pemandu lokal
+            dan buktinya diperiksa.
           </p>
 
           <div className="eo-form-group">
@@ -378,16 +377,14 @@ export function AdminDestinationVerificationDetailScreen() {
           <strong>
             Destinasi ini telah selesai diproses ({destApp.status}).
           </strong>
-          {destApp.approvedLevel && (
+          {destApp.status === "APPROVED" && (
             <p
               style={{
                 margin: "var(--space-1) 0 0",
                 color: "var(--color-success-text)",
               }}
             >
-              {destApp.approvedLevel === "BASIC"
-                ? "Terverifikasi Dasar"
-                : "Terverifikasi"}
+              Status pengajuan: Disetujui
             </p>
           )}
           {destApp.rejectionReason && (

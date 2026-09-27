@@ -1448,7 +1448,7 @@ describe("ContactVerificationScreen (T11) Unit & Integration Tests", () => {
       travelerId: traveler.id,
       sessionId: "ses_sgd_1",
       participantCount: 1,
-      expectedUnitPricePerPerson: 275000,
+      expectedUnitPricePerPerson: 300000,
       cancellationPolicyAcknowledged: true,
       idempotencyKey: "demo-scoped",
     };

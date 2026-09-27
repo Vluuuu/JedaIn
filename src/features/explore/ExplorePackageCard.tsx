@@ -1,5 +1,4 @@
 import { Link } from "react-router";
-import { Badge } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
 import type { PackageRecommendationSource } from "../recommendation/types";
@@ -13,7 +12,11 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
     QUIZ_DURATION_OPTIONS.find((d) => d.value === packageData.durationType)
       ?.label ?? packageData.durationType;
 
-  const visual = getPackageVisual(packageData.id, packageData.destinationName);
+  const visual = getPackageVisual(
+    packageData.id,
+    packageData.destinationName,
+    packageData.visualAsset,
+  );
   const formattedPrice = `Rp${packageData.pricePerPerson.toLocaleString("id-ID")}`;
 
   return (
@@ -31,11 +34,6 @@ export function ExplorePackageCard({ packageData }: ExplorePackageCardProps) {
           aria-hidden="true"
         />
         <div className="explore-package-card__badges">
-          <Badge tone="success">
-            {packageData.verificationLevel === "PLUS"
-              ? "Terverifikasi Plus"
-              : "Terverifikasi Dasar"}
-          </Badge>
           <span className="explore-package-card__rating-pill">
             <svg
               width="12"

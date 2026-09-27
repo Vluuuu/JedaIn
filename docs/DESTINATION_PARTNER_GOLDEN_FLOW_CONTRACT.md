@@ -1,5 +1,9 @@
 # JedaIn — Destination Partner Golden Flow Contract
 
+## Keputusan final Mitra Destinasi (27 September 2026)
+
+Alur aktif: pengajuan dengan bukti pemandu lokal → verifikasi Admin → `APPROVED`/`REJECTED`; bila disetujui, destinasi kanonikal `ACTIVE`. BASIC/PLUS pada kontrak historis di bawah adalah field internal kompatibilitas, tidak menjadi badge atau tier produk. Mitra tidak mendapat otoritas atas approval package/sesi EO. Overview memperlihatkan daftar sembilan informasi inti di balik disclosure; tarif pemandu lokal adalah field harga terpisah. Profil memungkinkan deskripsi yang di-trim (minimal 20 karakter), tarif pemandu Rp/orang, dan foto `DESTINATION`/`FACILITY` tanpa batas jumlah; validasi per file JPG/PNG/WebP maksimum 5 MB. Hanya media `DESTINATION_SOURCE` yang dapat dihapus Mitra. Foto bawaan tetap dilabeli ilustrasi prototype. 360° ditunda.
+
 **Status:** LOCKED FOR COMPETITION MVP  
 **Scope:** DP01–DP11  
 **Depends on:** Traveler Golden Flow, EO Golden Flow, Admin Trust Loop
@@ -18,7 +22,7 @@ Destination Partner must complete the three-sided JedaIn story without becoming 
 
 Locked story:
 
-`Partner Entry → Destination Application with local guide evidence → Admin Verification → BASIC (local guide required) → Destination Workspace → Venue Profile → Verification → EO Session Schedule → Capacity Visibility → Venue Reviews → Profile`
+`Partner Entry → Destination Application with local guide evidence → Admin Verification → APPROVED / REJECTED → ACTIVE Destination Workspace after approval → Venue Profile → EO Session Schedule → Capacity Visibility → Venue Reviews → Profile`
 
 Cross-surface proof:
 
@@ -265,25 +269,7 @@ Successful approval:
 
 ## 11. Destination Status Dimensions — DP04/DP07
 
-Display separately:
-
-```text
-verificationLevel = BASIC | PLUS
-guideReady = true | false
-```
-
-Do not collapse them into one opaque application state.
-
-Proposal-safe labels may combine them visually:
-
-- Terverifikasi Dasar
-- Terverifikasi Dasar + Siap sebagai Guide
-- Terverifikasi Plus
-- Terverifikasi Plus + Siap sebagai Guide
-
-But combination is presentation only.
-
-For this sprint, `PLUS` may be displayed for existing seeded canonical destinations. Destination Partner cannot self-promote to PLUS.
+Status yang dipahami Mitra adalah pengajuan `APPROVED`/`REJECTED` dan destinasi `ACTIVE` setelah Admin menyetujui bukti pemandu lokal. `verificationLevel = BASIC | PLUS` adalah field legacy internal; jangan tampilkan sebagai badge atau pilihan produk. `guideReady` tetap syarat verifikasi dan ketersediaan EO.
 
 ---
 
@@ -293,14 +279,14 @@ Overview must derive from shared stores, not component-local numbers.
 
 Minimum widgets:
 
-- verification level,
-- guide-ready state,
+- status pengajuan dan aktif,
+- informasi pemandu lokal,
 - upcoming sessions using this venue,
 - expected/confirmed visitor count from shared booking/capacity data,
 - latest/average venue rating when reviews exist,
 - profile completeness.
 
-Profile completeness must be derived from an explicit required-field checklist. Prefer wording such as `6/6 informasi inti lengkap` instead of fabricated vanity percentages.
+Profile completeness berasal dari sembilan informasi inti yang dapat dibuka sebagai checklist: nama, lokasi, deskripsi, aktivitas, fasilitas, catatan operasional, pemandu lokal, biaya dasar, dan kapasitas umum. Tarif pemandu terpisah.
 
 No fake:
 

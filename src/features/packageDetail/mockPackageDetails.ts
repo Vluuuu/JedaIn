@@ -86,7 +86,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         startAt: "2026-10-10T08:00:00+07:00",
         endAt: "2026-10-10T14:00:00+07:00",
         status: "OPEN",
-        pricePerPerson: 275000,
+        pricePerPerson: 300000,
         remainingSlots: 6,
       },
       {
@@ -95,7 +95,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         startAt: "2026-10-17T08:00:00+07:00",
         endAt: "2026-10-17T14:00:00+07:00",
         status: "OPEN",
-        pricePerPerson: 275000,
+        pricePerPerson: 300000,
         remainingSlots: 4,
       },
     ],

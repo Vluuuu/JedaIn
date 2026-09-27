@@ -1,4 +1,3 @@
-import { Badge } from "../../components/ui";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
@@ -15,16 +14,10 @@ export function DestinationVerificationBadgeScreen() {
     );
   }
 
-  const { destination } = context;
-  const isPlus = destination.verificationLevel === "PLUS";
-
   return (
     <div className="dest-container" style={{ maxWidth: "760px" }}>
       <header className="dest-page-header">
         <div>
-          <Badge tone="success">
-            {isPlus ? "Terverifikasi Plus" : "Terverifikasi Dasar"}
-          </Badge>
           <h1
             className="dest-page-title"
             style={{ marginTop: "var(--space-2)" }}
@@ -49,7 +42,7 @@ export function DestinationVerificationBadgeScreen() {
               <span className="dest-verification-single__eyebrow">
                 Status aktif
               </span>
-              <h2>{isPlus ? "Terverifikasi Plus" : "Terverifikasi Dasar"}</h2>
+              <h2>Aktif sebagai Mitra Destinasi JedaIn</h2>
             </div>
             <span className="dest-verification-single__guide-detail">
               Pemandu lokal tersedia
@@ -57,9 +50,8 @@ export function DestinationVerificationBadgeScreen() {
           </div>
 
           <p className="dest-verification-single__description">
-            {isPlus
-              ? "Destinasi telah memenuhi standar verifikasi JedaIn dan memperoleh level Plus melalui kurasi trust lanjutan."
-              : "Destinasi telah memenuhi standar dasar JedaIn, termasuk kesiapan pemandu lokal di lokasi."}
+            Destinasi ini telah melalui proses verifikasi JedaIn, termasuk
+            kesiapan pemandu lokal di lokasi.
           </p>
 
           <div className="dest-verification-single__note">

@@ -195,10 +195,8 @@ export function AdminPackageReviewChecklistScreen() {
                 }}
               >
                 {destination
-                  ? destination.verificationLevel === "PLUS"
-                    ? "Terverifikasi Plus · pemandu lokal tersedia"
-                    : "Terverifikasi Dasar · pemandu lokal tersedia"
-                  : "Status verifikasi tidak valid"}
+                  ? "Destinasi aktif · pemandu lokal tersedia"
+                  : "Status destinasi tidak valid"}
               </p>
             </div>
           </div>
@@ -244,8 +242,10 @@ export function AdminPackageReviewChecklistScreen() {
               >
                 Modal Destinasi: Rp
                 {pkg.pricing.destinationBaseCost.toLocaleString("id-ID")} +
-                Margin EO: Rp{pkg.pricing.eoMargin.toLocaleString("id-ID")} =
-                Total Rp{pkg.pricing.customerPrice.toLocaleString("id-ID")}
+                Pemandu Lokal: Rp
+                {pkg.pricing.localGuideFee.toLocaleString("id-ID")} + Margin EO:
+                Rp{pkg.pricing.eoMargin.toLocaleString("id-ID")} = Total Rp
+                {pkg.pricing.customerPrice.toLocaleString("id-ID")}
               </p>
             </div>
           </div>

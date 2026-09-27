@@ -443,6 +443,7 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
         safetyNotes: ["Hati-hati di bebatuan."],
         pricing: {
           destinationBaseCost: 160000,
+          localGuideFee: 0,
           eoMargin: 100000,
           customerPrice: 260000,
         },

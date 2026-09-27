@@ -54,7 +54,7 @@ export function AdminDestinationVerificationsScreen() {
               st === "PENDING_REVIEW"
                 ? "Menunggu Review"
                 : st === "APPROVED"
-                  ? "Terverifikasi (BASIC)"
+                  ? "Disetujui"
                   : st === "REJECTED"
                     ? "Ditolak"
                     : "Semua";

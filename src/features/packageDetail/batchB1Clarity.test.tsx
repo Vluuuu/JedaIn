@@ -98,9 +98,9 @@ describe("Batch B1 — Existing-Data Clarity Improvements", () => {
       );
 
       // Destination verification explanation
-      expect(view.textContent).toContain("Tentang Terverifikasi Dasar:");
+      expect(view.textContent).toContain("Tentang verifikasi destinasi:");
       expect(view.textContent).toContain(
-        "bukan konfirmasi ketersediaan tanggal/sesi",
+        "bukan konfirmasi ketersediaan pada tanggal atau sesi tertentu",
       );
 
       // Guide status explanation

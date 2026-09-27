@@ -114,7 +114,7 @@ export function DestinationVerificationStatusScreen() {
             }
           >
             {status === "APPROVED"
-              ? "Destinasi Terverifikasi"
+              ? "Status pengajuan: Disetujui"
               : status === "REJECTED"
                 ? "Perlu Perbaikan"
                 : "Menunggu Verifikasi Admin"}
@@ -141,25 +141,12 @@ export function DestinationVerificationStatusScreen() {
                 margin: "0 0 var(--space-1)",
               }}
             >
-              Selamat! Destinasi Anda Telah Terverifikasi JedaIn
+              Destinasi Anda Disetujui JedaIn
             </h2>
             <p style={{ margin: "0 0 var(--space-2)" }}>
-              Lokasi Anda telah disetujui sebagai destinasi terkurasi dengan
-              status:
+              Lokasi Anda telah melalui proses verifikasi dan aktif sebagai
+              Mitra Destinasi JedaIn.
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "var(--space-2)",
-                flexWrap: "wrap",
-              }}
-            >
-              <Badge tone="success">
-                {app.approvedLevel === "BASIC"
-                  ? "Terverifikasi Dasar"
-                  : "Terverifikasi"}
-              </Badge>
-            </div>
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end" }}>

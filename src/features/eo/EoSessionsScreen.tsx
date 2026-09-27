@@ -128,7 +128,7 @@ export function EoSessionsScreen() {
       startAt: startIso,
       endAt: endIso,
       capacity,
-      pricePerPerson: selectedPkg?.pricing.customerPrice ?? 275000,
+      pricePerPerson: selectedPkg?.pricing.customerPrice ?? 300000,
       operationalNote: operationalNote.trim() || undefined,
     });
 

@@ -73,7 +73,7 @@ describe("Batch B2 — Operational Summary & Insight Context", () => {
       // 5. Biaya Dasar Destinasi (per-person semantic)
       expect(view.textContent).toContain("Biaya Dasar Destinasi");
       expect(view.textContent).toContain("Rp125.000 / orang");
-      expect(view.textContent).toContain("Harga traveler: Rp275.000 / orang");
+      expect(view.textContent).toContain("Harga traveler: Rp300.000 / orang");
 
       // 6. Alur & Durasi
       expect(view.textContent).toContain("Alur & Durasi");

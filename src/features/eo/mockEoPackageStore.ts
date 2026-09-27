@@ -25,11 +25,7 @@ export function validateEoPackage(
     });
   } else {
     const dest = mockDestinationStore.getById(pkg.destinationId);
-    if (
-      !dest ||
-      dest.status !== "ACTIVE" ||
-      (dest.verificationLevel !== "BASIC" && dest.verificationLevel !== "PLUS")
-    ) {
+    if (!dest || dest.status !== "ACTIVE") {
       errors.push({
         step: 1,
         field: "destinationId",
@@ -152,12 +148,25 @@ export function validateEoPackage(
       });
     }
 
-    const exactCustomerPrice = authoritativeBaseCost + pkg.pricing.eoMargin;
+    const authoritativeGuideFee =
+      pkg.guideSource === "DESTINATION"
+        ? (dest?.localGuideFeePerPerson ?? 0)
+        : 0;
+    if (pkg.pricing.localGuideFee !== authoritativeGuideFee) {
+      errors.push({
+        step: 4,
+        field: "localGuideFee",
+        message:
+          "Tarif pemandu lokal tidak sesuai dengan sumber pemandu yang dipilih.",
+      });
+    }
+    const exactCustomerPrice =
+      authoritativeBaseCost + authoritativeGuideFee + pkg.pricing.eoMargin;
     if (pkg.pricing.customerPrice !== exactCustomerPrice) {
       errors.push({
         step: 4,
         field: "customerPrice",
-        message: `Harga jual ke traveler harus sama persis dengan modal destinasi + margin EO (Rp${exactCustomerPrice.toLocaleString("id-ID")}).`,
+        message: `Harga package harus sama dengan biaya dasar destinasi + tarif pemandu yang digunakan + margin EO (Rp${exactCustomerPrice.toLocaleString("id-ID")}).`,
       });
     }
   }
@@ -234,8 +243,9 @@ export const SEEDED_LIVE_PACKAGE: EoPackageRecord = {
   ],
   pricing: {
     destinationBaseCost: 125000,
+    localGuideFee: 25000,
     eoMargin: 150000,
-    customerPrice: 275000,
+    customerPrice: 300000,
   },
   guideStatus: "CERTIFIED_GUIDE",
   guideSource: "DESTINATION",
@@ -297,8 +307,9 @@ export const SEEDED_PENDING_PACKAGE: EoPackageRecord = {
   ],
   pricing: {
     destinationBaseCost: 160000,
+    localGuideFee: 30000,
     eoMargin: 100000,
-    customerPrice: 260000,
+    customerPrice: 290000,
   },
   guideStatus: "CERTIFIED_GUIDE",
   guideSource: "DESTINATION",
@@ -318,7 +329,7 @@ export const SEEDED_SESSIONS: EoSessionRecord[] = [
     endAt: "2026-10-10T14:00:00+07:00",
     capacity: 6,
     remainingSlots: 6,
-    pricePerPerson: 275000,
+    pricePerPerson: 300000,
     status: "OPEN",
     createdAt: "2026-08-05T10:00:00Z",
     operationalNote:
@@ -333,7 +344,7 @@ export const SEEDED_SESSIONS: EoSessionRecord[] = [
     endAt: "2026-10-17T14:00:00+07:00",
     capacity: 6,
     remainingSlots: 4,
-    pricePerPerson: 275000,
+    pricePerPerson: 300000,
     status: "OPEN",
     createdAt: "2026-08-05T10:00:00Z",
   },
@@ -342,6 +353,7 @@ export const SEEDED_SESSIONS: EoSessionRecord[] = [
 function clonePackage(pkg: EoPackageRecord): EoPackageRecord {
   return {
     ...pkg,
+    imageUrls: pkg.imageUrls ? [...pkg.imageUrls] : undefined,
     suitableGroupTypes: [...pkg.suitableGroupTypes],
     highlights: [...pkg.highlights],
     itinerary: pkg.itinerary.map((it) => ({ ...it })),
@@ -455,7 +467,20 @@ export const mockEoPackageStore = {
       : undefined;
     const baseCost = dest?.baseCostPerPerson ?? 100000;
     const margin = draft.pricing?.eoMargin ?? 150000;
-    const customerPrice = baseCost + margin;
+    const effectiveGuideSource = draft.guideSource || "DESTINATION";
+    const localGuideFee =
+      effectiveGuideSource === "DESTINATION"
+        ? (dest?.localGuideFeePerPerson ?? 0)
+        : 0;
+    const customerPrice = baseCost + localGuideFee + margin;
+    const imageUrls =
+      draft.imageUrls ??
+      (draft.imageUrl
+        ? [draft.imageUrl]
+        : existingIndex >= 0
+          ? packages[existingIndex].imageUrls
+          : undefined);
+    const imageUrl = draft.imageUrl ?? imageUrls?.[0];
 
     const record: EoPackageRecord = {
       packageId,
@@ -465,12 +490,8 @@ export const mockEoPackageStore = {
       shortSummary: draft.shortSummary || "",
       valueProposition: draft.valueProposition || draft.shortSummary || "",
       destinationId: draft.destinationId || "",
-      imageUrl:
-        draft.imageUrl !== undefined
-          ? draft.imageUrl
-          : existingIndex >= 0
-            ? packages[existingIndex].imageUrl
-            : undefined,
+      imageUrl,
+      imageUrls: imageUrls ? [...new Set(imageUrls)] : undefined,
       insightId: draft.insightId,
       durationLabel: draft.durationLabel || "1 hari",
       suitableGroupTypes: draft.suitableGroupTypes || [
@@ -498,6 +519,7 @@ export const mockEoPackageStore = {
             ],
       pricing: {
         destinationBaseCost: baseCost,
+        localGuideFee,
         eoMargin: margin,
         customerPrice,
       },

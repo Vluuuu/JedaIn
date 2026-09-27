@@ -1,5 +1,9 @@
 # JedaIn — Panduan Demo & Evaluasi Juri (Competition Golden Demo Guide)
 
+## Pembaruan alur demo (27 September 2026)
+
+Tunjukkan approval destinasi sebagai gate internal Admin dan status Mitra `Aktif`, tanpa badge BASIC/PLUS. Buka `Lihat 9 informasi inti` di Overview Mitra; edit deskripsi, tarif pemandu Rp/orang, dan tambahkan foto destinasi serta fasilitas. Di EO Builder, pilih beberapa foto destinasi dan foto EO, tetapkan cover, lalu pilih insight dengan `Pakai sebagai arahan`; jelaskan bahwa konteks terlihat dan tidak mengisi karya EO otomatis. Dengan Lereng Hijau dan pemandu destinasi, contoh harga per orang: Rp125.000 biaya dasar + Rp25.000 pemandu + Rp150.000 margin = Rp300.000. Bila pemandu EO, contoh menjadi Rp275.000. Service fee Traveler Rp7.500/booking tetap terpisah; komisi 10% GMV tidak berubah. Traveler Hero menampilkan galeri pilihan EO. Jangan mendemokan 360°; fitur itu ditunda.
+
 Panduan operasional dan evaluasi penjurian untuk menguji integrasi lintas 4 peran (**Traveler**, **Event Organizer / EO**, **Admin Tim Kurasi**, dan **Mitra Destinasi**) pada platform JedaIn.
 
 Demo URL utama: `https://jedain.biz.id`
@@ -124,7 +128,7 @@ Tanpa perlu mengetik kredensial atau registrasi manual, sistem menyediakan tombo
    - **Tahap 1 (Destinasi):** Pilih destinasi terverifikasi aktif **Lereng Hijau Batu** (`dest_lereng_hijau`).
    - **Tahap 2 (Sinyal Insight):** Tinjau keselarasan intent dan target area Malang/Surabaya.
    - **Tahap 3 (Rencana Itinerary):** Periksa susunan aktivitas hening dan catatan keselamatan.
-   - **Tahap 4 (Skema Harga):** Tentukan margin EO (misal Rp150.000, modal otomatis Rp125.000, total harga Rp275.000).
+   - **Tahap 4 (Skema Harga):** Tentukan margin EO (misal Rp150.000, modal otomatis Rp125.000, total harga Rp300.000).
    - **Tahap 5 (Tinjau & Submit):** Klik **Ajukan untuk Review Kurator Admin** → Status paket menjadi `PENDING_ADMIN_REVIEW`.
 
 ### Langkah 3: Kurasi & Persetujuan Admin (Admin Approval)

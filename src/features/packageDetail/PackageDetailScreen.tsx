@@ -393,23 +393,17 @@ export function PackageDetailScreen({
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                       <polyline points="9 12 11 14 15 10" />
                     </svg>
-                    <span>
-                      {pkg.verificationLevel === "PLUS"
-                        ? "Terverifikasi Plus"
-                        : "Terverifikasi Dasar"}
-                    </span>
+                    <span>Telah melalui proses verifikasi JedaIn</span>
                   </span>
                 </div>
                 <div className="package-detail-trust-explanation">
                   <strong className="package-detail-trust-explanation__title">
-                    {pkg.verificationLevel === "PLUS"
-                      ? "Tentang Terverifikasi Plus:"
-                      : "Tentang Terverifikasi Dasar:"}
+                    Tentang verifikasi destinasi:
                   </strong>
                   <p className="package-detail-trust-explanation__text">
-                    {pkg.verificationLevel === "PLUS"
-                      ? "Destinasi telah melalui verifikasi kelayakan fasilitas, legalitas pengelola, dan kurasi kenyamanan lanjutan oleh tim JedaIn."
-                      : "Destinasi telah melalui verifikasi internal data pengelola dan kesiapan fasilitas dasar oleh JedaIn (bukan konfirmasi ketersediaan tanggal/sesi)."}
+                    Destinasi telah melalui proses verifikasi JedaIn, termasuk
+                    kesiapan pemandu lokal. Ini bukan konfirmasi ketersediaan
+                    pada tanggal atau sesi tertentu.
                   </p>
                 </div>
                 <p className="package-detail-editorial-text">

@@ -1,6 +1,6 @@
 import { useNavigate, useParams, useSearchParams, Link } from "react-router";
 import { ArrowLeftIcon } from "../../components/shells/icons";
-import { Badge, Button } from "../../components/ui";
+import { Button } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import "./eo.css";
@@ -36,10 +36,7 @@ export function EoDestinationDetailScreen() {
   }
 
   const isEligible =
-    destination.status === "ACTIVE" &&
-    (destination.verificationLevel === "BASIC" ||
-      destination.verificationLevel === "PLUS") &&
-    destination.guideReady === true;
+    destination.status === "ACTIVE" && destination.guideReady === true;
 
   const builderReturnParams = new URLSearchParams();
   if (builderDraftId) builderReturnParams.set("draftId", builderDraftId);
@@ -92,24 +89,11 @@ export function EoDestinationDetailScreen() {
         <div className="eo-dest-detail-hero__content">
           <h1 className="eo-dest-detail-hero__title">{destination.name}</h1>
 
-          <div className="eo-dest-detail-hero__badges">
-            <Badge
-              tone={
-                isEligible
-                  ? destination.verificationLevel === "PLUS"
-                    ? "info"
-                    : "success"
-                  : "neutral"
-              }
-              showSymbol={false}
-            >
-              {isEligible
-                ? destination.verificationLevel === "PLUS"
-                  ? "Terverifikasi Plus"
-                  : "Terverifikasi Dasar"
-                : "Belum Terverifikasi"}
-            </Badge>
-          </div>
+          <p>
+            {isEligible
+              ? "Destinasi ini telah melalui proses verifikasi JedaIn."
+              : "Destinasi belum tersedia untuk perancangan paket EO."}
+          </p>
 
           <p className="eo-dest-detail-hero__loc">
             {destination.locationLabel}
@@ -122,6 +106,18 @@ export function EoDestinationDetailScreen() {
               </span>
               <strong className="eo-dest-detail-hero__price-val">
                 Rp{destination.baseCostPerPerson.toLocaleString("id-ID")}{" "}
+                <small>/ orang</small>
+              </strong>
+            </div>
+            <div>
+              <span className="eo-dest-detail-hero__price-label">
+                Tarif pemandu lokal
+              </span>
+              <strong className="eo-dest-detail-hero__price-val">
+                Rp
+                {(destination.localGuideFeePerPerson ?? 0).toLocaleString(
+                  "id-ID",
+                )}{" "}
                 <small>/ orang</small>
               </strong>
             </div>
@@ -144,56 +140,60 @@ export function EoDestinationDetailScreen() {
         </div>
       </header>
 
-      {destination.mediaGallery && destination.mediaGallery.length > 0 && (
-        <section
-          className="eo-dest-media-gallery"
-          aria-labelledby="eo-destination-media-heading"
-        >
-          <div className="eo-dest-media-gallery__header">
-            <div>
-              <h2 id="eo-destination-media-heading">Galeri Visual Destinasi</h2>
-              <p>
-                Pilih visual ini sebagai referensi package. Visual berlabel
-                prototype bukan foto kondisi aktual destinasi.
-              </p>
+      {(["DESTINATION", "FACILITY"] as const).map((category) => {
+        const mediaItems =
+          destination.mediaGallery?.filter(
+            (media) => (media.category ?? "DESTINATION") === category,
+          ) ?? [];
+        if (mediaItems.length === 0) return null;
+        return (
+          <section
+            key={category}
+            className="eo-dest-media-gallery"
+            aria-label={
+              category === "DESTINATION" ? "Galeri Destinasi" : "Foto Fasilitas"
+            }
+          >
+            <div className="eo-dest-media-gallery__header">
+              <div>
+                <h2>
+                  {category === "DESTINATION"
+                    ? "Galeri Destinasi"
+                    : "Foto Fasilitas"}
+                </h2>
+                <p>
+                  Pilih visual ini sebagai referensi package. Visual berlabel
+                  prototype bukan foto kondisi aktual destinasi.
+                </p>
+              </div>
+              <span>{mediaItems.length} visual</span>
             </div>
-            <span>{destination.mediaGallery.length} visual</span>
-          </div>
-          <div className="eo-dest-media-gallery__grid">
-            {destination.mediaGallery.map((media) => (
-              <figure
-                key={media.mediaId}
-                className="eo-dest-media-gallery__item"
-              >
-                <img src={media.url} alt={media.label} />
-                <figcaption>
-                  <strong>{media.label}</strong>
-                  <span>
-                    {media.provenance === "PROTOTYPE_ILLUSTRATION"
-                      ? "Visual prototype"
-                      : "Media destinasi"}
-                  </span>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
-      )}
+            <div className="eo-dest-media-gallery__grid">
+              {mediaItems.map((media) => (
+                <figure
+                  key={media.mediaId}
+                  className="eo-dest-media-gallery__item"
+                >
+                  <img src={media.url} alt={media.label} />
+                  <figcaption>
+                    <strong>{media.label}</strong>
+                    <span>
+                      {media.provenance === "PROTOTYPE_ILLUSTRATION"
+                        ? "Visual prototype"
+                        : "Ditambahkan Mitra Destinasi"}
+                    </span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
       <section
         className="eo-dest-decision-facts"
         aria-label="Ringkasan keputusan destinasi"
       >
-        <div className="eo-dest-decision-fact">
-          <span>Status verifikasi</span>
-          <strong>
-            {isEligible
-              ? destination.verificationLevel === "PLUS"
-                ? "Terverifikasi Plus"
-                : "Terverifikasi Dasar"
-              : "Belum Terverifikasi"}
-          </strong>
-        </div>
         <div className="eo-dest-decision-fact">
           <span>Pemandu lokal</span>
           <strong>Tersedia sebagai bagian dari standar verifikasi</strong>
@@ -206,6 +206,16 @@ export function EoDestinationDetailScreen() {
           <span>Biaya dasar</span>
           <strong>
             Rp{destination.baseCostPerPerson.toLocaleString("id-ID")} / orang
+          </strong>
+        </div>
+        <div className="eo-dest-decision-fact">
+          <span>Tarif pemandu lokal</span>
+          <strong>
+            Rp
+            {(destination.localGuideFeePerPerson ?? 0).toLocaleString(
+              "id-ID",
+            )}{" "}
+            / orang
           </strong>
         </div>
       </section>
@@ -380,15 +390,6 @@ export function EoDestinationDetailScreen() {
                   ? "Mitra destinasi menyediakan pemandu lokal terlatih untuk mendampingi alur trip di lokasi."
                   : "Destinasi belum memiliki pemandu lokal resmi terverifikasi di lokasi.")}
             </p>
-            <div className="eo-dest-side-badge-box">
-              {destination.guideReady ? (
-                <span className="eo-dest-badge-ready">Pemandu Lokal Siap</span>
-              ) : (
-                <span className="eo-dest-badge-not-ready">
-                  Pemandu Lokal Belum Siap
-                </span>
-              )}
-            </div>
             <p
               style={{
                 fontSize: "var(--font-size-caption)",

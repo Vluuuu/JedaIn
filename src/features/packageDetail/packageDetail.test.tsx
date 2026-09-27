@@ -68,7 +68,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
 
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
     expect(view.textContent).toContain("Mulai dari");
-    expect(view.textContent).toContain("Rp275.000");
+    expect(view.textContent).toContain("Rp300.000");
     expect(view.textContent).toContain("Destinasi");
     expect(view.textContent).toContain("Penyelenggara & Pemandu");
     expect(view.textContent).toContain("Highlight Pengalaman");
@@ -151,9 +151,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     const trustBadge = view.querySelector(
       ".package-detail-hero__badges .ui-badge--success",
     );
-    expect(trustBadge).not.toBeNull();
-    expect(trustBadge?.textContent).toContain("✓");
-    expect(trustBadge?.textContent).toContain("Terverifikasi");
+    expect(trustBadge).toBeNull();
   });
 
   it("2. unknown packageId renders NOT_FOUND state", async () => {
@@ -220,7 +218,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
 
   it("7 & 8. destination verification label is correct", async () => {
     const view = await renderPackageDetail("slow_green_day");
-    expect(view.textContent).toContain("Terverifikasi Dasar");
+    expect(view.textContent).not.toContain("Terverifikasi Dasar");
   });
 
   it("9. trust copy does not present government or external certification claims", async () => {
@@ -236,7 +234,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
   it("10. guide status is separate from destination verification", async () => {
     const view = await renderPackageDetail("slow_green_day");
     // Destination verification
-    expect(view.textContent).toContain("Terverifikasi Dasar");
+    expect(view.textContent).not.toContain("Terverifikasi Dasar");
     // EO guide status
     expect(view.textContent).toContain("Certified Guide");
     expect(view.textContent).toContain("Jeda Alam Nusantara");
@@ -532,7 +530,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     });
 
     const view = await renderPackageDetail("slow_green_day", { adapter });
-    expect(view.textContent).toContain("Terverifikasi Plus");
+    expect(view.textContent).not.toContain("Terverifikasi Plus");
 
     // Hero semantic checks:
     // 1. role="img" has accessible name and does NOT contain the badge or rating

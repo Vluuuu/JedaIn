@@ -152,6 +152,11 @@ export function buildTravelerPackageFromEo(
     destinationName: dest.name,
     locationLabel: dest.locationLabel,
     visualAsset: eoPkg.imageUrl || dest.imageUrl || "",
+    visualAssets: eoPkg.imageUrls?.length
+      ? [eoPkg.imageUrl, ...eoPkg.imageUrls]
+          .filter((url): url is string => Boolean(url))
+          .filter((url, index, all) => all.indexOf(url) === index)
+      : undefined,
     status: "LIVE",
     verificationLevel: dest.verificationLevel,
     pricePerPerson: eoPkg.pricing.customerPrice,

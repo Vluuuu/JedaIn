@@ -17,11 +17,11 @@ import type {
 import "./eo.css";
 
 const STEPS = [
-  { step: 1, label: "1. Destinasi & Pemandu" },
-  { step: 2, label: "2. Sinyal Insight" },
-  { step: 3, label: "3. Rencana Itinerary" },
-  { step: 4, label: "4. Skema Harga" },
-  { step: 5, label: "5. Tinjau & Submit" },
+  { step: 1, label: "Destinasi & Pemandu" },
+  { step: 2, label: "Sinyal Insight" },
+  { step: 3, label: "Rencana Itinerary" },
+  { step: 4, label: "Skema Harga" },
+  { step: 5, label: "Tinjau & Submit" },
 ] as const;
 
 export function EoPackageBuilderScreen() {
@@ -80,9 +80,6 @@ export function EoPackageBuilderScreen() {
     initialValidDestinationId,
   );
   const [destSearchQuery, setDestSearchQuery] = useState<string>("");
-  const [destLevelFilter, setDestLevelFilter] = useState<
-    "ALL" | "BASIC" | "PLUS"
-  >("ALL");
   const [destLocationFilter, setDestLocationFilter] = useState<string>("ALL");
 
   const destinationLocationOptions = Array.from(
@@ -110,19 +107,31 @@ export function EoPackageBuilderScreen() {
   const [selectedInsightId, setSelectedInsightId] = useState<
     string | undefined
   >(initialDraft?.insightId ?? initialInsightId ?? undefined);
-  const [title, setTitle] = useState<string>(
-    initialDraft?.title ??
-      (initialInsight ? `Jeda Mindful: ${initialInsight.intentLabel}` : ""),
-  );
+  const [title, setTitle] = useState<string>(initialDraft?.title ?? "");
   const [shortSummary, setShortSummary] = useState<string>(
     initialDraft?.shortSummary ?? initialDraft?.valueProposition ?? "",
   );
   const [durationLabel, setDurationLabel] = useState<string>(
     initialDraft?.durationLabel ?? initialInsight?.durationLabel ?? "1 hari",
   );
-  const [imageUrl, setImageUrl] = useState<string | undefined>(
+  const durationAuthoredRef = useRef(
+    Boolean(
+      initialDraft?.durationLabel &&
+      initialDraft.durationLabel !== initialInsight?.durationLabel,
+    ),
+  );
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    initialDraft?.imageUrls?.length
+      ? initialDraft.imageUrls
+      : initialDraft?.imageUrl
+        ? [initialDraft.imageUrl]
+        : [],
+  );
+  const [coverUrl, setCoverUrl] = useState<string | undefined>(
     initialDraft?.imageUrl,
   );
+  const imageUrl =
+    coverUrl && imageUrls.includes(coverUrl) ? coverUrl : imageUrls[0];
   const [imageError, setImageError] = useState<string | undefined>();
   const [itinerary, setItinerary] = useState<EoItineraryItem[]>(
     initialDraft?.itinerary && initialDraft.itinerary.length > 0
@@ -170,12 +179,6 @@ export function EoPackageBuilderScreen() {
   }, [validationErrors]);
 
   const filteredEligibleDestinations = eligibleDestinations.filter((dest) => {
-    if (
-      destLevelFilter !== "ALL" &&
-      dest.verificationLevel !== destLevelFilter
-    ) {
-      return false;
-    }
     if (destLocationFilter !== "ALL" && dest.city !== destLocationFilter) {
       return false;
     }
@@ -219,8 +222,21 @@ export function EoPackageBuilderScreen() {
     ? mockInsightStore.getInsightById(selectedInsightId)
     : undefined;
 
+  const handleInsightChoice = (insight: DemandInsightRecord) => {
+    const isSelected = selectedInsightId === insight.insightId;
+    setSelectedInsightId(isSelected ? undefined : insight.insightId);
+    if (!isSelected) {
+      if (!durationAuthoredRef.current) setDurationLabel(insight.durationLabel);
+      setShowPricingReference(true);
+    }
+  };
+
   const baseCost = selectedDestination?.baseCostPerPerson ?? 100000;
-  const customerPrice = baseCost + eoMargin;
+  const localGuideFee =
+    guideSource === "DESTINATION"
+      ? (selectedDestination?.localGuideFeePerPerson ?? 0)
+      : 0;
+  const customerPrice = baseCost + localGuideFee + eoMargin;
 
   // Auto-save draft on moving
   const saveCurrentDraft = () => {
@@ -245,6 +261,7 @@ export function EoPackageBuilderScreen() {
       valueProposition: shortSummary,
       destinationId: effectiveDestinationId,
       imageUrl,
+      imageUrls,
       insightId: selectedInsightId,
       durationLabel,
       itinerary,
@@ -252,6 +269,7 @@ export function EoPackageBuilderScreen() {
       guideSource: effectiveGuideSource,
       pricing: {
         destinationBaseCost: baseCost,
+        localGuideFee,
         eoMargin,
         customerPrice,
       },
@@ -274,23 +292,22 @@ export function EoPackageBuilderScreen() {
     reader.onload = (event) => {
       const result = event.target?.result;
       if (typeof result === "string") {
-        setImageUrl(result);
+        setImageUrls((current) =>
+          current.includes(result) ? current : [...current, result],
+        );
       }
     };
     reader.readAsDataURL(file);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    processImageFile(file);
+    Array.from(e.target.files ?? []).forEach(processImageFile);
+    e.currentTarget.value = "";
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    processImageFile(file);
+    Array.from(e.dataTransfer.files ?? []).forEach(processImageFile);
   };
 
   const handleNext = () => {
@@ -496,35 +513,6 @@ export function EoPackageBuilderScreen() {
                 ))}
               </select>
             </div>
-            <div className="eo-builder-dest-chips" role="tablist">
-              <button
-                type="button"
-                className={`eo-dest-chip ${destLevelFilter === "ALL" ? "eo-dest-chip--active" : ""}`}
-                onClick={() => setDestLevelFilter("ALL")}
-                role="tab"
-                aria-selected={destLevelFilter === "ALL"}
-              >
-                Semua
-              </button>
-              <button
-                type="button"
-                className={`eo-dest-chip ${destLevelFilter === "PLUS" ? "eo-dest-chip--active" : ""}`}
-                onClick={() => setDestLevelFilter("PLUS")}
-                role="tab"
-                aria-selected={destLevelFilter === "PLUS"}
-              >
-                Terverifikasi Plus
-              </button>
-              <button
-                type="button"
-                className={`eo-dest-chip ${destLevelFilter === "BASIC" ? "eo-dest-chip--active" : ""}`}
-                onClick={() => setDestLevelFilter("BASIC")}
-                role="tab"
-                aria-selected={destLevelFilter === "BASIC"}
-              >
-                Terverifikasi Dasar
-              </button>
-            </div>
           </div>
 
           {/* Destination Cards */}
@@ -560,24 +548,6 @@ export function EoPackageBuilderScreen() {
                         {dest.name}
                       </h3>
 
-                      <div className="eo-builder-dest-card__badges">
-                        <Badge
-                          tone={
-                            dest.verificationLevel === "PLUS"
-                              ? "info"
-                              : "success"
-                          }
-                          showSymbol={false}
-                        >
-                          {dest.verificationLevel === "PLUS"
-                            ? "Terverifikasi Plus"
-                            : "Terverifikasi Dasar"}
-                        </Badge>
-                        <span className="eo-builder-dest-card__guide-badge">
-                          Pemandu lokal tersedia
-                        </span>
-                      </div>
-
                       <p className="eo-builder-dest-card__loc">
                         {dest.locationLabel}
                       </p>
@@ -592,6 +562,16 @@ export function EoPackageBuilderScreen() {
                         <strong>
                           Rp{dest.baseCostPerPerson.toLocaleString("id-ID")}
                         </strong>
+                      </span>
+                      <span className="eo-builder-dest-card__price">
+                        Tarif pemandu lokal:{" "}
+                        <strong>
+                          Rp
+                          {(dest.localGuideFeePerPerson ?? 0).toLocaleString(
+                            "id-ID",
+                          )}
+                        </strong>{" "}
+                        / orang
                       </span>
                     </div>
 
@@ -783,12 +763,7 @@ export function EoPackageBuilderScreen() {
                   <div
                     key={ins.insightId}
                     className={`eo-insight-card ${isInsSelected ? "eo-insight-card--selected" : ""}`}
-                    style={{ cursor: "pointer", padding: "var(--space-4)" }}
-                    onClick={() =>
-                      setSelectedInsightId(
-                        isInsSelected ? undefined : ins.insightId,
-                      )
-                    }
+                    style={{ padding: "var(--space-4)" }}
                   >
                     <div>
                       <Badge tone={isInsSelected ? "info" : "neutral"}>
@@ -816,14 +791,66 @@ export function EoPackageBuilderScreen() {
                       type="button"
                       variant={isInsSelected ? "primary" : "secondary"}
                       size="sm"
+                      onClick={() => handleInsightChoice(ins)}
                     >
-                      {isInsSelected ? "Terpilih ✓" : "Gunakan Insight Ini"}
+                      {isInsSelected
+                        ? "Dipakai sebagai arahan ✓"
+                        : "Pakai sebagai arahan"}
                     </Button>
                   </div>
                 );
               })}
             </div>
           </div>
+
+          {selectedInsight && (
+            <div
+              className="eo-insight-brief"
+              aria-label="Arahan insight terpilih"
+            >
+              <h3>Insight ini dipakai untuk</h3>
+              <p>
+                Brief kreatif dari respons simulasi prototype. EO tetap
+                menentukan judul, ringkasan, itinerary, dan harga package.
+              </p>
+              <dl>
+                <div>
+                  <dt>Kebutuhan traveler</dt>
+                  <dd>{selectedInsight.intentLabel}</dd>
+                </div>
+                <div>
+                  <dt>Area target</dt>
+                  <dd>{selectedInsight.targetArea}</dd>
+                </div>
+                <div>
+                  <dt>Durasi referensi</dt>
+                  <dd>{selectedInsight.durationLabel}</dd>
+                </div>
+                <div>
+                  <dt>Preferensi budget</dt>
+                  <dd>{selectedInsight.preferredBudgetRange}</dd>
+                </div>
+              </dl>
+              <strong>Fokus experience yang disarankan</strong>
+              <ul>
+                {selectedInsight.recommendedFocus.map((focus) => (
+                  <li key={focus}>{focus}</li>
+                ))}
+              </ul>
+              <strong>Ide dari insight</strong>
+              <ul>
+                {selectedInsight.sampleActivities.map((activity) => (
+                  <li key={activity}>{activity}</li>
+                ))}
+              </ul>
+              {!title.trim() && (
+                <p>
+                  Saran judul: {selectedInsight.title}. Tulis sendiri jika
+                  sesuai dengan rancanganmu.
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Title & Description Form */}
           <div
@@ -871,7 +898,10 @@ export function EoPackageBuilderScreen() {
               id="package-duration"
               className="eo-form-select"
               value={durationLabel}
-              onChange={(e) => setDurationLabel(e.target.value)}
+              onChange={(e) => {
+                durationAuthoredRef.current = true;
+                setDurationLabel(e.target.value);
+              }}
             >
               <option value="Setengah hari">Setengah hari (4 - 5 jam)</option>
               <option value="1 hari">1 hari penuh (6 - 8 jam)</option>
@@ -883,7 +913,7 @@ export function EoPackageBuilderScreen() {
 
           {/* Cover Photo / Foto Utama Experience */}
           <div className="eo-form-group">
-            <label className="eo-form-label">Foto Utama Experience</label>
+            <label className="eo-form-label">Media Experience</label>
             <p
               style={{
                 margin: "0 0 var(--space-2)",
@@ -891,7 +921,8 @@ export function EoPackageBuilderScreen() {
                 color: "var(--color-text-secondary)",
               }}
             >
-              Tambahkan foto yang paling mewakili suasana perjalanan ini.
+              Pilih beberapa visual destinasi dan tambahkan foto milik EO.
+              Tentukan satu sebagai cover paket.
             </p>
 
             {selectedDestination?.mediaGallery &&
@@ -916,7 +947,7 @@ export function EoPackageBuilderScreen() {
                     aria-label="Pilihan visual dari galeri destinasi"
                   >
                     {selectedDestination.mediaGallery.map((media) => {
-                      const isSelected = imageUrl === media.url;
+                      const isSelected = imageUrls.includes(media.url);
 
                       return (
                         <button
@@ -925,7 +956,13 @@ export function EoPackageBuilderScreen() {
                           className={`eo-builder-destination-media__option${isSelected ? " eo-builder-destination-media__option--selected" : ""}`}
                           aria-pressed={isSelected}
                           onClick={() => {
-                            setImageUrl(media.url);
+                            setImageUrls((current) =>
+                              current.includes(media.url)
+                                ? current.filter((url) => url !== media.url)
+                                : [...current, media.url],
+                            );
+                            if (isSelected && coverUrl === media.url)
+                              setCoverUrl(undefined);
                             setImageError(undefined);
                           }}
                         >
@@ -944,84 +981,96 @@ export function EoPackageBuilderScreen() {
                   </div>
 
                   <p className="eo-builder-destination-media__or">
-                    Atau unggah visual package milik EO sendiri.
+                    Pilihan galeri dapat digabung dengan foto milik EO sendiri.
                   </p>
                 </div>
               )}
 
-            {imageUrl ? (
-              <div className="eo-builder-img-preview-card">
-                <div className="eo-builder-img-preview-wrap">
-                  <img
-                    src={imageUrl}
-                    alt="Preview foto utama experience"
-                    className="eo-builder-img-preview"
-                  />
-                </div>
-                <div className="eo-builder-img-preview-actions">
-                  <label className="eo-builder-upload-btn-label eo-builder-upload-btn-label--secondary">
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      className="eo-builder-file-input"
-                      onChange={handleFileChange}
-                      aria-label="Ganti foto"
-                    />
-                    <span>Ganti foto</span>
-                  </label>
-                  <Button
-                    type="button"
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      setImageUrl(undefined);
-                      setImageError(undefined);
-                    }}
-                  >
-                    Hapus
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div
-                className="eo-builder-dropzone"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleDrop}
+            <div
+              className="eo-builder-dropzone"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop}
+            >
+              <svg
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="eo-builder-dropzone__icon"
+                aria-hidden="true"
               >
-                <svg
-                  width="36"
-                  height="36"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="eo-builder-dropzone__icon"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-                <p className="eo-builder-dropzone__text">
-                  Seret dan lepas foto ke sini, atau klik tombol di bawah
-                </p>
-                <label className="eo-builder-upload-btn-label">
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="eo-builder-file-input"
-                    onChange={handleFileChange}
-                    aria-label="Unggah foto"
-                  />
-                  <span>Unggah foto</span>
-                </label>
-                <span className="eo-builder-dropzone__hint">
-                  Gunakan JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.
-                </span>
-              </div>
-            )}
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              <p className="eo-builder-dropzone__text">
+                Seret dan lepas foto EO ke sini, atau klik tombol di bawah
+              </p>
+              <label className="eo-builder-upload-btn-label">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp"
+                  className="eo-builder-file-input"
+                  onChange={handleFileChange}
+                  aria-label="Tambah foto milik EO"
+                />
+                <span>Tambah foto milik EO</span>
+              </label>
+              <span className="eo-builder-dropzone__hint">
+                JPG, PNG, atau WebP · maksimal 5 MB per file.
+              </span>
+            </div>
+
+            <div
+              className="eo-builder-selected-media"
+              aria-label="Media terpilih"
+            >
+              <strong>Media terpilih ({imageUrls.length})</strong>
+              {imageUrls.length === 0 ? (
+                <p>Belum ada media yang dipilih.</p>
+              ) : (
+                <div className="eo-builder-selected-media__grid">
+                  {imageUrls.map((url, index) => (
+                    <div className="eo-builder-selected-media__item" key={url}>
+                      <img
+                        src={url}
+                        alt={`Media terpilih ${index + 1}`}
+                        className="eo-builder-img-preview"
+                      />
+                      {imageUrl === url && <span>Cover package</span>}
+                      <div>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setCoverUrl(url)}
+                        >
+                          Jadikan cover
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="danger"
+                          size="sm"
+                          onClick={() => {
+                            setImageUrls((current) =>
+                              current.filter((item) => item !== url),
+                            );
+                            if (coverUrl === url) setCoverUrl(undefined);
+                          }}
+                        >
+                          Hapus media
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {imageError && (
               <p
@@ -1234,11 +1283,15 @@ export function EoPackageBuilderScreen() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Formula MVP:{" "}
+                Harga package per orang:{" "}
                 <strong>
-                  Harga Traveler = Biaya Dasar Destinasi + Margin EO
+                  Biaya Dasar Destinasi +{" "}
+                  {guideSource === "DESTINATION"
+                    ? "Tarif Pemandu Lokal + "
+                    : ""}
+                  Margin EO
                 </strong>
-                .
+                . Biaya layanan traveler tetap terpisah saat checkout.
               </p>
             </div>
           </div>
@@ -1386,6 +1439,15 @@ export function EoPackageBuilderScreen() {
                   {selectedDestination.baseCostIncludes.join(", ")}
                 </div>
               )}
+
+            <div className="eo-pricing-row">
+              <span>Pemandu destinasi:</span>
+              <strong>
+                {guideSource === "DESTINATION"
+                  ? `Rp${localGuideFee.toLocaleString("id-ID")}`
+                  : "Tidak digunakan"}
+              </strong>
+            </div>
 
             <div className="eo-pricing-row">
               <span>Margin EO:</span>
@@ -1602,7 +1664,13 @@ export function EoPackageBuilderScreen() {
                 }}
               >
                 <span>Biaya Dasar: Rp{baseCost.toLocaleString("id-ID")}</span> •{" "}
-                <span>Margin EO: Rp{eoMargin.toLocaleString("id-ID")}</span>
+                <span>
+                  Pemandu lokal:{" "}
+                  {guideSource === "DESTINATION"
+                    ? `Rp${localGuideFee.toLocaleString("id-ID")}`
+                    : "Tidak digunakan"}
+                </span>{" "}
+                • <span>Margin EO: Rp{eoMargin.toLocaleString("id-ID")}</span>
               </div>
             </div>
           </div>

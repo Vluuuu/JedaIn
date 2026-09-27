@@ -189,8 +189,8 @@ describe("F3.3 — Mitra Destination Overview Quick Actions", () => {
 
     // Readiness section
     expect(view.textContent).toContain("Status Destinasi");
-    expect(view.textContent).toContain("Status Verifikasi");
-    expect(view.textContent).toContain("Terverifikasi Dasar");
+    expect(view.textContent).toContain("Status Destinasi");
+    expect(view.textContent).not.toContain("Terverifikasi Dasar");
 
     // Collaboration context
     expect(view.textContent).toContain("Kolaborasi EO");

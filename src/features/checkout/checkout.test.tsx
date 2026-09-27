@@ -84,7 +84,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(view.textContent).toContain(
       "Lereng Hijau Batu • Batu / Malang Raya",
     );
-    expect(view.textContent).toContain("Rp275.000 / orang");
+    expect(view.textContent).toContain("Rp300.000 / orang");
     expect(view.textContent).toContain("Dewo Traveler");
     expect(view.textContent).toContain("08123456789");
     expect(view.textContent).toContain("Lanjut ke Pembayaran");
@@ -182,8 +182,8 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
 
     const view = await renderCheckout("ses_sgd_1"); // remainingSlots = 6, unitPrice = 275000
 
-    expect(view.textContent).toContain("1 × Rp275.000");
-    expect(view.textContent).toContain("Rp275.000"); // total
+    expect(view.textContent).toContain("1 × Rp300.000");
+    expect(view.textContent).toContain("Rp300.000"); // subtotal
 
     const minusBtn = Array.from(view.querySelectorAll("button")).find(
       (b) => b.getAttribute("aria-label") === "Kurangi jumlah peserta",
@@ -200,8 +200,8 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       plusBtn.click();
     });
 
-    expect(view.textContent).toContain("2 × Rp275.000");
-    expect(view.textContent).toContain("Rp550.000");
+    expect(view.textContent).toContain("2 × Rp300.000");
+    expect(view.textContent).toContain("Rp600.000");
 
     // Check that remainingSlots snapshot is unchanged
     const adapter = new MockCheckoutAdapter();
@@ -217,15 +217,15 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
 
     const view = await renderCheckout("ses_sgd_1");
 
-    expect(view.textContent).toContain("Rp275.000 / orang");
+    expect(view.textContent).toContain("Rp300.000 / orang");
     expect(view.textContent).not.toContain("Mulai dari Rp275.000");
     expect(view.textContent).toContain("Rincian Pembayaran");
     expect(view.textContent).toContain("Subtotal paket");
-    expect(view.textContent).toContain("Rp275.000");
+    expect(view.textContent).toContain("Rp300.000");
     expect(view.textContent).toContain("Biaya layanan");
     expect(view.textContent).toContain("Rp7.500");
     expect(view.textContent).toContain("Total Pembayaran");
-    expect(view.textContent).toContain("Rp282.500");
+    expect(view.textContent).toContain("Rp307.500");
 
     // No forbidden terminology
     expect(view.textContent).not.toContain("service fee");
@@ -449,7 +449,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     await act(async () => {
       plusBtn.click();
     });
-    expect(view.textContent).toContain("4 × Rp275.000");
+    expect(view.textContent).toContain("4 × Rp300.000");
 
     // Step 2: Check policy acknowledgement
     const policyCb = view.querySelector<HTMLInputElement>(
@@ -484,7 +484,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     // - Warning notice visible
     expect(view.textContent).toContain("Slot yang tersedia berubah");
     // - Participant count STILL 4 (not silently changed to 2)
-    expect(view.textContent).toContain("4 × Rp275.000");
+    expect(view.textContent).toContain("4 × Rp300.000");
     // - CTA disabled because 4 > latest available 2
     expect(ctaBtn.disabled).toBe(true);
 
@@ -499,7 +499,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       minusBtn.click();
     });
 
-    expect(view.textContent).toContain("2 × Rp275.000");
+    expect(view.textContent).toContain("2 × Rp300.000");
     // CTA re-enabled for 2 participants!
     expect(ctaBtn.disabled).toBe(false);
   });
@@ -566,7 +566,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
           startAt: "2026-09-12T08:00:00+07:00",
           endAt: "2026-09-12T14:00:00+07:00",
           status: "OPEN",
-          pricePerPerson: 300000, // Updated price
+          pricePerPerson: 325000, // Updated price
           remainingSlots: 6,
         },
       ],
@@ -586,8 +586,8 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     // - Zero booking created so far
     expect(mockTransactionStore.getBookings().length).toBe(0);
     // - Display updated unit & total
-    expect(container.textContent).toContain("Rp300.000 / orang");
-    expect(container.textContent).toContain("Rp300.000");
+    expect(container.textContent).toContain("Rp325.000 / orang");
+    expect(container.textContent).toContain("Rp325.000");
 
     // Second submit click with reviewed price (300000)
     await act(async () => {
@@ -599,7 +599,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     expect(currentPath).toMatch(/^\/payment\/bk_/);
     expect(mockTransactionStore.getBookings().length).toBe(1);
     expect(mockTransactionStore.getBookings()[0].unitPricePerPerson).toBe(
-      300000,
+      325000,
     );
   });
 
@@ -1052,7 +1052,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       travelerId: "usr_idemp",
       sessionId: "ses_sgd_1",
       participantCount: 2,
-      expectedUnitPricePerPerson: 275000,
+      expectedUnitPricePerPerson: 300000,
       cancellationPolicyAcknowledged: true,
       idempotencyKey: "k_stable_123",
     };
@@ -1324,7 +1324,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       await act(async () => {
         plusBtn.click();
       });
-      expect(container.textContent).toContain("3 × Rp275.000");
+      expect(container.textContent).toContain("3 × Rp300.000");
 
       // Check policy
       const policyCheckbox = container.querySelector<HTMLInputElement>(
@@ -1394,7 +1394,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       });
 
       // Verify draft restoration
-      expect(newContainer.textContent).toContain("3 × Rp275.000");
+      expect(newContainer.textContent).toContain("3 × Rp300.000");
       const restoredPolicyCheckbox =
         newContainer.querySelector<HTMLInputElement>(
           "#cancellation-policy-ack",

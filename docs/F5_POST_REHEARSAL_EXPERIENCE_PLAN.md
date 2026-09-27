@@ -1,5 +1,9 @@
 # JedaIn — F5 Post-Rehearsal Experience Improvement Plan
 
+## Keputusan final setelah rehearsal (27 September 2026)
+
+OD-03 tarif pemandu destinasi kini **RESOLVED untuk prototype**: Mitra menetapkan `localGuideFeePerPerson` dalam Rp/orang. EO menambahkan tarif itu pada biaya dasar + margin bila memakai pemandu destinasi; dengan pemandu EO kontribusinya Rp0. Service fee Traveler Rp7.500/booking dan komisi 10% GMV tidak berubah. BASIC/PLUS tetap field internal lama dan hilang dari UI/filter. Sembilan informasi profil dapat dibuka sebagai checklist; Mitra dapat mengedit deskripsi, mengunggah foto destinasi/fasilitas tanpa batas jumlah, dan EO dapat memilih banyak foto plus cover. Insight hanya arahan kreatif simulasi yang terlihat. Pernyataan HOLD/rumus lama di bawah mencatat fase sebelum keputusan ini. 360° tetap **DEFERRED**.
+
 **Status:** IMPLEMENTED — HARD FEATURE FREEZE / REGRESSION-ONLY  
 **Date:** 27 September 2026  
 **Source:** Internal team review + direct live prototype usage after F4.3 and Final Live-User UX Cleanup  
@@ -217,7 +221,7 @@ Adding a separate guide fee raises unanswered questions:
 - Is the fee visible to Traveler or only internal to EO pricing?
 - Does it change commission basis?
 
-**Status: HOLD. No schema or pricing code until the team locks the rule.**
+**Status: RESOLVED (27 September 2026).** Tarif Rp/orang ditetapkan Mitra; dipakai hanya untuk `guideSource=DESTINATION`, tidak termasuk `baseCostPerPerson`, dan menjadi bagian harga package. Service fee/komisi tetap seperti sebelumnya.
 
 ---
 
@@ -931,7 +935,7 @@ During final rehearsal:
 | 360° destination view | **DEFERRED / ASSET-DEPENDENT** |
 | OD-01 Organizer identity disclosure | **OPEN** |
 | OD-02 Verification requires guide | **HOLD** |
-| OD-03 Separate destination guide fee | **HOLD** |
+| OD-03 Separate destination guide fee | **RESOLVED — Rp/orang, hanya untuk pemandu destinasi** |
 | Partner registration-page issue | **OPEN — needs exact problem statement** |
 
 **Planning conclusion:** F5.1–F5.4 are complete. Development returns to regression-only final rehearsal / hard feature freeze; broad feature expansion remains out of scope.

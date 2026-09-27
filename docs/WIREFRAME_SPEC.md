@@ -1,5 +1,9 @@
 # JedaIn — Wireframe Specification
 
+## Wireframe aktif: final Destination dan EO (27 September 2026)
+
+Overview Mitra: `Informasi profil lengkap` dengan disclosure `Lihat 9 informasi inti`; status destinasi biasa. Profil: editor `Tentang Destinasi`, `Tarif Pemandu Lokal` Rp/orang, `Galeri Destinasi`, dan `Foto Fasilitas`. EO Directory/Detail/Builder tidak menampilkan badge atau filter BASIC/PLUS. Builder: badge langkah 1–5 dan label tanpa angka; Step 2 memberi pilihan banyak media destinasi, upload foto EO, daftar media terpilih, dan `Jadikan cover`. Tombol insight `Pakai sebagai arahan` membuka ringkasan konteks dan mengaitkan referensi harga Step 4, tanpa mengubah title/summary authored. Step 4 menampilkan biaya dasar + tarif pemandu destinasi (bila dipakai) + margin EO. Traveler Hero menampilkan foto package aktual. Wireframe tier di bawah adalah baseline lama yang digantikan bagian ini. 360° ditunda.
+
 **Version:** 0.1  
 **Date:** 30 Agustus 2026  
 **Source of Truth:** [`../PRD.md`](../PRD.md)  
@@ -1511,7 +1515,7 @@ States:
 
 - pending field/manual verification
 - rejected + specific reason
-- BASIC verified
+- approved and active destination
 - guide readiness status
 
 CTA rejected:
@@ -1545,16 +1549,11 @@ Operational profile fields; edits to verified-critical fields may require re-rev
 
 ---
 
-# DP07 — Verification & Badge
+# DP07 — Verification Status
 
 **Priority:** Must
 
-Explain separately:
-
-- Verification Level: BASIC / PLUS
-- Guide Capability: ready / not ready
-
-Avoid representing them as one opaque backend state.
+Explain application approval and active destination status in plain language. Pemandu lokal wajib untuk destinasi aktif yang tersedia bagi EO; no tier badge is shown.
 
 ---
 
@@ -1702,9 +1701,7 @@ Sections:
 Decision:
 
 - Reject + reason
-- Setujui Verifikasi Destinasi (BASIC; pemandu lokal dan bukti wajib tersedia)
-
-PLUS status comes from later trust lifecycle, not initial application.
+- Setujui Verifikasi Destinasi (pemandu lokal dan bukti wajib tersedia; destinasi menjadi `ACTIVE`).
 
 ---
 
@@ -1909,8 +1906,7 @@ Backend enum tidak harus ditampilkan mentah kepada user.
 | REJECTED | Perlu Diperbaiki / Ditolak sesuai context |
 | APPROVED | Disetujui |
 | LIVE | Tayang |
-| BASIC | Terverifikasi Dasar |
-| PLUS | Terverifikasi Plus |
+| ACTIVE | Aktif sebagai Mitra Destinasi JedaIn |
 | CONCEPT_ONLY | Concept Only — UI needs explanatory tooltip |
 | CERTIFIED_GUIDE | Certified Guide |
 

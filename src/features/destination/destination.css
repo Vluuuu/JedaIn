@@ -415,6 +415,17 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.dest-readiness__completeness summary {
+  cursor: pointer;
+}
+
+.dest-readiness__completeness ul {
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-4);
+  font-weight: normal;
+  line-height: 1.6;
+}
+
 .dest-readiness__facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

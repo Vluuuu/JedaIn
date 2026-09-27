@@ -241,6 +241,6 @@ describe("Batch C3 — Latest Operational Update (P1-M04)", () => {
     expect(session.status).toBe("OPEN");
     expect(session.capacity).toBe(6);
     expect(session.remainingSlots).toBe(4);
-    expect(session.pricePerPerson).toBe(275000);
+    expect(session.pricePerPerson).toBe(300000);
   });
 });

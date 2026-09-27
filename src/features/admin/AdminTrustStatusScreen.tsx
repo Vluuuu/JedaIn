@@ -82,9 +82,7 @@ export function AdminTrustStatusScreen() {
       name: d.name,
       locationOrBusiness: d.locationLabel,
       verificationLevelOrGuideStatus:
-        d.verificationLevel === "PLUS"
-          ? "Terverifikasi Plus"
-          : "Terverifikasi Dasar",
+        "Destinasi aktif · pemandu lokal tersedia",
       reviewAverage: avgRating,
       reviewCount: reviews.length,
       complaintCount: complaints.length,

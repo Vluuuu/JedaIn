@@ -228,7 +228,10 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const badgeView = await renderComponent(
         createElement(DestinationVerificationBadgeScreen),
       );
-      expect(badgeView.textContent).toContain("Terverifikasi Dasar");
+      expect(badgeView.textContent).toContain(
+        "Destinasi ini telah melalui proses verifikasi JedaIn",
+      );
+      expect(badgeView.textContent).not.toContain("Terverifikasi Dasar");
       expect(badgeView.textContent).toContain(
         "Pemandu lokal adalah bagian dari syarat verifikasi destinasi",
       );
@@ -717,8 +720,10 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const view = await renderComponent(
         createElement(DestinationVerificationStatusScreen),
       );
-      expect(view.textContent).toContain("Destinasi Terverifikasi");
-      expect(view.textContent).toContain("Terverifikasi Dasar");
+      expect(view.textContent).toContain(
+        "aktif sebagai Mitra Destinasi JedaIn",
+      );
+      expect(view.textContent).not.toContain("Terverifikasi Dasar");
       expect(view.textContent).not.toContain("Guide Ready");
     });
 
@@ -944,7 +949,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).toContain("Lereng Hijau Batu");
       expect(view.textContent).toContain("Batu / Malang Raya");
       expect(view.textContent).toContain("Pokdarwis Lereng Hijau");
-      expect(view.textContent).toContain("Terverifikasi Dasar");
+      expect(view.textContent).not.toContain("Terverifikasi Dasar");
       expect(view.textContent).toContain(
         "Tersedia sebagai bagian dari standar verifikasi",
       );
@@ -956,7 +961,8 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).not.toContain("PAID");
       expect(view.textContent).not.toContain("sessionId");
       expect(view.textContent).not.toContain("packageId");
-      expect(view.textContent).toContain("9/9 informasi lengkap");
+      expect(view.textContent).toContain("Informasi profil lengkap");
+      expect(view.textContent).toContain("Lihat 9 informasi inti");
       expect(view.textContent).toContain("Rp125.000 / orang");
       expect(view.textContent).toContain("20 orang / sesi");
       expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");

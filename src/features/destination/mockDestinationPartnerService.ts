@@ -151,7 +151,10 @@ export const mockDestinationPartnerService = {
       };
     }
 
-    if (!Number.isFinite(localGuideFeePerPerson) || localGuideFeePerPerson < 0) {
+    if (
+      !Number.isFinite(localGuideFeePerPerson) ||
+      localGuideFeePerPerson < 0
+    ) {
       return {
         success: false,
         message: "Tarif pemandu lokal harus bernilai 0 atau lebih.",

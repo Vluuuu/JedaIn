@@ -59,7 +59,7 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
 
     expect(view.textContent).toContain("Pilih Jadwal");
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
-    expect(view.textContent).toContain("Mulai dari Rp275.000 / orang");
+    expect(view.textContent).toContain("Mulai dari Rp300.000 / orang");
     expect(view.textContent).toContain("Jadwal Keberangkatan");
     expect(view.textContent).toContain("Sabtu, 10 Oktober 2026");
     expect(view.textContent).toContain("Sabtu, 17 Oktober 2026");
@@ -297,7 +297,7 @@ describe("SessionSelectionScreen Tests & Contracts", () => {
     expect(radios[0].checked).toBe(true);
     expect(radios[1].checked).toBe(false);
     expect(ctaBtn.disabled).toBe(false);
-    expect(view.textContent).toContain("Rp275.000 / orang");
+    expect(view.textContent).toContain("Rp300.000 / orang");
 
     // Select second session (19 Sept)
     await act(async () => {

@@ -1,11 +1,11 @@
 # JedaIn — F5 Post-Rehearsal Experience Improvement Plan
 
-**Status:** IN PROGRESS — F5.1 + F5.2 + F5.3 MERGED / F5.4 NEXT  
+**Status:** IMPLEMENTED — F5.1–F5.4 MERGED / FINAL REHEARSAL NEXT  
 **Date:** 27 September 2026  
 **Source:** Internal team review + direct live prototype usage after F4.3 and Final Live-User UX Cleanup  
-**Current app feature baseline:** `8796334bb596c9ba0782fb202237023eace831bd`  
+**Current app feature baseline:** `115bdc265d589efb19bce0479d388a2e5fd2c0ce`  
 **Current main incl. synchronized docs:** pending this documentation sync  
-**Quality baseline:** 49 test suites / 692 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
+**Quality baseline:** 50 test suites / 696 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
 
 ---
 
@@ -659,7 +659,7 @@ Verification after merge:
 - production build PASS,
 - Cloudflare Pages preview PASS.
 
-F5.3 is closed. F5.4 Destination Media is the next implementation batch. 360° remains optional / deferred and must not block the gallery work.
+F5.3 is closed. F5.4 Destination Media is also merged. 360° remains deferred and is not part of the implemented F5 baseline.
 
 ---
 
@@ -727,6 +727,33 @@ Preview 360° — Prototype
 Do not present a normal static illustration as a real 360° capture.
 
 This item must not delay F5.1–F5.3.
+
+
+## 8.3 Implementation Status — MERGED
+
+F5.4 was implemented and merged through PR #102 on 27 September 2026.
+
+Delivered behavior:
+
+- canonical `DestinationRecord` now supports a small `mediaGallery` with explicit media provenance;
+- seeded galleries reuse existing JedaIn prototype-safe illustration assets and label them as `Visual prototype`;
+- Mitra Destination Profile shows the destination gallery with explicit copy that it is not documentation of current real-world conditions;
+- EO Destination Detail shows the same gallery as decision context;
+- EO Package Builder can select one destination visual as the package cover while preserving the existing EO-owned image upload path;
+- selecting media does not mutate destination verification, authority, or canonical destination content;
+- no production media backend, CDN, upload service, or cross-role media authority was added;
+- 360° was intentionally not implemented and remains deferred / asset-dependent.
+
+Verification after merge:
+
+- 50 test files / 696 tests PASS,
+- format check PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS,
+- Cloudflare Pages preview PASS.
+
+F5.4 is closed. The implemented F5 development sequence is complete; next action is final rehearsal and regression-only follow-up if evidence requires it.
 
 ---
 

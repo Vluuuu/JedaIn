@@ -267,7 +267,6 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
 
       const res = mockAdminDecisionService.approveDestinationVerification(
         "dest_app_coban_rondo",
-        true, // guideReady = true
         "Kawasan hutan pinus memenuhi standar kebersihan dan SOP pemandu.",
       );
 

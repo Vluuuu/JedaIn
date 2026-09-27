@@ -73,8 +73,8 @@ export function DestinationVerificationBadgeScreen() {
           <div className="admin-alert admin-alert--error">
             <strong>Data perlu ditinjau ulang.</strong>
             <p>
-              Destinasi aktif terverifikasi tidak boleh berstatus tanpa
-              pemandu lokal.
+              Destinasi aktif terverifikasi tidak boleh berstatus tanpa pemandu
+              lokal.
             </p>
           </div>
         )}

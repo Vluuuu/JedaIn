@@ -1131,3 +1131,101 @@
     flex-direction: column;
   }
 }
+
+
+/* Destination verification & gallery cleanup */
+.dest-verification-single {
+  display: block;
+}
+
+.dest-verification-single__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.dest-verification-single__eyebrow {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dest-verification-single__heading h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-heading-md);
+}
+
+.dest-verification-single__description {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.55;
+}
+
+.dest-verification-single__note {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: 1.5;
+}
+
+.dest-media-gallery__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.dest-media-gallery__upload-hint,
+.dest-media-gallery__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.dest-media-gallery__error {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-size: var(--font-size-caption);
+}
+
+.dest-media-gallery__item figcaption .ui-button {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}
+
+.dest-guide-requirement {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-brand-primary-soft);
+  border: 1px solid var(--color-forest-200);
+  border-radius: var(--radius-lg);
+}
+
+.dest-guide-requirement strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body-md);
+}
+
+.dest-guide-requirement p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.5;
+}
+
+@media (max-width: 48rem) {
+  .dest-verification-single__heading {
+    flex-direction: column;
+  }
+}

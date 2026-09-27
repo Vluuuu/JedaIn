@@ -57,15 +57,17 @@ export const mockDestinationPartnerService = {
     return context?.destination;
   },
 
-  addGalleryMedia(input: {
-    url: string;
-    label: string;
-  }): { success: boolean; message?: string; media?: DestinationMediaItem } {
+  addGalleryMedia(input: { url: string; label: string }): {
+    success: boolean;
+    message?: string;
+    media?: DestinationMediaItem;
+  } {
     const context = resolveAuthenticatedDestinationContext();
     if (!context) {
       return {
         success: false,
-        message: "Akses galeri hanya tersedia untuk Mitra Destinasi terverifikasi.",
+        message:
+          "Akses galeri hanya tersedia untuk Mitra Destinasi terverifikasi.",
       };
     }
 
@@ -92,14 +94,13 @@ export const mockDestinationPartnerService = {
     return { success: true, media };
   },
 
-  removeGalleryMedia(
-    mediaId: string,
-  ): { success: boolean; message?: string } {
+  removeGalleryMedia(mediaId: string): { success: boolean; message?: string } {
     const context = resolveAuthenticatedDestinationContext();
     if (!context) {
       return {
         success: false,
-        message: "Akses galeri hanya tersedia untuk Mitra Destinasi terverifikasi.",
+        message:
+          "Akses galeri hanya tersedia untuk Mitra Destinasi terverifikasi.",
       };
     }
 

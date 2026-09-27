@@ -76,6 +76,30 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     expect(view.textContent).toContain("Pilih Jadwal");
   });
 
+  it("F5.1 buyer hierarchy keeps primary buyer information visible and secondary detail collapsed", async () => {
+    const view = await renderPackageDetail("slow_green_day");
+
+    expect(view.textContent).toContain("Detail Experience");
+    expect(view.textContent).toContain("Highlight Pengalaman");
+    expect(view.textContent).toContain("Jadwal Terdekat");
+    expect(view.textContent).toContain("★ 4.8 · contoh prototype");
+
+    const disclosures = Array.from(
+      view.querySelectorAll<HTMLDetailsElement>(
+        "details.package-detail-disclosure",
+      ),
+    );
+    expect(disclosures).toHaveLength(6);
+    expect(disclosures.every((detail) => detail.open === false)).toBe(true);
+
+    expect(
+      view.querySelector(".package-detail-secondary")?.textContent,
+    ).toContain("Penyelenggara & Pemandu");
+    expect(
+      view.querySelector(".package-detail-secondary")?.textContent,
+    ).toContain("Kebijakan Pembatalan & Refund");
+  });
+
   it.each([
     "slow_green_day",
     "mindful_morning",

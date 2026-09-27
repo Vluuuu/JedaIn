@@ -1,10 +1,10 @@
 # JedaIn — F5 Post-Rehearsal Experience Improvement Plan
 
-**Status:** IMPLEMENTED — F5.1–F5.4 MERGED / FINAL REHEARSAL NEXT  
+**Status:** IMPLEMENTED — HARD FEATURE FREEZE / REGRESSION-ONLY  
 **Date:** 27 September 2026  
 **Source:** Internal team review + direct live prototype usage after F4.3 and Final Live-User UX Cleanup  
-**Current app feature baseline:** `115bdc265d589efb19bce0479d388a2e5fd2c0ce`  
-**Current main incl. synchronized docs:** pending this documentation sync  
+**Current app feature baseline:** `0e9cc960d172ddd2ebd691b79faa9df2d20ebe4b`  
+**Current main incl. destination governance cleanup:** PR #105 + PR #106 merged  
 **Quality baseline:** 50 test suites / 696 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
 
 ---
@@ -724,7 +724,7 @@ Verification after merge:
 - production build PASS,
 - Cloudflare Pages preview PASS.
 
-F5.4 is closed. The implemented F5 development sequence is complete; next action is final rehearsal and regression-only follow-up if evidence requires it.
+F5.4 is closed. Final rehearsal subsequently locked destination verification into one concept: local guide readiness is mandatory inside verification, not a second badge. PR #105 and PR #106 are merged. Development is now hard feature freeze / regression-only.
 
 ---
 

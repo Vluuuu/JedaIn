@@ -1,11 +1,11 @@
 # JedaIn — F5 Post-Rehearsal Experience Improvement Plan
 
-**Status:** IN PROGRESS — F5.1 + F5.2 MERGED / F5.3 NEXT  
+**Status:** IN PROGRESS — F5.1 + F5.2 + F5.3 MERGED / F5.4 NEXT  
 **Date:** 27 September 2026  
 **Source:** Internal team review + direct live prototype usage after F4.3 and Final Live-User UX Cleanup  
-**Current app feature baseline:** `bffa2262cffb5836579ac0278666e79f5d08af4a`  
+**Current app feature baseline:** `8796334bb596c9ba0782fb202237023eace831bd`  
 **Current main incl. synchronized docs:** pending this documentation sync  
-**Quality baseline:** 48 test suites / 688 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
+**Quality baseline:** 49 test suites / 692 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
 
 ---
 
@@ -558,7 +558,7 @@ Verification after merge:
 - production build PASS,
 - Cloudflare Pages preview PASS.
 
-F5.2 is closed. F5.3 is the next implementation batch.
+F5.2 is closed. F5.3 is also merged; F5.4 is the next implementation batch.
 
 ---
 
@@ -630,6 +630,36 @@ Do not invent new statistical precision unless data exists in the prototype fixt
 - customer-price formula remains current canonical formula until OD-03 is resolved;
 - no change to Rp7.500 service fee;
 - no change to 10% GMV commission.
+
+## 7.1 Implementation Status — MERGED
+
+F5.3 was implemented and merged through PR #101 on 27 September 2026.
+
+Delivered behavior:
+
+- EO Package Builder Step 4 now provides an optional `Referensi Harga dari Sinyal Traveler` disclosure.
+- The reference reads the existing canonical simulated budget distribution from `mockInsightStore`; no new market data or statistical precision is fabricated.
+- The current canonical all-time prototype distribution is shown as:
+  - Di bawah Rp200.000 — 22% / 224 respons simulasi,
+  - Rp200.000–Rp300.000 — 48% / 490 respons simulasi,
+  - Rp300.000–Rp500.000 — 21% / 214 respons simulasi,
+  - Di atas Rp500.000 — 9% / 92 respons simulasi.
+- The most-selected budget range is highlighted only as a directional prototype signal.
+- When a Demand Insight is selected, its existing `preferredBudgetRange` is shown as context; the Builder does not generate a new “optimal” price.
+- Copy explicitly states `Data simulasi prototype`, `respons simulasi`, and that the reference is optional.
+- Opening or reading the reference never mutates EO Margin or Customer Price automatically.
+- Canonical pricing remains `Destination Base Cost + EO Margin`; no guide fee, Traveler service-fee change, or commission change was introduced.
+
+Verification after merge:
+
+- 49 test files / 692 tests PASS,
+- format check PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS,
+- Cloudflare Pages preview PASS.
+
+F5.3 is closed. F5.4 Destination Media is the next implementation batch. 360° remains optional / deferred and must not block the gallery work.
 
 ---
 

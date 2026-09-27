@@ -27,16 +27,17 @@ Bagian ini adalah urutan presentasi yang direkomendasikan ketika waktu juri terb
 1. Buka `/` dan tunjukkan opening proposition:
    - **Temukan jeda yang benar-benar kamu butuhkan**
    - supporting copy tentang wellness experience terkurasi + destinasi lokal terverifikasi
-   - CTA **Mulai Cari Jedamu**
-2. Lanjut ke `/login` melalui CTA tersebut.
+   - primary interaction **Geser ke atas untuk memulai**
+   - top-right **Masuk** tetap tersedia sebagai jalur login langsung
+2. Gunakan swipe-up untuk menuju `/login`.
 3. Klik **Lanjut sebagai Tamu**.
 4. Tunjukkan Consent → Quiz → Recommendation.
-5. Masuk ke satu Package Detail dan tunjukkan:
+5. Masuk ke satu Package Detail dan tunjukkan buyer-first hierarchy:
+   - konteks **Detail Experience**,
    - alasan pengalaman relevan,
-   - trust/verification context,
-   - meeting point/access jika tersedia,
-   - upcoming session,
-   - harga.
+   - trust/verification context + provenance rating yang jujur,
+   - harga dan upcoming session sebagai informasi utama,
+   - detail sekunder tetap tersedia melalui progressive disclosure.
 6. Buka Checkout dan tunjukkan bahwa:
    - quantity mengubah subtotal,
    - **Service Fee Rp7.500** tampil transparan,
@@ -50,10 +51,13 @@ Bagian ini adalah urutan presentasi yang direkomendasikan ketika waktu juri terb
 3. Tunjukkan **Demand Insights**.
 4. Jelaskan bahwa insight adalah **data simulasi/directional untuk prototype**, bukan market validation atau jaminan penjualan.
 5. Buka satu destinasi/package dan tunjukkan:
+   - filter lokasi + dedicated Destination Detail sebagai decision page,
    - kapasitas umum destinasi,
    - cost scope,
    - guide context,
+   - gallery visual dengan provenance prototype yang jelas,
    - operational summary.
+6. Di Package Builder, tunjukkan `Ringkasan Pengalaman`, optional `Referensi Harga dari Sinyal Traveler`, dan pilihan visual destinasi / upload visual EO. Tegaskan bahwa referensi harga tidak mengubah Margin EO otomatis.
 
 ### C. Mitra Destinasi — kesiapan operasional
 
@@ -167,7 +171,7 @@ Tanpa perlu mengetik kredensial atau registrasi manual, sistem menyediakan tombo
 4. **Verifikasi Propagasi Ulasan:**
    - Buka `/partner/destination/reviews` → Ulasan destinasi masuk ke mitra destinasi Lereng Hijau Batu.
    - Buka `/partner/eo/reviews` → Ulasan kepemanduan masuk ke profil EO Jeda Alam Nusantara.
-   - Buka `/admin/trust` → Skor rating dan jumlah ulasan mitra terakumulasi secara objektif.
+   - Buka `/admin/trust` → Skor rating dan jumlah ulasan mitra terakumulasi dari review pascatrip yang tercatat.
 
 ---
 
@@ -186,7 +190,7 @@ Untuk mengulang seluruh simulasi dari awal tanpa meninggalkan sampah data:
 - **OTP:** Kode demo `111111` adalah shortcut prototype; tidak ada SMS production.
 - **Demand Insight:** Data bersifat simulated/directional untuk mendemokan workflow EO; bukan human/market validation dan bukan proyeksi penjualan.
 - **Penyelesaian Trip:** Disediakan tombol simulasi eksplisit (*"Prototype Demo: Simulasikan Trip Selesai"*) karena automasi batch job kronologis di luar cakupan prototype.
-- **Media:** Renderer mendukung foto, tetapi beberapa surface masih memakai fallback illustration bila asset fotografi aktual belum tersedia.
+- **Media:** Destination gallery dan package visual choice tersedia dengan provenance yang jelas. Asset fotografi aktual tetap content dependency; visual prototype/fallback tidak boleh disebut foto aktual. 360° belum diimplementasikan.
 - **Session Traveler:** State onboarding/quiz disimpan sementara via `sessionStorage` agar refresh tidak memaksa pengulangan demo; ini bukan production auth.
 - **Performance:** Optimasi bundle lanjutan bersifat optional selama app tetap responsif pada perangkat demo.
 
@@ -214,5 +218,5 @@ Sebelum masuk ruang demo:
 4. Logout lalu refresh dan pastikan session lama tidak muncul kembali.
 5. Jalankan **Reset Demo State** sebelum rehearsal terakhir.
 
-Verified implementation baseline untuk behavior ini:
-`4208ddd` — D1 + D2 live verified, 39 suites / 607 tests.
+Verified implementation baseline untuk rehearsal saat ini:
+`115bdc265d589efb19bce0479d388a2e5fd2c0ce` — F5.1–F5.4 merged, 50 test files / 696 tests PASS; format/lint/typecheck/build PASS.

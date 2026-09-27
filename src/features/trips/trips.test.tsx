@@ -238,7 +238,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
 
     expect(container.textContent).toContain("Detail Perjalanan");
     expect(container.textContent).toContain(
-      "Area titik kumpul Lereng Hijau Batu",
+      "Area keberangkatan Alun-Alun Kota Batu",
     );
 
     const disclosure = container.querySelector<HTMLDetailsElement>(
@@ -677,7 +677,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       expect(container.textContent).toContain("Termasuk dalam Paket");
       expect(container.textContent).toContain("Tidak Termasuk");
       expect(container.textContent).toContain(
-        "Transportasi menuju titik kumpul awal",
+        "Transportasi peserta menuju titik kumpul awal",
       );
       expect(container.textContent).toContain("Sebelum Berangkat");
       expect(container.textContent).toContain(
@@ -1122,7 +1122,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       // Meeting point rendered from source fixture
       expect(container.textContent).toContain("Titik Kumpul");
       expect(container.textContent).toContain(
-        "Area titik kumpul Lereng Hijau Batu",
+        "Area keberangkatan Alun-Alun Kota Batu",
       );
 
       // Departure time & location rendered in brief
@@ -1154,10 +1154,10 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
 
       expect(container.textContent).toContain("Catatan Akses Lokasi");
       expect(container.textContent).toContain(
-        "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
+        "Area keberangkatan mudah diakses kendaraan pribadi di pusat Kota Batu.",
       );
       expect(container.textContent).toContain(
-        "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
+        "Titik kumpul berada di sisi timur Alun-Alun Kota Batu dengan penanda JedaIn.",
       );
     });
 

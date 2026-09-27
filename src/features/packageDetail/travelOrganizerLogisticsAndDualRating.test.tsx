@@ -597,4 +597,96 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
     );
     expect(view.textContent).not.toContain("Transportasi menuju lokasi");
   });
+
+  it("12. slow_green_day meeting point is located in Batu outside destination with consistent round-trip transport and itinerary", async () => {
+    // 1. Both sources must have the same synchronized data
+    const pkgDetail = MOCK_PACKAGE_DETAILS["slow_green_day"];
+    const eoPkg = mockEoPackageStore.getPackageById("slow_green_day")!;
+
+    expect(pkgDetail).toBeDefined();
+    expect(eoPkg).toBeDefined();
+
+    // 1. meetingPointLabel is not Lereng Hijau Batu / destination gate
+    expect(pkgDetail.meetingPointLabel).toBe(
+      "Area keberangkatan Alun-Alun Kota Batu",
+    );
+    expect(eoPkg.meetingPointLabel).toBe(
+      "Area keberangkatan Alun-Alun Kota Batu",
+    );
+    expect(pkgDetail.meetingPointLabel).not.toContain("Lereng Hijau");
+    expect(eoPkg.meetingPointLabel).not.toContain("Lereng Hijau");
+
+    // 2. outbound transport moves from meeting point to destination
+    expect(pkgDetail.outboundTransport).toBe(
+      "Minibus Travel Organizer dari titik kumpul Batu menuju Lereng Hijau Batu.",
+    );
+    expect(eoPkg.outboundTransport).toBe(
+      "Minibus Travel Organizer dari titik kumpul Batu menuju Lereng Hijau Batu.",
+    );
+
+    // 3. return transport returns to meeting point
+    expect(pkgDetail.returnTransport).toBe(
+      "Minibus kembali ke titik kumpul Batu setelah seluruh kegiatan selesai.",
+    );
+    expect(eoPkg.returnTransport).toBe(
+      "Minibus kembali ke titik kumpul Batu setelah seluruh kegiatan selesai.",
+    );
+
+    // 4. includedItems contains round-trip transport
+    expect(pkgDetail.includedItems).toContain(
+      "Transportasi PP dari titik kumpul",
+    );
+    expect(eoPkg.includedItems).toContain("Transportasi PP dari titik kumpul");
+
+    // 5. excludedItems states participant transport to the initial meeting point
+    expect(pkgDetail.excludedItems).toContain(
+      "Transportasi peserta menuju titik kumpul awal",
+    );
+    expect(eoPkg.excludedItems).toContain(
+      "Transportasi peserta menuju titik kumpul awal",
+    );
+
+    // 6. First itinerary item is consistent with the journey flow
+    expect(pkgDetail.itinerary[0].title).toBe(
+      "Pagi - Berkumpul & Perjalanan Santai",
+    );
+    expect(pkgDetail.itinerary[0].description).toContain(
+      "Berkumpul di titik kumpul Alun-Alun Kota Batu",
+    );
+    expect(pkgDetail.itinerary[0].description).toContain(
+      "perjalanan bersama menuju Lereng Hijau Batu",
+    );
+    expect(eoPkg.itinerary[0].description).toContain(
+      "Berkumpul di titik kumpul Alun-Alun Kota Batu",
+    );
+
+    // 7. accessNotes does not say meeting point is at destination gate
+    expect(pkgDetail.accessNotes?.join(" ")).not.toContain(
+      "gerbang masuk kawasan lereng",
+    );
+    expect(eoPkg.accessNotes?.join(" ")).not.toContain(
+      "gerbang masuk kawasan lereng",
+    );
+
+    // 8. Traveler Package Detail render test
+    const view = await renderRoute(
+      createElement(PackageDetailScreen),
+      "/packages/:packageId",
+      "/packages/slow_green_day",
+    );
+
+    expect(view.textContent).toContain(
+      "Area keberangkatan Alun-Alun Kota Batu",
+    );
+    expect(view.textContent).toContain(
+      "Minibus Travel Organizer dari titik kumpul Batu menuju Lereng Hijau Batu.",
+    );
+    expect(view.textContent).toContain(
+      "Minibus kembali ke titik kumpul Batu setelah seluruh kegiatan selesai.",
+    );
+    expect(view.textContent).toContain("Transportasi PP dari titik kumpul");
+    expect(view.textContent).toContain(
+      "Transportasi peserta menuju titik kumpul awal",
+    );
+  });
 });

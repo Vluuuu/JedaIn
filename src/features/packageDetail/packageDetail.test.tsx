@@ -256,7 +256,9 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
   it("12. default fixtures introduce no transport claim", async () => {
     const view = await renderPackageDetail("slow_green_day");
     expect(view.textContent).toContain("Belum Termasuk");
-    expect(view.textContent).toContain("Transportasi menuju titik kumpul awal");
+    expect(view.textContent).toContain(
+      "Transportasi peserta menuju titik kumpul awal",
+    );
     expect(view.textContent).not.toContain("Antar jemput gratis");
     expect(view.textContent).not.toContain("Transportasi termasuk");
   });

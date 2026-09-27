@@ -23,7 +23,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         order: 1,
         title: "Pagi - Berkumpul & Perjalanan Santai",
         description:
-          "Tiba di lokasi titik kumpul Lereng Hijau Batu, perkenalan hangat dengan pemandu lokal, dan menikmati teh sambutan hangat.",
+          "Berkumpul di titik kumpul Alun-Alun Kota Batu, perkenalan hangat dengan tim Travel Organizer, dan perjalanan bersama menuju Lereng Hijau Batu.",
         timeOfDayLabel: "Pagi",
         durationLabel: "1 jam",
       },
@@ -52,7 +52,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Santap siang menu pedesaan",
     ],
     excludedItems: [
-      "Transportasi menuju titik kumpul awal",
+      "Transportasi peserta menuju titik kumpul awal",
       "Pengeluaran dan belanja pribadi di luar paket",
       "Perlengkapan cuaca tambahan (jas hujan/jaket pribadi)",
     ],
@@ -62,16 +62,16 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Aktivitas berjalan santai dengan intensitas ringan dan jalur relatif datar.",
       "Ikuti arahan pemandu demi kenyamanan dan kelestarian perkebunan.",
     ],
-    meetingPointLabel: "Area titik kumpul Lereng Hijau Batu",
+    meetingPointLabel: "Area keberangkatan Alun-Alun Kota Batu",
     departureTimeLabel:
-      "Peserta berkumpul 30 menit sebelum jadwal sesi dimulai",
+      "Peserta berkumpul pukul 07.00 WIB sebelum keberangkatan.",
     outboundTransport:
-      "Transportasi minibus Travel Organizer dari titik kumpul menuju kawasan lereng",
+      "Minibus Travel Organizer dari titik kumpul Batu menuju Lereng Hijau Batu.",
     returnTransport:
-      "Kembali ke titik kumpul dengan kendaraan yang sama setelah kegiatan selesai",
+      "Minibus kembali ke titik kumpul Batu setelah seluruh kegiatan selesai.",
     accessNotes: [
-      "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
-      "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
+      "Area keberangkatan mudah diakses kendaraan pribadi di pusat Kota Batu.",
+      "Titik kumpul berada di sisi timur Alun-Alun Kota Batu dengan penanda JedaIn.",
     ],
     cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {

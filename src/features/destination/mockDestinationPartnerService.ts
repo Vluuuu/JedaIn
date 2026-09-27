@@ -57,9 +57,11 @@ export const mockDestinationPartnerService = {
     return context?.destination;
   },
 
-  addGalleryMedia(
-    media: DestinationMediaItem,
-  ): { success: boolean; destination?: DestinationRecord; message?: string } {
+  addGalleryMedia(media: DestinationMediaItem): {
+    success: boolean;
+    destination?: DestinationRecord;
+    message?: string;
+  } {
     const context = resolveAuthenticatedDestinationContext();
     if (!context) {
       return {
@@ -75,9 +77,11 @@ export const mockDestinationPartnerService = {
     );
   },
 
-  removeGalleryMedia(
-    mediaId: string,
-  ): { success: boolean; destination?: DestinationRecord; message?: string } {
+  removeGalleryMedia(mediaId: string): {
+    success: boolean;
+    destination?: DestinationRecord;
+    message?: string;
+  } {
     const context = resolveAuthenticatedDestinationContext();
     if (!context) {
       return {

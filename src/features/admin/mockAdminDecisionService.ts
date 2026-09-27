@@ -110,7 +110,6 @@ export const mockAdminDecisionService = {
   // 2. Destination Verification Decisions
   approveDestinationVerification(
     applicationId: string,
-    guideReady: boolean,
     reason: string,
   ): { success: boolean; message?: string } {
     const admin = adminSessionStore.get();
@@ -137,10 +136,8 @@ export const mockAdminDecisionService = {
       };
     }
 
-    const res = mockDestinationVerificationStore.approveApplication(
-      applicationId,
-      guideReady,
-    );
+    const res =
+      mockDestinationVerificationStore.approveApplication(applicationId);
     if (!res.success) {
       return {
         success: false,
@@ -160,7 +157,7 @@ export const mockAdminDecisionService = {
       metadata: {
         destinationName: app.name,
         verificationLevel: "BASIC",
-        guideReady,
+        localGuideRequired: true,
       },
     });
 

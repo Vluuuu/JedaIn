@@ -196,7 +196,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       );
     });
 
-    it("11 & 12 & 13. Starting Package Builder from Insight keeps insightId but does NOT prefill shortSummary with unmetDemandDescription", async () => {
+    it("11 & 12 & 13. Starting Package Builder from Insight applies editable source-backed draft without copying unmet-demand claims", async () => {
       partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
       const view = await renderComponent(
@@ -225,16 +225,20 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       );
       expect(view.textContent).toContain("Dipakai sebagai arahan ✓");
 
-      // Title concept hint may be present
+      // Source-backed starting draft is applied from the selected insight.
       const titleInput = view.querySelector<HTMLInputElement>(
         'input[placeholder*="Sehari Pelan di Lereng Hijau"]',
       )!;
-      expect(titleInput.value).toBe("");
+      expect(titleInput.value).toBe(
+        "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
+      );
 
-      // Short summary / value proposition must NOT be auto-filled with the unmet demand description
+      // Summary may be auto-filled, but must not copy the simulated unmet-demand claim.
       const summaryInput =
         view.querySelector<HTMLTextAreaElement>("#package-summary")!;
-      expect(summaryInput.value).toBe("");
+      expect(summaryInput.value).toContain(
+        "Experience untuk traveler yang mencari",
+      );
       expect(summaryInput.value).not.toContain(
         "Traveler dari Malang & Surabaya mencari",
       );
@@ -260,7 +264,9 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       expect(dialog.textContent).not.toContain(
         "Traveler dari Malang & Surabaya mencari",
       );
-      expect(dialog.textContent).toContain("Belum ada ringkasan pengalaman.");
+      expect(dialog.textContent).toContain(
+        "Experience untuk traveler yang mencari",
+      );
     });
 
     it("14. Editing existing draft preserves its authored shortSummary", async () => {

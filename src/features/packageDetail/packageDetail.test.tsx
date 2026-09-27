@@ -115,7 +115,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
       bookingId: "bk_org_rating_1",
       travelerId: "usr_org_rating_1",
       targetType: "EO_GUIDE",
-      targetRef: "org_lereng_guide",
+      targetRef: "org_lereng_batu",
       rating: 5,
       comment: "Pendampingan jelas.",
     });
@@ -123,7 +123,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
       bookingId: "bk_org_rating_2",
       travelerId: "usr_org_rating_2",
       targetType: "EO_GUIDE",
-      targetRef: "org_lereng_guide",
+      targetRef: "org_lereng_batu",
       rating: 4,
       comment: "Alur trip nyaman.",
     });
@@ -148,8 +148,12 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
       `Ilustrasi suasana ${view.querySelector("h1")!.textContent}`,
     );
     expect(image?.getAttribute("fetchpriority")).toBe("high");
-    expect(view.querySelector(".package-detail-hero__badges")).toBeNull();
-    expect(view.textContent).toContain("Terverifikasi");
+    const trustBadge = view.querySelector(
+      ".package-detail-hero__badges .ui-badge--success",
+    );
+    expect(trustBadge).not.toBeNull();
+    expect(trustBadge?.textContent).toContain("✓");
+    expect(trustBadge?.textContent).toContain("Terverifikasi");
   });
 
   it("2. unknown packageId renders NOT_FOUND state", async () => {

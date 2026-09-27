@@ -18,8 +18,7 @@ export function EoProfileScreen() {
             Profil Mitra Event Organizer
           </h1>
           <p className="eo-page-subtitle">
-            Informasi entitas bisnis, status pemandu, dan detail operasional
-            kemitraan.
+            Informasi entitas bisnis dan detail operasional kemitraan.
           </p>
         </div>
       </header>
@@ -71,7 +70,7 @@ export function EoProfileScreen() {
             <small
               style={{ color: "var(--color-text-muted)", display: "block" }}
             >
-              Status Kategori Pemandu:
+              Kapabilitas Pemanduan EO:
             </small>
             <Badge
               tone={
@@ -81,8 +80,8 @@ export function EoProfileScreen() {
               }
             >
               {partner?.guideStatus === "CERTIFIED_GUIDE"
-                ? "Certified Guide (Lisensi Resmi)"
-                : "Concept-Only (Guide Ready Required)"}
+                ? "Memiliki sertifikasi pemanduan"
+                : "Tidak menggunakan sertifikasi pemanduan EO"}
             </Badge>
           </div>
         </div>

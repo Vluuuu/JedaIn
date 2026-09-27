@@ -1,11 +1,11 @@
 # JedaIn — F5 Post-Rehearsal Experience Improvement Plan
 
-**Status:** PLANNING / EVIDENCE-BACKED DEVELOPMENT REOPEN  
-**Date:** 26 September 2026  
+**Status:** IN PROGRESS — F5.1 MERGED / F5.2 NEXT  
+**Date:** 27 September 2026  
 **Source:** Internal team review + direct live prototype usage after F4.3 and Final Live-User UX Cleanup  
-**Current app feature baseline:** `d0f3da9914f2fa5ae5a025faf66a029f08654c7c`  
-**Current main incl. synchronized docs:** `1ed7f70317aa2a0861d8babc769268c77b06e9cd`  
-**Quality baseline:** 48 test suites / 679 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
+**Current app feature baseline:** `f0fcad9eee3b95714f63462a64bde3697884ff57`  
+**Current main incl. synchronized docs:** pending this documentation sync  
+**Quality baseline:** 48 test suites / 683 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
 
 ---
 
@@ -371,6 +371,36 @@ Do not change:
 - session selection,
 - organizer authority,
 - destination trust model.
+
+---
+
+## 5.1.4 Implementation Status — MERGED
+
+F5.1 was implemented and merged through PR #97 on 27 September 2026.
+
+Delivered behavior:
+
+- Package Detail now has explicit `Detail Experience` context and a buyer-first hierarchy.
+- Package identity, truthful trust/rating provenance, price, highlights, and upcoming sessions remain primary.
+- Secondary destination, organizer, itinerary, inclusion/exclusion, preparation/access, cancellation, and review information use progressive disclosure.
+- Organizer rating is derived only from actual EO/Guide post-trip review records; zero-review state remains truthful.
+- Organizer identity remains secondary; OD-01 (named vs anonymous policy) is still open and was not silently resolved.
+- Trip Detail now uses `Detail Perjalanan` / `Perjalanan Selesai` context.
+- Date and meeting point remain primary trip facts.
+- Booking/payment detail, EO contact, access, activities, itinerary, inclusions/exclusions, safety, and cancellation are grouped under one `Lihat Detail Perjalanan` disclosure.
+- Completed trips prioritize separate Destination and EO/Guide review actions before secondary trip details.
+- Guest Demo review, review eligibility, booking/payment semantics, pricing, session rules, and destination governance remain unchanged.
+
+Verification after merge:
+
+- 48 test files / 683 tests PASS,
+- format check PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS,
+- Cloudflare Pages preview PASS.
+
+F5.1 is closed. F5.2 is the next implementation batch.
 
 ---
 

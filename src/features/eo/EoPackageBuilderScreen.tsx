@@ -1225,9 +1225,7 @@ export function EoPackageBuilderScreen() {
                   bahan pertimbangan.
                 </span>
               </span>
-              <span aria-hidden="true">
-                {showPricingReference ? "−" : "+"}
-              </span>
+              <span aria-hidden="true">{showPricingReference ? "−" : "+"}</span>
             </button>
 
             {showPricingReference && (
@@ -1272,10 +1270,7 @@ export function EoPackageBuilderScreen() {
                   aria-label="Distribusi budget respons simulasi"
                 >
                   {pricingBudgetDistribution.map((budget) => (
-                    <div
-                      key={budget.id}
-                      className="eo-pricing-reference__row"
-                    >
+                    <div key={budget.id} className="eo-pricing-reference__row">
                       <div className="eo-pricing-reference__row-copy">
                         <span>{budget.label}</span>
                         <strong>{budget.percentage}%</strong>

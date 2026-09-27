@@ -106,10 +106,9 @@ describe("F3.3 — Mitra Destination Overview Quick Actions", () => {
   });
 
   it("4. Quick Actions remain present and functional when upcoming-session and review data is empty", async () => {
-    const approval =
-      mockDestinationVerificationStore.approveApplication(
-        "dest_app_coban_rondo",
-      );
+    const approval = mockDestinationVerificationStore.approveApplication(
+      "dest_app_coban_rondo",
+    );
     expect(approval.success).toBe(true);
     partnerSessionStore.setPartner({
       id: "dest_partner_coban_rondo",

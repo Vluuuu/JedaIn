@@ -84,7 +84,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     expect(view.textContent).toContain("Detail Experience");
     expect(view.textContent).toContain("Highlight Pengalaman");
     expect(view.textContent).toContain("Jadwal Terdekat");
-    expect(view.textContent).toContain("★ 4.8 · contoh prototype");
+    expect(view.textContent).toContain("4.8 (contoh)");
 
     const disclosures = Array.from(
       view.querySelectorAll<HTMLDetailsElement>(

@@ -1,11 +1,11 @@
 # JedaIn — F5 Post-Rehearsal Experience Improvement Plan
 
-**Status:** IN PROGRESS — F5.1 MERGED / F5.2 NEXT  
+**Status:** IN PROGRESS — F5.1 + F5.2 MERGED / F5.3 NEXT  
 **Date:** 27 September 2026  
 **Source:** Internal team review + direct live prototype usage after F4.3 and Final Live-User UX Cleanup  
-**Current app feature baseline:** `f0fcad9eee3b95714f63462a64bde3697884ff57`  
+**Current app feature baseline:** `bffa2262cffb5836579ac0278666e79f5d08af4a`  
 **Current main incl. synchronized docs:** pending this documentation sync  
-**Quality baseline:** 48 test suites / 683 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
+**Quality baseline:** 48 test suites / 688 tests PASS; format/lint/typecheck/build PASS; Cloudflare Pages PASS
 
 ---
 
@@ -529,6 +529,36 @@ Tentang Destinasi
 ```
 
 No destination data needs to be deleted.
+
+---
+
+## 6.6 Implementation Status — MERGED
+
+F5.2 was implemented and merged through PR #99 on 27 September 2026.
+
+Delivered behavior:
+
+- EO Package Builder now exposes explicit location filtering using existing city/province data while preserving authoritative destination eligibility.
+- Builder destination search and verification filters remain available.
+- `Lihat Detail Destinasi` now reuses the dedicated `/partner/eo/destinations/:destinationId` decision page instead of duplicating detail in a modal.
+- Builder draft context and explicit destination choice survive the detail-page round trip.
+- EO Destination Detail now surfaces verification, guide readiness, Kapasitas Umum Destinasi, base cost, cost scope, activities, facilities, and descriptive operational notes.
+- `guideReady=false` destinations remain informational/read-only and remain excluded from EO package selection.
+- Builder wording is simplified to `Ringkasan Pengalaman` while retaining the existing `valueProposition` data semantics and F4.3 simulated-insight isolation.
+- EO Sessions package selection is now visual, showing package image, title, destination, lifecycle status, selected state, and new-session eligibility.
+- Only `APPROVED` / `LIVE` selected packages enable creation of a new Session; existing F4.2 temporal/store guards remain unchanged.
+- Mitra Destination Profile now uses neutral `Tentang Destinasi` wording instead of `Deskripsi Ketenangan Kawasan`.
+
+Verification after merge:
+
+- 48 test files / 688 tests PASS,
+- format check PASS,
+- lint PASS,
+- typecheck PASS,
+- production build PASS,
+- Cloudflare Pages preview PASS.
+
+F5.2 is closed. F5.3 is the next implementation batch.
 
 ---
 

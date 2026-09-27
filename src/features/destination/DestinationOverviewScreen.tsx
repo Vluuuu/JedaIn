@@ -91,11 +91,6 @@ export function DestinationOverviewScreen() {
             <Badge tone="success" showSymbol={false}>
               {verificationLabel}
             </Badge>
-            <Badge tone="neutral" showSymbol={false}>
-              {destination.guideReady
-                ? "Pemandu lokal tersedia"
-                : "Pemandu lokal belum tersedia"}
-            </Badge>
           </div>
         </div>
 
@@ -233,12 +228,8 @@ export function DestinationOverviewScreen() {
               <dd>{verificationLabel}</dd>
             </div>
             <div>
-              <dt>Pemanduan Lokal</dt>
-              <dd>
-                {destination.guideReady
-                  ? "Pemandu lokal tersedia"
-                  : "Pemandu lokal belum tersedia"}
-              </dd>
+              <dt>Pemandu Lokal</dt>
+              <dd>Tersedia sebagai bagian dari standar verifikasi</dd>
             </div>
             <div>
               <dt>Biaya Dasar</dt>

@@ -20,7 +20,9 @@ export function AdminTrustStatusScreen() {
 
   // Collect EO entities from mockApplicationStore
   const eoApps = mockApplicationStore.getAll();
-  const allDestinations = mockDestinationStore.getAll();
+  const allDestinations = mockDestinationStore
+    .getAll()
+    .filter((destination) => destination.status === "ACTIVE");
   const allComplaints = mockComplaintStore.getAll();
 
   const eoEntities: TrustEntitySummary[] = eoApps.map((app) => {

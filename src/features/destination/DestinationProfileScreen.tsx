@@ -50,11 +50,11 @@ export function DestinationProfileScreen() {
       const cleanName =
         file.name.replace(/\.[^/.]+$/, "").trim() || "Visual destinasi";
       const result = mockDestinationPartnerService.addGalleryMedia({
-          mediaId: `media_${destination.destinationId}_${Date.now()}`,
-          url: reader.result,
-          label: cleanName,
-          provenance: "DESTINATION_SOURCE",
-        });
+        mediaId: `media_${destination.destinationId}_${Date.now()}`,
+        url: reader.result,
+        label: cleanName,
+        provenance: "DESTINATION_SOURCE",
+      });
 
       if (!result.success) {
         setGalleryError(result.message ?? "Visual belum bisa ditambahkan.");

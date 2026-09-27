@@ -1155,3 +1155,30 @@
     display: none;
   }
 }
+
+.package-detail-section--primary {
+  padding-inline: var(--space-1);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.package-detail-organizer-rating {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: var(--space-2);
+}
+
+.package-detail-organizer-rating__label {
+  color: var(--color-stone-500);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.package-detail-organizer-rating__value {
+  color: var(--color-stone-800);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+}

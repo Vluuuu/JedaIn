@@ -7,7 +7,7 @@
 **Tanggal:** 24 September 2026  
 **Status:** CANONICAL — source of truth competition prototype HOLOGY  
 **Canonicalized via:** PR #74 pada 24 September 2026  
-**Implementation Baseline:** f0fcad9eee3b95714f63462a64bde3697884ff57
+**Implementation Baseline:** bffa2262cffb5836579ac0278666e79f5d08af4a
 
 > Dokumen ini merangkum requirement produk JedaIn berdasarkan prototype yang benar-benar sudah dibangun, evaluasi/discovery terbaru, dan kebutuhan demo kompetisi. Dokumen ini sengaja tidak mendefinisikan JedaIn sebagai aplikasi production-grade. Fokusnya adalah prototype yang stabil, jelas, dapat didemokan, dan konsisten untuk penjurian.
 
@@ -1619,16 +1619,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F5.1 Traveler Buyer Experience:
+Current verified competition baseline setelah F5.2 EO Destination Discovery & Builder Clarity:
 
-- current app feature commit: f0fcad9eee3b95714f63462a64bde3697884ff57,
-- 48 suites / 683 tests,
+- current app feature commit: bffa2262cffb5836579ac0278666e79f5d08af4a,
+- 48 suites / 688 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, PR #92 Final Semantic Truthfulness Hardening, PR #94 Final Live-User UX Cleanup, dan PR #97 F5.1 Traveler Buyer Experience sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, PR #92 Final Semantic Truthfulness Hardening, PR #94 Final Live-User UX Cleanup, PR #97 F5.1 Traveler Buyer Experience, dan PR #99 F5.2 EO Destination Discovery & Builder Clarity sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1665,6 +1665,7 @@ Implemented and verified:
 - sample-vs-post-trip rating provenance, Demand Insight disclosure/Builder isolation, APPROVED-vs-LIVE guidance, Mitra capacity semantic truthfulness, dan conditional re-review copy (F4.3 / PR #92),
 - final live-user UX cleanup: redundant landing CTA dihapus sehingga swipe-up menjadi primary start interaction, dan redundant Home "JedaIn Traveler" chip dihapus (PR #94),
 - F5.1 Traveler Buyer Experience: Package Detail buyer-first dengan progressive disclosure, Trip Detail summary-first dengan satu `Lihat Detail Perjalanan`, completed-trip review CTA diprioritaskan, dan organizer rating hanya berasal dari actual EO/Guide post-trip review records (PR #97),
+- F5.2 EO Destination Discovery & Builder Clarity: filter lokasi destinasi eksplisit, dedicated Destination Detail decision page dari Builder, copy `Ringkasan Pengalaman`, visual package selector di EO Sessions, dan wording netral `Tentang Destinasi` pada profil Mitra (PR #99),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1893,7 +1894,7 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] Final Live-User UX Cleanup merged melalui PR #94 tanpa flow/business-rule change.
 - [x] Guest Demo tetap diperbolehkan sebagai prototype Traveler identity untuk mendemonstrasikan booking → completion → Destination review + EO/Guide review.
 - [x] Accepted findings dari Traveler / EO / Mitra / Admin-Judge simulation sudah ditutup sampai F4.3.
-- [x] Current canonical app baseline: f0fcad9eee3b95714f63462a64bde3697884ff57 dengan 48 suites / 683 tests PASS.
+- [x] Current canonical app baseline: bffa2262cffb5836579ac0278666e79f5d08af4a dengan 48 suites / 688 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.

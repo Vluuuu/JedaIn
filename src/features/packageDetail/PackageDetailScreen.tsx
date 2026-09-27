@@ -215,11 +215,8 @@ export function PackageDetailScreen({
             <div className="package-detail-trust-card__rating">
               {destinationReviewSummary ? (
                 <span>
-                  ★{" "}
-                  {destinationReviewSummary.averageRating
-                    .toFixed(1)
-                    .replace(".", ",")}{" "}
-                  · {destinationReviewSummary.reviewCount} ulasan destinasi
+                  ★ {destinationReviewSummary.averageRating.toFixed(1)} ·{" "}
+                  {destinationReviewSummary.reviewCount} ulasan destinasi
                 </span>
               ) : (
                 <span className="package-detail-trust-card__rating--empty">
@@ -243,11 +240,8 @@ export function PackageDetailScreen({
             <div className="package-detail-trust-card__rating">
               {organizerReviewSummary ? (
                 <span>
-                  ★{" "}
-                  {organizerReviewSummary.averageRating
-                    .toFixed(1)
-                    .replace(".", ",")}{" "}
-                  · {organizerReviewSummary.reviewCount} ulasan pascatrip
+                  ★ {organizerReviewSummary.averageRating.toFixed(1)} ·{" "}
+                  {organizerReviewSummary.reviewCount} ulasan pascatrip
                 </span>
               ) : (
                 <span className="package-detail-trust-card__rating--empty">
@@ -438,34 +432,6 @@ export function PackageDetailScreen({
                       {pkg.locationLabel}
                     </p>
                   </div>
-                  <span className="package-detail-inline-trust">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                      className="package-detail-inline-trust__icon"
-                    >
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                      <polyline points="9 12 11 14 15 10" />
-                    </svg>
-                    <span>Telah melalui proses verifikasi JedaIn</span>
-                  </span>
-                </div>
-                <div className="package-detail-trust-explanation">
-                  <strong className="package-detail-trust-explanation__title">
-                    Tentang verifikasi destinasi:
-                  </strong>
-                  <p className="package-detail-trust-explanation__text">
-                    Destinasi telah melalui proses verifikasi JedaIn, termasuk
-                    kesiapan pemandu lokal. Ini bukan konfirmasi ketersediaan
-                    pada tanggal atau sesi tertentu.
-                  </p>
                 </div>
                 <p className="package-detail-editorial-text">
                   {detail.destinationDetail.overviewDescription}
@@ -483,18 +449,16 @@ export function PackageDetailScreen({
                     aria-hidden="true"
                     className="package-detail-subtle-note__icon"
                   >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="16" x2="12" y2="12" />
-                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <polyline points="9 12 11 14 15 10" />
                   </svg>
                   <span>
-                    Status mitra destinasi berdasarkan proses verifikasi
-                    internal JedaIn.
+                    Destinasi ini telah melalui proses verifikasi JedaIn.
                   </span>
                 </p>
               </section>
 
-              {/* 5. EO / Guide Identity & Status */}
+              {/* 5. Travel Organizer Section */}
               <section
                 className="package-detail-section"
                 aria-labelledby="organizer-heading"
@@ -515,61 +479,7 @@ export function PackageDetailScreen({
                         {detail.organizer.roleDescription}
                       </p>
                     )}
-                    <div
-                      className="package-detail-organizer-rating"
-                      aria-label="Rating penyelenggara"
-                    >
-                      <span className="package-detail-organizer-rating__label">
-                        Rating penyelenggara
-                      </span>
-                      <strong className="package-detail-organizer-rating__value">
-                        {organizerReviewSummary
-                          ? `★ ${organizerReviewSummary.averageRating.toFixed(1)} · ${organizerReviewSummary.reviewCount} ulasan pascatrip`
-                          : "Belum ada ulasan pascatrip"}
-                      </strong>
-                    </div>
                   </div>
-                  <div className="package-detail-guide-meta">
-                    <span className="package-detail-guide-meta__label">
-                      Status pemandu
-                    </span>
-                    <span className="package-detail-guide-meta__value">
-                      {detail.organizer.guideStatus === "CERTIFIED_GUIDE" ? (
-                        <>
-                          <svg
-                            width="13"
-                            height="13"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                            className="package-detail-guide-meta__icon"
-                          >
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            <polyline points="9 12 11 14 15 10" />
-                          </svg>
-                          <span>Certified Guide</span>
-                        </>
-                      ) : (
-                        <span>Concept Organizer</span>
-                      )}
-                    </span>
-                  </div>
-                </div>
-                <div className="package-detail-trust-explanation">
-                  <strong className="package-detail-trust-explanation__title">
-                    {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
-                      ? "Tentang Certified Guide:"
-                      : "Tentang Concept Organizer:"}
-                  </strong>
-                  <p className="package-detail-trust-explanation__text">
-                    {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
-                      ? "Certified Guide menunjukkan status kepemanduan berlisensi milik penyelenggara (Travel Organizer). Status ini tidak menunjukkan pemandu individu tertentu untuk jadwal sesi."
-                      : "Concept Organizer merancang konsep perjalanan dan bermitra dengan pemandu lokal di destinasi, bukan penugasan pemandu individu tertentu."}
-                  </p>
                 </div>
                 {detail.organizer.bioSummary && (
                   <p className="package-detail-editorial-text">
@@ -780,6 +690,7 @@ export function PackageDetailScreen({
 
               {/* 10. Travel Logistics & Meeting Point */}
               {(detail.meetingPointLabel ||
+                detail.departureTimeLabel ||
                 detail.outboundTransport ||
                 detail.returnTransport ||
                 (detail.accessNotes && detail.accessNotes.length > 0)) && (
@@ -812,15 +723,16 @@ export function PackageDetailScreen({
                         {pkg.destinationName}, {pkg.locationLabel}
                       </strong>
                     </div>
-                    <div className="package-detail-logistics-item">
-                      <span className="package-detail-logistics-label">
-                        Waktu Kumpul / Keberangkatan
-                      </span>
-                      <span className="package-detail-logistics-val">
-                        {detail.departureTimeLabel ||
-                          "Jam mengikuti jadwal keberangkatan yang dipilih saat memilih sesi."}
-                      </span>
-                    </div>
+                    {detail.departureTimeLabel && (
+                      <div className="package-detail-logistics-item">
+                        <span className="package-detail-logistics-label">
+                          Waktu Kumpul / Keberangkatan
+                        </span>
+                        <span className="package-detail-logistics-val">
+                          {detail.departureTimeLabel}
+                        </span>
+                      </div>
+                    )}
                     {detail.outboundTransport && (
                       <div className="package-detail-logistics-item">
                         <span className="package-detail-logistics-label">

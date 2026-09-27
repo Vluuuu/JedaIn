@@ -188,36 +188,28 @@ export function EoPackageBuilderScreen() {
           ],
   );
   const [safetyNotes, setSafetyNotes] = useState<string>(
-    initialDraft?.safetyNotes?.join("\n") ??
-      "Gunakan alas kaki yang nyaman dan tidak licin.\nPatuhi arahan pemandu selama kegiatan di lokasi.",
+    initialDraft?.safetyNotes ? initialDraft.safetyNotes.join("\n") : "",
   );
   const [meetingPointLabel, setMeetingPointLabel] = useState<string>(
-    initialDraft?.meetingPointLabel ?? "Area titik kumpul utama kawasan",
+    initialDraft?.meetingPointLabel ?? "",
   );
   const [departureTimeLabel, setDepartureTimeLabel] = useState<string>(
-    initialDraft?.departureTimeLabel ??
-      "Peserta berkumpul 30 menit sebelum keberangkatan.",
+    initialDraft?.departureTimeLabel ?? "",
   );
   const [outboundTransport, setOutboundTransport] = useState<string>(
-    initialDraft?.outboundTransport ??
-      "Minibus Travel Organizer dari titik kumpul menuju destinasi.",
+    initialDraft?.outboundTransport ?? "",
   );
   const [returnTransport, setReturnTransport] = useState<string>(
-    initialDraft?.returnTransport ??
-      "Peserta kembali ke titik kumpul menggunakan kendaraan yang sama setelah kegiatan selesai.",
+    initialDraft?.returnTransport ?? "",
   );
   const [includedItemsText, setIncludedItemsText] = useState<string>(
-    initialDraft?.includedItems && initialDraft.includedItems.length > 0
-      ? initialDraft.includedItems.join("\n")
-      : "Tiket masuk destinasi\nPemandu selama kegiatan\nKonsumsi lokal",
+    initialDraft?.includedItems ? initialDraft.includedItems.join("\n") : "",
   );
   const [excludedItemsText, setExcludedItemsText] = useState<string>(
-    initialDraft?.excludedItems && initialDraft.excludedItems.length > 0
-      ? initialDraft.excludedItems.join("\n")
-      : "Transportasi peserta menuju titik kumpul\nPengeluaran pribadi",
+    initialDraft?.excludedItems ? initialDraft.excludedItems.join("\n") : "",
   );
   const [accessNotesText, setAccessNotesText] = useState<string>(
-    initialDraft?.accessNotes?.join("\n") ?? "",
+    initialDraft?.accessNotes ? initialDraft.accessNotes.join("\n") : "",
   );
   const [eoMargin, setEoMargin] = useState<number>(
     initialDraft?.pricing?.eoMargin ?? 150000,
@@ -1376,29 +1368,31 @@ export function EoPackageBuilderScreen() {
             >
               <div className="eo-form-group">
                 <label htmlFor="outbound-transport" className="eo-form-label">
-                  Transportasi Menuju Destinasi
+                  Transportasi Menuju Destinasi *
                 </label>
                 <input
                   id="outbound-transport"
                   type="text"
+                  required
                   className="eo-form-input"
                   value={outboundTransport}
                   onChange={(e) => setOutboundTransport(e.target.value)}
-                  placeholder="Contoh: Minibus Travel Organizer dari titik kumpul menuju destinasi."
+                  placeholder="Contoh: Shuttle minibus dari titik kumpul menuju destinasi."
                 />
               </div>
 
               <div className="eo-form-group">
                 <label htmlFor="return-transport" className="eo-form-label">
-                  Transportasi Kembali
+                  Transportasi Kembali *
                 </label>
                 <input
                   id="return-transport"
                   type="text"
+                  required
                   className="eo-form-input"
                   value={returnTransport}
                   onChange={(e) => setReturnTransport(e.target.value)}
-                  placeholder="Contoh: Peserta kembali ke titik kumpul menggunakan kendaraan yang sama setelah kegiatan selesai."
+                  placeholder="Contoh: Shuttle kembali ke titik kumpul setelah kegiatan selesai."
                 />
               </div>
             </div>
@@ -1542,7 +1536,7 @@ export function EoPackageBuilderScreen() {
                   className="eo-form-textarea"
                   value={includedItemsText}
                   onChange={(e) => setIncludedItemsText(e.target.value)}
-                  placeholder="Satu butir per baris..."
+                  placeholder="Satu butir per baris (contoh: Transportasi PP dari titik kumpul, tiket masuk, pemandu)..."
                 />
               </div>
 
@@ -1556,7 +1550,7 @@ export function EoPackageBuilderScreen() {
                   className="eo-form-textarea"
                   value={excludedItemsText}
                   onChange={(e) => setExcludedItemsText(e.target.value)}
-                  placeholder="Satu butir per baris..."
+                  placeholder="Satu butir per baris (contoh: Transportasi menuju titik kumpul awal, pengeluaran pribadi)..."
                 />
               </div>
             </div>
@@ -1578,7 +1572,7 @@ export function EoPackageBuilderScreen() {
                 className="eo-form-textarea"
                 value={safetyNotes}
                 onChange={(e) => setSafetyNotes(e.target.value)}
-                placeholder="Pisahkan dengan baris baru (misal: alas kaki yang nyaman, pakaian hangat, dsb)..."
+                placeholder="Pisahkan dengan baris baru (contoh: alas kaki yang nyaman, pakaian hangat, dsb)..."
               />
             </div>
 

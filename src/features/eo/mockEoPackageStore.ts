@@ -86,7 +86,52 @@ export function validateEoPackage(
     });
   }
 
-  // Step 3: Itinerary & Safety
+  // Step 3: Logistics & Itinerary
+  if (!pkg.meetingPointLabel || !pkg.meetingPointLabel.trim()) {
+    errors.push({
+      step: 3,
+      field: "meetingPointLabel",
+      message: "Lengkapi titik kumpul perjalanan.",
+    });
+  }
+
+  if (!pkg.departureTimeLabel || !pkg.departureTimeLabel.trim()) {
+    errors.push({
+      step: 3,
+      field: "departureTimeLabel",
+      message: "Lengkapi waktu kumpul atau keberangkatan.",
+    });
+  }
+
+  if (!pkg.outboundTransport || !pkg.outboundTransport.trim()) {
+    errors.push({
+      step: 3,
+      field: "outboundTransport",
+      message: "Jelaskan transportasi menuju destinasi.",
+    });
+  }
+
+  if (!pkg.returnTransport || !pkg.returnTransport.trim()) {
+    errors.push({
+      step: 3,
+      field: "returnTransport",
+      message: "Jelaskan transportasi kembali setelah kegiatan.",
+    });
+  }
+
+  if (
+    !pkg.includedItems ||
+    pkg.includedItems.length === 0 ||
+    !pkg.includedItems.some((s) => s && s.trim().length > 0)
+  ) {
+    errors.push({
+      step: 3,
+      field: "includedItems",
+      message:
+        "Minimal cantumkan 1 fasilitas atau layanan yang termasuk dalam paket.",
+    });
+  }
+
   if (!pkg.itinerary || pkg.itinerary.length === 0) {
     errors.push({
       step: 3,
@@ -223,14 +268,15 @@ export const SEEDED_LIVE_PACKAGE: EoPackageRecord = {
     },
   ],
   includedItems: [
+    "Transportasi PP dari titik kumpul",
     "Tiket masuk kawasan Lereng Hijau Batu",
     "Pemandu lokal selama sesi kegiatan",
     "Seduhan teh herbal dan kudapan lokal",
     "Santap siang menu pedesaan",
   ],
   excludedItems: [
-    "Transportasi pribadi ke titik kumpul",
-    "Pengeluaran pribadi",
+    "Transportasi menuju titik kumpul awal",
+    "Pengeluaran dan belanja pribadi di luar paket",
   ],
   safetyNotes: [
     "Gunakan sepatu berjalan yang nyaman dan tidak licin.",
@@ -238,9 +284,10 @@ export const SEEDED_LIVE_PACKAGE: EoPackageRecord = {
   ],
   meetingPointLabel: "Area titik kumpul Lereng Hijau Batu",
   departureTimeLabel: "Peserta berkumpul 30 menit sebelum jadwal sesi dimulai",
-  outboundTransport: "Transportasi mandiri menuju titik kumpul kawasan lereng",
+  outboundTransport:
+    "Transportasi minibus Travel Organizer dari titik kumpul menuju kawasan lereng",
   returnTransport:
-    "Kembali mandiri dari titik kumpul kawasan setelah kegiatan selesai",
+    "Kembali ke titik kumpul dengan kendaraan yang sama setelah kegiatan selesai",
   accessNotes: [
     "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
     "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
@@ -300,11 +347,15 @@ export const SEEDED_PENDING_PACKAGE: EoPackageRecord = {
     },
   ],
   includedItems: [
+    "Transportasi PP dari titik kumpul Pacet",
     "Tiket masuk Lembah Alam Pacet",
     "Pemandu retreat bersertifikat",
     "Teh herbal dan kudapan buah sehat",
   ],
-  excludedItems: ["Transportasi pribadi", "Belanja pribadi"],
+  excludedItems: [
+    "Transportasi peserta menuju titik kumpul awal",
+    "Belanja pribadi",
+  ],
   safetyNotes: [
     "Kenakan pakaian santai yang nyaman.",
     "Hati-hati saat melangkah di bebatuan tepi sungai.",
@@ -512,22 +563,24 @@ export const mockEoPackageStore = {
       ],
       highlights: draft.highlights || [],
       itinerary: draft.itinerary || [],
-      includedItems: draft.includedItems || [
-        "Tiket masuk destinasi",
-        "Pemandu selama kegiatan",
-        "Konsumsi lokal",
-      ],
-      excludedItems: draft.excludedItems || [
-        "Transportasi ke titik kumpul",
-        "Pengeluaran pribadi",
-      ],
+      includedItems:
+        draft.includedItems !== undefined
+          ? draft.includedItems
+          : existingIndex >= 0
+            ? packages[existingIndex].includedItems
+            : [],
+      excludedItems:
+        draft.excludedItems !== undefined
+          ? draft.excludedItems
+          : existingIndex >= 0
+            ? packages[existingIndex].excludedItems
+            : [],
       safetyNotes:
         draft.safetyNotes !== undefined
           ? draft.safetyNotes
-          : [
-              "Kenakan alas kaki yang nyaman.",
-              "Patuhi arahan pemandu selama kegiatan.",
-            ],
+          : existingIndex >= 0
+            ? packages[existingIndex].safetyNotes
+            : [],
       meetingPointLabel:
         draft.meetingPointLabel !== undefined
           ? draft.meetingPointLabel

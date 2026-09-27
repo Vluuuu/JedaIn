@@ -181,6 +181,11 @@ describe("F4.2 — Part A: EO Session Temporal Integrity (EO-F01)", () => {
         },
       ],
       safetyNotes: ["Patuhi aturan."],
+      meetingPointLabel: "Stasiun Malang",
+      departureTimeLabel: "07.00 WIB",
+      outboundTransport: "Minibus",
+      returnTransport: "Minibus",
+      includedItems: ["Transportasi PP"],
       pricing: {
         destinationBaseCost: 125000,
         localGuideFee: 0,

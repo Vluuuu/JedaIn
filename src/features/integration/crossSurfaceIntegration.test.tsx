@@ -244,6 +244,11 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
         shortSummary: "Ringkasan paket baru 10 karakter.",
         durationLabel: "1 hari",
         itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi sesi" }],
+        meetingPointLabel: "Stasiun Malang",
+        departureTimeLabel: "Pukul 07.00 WIB",
+        outboundTransport: "Shuttle minibus Travel Organizer",
+        returnTransport: "Shuttle kembali ke titik kumpul",
+        includedItems: ["Transportasi PP", "Tiket masuk"],
         safetyNotes: ["Aman"],
         pricing: {
           destinationBaseCost: 125000,
@@ -364,6 +369,10 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
         includedItems: ["Tiket masuk", "Pemandu lokal", "Teh herbal"],
         excludedItems: ["Transportasi pribadi"],
         safetyNotes: ["Gunakan sepatu nyaman."],
+        meetingPointLabel: "Stasiun Kota Malang Pintu Selatan",
+        departureTimeLabel: "Pukul 07.00 WIB",
+        outboundTransport: "Shuttle minibus Travel Organizer",
+        returnTransport: "Shuttle kembali ke Stasiun Kota Malang",
         pricing: {
           destinationBaseCost: 125000,
           localGuideFee: 0,

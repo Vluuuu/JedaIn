@@ -97,20 +97,18 @@ describe("Batch B1 — Existing-Data Clarity Improvements", () => {
         ["/packages/slow_green_day"],
       );
 
-      // Destination verification explanation
-      expect(view.textContent).toContain("Tentang verifikasi destinasi:");
+      // Destination verification statement
       expect(view.textContent).toContain(
-        "bukan konfirmasi ketersediaan pada tanggal atau sesi tertentu",
+        "Destinasi ini telah melalui proses verifikasi JedaIn.",
       );
+      expect(view.textContent).not.toContain("Tentang verifikasi destinasi:");
 
-      // Guide status explanation
-      expect(view.textContent).toContain("Tentang Certified Guide:");
+      // Travel Organizer identity and role
+      expect(view.textContent).toContain("Travel Organizer JedaIn");
       expect(view.textContent).toContain(
-        "Certified Guide menunjukkan status kepemanduan berlisensi milik penyelenggara",
+        "Penyelenggara terdaftar di JedaIn Partner Portal.",
       );
-      expect(view.textContent).toContain(
-        "Status ini tidak menunjukkan pemandu individu tertentu untuk jadwal sesi",
-      );
+      expect(view.textContent).not.toContain("Tentang Certified Guide:");
     });
   });
 

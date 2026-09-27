@@ -359,6 +359,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         destinationId: "dest_lereng_hijau",
         durationLabel: "1 hari",
         itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi sesi" }],
+        meetingPointLabel: "Stasiun Malang",
+        departureTimeLabel: "07.00 WIB",
+        outboundTransport: "Minibus",
+        returnTransport: "Minibus",
+        includedItems: ["Transportasi PP"],
         safetyNotes: ["Pakai sepatu."],
         pricing: {
           destinationBaseCost: 125000,
@@ -390,6 +395,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         destinationId: "dest_lereng_hijau",
         durationLabel: "1 hari",
         itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi sesi" }],
+        meetingPointLabel: "Stasiun Malang",
+        departureTimeLabel: "07.00 WIB",
+        outboundTransport: "Minibus",
+        returnTransport: "Minibus",
+        includedItems: ["Transportasi PP"],
         safetyNotes: ["Pakai sepatu."],
         pricing: {
           destinationBaseCost: 125000,
@@ -467,6 +477,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           destinationId: "dest_lereng_hijau", // 125000
           durationLabel: "1 hari",
           itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
+          meetingPointLabel: "Stasiun Malang",
+          departureTimeLabel: "07.00 WIB",
+          outboundTransport: "Minibus",
+          returnTransport: "Minibus",
+          includedItems: ["Transportasi PP"],
           safetyNotes: ["Catatan keselamatan."],
           guideSource: "DESTINATION",
           pricing: {
@@ -1570,6 +1585,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         destinationId: "dest_lereng_hijau",
         durationLabel: "1 hari",
         itinerary: [{ order: 1, title: "Sesi", description: "Desc" }],
+        meetingPointLabel: "Stasiun Malang",
+        departureTimeLabel: "07.00 WIB",
+        outboundTransport: "Minibus",
+        returnTransport: "Minibus",
+        includedItems: ["Transportasi PP"],
         safetyNotes: ["Aman"],
         pricing: {
           destinationBaseCost: 125000,
@@ -1972,9 +1992,18 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
     it("BP. Package guideSource is strictly validated: missing rejected, Concept Only locked, Certified Guide flexible", () => {
       partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
 
+      const commonLogistics = {
+        meetingPointLabel: "Stasiun Malang",
+        departureTimeLabel: "07.00 WIB",
+        outboundTransport: "Minibus",
+        returnTransport: "Minibus",
+        includedItems: ["Transportasi PP"],
+      };
+
       // 1. Missing guideSource is rejected
       const missingRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
@@ -1999,6 +2028,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // 2. Concept Only with DESTINATION passes
       const conceptDestRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
@@ -2020,6 +2050,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // 3. Concept Only with EO fails
       const conceptEoRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
@@ -2044,6 +2075,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // 4. Certified Guide with DESTINATION passes
       const certDestRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
@@ -2065,6 +2097,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // 5. Certified Guide with EO passes
       const certEoRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",

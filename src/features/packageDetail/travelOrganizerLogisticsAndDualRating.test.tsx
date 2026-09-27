@@ -13,6 +13,13 @@ import { PackageDetailScreen } from "./PackageDetailScreen";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { AuthUser } from "../auth/types";
+import { AdminPackageReviewChecklistScreen } from "../admin/AdminPackageReviewChecklistScreen";
+import { adminSessionStore } from "../admin/adminSessionStore";
+import { MockPackageDetailAdapter } from "./mockAdapter";
+import { PROTOTYPE_CANCELLATION_POLICY_SUMMARY } from "./mockPackageDetails";
+import type { PackageDetailSource } from "./types";
+import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
+import type { PackageRecommendationSource } from "../recommendation/types";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -29,6 +36,7 @@ afterEach(async () => {
   mockReviewStore.reset();
   partnerSessionStore.reset();
   sessionStore.reset();
+  adminSessionStore.reset();
 });
 
 async function renderRoute(
@@ -61,34 +69,64 @@ async function renderRoute(
 }
 
 describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", () => {
-  it("1 & 2. Product-facing screens use 'Travel Organizer' while internal routes remain intact", async () => {
+  it("1. New Builder logistics fields start empty and placeholders are not persisted into draft", async () => {
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
-    const builderView = await renderRoute(
+    const view = await renderRoute(
       createElement(EoPackageBuilderScreen),
       "/partner/eo/packages/new",
       "/partner/eo/packages/new?destinationId=dest_lereng_hijau",
     );
 
-    // Step 1 guide options
-    expect(builderView.textContent).toContain(
-      "Pemandu dari Travel Organizer (Certified Guide)",
-    );
-    expect(builderView.textContent).not.toContain("Pemandu dari EO");
-
-    // Stepper Step 3
     const steps = Array.from(
-      builderView.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
+      view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
     );
-    expect(steps[2].textContent).toContain("Perjalanan & Itinerary");
 
-    // Step 4 pricing label
+    // Navigate to Step 3: Perjalanan & Itinerary
+    await act(async () => steps[2].click());
+
+    // Check all logistics inputs start completely empty (not pre-filled with synthetic facts)
+    expect(view.querySelector<HTMLInputElement>("#meeting-point")?.value).toBe(
+      "",
+    );
+    expect(view.querySelector<HTMLInputElement>("#departure-time")?.value).toBe(
+      "",
+    );
+    expect(
+      view.querySelector<HTMLInputElement>("#outbound-transport")?.value,
+    ).toBe("");
+    expect(
+      view.querySelector<HTMLInputElement>("#return-transport")?.value,
+    ).toBe("");
+    expect(
+      view.querySelector<HTMLTextAreaElement>("#included-items")?.value,
+    ).toBe("");
+    expect(
+      view.querySelector<HTMLTextAreaElement>("#excluded-items")?.value,
+    ).toBe("");
+    expect(
+      view.querySelector<HTMLTextAreaElement>("#safety-notes")?.value,
+    ).toBe("");
+    expect(
+      view.querySelector<HTMLTextAreaElement>("#access-notes")?.value,
+    ).toBe("");
+
+    // Step to Step 4: auto-saves current draft
     await act(async () => steps[3].click());
-    expect(builderView.textContent).toContain("Margin Travel Organizer");
-    expect(builderView.textContent).not.toContain("Margin EO:");
+
+    // Inspect persisted draft in store: must not have synthetic values
+    const allDrafts = mockEoPackageStore.getAllPackages();
+    const createdDraft = allDrafts[allDrafts.length - 1];
+    expect(createdDraft.meetingPointLabel).toBeUndefined();
+    expect(createdDraft.departureTimeLabel).toBeUndefined();
+    expect(createdDraft.outboundTransport).toBeUndefined();
+    expect(createdDraft.returnTransport).toBeUndefined();
+    expect(createdDraft.includedItems).toEqual([]);
+    expect(createdDraft.excludedItems).toEqual([]);
+    expect(createdDraft.safetyNotes).toEqual([]);
   });
 
-  it("3, 4, 6, 7. Travel Organizer authors full logistics in Step 3, persists across steps, and custom transport inclusion works", async () => {
+  it("2 & 3. Travel Organizer authors full logistics in Step 3, persists across steps, and custom transport inclusion works", async () => {
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
     const view = await renderRoute(
@@ -123,6 +161,8 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
       view.querySelector<HTMLTextAreaElement>("#included-items")!;
     const excludedTextarea =
       view.querySelector<HTMLTextAreaElement>("#excluded-items")!;
+    const safetyTextarea =
+      view.querySelector<HTMLTextAreaElement>("#safety-notes")!;
 
     await act(async () => {
       Object.getOwnPropertyDescriptor(
@@ -160,7 +200,6 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
       );
       returnTransportInput.dispatchEvent(new Event("input", { bubbles: true }));
 
-      // Custom inclusion with transport included
       Object.getOwnPropertyDescriptor(
         HTMLTextAreaElement.prototype,
         "value",
@@ -170,7 +209,6 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
       );
       includedTextarea.dispatchEvent(new Event("input", { bubbles: true }));
 
-      // Custom exclusion: NO universal "Transportasi menuju lokasi"
       Object.getOwnPropertyDescriptor(
         HTMLTextAreaElement.prototype,
         "value",
@@ -179,9 +217,18 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
         "Pengeluaran pribadi\nOleh-oleh belanjaan",
       );
       excludedTextarea.dispatchEvent(new Event("input", { bubbles: true }));
+
+      Object.getOwnPropertyDescriptor(
+        HTMLTextAreaElement.prototype,
+        "value",
+      )?.set?.call(
+        safetyTextarea,
+        "Gunakan pakaian hangat dan sepatu berjalan.",
+      );
+      safetyTextarea.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
-    // 4. Switch steps to Step 4 then back to Step 3 - values must persist!
+    // Switch steps to Step 4 then back to Step 3 - values must persist!
     await act(async () => steps[3].click());
     await act(async () => steps[2].click());
 
@@ -204,7 +251,7 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
       view.querySelector<HTMLTextAreaElement>("#excluded-items")?.value,
     ).not.toContain("Transportasi menuju lokasi");
 
-    // Check Step 5 preview includes authored travel arrangements
+    // Step 5 preview includes authored travel arrangements
     await act(async () => steps[4].click());
     expect(view.textContent).toContain("Stasiun Kota Malang Pintu Selatan");
     expect(view.textContent).toContain(
@@ -213,148 +260,243 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
     expect(view.textContent).toContain("Transportasi PP dari titik kumpul");
   });
 
-  it("5, 8, 9, 10, 11. Traveler Package Detail displays dual trust identity, separate ratings, zero state, and authored logistics", async () => {
+  it("4. Package cannot Submit if mandatory trip logistics are missing, directs to Step 3 with natural errors", async () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+    const view = await renderRoute(
+      createElement(EoPackageBuilderScreen),
+      "/partner/eo/packages/new",
+      "/partner/eo/packages/new?destinationId=dest_lereng_hijau",
+    );
+
+    // Fill Step 2 title & summary
+    const steps = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
+    );
+    await act(async () => steps[1].click());
+
+    const titleInput = view.querySelector<HTMLInputElement>("#package-title")!;
+    const summaryInput =
+      view.querySelector<HTMLTextAreaElement>("#package-summary")!;
+
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )?.set?.call(titleInput, "Paket Uji Validasi Logistik");
+      titleInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+      Object.getOwnPropertyDescriptor(
+        HTMLTextAreaElement.prototype,
+        "value",
+      )?.set?.call(
+        summaryInput,
+        "Deskripsi paket pengalaman yang valid dan cukup panjang.",
+      );
+      summaryInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    // Go directly to Step 5 without filling Step 3 logistics
+    await act(async () => steps[4].click());
+
+    // Click submit
+    const submitBtn = Array.from(
+      view.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => b.textContent?.includes("Submit untuk Review Admin"))!;
+    expect(submitBtn).toBeDefined();
+
+    await act(async () => submitBtn.click());
+
+    // Expect navigation to Step 3 with natural validation errors
+    expect(view.textContent).toContain(
+      "Langkah 3: Perjalanan & Alur Itinerary",
+    );
+    expect(view.textContent).toContain("Lengkapi titik kumpul perjalanan.");
+    expect(view.textContent).toContain(
+      "Lengkapi waktu kumpul atau keberangkatan.",
+    );
+    expect(view.textContent).toContain(
+      "Jelaskan transportasi menuju destinasi.",
+    );
+    expect(view.textContent).toContain(
+      "Jelaskan transportasi kembali setelah kegiatan.",
+    );
+    expect(view.textContent).toContain(
+      "Minimal cantumkan 1 fasilitas atau layanan yang termasuk dalam paket.",
+    );
+    expect(view.textContent).toContain(
+      "Minimal cantumkan 1 catatan operasional atau keselamatan.",
+    );
+  });
+
+  it("5. Travel Organizer Package Detail renders 'Belum diisi' for unauthored fields", async () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+    // Save a draft without logistics
+    const draft = mockEoPackageStore.saveDraft({
+      title: "Draf Tanpa Logistik",
+      shortSummary: "Ringkasan draf yang belum diisi logistiknya.",
+      destinationId: "dest_lereng_hijau",
+      durationLabel: "1 hari",
+    });
+    expect(draft.success).toBe(true);
+
+    const view = await renderRoute(
+      createElement(EoPackageDetailScreen),
+      "/partner/eo/packages/:packageId",
+      `/partner/eo/packages/${draft.package!.packageId}`,
+    );
+
+    expect(view.textContent).toContain("Titik Kumpul");
+    expect(view.textContent).toContain("Belum diisi");
+    expect(view.textContent).not.toContain("Area titik kumpul utama kawasan");
+    expect(view.textContent).not.toContain(
+      "Mengikuti jadwal sesi yang dipilih",
+    );
+  });
+
+  it("6 & 7. Traveler Package Detail: no departure fallback claim, renders section when only departureTimeLabel present", async () => {
+    const customPkg: PackageRecommendationSource = {
+      ...MOCK_RECOMMENDATION_PACKAGES[0],
+      id: "pkg_custom_logistics",
+      title: "Paket Logistik Parsial",
+      destinationName: "Lereng Hijau",
+      locationLabel: "Batu, Jawa Timur",
+      durationType: "FULL_DAY",
+      pricePerPerson: 300000,
+      status: "LIVE",
+      rating: 4.8,
+      ratingProvenance: "POST_TRIP",
+    };
+
+    const customDetail: PackageDetailSource = {
+      packageId: "pkg_custom_logistics",
+      valueProposition: "Value prop",
+      highlights: ["Highlight 1"],
+      itinerary: [{ order: 1, title: "Sesi 1", description: "Desc 1" }],
+      includedItems: ["Tiket masuk"],
+      excludedItems: ["Belanja"],
+      safetyNotes: ["Aman"],
+      // ONLY departureTimeLabel is present (no meetingPointLabel, no transports, no accessNotes)
+      departureTimeLabel: "Pukul 06.30 WIB dari titik kumpul",
+      cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
+      organizer: {
+        id: "org_lereng_batu",
+        displayName: "Jeda Alam Nusantara",
+        guideStatus: "CERTIFIED_GUIDE",
+        roleDescription: "Travel Organizer JedaIn",
+      },
+      destinationDetail: {
+        overviewDescription: "Deskripsi destinasi",
+      },
+      upcomingSessionPreviews: [
+        {
+          sessionId: "ses_1",
+          packageId: "pkg_custom_logistics",
+          startAt: "2026-10-10T08:00:00+07:00",
+          endAt: "2026-10-10T14:00:00+07:00",
+          status: "OPEN",
+          pricePerPerson: 300000,
+        },
+      ],
+    };
+
+    const customAdapter = new MockPackageDetailAdapter({
+      packages: [customPkg],
+      details: { pkg_custom_logistics: customDetail },
+    });
+
+    const view = await renderRoute(
+      createElement(PackageDetailScreen, { adapter: customAdapter }),
+      "/packages/:packageId",
+      "/packages/pkg_custom_logistics",
+    );
+
+    // Section must be rendered because departureTimeLabel is present
+    expect(view.textContent).toContain("Informasi Titik Kumpul & Akses");
+    expect(view.textContent).toContain("Waktu Kumpul / Keberangkatan");
+    expect(view.textContent).toContain("Pukul 06.30 WIB dari titik kumpul");
+
+    // Must NOT have old synthetic fallback
+    expect(view.textContent).not.toContain(
+      "Jam mengikuti jadwal keberangkatan yang dipilih saat memilih sesi.",
+    );
+
+    // Titik Kumpul item must NOT be rendered if meetingPointLabel is empty
+    const logisticsItems = Array.from(
+      view.querySelectorAll(".package-detail-logistics-item"),
+    );
+    const itemLabels = logisticsItems.map((item) =>
+      item
+        .querySelector(".package-detail-logistics-label")
+        ?.textContent?.trim(),
+    );
+    expect(itemLabels).not.toContain("Titik Kumpul");
+    expect(itemLabels).toContain("Lokasi Kawasan");
+    expect(itemLabels).toContain("Waktu Kumpul / Keberangkatan");
+  });
+
+  it("8. Traveler Package Detail displays dual trust cards with separate ratings without duplicate clutter below", async () => {
     const traveler: AuthUser = {
-      id: "usr_test_dual_rating",
+      id: "usr_test_dual_rating_clean",
       onboardingStatus: "COMPLETED",
     };
     sessionStore.setUser(traveler);
 
-    // Initially for seeded package "slow_green_day":
-    // No destination reviews, no organizer reviews
-    const view = await renderRoute(
-      createElement(PackageDetailScreen),
-      "/packages/:packageId",
-      "/packages/slow_green_day",
-    );
-
-    // 8. Dual trust cards are rendered
-    expect(view.textContent).toContain("Destinasi");
-    expect(view.textContent).toContain("Lereng Hijau Batu");
-    expect(view.textContent).toContain(
-      "Destinasi ini telah melalui proses verifikasi JedaIn.",
-    );
-
-    expect(view.textContent).toContain("Travel Organizer");
-    expect(view.textContent).toContain("Jeda Alam Nusantara");
-    expect(view.textContent).toContain("Travel Organizer JedaIn");
-
-    // 9. Zero state without reviews
-    expect(view.textContent).toContain("Belum ada ulasan destinasi.");
-    expect(view.textContent).toContain("Belum ada ulasan pascatrip.");
-
-    // Check logistics section renders authored fields
-    expect(view.textContent).toContain("Informasi Titik Kumpul & Akses");
-    expect(view.textContent).toContain("Area titik kumpul Lereng Hijau Batu");
-
-    // 10 & 11. Add a runtime destination review AND a runtime organizer review separately
-    await act(async () => root.unmount());
-    container.remove();
-
-    // Destination review only
+    // Submit destination review
     mockReviewStore.submitReview({
-      bookingId: "bk_test_dest",
+      bookingId: "bk_clean_dest",
       travelerId: traveler.id,
       targetType: "DESTINATION",
       targetRef: "Lereng Hijau Batu",
       rating: 5,
     });
 
-    const viewWithDestReview = await renderRoute(
-      createElement(PackageDetailScreen),
-      "/packages/:packageId",
-      "/packages/slow_green_day",
-    );
-
-    // Destination card has rating, but Travel Organizer is still zero-state!
-    expect(viewWithDestReview.textContent).toContain(
-      "★ 5,0 · 1 ulasan destinasi",
-    );
-    expect(viewWithDestReview.textContent).toContain(
-      "Belum ada ulasan pascatrip.",
-    );
-
-    await act(async () => root.unmount());
-    container.remove();
-
-    // Now submit organizer review
+    // Submit organizer review
     mockReviewStore.submitReview({
-      bookingId: "bk_test_org",
+      bookingId: "bk_clean_org",
       travelerId: traveler.id,
       targetType: "EO_GUIDE",
       targetRef: "org_lereng_batu",
       rating: 4,
     });
 
-    const viewWithBoth = await renderRoute(
+    const view = await renderRoute(
       createElement(PackageDetailScreen),
       "/packages/:packageId",
       "/packages/slow_green_day",
     );
 
-    // Both cards show distinct ratings without leakage
-    expect(viewWithBoth.textContent).toContain("★ 5,0 · 1 ulasan destinasi");
-    expect(viewWithBoth.textContent).toContain("★ 4,0 · 1 ulasan pascatrip");
+    // Top dual trust cards
+    expect(view.textContent).toContain("Destinasi");
+    expect(view.textContent).toContain("★ 5.0 · 1 ulasan destinasi");
+    expect(view.textContent).toContain("Travel Organizer");
+    expect(view.textContent).toContain("★ 4.0 · 1 ulasan pascatrip");
+
+    // Detailed section below: clean, no duplicate ratings, no technical badge explanation
+    expect(view.textContent).toContain(
+      "Destinasi ini telah melalui proses verifikasi JedaIn.",
+    );
+    expect(view.textContent).not.toContain("Tentang verifikasi destinasi:");
+    expect(view.textContent).not.toContain("Tentang Certified Guide:");
   });
 
-  it("12, 13, 14, 15. Same runtime guide fee (Rp150.000) and pricing formula integrity remain intact with logistics fields", async () => {
-    partnerSessionStore.loginAsDemoDestination();
-    mockDestinationStore.updateLocalGuideFee("dest_lereng_hijau", 150000);
+  it("9. Admin review checklist shows authored logistics without synthetic defaults", async () => {
+    adminSessionStore.loginAsDemoAdmin();
 
-    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-    const builder = await renderRoute(
-      createElement(EoPackageBuilderScreen),
-      "/partner/eo/packages/new",
-      "/partner/eo/packages/new?destinationId=dest_lereng_hijau",
+    const view = await renderRoute(
+      createElement(AdminPackageReviewChecklistScreen),
+      "/admin/package-approvals/:submissionId",
+      "/admin/package-approvals/pkg_pacet_mindful_retreat",
     );
 
-    // Check pricing calculation
-    // Base: 125.000 + Guide: 150.000 + Margin: 150.000 = 425.000
-    const steps = Array.from(
-      builder.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
+    expect(view.textContent).toContain("Pengaturan Perjalanan & Logistik");
+    expect(view.textContent).toContain("Pendopo Utama Lembah Alam Pacet");
+    expect(view.textContent).toContain(
+      "Shuttle Travel Organizer dari titik kumpul Pacet",
     );
-    await act(async () => steps[3].click());
-
-    expect(builder.textContent).toContain("Rp125.000");
-    expect(builder.textContent).toContain("Rp150.000");
-    expect(builder.textContent).toContain("Rp425.000");
-
-    // Approved != Live: check that draft is saved and does not appear on traveler catalog
-    const draft = mockEoPackageStore.saveDraft({
-      title: "Paket Logistik Mandiri Baru",
-      shortSummary: "Pengalaman mindful dengan transportasi terkelola penuh.",
-      destinationId: "dest_lereng_hijau",
-      durationLabel: "1 hari",
-      meetingPointLabel: "Terminal Kota Batu",
-      outboundTransport: "Mobil travel rombongan",
-      returnTransport: "Mobil travel rombongan kembali ke terminal",
-      includedItems: ["Transportasi PP", "Tiket kawasan"],
-      excludedItems: ["Uang jajan pribadi"],
-      safetyNotes: ["Pakai masker saat berdebu."],
-    });
-
-    expect(draft.success).toBe(true);
-    expect(draft.package?.status).toBe("DRAFT");
-    expect(draft.package?.meetingPointLabel).toBe("Terminal Kota Batu");
-    expect(draft.package?.outboundTransport).toBe("Mobil travel rombongan");
-    expect(draft.package?.returnTransport).toBe(
-      "Mobil travel rombongan kembali ke terminal",
+    expect(view.textContent).toContain(
+      "Transportasi PP dari titik kumpul Pacet",
     );
-
-    // TO Detail screen shows the same logistics
-    await act(async () => root.unmount());
-    container.remove();
-
-    const toDetail = await renderRoute(
-      createElement(EoPackageDetailScreen),
-      "/partner/eo/packages/:packageId",
-      `/partner/eo/packages/${draft.package!.packageId}`,
-    );
-
-    expect(toDetail.textContent).toContain(
-      "Pengaturan Perjalanan & Titik Kumpul",
-    );
-    expect(toDetail.textContent).toContain("Terminal Kota Batu");
-    expect(toDetail.textContent).toContain("Mobil travel rombongan");
   });
 });

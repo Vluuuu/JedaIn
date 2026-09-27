@@ -224,7 +224,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
   it("9. trust copy does not present government or external certification claims", async () => {
     const view = await renderPackageDetail("slow_green_day");
     expect(view.textContent).toContain(
-      "Status mitra destinasi berdasarkan proses verifikasi internal JedaIn.",
+      "Destinasi ini telah melalui proses verifikasi JedaIn.",
     );
     expect(view.textContent).not.toContain("kementerian");
     expect(view.textContent).not.toContain("pemerintah");
@@ -235,8 +235,8 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     const view = await renderPackageDetail("slow_green_day");
     // Destination verification
     expect(view.textContent).not.toContain("Terverifikasi Dasar");
-    // EO guide status
-    expect(view.textContent).toContain("Certified Guide");
+    // Travel Organizer identity & verification separation
+    expect(view.textContent).toContain("Travel Organizer JedaIn");
     expect(view.textContent).toContain("Jeda Alam Nusantara");
   });
 

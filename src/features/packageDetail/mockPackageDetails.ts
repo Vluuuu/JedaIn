@@ -45,6 +45,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul",
       "Tiket masuk kawasan Lereng Hijau Batu",
       "Pemandu lokal selama sesi kegiatan",
       "Seduhan teh herbal dan kudapan lokal",
@@ -62,11 +63,12 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Ikuti arahan pemandu demi kenyamanan dan kelestarian perkebunan.",
     ],
     meetingPointLabel: "Area titik kumpul Lereng Hijau Batu",
-    departureTimeLabel: "30 menit sebelum jadwal sesi dimulai",
+    departureTimeLabel:
+      "Peserta berkumpul 30 menit sebelum jadwal sesi dimulai",
     outboundTransport:
-      "Transportasi mandiri menuju titik kumpul kawasan lereng",
+      "Transportasi minibus Travel Organizer dari titik kumpul menuju kawasan lereng",
     returnTransport:
-      "Kembali mandiri dari titik kumpul kawasan setelah kegiatan selesai",
+      "Kembali ke titik kumpul dengan kendaraan yang sama setelah kegiatan selesai",
     accessNotes: [
       "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
       "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",

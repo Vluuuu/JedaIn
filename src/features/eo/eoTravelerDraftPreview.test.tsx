@@ -129,6 +129,28 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
       summaryInput.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
+    // Set fields in Step 3
+    const step3Button = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
+    ).find((btn) => btn.textContent?.includes("Perjalanan & Itinerary"));
+    await act(async () => {
+      step3Button!.click();
+    });
+
+    const safetyInput =
+      view.querySelector<HTMLTextAreaElement>("#safety-notes")!;
+    await act(async () => {
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype,
+        "value",
+      )?.set;
+      nativeSetter?.call(
+        safetyInput,
+        "Gunakan alas kaki yang nyaman dan tidak licin.",
+      );
+      safetyInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
     // Navigate to Step 5
     const step5Button = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),

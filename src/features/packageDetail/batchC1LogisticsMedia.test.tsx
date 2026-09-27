@@ -278,13 +278,14 @@ describe("Batch C1 — Media Source Consistency & Traveler Logistics", () => {
       expect(view.textContent).not.toContain("Titik Kumpul");
     });
 
-    it("4 & 5. Session departure time explicitly defers to chosen session schedule without map/GPS assumptions", async () => {
+    it("4 & 5. Session departure time renders authored departure time without map/GPS assumptions", async () => {
       const adapter = new MockPackageDetailAdapter({
         packages: [basePkg],
         details: {
           pkg_logistics_demo: {
             ...baseDetail,
             meetingPointLabel: "Titik Kumpul Demo",
+            departureTimeLabel: "Pukul 07.00 WIB dari titik kumpul",
           },
         },
       });
@@ -301,7 +302,8 @@ describe("Batch C1 — Media Source Consistency & Traveler Logistics", () => {
         ["/packages/pkg_logistics_demo"],
       );
 
-      expect(view.textContent).toContain(
+      expect(view.textContent).toContain("Pukul 07.00 WIB dari titik kumpul");
+      expect(view.textContent).not.toContain(
         "Jam mengikuti jadwal keberangkatan yang dipilih saat memilih sesi.",
       );
       expect(view.textContent).not.toContain("GPS");

@@ -386,32 +386,29 @@ export function EoPackageDetailScreen() {
               <div className="eo-pkg-op-item">
                 <span className="eo-pkg-op-label">Titik Kumpul</span>
                 <strong className="eo-pkg-op-value">
-                  {pkg.meetingPointLabel || "Area titik kumpul utama kawasan"}
+                  {pkg.meetingPointLabel || "Belum diisi"}
                 </strong>
               </div>
               <div className="eo-pkg-op-item">
                 <span className="eo-pkg-op-label">Waktu Keberangkatan</span>
                 <strong className="eo-pkg-op-value">
-                  {pkg.departureTimeLabel ||
-                    "Mengikuti jadwal sesi yang dipilih"}
+                  {pkg.departureTimeLabel || "Belum diisi"}
                 </strong>
               </div>
-              {pkg.outboundTransport && (
-                <div className="eo-pkg-op-item">
-                  <span className="eo-pkg-op-label">
-                    Transportasi Menuju Destinasi
-                  </span>
-                  <span className="eo-pkg-op-value">
-                    {pkg.outboundTransport}
-                  </span>
-                </div>
-              )}
-              {pkg.returnTransport && (
-                <div className="eo-pkg-op-item">
-                  <span className="eo-pkg-op-label">Transportasi Kembali</span>
-                  <span className="eo-pkg-op-value">{pkg.returnTransport}</span>
-                </div>
-              )}
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">
+                  Transportasi Menuju Destinasi
+                </span>
+                <span className="eo-pkg-op-value">
+                  {pkg.outboundTransport || "Belum diisi"}
+                </span>
+              </div>
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">Transportasi Kembali</span>
+                <span className="eo-pkg-op-value">
+                  {pkg.returnTransport || "Belum diisi"}
+                </span>
+              </div>
             </div>
             {pkg.accessNotes && pkg.accessNotes.length > 0 && (
               <div

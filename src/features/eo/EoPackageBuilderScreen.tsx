@@ -231,9 +231,11 @@ export function EoPackageBuilderScreen() {
     }
   };
 
+  const effectiveGuideSource: PackageGuideSource =
+    guideStatus === "CONCEPT_ONLY" ? "DESTINATION" : guideSource;
   const baseCost = selectedDestination?.baseCostPerPerson ?? 100000;
   const localGuideFee =
-    guideSource === "DESTINATION"
+    effectiveGuideSource === "DESTINATION"
       ? (selectedDestination?.localGuideFeePerPerson ?? 0)
       : 0;
   const customerPrice = baseCost + localGuideFee + eoMargin;
@@ -244,10 +246,6 @@ export function EoPackageBuilderScreen() {
       .split("\n")
       .map((s) => s.trim())
       .filter(Boolean);
-
-    // Enforce Concept-Only rule on save: must use DESTINATION
-    const effectiveGuideSource: PackageGuideSource =
-      guideStatus === "CONCEPT_ONLY" ? "DESTINATION" : guideSource;
 
     // Only persist destinationId if it is authoritative and eligible
     const effectiveDestinationId = selectedDestination

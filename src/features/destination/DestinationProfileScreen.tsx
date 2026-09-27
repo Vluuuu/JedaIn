@@ -78,8 +78,8 @@ export function DestinationProfileScreen() {
                 Galeri Destinasi
               </h2>
               <p className="dest-media-gallery__desc">
-                Visual ini adalah representasi prototype untuk membantu
-                konteks destinasi, bukan dokumentasi kondisi aktual.
+                Visual ini adalah representasi prototype untuk membantu konteks
+                destinasi, bukan dokumentasi kondisi aktual.
               </p>
             </div>
             <span className="dest-media-gallery__count">

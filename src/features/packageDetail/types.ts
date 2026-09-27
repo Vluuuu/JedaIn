@@ -71,11 +71,17 @@ export interface PersonalizedContext {
   mode: PersonalizedReasonMode;
 }
 
+export interface OrganizerReviewSummary {
+  averageRating: number;
+  reviewCount: number;
+}
+
 export interface PackageDetailViewModel {
   state: PackageDetailState;
   package?: PackageRecommendationSource;
   detail?: PackageDetailSource;
   hasOpenSession: boolean;
+  organizerReviewSummary?: OrganizerReviewSummary;
   personalizedContext?: PersonalizedContext;
   errorMessage?: string;
 }

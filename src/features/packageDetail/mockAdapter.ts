@@ -4,6 +4,7 @@ import {
   getCombinedPackageDetails,
 } from "../marketplace/marketplaceAdapter";
 import type { PackageRecommendationSource } from "../recommendation/types";
+import { mockReviewStore } from "../reviews/mockReviewStore";
 import type {
   PackageDetailAdapter,
   PackageDetailSource,
@@ -101,6 +102,19 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
       (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
     );
 
+    const organizerReviews = mockReviewStore.getReviewsForOrganizer(
+      detail.organizer.id,
+    );
+    const organizerReviewSummary =
+      organizerReviews.length > 0
+        ? {
+            averageRating:
+              organizerReviews.reduce((sum, review) => sum + review.rating, 0) /
+              organizerReviews.length,
+            reviewCount: organizerReviews.length,
+          }
+        : undefined;
+
     return {
       state: "READY",
       package: pkg,
@@ -109,6 +123,7 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
         upcomingSessionPreviews: sortedSessions,
       },
       hasOpenSession,
+      organizerReviewSummary,
       personalizedContext: options?.personalizedContext,
     };
   }

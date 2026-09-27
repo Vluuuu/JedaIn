@@ -247,6 +247,12 @@ export function TripDetailScreen({
         </Link>
       </div>
 
+      <div className="trip-detail-context" aria-label="Konteks halaman">
+        <span className="trip-detail-context__label">
+          {isCompleted ? "Perjalanan Selesai" : "Detail Perjalanan"}
+        </span>
+      </div>
+
       {/* 2. Hero & Experience Identity */}
       <header className="trip-detail-hero">
         <div className="trip-detail-hero__thumb">
@@ -414,114 +420,428 @@ export function TripDetailScreen({
         </section>
       )}
 
-      {/* 4. Trip Essentials */}
       <section
-        className="trip-detail-section"
-        aria-label="Informasi pesanan dan trip"
+        className="trip-detail-primary-summary"
+        aria-label="Ringkasan perjalanan utama"
       >
-        <h2 className="trip-detail-section__title">Informasi Trip</h2>
-        <div className="trip-detail-facts-grid">
-          <div className="trip-detail-fact">
-            <span className="trip-detail-fact__label">Nomor Pesanan</span>
-            <strong className="trip-detail-fact__value trip-detail-fact__value--break">
-              {booking.bookingId}
-            </strong>
-          </div>
-
-          {sessionDateLabel && (
-            <div className="trip-detail-fact">
-              <span className="trip-detail-fact__label">
-                Jadwal Keberangkatan
-              </span>
-              <strong className="trip-detail-fact__value">
-                {sessionDateLabel}
-              </strong>
-            </div>
-          )}
-
-          <div className="trip-detail-fact">
-            <span className="trip-detail-fact__label">Jumlah Peserta</span>
-            <span className="trip-detail-fact__value">
-              {booking.participantCount} Orang
-            </span>
-          </div>
-
-          <div className="trip-detail-fact">
-            <span className="trip-detail-fact__label">Status Pesanan</span>
-            <span className="trip-detail-fact__value">
-              {isCompleted ? "Selesai" : "Terkonfirmasi"}
-            </span>
-          </div>
-
-          <div className="trip-detail-fact">
-            <span className="trip-detail-fact__label">Total Pembayaran</span>
-            <span className="trip-detail-fact__value trip-detail-fact__value--price">
-              {formatRupiah(getBookingPaymentBreakdown(booking).total)}
-            </span>
-          </div>
+        <div className="trip-detail-primary-summary__item">
+          <span className="trip-detail-primary-summary__label">
+            Tanggal perjalanan
+          </span>
+          <strong className="trip-detail-primary-summary__value">
+            {sessionDateLabel ?? "Jadwal belum tersedia"}
+          </strong>
+        </div>
+        <div className="trip-detail-primary-summary__item">
+          <span className="trip-detail-primary-summary__label">
+            Titik kumpul
+          </span>
+          <strong className="trip-detail-primary-summary__value">
+            {detail?.meetingPointLabel ??
+              "Belum dicantumkan pada detail experience."}
+          </strong>
         </div>
       </section>
 
-      {/* 5. Informasi Keberangkatan (Trip Brief) */}
-      {(sessionDateLabel ||
-        detail?.meetingPointLabel ||
-        pkg?.destinationName ||
-        (detail?.accessNotes && detail.accessNotes.length > 0)) && (
-        <section
-          className="trip-detail-section"
-          aria-labelledby="trip-brief-heading"
-        >
-          <h2 id="trip-brief-heading" className="trip-detail-section__title">
-            Informasi Keberangkatan
-          </h2>
+      <details className="trip-detail-disclosure">
+        <summary className="trip-detail-disclosure__summary">
+          <span>Lihat Detail Perjalanan</span>
+          <span className="trip-detail-disclosure__hint">
+            Pesanan, kontak, itinerary & kebijakan
+          </span>
+        </summary>
+        <div className="trip-detail-disclosure__body">
+          {/* 4. Trip Essentials */}
+          <section
+            className="trip-detail-section"
+            aria-label="Informasi pesanan dan trip"
+          >
+            <h2 className="trip-detail-section__title">Informasi Trip</h2>
+            <div className="trip-detail-facts-grid">
+              <div className="trip-detail-fact">
+                <span className="trip-detail-fact__label">Nomor Pesanan</span>
+                <strong className="trip-detail-fact__value trip-detail-fact__value--break">
+                  {booking.bookingId}
+                </strong>
+              </div>
 
-          <div className="trip-detail-brief-grid">
-            {sessionDateLabel && (
-              <div className="trip-detail-brief-card">
-                <span className="trip-detail-brief-label">
-                  Waktu Keberangkatan
+              {sessionDateLabel && (
+                <div className="trip-detail-fact">
+                  <span className="trip-detail-fact__label">
+                    Jadwal Keberangkatan
+                  </span>
+                  <strong className="trip-detail-fact__value">
+                    {sessionDateLabel}
+                  </strong>
+                </div>
+              )}
+
+              <div className="trip-detail-fact">
+                <span className="trip-detail-fact__label">Jumlah Peserta</span>
+                <span className="trip-detail-fact__value">
+                  {booking.participantCount} Orang
                 </span>
-                <strong className="trip-detail-brief-val">
-                  {sessionDateLabel}
-                </strong>
               </div>
-            )}
 
-            {detail?.meetingPointLabel ? (
-              <div className="trip-detail-brief-card">
-                <span className="trip-detail-brief-label">Titik Kumpul</span>
-                <strong className="trip-detail-brief-val">
-                  {detail.meetingPointLabel}
-                </strong>
-              </div>
-            ) : (
-              <div className="trip-detail-brief-card">
-                <span className="trip-detail-brief-label">Titik Kumpul</span>
-                <span className="trip-detail-brief-val trip-detail-brief-val--neutral">
-                  Belum dicantumkan pada detail experience.
+              <div className="trip-detail-fact">
+                <span className="trip-detail-fact__label">Status Pesanan</span>
+                <span className="trip-detail-fact__value">
+                  {isCompleted ? "Selesai" : "Terkonfirmasi"}
                 </span>
               </div>
-            )}
 
-            {pkg?.destinationName && (
-              <div className="trip-detail-brief-card">
-                <span className="trip-detail-brief-label">Lokasi Kawasan</span>
-                <strong className="trip-detail-brief-val">
-                  {pkg.destinationName}
-                  {pkg.locationLabel ? ` • ${pkg.locationLabel}` : ""}
-                </strong>
+              <div className="trip-detail-fact">
+                <span className="trip-detail-fact__label">
+                  Total Pembayaran
+                </span>
+                <span className="trip-detail-fact__value trip-detail-fact__value--price">
+                  {formatRupiah(getBookingPaymentBreakdown(booking).total)}
+                </span>
               </div>
-            )}
-          </div>
+            </div>
+          </section>
 
-          {detail?.accessNotes && detail.accessNotes.length > 0 && (
-            <div className="trip-detail-brief-notes">
-              <span className="trip-detail-brief-notes__label">
-                Catatan Akses Lokasi
-              </span>
+          {/* 5. Informasi Keberangkatan (Trip Brief) */}
+          {(sessionDateLabel ||
+            detail?.meetingPointLabel ||
+            pkg?.destinationName ||
+            (detail?.accessNotes && detail.accessNotes.length > 0)) && (
+            <section
+              className="trip-detail-section"
+              aria-labelledby="trip-brief-heading"
+            >
+              <h2
+                id="trip-brief-heading"
+                className="trip-detail-section__title"
+              >
+                Informasi Keberangkatan
+              </h2>
+
+              <div className="trip-detail-brief-grid">
+                {sessionDateLabel && (
+                  <div className="trip-detail-brief-card">
+                    <span className="trip-detail-brief-label">
+                      Waktu Keberangkatan
+                    </span>
+                    <strong className="trip-detail-brief-val">
+                      {sessionDateLabel}
+                    </strong>
+                  </div>
+                )}
+
+                {detail?.meetingPointLabel ? (
+                  <div className="trip-detail-brief-card">
+                    <span className="trip-detail-brief-label">
+                      Titik Kumpul
+                    </span>
+                    <strong className="trip-detail-brief-val">
+                      {detail.meetingPointLabel}
+                    </strong>
+                  </div>
+                ) : (
+                  <div className="trip-detail-brief-card">
+                    <span className="trip-detail-brief-label">
+                      Titik Kumpul
+                    </span>
+                    <span className="trip-detail-brief-val trip-detail-brief-val--neutral">
+                      Belum dicantumkan pada detail experience.
+                    </span>
+                  </div>
+                )}
+
+                {pkg?.destinationName && (
+                  <div className="trip-detail-brief-card">
+                    <span className="trip-detail-brief-label">
+                      Lokasi Kawasan
+                    </span>
+                    <strong className="trip-detail-brief-val">
+                      {pkg.destinationName}
+                      {pkg.locationLabel ? ` • ${pkg.locationLabel}` : ""}
+                    </strong>
+                  </div>
+                )}
+              </div>
+
+              {detail?.accessNotes && detail.accessNotes.length > 0 && (
+                <div className="trip-detail-brief-notes">
+                  <span className="trip-detail-brief-notes__label">
+                    Catatan Akses Lokasi
+                  </span>
+                  <ul className="trip-detail-list">
+                    {detail.accessNotes.map((note, idx) => (
+                      <li key={idx} className="trip-detail-list-item">
+                        <span
+                          className="trip-detail-list-icon"
+                          aria-hidden="true"
+                        >
+                          •
+                        </span>
+                        <span>{note}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* 6. Post-Purchase EO Contact & Organizer Profile */}
+          {detail && (
+            <section
+              className="trip-detail-section"
+              aria-label="Penyelenggara dan kontak trip"
+            >
+              <h2 className="trip-detail-section__title">
+                Penyelenggara & Kontak Trip
+              </h2>
+
+              <div className="trip-detail-organizer-block">
+                <div className="trip-detail-organizer-header">
+                  <div className="trip-detail-organizer-title-wrap">
+                    <h3 className="trip-detail-organizer-name">
+                      {detail.organizer.displayName}
+                    </h3>
+                    {detail.organizer.roleDescription && (
+                      <p className="trip-detail-organizer-role">
+                        {detail.organizer.roleDescription}
+                      </p>
+                    )}
+                  </div>
+
+                  {detail.organizer.guideStatus === "CERTIFIED_GUIDE" && (
+                    <div className="trip-detail-certified-inline">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        className="trip-detail-certified-icon"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>Pemandu tersertifikasi</span>
+                    </div>
+                  )}
+                </div>
+
+                {detail.organizer.bioSummary && (
+                  <p className="trip-detail-organizer-bio">
+                    {detail.organizer.bioSummary}
+                  </p>
+                )}
+
+                {/* Source-backed EO Contact Information (Post-Purchase Only) */}
+                {organizerContact && (
+                  <div className="trip-detail-contact-card">
+                    <div className="trip-detail-contact-card__body">
+                      <div className="trip-detail-contact-person">
+                        <span className="trip-detail-contact-person__label">
+                          Penanggung Jawab EO
+                        </span>
+                        <strong className="trip-detail-contact-person__name">
+                          {organizerContact.contactPerson}
+                        </strong>
+                      </div>
+
+                      <div className="trip-detail-contact-methods">
+                        {organizerContact.phone && (
+                          <div className="trip-detail-contact-method-row">
+                            <span className="trip-detail-contact-method-icon">
+                              <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                              >
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                              </svg>
+                            </span>
+                            <span className="trip-detail-contact-method-val">
+                              {organizerContact.phone}
+                            </span>
+                          </div>
+                        )}
+
+                        {organizerContact.email && (
+                          <div className="trip-detail-contact-method-row">
+                            <span className="trip-detail-contact-method-icon">
+                              <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                              >
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                              </svg>
+                            </span>
+                            <a
+                              href={`mailto:${organizerContact.email}`}
+                              className="trip-detail-contact-email-link"
+                            >
+                              {organizerContact.email}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {organizerContact.phone && (
+                      <div className="trip-detail-contact-card__action">
+                        <a
+                          href={`tel:${organizerContact.phone}`}
+                          className="ui-button ui-button--secondary ui-button--md trip-detail-contact-cta"
+                        >
+                          Hubungi EO
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* 7. Highlights */}
+          {detail?.highlights && detail.highlights.length > 0 && (
+            <section
+              className="trip-detail-section"
+              aria-label="Aktivitas utama"
+            >
+              <h2 className="trip-detail-section__title">Aktivitas Utama</h2>
               <ul className="trip-detail-list">
-                {detail.accessNotes.map((note, idx) => (
+                {detail.highlights.map((highlight, idx) => (
                   <li key={idx} className="trip-detail-list-item">
+                    <span className="trip-detail-list-icon" aria-hidden="true">
+                      •
+                    </span>
+                    <span>{highlight}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* 8. Itinerary Timeline */}
+          {detail?.itinerary && detail.itinerary.length > 0 && (
+            <section
+              className="trip-detail-section"
+              aria-label="Rencana perjalanan itinerary"
+            >
+              <h2 className="trip-detail-section__title">
+                Rencana Perjalanan (Itinerary)
+              </h2>
+              <div className="trip-detail-timeline">
+                {detail.itinerary.map((item) => (
+                  <div key={item.order} className="trip-detail-timeline-item">
+                    <div
+                      className="trip-detail-timeline-marker"
+                      aria-hidden="true"
+                    />
+                    <div className="trip-detail-timeline-content">
+                      {(item.timeOfDayLabel || item.durationLabel) && (
+                        <div className="trip-detail-timeline-tag">
+                          {item.timeOfDayLabel && (
+                            <span>{item.timeOfDayLabel}</span>
+                          )}
+                          {item.timeOfDayLabel && item.durationLabel && (
+                            <span aria-hidden="true"> • </span>
+                          )}
+                          {item.durationLabel && (
+                            <span>{item.durationLabel}</span>
+                          )}
+                        </div>
+                      )}
+                      <h3 className="trip-detail-timeline-title">
+                        {item.title}
+                      </h3>
+                      <p className="trip-detail-timeline-desc">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* 9. Inclusions & Exclusions */}
+          {detail && (
+            <section
+              className="trip-detail-section"
+              aria-label="Kelengkapan paket perjalanan"
+            >
+              <div className="trip-detail-in-out-grid">
+                {detail.includedItems && detail.includedItems.length > 0 && (
+                  <div className="trip-detail-in-out-block">
+                    <h2 className="trip-detail-section__title">
+                      Termasuk dalam Paket
+                    </h2>
+                    <ul className="trip-detail-list">
+                      {detail.includedItems.map((inc, i) => (
+                        <li key={i} className="trip-detail-list-item">
+                          <span
+                            className="trip-detail-list-icon trip-detail-list-icon--check"
+                            aria-hidden="true"
+                          >
+                            ✓
+                          </span>
+                          <span>{inc}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {detail.excludedItems && detail.excludedItems.length > 0 && (
+                  <div className="trip-detail-in-out-block">
+                    <h2 className="trip-detail-section__title">
+                      Tidak Termasuk
+                    </h2>
+                    <ul className="trip-detail-list">
+                      {detail.excludedItems.map((exc, i) => (
+                        <li key={i} className="trip-detail-list-item">
+                          <span
+                            className="trip-detail-list-icon trip-detail-list-icon--cross"
+                            aria-hidden="true"
+                          >
+                            ✕
+                          </span>
+                          <span>{exc}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* 10. Safety Notes / Sebelum Berangkat */}
+          {detail?.safetyNotes && detail.safetyNotes.length > 0 && (
+            <section
+              className="trip-detail-section"
+              aria-label="Catatan persiapan sebelum berangkat"
+            >
+              <h2 className="trip-detail-section__title">Sebelum Berangkat</h2>
+              <ul className="trip-detail-list">
+                {detail.safetyNotes.map((note, i) => (
+                  <li key={i} className="trip-detail-list-item">
                     <span className="trip-detail-list-icon" aria-hidden="true">
                       •
                     </span>
@@ -529,281 +849,25 @@ export function TripDetailScreen({
                   </li>
                 ))}
               </ul>
-            </div>
+            </section>
           )}
-        </section>
-      )}
 
-      {/* 6. Post-Purchase EO Contact & Organizer Profile */}
-      {detail && (
-        <section
-          className="trip-detail-section"
-          aria-label="Penyelenggara dan kontak trip"
-        >
-          <h2 className="trip-detail-section__title">
-            Penyelenggara & Kontak Trip
-          </h2>
-
-          <div className="trip-detail-organizer-block">
-            <div className="trip-detail-organizer-header">
-              <div className="trip-detail-organizer-title-wrap">
-                <h3 className="trip-detail-organizer-name">
-                  {detail.organizer.displayName}
-                </h3>
-                {detail.organizer.roleDescription && (
-                  <p className="trip-detail-organizer-role">
-                    {detail.organizer.roleDescription}
-                  </p>
-                )}
-              </div>
-
-              {detail.organizer.guideStatus === "CERTIFIED_GUIDE" && (
-                <div className="trip-detail-certified-inline">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    className="trip-detail-certified-icon"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Pemandu tersertifikasi</span>
-                </div>
-              )}
-            </div>
-
-            {detail.organizer.bioSummary && (
-              <p className="trip-detail-organizer-bio">
-                {detail.organizer.bioSummary}
+          {/* 11. Cancellation Policy */}
+          {detail?.cancellationPolicySummary && (
+            <section
+              className="trip-detail-section"
+              aria-label="Kebijakan pembatalan"
+            >
+              <h2 className="trip-detail-section__title">
+                Kebijakan Pembatalan
+              </h2>
+              <p className="trip-detail-policy-text">
+                {detail.cancellationPolicySummary}
               </p>
-            )}
-
-            {/* Source-backed EO Contact Information (Post-Purchase Only) */}
-            {organizerContact && (
-              <div className="trip-detail-contact-card">
-                <div className="trip-detail-contact-card__body">
-                  <div className="trip-detail-contact-person">
-                    <span className="trip-detail-contact-person__label">
-                      Penanggung Jawab EO
-                    </span>
-                    <strong className="trip-detail-contact-person__name">
-                      {organizerContact.contactPerson}
-                    </strong>
-                  </div>
-
-                  <div className="trip-detail-contact-methods">
-                    {organizerContact.phone && (
-                      <div className="trip-detail-contact-method-row">
-                        <span className="trip-detail-contact-method-icon">
-                          <svg
-                            width="15"
-                            height="15"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                          >
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                          </svg>
-                        </span>
-                        <span className="trip-detail-contact-method-val">
-                          {organizerContact.phone}
-                        </span>
-                      </div>
-                    )}
-
-                    {organizerContact.email && (
-                      <div className="trip-detail-contact-method-row">
-                        <span className="trip-detail-contact-method-icon">
-                          <svg
-                            width="15"
-                            height="15"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                          >
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                            <polyline points="22,6 12,13 2,6" />
-                          </svg>
-                        </span>
-                        <a
-                          href={`mailto:${organizerContact.email}`}
-                          className="trip-detail-contact-email-link"
-                        >
-                          {organizerContact.email}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {organizerContact.phone && (
-                  <div className="trip-detail-contact-card__action">
-                    <a
-                      href={`tel:${organizerContact.phone}`}
-                      className="ui-button ui-button--secondary ui-button--md trip-detail-contact-cta"
-                    >
-                      Hubungi EO
-                    </a>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* 7. Highlights */}
-      {detail?.highlights && detail.highlights.length > 0 && (
-        <section className="trip-detail-section" aria-label="Aktivitas utama">
-          <h2 className="trip-detail-section__title">Aktivitas Utama</h2>
-          <ul className="trip-detail-list">
-            {detail.highlights.map((highlight, idx) => (
-              <li key={idx} className="trip-detail-list-item">
-                <span className="trip-detail-list-icon" aria-hidden="true">
-                  •
-                </span>
-                <span>{highlight}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* 8. Itinerary Timeline */}
-      {detail?.itinerary && detail.itinerary.length > 0 && (
-        <section
-          className="trip-detail-section"
-          aria-label="Rencana perjalanan itinerary"
-        >
-          <h2 className="trip-detail-section__title">
-            Rencana Perjalanan (Itinerary)
-          </h2>
-          <div className="trip-detail-timeline">
-            {detail.itinerary.map((item) => (
-              <div key={item.order} className="trip-detail-timeline-item">
-                <div
-                  className="trip-detail-timeline-marker"
-                  aria-hidden="true"
-                />
-                <div className="trip-detail-timeline-content">
-                  {(item.timeOfDayLabel || item.durationLabel) && (
-                    <div className="trip-detail-timeline-tag">
-                      {item.timeOfDayLabel && (
-                        <span>{item.timeOfDayLabel}</span>
-                      )}
-                      {item.timeOfDayLabel && item.durationLabel && (
-                        <span aria-hidden="true"> • </span>
-                      )}
-                      {item.durationLabel && <span>{item.durationLabel}</span>}
-                    </div>
-                  )}
-                  <h3 className="trip-detail-timeline-title">{item.title}</h3>
-                  <p className="trip-detail-timeline-desc">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 9. Inclusions & Exclusions */}
-      {detail && (
-        <section
-          className="trip-detail-section"
-          aria-label="Kelengkapan paket perjalanan"
-        >
-          <div className="trip-detail-in-out-grid">
-            {detail.includedItems && detail.includedItems.length > 0 && (
-              <div className="trip-detail-in-out-block">
-                <h2 className="trip-detail-section__title">
-                  Termasuk dalam Paket
-                </h2>
-                <ul className="trip-detail-list">
-                  {detail.includedItems.map((inc, i) => (
-                    <li key={i} className="trip-detail-list-item">
-                      <span
-                        className="trip-detail-list-icon trip-detail-list-icon--check"
-                        aria-hidden="true"
-                      >
-                        ✓
-                      </span>
-                      <span>{inc}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {detail.excludedItems && detail.excludedItems.length > 0 && (
-              <div className="trip-detail-in-out-block">
-                <h2 className="trip-detail-section__title">Tidak Termasuk</h2>
-                <ul className="trip-detail-list">
-                  {detail.excludedItems.map((exc, i) => (
-                    <li key={i} className="trip-detail-list-item">
-                      <span
-                        className="trip-detail-list-icon trip-detail-list-icon--cross"
-                        aria-hidden="true"
-                      >
-                        ✕
-                      </span>
-                      <span>{exc}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* 10. Safety Notes / Sebelum Berangkat */}
-      {detail?.safetyNotes && detail.safetyNotes.length > 0 && (
-        <section
-          className="trip-detail-section"
-          aria-label="Catatan persiapan sebelum berangkat"
-        >
-          <h2 className="trip-detail-section__title">Sebelum Berangkat</h2>
-          <ul className="trip-detail-list">
-            {detail.safetyNotes.map((note, i) => (
-              <li key={i} className="trip-detail-list-item">
-                <span className="trip-detail-list-icon" aria-hidden="true">
-                  •
-                </span>
-                <span>{note}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* 11. Cancellation Policy */}
-      {detail?.cancellationPolicySummary && (
-        <section
-          className="trip-detail-section"
-          aria-label="Kebijakan pembatalan"
-        >
-          <h2 className="trip-detail-section__title">Kebijakan Pembatalan</h2>
-          <p className="trip-detail-policy-text">
-            {detail.cancellationPolicySummary}
-          </p>
-        </section>
-      )}
+            </section>
+          )}
+        </div>
+      </details>
 
       {/* 12. Discreet Prototype Demo Trip Completion Disclosure (PAID Only) */}
       {isPaid && (

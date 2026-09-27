@@ -146,7 +146,12 @@ export function PackageDetailScreen({
     );
   }
 
-  const { package: pkg, detail, hasOpenSession } = viewModel;
+  const {
+    package: pkg,
+    detail,
+    hasOpenSession,
+    organizerReviewSummary,
+  } = viewModel;
   const durationLabel =
     QUIZ_DURATION_OPTIONS.find((d) => d.value === pkg.durationType)?.label ??
     pkg.durationType;
@@ -155,6 +160,10 @@ export function PackageDetailScreen({
 
   return (
     <div className="package-detail-container">
+      <div className="package-detail-context" aria-label="Konteks halaman">
+        <span className="package-detail-context__label">Detail Experience</span>
+      </div>
+
       {/* 1. Hero Media */}
       <PackageHero packageData={pkg} />
 
@@ -177,8 +186,6 @@ export function PackageDetailScreen({
             {pkg.title}
           </h1>
 
-          <p className="package-detail-value-prop">{detail.valueProposition}</p>
-
           <div className="package-detail-price-badge">
             <span className="package-detail-price-label">Mulai dari</span>
             <span className="package-detail-price-amount">
@@ -186,6 +193,8 @@ export function PackageDetailScreen({
             </span>
             <span className="package-detail-price-unit">/ orang</span>
           </div>
+
+          <p className="package-detail-value-prop">{detail.valueProposition}</p>
         </section>
 
         {/* 3. Optional Personalized Match Explanation */}
@@ -227,180 +236,10 @@ export function PackageDetailScreen({
           </section>
         )}
 
-        {/* 4. Destination & Location Trust Section */}
-        <section
-          className="package-detail-section"
-          aria-labelledby="dest-trust-heading"
-        >
-          <div className="package-detail-section__header">
-            <div>
-              <span className="package-detail-section__eyebrow">Destinasi</span>
-              <h2
-                id="dest-trust-heading"
-                className="package-detail-section__title"
-              >
-                {pkg.destinationName}
-              </h2>
-              <p className="package-detail-section__subtitle">
-                {pkg.locationLabel}
-              </p>
-            </div>
-            <span className="package-detail-inline-trust">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                className="package-detail-inline-trust__icon"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                <polyline points="9 12 11 14 15 10" />
-              </svg>
-              <span>
-                {pkg.verificationLevel === "PLUS"
-                  ? "Terverifikasi Plus"
-                  : "Terverifikasi Dasar"}
-              </span>
-            </span>
-          </div>
-          <div className="package-detail-trust-explanation">
-            <strong className="package-detail-trust-explanation__title">
-              {pkg.verificationLevel === "PLUS"
-                ? "Tentang Terverifikasi Plus:"
-                : "Tentang Terverifikasi Dasar:"}
-            </strong>
-            <p className="package-detail-trust-explanation__text">
-              {pkg.verificationLevel === "PLUS"
-                ? "Destinasi telah melalui verifikasi kelayakan fasilitas, legalitas pengelola, dan kurasi kenyamanan lanjutan oleh tim JedaIn."
-                : "Destinasi telah melalui verifikasi internal data pengelola dan kesiapan fasilitas dasar oleh JedaIn (bukan konfirmasi ketersediaan tanggal/sesi)."}
-            </p>
-          </div>
-          <p className="package-detail-editorial-text">
-            {detail.destinationDetail.overviewDescription}
-          </p>
-          <p className="package-detail-subtle-note">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="package-detail-subtle-note__icon"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            <span>
-              Status mitra destinasi berdasarkan proses verifikasi internal
-              JedaIn.
-            </span>
-          </p>
-        </section>
-
-        {/* 5. EO / Guide Identity & Status */}
-        <section
-          className="package-detail-section"
-          aria-labelledby="organizer-heading"
-        >
-          <div className="package-detail-section__header">
-            <div>
-              <span className="package-detail-section__eyebrow">
-                Penyelenggara & Pemandu
-              </span>
-              <h2
-                id="organizer-heading"
-                className="package-detail-section__title"
-              >
-                {detail.organizer.displayName}
-              </h2>
-              {detail.organizer.roleDescription && (
-                <p className="package-detail-section__subtitle">
-                  {detail.organizer.roleDescription}
-                </p>
-              )}
-            </div>
-            <div className="package-detail-guide-meta">
-              <span className="package-detail-guide-meta__label">
-                Status pemandu
-              </span>
-              <span className="package-detail-guide-meta__value">
-                {detail.organizer.guideStatus === "CERTIFIED_GUIDE" ? (
-                  <>
-                    <svg
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                      className="package-detail-guide-meta__icon"
-                    >
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                      <polyline points="9 12 11 14 15 10" />
-                    </svg>
-                    <span>Certified Guide</span>
-                  </>
-                ) : (
-                  <span>Concept Organizer</span>
-                )}
-              </span>
-            </div>
-          </div>
-          <div className="package-detail-trust-explanation">
-            <strong className="package-detail-trust-explanation__title">
-              {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
-                ? "Tentang Certified Guide:"
-                : "Tentang Concept Organizer:"}
-            </strong>
-            <p className="package-detail-trust-explanation__text">
-              {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
-                ? "Certified Guide menunjukkan status kepemanduan berlisensi milik penyelenggara (EO). Status ini tidak menunjukkan pemandu individu tertentu untuk jadwal sesi."
-                : "Concept Organizer merancang konsep perjalanan dan bermitra dengan pemandu lokal di destinasi, bukan penugasan pemandu individu tertentu."}
-            </p>
-          </div>
-          {detail.organizer.bioSummary && (
-            <p className="package-detail-editorial-text">
-              {detail.organizer.bioSummary}
-            </p>
-          )}
-          <p className="package-detail-subtle-note">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="package-detail-subtle-note__icon"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            <span>Penyelenggara terdaftar di JedaIn Partner Portal.</span>
-          </p>
-        </section>
-
         {/* 6. Experience Highlights */}
         {detail.highlights.length > 0 && (
           <section
-            className="package-detail-section"
+            className="package-detail-section package-detail-section--primary"
             aria-labelledby="highlights-heading"
           >
             <h2
@@ -436,211 +275,9 @@ export function PackageDetailScreen({
           </section>
         )}
 
-        {/* 7. Itinerary */}
-        {detail.itinerary.length > 0 && (
-          <section
-            className="package-detail-section"
-            aria-labelledby="itinerary-heading"
-          >
-            <h2
-              id="itinerary-heading"
-              className="package-detail-section__title"
-            >
-              Rencana Perjalanan
-            </h2>
-            <p className="package-detail-section__desc">
-              Garis besar alur kegiatan paket template:
-            </p>
-            <ol className="package-detail-itinerary-list">
-              {detail.itinerary.map((item) => (
-                <li key={item.order} className="package-detail-itinerary-item">
-                  <span
-                    className="package-detail-itinerary-order"
-                    aria-hidden="true"
-                  >
-                    {item.order < 10 ? `0${item.order}` : item.order}
-                  </span>
-                  <div className="package-detail-itinerary-content">
-                    <div className="package-detail-itinerary-header">
-                      <h3 className="package-detail-itinerary-title">
-                        {item.title}
-                      </h3>
-                      {item.durationLabel && (
-                        <span className="package-detail-itinerary-duration">
-                          {item.durationLabel}
-                        </span>
-                      )}
-                    </div>
-                    <p className="package-detail-itinerary-desc">
-                      {item.description}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
-
-        {/* 8. What's Included / Excluded */}
-        <section
-          className="package-detail-section"
-          aria-labelledby="in-out-heading"
-        >
-          <h2 id="in-out-heading" className="package-detail-section__title">
-            Fasilitas & Ketentuan
-          </h2>
-          <div className="package-detail-in-out-grid">
-            <div className="package-detail-in-out-col">
-              <h3 className="package-detail-in-out-heading">Sudah Termasuk</h3>
-              <ul className="package-detail-in-out-list">
-                {detail.includedItems.map((item, idx) => (
-                  <li key={idx} className="package-detail-in-out-row">
-                    <span
-                      className="package-detail-in-out-icon package-detail-in-out-icon--included"
-                      aria-hidden="true"
-                    >
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </span>
-                    <span className="package-detail-in-out-text">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="package-detail-in-out-divider" aria-hidden="true" />
-
-            <div className="package-detail-in-out-col">
-              <h3 className="package-detail-in-out-heading">Belum Termasuk</h3>
-              <ul className="package-detail-in-out-list">
-                {detail.excludedItems.map((item, idx) => (
-                  <li key={idx} className="package-detail-in-out-row">
-                    <span
-                      className="package-detail-in-out-icon package-detail-in-out-icon--excluded"
-                      aria-hidden="true"
-                    >
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
-                    </span>
-                    <span className="package-detail-in-out-text">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* 9. Safety & Basic Notes */}
-        {detail.safetyNotes.length > 0 && (
-          <section
-            className="package-detail-section"
-            aria-labelledby="safety-heading"
-          >
-            <h2 id="safety-heading" className="package-detail-section__title">
-              Catatan Keselamatan & Persiapan
-            </h2>
-            <ul className="package-detail-simple-list">
-              {detail.safetyNotes.map((note, idx) => (
-                <li key={idx}>{note}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* 10. Travel Logistics & Meeting Point (P1-T02) */}
-        {(detail.meetingPointLabel ||
-          (detail.accessNotes && detail.accessNotes.length > 0)) && (
-          <section
-            className="package-detail-section"
-            aria-labelledby="logistics-heading"
-          >
-            <h2
-              id="logistics-heading"
-              className="package-detail-section__title"
-            >
-              Informasi Titik Kumpul & Akses
-            </h2>
-            <div className="package-detail-logistics-grid">
-              {detail.meetingPointLabel && (
-                <div className="package-detail-logistics-item">
-                  <span className="package-detail-logistics-label">
-                    Titik Kumpul
-                  </span>
-                  <strong className="package-detail-logistics-val">
-                    {detail.meetingPointLabel}
-                  </strong>
-                </div>
-              )}
-              <div className="package-detail-logistics-item">
-                <span className="package-detail-logistics-label">
-                  Lokasi Kawasan
-                </span>
-                <strong className="package-detail-logistics-val">
-                  {pkg.destinationName}, {pkg.locationLabel}
-                </strong>
-              </div>
-              <div className="package-detail-logistics-item">
-                <span className="package-detail-logistics-label">
-                  Waktu Keberangkatan
-                </span>
-                <span className="package-detail-logistics-val">
-                  Jam mengikuti jadwal keberangkatan yang dipilih saat memilih
-                  sesi.
-                </span>
-              </div>
-            </div>
-
-            {detail.accessNotes && detail.accessNotes.length > 0 && (
-              <div className="package-detail-logistics-notes">
-                <span className="package-detail-logistics-label">
-                  Catatan Akses Lokasi:
-                </span>
-                <ul className="package-detail-simple-list">
-                  {detail.accessNotes.map((note, idx) => (
-                    <li key={idx}>{note}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* 11. Cancellation & Refund Policy Summary */}
-        <section
-          className="package-detail-section"
-          aria-labelledby="policy-heading"
-        >
-          <h2 id="policy-heading" className="package-detail-section__title">
-            Kebijakan Pembatalan & Refund
-          </h2>
-          <p className="package-detail-editorial-text">
-            {detail.cancellationPolicySummary}
-          </p>
-        </section>
-
         {/* 11. Upcoming Sessions Preview */}
         <section
-          className="package-detail-section"
+          className="package-detail-section package-detail-section--primary"
           aria-labelledby="sessions-preview-heading"
         >
           <h2
@@ -708,60 +345,538 @@ export function PackageDetailScreen({
           )}
         </section>
 
-        {/* 12. Reviews Preview */}
-        <section
-          className="package-detail-section"
-          aria-labelledby="reviews-heading"
+        <div
+          className="package-detail-secondary"
+          aria-label="Detail tambahan experience"
         >
-          <h2 id="reviews-heading" className="package-detail-section__title">
-            {pkg.ratingProvenance === "SAMPLE"
-              ? "Contoh Ulasan Paket"
-              : "Ulasan Pascatrip"}
-          </h2>
-          <p className="package-detail-section__desc">
-            {pkg.ratingProvenance === "SAMPLE"
-              ? "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket. Ulasan Destinasi dan EO/Guide pascatrip dicatat terpisah."
-              : "Ulasan pascatrip dari traveler yang telah menyelesaikan perjalanan. Ulasan Destinasi dan EO/Guide dicatat terpisah."}
-          </p>
-          <div className="package-detail-reviews-summary">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-              className="package-detail-reviews-star"
-            >
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-            <span>
-              {pkg.rating !== undefined && pkg.rating !== null
-                ? pkg.ratingProvenance === "SAMPLE"
-                  ? `Rating paket contoh: ${pkg.rating.toFixed(1)} / 5.0`
-                  : `Rating paket: ${pkg.rating.toFixed(1)} / 5.0`
-                : "Belum ada rating"}
-            </span>
-          </div>
-          {detail.reviewPreview?.excerpts &&
-          detail.reviewPreview.excerpts.length > 0 ? (
-            <div className="package-detail-review-excerpt">
-              {detail.reviewPreview.excerpts.map((rev) => (
-                <div key={rev.bookingId}>
-                  <span className="package-detail-review-excerpt__author">
-                    {rev.authorName} • {rev.tripDateLabel}
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Tentang destinasi & penyelenggara</span>
+              <span className="package-detail-disclosure__hint">
+                Lihat detail
+              </span>
+            </summary>
+            <div className="package-detail-disclosure__body">
+              {/* 4. Destination & Location Trust Section */}
+              <section
+                className="package-detail-section"
+                aria-labelledby="dest-trust-heading"
+              >
+                <div className="package-detail-section__header">
+                  <div>
+                    <span className="package-detail-section__eyebrow">
+                      Destinasi
+                    </span>
+                    <h2
+                      id="dest-trust-heading"
+                      className="package-detail-section__title"
+                    >
+                      {pkg.destinationName}
+                    </h2>
+                    <p className="package-detail-section__subtitle">
+                      {pkg.locationLabel}
+                    </p>
+                  </div>
+                  <span className="package-detail-inline-trust">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className="package-detail-inline-trust__icon"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <polyline points="9 12 11 14 15 10" />
+                    </svg>
+                    <span>
+                      {pkg.verificationLevel === "PLUS"
+                        ? "Terverifikasi Plus"
+                        : "Terverifikasi Dasar"}
+                    </span>
                   </span>
-                  <p className="package-detail-review-excerpt__comment">
-                    "{rev.comment}"
+                </div>
+                <div className="package-detail-trust-explanation">
+                  <strong className="package-detail-trust-explanation__title">
+                    {pkg.verificationLevel === "PLUS"
+                      ? "Tentang Terverifikasi Plus:"
+                      : "Tentang Terverifikasi Dasar:"}
+                  </strong>
+                  <p className="package-detail-trust-explanation__text">
+                    {pkg.verificationLevel === "PLUS"
+                      ? "Destinasi telah melalui verifikasi kelayakan fasilitas, legalitas pengelola, dan kurasi kenyamanan lanjutan oleh tim JedaIn."
+                      : "Destinasi telah melalui verifikasi internal data pengelola dan kesiapan fasilitas dasar oleh JedaIn (bukan konfirmasi ketersediaan tanggal/sesi)."}
                   </p>
                 </div>
-              ))}
+                <p className="package-detail-editorial-text">
+                  {detail.destinationDetail.overviewDescription}
+                </p>
+                <p className="package-detail-subtle-note">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className="package-detail-subtle-note__icon"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span>
+                    Status mitra destinasi berdasarkan proses verifikasi
+                    internal JedaIn.
+                  </span>
+                </p>
+              </section>
+
+              {/* 5. EO / Guide Identity & Status */}
+              <section
+                className="package-detail-section"
+                aria-labelledby="organizer-heading"
+              >
+                <div className="package-detail-section__header">
+                  <div>
+                    <span className="package-detail-section__eyebrow">
+                      Penyelenggara & Pemandu
+                    </span>
+                    <h2
+                      id="organizer-heading"
+                      className="package-detail-section__title"
+                    >
+                      {detail.organizer.displayName}
+                    </h2>
+                    {detail.organizer.roleDescription && (
+                      <p className="package-detail-section__subtitle">
+                        {detail.organizer.roleDescription}
+                      </p>
+                    )}
+                    <div
+                      className="package-detail-organizer-rating"
+                      aria-label="Rating penyelenggara"
+                    >
+                      <span className="package-detail-organizer-rating__label">
+                        Rating penyelenggara
+                      </span>
+                      <strong className="package-detail-organizer-rating__value">
+                        {organizerReviewSummary
+                          ? `★ ${organizerReviewSummary.averageRating.toFixed(1)} · ${organizerReviewSummary.reviewCount} ulasan pascatrip`
+                          : "Belum ada ulasan pascatrip"}
+                      </strong>
+                    </div>
+                  </div>
+                  <div className="package-detail-guide-meta">
+                    <span className="package-detail-guide-meta__label">
+                      Status pemandu
+                    </span>
+                    <span className="package-detail-guide-meta__value">
+                      {detail.organizer.guideStatus === "CERTIFIED_GUIDE" ? (
+                        <>
+                          <svg
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                            className="package-detail-guide-meta__icon"
+                          >
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            <polyline points="9 12 11 14 15 10" />
+                          </svg>
+                          <span>Certified Guide</span>
+                        </>
+                      ) : (
+                        <span>Concept Organizer</span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <div className="package-detail-trust-explanation">
+                  <strong className="package-detail-trust-explanation__title">
+                    {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
+                      ? "Tentang Certified Guide:"
+                      : "Tentang Concept Organizer:"}
+                  </strong>
+                  <p className="package-detail-trust-explanation__text">
+                    {detail.organizer.guideStatus === "CERTIFIED_GUIDE"
+                      ? "Certified Guide menunjukkan status kepemanduan berlisensi milik penyelenggara (EO). Status ini tidak menunjukkan pemandu individu tertentu untuk jadwal sesi."
+                      : "Concept Organizer merancang konsep perjalanan dan bermitra dengan pemandu lokal di destinasi, bukan penugasan pemandu individu tertentu."}
+                  </p>
+                </div>
+                {detail.organizer.bioSummary && (
+                  <p className="package-detail-editorial-text">
+                    {detail.organizer.bioSummary}
+                  </p>
+                )}
+                <p className="package-detail-subtle-note">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className="package-detail-subtle-note__icon"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span>Penyelenggara terdaftar di JedaIn Partner Portal.</span>
+                </p>
+              </section>
             </div>
-          ) : (
-            <p className="package-detail-section__desc">
-              Belum ada ulasan tertulis yang ditampilkan.
-            </p>
-          )}
-        </section>
+          </details>
+
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Rencana perjalanan</span>
+              <span className="package-detail-disclosure__hint">
+                Lihat itinerary
+              </span>
+            </summary>
+            <div className="package-detail-disclosure__body">
+              {/* 7. Itinerary */}
+              {detail.itinerary.length > 0 && (
+                <section
+                  className="package-detail-section"
+                  aria-labelledby="itinerary-heading"
+                >
+                  <h2
+                    id="itinerary-heading"
+                    className="package-detail-section__title"
+                  >
+                    Rencana Perjalanan
+                  </h2>
+                  <p className="package-detail-section__desc">
+                    Garis besar alur kegiatan paket template:
+                  </p>
+                  <ol className="package-detail-itinerary-list">
+                    {detail.itinerary.map((item) => (
+                      <li
+                        key={item.order}
+                        className="package-detail-itinerary-item"
+                      >
+                        <span
+                          className="package-detail-itinerary-order"
+                          aria-hidden="true"
+                        >
+                          {item.order < 10 ? `0${item.order}` : item.order}
+                        </span>
+                        <div className="package-detail-itinerary-content">
+                          <div className="package-detail-itinerary-header">
+                            <h3 className="package-detail-itinerary-title">
+                              {item.title}
+                            </h3>
+                            {item.durationLabel && (
+                              <span className="package-detail-itinerary-duration">
+                                {item.durationLabel}
+                              </span>
+                            )}
+                          </div>
+                          <p className="package-detail-itinerary-desc">
+                            {item.description}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+            </div>
+          </details>
+
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Yang kamu dapatkan</span>
+              <span className="package-detail-disclosure__hint">
+                Lihat fasilitas
+              </span>
+            </summary>
+            <div className="package-detail-disclosure__body">
+              {/* 8. What's Included / Excluded */}
+              <section
+                className="package-detail-section"
+                aria-labelledby="in-out-heading"
+              >
+                <h2
+                  id="in-out-heading"
+                  className="package-detail-section__title"
+                >
+                  Fasilitas & Ketentuan
+                </h2>
+                <div className="package-detail-in-out-grid">
+                  <div className="package-detail-in-out-col">
+                    <h3 className="package-detail-in-out-heading">
+                      Sudah Termasuk
+                    </h3>
+                    <ul className="package-detail-in-out-list">
+                      {detail.includedItems.map((item, idx) => (
+                        <li key={idx} className="package-detail-in-out-row">
+                          <span
+                            className="package-detail-in-out-icon package-detail-in-out-icon--included"
+                            aria-hidden="true"
+                          >
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </span>
+                          <span className="package-detail-in-out-text">
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div
+                    className="package-detail-in-out-divider"
+                    aria-hidden="true"
+                  />
+
+                  <div className="package-detail-in-out-col">
+                    <h3 className="package-detail-in-out-heading">
+                      Belum Termasuk
+                    </h3>
+                    <ul className="package-detail-in-out-list">
+                      {detail.excludedItems.map((item, idx) => (
+                        <li key={idx} className="package-detail-in-out-row">
+                          <span
+                            className="package-detail-in-out-icon package-detail-in-out-icon--excluded"
+                            aria-hidden="true"
+                          >
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                          </span>
+                          <span className="package-detail-in-out-text">
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </details>
+
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Persiapan, titik kumpul & akses</span>
+              <span className="package-detail-disclosure__hint">
+                Lihat detail
+              </span>
+            </summary>
+            <div className="package-detail-disclosure__body">
+              {/* 9. Safety & Basic Notes */}
+              {detail.safetyNotes.length > 0 && (
+                <section
+                  className="package-detail-section"
+                  aria-labelledby="safety-heading"
+                >
+                  <h2
+                    id="safety-heading"
+                    className="package-detail-section__title"
+                  >
+                    Catatan Keselamatan & Persiapan
+                  </h2>
+                  <ul className="package-detail-simple-list">
+                    {detail.safetyNotes.map((note, idx) => (
+                      <li key={idx}>{note}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {/* 10. Travel Logistics & Meeting Point (P1-T02) */}
+              {(detail.meetingPointLabel ||
+                (detail.accessNotes && detail.accessNotes.length > 0)) && (
+                <section
+                  className="package-detail-section"
+                  aria-labelledby="logistics-heading"
+                >
+                  <h2
+                    id="logistics-heading"
+                    className="package-detail-section__title"
+                  >
+                    Informasi Titik Kumpul & Akses
+                  </h2>
+                  <div className="package-detail-logistics-grid">
+                    {detail.meetingPointLabel && (
+                      <div className="package-detail-logistics-item">
+                        <span className="package-detail-logistics-label">
+                          Titik Kumpul
+                        </span>
+                        <strong className="package-detail-logistics-val">
+                          {detail.meetingPointLabel}
+                        </strong>
+                      </div>
+                    )}
+                    <div className="package-detail-logistics-item">
+                      <span className="package-detail-logistics-label">
+                        Lokasi Kawasan
+                      </span>
+                      <strong className="package-detail-logistics-val">
+                        {pkg.destinationName}, {pkg.locationLabel}
+                      </strong>
+                    </div>
+                    <div className="package-detail-logistics-item">
+                      <span className="package-detail-logistics-label">
+                        Waktu Keberangkatan
+                      </span>
+                      <span className="package-detail-logistics-val">
+                        Jam mengikuti jadwal keberangkatan yang dipilih saat
+                        memilih sesi.
+                      </span>
+                    </div>
+                  </div>
+
+                  {detail.accessNotes && detail.accessNotes.length > 0 && (
+                    <div className="package-detail-logistics-notes">
+                      <span className="package-detail-logistics-label">
+                        Catatan Akses Lokasi:
+                      </span>
+                      <ul className="package-detail-simple-list">
+                        {detail.accessNotes.map((note, idx) => (
+                          <li key={idx}>{note}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </section>
+              )}
+            </div>
+          </details>
+
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Kebijakan pembatalan</span>
+              <span className="package-detail-disclosure__hint">
+                Lihat kebijakan
+              </span>
+            </summary>
+            <div className="package-detail-disclosure__body">
+              {/* 11. Cancellation & Refund Policy Summary */}
+              <section
+                className="package-detail-section"
+                aria-labelledby="policy-heading"
+              >
+                <h2
+                  id="policy-heading"
+                  className="package-detail-section__title"
+                >
+                  Kebijakan Pembatalan & Refund
+                </h2>
+                <p className="package-detail-editorial-text">
+                  {detail.cancellationPolicySummary}
+                </p>
+              </section>
+            </div>
+          </details>
+
+          <details className="package-detail-disclosure">
+            <summary className="package-detail-disclosure__summary">
+              <span>Ulasan & rating</span>
+              <span className="package-detail-disclosure__hint">
+                Lihat ulasan
+              </span>
+            </summary>
+            <div className="package-detail-disclosure__body">
+              {/* 12. Reviews Preview */}
+              <section
+                className="package-detail-section"
+                aria-labelledby="reviews-heading"
+              >
+                <h2
+                  id="reviews-heading"
+                  className="package-detail-section__title"
+                >
+                  {pkg.ratingProvenance === "SAMPLE"
+                    ? "Contoh Ulasan Paket"
+                    : "Ulasan Pascatrip"}
+                </h2>
+                <p className="package-detail-section__desc">
+                  {pkg.ratingProvenance === "SAMPLE"
+                    ? "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket. Ulasan Destinasi dan EO/Guide pascatrip dicatat terpisah."
+                    : "Ulasan pascatrip dari traveler yang telah menyelesaikan perjalanan. Ulasan Destinasi dan EO/Guide dicatat terpisah."}
+                </p>
+                <div className="package-detail-reviews-summary">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                    className="package-detail-reviews-star"
+                  >
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                  <span>
+                    {pkg.rating !== undefined && pkg.rating !== null
+                      ? pkg.ratingProvenance === "SAMPLE"
+                        ? `Rating paket contoh: ${pkg.rating.toFixed(1)} / 5.0`
+                        : `Rating paket: ${pkg.rating.toFixed(1)} / 5.0`
+                      : "Belum ada rating"}
+                  </span>
+                </div>
+                {detail.reviewPreview?.excerpts &&
+                detail.reviewPreview.excerpts.length > 0 ? (
+                  <div className="package-detail-review-excerpt">
+                    {detail.reviewPreview.excerpts.map((rev) => (
+                      <div key={rev.bookingId}>
+                        <span className="package-detail-review-excerpt__author">
+                          {rev.authorName} • {rev.tripDateLabel}
+                        </span>
+                        <p className="package-detail-review-excerpt__comment">
+                          "{rev.comment}"
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="package-detail-section__desc">
+                    Belum ada ulasan tertulis yang ditampilkan.
+                  </p>
+                )}
+              </section>
+            </div>
+          </details>
+        </div>
       </div>
 
       {/* 13. Sticky Progression CTA */}

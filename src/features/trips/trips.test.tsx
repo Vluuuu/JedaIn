@@ -213,6 +213,92 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(container.textContent).toContain("Beri Nilai EO / Guide");
   });
 
+  it("F5.1 active Trip Detail keeps meeting point primary and EO contact inside the main disclosure", async () => {
+    const traveler: AuthUser = {
+      id: "usr_f51_active_trip",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    const tx = mockTransactionStore.createTransaction({
+      travelerId: traveler.id,
+      packageId: "slow_green_day",
+      sessionId: "ses_sgd_1",
+      participantCount: 1,
+      unitPricePerPerson: 275000,
+      capacitySnapshot: 6,
+      idempotencyKey: "k_f51_active_trip",
+    });
+    const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
+    mockTransactionStore.executePaymentSuccess({ bookingId: bId });
+
+    const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+    expect(container.textContent).toContain("Detail Perjalanan");
+    expect(container.textContent).toContain(
+      "Area titik kumpul Lereng Hijau Batu",
+    );
+
+    const disclosure = container.querySelector<HTMLDetailsElement>(
+      "details.trip-detail-disclosure",
+    );
+    expect(disclosure).not.toBeNull();
+    expect(disclosure?.open).toBe(false);
+    expect(disclosure?.querySelector("summary")?.textContent).toContain(
+      "Lihat Detail Perjalanan",
+    );
+
+    const telLink = container.querySelector(
+      'a[href="tel:081234567890"]',
+    ) as HTMLAnchorElement;
+    expect(telLink).not.toBeNull();
+    expect(disclosure?.contains(telLink)).toBe(true);
+    expect(disclosure?.textContent).toContain("Informasi Trip");
+    expect(disclosure?.textContent).toContain("Penyelenggara & Kontak Trip");
+    expect(disclosure?.textContent).toContain("Rencana Perjalanan (Itinerary)");
+    expect(disclosure?.textContent).toContain("Termasuk dalam Paket");
+    expect(disclosure?.textContent).toContain("Sebelum Berangkat");
+    expect(disclosure?.textContent).toContain("Kebijakan Pembatalan");
+  });
+
+  it("F5.1 completed Trip Detail prioritizes separate review actions before secondary trip detail", async () => {
+    const traveler: AuthUser = {
+      id: "usr_f51_completed_trip",
+      onboardingStatus: "COMPLETED",
+    };
+    sessionStore.setUser(traveler);
+
+    const bId = `bk_demo_completed_${traveler.id}`;
+    const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+
+    expect(container.textContent).toContain("Perjalanan Selesai");
+    expect(container.textContent).toContain("Beri Nilai Destinasi");
+    expect(container.textContent).toContain("Beri Nilai EO / Guide");
+
+    const reviews = container.querySelector(".trip-detail-section--reviews");
+    const disclosure = container.querySelector<HTMLDetailsElement>(
+      "details.trip-detail-disclosure",
+    );
+    expect(reviews).not.toBeNull();
+    expect(disclosure).not.toBeNull();
+    expect(disclosure?.open).toBe(false);
+    expect(
+      Boolean(
+        reviews &&
+        disclosure &&
+        reviews.compareDocumentPosition(disclosure) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+    ).toBe(true);
+
+    const telLink = container.querySelector(
+      'a[href="tel:081234567890"]',
+    ) as HTMLAnchorElement;
+    expect(telLink).not.toBeNull();
+    expect(disclosure?.contains(telLink)).toBe(true);
+    expect(container.textContent).not.toContain("Kontrol Demo");
+  });
+
   it("L. wrong owner trip detail blocked → returns Trip tidak ditemukan", async () => {
     const travelerA: AuthUser = {
       id: "usr_trip_A",

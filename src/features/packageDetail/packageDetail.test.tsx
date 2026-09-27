@@ -7,6 +7,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { App } from "../../App";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import { sessionStore } from "../onboarding/sessionStore";
+import { mockReviewStore } from "../reviews/mockReviewStore";
 import { MOCK_PACKAGE_DETAILS } from "./mockPackageDetails";
 import { MockPackageDetailAdapter } from "./mockAdapter";
 import { PackageDetailScreen } from "./PackageDetailScreen";
@@ -23,6 +24,7 @@ afterEach(async () => {
   await act(() => root?.unmount());
   container?.remove();
   sessionStore.reset();
+  mockReviewStore.reset();
 });
 
 async function renderPackageDetail(
@@ -74,6 +76,60 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     expect(view.textContent).toContain("Fasilitas & Ketentuan");
     expect(view.textContent).toContain("Jadwal Terdekat");
     expect(view.textContent).toContain("Pilih Jadwal");
+  });
+
+  it("F5.1 buyer hierarchy keeps primary buyer information visible and secondary detail collapsed", async () => {
+    const view = await renderPackageDetail("slow_green_day");
+
+    expect(view.textContent).toContain("Detail Experience");
+    expect(view.textContent).toContain("Highlight Pengalaman");
+    expect(view.textContent).toContain("Jadwal Terdekat");
+    expect(view.textContent).toContain("4.8 (contoh)");
+
+    const disclosures = Array.from(
+      view.querySelectorAll<HTMLDetailsElement>(
+        "details.package-detail-disclosure",
+      ),
+    );
+    expect(disclosures).toHaveLength(6);
+    expect(disclosures.every((detail) => detail.open === false)).toBe(true);
+
+    expect(
+      view.querySelector(".package-detail-secondary")?.textContent,
+    ).toContain("Penyelenggara & Pemandu");
+    expect(
+      view.querySelector(".package-detail-secondary")?.textContent,
+    ).toContain("Kebijakan Pembatalan & Refund");
+  });
+
+  it("F5.1 organizer rating stays truthful: zero state first, runtime post-trip aggregate when available", async () => {
+    let view = await renderPackageDetail("slow_green_day");
+    expect(view.textContent).toContain("Belum ada ulasan pascatrip");
+
+    await act(async () => {
+      root.unmount();
+    });
+    container.remove();
+
+    mockReviewStore.submitReview({
+      bookingId: "bk_org_rating_1",
+      travelerId: "usr_org_rating_1",
+      targetType: "EO_GUIDE",
+      targetRef: "org_lereng_batu",
+      rating: 5,
+      comment: "Pendampingan jelas.",
+    });
+    mockReviewStore.submitReview({
+      bookingId: "bk_org_rating_2",
+      travelerId: "usr_org_rating_2",
+      targetType: "EO_GUIDE",
+      targetRef: "org_lereng_batu",
+      rating: 4,
+      comment: "Alur trip nyaman.",
+    });
+
+    view = await renderPackageDetail("slow_green_day");
+    expect(view.textContent).toContain("★ 4.5 · 2 ulasan pascatrip");
   });
 
   it.each([

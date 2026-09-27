@@ -27,26 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Format F5.1 files for audit
-        run: |
-          npx prettier --write \
-            src/features/packageDetail/PackageDetailScreen.tsx \
-            src/features/packageDetail/packageDetail.css \
-            src/features/trips/TripDetailScreen.tsx \
-            src/features/trips/trips.css \
-            src/features/trips/trips.test.tsx
-          for f in \
-            src/features/packageDetail/PackageDetailScreen.tsx \
-            src/features/packageDetail/packageDetail.css \
-            src/features/trips/TripDetailScreen.tsx \
-            src/features/trips/trips.css \
-            src/features/trips/trips.test.tsx
-          do
-            echo "FORMATTED_FILE:$f"
-            base64 -w 0 "$f"
-            echo
-          done
-
       - name: Check formatting
         run: npm run format:check
 

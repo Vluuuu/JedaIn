@@ -898,10 +898,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
     });
 
     it("AE & AF & AG. zero reviews shows 'Belum ada rating', empty comment shows 'Tanpa komentar', and travelerId is hidden", async () => {
-      const approval =
-        mockDestinationVerificationStore.approveApplication(
-          "dest_app_coban_rondo",
-        );
+      const approval = mockDestinationVerificationStore.approveApplication(
+        "dest_app_coban_rondo",
+      );
       expect(approval.success).toBe(true);
       partnerSessionStore.setPartner({
         id: "dest_partner_coban_rondo",
@@ -1098,10 +1097,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
     });
 
     it("renders calm empty states for sessions and destination reviews", async () => {
-      const approval =
-        mockDestinationVerificationStore.approveApplication(
-          "dest_app_coban_rondo",
-        );
+      const approval = mockDestinationVerificationStore.approveApplication(
+        "dest_app_coban_rondo",
+      );
       expect(approval.success).toBe(true);
       partnerSessionStore.setPartner({
         id: "dest_partner_coban_rondo",
@@ -1172,7 +1170,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const badgeView = await renderComponent(
         createElement(DestinationVerificationBadgeScreen),
       );
-      expect(badgeView.textContent).toContain("Status Verifikasi Tidak Tersedia");
+      expect(badgeView.textContent).toContain(
+        "Status Verifikasi Tidak Tersedia",
+      );
 
       const schedView = await renderComponent(
         createElement(DestinationScheduleScreen),

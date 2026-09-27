@@ -1,5 +1,5 @@
 import { PACKAGE_VISUALS } from "../../lib/assets/packageImages";
-import type { DestinationRecord } from "./types";
+import type { DestinationMediaItem, DestinationRecord } from "./types";
 
 export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
   {
@@ -175,7 +175,7 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
         provenance: "PROTOTYPE_ILLUSTRATION",
       },
     ],
-    status: "ACTIVE",
+    status: "INACTIVE",
     availableActivities: [
       "Jalan hening melintasi kanopi rumpun bambu",
       "Sesi journaling & kontemplasi santai",
@@ -249,6 +249,81 @@ export const mockDestinationStore = {
     }
     return cloneDestination(cloned);
   },
+
+  addMediaItem(
+    destinationId: string,
+    media: DestinationMediaItem,
+  ): { success: boolean; destination?: DestinationRecord; message?: string } {
+    const index = destinations.findIndex(
+      (destination) => destination.destinationId === destinationId,
+    );
+    if (index < 0) {
+      return { success: false, message: "Destinasi tidak ditemukan." };
+    }
+
+    const currentGallery = destinations[index].mediaGallery ?? [];
+    if (currentGallery.length >= 8) {
+      return {
+        success: false,
+        message: "Galeri prototype dibatasi maksimal 8 visual.",
+      };
+    }
+
+    if (currentGallery.some((item) => item.mediaId === media.mediaId)) {
+      return {
+        success: false,
+        message: "Visual dengan ID yang sama sudah ada di galeri.",
+      };
+    }
+
+    destinations[index] = {
+      ...destinations[index],
+      mediaGallery: [...currentGallery, { ...media }],
+    };
+
+    return {
+      success: true,
+      destination: cloneDestination(destinations[index]),
+    };
+  },
+
+  removeMediaItem(
+    destinationId: string,
+    mediaId: string,
+  ): { success: boolean; destination?: DestinationRecord; message?: string } {
+    const index = destinations.findIndex(
+      (destination) => destination.destinationId === destinationId,
+    );
+    if (index < 0) {
+      return { success: false, message: "Destinasi tidak ditemukan." };
+    }
+
+    const currentGallery = destinations[index].mediaGallery ?? [];
+    const media = currentGallery.find((item) => item.mediaId === mediaId);
+    if (!media) {
+      return { success: false, message: "Visual galeri tidak ditemukan." };
+    }
+
+    if (media.provenance !== "DESTINATION_SOURCE") {
+      return {
+        success: false,
+        message: "Visual bawaan prototype tidak dapat dihapus oleh Mitra.",
+      };
+    }
+
+    destinations[index] = {
+      ...destinations[index],
+      mediaGallery: currentGallery
+        .filter((item) => item.mediaId !== mediaId)
+        .map((item) => ({ ...item })),
+    };
+
+    return {
+      success: true,
+      destination: cloneDestination(destinations[index]),
+    };
+  },
+
 
   /**
    * Authoritative EO-available destination selector:

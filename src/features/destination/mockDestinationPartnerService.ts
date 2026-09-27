@@ -1,6 +1,7 @@
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
+import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
-import type { DestinationRecord } from "../eo/types";
+import type { DestinationMediaItem, DestinationRecord } from "../eo/types";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import type { DestinationApplicationDraft } from "./types";
 
@@ -54,5 +55,41 @@ export const mockDestinationPartnerService = {
   getCanonicalDestinationForPartner(): DestinationRecord | undefined {
     const context = resolveAuthenticatedDestinationContext();
     return context?.destination;
+  },
+
+  addGalleryMedia(
+    media: DestinationMediaItem,
+  ): { success: boolean; destination?: DestinationRecord; message?: string } {
+    const context = resolveAuthenticatedDestinationContext();
+    if (!context) {
+      return {
+        success: false,
+        message:
+          "Akses ditolak: Galeri hanya dapat dikelola oleh Mitra Destinasi terverifikasi.",
+      };
+    }
+
+    return mockDestinationStore.addMediaItem(
+      context.destination.destinationId,
+      media,
+    );
+  },
+
+  removeGalleryMedia(
+    mediaId: string,
+  ): { success: boolean; destination?: DestinationRecord; message?: string } {
+    const context = resolveAuthenticatedDestinationContext();
+    if (!context) {
+      return {
+        success: false,
+        message:
+          "Akses ditolak: Galeri hanya dapat dikelola oleh Mitra Destinasi terverifikasi.",
+      };
+    }
+
+    return mockDestinationStore.removeMediaItem(
+      context.destination.destinationId,
+      mediaId,
+    );
   },
 };

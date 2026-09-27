@@ -358,9 +358,11 @@ export const mockDestinationVerificationStore = {
     return { success: true, application: cloneVerificationApp(application) };
   },
 
-  approveApplication(
-    applicationId: string,
-  ): { success: boolean; destination?: DestinationRecord; message?: string } {
+  approveApplication(applicationId: string): {
+    success: boolean;
+    destination?: DestinationRecord;
+    message?: string;
+  } {
     const app = verificationApps.find((a) => a.applicationId === applicationId);
     if (!app || app.status !== "PENDING_REVIEW") {
       return {

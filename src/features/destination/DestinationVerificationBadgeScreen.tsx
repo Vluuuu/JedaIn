@@ -9,9 +9,7 @@ export function DestinationVerificationBadgeScreen() {
       <div className="dest-container" style={{ padding: "var(--space-8)" }}>
         <div className="admin-alert admin-alert--warning">
           <h2>Status Verifikasi Tidak Tersedia</h2>
-          <p>
-            Status verifikasi destinasi tidak tersedia untuk akun ini.
-          </p>
+          <p>Status verifikasi destinasi tidak tersedia untuk akun ini.</p>
         </div>
       </div>
     );
@@ -41,16 +39,17 @@ export function DestinationVerificationBadgeScreen() {
         </div>
       </header>
 
-      <section className="dest-verification-single" aria-label="Status verifikasi">
+      <section
+        className="dest-verification-single"
+        aria-label="Status verifikasi"
+      >
         <article className="dest-badge-card dest-badge-card--active">
           <div className="dest-verification-single__heading">
             <div>
               <span className="dest-verification-single__eyebrow">
                 Status aktif
               </span>
-              <h2>
-                {isPlus ? "Terverifikasi Plus" : "Terverifikasi Dasar"}
-              </h2>
+              <h2>{isPlus ? "Terverifikasi Plus" : "Terverifikasi Dasar"}</h2>
             </div>
             <Badge tone="success">Pemandu lokal tersedia</Badge>
           </div>

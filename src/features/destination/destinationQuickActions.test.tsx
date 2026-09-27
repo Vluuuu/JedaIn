@@ -4,6 +4,8 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
+import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
 import { DestinationOverviewScreen } from "./DestinationOverviewScreen";
 
@@ -18,6 +20,8 @@ afterEach(async () => {
   await act(() => root?.unmount());
   container?.remove();
   partnerSessionStore.reset();
+  mockDestinationStore.reset();
+  mockDestinationVerificationStore.reset();
 });
 
 async function renderComponent(
@@ -102,13 +106,18 @@ describe("F3.3 — Mitra Destination Overview Quick Actions", () => {
   });
 
   it("4. Quick Actions remain present and functional when upcoming-session and review data is empty", async () => {
+    const approval =
+      mockDestinationVerificationStore.approveApplication(
+        "dest_app_coban_rondo",
+      );
+    expect(approval.success).toBe(true);
     partnerSessionStore.setPartner({
-      id: "dest_partner_trawas_bambu",
-      email: "partner@trawas.id",
-      name: "Pengelola Trawas",
+      id: "dest_partner_coban_rondo",
+      email: "partner@cobanrondo.id",
+      name: "Pengelola Coban Rondo",
       role: "DESTINATION",
-      businessName: "Pengelola Bambu Trawas",
-      destinationIdentityId: "dest_hutan_trawas",
+      businessName: "Pengelola Coban Rondo",
+      destinationIdentityId: "dest_coban_rondo",
     });
 
     const view = await renderComponent(

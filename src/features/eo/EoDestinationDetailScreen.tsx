@@ -63,15 +63,15 @@ export function EoDestinationDetailScreen() {
       <nav className="eo-dest-detail-back-nav" aria-label="Navigasi kembali">
         <Link
           to={
-            openedFromBuilder
-              ? builderBackTarget
-              : "/partner/eo/destinations"
+            openedFromBuilder ? builderBackTarget : "/partner/eo/destinations"
           }
           className="eo-dest-detail-back-link"
         >
           <ArrowLeftIcon className="eo-dest-detail-back-icon" />
           <span>
-            {openedFromBuilder ? "Kembali ke Perancang Paket" : "Kembali ke Destinasi"}
+            {openedFromBuilder
+              ? "Kembali ke Perancang Paket"
+              : "Kembali ke Destinasi"}
           </span>
         </Link>
       </nav>
@@ -415,7 +415,9 @@ export function EoDestinationDetailScreen() {
                 size="md"
                 onClick={handleCreatePackage}
               >
-                {openedFromBuilder ? "Pilih Destinasi Ini" : "Buat Paket Sekarang"}
+                {openedFromBuilder
+                  ? "Pilih Destinasi Ini"
+                  : "Buat Paket Sekarang"}
               </Button>
             </div>
           ) : (

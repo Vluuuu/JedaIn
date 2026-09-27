@@ -52,9 +52,10 @@ Bagian ini adalah urutan presentasi yang direkomendasikan ketika waktu juri terb
 4. Jelaskan bahwa insight adalah **data simulasi/directional untuk prototype**, bukan market validation atau jaminan penjualan.
 5. Buka satu destinasi/package dan tunjukkan:
    - filter lokasi + dedicated Destination Detail sebagai decision page,
+   - satu status verifikasi yang jelas: **Terverifikasi Dasar** / **Terverifikasi Plus**,
+   - jelaskan bahwa pemandu lokal adalah syarat verifikasi destinasi, bukan lencana kedua,
    - kapasitas umum destinasi,
    - cost scope,
-   - guide context,
    - gallery visual dengan provenance prototype yang jelas,
    - operational summary.
 6. Di Package Builder, tunjukkan `Ringkasan Pengalaman`, optional `Referensi Harga dari Sinyal Traveler`, dan pilihan visual destinasi / upload visual EO. Tegaskan bahwa referensi harga tidak mengubah Margin EO otomatis.
@@ -69,13 +70,19 @@ Bagian ini adalah urutan presentasi yang direkomendasikan ketika waktu juri terb
    - **Kuota Sesi EO**,
    - **Peserta Terkonfirmasi**,
    - **Selisih Operasional** bila tampil.
-5. Tunjukkan operational note sebagai informasi read-only, bukan approval.
+5. Buka **Profil Destinasi** dan tunjukkan **Galeri Destinasi**:
+   - Mitra dapat **Tambah visual** sendiri,
+   - visual bawaan tetap berlabel **Visual prototype**,
+   - visual yang ditambahkan Mitra dapat dihapus oleh Mitra,
+   - 360° tidak tersedia pada baseline ini.
+6. Tunjukkan operational note sebagai informasi read-only, bukan approval.
 
 ### D. Admin — trust layer
 
 1. Buka `/admin/login`.
 2. Klik **Masuk sebagai Admin Demo**.
 3. Tunjukkan queue kurasi/verifikasi dan jelaskan bahwa Admin adalah trust/governance layer.
+4. Untuk verifikasi destinasi, jelaskan bahwa Admin hanya memiliki satu approval awal **Terverifikasi Dasar** dan approval hanya bisa dilakukan bila bukti pemandu lokal tersedia. Tidak ada lagi approval "BASIC tanpa guide".
 4. Jika waktu masih ada, lanjutkan ke full shared-state demo pada Bagian 3.
 
 ### Story yang harus tertangkap juri
@@ -203,6 +210,7 @@ Saat presentasi, gunakan framing berikut:
 - sebut **prototype**, **simulasi**, atau **demo** pada payment/OTP/state yang memang mock,
 - sebut Demand Insight sebagai **sinyal/insight directional**, bukan "permintaan nyata terukur" bila sumbernya fixture prototype,
 - jangan menyebut fallback illustration sebagai foto aktual destinasi,
+- jangan menjelaskan "Guide Ready" sebagai lencana verifikasi kedua; pemandu lokal adalah syarat verifikasi destinasi,
 - jangan menyebut operational note sebagai approval/readiness confirmation,
 - jangan menyebut general destination capacity sebagai slot yang masih tersedia,
 - jangan menjelaskan commission 10% sebagai biaya tambahan Traveler,

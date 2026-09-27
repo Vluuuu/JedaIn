@@ -154,9 +154,10 @@ export function DestinationVerificationStatusScreen() {
                 flexWrap: "wrap",
               }}
             >
-              <Badge tone="success">Level: {app.approvedLevel ?? "—"}</Badge>
-              <Badge tone={app.approvedGuideReady ? "success" : "neutral"}>
-                {app.approvedGuideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
+              <Badge tone="success">
+                {app.approvedLevel === "BASIC"
+                  ? "Terverifikasi Dasar"
+                  : "Terverifikasi"}
               </Badge>
             </div>
           </div>

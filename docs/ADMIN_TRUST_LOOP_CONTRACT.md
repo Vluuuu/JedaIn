@@ -210,11 +210,10 @@ Later Destination Partner sprint must submit into this same store rather than cr
 
 ## 11. Destination Verification Decision — A06
 
-Wireframe locks initial decisions to:
+Current locked initial decisions are:
 
 - Reject + reason
-- Approve BASIC
-- Approve BASIC + `guide_ready`
+- Approve Destination
 
 `PLUS` is not an initial-application approval result; PLUS belongs to later trust lifecycle.
 
@@ -222,9 +221,10 @@ Rules:
 
 - only pending verification applications may be decided,
 - reject requires specific reason,
+- approval requires declared local-guide readiness plus reviewed guide evidence,
 - approval creates/updates the canonical destination directory through one authoritative store helper,
 - initial verification level is `BASIC`,
-- `guideReady` is explicit true/false based on chosen Admin decision and reviewed prototype evidence,
+- approved canonical destination always has `guideReady=true`,
 - do not silently create `PLUS` on first approval,
 - every decision requires audit reason/note and creates one audit event,
 - duplicate approval/reject attempts are deterministic and do not duplicate canonical destinations.
@@ -501,8 +501,8 @@ Use high-value integration tests, not one test per sentence.
 ### Destination Verification
 
 - pending seeded application appears,
-- approve BASIC creates/updates canonical destination once,
-- approve BASIC + guide_ready sets guideReady true,
+- approval with valid local-guide evidence creates/updates canonical destination once,
+- approval always produces canonical `guideReady=true`,
 - reject reason persists,
 - initial approval never grants PLUS,
 - duplicate decision is idempotent.
@@ -551,7 +551,7 @@ Also smoke:
 
 - EO rejection with exact reason,
 - Package rejection with exact reason,
-- Destination verification: Approve BASIC + guide_ready,
+- Destination verification: Approve Destination with local-guide evidence,
 - invalid/stale decision recovery,
 - audit event for each successful manual decision.
 

@@ -22,6 +22,7 @@ export interface PackageRecommendationSource {
   destinationName: string;
   locationLabel: string;
   visualAsset: string;
+  visualAssets?: string[];
   status: PackageStatus;
   verificationLevel: VerificationLevel;
   pricePerPerson: number;

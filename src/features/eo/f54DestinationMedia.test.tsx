@@ -178,7 +178,7 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
       provenance: "DESTINATION_SOURCE",
     });
     expect(denied.success).toBe(false);
-    expect(denied.message).toContain("Hanya dapat dikelola oleh Mitra");
+    expect(denied.message).toContain("hanya dapat dikelola oleh Mitra");
 
     partnerSessionStore.loginAsDemoDestination();
 

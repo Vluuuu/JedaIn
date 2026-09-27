@@ -898,13 +898,18 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
     });
 
     it("AE & AF & AG. zero reviews shows 'Belum ada rating', empty comment shows 'Tanpa komentar', and travelerId is hidden", async () => {
+      const approval =
+        mockDestinationVerificationStore.approveApplication(
+          "dest_app_coban_rondo",
+        );
+      expect(approval.success).toBe(true);
       partnerSessionStore.setPartner({
-        id: "dest_partner_trawas_bambu",
-        email: "partner@trawas.id",
-        name: "Pengelola Trawas",
+        id: "dest_partner_coban_rondo",
+        email: "partner@cobanrondo.id",
+        name: "Pengelola Coban Rondo",
         role: "DESTINATION",
-        businessName: "Pengelola Bambu Trawas",
-        destinationIdentityId: "dest_hutan_trawas",
+        businessName: "Pengelola Coban Rondo",
+        destinationIdentityId: "dest_coban_rondo",
       });
 
       const emptyView = await renderComponent(
@@ -917,7 +922,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         bookingId: "bk_empty_comment_dest",
         travelerId: "usr_secret_privacy_dest",
         targetType: "DESTINATION",
-        targetRef: "Hutan Bambu Trawas",
+        targetRef: "Hutan Pinus Coban Rondo",
         rating: 5,
         comment: "",
       });
@@ -1093,13 +1098,18 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
     });
 
     it("renders calm empty states for sessions and destination reviews", async () => {
+      const approval =
+        mockDestinationVerificationStore.approveApplication(
+          "dest_app_coban_rondo",
+        );
+      expect(approval.success).toBe(true);
       partnerSessionStore.setPartner({
-        id: "dest_partner_trawas_bambu",
-        email: "partner@trawas.id",
-        name: "Pengelola Trawas",
+        id: "dest_partner_coban_rondo",
+        email: "partner@cobanrondo.id",
+        name: "Pengelola Coban Rondo",
         role: "DESTINATION",
-        businessName: "Pengelola Bambu Trawas",
-        destinationIdentityId: "dest_hutan_trawas",
+        businessName: "Pengelola Coban Rondo",
+        destinationIdentityId: "dest_coban_rondo",
       });
 
       const view = await renderComponent(
@@ -1162,7 +1172,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const badgeView = await renderComponent(
         createElement(DestinationVerificationBadgeScreen),
       );
-      expect(badgeView.textContent).toContain("Data Lencana Tidak Tersedia");
+      expect(badgeView.textContent).toContain("Status Verifikasi Tidak Tersedia");
 
       const schedView = await renderComponent(
         createElement(DestinationScheduleScreen),

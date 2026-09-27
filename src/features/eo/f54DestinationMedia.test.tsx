@@ -86,12 +86,8 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     );
 
     expect(view.textContent).toContain("Galeri Destinasi");
-    expect(view.textContent).toContain(
-      "bukan dokumentasi kondisi aktual",
-    );
-    expect(
-      view.querySelectorAll(".dest-media-gallery__item"),
-    ).toHaveLength(3);
+    expect(view.textContent).toContain("bukan dokumentasi kondisi aktual");
+    expect(view.querySelectorAll(".dest-media-gallery__item")).toHaveLength(3);
     expect(view.textContent).toContain("Visual prototype");
     expect(view.textContent).not.toContain("Preview 360");
   });
@@ -106,12 +102,10 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     );
 
     expect(view.textContent).toContain("Galeri Visual Destinasi");
-    expect(view.textContent).toContain(
-      "bukan foto kondisi aktual destinasi",
+    expect(view.textContent).toContain("bukan foto kondisi aktual destinasi");
+    expect(view.querySelectorAll(".eo-dest-media-gallery__item")).toHaveLength(
+      3,
     );
-    expect(
-      view.querySelectorAll(".eo-dest-media-gallery__item"),
-    ).toHaveLength(3);
     expect(view.textContent).not.toContain("360");
   });
 

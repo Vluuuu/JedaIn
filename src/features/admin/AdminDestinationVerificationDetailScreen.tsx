@@ -381,10 +381,9 @@ export function AdminDestinationVerificationDetailScreen() {
                 color: "var(--color-success-text)",
               }}
             >
-              Level: {destApp.approvedLevel}{" "}
-              {destApp.approvedGuideReady
-                ? "(Guide Ready ✓)"
-                : "(Non-Guide Ready)"}
+              {destApp.approvedLevel === "BASIC"
+                ? "Terverifikasi Dasar"
+                : "Terverifikasi"}
             </p>
           )}
           {destApp.rejectionReason && (

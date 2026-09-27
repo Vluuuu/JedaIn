@@ -27,28 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Format remaining F6 files for audit
-        run: |
-          npx prettier --write \
-            src/features/destination/destination.test.tsx \
-            src/features/destination/destinationQuickActions.test.tsx \
-            src/features/eo/eoPackageBuilderValidation.test.tsx \
-            src/features/eo/f54DestinationMedia.test.tsx \
-            src/features/eo/mockDestinationStore.ts \
-            src/features/eo/sessionAndDestinationGovernance.test.tsx
-          for f in \
-            src/features/destination/destination.test.tsx \
-            src/features/destination/destinationQuickActions.test.tsx \
-            src/features/eo/eoPackageBuilderValidation.test.tsx \
-            src/features/eo/f54DestinationMedia.test.tsx \
-            src/features/eo/mockDestinationStore.ts \
-            src/features/eo/sessionAndDestinationGovernance.test.tsx
-          do
-            echo "FORMATTED_FILE:$f"
-            base64 -w 0 "$f"
-            echo
-          done
-
       - name: Check formatting
         run: npm run format:check
 

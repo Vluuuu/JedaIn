@@ -118,6 +118,19 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     expect(added.success).toBe(true);
     expect(added.media?.provenance).toBe("DESTINATION_SOURCE");
 
+    expect(
+      mockDestinationPartnerService.addGalleryMedia({
+        url: "data:text/plain;base64,ZmFrZQ==",
+        label: "Invalid",
+      }).success,
+    ).toBe(false);
+    expect(
+      mockDestinationPartnerService.addGalleryMedia({
+        url: `data:image/png;base64,${"A".repeat(7 * 1024 * 1024)}`,
+        label: "Too large",
+      }).success,
+    ).toBe(false);
+
     const afterAdd =
       mockDestinationStore.getById("dest_lereng_hijau")!.mediaGallery!;
     expect(afterAdd).toHaveLength(4);
@@ -138,6 +151,12 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
   });
 
   it("3. EO destination detail exposes the same gallery as decision context", async () => {
+    partnerSessionStore.loginAsDemoDestination();
+    const added = mockDestinationPartnerService.addGalleryMedia({
+      url: "data:image/png;base64,ZmFrZQ==",
+      label: "Visual terbaru Mitra",
+    });
+    expect(added.success).toBe(true);
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
     const view = await renderRoute(
@@ -149,8 +168,9 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     expect(view.textContent).toContain("Galeri Visual Destinasi");
     expect(view.textContent).toContain("bukan foto kondisi aktual destinasi");
     expect(view.querySelectorAll(".eo-dest-media-gallery__item")).toHaveLength(
-      3,
+      4,
     );
+    expect(view.textContent).toContain("Visual terbaru Mitra");
     expect(view.textContent).not.toContain("360");
   });
 

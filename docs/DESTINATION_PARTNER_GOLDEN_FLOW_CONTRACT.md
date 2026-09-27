@@ -18,7 +18,7 @@ Destination Partner must complete the three-sided JedaIn story without becoming 
 
 Locked story:
 
-`Partner Entry → Destination Application → Admin Verification → BASIC / BASIC + guide_ready → Destination Workspace → Venue Profile → Verification → EO Session Schedule → Capacity Visibility → Venue Reviews → Profile`
+`Partner Entry → Destination Application with local guide evidence → Admin Verification → BASIC (local guide required) → Destination Workspace → Venue Profile → Verification → EO Session Schedule → Capacity Visibility → Venue Reviews → Profile`
 
 Cross-surface proof:
 
@@ -246,8 +246,7 @@ Locked initial Admin outcomes:
 
 ```text
 Reject + reason
-Approve BASIC
-Approve BASIC + guide_ready
+Setujui Verifikasi Destinasi (BASIC, local guide required)
 ```
 
 Initial approval must NEVER grant `PLUS`.
@@ -256,9 +255,9 @@ Successful approval:
 
 - verification application → `APPROVED`,
 - `approvedLevel = BASIC`,
-- `approvedGuideReady = true|false`,
+- `approvedGuideReady = true`,
 - canonical `mockDestinationStore` upserted once,
-- canonical destination `status = ACTIVE`,
+- canonical destination `status = ACTIVE` and `guideReady = true`,
 - same Destination Partner identity becomes eligible for `/partner/destination/*`,
 - EO Builder reads the newly approved destination through the existing canonical destination eligibility source.
 
@@ -514,7 +513,7 @@ Trust cross-surface demo:
 ```text
 Destination Pending Application
 → Admin Destination Verification Queue
-→ Approve BASIC + guide_ready
+→ Setujui Verifikasi Destinasi
 → same Destination Partner identity becomes operational
 → canonical destination appears in EO eligibility source.
 ```
@@ -544,15 +543,14 @@ Admin Reject with specific reason
 - new Destination application submission creates exactly one shared `PENDING_REVIEW` record,
 - Admin queue sees the same record,
 - duplicate submit creates no duplicate,
-- Admin approve BASIC opens same identity workspace,
-- Admin approve BASIC + guide_ready opens same identity workspace and EO eligibility includes destination,
+- Admin's single destination verification approval opens the same identity workspace and EO eligibility includes the destination,
 - initial approval never PLUS,
 - Admin rejection reason is visible exactly to Destination Partner,
 - rejected reapply uses same identity/application.
 
 ### Profile / verification
 
-- verificationLevel and guideReady display independently,
+- one verification badge is shown; local guide availability is a factual detail,
 - Destination Partner cannot self-change verification/guideReady,
 - canonical profile fields come from shared destination store,
 - runtime profile snapshot cannot mutate store by reference.

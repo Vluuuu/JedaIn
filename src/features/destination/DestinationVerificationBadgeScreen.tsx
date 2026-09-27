@@ -51,7 +51,9 @@ export function DestinationVerificationBadgeScreen() {
               </span>
               <h2>{isPlus ? "Terverifikasi Plus" : "Terverifikasi Dasar"}</h2>
             </div>
-            <Badge tone="success">Pemandu lokal tersedia</Badge>
+            <span className="dest-verification-single__guide-detail">
+              Pemandu lokal tersedia
+            </span>
           </div>
 
           <p className="dest-verification-single__description">

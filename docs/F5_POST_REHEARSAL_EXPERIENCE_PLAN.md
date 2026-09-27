@@ -103,10 +103,10 @@ A change is justified only when it helps Traveler, EO, or Mitra:
 | Finding | Interpretation | Decision | Batch |
 |---|---|---|---|
 | Remove “Deskripsi Ketenangan Kawasan” wording | Current label is overly artificial; destination description can use neutral wording | **COPY POLISH** | F5.2 |
-| Destination verification should require guide availability | This can mean two different rules and would change current governance | **OPEN / HOLD** | Decision needed |
+| Destination verification should require guide availability | Local guide and evidence are required inside one destination verification decision | **LOCKED / IMPLEMENTED** | PR #105 |
 | Destination gallery should exist | Destination currently has only a single optional image path; richer visual source would help EO decision-making | **DEVELOP** | F5.4 |
 | EO should be able to choose destination image or add own package image | Fits package creation if provenance remains truthful | **DEVELOP** | F5.4 |
-| 360° destination view | Useful visual demo only if truthful panorama/360 asset exists | **OPTIONAL / ASSET-DEPENDENT** | F5.4 optional |
+| 360° destination view | Outside the competition prototype slice | **DEFERRED** | No UI |
 
 ---
 
@@ -181,26 +181,9 @@ Cons:
 
 ## OD-02 — Does destination verification require `guideReady=true`?
 
-Current canonical rule:
+Resolved for the competition prototype in PR #105: local guide readiness and its evidence are required for destination verification. Admin has one approval action, which creates an `ACTIVE` destination at `BASIC` with `guideReady=true`. Destinations without local guides remain unverified and outside EO discovery and Builder.
 
-- verification level and guide readiness are separate;
-- destination may be `ACTIVE + BASIC/PLUS + guideReady=false`;
-- EO eligibility requires `ACTIVE + BASIC/PLUS + guideReady=true`;
-- therefore a verified destination can exist while temporarily not eligible for EO package creation.
-
-The meeting note “verifikasi wajib ada pemandu” may mean:
-
-### Interpretation A — Keep current rule
-
-Verification is allowed without guide readiness, but EO use is blocked until guide ready.
-
-### Interpretation B — Change governance rule
-
-Destination cannot become verified until guide readiness is approved.
-
-Interpretation B changes Admin/Destination governance and must not be implemented accidentally.
-
-**Status: HOLD.**
+**Status: LOCKED / IMPLEMENTED.**
 
 ---
 
@@ -714,19 +697,7 @@ Exact schema must be designed before implementation, but likely needs:
 
 ## 8.2 360° destination view
 
-Status: **OPTIONAL / ASSET-DEPENDENT**.
-
-Only implement when there is a suitable panorama/360 asset or a clearly labeled prototype representation.
-
-Required label if simulated:
-
-```text
-Preview 360° — Prototype
-```
-
-Do not present a normal static illustration as a real 360° capture.
-
-This item must not delay F5.1–F5.3.
+Status: **DEFERRED**. No view, placeholder, or coming-soon control is part of this prototype slice.
 
 
 ## 8.3 Implementation Status — MERGED

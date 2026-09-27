@@ -951,13 +951,14 @@ Application dapat menangkap data prototype yang relevan seperti:
 - general capacity,
 - base cost,
 - guide readiness,
+- bukti/keterangan kesiapan pemandu lokal,
 - optional base-cost scope.
 
 Acceptance:
 
 - helper/copy tidak menciptakan rule pricing/capacity baru,
 - cost scope optional,
-- lifecycle verification existing dipertahankan.
+- pengajuan hanya dapat dikirim bila pemandu lokal tersedia dan buktinya diisi.
 
 Status: IMPLEMENTED.
 
@@ -1052,15 +1053,18 @@ Status: IMPLEMENTED LIVE.
 
 ## REQ-MIT-07 — Media
 
-Destination profile memprioritaskan destination.imageUrl jika tersedia.
+Destination profile menampilkan galeri kanonikal yang dapat dikelola Mitra terverifikasi.
 
 Acceptance:
 
 - asset aktual boleh ditampilkan bila tim menyediakannya,
 - prototype fallback tetap illustration,
+- Mitra dapat menambah JPG/PNG/WebP hingga 5 MB dan menghapus visual miliknya sendiri,
+- visual bawaan tetap berlabel `PROTOTYPE_ILLUSTRATION` dan tidak dapat dihapus Mitra,
+- EO Detail dan Builder membaca galeri destinasi yang sama,
 - tidak perlu persistent upload infrastructure untuk lomba.
 
-Status: PARTIAL — renderer ready, actual photography belum tersedia.
+Status: IMPLEMENTED PROTOTYPE — galeri lokal/mock tersedia; actual photography belum tersedia.
 
 ## REQ-MIT-08 — Reviews dan Settings
 
@@ -1127,13 +1131,14 @@ Admin dapat melihat destination application dan verification context.
 Acceptance:
 
 - approved destination mapping menghasilkan canonical destination sesuai flow existing,
-- canonical `guideReady` harus konsisten dengan hasil verification Admin `approvedGuideReady`,
-- BASIC/PLUS verification dan Guide Ready tetap dua dimensi terpisah,
-- destination `guideReady=false` tetap dapat ACTIVE/BASIC tetapi tidak boleh diklaim guide-ready atau menjadi EO-eligible destination,
+- pemandu lokal dan bukti kesiapannya wajib ada sebelum pengajuan dapat masuk antrean review,
+- Admin hanya memiliki satu aksi persetujuan verifikasi destinasi,
+- persetujuan awal menghasilkan `APPROVED`, `approvedLevel=BASIC`, `approvedGuideReady=true`, dan destinasi kanonikal `ACTIVE` dengan `guideReady=true`,
+- destinasi tanpa pemandu lokal tidak dapat berstatus aktif terverifikasi,
 - cost-scope fields optional dapat diteruskan,
 - lifecycle tidak berubah karena discovery polish.
 
-Status: IMPLEMENTED LIVE — destination guide-ready consistency diperkuat pada F4.2 / PR #90.
+Status: IMPLEMENTED PROTOTYPE — keputusan satu verifikasi destinasi dengan pemandu lokal sebagai syarat; PR #105 menggantikan aturan dua dimensi dari F4.2 / PR #90.
 
 ## REQ-ADM-04 — Package Review
 
@@ -2140,11 +2145,11 @@ Perubahan canonical:
 - `updateSessionStatus(..., "OPEN")` menolak Session yang start time-nya sudah lewat.
 - UI EO Session memakai future-safe datetime default yang berasal dari waktu browser, bukan hard-coded competition date.
 - Package `APPROVED` maupun `LIVE` tetap dapat menyiapkan future Session; `APPROVED` tetap tidak berarti marketplace `LIVE`.
-- `dest_hutan_trawas` tetap `ACTIVE` + `BASIC`, tetapi canonical `guideReady=false` sesuai Admin verification.
+- Pada F4.2, `dest_hutan_trawas` sempat `ACTIVE` + `BASIC` dengan `guideReady=false`; keputusan produk berikutnya pada PR #105 mengganti state ini menjadi application `REJECTED` dan destinasi kanonikal `INACTIVE`.
 - Copy yang mengklaim kesiapan pemandu pada Hutan Bambu dihapus/diturunkan menjadi not-ready factual context.
 - Existing EO eligibility tetap membutuhkan `ACTIVE` + BASIC/PLUS + `guideReady=true`; Hutan Bambu tidak lagi EO-eligible selama `guideReady=false`.
 - Direct EO destination detail untuk destination yang tidak eligible tetap dapat dibaca sebagai context, tetapi tidak menawarkan active create-package CTA.
-- Admin Trust dan Mitra surfaces membaca Guide Ready dari canonical destination yang sama dan tidak lagi mengklaim Hutan Bambu Guide Ready.
+- Admin Trust dan katalog EO hanya menampilkan destinasi aktif terverifikasi yang memenuhi syarat pemandu lokal.
 - Test temporal yang berhasil dibuat calendar-safe agar tidak kedaluwarsa karena tanggal tetap.
 
 Quality gate setelah F4.2:

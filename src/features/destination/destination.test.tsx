@@ -233,6 +233,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         "Pemandu lokal adalah bagian dari syarat verifikasi destinasi",
       );
       expect(badgeView.textContent).not.toContain("Dimensi 2");
+      expect(
+        badgeView.querySelectorAll(".dest-verification-single .ui-badge"),
+      ).toHaveLength(0);
 
       // Schedule
       const schedView = await renderComponent(

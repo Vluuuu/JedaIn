@@ -18,12 +18,16 @@ export function resolveAuthenticatedDestinationContext(): AuthenticatedDestinati
   }
 
   const app = mockDestinationVerificationStore.getByPartnerId(partner.id);
-  if (!app || app.status !== "APPROVED") {
+  if (!app || app.status !== "APPROVED" || app.approvedGuideReady !== true) {
     return null;
   }
 
   const destination = mockDestinationStore.getById(app.destinationIdentityId);
-  if (!destination || destination.status !== "ACTIVE") {
+  if (
+    !destination ||
+    destination.status !== "ACTIVE" ||
+    destination.guideReady !== true
+  ) {
     return null;
   }
 

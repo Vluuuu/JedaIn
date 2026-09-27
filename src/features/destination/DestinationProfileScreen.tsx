@@ -102,6 +102,12 @@ export function DestinationProfileScreen() {
                 event.currentTarget.value = "";
                 setGalleryError(undefined);
                 if (!file) return;
+                if (
+                  !["image/jpeg", "image/png", "image/webp"].includes(file.type)
+                ) {
+                  setGalleryError("Format visual harus JPG, PNG, atau WebP.");
+                  return;
+                }
                 if (file.size > 5 * 1024 * 1024) {
                   setGalleryError("Ukuran visual maksimal 5 MB.");
                   return;

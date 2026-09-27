@@ -9,12 +9,25 @@ import "./destination.css";
 export function DestinationProfileScreen() {
   const [, setProfileVersion] = useState(0);
   const [profileError, setProfileError] = useState<string | undefined>();
+  const [profileSuccess, setProfileSuccess] = useState<string | undefined>();
+  const [descriptionSuccess, setDescriptionSuccess] = useState<
+    string | undefined
+  >();
+  const [guideFeeSuccess, setGuideFeeSuccess] = useState<string | undefined>();
+
   const context = resolveAuthenticatedDestinationContext();
   const [descriptionDraft, setDescriptionDraft] = useState(
     context?.destination.description ?? "",
   );
-  const [guideFeeDraft, setGuideFeeDraft] = useState(
-    context?.destination.localGuideFeePerPerson ?? 0,
+  const initialGuideFee = context?.destination.localGuideFeePerPerson ?? 0;
+  const [guideFeeDraft, setGuideFeeDraft] = useState<number>(initialGuideFee);
+  const [guideFeeInput, setGuideFeeInput] = useState<string>(
+    initialGuideFee > 0 ? initialGuideFee.toLocaleString("id-ID") : "0",
+  );
+
+  const facilitiesList = context?.destination.facilities ?? [];
+  const [selectedFacility, setSelectedFacility] = useState<string>(
+    facilitiesList[0] ?? "",
   );
 
   if (!context) {
@@ -41,13 +54,17 @@ export function DestinationProfileScreen() {
       (media) => media.category === "FACILITY",
     ) ?? [];
 
+  const currentSelectedFacility = selectedFacility || facilitiesList[0] || "";
+
   const handleUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
     category: DestinationMediaCategory,
+    facilityLabel?: string,
   ) => {
     const file = event.target.files?.[0];
     event.currentTarget.value = "";
     setProfileError(undefined);
+    setProfileSuccess(undefined);
     if (!file) return;
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -71,10 +88,17 @@ export function DestinationProfileScreen() {
         url: result,
         label: file.name.replace(/\.[^.]+$/, ""),
         category,
+        facilityLabel: category === "FACILITY" ? facilityLabel : undefined,
       });
       if (!added.success) {
         setProfileError(added.message);
         return;
+      }
+      setProfileError(undefined);
+      if (category === "FACILITY" && facilityLabel) {
+        setProfileSuccess(`Foto fasilitas ${facilityLabel} ditambahkan`);
+      } else {
+        setProfileSuccess("Foto destinasi berhasil ditambahkan");
       }
       setProfileVersion((version) => version + 1);
     };
@@ -83,13 +107,24 @@ export function DestinationProfileScreen() {
   };
 
   const handleRemoveMedia = (mediaId: string) => {
+    setProfileError(undefined);
+    setProfileSuccess(undefined);
     const removed = mockDestinationPartnerService.removeGalleryMedia(mediaId);
     if (!removed.success) {
       setProfileError(removed.message);
       return;
     }
-    setProfileError(undefined);
+    setProfileSuccess("Foto berhasil dihapus");
     setProfileVersion((version) => version + 1);
+  };
+
+  const handleGuideFeeChange = (val: string) => {
+    setProfileError(undefined);
+    setGuideFeeSuccess(undefined);
+    const digits = val.replace(/[^0-9]/g, "");
+    const num = digits ? parseInt(digits, 10) : 0;
+    setGuideFeeDraft(num);
+    setGuideFeeInput(digits ? num.toLocaleString("id-ID") : "");
   };
 
   const renderMediaGrid = (
@@ -152,6 +187,7 @@ export function DestinationProfileScreen() {
         />
       </div>
 
+      {/* 1. Galeri Destinasi */}
       <section
         className="dest-media-gallery"
         aria-labelledby="destination-media-gallery-heading"
@@ -197,6 +233,7 @@ export function DestinationProfileScreen() {
         )}
       </section>
 
+      {/* 2. Foto Fasilitas */}
       <section
         className="dest-media-gallery"
         aria-labelledby="destination-facility-gallery-heading"
@@ -210,9 +247,8 @@ export function DestinationProfileScreen() {
               Foto Fasilitas
             </h2>
             <p className="dest-media-gallery__desc">
-              Tambahkan foto fasilitas seperti saung, toilet, area parkir,
-              musholla, paviliun, titik bilas, atau fasilitas lain yang penting
-              diketahui EO.
+              Tambahkan foto untuk fasilitas yang sudah tercatat agar EO
+              mendapat gambaran yang lebih jelas.
             </p>
           </div>
           <span className="dest-media-gallery__count">
@@ -220,24 +256,80 @@ export function DestinationProfileScreen() {
           </span>
         </div>
 
-        <div className="dest-media-gallery__actions">
+        <div className="dest-facility-upload-control">
+          <div className="dest-facility-select-group">
+            <label
+              htmlFor="facility-selector"
+              className="dest-facility-select-label"
+            >
+              Pilih fasilitas
+            </label>
+            <select
+              id="facility-selector"
+              className="eo-form-input dest-facility-select"
+              value={currentSelectedFacility}
+              onChange={(e) => setSelectedFacility(e.target.value)}
+              aria-label="Pilih fasilitas"
+            >
+              {facilitiesList.map((fac) => (
+                <option key={fac} value={fac}>
+                  {fac}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <label className="dest-media-gallery__upload-button">
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
               className="dest-media-gallery__file-input"
-              aria-label="Tambah foto fasilitas"
-              onChange={(event) => handleUpload(event, "FACILITY")}
+              aria-label={
+                currentSelectedFacility
+                  ? `Tambah foto untuk ${currentSelectedFacility}`
+                  : "Tambah foto fasilitas"
+              }
+              onChange={(event) =>
+                handleUpload(event, "FACILITY", currentSelectedFacility)
+              }
             />
-            Tambah foto fasilitas
+            {currentSelectedFacility
+              ? `Tambah foto untuk ${currentSelectedFacility}`
+              : "Tambah foto fasilitas"}
           </label>
         </div>
 
-        {renderMediaGrid(
-          facilityMedia,
-          "Belum ada foto fasilitas yang ditambahkan Mitra Destinasi.",
-        )}
+        <div className="dest-facility-grouped-list">
+          {facilitiesList.map((fac) => {
+            const photosForFac = facilityMedia.filter(
+              (m) =>
+                m.facilityLabel === fac ||
+                (!m.facilityLabel &&
+                  m.label.toLowerCase().includes(fac.toLowerCase())),
+            );
+
+            return (
+              <div key={fac} className="dest-facility-group">
+                <h3 className="dest-facility-group__title">{fac}</h3>
+                {photosForFac.length > 0 ? (
+                  renderMediaGrid(photosForFac, "Belum ada foto")
+                ) : (
+                  <p className="dest-facility-empty">Belum ada foto</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </section>
+
+      {profileSuccess && (
+        <p
+          className="dest-profile-feedback dest-profile-feedback--success"
+          role="status"
+        >
+          ✓ {profileSuccess}
+        </p>
+      )}
 
       {profileError && (
         <p className="dest-media-gallery__error" role="alert">
@@ -245,37 +337,50 @@ export function DestinationProfileScreen() {
         </p>
       )}
 
+      {/* 3. Informasi Destinasi */}
       <section className="eo-section" aria-label="Informasi utama destinasi">
         <h2 className="eo-section-title">Informasi Destinasi</h2>
 
-        <div className="dest-profile-facts">
-          <div>
-            <small>Nama Destinasi</small>
-            <strong>{destination.name}</strong>
-          </div>
-          <div>
-            <small>Wilayah & Lokasi</small>
-            <strong>{destination.locationLabel}</strong>
-          </div>
-          <div>
-            <small>Biaya Dasar</small>
-            <strong>
-              Rp{destination.baseCostPerPerson.toLocaleString("id-ID")} / orang
-            </strong>
-          </div>
-          <div>
-            <small>Kapasitas Umum</small>
-            <strong>{destination.capacityPerSession} orang / sesi</strong>
+        {/* Ringkasan 2x2 facts */}
+        <div className="dest-profile-summary">
+          <h3 className="dest-profile-summary__title">Ringkasan</h3>
+          <div className="dest-profile-facts">
+            <div className="dest-profile-fact-card">
+              <span className="dest-profile-fact-label">Nama Destinasi</span>
+              <strong className="dest-profile-fact-value">
+                {destination.name}
+              </strong>
+            </div>
+            <div className="dest-profile-fact-card">
+              <span className="dest-profile-fact-label">Lokasi</span>
+              <strong className="dest-profile-fact-value">
+                {destination.locationLabel}
+              </strong>
+            </div>
+            <div className="dest-profile-fact-card">
+              <span className="dest-profile-fact-label">Biaya Dasar</span>
+              <strong className="dest-profile-fact-value">
+                Rp{destination.baseCostPerPerson.toLocaleString("id-ID")} /
+                orang
+              </strong>
+            </div>
+            <div className="dest-profile-fact-card">
+              <span className="dest-profile-fact-label">Kapasitas Umum</span>
+              <strong className="dest-profile-fact-value">
+                {destination.capacityPerSession} orang / sesi
+              </strong>
+            </div>
           </div>
         </div>
 
+        {/* Tentang Destinasi Editor */}
         <div className="dest-profile-editor">
           <div className="dest-profile-editor__heading">
             <div>
               <h3>Tentang Destinasi</h3>
               <p>
-                Deskripsi ini dibaca EO saat mengevaluasi destinasi dan menyusun
-                package.
+                Deskripsi ini membantu EO memahami karakter lokasi sebelum
+                menyusun experience.
               </p>
             </div>
           </div>
@@ -283,30 +388,47 @@ export function DestinationProfileScreen() {
             className="eo-form-textarea"
             rows={4}
             value={descriptionDraft}
-            onChange={(event) => setDescriptionDraft(event.target.value)}
+            onChange={(event) => {
+              setProfileError(undefined);
+              setDescriptionSuccess(undefined);
+              setDescriptionDraft(event.target.value);
+            }}
             aria-label="Edit deskripsi destinasi"
           />
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={() => {
-              const result =
-                mockDestinationPartnerService.updateDescription(
-                  descriptionDraft,
-                );
-              if (!result.success) {
-                setProfileError(result.message);
-                return;
-              }
-              setProfileError(undefined);
-              setProfileVersion((version) => version + 1);
-            }}
-          >
-            Simpan deskripsi
-          </Button>
+          <div className="dest-profile-editor__actions">
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setProfileError(undefined);
+                setDescriptionSuccess(undefined);
+                const result =
+                  mockDestinationPartnerService.updateDescription(
+                    descriptionDraft,
+                  );
+                if (!result.success) {
+                  setProfileError(result.message);
+                  return;
+                }
+                setDescriptionSuccess("Deskripsi berhasil disimpan");
+                setProfileVersion((version) => version + 1);
+              }}
+            >
+              Simpan deskripsi
+            </Button>
+            {descriptionSuccess && (
+              <span
+                className="dest-profile-feedback dest-profile-feedback--success"
+                role="status"
+              >
+                ✓ {descriptionSuccess}
+              </span>
+            )}
+          </div>
         </div>
 
+        {/* Tarif Pemandu Lokal Editor */}
         <div className="dest-profile-editor">
           <div className="dest-profile-editor__heading">
             <div>
@@ -317,40 +439,62 @@ export function DestinationProfileScreen() {
               </p>
             </div>
           </div>
-          <div className="dest-profile-guide-fee">
-            <span>Rp</span>
-            <input
-              type="number"
-              min={0}
-              step={5000}
-              value={guideFeeDraft}
-              onChange={(event) =>
-                setGuideFeeDraft(Math.max(0, Number(event.target.value) || 0))
-              }
-              aria-label="Tarif pemandu lokal per orang"
-              className="eo-form-input"
-            />
-            <span>/ orang</span>
+
+          <div className="dest-profile-guide-fee-wrapper">
+            <div className="dest-profile-guide-fee-group">
+              <span className="dest-currency-prefix">Rp</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={guideFeeInput}
+                onChange={(event) => handleGuideFeeChange(event.target.value)}
+                aria-label="Tarif pemandu lokal per orang"
+                className="dest-currency-input"
+                placeholder="0"
+              />
+              <span className="dest-currency-suffix">/ orang</span>
+            </div>
+
+            <div className="dest-profile-editor__actions">
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={() => {
+                  setProfileError(undefined);
+                  setGuideFeeSuccess(undefined);
+                  const result =
+                    mockDestinationPartnerService.updateLocalGuideFee(
+                      guideFeeDraft,
+                    );
+                  if (!result.success) {
+                    setProfileError(result.message);
+                    return;
+                  }
+                  setGuideFeeSuccess("Tarif pemandu berhasil disimpan");
+                  setProfileVersion((version) => version + 1);
+                }}
+              >
+                Simpan tarif pemandu
+              </Button>
+              {guideFeeSuccess && (
+                <span
+                  className="dest-profile-feedback dest-profile-feedback--success"
+                  role="status"
+                >
+                  ✓ {guideFeeSuccess}
+                </span>
+              )}
+            </div>
           </div>
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={() => {
-              const result =
-                mockDestinationPartnerService.updateLocalGuideFee(
-                  guideFeeDraft,
-                );
-              if (!result.success) {
-                setProfileError(result.message);
-                return;
-              }
-              setProfileError(undefined);
-              setProfileVersion((version) => version + 1);
-            }}
-          >
-            Simpan tarif pemandu
-          </Button>
+
+          <p className="dest-profile-active-fee">
+            Tarif aktif: Rp
+            {(
+              destination.localGuideFeePerPerson ?? guideFeeDraft
+            ).toLocaleString("id-ID")}{" "}
+            / orang
+          </p>
         </div>
 
         {((destination.baseCostIncludes &&

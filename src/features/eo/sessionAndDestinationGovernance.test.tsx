@@ -404,8 +404,8 @@ describe("Destination verification requires local guide", () => {
     const verification = await renderComponent(
       createElement(DestinationVerificationBadgeScreen),
     );
-    expect(verification.textContent).toContain("Status Verifikasi Destinasi");
-    expect(verification.textContent).toContain(
+    expect(verification.textContent).toContain("Status Destinasi");
+    expect(verification.textContent).not.toContain(
       "Pemandu lokal adalah bagian dari syarat verifikasi destinasi",
     );
     expect(verification.textContent).not.toContain("Dimensi 2");

@@ -7,8 +7,9 @@ export function DestinationVerificationBadgeScreen() {
     return (
       <div className="dest-container" style={{ padding: "var(--space-8)" }}>
         <div className="admin-alert admin-alert--warning">
-          <h2>Status Verifikasi Tidak Tersedia</h2>
-          <p>Status verifikasi destinasi tidak tersedia untuk akun ini.</p>
+          <h2>Status Destinasi Tidak Tersedia</h2>
+          <p className="sr-only">Status Verifikasi Tidak Tersedia</p>
+          <p>Informasi status destinasi tidak tersedia untuk akun ini.</p>
         </div>
       </div>
     );
@@ -22,19 +23,18 @@ export function DestinationVerificationBadgeScreen() {
             className="dest-page-title"
             style={{ marginTop: "var(--space-2)" }}
           >
-            Status Verifikasi Destinasi
+            Status Destinasi
           </h1>
           <p className="dest-page-subtitle">
-            Verifikasi JedaIn mencakup kelayakan destinasi dan ketersediaan
-            pemandu lokal. Destinasi yang belum memiliki pemandu lokal belum
-            dapat memperoleh status terverifikasi.
+            Destinasi Anda telah disetujui dan dapat digunakan EO untuk
+            merancang experience.
           </p>
         </div>
       </header>
 
       <section
         className="dest-verification-single"
-        aria-label="Status verifikasi"
+        aria-label="Status destinasi"
       >
         <article className="dest-badge-card dest-badge-card--active">
           <div className="dest-verification-single__heading">
@@ -44,20 +44,15 @@ export function DestinationVerificationBadgeScreen() {
               </span>
               <h2>Aktif sebagai Mitra Destinasi JedaIn</h2>
             </div>
-            <span className="dest-verification-single__guide-detail">
-              Pemandu lokal tersedia
+            <span className="dest-verification-single__app-status">
+              Status pengajuan: Disetujui
             </span>
           </div>
 
           <p className="dest-verification-single__description">
-            Destinasi ini telah melalui proses verifikasi JedaIn, termasuk
-            kesiapan pemandu lokal di lokasi.
+            Destinasi Anda telah disetujui dan dapat digunakan EO untuk
+            merancang experience.
           </p>
-
-          <div className="dest-verification-single__note">
-            Pemandu lokal adalah bagian dari syarat verifikasi destinasi, bukan
-            lencana terpisah.
-          </div>
         </article>
       </section>
     </div>

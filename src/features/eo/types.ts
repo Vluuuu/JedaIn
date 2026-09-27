@@ -57,6 +57,7 @@ export interface DestinationMediaItem {
   label: string;
   provenance: DestinationMediaProvenance;
   category?: DestinationMediaCategory;
+  facilityLabel?: string;
 }
 
 export interface DestinationRecord {

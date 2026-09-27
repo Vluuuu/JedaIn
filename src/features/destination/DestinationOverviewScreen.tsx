@@ -199,55 +199,102 @@ export function DestinationOverviewScreen() {
 
       <div className="dest-readiness-layout">
         <section className="dest-readiness" aria-labelledby="dest-status-title">
-          <div className="dest-section-heading">
-            <div>
-              <h2 id="dest-status-title">Status Destinasi</h2>
-              <p>
-                Kesiapan yang digunakan JedaIn untuk operasional pengalaman.
+          <div className="dest-readiness__header">
+            <div className="dest-readiness__status-meta">
+              <span className="dest-readiness__status-badge">
+                Status: Aktif
+              </span>
+            </div>
+            <div className="dest-readiness__title-block">
+              <h2 id="dest-status-title" className="dest-readiness__title">
+                Status Destinasi
+              </h2>
+              <p className="dest-readiness__lead">
+                Profil destinasi siap digunakan EO
+              </p>
+              <p className="dest-readiness__subcopy">
+                Informasi ini menjadi acuan EO saat memilih destinasi dan
+                merancang experience.
               </p>
             </div>
-            <details className="dest-readiness__completeness">
-              <summary>
-                {data.profileCompletedItems === data.profileTotalItems
-                  ? "Informasi profil lengkap"
-                  : `${data.profileCompletedItems}/${data.profileTotalItems} informasi inti lengkap`}{" "}
-                · Lihat 9 informasi inti
-              </summary>
-              <ul>
-                {data.profileChecklist.map((item) => (
-                  <li key={item.label}>
-                    {item.complete ? "✓" : "Belum lengkap"} {item.label}
-                  </li>
-                ))}
-              </ul>
-            </details>
+
+            <div className="dest-readiness__disclosure-card">
+              <div className="dest-readiness__disclosure-status">
+                <strong>
+                  {data.profileCompletedItems === data.profileTotalItems
+                    ? "Informasi profil lengkap"
+                    : `${data.profileCompletedItems}/${data.profileTotalItems} informasi inti lengkap`}
+                </strong>
+                <span>
+                  {data.profileCompletedItems === data.profileTotalItems
+                    ? "9 dari 9 informasi inti sudah tersedia"
+                    : `${data.profileCompletedItems} dari ${data.profileTotalItems} informasi inti sudah tersedia`}
+                </span>
+              </div>
+              <details className="dest-readiness__completeness">
+                <summary>Lihat 9 informasi inti</summary>
+                <ul
+                  className="dest-readiness__checklist"
+                  aria-label="Daftar 9 informasi inti"
+                >
+                  {data.profileChecklist.map((item) => (
+                    <li
+                      key={item.label}
+                      className={`dest-readiness__checklist-item ${
+                        item.complete
+                          ? "dest-readiness__checklist-item--complete"
+                          : "dest-readiness__checklist-item--incomplete"
+                      }`}
+                    >
+                      <span
+                        className="dest-readiness__check-icon"
+                        aria-hidden="true"
+                      >
+                        {item.complete ? "✓" : "○"}
+                      </span>
+                      <span>
+                        {item.complete
+                          ? item.label
+                          : `${item.label} belum lengkap`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
           </div>
 
-          <dl className="dest-readiness__facts">
-            <div>
-              <dt>Status Mitra</dt>
-              <dd>Aktif sebagai Mitra Destinasi JedaIn</dd>
+          <div
+            className="dest-readiness__operational-summary"
+            aria-label="Ringkasan operasional destinasi"
+          >
+            <div className="dest-readiness__summary-card">
+              <span className="dest-readiness__summary-label">Biaya dasar</span>
+              <strong className="dest-readiness__summary-value">
+                {formatCurrency(destination.baseCostPerPerson)} / orang
+              </strong>
             </div>
-            <div>
-              <dt>Pemandu Lokal</dt>
-              <dd>Tersedia sebagai bagian dari standar verifikasi</dd>
+
+            <div className="dest-readiness__summary-card">
+              <span className="dest-readiness__summary-label">
+                Pemandu lokal
+              </span>
+              <strong className="dest-readiness__summary-value">
+                {destination.localGuideFeePerPerson
+                  ? `${formatCurrency(destination.localGuideFeePerPerson)} / orang`
+                  : "Rp0 / orang"}
+              </strong>
             </div>
-            <div>
-              <dt>Biaya Dasar</dt>
-              <dd>{formatCurrency(destination.baseCostPerPerson)} / orang</dd>
+
+            <div className="dest-readiness__summary-card">
+              <span className="dest-readiness__summary-label">
+                Kapasitas umum
+              </span>
+              <strong className="dest-readiness__summary-value">
+                {destination.capacityPerSession} orang / sesi
+              </strong>
             </div>
-            <div>
-              <dt>Tarif Pemandu Lokal</dt>
-              <dd>
-                {formatCurrency(destination.localGuideFeePerPerson ?? 0)} /
-                orang
-              </dd>
-            </div>
-            <div>
-              <dt>Kapasitas Umum Destinasi</dt>
-              <dd>{destination.capacityPerSession} orang / sesi</dd>
-            </div>
-          </dl>
+          </div>
         </section>
 
         <aside className="dest-partners" aria-labelledby="dest-partners-title">

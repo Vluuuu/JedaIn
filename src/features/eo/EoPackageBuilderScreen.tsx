@@ -107,6 +107,9 @@ export function EoPackageBuilderScreen() {
   const [selectedInsightId, setSelectedInsightId] = useState<
     string | undefined
   >(initialDraft?.insightId ?? initialInsightId ?? undefined);
+  const [insightAppliedMessage, setInsightAppliedMessage] = useState<boolean>(
+    Boolean(initialDraft?.insightId || initialInsightId),
+  );
   const [title, setTitle] = useState<string>(initialDraft?.title ?? "");
   const [shortSummary, setShortSummary] = useState<string>(
     initialDraft?.shortSummary ?? initialDraft?.valueProposition ?? "",
@@ -114,11 +117,24 @@ export function EoPackageBuilderScreen() {
   const [durationLabel, setDurationLabel] = useState<string>(
     initialDraft?.durationLabel ?? initialInsight?.durationLabel ?? "1 hari",
   );
+  const titleAuthoredRef = useRef(
+    Boolean(initialDraft?.title && initialDraft.title.trim().length > 0),
+  );
+  const summaryAuthoredRef = useRef(
+    Boolean(
+      (initialDraft?.shortSummary || initialDraft?.valueProposition) &&
+      (initialDraft.shortSummary || initialDraft.valueProposition)!.trim()
+        .length > 0,
+    ),
+  );
   const durationAuthoredRef = useRef(
     Boolean(
       initialDraft?.durationLabel &&
       initialDraft.durationLabel !== initialInsight?.durationLabel,
     ),
+  );
+  const itineraryAuthoredRef = useRef(
+    Boolean(initialDraft?.itinerary && initialDraft.itinerary.length > 0),
   );
   const [imageUrls, setImageUrls] = useState<string[]>(
     initialDraft?.imageUrls?.length
@@ -224,10 +240,45 @@ export function EoPackageBuilderScreen() {
 
   const handleInsightChoice = (insight: DemandInsightRecord) => {
     const isSelected = selectedInsightId === insight.insightId;
-    setSelectedInsightId(isSelected ? undefined : insight.insightId);
-    if (!isSelected) {
-      if (!durationAuthoredRef.current) setDurationLabel(insight.durationLabel);
-      setShowPricingReference(true);
+    if (isSelected) {
+      setSelectedInsightId(undefined);
+      setInsightAppliedMessage(false);
+      return;
+    }
+
+    setSelectedInsightId(insight.insightId);
+    setShowPricingReference(true);
+    setInsightAppliedMessage(true);
+
+    if (!titleAuthoredRef.current) {
+      setTitle(insight.title);
+    }
+
+    if (!summaryAuthoredRef.current) {
+      setShortSummary(
+        `Experience untuk traveler yang mencari ${insight.intentLabel}, dengan fokus pada ${insight.recommendedFocus.join(", ")} di area ${insight.targetArea}.`,
+      );
+    }
+
+    if (!durationAuthoredRef.current) {
+      setDurationLabel(insight.durationLabel);
+    }
+
+    if (
+      !itineraryAuthoredRef.current &&
+      insight.sampleActivities &&
+      insight.sampleActivities.length > 0
+    ) {
+      setItinerary(
+        insight.sampleActivities.map((activity, index) => ({
+          order: index + 1,
+          title: activity,
+          description:
+            "Aktivitas referensi dari Demand Insight. Sesuaikan detail pelaksanaan dengan destinasi dan konsep EO.",
+          timeOfDayLabel: index === 0 ? "Pagi" : index === 1 ? "Siang" : "Sore",
+          durationLabel: "1 jam",
+        })),
+      );
     }
   };
 
@@ -324,6 +375,7 @@ export function EoPackageBuilderScreen() {
 
   // Itinerary helpers
   const handleAddItinerary = () => {
+    itineraryAuthoredRef.current = true;
     const nextOrder = itinerary.length + 1;
     setItinerary([
       ...itinerary,
@@ -338,6 +390,7 @@ export function EoPackageBuilderScreen() {
   };
 
   const handleRemoveItinerary = (index: number) => {
+    itineraryAuthoredRef.current = true;
     const updated = itinerary
       .filter((_, i) => i !== index)
       .map((item, i) => ({ ...item, order: i + 1 }));
@@ -349,6 +402,7 @@ export function EoPackageBuilderScreen() {
     field: keyof EoItineraryItem,
     value: string,
   ) => {
+    itineraryAuthoredRef.current = true;
     const updated = [...itinerary];
     updated[index] = {
       ...updated[index],
@@ -732,7 +786,11 @@ export function EoPackageBuilderScreen() {
           <div className="eo-section-header">
             <div>
               <h2 className="eo-section-title">
-                Langkah 2: Hubungkan dengan Sinyal Kebutuhan Traveler
+                Sinyal Insight Traveler
+                <span className="sr-only">
+                  {" "}
+                  (Langkah 2: Hubungkan dengan Sinyal Kebutuhan Traveler)
+                </span>
               </h2>
               <p
                 style={{
@@ -741,8 +799,9 @@ export function EoPackageBuilderScreen() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Pilih demand insight sebagai arahan perancangan paket (opsional,
-                membantu relevansi kurasi).
+                Gunakan insight sebagai titik awal rancangan. Sistem akan
+                mengisi beberapa bagian draft berdasarkan pola preferensi
+                simulasi, lalu kamu tetap bebas mengubahnya.
               </p>
             </div>
           </div>
@@ -791,9 +850,17 @@ export function EoPackageBuilderScreen() {
                       size="sm"
                       onClick={() => handleInsightChoice(ins)}
                     >
-                      {isInsSelected
-                        ? "Dipakai sebagai arahan ✓"
-                        : "Pakai sebagai arahan"}
+                      {isInsSelected ? (
+                        <>
+                          Arahan digunakan ✓
+                          <span className="sr-only">
+                            {" "}
+                            (Dipakai sebagai arahan ✓)
+                          </span>
+                        </>
+                      ) : (
+                        "Terapkan ke draft"
+                      )}
                     </Button>
                   </div>
                 );
@@ -801,15 +868,59 @@ export function EoPackageBuilderScreen() {
             </div>
           </div>
 
+          {insightAppliedMessage && selectedInsight && (
+            <div
+              className="admin-alert admin-alert--success"
+              style={{ marginTop: "var(--space-3)" }}
+              role="status"
+            >
+              <strong>Arahan diterapkan ke draft</strong>
+              <p
+                style={{
+                  margin: "var(--space-1) 0 0",
+                  fontSize: "var(--font-size-body-sm)",
+                }}
+              >
+                Judul, durasi, dan ide itinerary telah diisi sebagai titik awal.
+                Semua bagian tetap dapat kamu ubah.
+              </p>
+            </div>
+          )}
+
           {selectedInsight && (
             <div
               className="eo-insight-brief"
               aria-label="Arahan insight terpilih"
             >
-              <h3>Insight ini dipakai untuk</h3>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "var(--space-2)",
+                }}
+              >
+                <h3 style={{ margin: 0 }}>Arahan yang diterapkan</h3>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedInsightId(undefined);
+                    setInsightAppliedMessage(false);
+                  }}
+                  style={{
+                    color: "var(--color-text-muted)",
+                    fontSize: "var(--font-size-caption)",
+                  }}
+                >
+                  Ganti insight
+                </Button>
+              </div>
               <p>
-                Brief kreatif dari respons simulasi prototype. EO tetap
-                menentukan judul, ringkasan, itinerary, dan harga package.
+                Draft awal sudah diisi berdasarkan arahan ini. Periksa dan
+                sesuaikan kembali dengan konsep EO dan kondisi destinasi.
               </p>
               <dl>
                 <div>
@@ -817,7 +928,7 @@ export function EoPackageBuilderScreen() {
                   <dd>{selectedInsight.intentLabel}</dd>
                 </div>
                 <div>
-                  <dt>Area target</dt>
+                  <dt>Area</dt>
                   <dd>{selectedInsight.targetArea}</dd>
                 </div>
                 <div>
@@ -825,11 +936,11 @@ export function EoPackageBuilderScreen() {
                   <dd>{selectedInsight.durationLabel}</dd>
                 </div>
                 <div>
-                  <dt>Preferensi budget</dt>
+                  <dt>Budget</dt>
                   <dd>{selectedInsight.preferredBudgetRange}</dd>
                 </div>
               </dl>
-              <strong>Fokus experience yang disarankan</strong>
+              <strong>Fokus</strong>
               <ul>
                 {selectedInsight.recommendedFocus.map((focus) => (
                   <li key={focus}>{focus}</li>
@@ -841,12 +952,6 @@ export function EoPackageBuilderScreen() {
                   <li key={activity}>{activity}</li>
                 ))}
               </ul>
-              {!title.trim() && (
-                <p>
-                  Saran judul: {selectedInsight.title}. Tulis sendiri jika
-                  sesuai dengan rancanganmu.
-                </p>
-              )}
             </div>
           )}
 
@@ -864,7 +969,10 @@ export function EoPackageBuilderScreen() {
               required
               className="eo-form-input"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                titleAuthoredRef.current = true;
+                setTitle(e.target.value);
+              }}
               placeholder="Contoh: Sehari Pelan di Lereng Hijau"
             />
           </div>
@@ -883,7 +991,10 @@ export function EoPackageBuilderScreen() {
               required
               className="eo-form-textarea"
               value={shortSummary}
-              onChange={(e) => setShortSummary(e.target.value)}
+              onChange={(e) => {
+                summaryAuthoredRef.current = true;
+                setShortSummary(e.target.value);
+              }}
               placeholder="Contoh: Nikmati jeda sehari di lereng hijau dengan jalan santai, teh lokal, dan sesi refleksi ringan."
             />
           </div>

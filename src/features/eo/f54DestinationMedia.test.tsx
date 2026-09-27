@@ -291,6 +291,7 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
       url: "data:image/webp;base64,ZmFrZQ==",
       label: "Saung Mitra",
       category: "FACILITY",
+      facilityLabel: "Saung istirahat bambu",
     });
     expect(facility.success).toBe(true);
     expect(
@@ -502,14 +503,18 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     });
     const insightButton = Array.from(
       view.querySelectorAll<HTMLButtonElement>("button"),
-    ).find((button) => button.textContent === "Pakai sebagai arahan")!;
+    ).find(
+      (button) =>
+        button.textContent === "Terapkan ke draft" ||
+        button.textContent === "Pakai sebagai arahan",
+    )!;
     await act(async () => insightButton.click());
     for (const copy of [
-      "Insight ini dipakai untuk",
+      "Arahan yang diterapkan",
       "Kebutuhan traveler",
-      "Area target",
+      "Area",
       "Durasi referensi",
-      "Preferensi budget",
+      "Budget",
       "Ide dari insight",
     ]) {
       expect(view.textContent).toContain(copy);
@@ -526,7 +531,12 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     await act(async () => steps[1].click());
     const selectedButton = Array.from(
       view.querySelectorAll<HTMLButtonElement>("button"),
-    ).find((button) => button.textContent?.includes("Dipakai sebagai arahan"))!;
+    ).find(
+      (button) =>
+        button.textContent?.includes("Arahan digunakan") ||
+        button.textContent?.includes("Dipakai sebagai arahan") ||
+        button.textContent?.includes("Ganti insight"),
+    )!;
     await act(async () => selectedButton.click());
     expect(view.querySelector(".eo-insight-brief")).toBeNull();
     expect(titleInput.value).toBe("Judul buatan EO");

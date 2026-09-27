@@ -4391,6 +4391,35 @@
   font-size: 0.72rem;
 }
 
+.eo-dest-facility-grouped-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.eo-dest-facility-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-border-default);
+}
+
+.eo-dest-facility-group__title {
+  margin: 0;
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.eo-dest-facility-empty {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
 .eo-builder-destination-media {
   display: flex;
   flex-direction: column;

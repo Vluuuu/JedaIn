@@ -61,6 +61,7 @@ export const mockDestinationPartnerService = {
     url: string;
     label: string;
     category?: "DESTINATION" | "FACILITY";
+    facilityLabel?: string;
   }): {
     success: boolean;
     message?: string;
@@ -72,6 +73,14 @@ export const mockDestinationPartnerService = {
         success: false,
         message:
           "Akses galeri hanya tersedia untuk Mitra Destinasi terverifikasi.",
+      };
+    }
+
+    if (input.category === "FACILITY" && !input.facilityLabel?.trim()) {
+      return {
+        success: false,
+        message:
+          "Pilih fasilitas terlebih dahulu sebelum menambahkan foto fasilitas.",
       };
     }
 
@@ -97,9 +106,15 @@ export const mockDestinationPartnerService = {
     const media: DestinationMediaItem = {
       mediaId: `media_${context.destination.destinationId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       url: input.url,
-      label: input.label.trim() || "Visual destinasi",
+      label:
+        input.label.trim() ||
+        (input.facilityLabel
+          ? `Foto ${input.facilityLabel}`
+          : "Visual destinasi"),
       provenance: "DESTINATION_SOURCE",
       category: input.category ?? "DESTINATION",
+      facilityLabel:
+        input.category === "FACILITY" ? input.facilityLabel?.trim() : undefined,
     };
 
     mockDestinationStore.updateMediaGallery(context.destination.destinationId, [

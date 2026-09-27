@@ -229,10 +229,10 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         createElement(DestinationVerificationBadgeScreen),
       );
       expect(badgeView.textContent).toContain(
-        "Destinasi ini telah melalui proses verifikasi JedaIn",
+        "Destinasi Anda telah disetujui dan dapat digunakan EO untuk merancang experience.",
       );
       expect(badgeView.textContent).not.toContain("Terverifikasi Dasar");
-      expect(badgeView.textContent).toContain(
+      expect(badgeView.textContent).not.toContain(
         "Pemandu lokal adalah bagian dari syarat verifikasi destinasi",
       );
       expect(badgeView.textContent).not.toContain("Dimensi 2");
@@ -950,9 +950,8 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).toContain("Batu / Malang Raya");
       expect(view.textContent).toContain("Pokdarwis Lereng Hijau");
       expect(view.textContent).not.toContain("Terverifikasi Dasar");
-      expect(view.textContent).toContain(
-        "Tersedia sebagai bagian dari standar verifikasi",
-      );
+      expect(view.textContent).toContain("Profil destinasi siap digunakan EO");
+      expect(view.textContent).toContain("Status: Aktif");
       expect(view.textContent).not.toContain("Guide Ready ✓");
       expect(view.textContent).not.toContain("Non-Guide Ready");
       expect(view.textContent).not.toContain("Tanpa Guide Lokal");

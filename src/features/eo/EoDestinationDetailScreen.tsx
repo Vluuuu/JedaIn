@@ -140,36 +140,30 @@ export function EoDestinationDetailScreen() {
         </div>
       </header>
 
-      {(["DESTINATION", "FACILITY"] as const).map((category) => {
-        const mediaItems =
+      {/* Galeri Destinasi */}
+      {(() => {
+        const destMedia =
           destination.mediaGallery?.filter(
-            (media) => (media.category ?? "DESTINATION") === category,
+            (media) => (media.category ?? "DESTINATION") === "DESTINATION",
           ) ?? [];
-        if (mediaItems.length === 0) return null;
+        if (destMedia.length === 0) return null;
         return (
           <section
-            key={category}
             className="eo-dest-media-gallery"
-            aria-label={
-              category === "DESTINATION" ? "Galeri Destinasi" : "Foto Fasilitas"
-            }
+            aria-label="Galeri Destinasi"
           >
             <div className="eo-dest-media-gallery__header">
               <div>
-                <h2>
-                  {category === "DESTINATION"
-                    ? "Galeri Destinasi"
-                    : "Foto Fasilitas"}
-                </h2>
+                <h2>Galeri Destinasi</h2>
                 <p>
                   Pilih visual ini sebagai referensi package. Visual berlabel
                   prototype bukan foto kondisi aktual destinasi.
                 </p>
               </div>
-              <span>{mediaItems.length} visual</span>
+              <span>{destMedia.length} visual</span>
             </div>
             <div className="eo-dest-media-gallery__grid">
-              {mediaItems.map((media) => (
+              {destMedia.map((media) => (
                 <figure
                   key={media.mediaId}
                   className="eo-dest-media-gallery__item"
@@ -188,7 +182,73 @@ export function EoDestinationDetailScreen() {
             </div>
           </section>
         );
-      })}
+      })()}
+
+      {/* Foto Fasilitas - Grouped by Facility */}
+      {(() => {
+        const facMedia =
+          destination.mediaGallery?.filter(
+            (media) => media.category === "FACILITY",
+          ) ?? [];
+        const facilities = destination.facilities ?? [];
+        if (facMedia.length === 0 && facilities.length === 0) return null;
+
+        return (
+          <section
+            className="eo-dest-media-gallery"
+            aria-label="Foto Fasilitas"
+          >
+            <div className="eo-dest-media-gallery__header">
+              <div>
+                <h2>Foto Fasilitas</h2>
+                <p>
+                  Foto fasilitas yang tercatat di destinasi ini untuk gambaran
+                  operasional EO.
+                </p>
+              </div>
+              <span>{facMedia.length} foto</span>
+            </div>
+
+            <div className="eo-dest-facility-grouped-list">
+              {facilities.map((fac) => {
+                const photos = facMedia.filter(
+                  (m) =>
+                    m.facilityLabel === fac ||
+                    (!m.facilityLabel &&
+                      m.label.toLowerCase().includes(fac.toLowerCase())),
+                );
+                return (
+                  <div key={fac} className="eo-dest-facility-group">
+                    <h3 className="eo-dest-facility-group__title">{fac}</h3>
+                    {photos.length > 0 ? (
+                      <div className="eo-dest-media-gallery__grid">
+                        {photos.map((media) => (
+                          <figure
+                            key={media.mediaId}
+                            className="eo-dest-media-gallery__item"
+                          >
+                            <img src={media.url} alt={media.label} />
+                            <figcaption>
+                              <strong>{media.label}</strong>
+                              <span>
+                                {media.provenance === "PROTOTYPE_ILLUSTRATION"
+                                  ? "Visual prototype"
+                                  : "Ditambahkan Mitra Destinasi"}
+                              </span>
+                            </figcaption>
+                          </figure>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="eo-dest-facility-empty">Belum ada foto</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })()}
 
       <section
         className="eo-dest-decision-facts"

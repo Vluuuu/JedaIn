@@ -7,7 +7,8 @@ import "./eo.css";
 
 export function EoDestinationsScreen() {
   const navigate = useNavigate();
-  // Authoritative EO-available destinations: ACTIVE + BASIC/PLUS + guideReady
+  // EO catalog contains only active destinations that have passed the unified
+  // JedaIn verification, including mandatory local-guide readiness.
   const destinations = mockDestinationStore.getEligibleForEo();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -145,9 +146,6 @@ export function EoDestinationsScreen() {
                         ? "Terverifikasi Plus"
                         : "Terverifikasi Dasar"}
                     </Badge>
-                    <span className="eo-dest-card__guide-badge">
-                      Pemandu lokal tersedia
-                    </span>
                   </div>
 
                   <p className="eo-dest-card__location">{dest.locationLabel}</p>

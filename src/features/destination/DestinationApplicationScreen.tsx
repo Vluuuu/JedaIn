@@ -513,12 +513,12 @@ export function DestinationApplicationScreen() {
                 color: "var(--color-text-primary)",
               }}
             >
-              3. Deskripsi Ketenangan & Fasilitas
+              3. Profil & Fasilitas Destinasi
             </legend>
 
             <div className="eo-form-group">
               <label htmlFor="dest-desc" className="eo-form-label">
-                Deskripsi Suasana & Daya Tarik Ketenangan *
+                Deskripsi Destinasi & Daya Tarik *
               </label>
               <textarea
                 id="dest-desc"
@@ -527,7 +527,7 @@ export function DestinationApplicationScreen() {
                 className="eo-form-textarea"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ceritakan keindahan alam, suasana hening, dan kearifan lokal kawasan..."
+                placeholder="Ceritakan karakter destinasi, daya tarik utama, dan pengalaman lokal yang tersedia..."
               />
             </div>
 

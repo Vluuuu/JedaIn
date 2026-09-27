@@ -1160,6 +1160,11 @@
   font-size: var(--font-size-heading-md);
 }
 
+.dest-verification-single__guide-detail {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+}
+
 .dest-verification-single__description {
   margin: var(--space-3) 0 0;
   color: var(--color-text-secondary);

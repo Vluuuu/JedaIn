@@ -1150,7 +1150,7 @@ Stepper: `1 Destination / 2 Insight / 3 Itinerary / 4 Pricing / 5 Review`
 
 - name
 - verification level
-- guide-ready badge
+- local guide availability as a factual detail
 - base cost
 - capacity
 - location
@@ -1160,11 +1160,11 @@ Stepper: `1 Destination / 2 Insight / 3 Itinerary / 4 Pricing / 5 Review`
 
 If EO `CONCEPT_ONLY`:
 
-Only `verified + guide_ready` available.
+All verified destinations already include local guide capability.
 
 Explain why unavailable destinations are hidden/disabled:
 
-> Statusmu saat ini Concept Only, jadi package harus menggunakan destinasi dengan guide lokal yang siap.
+> Sertifikasi pemanduan bukan syarat menjadi EO. Semua destinasi terverifikasi JedaIn sudah memiliki pemandu lokal.
 
 ### Primary CTA
 
@@ -1702,8 +1702,7 @@ Sections:
 Decision:
 
 - Reject + reason
-- Approve BASIC
-- Approve BASIC + guide_ready
+- Setujui Verifikasi Destinasi (BASIC; pemandu lokal dan bukti wajib tersedia)
 
 PLUS status comes from later trust lifecycle, not initial application.
 

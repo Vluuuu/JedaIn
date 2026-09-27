@@ -916,7 +916,7 @@ Desktop centered workflow with persistent `BuilderStepper`:
 
 - search/filter verified destinations,
 - verification badge,
-- guide-ready badge,
+- local guide availability as a factual detail,
 - capacity/base-cost summary,
 - backend enforces guide rule.
 
@@ -1030,14 +1030,14 @@ Review & Submit
 
 ## Verification Status
 
-Display dimensions separately:
+Display one destination verification status. Local guide readiness is a requirement inside that status:
 
 ```text
 verification_level: BASIC | PLUS
-guide_ready: true | false
+guide_ready: true (required for verified destinations)
 ```
 
-UI renders combination badge but must not store combination as UI-only truth.
+UI renders one `Terverifikasi Dasar` or `Terverifikasi Plus` badge. Guide availability may appear as ordinary profile detail.
 
 ## Schedule
 

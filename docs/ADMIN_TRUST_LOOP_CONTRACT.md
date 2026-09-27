@@ -213,8 +213,7 @@ Later Destination Partner sprint must submit into this same store rather than cr
 Wireframe locks initial decisions to:
 
 - Reject + reason
-- Approve BASIC
-- Approve BASIC + `guide_ready`
+- Setujui Verifikasi Destinasi (initial BASIC; local guide and evidence required)
 
 `PLUS` is not an initial-application approval result; PLUS belongs to later trust lifecycle.
 
@@ -501,8 +500,7 @@ Use high-value integration tests, not one test per sentence.
 ### Destination Verification
 
 - pending seeded application appears,
-- approve BASIC creates/updates canonical destination once,
-- approve BASIC + guide_ready sets guideReady true,
+- the single approval creates/updates the canonical ACTIVE destination once with guideReady true,
 - reject reason persists,
 - initial approval never grants PLUS,
 - duplicate decision is idempotent.
@@ -551,7 +549,7 @@ Also smoke:
 
 - EO rejection with exact reason,
 - Package rejection with exact reason,
-- Destination verification: Approve BASIC + guide_ready,
+- Destination verification: Setujui Verifikasi Destinasi,
 - invalid/stale decision recovery,
 - audit event for each successful manual decision.
 

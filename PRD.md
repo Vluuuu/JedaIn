@@ -596,12 +596,12 @@ Untuk 1–2 pilot destination, tim internal melakukan verifikasi manual terhadap
 
 ## FR-3.4 Destination Status Model & EO Availability — UPDATED FOR MVP
 
-Verification dimension:
+Tingkat verifikasi destinasi:
 
 - `BASIC`
 - `PLUS`
 
-Guide dimension:
+Kesiapan pemandu lokal adalah syarat di dalam verifikasi, bukan dimensi badge terpisah. State internal untuk asesmen:
 
 - `guide_ready = false` (pre-availability / assessment / remediation state)
 - `guide_ready = true` (operational local destination guide verified)
@@ -612,11 +612,13 @@ Dalam MVP JedaIn, sebuah destinasi hanya dapat berstatus `ACTIVE` dan tersedia u
 2. Memiliki verifikasi `BASIC` atau `PLUS`, dan
 3. Memiliki pemandu lokal siap (`guide_ready = true`).
 
-Destinasi dengan `guide_ready = false` dapat tetap disimpan dalam data domain untuk keperluan internal asesmen atau perbaikan mitra destinasi, namun **tidak akan ditampilkan pada direktori destinasi EO maupun pilihan destinasi di Trip Builder**.
+Destinasi dengan `guide_ready = false` dapat tetap disimpan dalam data domain untuk asesmen atau perbaikan, tetapi tidak dapat `ACTIVE` terverifikasi dan **tidak ditampilkan pada direktori destinasi EO maupun pilihan destinasi di Trip Builder**.
 
 Badge pada surface EO disederhanakan tanpa duplikasi:
-- Terverifikasi Dasar (Pemandu lokal tersedia)
-- Terverifikasi Plus (Pemandu lokal tersedia)
+- Terverifikasi Dasar
+- Terverifikasi Plus
+
+Ketersediaan pemandu lokal dapat ditampilkan sebagai fakta profil biasa, bukan badge verifikasi kedua.
 
 ## FR-3.5 Failed Verification & Re-Apply
 

@@ -494,19 +494,15 @@ flowchart TD
     F --> G[Location Documentation]
     G --> H[Facilities & Activities]
     H --> I[Capacity & Base Cost]
-    I --> J[Guide Readiness]
+    I --> J[Declare Local Guide + Provide Evidence]
     J --> K[Submit]
     K --> L[Manual Verification]
 
     L -- Fail --> M[Specific Reason]
     M --> E
 
-    L -- Pass --> N[Verification Level BASIC]
-    N --> O{Guide ready?}
-    O -- Yes --> P[guide_ready = true]
-    O -- No --> Q[guide_ready = false]
-    P --> R[Destination Dashboard]
-    Q --> R
+    L -- Pass, including local guide evidence --> N[Verification Level BASIC, guide_ready = true]
+    N --> R[Destination Dashboard]
 
     C -- Yes --> R
 ```
@@ -582,8 +578,7 @@ flowchart TD
     D --> E[Guide Readiness]
     E --> F{Pass?}
     F -- No --> G[Reject + Specific Reason]
-    F -- Yes --> H[Set BASIC Verification]
-    H --> I[Set guide_ready true/false]
+    F -- Yes, with local guide evidence --> H[Set BASIC Verification and guide_ready = true]
 ```
 
 ---
@@ -795,7 +790,7 @@ This section is the direct bridge from system flow to wireframe.
 | A03 | EO Approval Queue | Must | Review |
 | A04 | EO Application Review | Must | Approve/Reject |
 | A05 | Destination Verification Queue | Must | Review |
-| A06 | Destination Verification Detail | Must | Approve/Reject + Guide Ready |
+| A06 | Destination Verification Detail | Must | Approve/Reject destination verification |
 | A07 | Package Approval Queue | Must | Review |
 | A08 | Package Review Checklist | Must | Approve/Reject |
 | A09 | Bookings / Payments | Should | Inspect |

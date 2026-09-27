@@ -245,11 +245,11 @@ export function AdminDestinationVerificationDetailScreen() {
               Deklarasi & Bukti Kesiapan Pemandu Lokal:
             </small>
             <div style={{ marginTop: "var(--space-1)" }}>
-              <Badge tone={destApp.declaredGuideReady ? "success" : "danger"}>
+              <strong>
                 {destApp.declaredGuideReady
                   ? "Pemandu lokal tersedia"
                   : "Pemandu lokal belum tersedia"}
-              </Badge>
+              </strong>
             </div>
             <p
               style={{
@@ -323,7 +323,10 @@ export function AdminDestinationVerificationDetailScreen() {
                 variant="primary"
                 size="md"
                 loading={isProcessing}
-                disabled={!destApp.declaredGuideReady}
+                disabled={
+                  !destApp.declaredGuideReady ||
+                  !destApp.guideReadinessEvidence.trim()
+                }
                 onClick={handleApprove}
               >
                 Setujui Verifikasi Destinasi

@@ -71,6 +71,23 @@ export const mockDestinationPartnerService = {
       };
     }
 
+    const mediaData = input.url.match(
+      /^data:image\/(?:jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/,
+    );
+    if (!mediaData) {
+      return {
+        success: false,
+        message: "Format visual harus JPG, PNG, atau WebP.",
+      };
+    }
+    const encoded = mediaData[1];
+    const byteLength =
+      (encoded.length * 3) / 4 -
+      (encoded.endsWith("==") ? 2 : encoded.endsWith("=") ? 1 : 0);
+    if (byteLength > 5 * 1024 * 1024) {
+      return { success: false, message: "Ukuran visual maksimal 5 MB." };
+    }
+
     const currentGallery = context.destination.mediaGallery ?? [];
     if (currentGallery.length >= 6) {
       return {
@@ -80,7 +97,7 @@ export const mockDestinationPartnerService = {
     }
 
     const media: DestinationMediaItem = {
-      mediaId: `media_${context.destination.destinationId}_${Date.now()}`,
+      mediaId: `media_${context.destination.destinationId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       url: input.url,
       label: input.label.trim() || "Visual destinasi",
       provenance: "DESTINATION_SOURCE",

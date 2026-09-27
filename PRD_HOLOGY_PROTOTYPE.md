@@ -1619,16 +1619,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F5.3 Demand-Assisted Pricing Reference:
+Current verified competition baseline setelah F5.4 Destination Media & Package Visual Choice:
 
-- current app feature commit: 8796334bb596c9ba0782fb202237023eace831bd,
-- 49 suites / 692 tests,
+- current app feature commit: 115bdc265d589efb19bce0479d388a2e5fd2c0ce,
+- 50 suites / 696 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, PR #92 Final Semantic Truthfulness Hardening, PR #94 Final Live-User UX Cleanup, PR #97 F5.1 Traveler Buyer Experience, PR #99 F5.2 EO Destination Discovery & Builder Clarity, dan PR #101 F5.3 Demand-Assisted Pricing Reference sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, PR #92 Final Semantic Truthfulness Hardening, PR #94 Final Live-User UX Cleanup, PR #97 F5.1 Traveler Buyer Experience, PR #99 F5.2 EO Destination Discovery & Builder Clarity, PR #101 F5.3 Demand-Assisted Pricing Reference, dan PR #102 F5.4 Destination Media & Package Visual Choice sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1895,7 +1895,7 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] Final Live-User UX Cleanup merged melalui PR #94 tanpa flow/business-rule change.
 - [x] Guest Demo tetap diperbolehkan sebagai prototype Traveler identity untuk mendemonstrasikan booking → completion → Destination review + EO/Guide review.
 - [x] Accepted findings dari Traveler / EO / Mitra / Admin-Judge simulation sudah ditutup sampai F4.3.
-- [x] Current canonical app baseline: 8796334bb596c9ba0782fb202237023eace831bd dengan 49 suites / 692 tests PASS.
+- [x] Current canonical app baseline: 115bdc265d589efb19bce0479d388a2e5fd2c0ce dengan 50 suites / 696 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.

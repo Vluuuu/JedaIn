@@ -200,10 +200,8 @@ describe("Batch C2 — Destination Cost Scope Clarity (P1-E01)", () => {
     expect(res.application?.baseCostExcludes).toContain("Tenda pribadi");
 
     // 2. Admin approves application
-    const approveResult = mockDestinationVerificationStore.approveApplication(
-      appId,
-      true,
-    );
+    const approveResult =
+      mockDestinationVerificationStore.approveApplication(appId);
     expect(approveResult.success).toBe(true);
 
     // 3. Verify canonical destination record received the cost scope

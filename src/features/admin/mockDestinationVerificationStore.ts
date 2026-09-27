@@ -99,9 +99,9 @@ export const INITIAL_DESTINATION_APPLICATIONS: DestinationVerificationRecord[] =
       declaredGuideReady: false,
       guideReadinessEvidence: "Belum memiliki pemandu lokal resmi di lokasi.",
       submittedAt: "2026-08-15T09:00:00Z",
-      status: "APPROVED",
-      approvedLevel: "BASIC",
-      approvedGuideReady: false,
+      status: "REJECTED",
+      rejectionReason:
+        "Verifikasi destinasi JedaIn mewajibkan pemandu lokal yang siap di lokasi.",
       reviewedAt: "2026-08-16T11:00:00Z",
     },
     {
@@ -241,6 +241,14 @@ export const mockDestinationVerificationStore = {
       };
     }
 
+    if (!input.guideReady) {
+      return {
+        success: false,
+        message:
+          "Destinasi wajib memiliki pemandu lokal yang siap sebelum dapat diajukan untuk verifikasi JedaIn.",
+      };
+    }
+
     if (
       !input.name.trim() ||
       !input.locationLabel.trim() ||
@@ -350,10 +358,11 @@ export const mockDestinationVerificationStore = {
     return { success: true, application: cloneVerificationApp(application) };
   },
 
-  approveApplication(
-    applicationId: string,
-    guideReady: boolean,
-  ): { success: boolean; destination?: DestinationRecord; message?: string } {
+  approveApplication(applicationId: string): {
+    success: boolean;
+    destination?: DestinationRecord;
+    message?: string;
+  } {
     const app = verificationApps.find((a) => a.applicationId === applicationId);
     if (!app || app.status !== "PENDING_REVIEW") {
       return {
@@ -362,9 +371,17 @@ export const mockDestinationVerificationStore = {
       };
     }
 
+    if (!app.declaredGuideReady || !app.guideReadinessEvidence.trim()) {
+      return {
+        success: false,
+        message:
+          "Verifikasi tidak dapat disetujui sebelum kesiapan pemandu lokal dibuktikan.",
+      };
+    }
+
     app.status = "APPROVED";
-    app.approvedLevel = "BASIC"; // LOCKED: initial approval is NEVER PLUS
-    app.approvedGuideReady = guideReady;
+    app.approvedLevel = "BASIC"; // Initial approval remains BASIC.
+    app.approvedGuideReady = true;
     app.reviewedAt = new Date().toISOString();
 
     // Canonical bridge: Explicit domain upsert in mockDestinationStore
@@ -375,7 +392,7 @@ export const mockDestinationVerificationStore = {
       province: app.province,
       city: app.city,
       verificationLevel: "BASIC",
-      guideReady,
+      guideReady: true,
       baseCostPerPerson: app.baseCostPerPerson,
       description: app.description,
       highlights: [...app.highlights],

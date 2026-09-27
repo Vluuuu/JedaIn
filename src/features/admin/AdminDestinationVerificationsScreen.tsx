@@ -29,8 +29,8 @@ export function AdminDestinationVerificationsScreen() {
             Antrean Verifikasi Destinasi Lokal
           </h1>
           <p className="admin-page-subtitle">
-            Tinjau kesiapan lokasi alam, ketenangan lingkungan, fasilitas SOP,
-            dan ketersediaan pemandu lokal (Guide Ready).
+            Tinjau kelayakan destinasi, fasilitas, SOP, dan bukti ketersediaan
+            pemandu lokal sebagai satu proses verifikasi JedaIn.
           </p>
         </div>
       </header>

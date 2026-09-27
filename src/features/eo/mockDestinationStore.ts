@@ -175,7 +175,7 @@ export const MOCK_DESTINATION_DIRECTORY: DestinationRecord[] = [
         provenance: "PROTOTYPE_ILLUSTRATION",
       },
     ],
-    status: "ACTIVE",
+    status: "INACTIVE",
     availableActivities: [
       "Jalan hening melintasi kanopi rumpun bambu",
       "Sesi journaling & kontemplasi santai",
@@ -248,6 +248,22 @@ export const mockDestinationStore = {
       destinations.push(cloned);
     }
     return cloneDestination(cloned);
+  },
+
+  updateMediaGallery(
+    destinationId: string,
+    mediaGallery: NonNullable<DestinationRecord["mediaGallery"]>,
+  ): DestinationRecord | undefined {
+    const existingIndex = destinations.findIndex(
+      (d) => d.destinationId === destinationId,
+    );
+    if (existingIndex < 0) return undefined;
+
+    destinations[existingIndex] = {
+      ...destinations[existingIndex],
+      mediaGallery: mediaGallery.map((media) => ({ ...media })),
+    };
+    return cloneDestination(destinations[existingIndex]);
   },
 
   /**

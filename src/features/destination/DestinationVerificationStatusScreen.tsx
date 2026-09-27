@@ -154,9 +154,10 @@ export function DestinationVerificationStatusScreen() {
                 flexWrap: "wrap",
               }}
             >
-              <Badge tone="success">Level: {app.approvedLevel ?? "—"}</Badge>
-              <Badge tone={app.approvedGuideReady ? "success" : "neutral"}>
-                {app.approvedGuideReady ? "Guide Ready ✓" : "Non-Guide Ready"}
+              <Badge tone="success">
+                {app.approvedLevel === "BASIC"
+                  ? "Terverifikasi Dasar"
+                  : "Terverifikasi"}
               </Badge>
             </div>
           </div>
@@ -252,8 +253,8 @@ export function DestinationVerificationStatusScreen() {
                   ? new Date(app.submittedAt).toLocaleDateString("id-ID")
                   : "hari ini"}
               </strong>
-              . Tim Kurator Admin JedaIn sedang meninjau kelayakan standar
-              ketenangan dan kesiapan operasional destinasi.
+              . Tim Kurator Admin JedaIn sedang meninjau kelayakan destinasi,
+              fasilitas, SOP, dan bukti kesiapan pemandu lokal.
             </p>
           </div>
 

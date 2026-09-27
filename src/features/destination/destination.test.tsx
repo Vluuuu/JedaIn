@@ -228,10 +228,11 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const badgeView = await renderComponent(
         createElement(DestinationVerificationBadgeScreen),
       );
-      expect(badgeView.textContent).toContain("Terverifikasi Dasar (BASIC)");
+      expect(badgeView.textContent).toContain("Terverifikasi Dasar");
       expect(badgeView.textContent).toContain(
-        "Siap sebagai Pemandu (Guide Ready)",
+        "Pemandu lokal adalah bagian dari syarat verifikasi destinasi",
       );
+      expect(badgeView.textContent).not.toContain("Dimensi 2");
 
       // Schedule
       const schedView = await renderComponent(
@@ -346,7 +347,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(res4.success).toBe(false);
     });
 
-    it("C2. declaredGuideReady=false with non-empty evidence persists false and is preserved on reapply", () => {
+    it("C2. destination without a local guide cannot be submitted for verification", () => {
       partnerSessionStore.setPartner({
         id: "dest_partner_guide_decl",
         email: "decl@test.id",
@@ -374,11 +375,13 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         agreedToSop: true,
       });
 
-      expect(res.success).toBe(true);
-      const app = mockDestinationVerificationStore.getByPartnerId(
-        "dest_partner_guide_decl",
-      );
-      expect(app?.declaredGuideReady).toBe(false);
+      expect(res.success).toBe(false);
+      expect(res.message).toContain("wajib memiliki pemandu lokal");
+      expect(
+        mockDestinationVerificationStore.getByPartnerId(
+          "dest_partner_guide_decl",
+        ),
+      ).toBeUndefined();
     });
 
     it("C3. two new destinations with same name get unique destinationIdentityIds and never collide with canonical", () => {
@@ -569,7 +572,6 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       adminSessionStore.loginAsDemoAdmin();
       mockAdminDecisionService.approveDestinationVerification(
         subRes.applicationId!,
-        true,
         "Approved",
       );
 
@@ -713,8 +715,8 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         createElement(DestinationVerificationStatusScreen),
       );
       expect(view.textContent).toContain("Destinasi Terverifikasi");
-      expect(view.textContent).toContain("Level: BASIC");
-      expect(view.textContent).toContain("Guide Ready ✓");
+      expect(view.textContent).toContain("Terverifikasi Dasar");
+      expect(view.textContent).not.toContain("Guide Ready");
     });
 
     it("P & Q. pending and rejected show exact shared state and Admin rejection reason", async () => {
@@ -891,13 +893,17 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
     });
 
     it("AE & AF & AG. zero reviews shows 'Belum ada rating', empty comment shows 'Tanpa komentar', and travelerId is hidden", async () => {
+      const approved = mockDestinationVerificationStore.approveApplication(
+        "dest_app_coban_rondo",
+      );
+      expect(approved.success).toBe(true);
       partnerSessionStore.setPartner({
-        id: "dest_partner_trawas_bambu",
-        email: "partner@trawas.id",
-        name: "Pengelola Trawas",
+        id: "dest_partner_coban_rondo",
+        email: "partner@cobanrondo.id",
+        name: "Pengelola Coban Rondo",
         role: "DESTINATION",
-        businessName: "Pengelola Bambu Trawas",
-        destinationIdentityId: "dest_hutan_trawas",
+        businessName: "Pengelola Coban Rondo",
+        destinationIdentityId: "dest_coban_rondo",
       });
 
       const emptyView = await renderComponent(
@@ -910,7 +916,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         bookingId: "bk_empty_comment_dest",
         travelerId: "usr_secret_privacy_dest",
         targetType: "DESTINATION",
-        targetRef: "Hutan Bambu Trawas",
+        targetRef: "Hutan Pinus Coban Rondo",
         rating: 5,
         comment: "",
       });
@@ -936,7 +942,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).toContain("Batu / Malang Raya");
       expect(view.textContent).toContain("Pokdarwis Lereng Hijau");
       expect(view.textContent).toContain("Terverifikasi Dasar");
-      expect(view.textContent).toContain("Pemandu lokal tersedia");
+      expect(view.textContent).toContain(
+        "Tersedia sebagai bagian dari standar verifikasi",
+      );
       expect(view.textContent).not.toContain("Guide Ready ✓");
       expect(view.textContent).not.toContain("Non-Guide Ready");
       expect(view.textContent).not.toContain("Tanpa Guide Lokal");
@@ -1085,13 +1093,17 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
     });
 
     it("renders calm empty states for sessions and destination reviews", async () => {
+      const approved = mockDestinationVerificationStore.approveApplication(
+        "dest_app_coban_rondo",
+      );
+      expect(approved.success).toBe(true);
       partnerSessionStore.setPartner({
-        id: "dest_partner_trawas_bambu",
-        email: "partner@trawas.id",
-        name: "Pengelola Trawas",
+        id: "dest_partner_coban_rondo",
+        email: "partner@cobanrondo.id",
+        name: "Pengelola Coban Rondo",
         role: "DESTINATION",
-        businessName: "Pengelola Bambu Trawas",
-        destinationIdentityId: "dest_hutan_trawas",
+        businessName: "Pengelola Coban Rondo",
+        destinationIdentityId: "dest_coban_rondo",
       });
 
       const view = await renderComponent(
@@ -1154,7 +1166,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const badgeView = await renderComponent(
         createElement(DestinationVerificationBadgeScreen),
       );
-      expect(badgeView.textContent).toContain("Data Lencana Tidak Tersedia");
+      expect(badgeView.textContent).toContain(
+        "Status Verifikasi Tidak Tersedia",
+      );
 
       const schedView = await renderComponent(
         createElement(DestinationScheduleScreen),

@@ -276,12 +276,12 @@ export function EoApplicationScreen() {
               color: "var(--color-text-primary)",
             }}
           >
-            2. Kompetensi Pemandu & Pengalaman
+            2. Pengalaman Operasional
           </legend>
 
           <div className="eo-form-group">
             <label htmlFor="eo-guide-status" className="eo-form-label">
-              Kategori Kesiapan Pemandu (Guide Status) *
+              Kapabilitas Pemanduan EO (Opsional)
             </label>
             <select
               id="eo-guide-status"
@@ -289,19 +289,16 @@ export function EoApplicationScreen() {
               value={guideStatus}
               onChange={(e) => setGuideStatus(e.target.value as EoGuideStatus)}
             >
-              <option value="CERTIFIED_GUIDE">
-                Certified Guide (Memiliki sertifikasi kepemanduan / lisensi
-                resmi)
-              </option>
               <option value="CONCEPT_ONLY">
-                Concept-Only (Perancang konsep — wajib memilih destinasi dengan
-                Guide Ready)
+                Fokus sebagai perancang experience
+              </option>
+              <option value="CERTIFIED_GUIDE">
+                EO juga memiliki sertifikasi pemanduan
               </option>
             </select>
             <span className="eo-form-helper">
-              {guideStatus === "CERTIFIED_GUIDE"
-                ? "Dapat merancang paket di seluruh destinasi terverifikasi BASIC maupun PLUS."
-                : "Hanya dapat memilih destinasi yang memiliki pemandu lokal terlatih di lokasi (Guide Ready)."}
+              Sertifikasi pemanduan bukan syarat menjadi EO. Semua destinasi
+              terverifikasi JedaIn sudah wajib memiliki pemandu lokal.
             </span>
           </div>
 

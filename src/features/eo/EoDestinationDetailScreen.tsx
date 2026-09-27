@@ -95,23 +95,20 @@ export function EoDestinationDetailScreen() {
           <div className="eo-dest-detail-hero__badges">
             <Badge
               tone={
-                destination.verificationLevel === "PLUS" ? "info" : "success"
+                isEligible
+                  ? destination.verificationLevel === "PLUS"
+                    ? "info"
+                    : "success"
+                  : "neutral"
               }
               showSymbol={false}
             >
-              {destination.verificationLevel === "PLUS"
-                ? "Terverifikasi Plus"
-                : "Terverifikasi Dasar"}
+              {isEligible
+                ? destination.verificationLevel === "PLUS"
+                  ? "Terverifikasi Plus"
+                  : "Terverifikasi Dasar"
+                : "Belum Terverifikasi"}
             </Badge>
-            {destination.guideReady ? (
-              <span className="eo-dest-detail-hero__guide-badge">
-                Pemandu lokal tersedia
-              </span>
-            ) : (
-              <span className="eo-dest-detail-hero__guide-badge eo-dest-detail-hero__guide-badge--not-ready">
-                Pemandu lokal belum tersedia
-              </span>
-            )}
           </div>
 
           <p className="eo-dest-detail-hero__loc">
@@ -190,16 +187,16 @@ export function EoDestinationDetailScreen() {
         <div className="eo-dest-decision-fact">
           <span>Status verifikasi</span>
           <strong>
-            {destination.verificationLevel === "PLUS"
-              ? "Terverifikasi Plus"
-              : "Terverifikasi Dasar"}
+            {isEligible
+              ? destination.verificationLevel === "PLUS"
+                ? "Terverifikasi Plus"
+                : "Terverifikasi Dasar"
+              : "Belum Terverifikasi"}
           </strong>
         </div>
         <div className="eo-dest-decision-fact">
-          <span>Kesiapan pemandu</span>
-          <strong>
-            {destination.guideReady ? "Pemandu lokal siap" : "Belum siap"}
-          </strong>
+          <span>Pemandu lokal</span>
+          <strong>Tersedia sebagai bagian dari standar verifikasi</strong>
         </div>
         <div className="eo-dest-decision-fact">
           <span>Kapasitas umum destinasi</span>

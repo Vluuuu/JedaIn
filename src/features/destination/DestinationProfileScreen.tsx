@@ -1,9 +1,13 @@
-import { Badge } from "../../components/ui";
+import { useState } from "react";
+import { Badge, Button } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
+import { mockDestinationPartnerService } from "./mockDestinationPartnerService";
 import "./destination.css";
 
 export function DestinationProfileScreen() {
+  const [, setGalleryVersion] = useState(0);
+  const [galleryError, setGalleryError] = useState<string | undefined>();
   const context = resolveAuthenticatedDestinationContext();
   if (!context) {
     return (
@@ -34,10 +38,9 @@ export function DestinationProfileScreen() {
             }}
           >
             <Badge tone="success">
-              Terverifikasi {destination.verificationLevel}
-            </Badge>
-            <Badge tone={destination.guideReady ? "success" : "neutral"}>
-              {destination.guideReady ? "Guide Ready ✓" : "Tanpa Guide Lokal"}
+              {destination.verificationLevel === "PLUS"
+                ? "Terverifikasi Plus"
+                : "Terverifikasi Dasar"}
             </Badge>
           </div>
           <h1 className="dest-page-title">Profil Kawasan Destinasi</h1>
@@ -64,28 +67,83 @@ export function DestinationProfileScreen() {
         />
       </div>
 
-      {destination.mediaGallery && destination.mediaGallery.length > 0 && (
-        <section
-          className="dest-media-gallery"
-          aria-labelledby="destination-media-gallery-heading"
-        >
-          <div className="dest-media-gallery__header">
-            <div>
-              <h2
-                id="destination-media-gallery-heading"
-                className="dest-media-gallery__title"
-              >
-                Galeri Destinasi
-              </h2>
-              <p className="dest-media-gallery__desc">
-                Visual ini adalah representasi prototype untuk membantu konteks
-                destinasi, bukan dokumentasi kondisi aktual.
-              </p>
-            </div>
-            <span className="dest-media-gallery__count">
-              {destination.mediaGallery.length} visual
-            </span>
+      <section
+        className="dest-media-gallery"
+        aria-labelledby="destination-media-gallery-heading"
+      >
+        <div className="dest-media-gallery__header">
+          <div>
+            <h2
+              id="destination-media-gallery-heading"
+              className="dest-media-gallery__title"
+            >
+              Galeri Destinasi
+            </h2>
+            <p className="dest-media-gallery__desc">
+              Tambahkan visual destinasi untuk membantu EO memahami suasana
+              lokasi. Visual prototype bawaan tetap diberi label dan tidak
+              dianggap sebagai foto kondisi aktual.
+            </p>
           </div>
+          <span className="dest-media-gallery__count">
+            {destination.mediaGallery?.length ?? 0}/6 visual
+          </span>
+        </div>
+
+        <div className="dest-media-gallery__actions">
+          <label className="dest-media-gallery__upload-button">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="dest-media-gallery__file-input"
+              aria-label="Tambah visual destinasi"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.currentTarget.value = "";
+                setGalleryError(undefined);
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) {
+                  setGalleryError("Ukuran visual maksimal 5 MB.");
+                  return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const result = reader.result;
+                  if (typeof result !== "string") {
+                    setGalleryError("Visual tidak dapat dibaca.");
+                    return;
+                  }
+
+                  const added = mockDestinationPartnerService.addGalleryMedia({
+                    url: result,
+                    label: file.name.replace(/\.[^.]+$/, ""),
+                  });
+                  if (!added.success) {
+                    setGalleryError(added.message);
+                    return;
+                  }
+                  setGalleryVersion((version) => version + 1);
+                };
+                reader.onerror = () =>
+                  setGalleryError("Visual tidak dapat dibaca.");
+                reader.readAsDataURL(file);
+              }}
+            />
+            Tambah visual
+          </label>
+          <span className="dest-media-gallery__upload-hint">
+            JPG, PNG, atau WebP · maksimal 5 MB.
+          </span>
+        </div>
+
+        {galleryError && (
+          <p className="dest-media-gallery__error" role="alert">
+            {galleryError}
+          </p>
+        )}
+
+        {destination.mediaGallery && destination.mediaGallery.length > 0 ? (
           <div className="dest-media-gallery__grid">
             {destination.mediaGallery.map((media) => (
               <figure key={media.mediaId} className="dest-media-gallery__item">
@@ -95,14 +153,39 @@ export function DestinationProfileScreen() {
                   <span>
                     {media.provenance === "PROTOTYPE_ILLUSTRATION"
                       ? "Visual prototype"
-                      : "Media destinasi"}
+                      : "Ditambahkan Mitra Destinasi"}
                   </span>
+                  {media.provenance === "DESTINATION_SOURCE" && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        const removed =
+                          mockDestinationPartnerService.removeGalleryMedia(
+                            media.mediaId,
+                          );
+                        if (!removed.success) {
+                          setGalleryError(removed.message);
+                          return;
+                        }
+                        setGalleryError(undefined);
+                        setGalleryVersion((version) => version + 1);
+                      }}
+                    >
+                      Hapus visual
+                    </Button>
+                  )}
                 </figcaption>
               </figure>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <p className="dest-media-gallery__empty">
+            Belum ada visual di galeri destinasi.
+          </p>
+        )}
+      </section>
 
       {/* Critical Edit Policy Notice */}
       <div className="admin-alert admin-alert--info">

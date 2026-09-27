@@ -485,15 +485,9 @@ export function EoPackageDetailScreen() {
                 <p className="eo-pkg-dest-loc">{destination.locationLabel}</p>
 
                 <div className="eo-pkg-dest-guide-state">
-                  <Badge tone={destination.guideReady ? "success" : "neutral"}>
-                    {destination.guideReady ? "Guide Ready" : "Non-Guide Ready"}
-                  </Badge>
                   <p className="eo-pkg-guide-expl">
-                    {destination.guideReady
-                      ? "Pemandu lokal tersedia dari destinasi"
-                      : partner?.guideStatus === "CERTIFIED_GUIDE"
-                        ? "Pemanduan dapat disiapkan oleh EO bersertifikat"
-                        : "Perlu konfirmasi pemandu mandiri"}
+                    Pemandu lokal tersedia sebagai bagian dari standar
+                    verifikasi destinasi.
                   </p>
                 </div>
               </div>

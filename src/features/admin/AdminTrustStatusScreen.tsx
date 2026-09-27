@@ -20,7 +20,12 @@ export function AdminTrustStatusScreen() {
 
   // Collect EO entities from mockApplicationStore
   const eoApps = mockApplicationStore.getAll();
-  const allDestinations = mockDestinationStore.getAll();
+  const allDestinations = mockDestinationStore
+    .getAll()
+    .filter(
+      (destination) =>
+        destination.status === "ACTIVE" && destination.guideReady,
+    );
   const allComplaints = mockComplaintStore.getAll();
 
   const eoEntities: TrustEntitySummary[] = eoApps.map((app) => {
@@ -76,7 +81,10 @@ export function AdminTrustStatusScreen() {
       entityType: "DESTINATION",
       name: d.name,
       locationOrBusiness: d.locationLabel,
-      verificationLevelOrGuideStatus: `Verifikasi ${d.verificationLevel}${d.guideReady ? " (Guide Ready ✓)" : ""}`,
+      verificationLevelOrGuideStatus:
+        d.verificationLevel === "PLUS"
+          ? "Terverifikasi Plus"
+          : "Terverifikasi Dasar",
       reviewAverage: avgRating,
       reviewCount: reviews.length,
       complaintCount: complaints.length,
@@ -156,7 +164,7 @@ export function AdminTrustStatusScreen() {
                 <th>Nama Entitas Mitra</th>
                 <th>Tipe Entitas</th>
                 <th>Lokasi / Wilayah</th>
-                <th>Status Verifikasi / Guide</th>
+                <th>Status Verifikasi</th>
                 <th>Rating Ulasan</th>
                 <th>Aduan Masuk</th>
                 <th>Status Kemitraan</th>

@@ -76,9 +76,7 @@ export function DestinationApplicationScreen() {
     existingApp?.baseCostExcludes?.join("\n") ?? "",
   );
 
-  const [guideReady, setGuideReady] = useState<boolean>(
-    existingApp?.declaredGuideReady ?? false,
-  );
+  const guideReady = true;
   const [guideReadinessEvidence, setGuideReadinessEvidence] = useState(
     existingApp?.guideReadinessEvidence ?? "",
   );
@@ -515,12 +513,12 @@ export function DestinationApplicationScreen() {
                 color: "var(--color-text-primary)",
               }}
             >
-              3. Deskripsi Ketenangan & Fasilitas
+              3. Profil Destinasi & Fasilitas
             </legend>
 
             <div className="eo-form-group">
               <label htmlFor="dest-desc" className="eo-form-label">
-                Deskripsi Suasana & Daya Tarik Ketenangan *
+                Tentang Destinasi *
               </label>
               <textarea
                 id="dest-desc"
@@ -529,7 +527,7 @@ export function DestinationApplicationScreen() {
                 className="eo-form-textarea"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ceritakan keindahan alam, suasana hening, dan kearifan lokal kawasan..."
+                placeholder="Jelaskan karakter destinasi, daya tarik utama, dan konteks lokal kawasan..."
               />
             </div>
 
@@ -732,39 +730,16 @@ export function DestinationApplicationScreen() {
                 color: "var(--color-text-primary)",
               }}
             >
-              5. Kesiapan Pemandu Lokal (Guide Readiness)
+              5. Pemandu Lokal
             </legend>
 
-            <div>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--space-3)",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  id="dest-guide-ready-cb"
-                  checked={guideReady}
-                  onChange={(e) => setGuideReady(e.target.checked)}
-                  style={{ width: "1.25rem", height: "1.25rem" }}
-                />
-                <strong style={{ fontSize: "var(--font-size-body-md)" }}>
-                  Destinasi Memiliki Pemandu Lokal Siap Ditempatkan (Guide
-                  Ready)
-                </strong>
-              </label>
-              <p
-                style={{
-                  margin: "var(--space-1) 0 0",
-                  fontSize: "var(--font-size-caption)",
-                  color: "var(--color-text-secondary)",
-                }}
-              >
-                Centang jika pengelola memiliki warga binaan yang terlatih
-                memandu rute untuk EO berkategori Concept-Only.
+            <div className="dest-guide-requirement">
+              <Badge tone="info">Syarat verifikasi</Badge>
+              <strong>Pemandu lokal wajib tersedia di destinasi.</strong>
+              <p>
+                JedaIn hanya memverifikasi destinasi yang memiliki pemandu lokal
+                siap mendampingi rute. EO tidak wajib memiliki sertifikasi
+                pemanduan sendiri.
               </p>
             </div>
 
@@ -845,9 +820,7 @@ export function DestinationApplicationScreen() {
               }}
             >
               <div>
-                <Badge tone={guideReady ? "success" : "neutral"}>
-                  {guideReady ? "Guide Ready ✓" : "Tanpa Guide Lokal"}
-                </Badge>
+                <Badge tone="success">Pemandu lokal tersedia</Badge>
                 <h3
                   style={{
                     margin: "var(--space-2) 0 var(--space-1)",

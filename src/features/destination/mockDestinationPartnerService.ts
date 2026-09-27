@@ -1,6 +1,6 @@
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
-import type { DestinationRecord } from "../eo/types";
+import type { DestinationMediaItem, DestinationRecord } from "../eo/types";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import type { DestinationApplicationDraft } from "./types";
 
@@ -54,5 +54,71 @@ export const mockDestinationPartnerService = {
   getCanonicalDestinationForPartner(): DestinationRecord | undefined {
     const context = resolveAuthenticatedDestinationContext();
     return context?.destination;
+  },
+
+  addGalleryMedia(input: {
+    url: string;
+    label: string;
+  }): { success: boolean; message?: string; media?: DestinationMediaItem } {
+    const context = resolveAuthenticatedDestinationContext();
+    if (!context) {
+      return {
+        success: false,
+        message: "Akses galeri hanya tersedia untuk Mitra Destinasi terverifikasi.",
+      };
+    }
+
+    const currentGallery = context.destination.mediaGallery ?? [];
+    if (currentGallery.length >= 6) {
+      return {
+        success: false,
+        message: "Galeri prototype dibatasi maksimal 6 visual per destinasi.",
+      };
+    }
+
+    const media: DestinationMediaItem = {
+      mediaId: `media_${context.destination.destinationId}_${Date.now()}`,
+      url: input.url,
+      label: input.label.trim() || "Visual destinasi",
+      provenance: "DESTINATION_SOURCE",
+    };
+
+    mockDestinationStore.updateMediaGallery(context.destination.destinationId, [
+      ...currentGallery,
+      media,
+    ]);
+
+    return { success: true, media };
+  },
+
+  removeGalleryMedia(
+    mediaId: string,
+  ): { success: boolean; message?: string } {
+    const context = resolveAuthenticatedDestinationContext();
+    if (!context) {
+      return {
+        success: false,
+        message: "Akses galeri hanya tersedia untuk Mitra Destinasi terverifikasi.",
+      };
+    }
+
+    const currentGallery = context.destination.mediaGallery ?? [];
+    const target = currentGallery.find((media) => media.mediaId === mediaId);
+    if (!target) {
+      return { success: false, message: "Visual tidak ditemukan." };
+    }
+
+    if (target.provenance !== "DESTINATION_SOURCE") {
+      return {
+        success: false,
+        message: "Visual prototype bawaan tidak dapat dihapus oleh Mitra.",
+      };
+    }
+
+    mockDestinationStore.updateMediaGallery(
+      context.destination.destinationId,
+      currentGallery.filter((media) => media.mediaId !== mediaId),
+    );
+    return { success: true };
   },
 };

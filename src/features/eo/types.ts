@@ -46,6 +46,17 @@ export interface EoApplicationRecord {
 
 export type DestinationVerificationLevel = "BASIC" | "PLUS";
 
+export type DestinationMediaProvenance =
+  | "PROTOTYPE_ILLUSTRATION"
+  | "DESTINATION_SOURCE";
+
+export interface DestinationMediaItem {
+  mediaId: string;
+  url: string;
+  label: string;
+  provenance: DestinationMediaProvenance;
+}
+
 export interface DestinationRecord {
   destinationId: string;
   name: string;
@@ -59,6 +70,7 @@ export interface DestinationRecord {
   highlights: string[];
   capacityPerSession: number;
   imageUrl?: string;
+  mediaGallery?: DestinationMediaItem[];
   status: "ACTIVE" | "INACTIVE";
   availableActivities?: string[];
   facilities?: string[];

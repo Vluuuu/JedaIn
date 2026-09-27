@@ -262,12 +262,11 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
       expect(view.textContent).toContain("Verifikasi Lokasi");
     });
 
-    it("M & N & O. Approve BASIC + guide_ready sets guideReady true (NEVER PLUS on initial approval)", () => {
+    it("M & N & O. destination approval requires guide readiness and starts at BASIC", () => {
       adminSessionStore.loginAsDemoAdmin();
 
       const res = mockAdminDecisionService.approveDestinationVerification(
         "dest_app_coban_rondo",
-        true, // guideReady = true
         "Kawasan hutan pinus memenuhi standar kebersihan dan SOP pemandu.",
       );
 
@@ -311,7 +310,6 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
 
       mockAdminDecisionService.approveDestinationVerification(
         "dest_app_coban_rondo",
-        true,
         "Disetujui untuk pilot program.",
       );
 
@@ -325,7 +323,6 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
       // Idempotency: duplicate decision
       const dup = mockAdminDecisionService.approveDestinationVerification(
         "dest_app_coban_rondo",
-        true,
         "Duplicate",
       );
       expect(dup.success).toBe(false);

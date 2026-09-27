@@ -1024,20 +1024,21 @@ Legal/Management
 Location Documentation
 Facilities & Activities
 Capacity & Base Cost
-Guide Readiness
+Local Guide Evidence
 Review & Submit
 ```
 
 ## Verification Status
 
-Display dimensions separately:
+Display one verification status:
 
 ```text
-verification_level: BASIC | PLUS
-guide_ready: true | false
+Terverifikasi Dasar | Terverifikasi Plus
 ```
 
-UI renders combination badge but must not store combination as UI-only truth.
+Local-guide readiness is a mandatory verification condition and may be shown as explanatory operational information, not as a second verification badge.
+
+A destination without a local guide cannot be approved or presented as an active verified destination.
 
 ## Schedule
 

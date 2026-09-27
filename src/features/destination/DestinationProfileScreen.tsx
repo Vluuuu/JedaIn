@@ -91,11 +91,11 @@ export function DestinationProfileScreen() {
         </div>
 
         <div className="dest-media-gallery__actions">
-          <label className="eo-builder-upload-btn-label">
+          <label className="dest-media-gallery__upload-button">
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              className="eo-builder-file-input"
+              className="dest-media-gallery__file-input"
               aria-label="Tambah visual destinasi"
               onChange={(event) => {
                 const file = event.target.files?.[0];

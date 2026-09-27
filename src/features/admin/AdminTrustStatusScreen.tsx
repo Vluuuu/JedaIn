@@ -76,7 +76,10 @@ export function AdminTrustStatusScreen() {
       entityType: "DESTINATION",
       name: d.name,
       locationOrBusiness: d.locationLabel,
-      verificationLevelOrGuideStatus: `Verifikasi ${d.verificationLevel}${d.guideReady ? " (Guide Ready ✓)" : ""}`,
+      verificationLevelOrGuideStatus:
+        d.verificationLevel === "PLUS"
+          ? "Terverifikasi Plus"
+          : "Terverifikasi Dasar",
       reviewAverage: avgRating,
       reviewCount: reviews.length,
       complaintCount: complaints.length,
@@ -156,7 +159,7 @@ export function AdminTrustStatusScreen() {
                 <th>Nama Entitas Mitra</th>
                 <th>Tipe Entitas</th>
                 <th>Lokasi / Wilayah</th>
-                <th>Status Verifikasi / Guide</th>
+                <th>Status Verifikasi / Pemanduan</th>
                 <th>Rating Ulasan</th>
                 <th>Aduan Masuk</th>
                 <th>Status Kemitraan</th>

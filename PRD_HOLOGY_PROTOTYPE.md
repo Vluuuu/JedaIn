@@ -1624,16 +1624,16 @@ Sebelum commit besar dinyatakan siap:
 - tests pass,
 - build pass.
 
-Current verified competition baseline setelah F5.4 Destination Media & Package Visual Choice:
+Current verified competition baseline setelah destination verification & gallery governance cleanup (PR #105 + PR #106):
 
-- current app feature commit: 115bdc265d589efb19bce0479d388a2e5fd2c0ce,
+- current app feature commit: 0e9cc960d172ddd2ebd691b79faa9df2d20ebe4b,
 - 50 suites / 696 tests,
 - format check PASS,
 - lint PASS,
 - typecheck PASS,
 - tests PASS,
 - production build PASS,
-- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, PR #92 Final Semantic Truthfulness Hardening, PR #94 Final Live-User UX Cleanup, PR #97 F5.1 Traveler Buyer Experience, PR #99 F5.2 EO Destination Discovery & Builder Clarity, PR #101 F5.3 Demand-Assisted Pricing Reference, dan PR #102 F5.4 Destination Media & Package Visual Choice sudah merged.
+- PR #79 Package Gallery, PR #80 Post-Booking Trip Brief, PR #81 EO Traveler-Facing Draft Preview, PR #83 Mitra Destination Overview Quick Actions, PR #86 Final Trust & Interaction Cleanup, PR #88 Traveler Transaction Session Persistence, PR #90 Session & Destination Governance Integrity, PR #92 Final Semantic Truthfulness Hardening, PR #94 Final Live-User UX Cleanup, PR #97 F5.1 Traveler Buyer Experience, PR #99 F5.2 EO Destination Discovery & Builder Clarity, PR #101 F5.3 Demand-Assisted Pricing Reference, PR #102 F5.4 Destination Media & Package Visual Choice, PR #105 unified destination verification + Mitra gallery management, dan PR #106 final verification/gallery audit follow-up sudah merged.
 
 Catatan: production/live deployment tetap mengikuti hasil deploy platform; baseline di atas adalah current canonical app source pada `main`.
 
@@ -1900,7 +1900,7 @@ Checklist ini telah direview untuk canonical merge PR #74:
 - [x] Final Live-User UX Cleanup merged melalui PR #94 tanpa flow/business-rule change.
 - [x] Guest Demo tetap diperbolehkan sebagai prototype Traveler identity untuk mendemonstrasikan booking → completion → Destination review + EO/Guide review.
 - [x] Accepted findings dari Traveler / EO / Mitra / Admin-Judge simulation sudah ditutup sampai F4.3.
-- [x] Current canonical app baseline: 115bdc265d589efb19bce0479d388a2e5fd2c0ce dengan 50 suites / 696 tests PASS.
+- [x] Current canonical app baseline: 0e9cc960d172ddd2ebd691b79faa9df2d20ebe4b dengan 50 suites / 696 tests PASS.
 - [x] Tidak ada requirement production infrastructure yang tanpa sengaja menjadi wajib.
 
 Jika business rule baru muncul di luar keputusan di atas, PRD boleh menyimpannya sebagai **OPEN** dan developer tidak boleh menguncinya sendiri.

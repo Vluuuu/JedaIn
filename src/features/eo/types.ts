@@ -47,8 +47,7 @@ export interface EoApplicationRecord {
 export type DestinationVerificationLevel = "BASIC" | "PLUS";
 
 export type DestinationMediaProvenance =
-  | "PROTOTYPE_ILLUSTRATION"
-  | "DESTINATION_SOURCE";
+  "PROTOTYPE_ILLUSTRATION" | "DESTINATION_SOURCE";
 
 export interface DestinationMediaItem {
   mediaId: string;

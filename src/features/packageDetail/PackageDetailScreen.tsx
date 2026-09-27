@@ -186,30 +186,6 @@ export function PackageDetailScreen({
             {pkg.title}
           </h1>
 
-          <div
-            className="package-detail-rating-line"
-            aria-label="Kepercayaan dan rating paket"
-          >
-            <span className="package-detail-rating-line__trust">
-              {pkg.verificationLevel === "PLUS"
-                ? "Terverifikasi Plus"
-                : "Terverifikasi Dasar"}
-            </span>
-            <span
-              className="package-detail-rating-line__separator"
-              aria-hidden="true"
-            >
-              •
-            </span>
-            <span>
-              {pkg.rating !== undefined && pkg.rating !== null
-                ? pkg.ratingProvenance === "SAMPLE"
-                  ? `★ ${pkg.rating.toFixed(1)} · contoh prototype`
-                  : `★ ${pkg.rating.toFixed(1)} · ulasan pascatrip`
-                : "Belum ada rating"}
-            </span>
-          </div>
-
           <div className="package-detail-price-badge">
             <span className="package-detail-price-label">Mulai dari</span>
             <span className="package-detail-price-amount">

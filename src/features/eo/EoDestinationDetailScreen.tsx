@@ -154,9 +154,7 @@ export function EoDestinationDetailScreen() {
         >
           <div className="eo-dest-media-gallery__header">
             <div>
-              <h2 id="eo-destination-media-heading">
-                Galeri Visual Destinasi
-              </h2>
+              <h2 id="eo-destination-media-heading">Galeri Visual Destinasi</h2>
               <p>
                 Pilih visual ini sebagai referensi package. Visual berlabel
                 prototype bukan foto kondisi aktual destinasi.
@@ -166,7 +164,10 @@ export function EoDestinationDetailScreen() {
           </div>
           <div className="eo-dest-media-gallery__grid">
             {destination.mediaGallery.map((media) => (
-              <figure key={media.mediaId} className="eo-dest-media-gallery__item">
+              <figure
+                key={media.mediaId}
+                className="eo-dest-media-gallery__item"
+              >
                 <img src={media.url} alt={media.label} />
                 <figcaption>
                   <strong>{media.label}</strong>

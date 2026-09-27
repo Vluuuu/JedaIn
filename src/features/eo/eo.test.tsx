@@ -1887,6 +1887,10 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         status: "ACTIVE",
       });
 
+      expect(
+        mockDestinationStore.getById("dest_future_noguide")?.status,
+      ).toBe("INACTIVE");
+
       // 1. Selector check
       const conceptEligible =
         mockDestinationStore.getEligibleForEo("CONCEPT_ONLY");

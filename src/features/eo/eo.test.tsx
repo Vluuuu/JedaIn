@@ -1640,11 +1640,10 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("Paket Sedang Tayang (Live)");
       expect(view.textContent).toContain("2 jadwal keberangkatan mendatang");
 
-      // Clean Guide Ready wording (no duplicate checkmarks like ✓ Guide Ready ✓)
-      expect(view.textContent).toContain("Guide Ready");
-      expect(view.textContent).not.toContain("✓ Guide Ready ✓");
+      // Local-guide availability is part of destination verification, not a second badge.
+      expect(view.textContent).not.toContain("Guide Ready");
       expect(view.textContent).toContain(
-        "Pemandu lokal tersedia dari destinasi",
+        "Pemandu lokal tersedia sebagai bagian dari standar verifikasi destinasi.",
       );
 
       // Accurate pricing terminology
@@ -1672,13 +1671,12 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       const allDests = mockDestinationStore.getAll();
       expect(allDests.length).toBeGreaterThan(0);
 
-      // dest_hutan_trawas is ACTIVE, BASIC, but guideReady=false per Admin verification
+      // A destination without a local guide is not an active verified destination.
       const trawas = allDests.find(
         (d) => d.destinationId === "dest_hutan_trawas",
       );
       expect(trawas).toBeDefined();
-      expect(trawas?.status).toBe("ACTIVE");
-      expect(trawas?.verificationLevel).toBe("BASIC");
+      expect(trawas?.status).toBe("INACTIVE");
       expect(trawas?.guideReady).toBe(false);
 
       // getEligibleForEo only returns destinations with guideReady=true
@@ -1718,9 +1716,8 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("Lembah Alam Pacet");
       // Ineligible guideReady=false destination is not listed
       expect(view.textContent).not.toContain("Hutan Bambu Trawas");
-      expect(view.textContent).toContain("Pemandu lokal tersedia");
-      expect(view.textContent).not.toContain("Guide Ready ✓");
-      expect(view.textContent).not.toContain("✓ Guide Ready ✓");
+      expect(view.textContent).not.toContain("Guide Ready");
+      expect(view.textContent).not.toContain("Hutan Bambu Trawas");
     });
 
     it("BI. Search filters destination cards by name and location", async () => {

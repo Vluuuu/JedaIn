@@ -737,9 +737,8 @@ export function DestinationApplicationScreen() {
               <strong>Pemandu lokal wajib tersedia</strong>
               <p>
                 Verifikasi destinasi hanya dapat diajukan jika pengelola sudah
-                memiliki pemandu lokal yang siap mendampingi perjalanan.
-                EO bertipe Concept-Only dapat menggunakan pemandu dari
-                destinasi.
+                memiliki pemandu lokal yang siap mendampingi perjalanan. EO
+                bertipe Concept-Only dapat menggunakan pemandu dari destinasi.
               </p>
             </div>
 

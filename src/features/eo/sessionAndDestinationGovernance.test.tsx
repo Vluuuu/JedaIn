@@ -530,3 +530,151 @@ describe("F4.2 — Part B: Destination Governance Consistency (ADM-F01)", () => 
     expect(badgeView.textContent).toContain("Belum Memiliki Pemandu Lokal");
   });
 });
+
+describe("F5.2 — EO Destination Discovery & Builder Clarity", () => {
+  it("1. Builder exposes explicit location filter without bypassing EO destination eligibility", async () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+    const view = await renderComponent(createElement(EoPackageBuilderScreen));
+    const locationFilter = view.querySelector<HTMLSelectElement>(
+      "#destination-location-filter",
+    )!;
+
+    expect(locationFilter).not.toBeNull();
+    expect(locationFilter.textContent).toContain("Semua Lokasi");
+    expect(locationFilter.textContent).toContain("Batu, Jawa Timur");
+    expect(locationFilter.textContent).toContain("Mojokerto, Jawa Timur");
+    expect(view.textContent).not.toContain("Hutan Bambu Trawas");
+
+    await act(async () => {
+      locationFilter.value = "Mojokerto";
+      locationFilter.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    expect(view.textContent).toContain("Lembah Alam Pacet");
+    expect(view.textContent).not.toContain("Lereng Hijau Batu");
+    expect(view.textContent).not.toContain("Hutan Bambu Trawas");
+  });
+
+  it("2. Builder opens dedicated Destination Detail decision page and can return with the destination selected", async () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+    const view = await renderComponent(
+      createElement(
+        Routes,
+        undefined,
+        createElement(Route, {
+          path: "/partner/eo/packages/new",
+          element: createElement(EoPackageBuilderScreen),
+        }),
+        createElement(Route, {
+          path: "/partner/eo/destinations/:destinationId",
+          element: createElement(EoDestinationDetailScreen),
+        }),
+      ),
+      ["/partner/eo/packages/new"],
+    );
+
+    const destinationCard = Array.from(
+      view.querySelectorAll<HTMLElement>(".eo-builder-dest-card"),
+    ).find((card) => card.textContent?.includes("Lereng Hijau Batu"))!;
+    const detailButton = Array.from(
+      destinationCard.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((button) => button.textContent?.includes("Lihat Detail Destinasi"))!;
+
+    expect(detailButton).not.toBeNull();
+
+    await act(async () => {
+      detailButton.click();
+    });
+
+    expect(view.textContent).toContain("Kembali ke Perancang Paket");
+    expect(view.textContent).toContain("Kapasitas umum destinasi");
+    expect(view.textContent).toContain("Cakupan Biaya Dasar Destinasi");
+    expect(view.textContent).toContain(
+      "bukan sertifikasi keselamatan atau persetujuan operasional",
+    );
+
+    const selectButton = Array.from(
+      view.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((button) => button.textContent?.includes("Pilih Destinasi Ini"))!;
+    expect(selectButton).not.toBeNull();
+
+    await act(async () => {
+      selectButton.click();
+    });
+
+    expect(view.textContent).toContain("Langkah 1: Pilih Destinasi");
+    const selectedCard = Array.from(
+      view.querySelectorAll<HTMLElement>(".eo-builder-dest-card"),
+    ).find((card) => card.textContent?.includes("Lereng Hijau Batu"))!;
+    expect(selectedCard.textContent).toContain("Terpilih ✓");
+  });
+
+  it("3. Builder uses plain-language Ringkasan Pengalaman copy without changing valueProposition semantics", async () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+
+    const view = await renderComponent(createElement(EoPackageBuilderScreen));
+
+    const stepTwoButton = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
+    ).find((button) => button.textContent?.includes("2. Sinyal Insight"))!;
+    expect(stepTwoButton).not.toBeNull();
+
+    await act(async () => {
+      stepTwoButton.click();
+    });
+
+    expect(view.textContent).toContain("Ringkasan Pengalaman");
+    expect(view.textContent).toContain(
+      "Jelaskan dalam 1–2 kalimat pengalaman utama yang akan didapat Traveler",
+    );
+    expect(view.textContent).not.toContain(
+      "Ringkasan Nilai & Janji Pengalaman",
+    );
+    expect(view.querySelector("#package-summary")).not.toBeNull();
+  });
+
+  it("4. Sessions uses visual package cards and keeps DRAFT package ineligible for new sessions", async () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+    mockEoPackageStore.saveDraft({
+      packageId: "pkg_f52_draft",
+      title: "Paket F5.2 Masih Draf",
+      destinationId: "dest_lereng_hijau",
+      status: "DRAFT",
+    });
+
+    const view = await renderComponent(createElement(EoSessionsScreen));
+
+    expect(view.querySelector("#package-session-filter")).toBeNull();
+    expect(view.querySelector(".eo-session-package-selector")).not.toBeNull();
+    expect(view.textContent).toContain("Lereng Hijau Batu");
+    expect(view.textContent).toContain("Siap dibuka jadwal sesi");
+
+    const draftCard = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".eo-session-package-card"),
+    ).find((card) => card.textContent?.includes("Paket F5.2 Masih Draf"))!;
+    expect(draftCard).not.toBeNull();
+
+    await act(async () => {
+      draftCard.click();
+    });
+
+    expect(view.textContent).toContain(
+      "Sesi baru hanya dapat dibuat setelah paket APPROVED atau LIVE",
+    );
+    expect(
+      view.querySelector<HTMLButtonElement>(".eo-action-spotlight__btn")
+        ?.disabled,
+    ).toBe(true);
+  });
+
+  it("5. Mitra Destination Profile uses neutral destination wording", async () => {
+    partnerSessionStore.loginAsDemoDestination();
+
+    const view = await renderComponent(createElement(DestinationProfileScreen));
+
+    expect(view.textContent).toContain("Tentang Destinasi:");
+    expect(view.textContent).not.toContain("Deskripsi Ketenangan Kawasan");
+  });
+});

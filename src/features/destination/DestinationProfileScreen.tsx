@@ -232,7 +232,7 @@ export function DestinationProfileScreen() {
           }}
         >
           <small style={{ color: "var(--color-text-muted)", display: "block" }}>
-            Deskripsi Ketenangan Kawasan:
+            Tentang Destinasi:
           </small>
           <p
             style={{

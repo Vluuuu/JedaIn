@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Badge, Button } from "../../components/ui";
+import { getDestinationVisual } from "../../lib/assets/packageImages";
+import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
@@ -87,7 +89,14 @@ export function EoSessionsScreen() {
     (p) => p.packageId === selectedPackageId,
   );
 
+  const selectedPkgIsEligible =
+    selectedPkg?.status === "APPROVED" || selectedPkg?.status === "LIVE";
+
   const openAddModal = () => {
+    if (!selectedPkgIsEligible) {
+      setFormError("Pilih paket berstatus APPROVED atau LIVE terlebih dahulu.");
+      return;
+    }
     const defaults = getFutureDefaultDateTimes();
     setStartDate(defaults.start);
     setEndDate(defaults.end);
@@ -199,7 +208,7 @@ export function EoSessionsScreen() {
           <button
             type="button"
             className="eo-action-spotlight__btn"
-            disabled={eligiblePackages.length === 0}
+            disabled={!selectedPkgIsEligible}
             onClick={openAddModal}
             aria-label="Buka Sesi Baru"
           >
@@ -225,39 +234,103 @@ export function EoSessionsScreen() {
         </aside>
       </header>
 
-      {/* Package Selector Filter */}
+      {/* Visual Package Selector */}
       {allEoPackages.length > 0 && (
-        <div className="eo-section" style={{ padding: "var(--space-4)" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--space-3)",
-              flexWrap: "wrap",
-            }}
-          >
-            <label
-              htmlFor="package-session-filter"
-              style={{ fontWeight: 600, fontSize: "var(--font-size-body-sm)" }}
-            >
-              Pilih Paket:
-            </label>
-            <select
-              id="package-session-filter"
-              className="eo-form-select"
-              style={{ maxWidth: "350px" }}
-              value={selectedPackageId}
-              onChange={(e) => setSelectedPackageId(e.target.value)}
-            >
-              <option value="">Semua Paket Milik Saya</option>
-              {allEoPackages.map((p) => (
-                <option key={p.packageId} value={p.packageId}>
-                  {p.title} ({p.status})
-                </option>
-              ))}
-            </select>
+        <section
+          className="eo-session-package-selector"
+          aria-label="Pilih paket untuk melihat atau membuka sesi"
+        >
+          <div className="eo-session-package-selector__header">
+            <div>
+              <h2>Pilih Paket</h2>
+              <p>
+                Pilih paket untuk melihat jadwalnya. Sesi baru hanya dapat
+                dibuka untuk paket APPROVED atau LIVE.
+              </p>
+            </div>
           </div>
-        </div>
+
+          <div className="eo-session-package-selector__grid">
+            <button
+              type="button"
+              className={`eo-session-package-card eo-session-package-card--all ${
+                selectedPackageId === ""
+                  ? "eo-session-package-card--selected"
+                  : ""
+              }`}
+              onClick={() => setSelectedPackageId("")}
+              aria-pressed={selectedPackageId === ""}
+            >
+              <span
+                className="eo-session-package-card__all-icon"
+                aria-hidden="true"
+              >
+                ≡
+              </span>
+              <span className="eo-session-package-card__content">
+                <strong>Semua Sesi</strong>
+                <span>Lihat seluruh jadwal milik EO</span>
+              </span>
+            </button>
+
+            {allEoPackages.map((pkg) => {
+              const destination = mockDestinationStore.getById(
+                pkg.destinationId,
+              );
+              const visual = getDestinationVisual(
+                destination?.name ?? pkg.title,
+                destination?.imageUrl,
+              );
+              const isSelected = selectedPackageId === pkg.packageId;
+              const canOpenSession =
+                pkg.status === "APPROVED" || pkg.status === "LIVE";
+
+              return (
+                <button
+                  key={pkg.packageId}
+                  type="button"
+                  className={`eo-session-package-card ${
+                    isSelected ? "eo-session-package-card--selected" : ""
+                  }`}
+                  onClick={() => setSelectedPackageId(pkg.packageId)}
+                  aria-pressed={isSelected}
+                >
+                  <img
+                    src={visual.svgDataUri}
+                    alt=""
+                    aria-hidden="true"
+                    className="eo-session-package-card__image"
+                  />
+                  <span className="eo-session-package-card__content">
+                    <span className="eo-session-package-card__topline">
+                      <strong>{pkg.title}</strong>
+                      <Badge tone={canOpenSession ? "success" : "neutral"}>
+                        {pkg.status}
+                      </Badge>
+                    </span>
+                    <span className="eo-session-package-card__destination">
+                      {destination
+                        ? `${destination.name} · ${destination.locationLabel}`
+                        : "Destinasi tidak tersedia"}
+                    </span>
+                    <span className="eo-session-package-card__eligibility">
+                      {canOpenSession
+                        ? "Siap dibuka jadwal sesi"
+                        : "Belum dapat membuka sesi baru"}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedPkg && !selectedPkgIsEligible && (
+            <p className="eo-session-package-selector__notice" role="status">
+              Paket ini berstatus {selectedPkg.status}. Sesi baru hanya dapat
+              dibuat setelah paket APPROVED atau LIVE.
+            </p>
+          )}
+        </section>
       )}
 
       {/* Sessions List */}
@@ -285,7 +358,7 @@ export function EoSessionsScreen() {
             }}
           >
             <p>Belum ada jadwal sesi yang dibuat.</p>
-            {eligiblePackages.length > 0 ? (
+            {selectedPkgIsEligible ? (
               <Button
                 type="button"
                 variant="secondary"

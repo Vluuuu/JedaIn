@@ -1,4 +1,4 @@
-import { useNavigate, useParams, Link } from "react-router";
+import { useNavigate, useParams, useSearchParams, Link } from "react-router";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Badge, Button } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
@@ -8,6 +8,9 @@ import "./eo.css";
 export function EoDestinationDetailScreen() {
   const { destinationId } = useParams<{ destinationId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const openedFromBuilder = searchParams.get("from") === "builder";
+  const builderDraftId = searchParams.get("draftId");
 
   const destination = destinationId
     ? mockDestinationStore.getById(destinationId)
@@ -38,11 +41,20 @@ export function EoDestinationDetailScreen() {
       destination.verificationLevel === "PLUS") &&
     destination.guideReady === true;
 
+  const builderReturnParams = new URLSearchParams();
+  if (builderDraftId) builderReturnParams.set("draftId", builderDraftId);
+
+  const builderBackTarget = builderDraftId
+    ? `/partner/eo/packages/new?${builderReturnParams.toString()}`
+    : "/partner/eo/packages/new";
+
   const handleCreatePackage = () => {
     if (!isEligible) return;
-    navigate(
-      `/partner/eo/packages/new?destinationId=${destination.destinationId}`,
-    );
+    const params = new URLSearchParams({
+      destinationId: destination.destinationId,
+    });
+    if (builderDraftId) params.set("draftId", builderDraftId);
+    navigate(`/partner/eo/packages/new?${params.toString()}`);
   };
 
   return (
@@ -50,11 +62,17 @@ export function EoDestinationDetailScreen() {
       {/* 1. Back Navigation */}
       <nav className="eo-dest-detail-back-nav" aria-label="Navigasi kembali">
         <Link
-          to="/partner/eo/destinations"
+          to={
+            openedFromBuilder ? builderBackTarget : "/partner/eo/destinations"
+          }
           className="eo-dest-detail-back-link"
         >
           <ArrowLeftIcon className="eo-dest-detail-back-icon" />
-          <span>Kembali ke Destinasi</span>
+          <span>
+            {openedFromBuilder
+              ? "Kembali ke Perancang Paket"
+              : "Kembali ke Destinasi"}
+          </span>
         </Link>
       </nav>
 
@@ -129,6 +147,36 @@ export function EoDestinationDetailScreen() {
         </div>
       </header>
 
+      <section
+        className="eo-dest-decision-facts"
+        aria-label="Ringkasan keputusan destinasi"
+      >
+        <div className="eo-dest-decision-fact">
+          <span>Status verifikasi</span>
+          <strong>
+            {destination.verificationLevel === "PLUS"
+              ? "Terverifikasi Plus"
+              : "Terverifikasi Dasar"}
+          </strong>
+        </div>
+        <div className="eo-dest-decision-fact">
+          <span>Kesiapan pemandu</span>
+          <strong>
+            {destination.guideReady ? "Pemandu lokal siap" : "Belum siap"}
+          </strong>
+        </div>
+        <div className="eo-dest-decision-fact">
+          <span>Kapasitas umum destinasi</span>
+          <strong>{destination.capacityPerSession} orang/sesi</strong>
+        </div>
+        <div className="eo-dest-decision-fact">
+          <span>Biaya dasar</span>
+          <strong>
+            Rp{destination.baseCostPerPerson.toLocaleString("id-ID")} / orang
+          </strong>
+        </div>
+      </section>
+
       {/* 3. Detail Grid: Main & Side */}
       <div className="eo-dest-detail-grid">
         {/* Main Column */}
@@ -194,6 +242,10 @@ export function EoDestinationDetailScreen() {
               <h2 className="eo-dest-detail-card__title">
                 Catatan Operasional
               </h2>
+              <p className="eo-dest-detail-card__hint">
+                Catatan ini bersifat deskriptif untuk membantu perencanaan EO,
+                bukan sertifikasi keselamatan atau persetujuan operasional.
+              </p>
               <ul className="eo-dest-detail-bullet-list">
                 {destination.operationalNotes.map((note, i) => (
                   <li key={i}>{note}</li>
@@ -363,7 +415,9 @@ export function EoDestinationDetailScreen() {
                 size="md"
                 onClick={handleCreatePackage}
               >
-                Buat Paket Sekarang
+                {openedFromBuilder
+                  ? "Pilih Destinasi Ini"
+                  : "Buat Paket Sekarang"}
               </Button>
             </div>
           ) : (

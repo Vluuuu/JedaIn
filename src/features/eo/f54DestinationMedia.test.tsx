@@ -87,7 +87,9 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
     );
 
     expect(view.textContent).toContain("Galeri Destinasi");
-    expect(view.textContent).toContain("bukan dokumentasi kondisi aktual");
+    expect(view.textContent).toContain(
+      "tidak dianggap sebagai foto kondisi aktual",
+    );
     expect(view.querySelectorAll(".dest-media-gallery__item")).toHaveLength(3);
     expect(view.textContent).toContain("Visual prototype");
     expect(view.textContent).not.toContain("Preview 360");

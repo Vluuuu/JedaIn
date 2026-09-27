@@ -43,7 +43,7 @@ export function AdminDestinationVerificationDetailScreen() {
 
   const isPending = destApp.status === "PENDING_REVIEW";
 
-  const handleApprove = (guideReady: boolean) => {
+  const handleApprove = () => {
     setErrorMessage(undefined);
     if (!auditReason.trim()) {
       setErrorMessage(
@@ -55,7 +55,6 @@ export function AdminDestinationVerificationDetailScreen() {
     setIsProcessing(true);
     const res = mockAdminDecisionService.approveDestinationVerification(
       destApp.applicationId,
-      guideReady,
       auditReason,
     );
     setIsProcessing(false);
@@ -246,10 +245,10 @@ export function AdminDestinationVerificationDetailScreen() {
               Deklarasi & Bukti Kesiapan Pemandu Lokal:
             </small>
             <div style={{ marginTop: "var(--space-1)" }}>
-              <Badge tone={destApp.declaredGuideReady ? "success" : "neutral"}>
+              <Badge tone={destApp.declaredGuideReady ? "success" : "danger"}>
                 {destApp.declaredGuideReady
-                  ? "Deklarasi: Guide Ready"
-                  : "Deklarasi: Belum Guide Ready"}
+                  ? "Pemandu lokal tersedia"
+                  : "Pemandu lokal belum tersedia"}
               </Badge>
             </div>
             <p
@@ -286,9 +285,9 @@ export function AdminDestinationVerificationDetailScreen() {
               color: "var(--color-text-secondary)",
             }}
           >
-            Catatan: Persetujuan awal selalu memberikan level{" "}
-            <strong>BASIC</strong>. Level PLUS hanya dapat diberikan melalui
-            promosi trust lifecycle lanjutan.
+            Persetujuan awal memberikan status <strong>Terverifikasi Dasar</strong>.
+            Ketersediaan pemandu lokal adalah syarat verifikasi, bukan keputusan
+            atau lencana terpisah.
           </p>
 
           <div className="eo-form-group">
@@ -301,7 +300,7 @@ export function AdminDestinationVerificationDetailScreen() {
               className="eo-form-textarea"
               value={auditReason}
               onChange={(e) => setAuditReason(e.target.value)}
-              placeholder="Tuliskan justifikasi kelayakan ketenangan lokasi dan kesiapan pemandu..."
+              placeholder="Tuliskan justifikasi kelayakan destinasi dan bukti kesiapan pemandu lokal..."
             />
           </div>
 
@@ -324,19 +323,23 @@ export function AdminDestinationVerificationDetailScreen() {
                 variant="primary"
                 size="md"
                 loading={isProcessing}
-                onClick={() => handleApprove(true)}
+                disabled={!destApp.declaredGuideReady}
+                onClick={handleApprove}
               >
-                Setujui: BASIC + Guide Ready ✓
+                Setujui Verifikasi Destinasi
               </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="md"
-                loading={isProcessing}
-                onClick={() => handleApprove(false)}
-              >
-                Setujui: BASIC (Tanpa Guide Lokal)
-              </Button>
+              {!destApp.declaredGuideReady && (
+                <span
+                  style={{
+                    color: "var(--color-danger-text)",
+                    fontSize: "var(--font-size-caption)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Pengajuan belum dapat disetujui karena pemandu lokal belum
+                  tersedia.
+                </span>
+              )}
             </div>
 
             <div
@@ -379,10 +382,9 @@ export function AdminDestinationVerificationDetailScreen() {
                 color: "var(--color-success-text)",
               }}
             >
-              Level: {destApp.approvedLevel}{" "}
-              {destApp.approvedGuideReady
-                ? "(Guide Ready ✓)"
-                : "(Non-Guide Ready)"}
+              {destApp.approvedLevel === "BASIC"
+                ? "Terverifikasi Dasar"
+                : "Terverifikasi"}
             </p>
           )}
           {destApp.rejectionReason && (

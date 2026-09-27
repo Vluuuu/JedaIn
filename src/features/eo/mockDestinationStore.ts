@@ -242,12 +242,17 @@ export const mockDestinationStore = {
     );
 
     const cloned = cloneDestination(record);
+    const normalized =
+      cloned.status === "ACTIVE" && !cloned.guideReady
+        ? { ...cloned, status: "INACTIVE" as const }
+        : cloned;
+
     if (existingIndex >= 0) {
-      destinations[existingIndex] = cloned;
+      destinations[existingIndex] = normalized;
     } else {
-      destinations.push(cloned);
+      destinations.push(normalized);
     }
-    return cloneDestination(cloned);
+    return cloneDestination(normalized);
   },
 
   addMediaItem(

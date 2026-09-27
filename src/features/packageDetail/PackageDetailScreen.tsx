@@ -146,7 +146,12 @@ export function PackageDetailScreen({
     );
   }
 
-  const { package: pkg, detail, hasOpenSession } = viewModel;
+  const {
+    package: pkg,
+    detail,
+    hasOpenSession,
+    organizerReviewSummary,
+  } = viewModel;
   const durationLabel =
     QUIZ_DURATION_OPTIONS.find((d) => d.value === pkg.durationType)?.label ??
     pkg.durationType;
@@ -177,6 +182,10 @@ export function PackageDetailScreen({
             <span>{durationLabel}</span>
           </div>
 
+          <h1 id="package-title" className="package-detail-title">
+            {pkg.title}
+          </h1>
+
           <div
             className="package-detail-rating-line"
             aria-label="Kepercayaan dan rating paket"
@@ -201,12 +210,6 @@ export function PackageDetailScreen({
             </span>
           </div>
 
-          <h1 id="package-title" className="package-detail-title">
-            {pkg.title}
-          </h1>
-
-          <p className="package-detail-value-prop">{detail.valueProposition}</p>
-
           <div className="package-detail-price-badge">
             <span className="package-detail-price-label">Mulai dari</span>
             <span className="package-detail-price-amount">
@@ -214,6 +217,8 @@ export function PackageDetailScreen({
             </span>
             <span className="package-detail-price-unit">/ orang</span>
           </div>
+
+          <p className="package-detail-value-prop">{detail.valueProposition}</p>
         </section>
 
         {/* 3. Optional Personalized Match Explanation */}
@@ -258,7 +263,7 @@ export function PackageDetailScreen({
         {/* 6. Experience Highlights */}
         {detail.highlights.length > 0 && (
           <section
-            className="package-detail-section"
+            className="package-detail-section package-detail-section--primary"
             aria-labelledby="highlights-heading"
           >
             <h2
@@ -296,7 +301,7 @@ export function PackageDetailScreen({
 
         {/* 11. Upcoming Sessions Preview */}
         <section
-          className="package-detail-section"
+          className="package-detail-section package-detail-section--primary"
           aria-labelledby="sessions-preview-heading"
         >
           <h2
@@ -479,6 +484,19 @@ export function PackageDetailScreen({
                         {detail.organizer.roleDescription}
                       </p>
                     )}
+                    <div
+                      className="package-detail-organizer-rating"
+                      aria-label="Rating penyelenggara"
+                    >
+                      <span className="package-detail-organizer-rating__label">
+                        Rating penyelenggara
+                      </span>
+                      <strong className="package-detail-organizer-rating__value">
+                        {organizerReviewSummary
+                          ? `★ ${organizerReviewSummary.averageRating.toFixed(1)} · ${organizerReviewSummary.reviewCount} ulasan pascatrip`
+                          : "Belum ada ulasan pascatrip"}
+                      </strong>
+                    </div>
                   </div>
                   <div className="package-detail-guide-meta">
                     <span className="package-detail-guide-meta__label">

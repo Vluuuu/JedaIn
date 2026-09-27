@@ -894,6 +894,61 @@ export function EoPackageBuilderScreen() {
               Tambahkan foto yang paling mewakili suasana perjalanan ini.
             </p>
 
+            {selectedDestination?.mediaGallery &&
+              selectedDestination.mediaGallery.length > 0 && (
+                <div className="eo-builder-destination-media">
+                  <div className="eo-builder-destination-media__header">
+                    <div>
+                      <strong>Pilih dari galeri destinasi</strong>
+                      <span>
+                        Visual prototype diberi label jelas dan tidak diklaim
+                        sebagai foto kondisi aktual.
+                      </span>
+                    </div>
+                    <span>
+                      {selectedDestination.mediaGallery.length} pilihan
+                    </span>
+                  </div>
+
+                  <div
+                    className="eo-builder-destination-media__grid"
+                    role="group"
+                    aria-label="Pilihan visual dari galeri destinasi"
+                  >
+                    {selectedDestination.mediaGallery.map((media) => {
+                      const isSelected = imageUrl === media.url;
+
+                      return (
+                        <button
+                          key={media.mediaId}
+                          type="button"
+                          className={`eo-builder-destination-media__option${isSelected ? " eo-builder-destination-media__option--selected" : ""}`}
+                          aria-pressed={isSelected}
+                          onClick={() => {
+                            setImageUrl(media.url);
+                            setImageError(undefined);
+                          }}
+                        >
+                          <img src={media.url} alt="" aria-hidden="true" />
+                          <span>
+                            <strong>{media.label}</strong>
+                            <small>
+                              {media.provenance === "PROTOTYPE_ILLUSTRATION"
+                                ? "Visual prototype"
+                                : "Media destinasi"}
+                            </small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <p className="eo-builder-destination-media__or">
+                    Atau unggah visual package milik EO sendiri.
+                  </p>
+                </div>
+              )}
+
             {imageUrl ? (
               <div className="eo-builder-img-preview-card">
                 <div className="eo-builder-img-preview-wrap">

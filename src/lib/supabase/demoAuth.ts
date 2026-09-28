@@ -497,6 +497,10 @@ export async function requireAuthenticatedUser(
         };
       }
 
+      // Contract: Database migration 20260928000002_restrict_partner_profile_claim_updates.sql
+      // revokes table-wide UPDATE and grants column-level UPDATE strictly on (auth_user_id)
+      // to 'authenticated'. The claim payload MUST ONLY contain auth_user_id and NEVER modify
+      // authorization attributes (role, email, display_name, business_name, etc.).
       const { error: updateError } = await supabase
         .from("partner_profiles")
         .update({ auth_user_id: session.user.id })

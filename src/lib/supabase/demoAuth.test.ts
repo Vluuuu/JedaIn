@@ -180,6 +180,84 @@ describe("demoAuth - Prototype Demo Authentication Bridge", () => {
       expect(query.is).toHaveBeenCalledWith("auth_user_id", null);
     });
 
+    it("strictly limits profile claim update payload to auth_user_id only (defense-in-depth contract)", async () => {
+      // Contract: Database migration 20260928000002_restrict_partner_profile_claim_updates.sql
+      // grants UPDATE (auth_user_id) only, revoking table-wide UPDATE from authenticated & anon.
+      // The client claim operation MUST strictly transmit only auth_user_id and never modify
+      // authorization attributes (role, email, display_name, business_name, etc.).
+      let capturedPayload: Record<string, unknown> | null = null;
+      const { query } = mockProfileClient("eo_uid", DEMO_EO_CREDENTIALS.email, [
+        null,
+        profileRow({ auth_user_id: null }),
+        profileRow({ auth_user_id: "eo_uid" }),
+      ]);
+
+      query.update.mockImplementation((payload: Record<string, unknown>) => {
+        capturedPayload = payload;
+        return query;
+      });
+
+      const result = await requireAuthenticatedUser("EO");
+      expect(result.success).toBe(true);
+
+      // Verify payload strictly and only contains auth_user_id
+      expect(capturedPayload).not.toBeNull();
+      expect(capturedPayload).toEqual({ auth_user_id: "eo_uid" });
+      expect(Object.keys(capturedPayload!)).toEqual(["auth_user_id"]);
+
+      // Explicitly assert forbidden authorization and profile fields are absent
+      expect(capturedPayload).not.toHaveProperty("role");
+      expect(capturedPayload).not.toHaveProperty("email");
+      expect(capturedPayload).not.toHaveProperty("display_name");
+      expect(capturedPayload).not.toHaveProperty("business_name");
+      expect(capturedPayload).not.toHaveProperty("guide_status");
+      expect(capturedPayload).not.toHaveProperty("organizer_review_ref");
+      expect(capturedPayload).not.toHaveProperty("destination_identity_id");
+    });
+
+    it("strictly limits destination partner profile claim update payload to auth_user_id only", async () => {
+      let capturedPayload: Record<string, unknown> | null = null;
+      const { query } = mockProfileClient(
+        "dest_uid",
+        DEMO_DESTINATION_CREDENTIALS.email,
+        [
+          null,
+          profileRow({
+            id: DEMO_DESTINATION_CREDENTIALS.partnerId,
+            role: "DESTINATION",
+            email: DEMO_DESTINATION_CREDENTIALS.email,
+            display_name: "Hadi Purnomo",
+            business_name: "Pengelola Lereng Hijau Batu",
+            destination_identity_id: "dest_lereng_hijau",
+            auth_user_id: null,
+          }),
+          profileRow({
+            id: DEMO_DESTINATION_CREDENTIALS.partnerId,
+            role: "DESTINATION",
+            email: DEMO_DESTINATION_CREDENTIALS.email,
+            display_name: "Hadi Purnomo",
+            business_name: "Pengelola Lereng Hijau Batu",
+            destination_identity_id: "dest_lereng_hijau",
+            auth_user_id: "dest_uid",
+          }),
+        ],
+      );
+
+      query.update.mockImplementation((payload: Record<string, unknown>) => {
+        capturedPayload = payload;
+        return query;
+      });
+
+      const result = await requireAuthenticatedUser("DESTINATION");
+      expect(result.success).toBe(true);
+      expect(capturedPayload).toEqual({ auth_user_id: "dest_uid" });
+      expect(Object.keys(capturedPayload!)).toEqual(["auth_user_id"]);
+      expect(capturedPayload).not.toHaveProperty("role");
+      expect(capturedPayload).not.toHaveProperty("email");
+      expect(capturedPayload).not.toHaveProperty("display_name");
+      expect(capturedPayload).not.toHaveProperty("business_name");
+    });
+
     it("re-fetches and verifies the profile after a successful claim", async () => {
       const { query } = mockProfileClient("eo_uid", DEMO_EO_CREDENTIALS.email, [
         null,

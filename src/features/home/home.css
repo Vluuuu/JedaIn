@@ -1174,11 +1174,7 @@
       rgb(10 28 18 / 48%) 48%,
       rgb(10 28 18 / 8%) 100%
     ),
-    linear-gradient(
-      to top,
-      rgb(10 28 18 / 70%) 0%,
-      transparent 58%
-    );
+    linear-gradient(to top, rgb(10 28 18 / 70%) 0%, transparent 58%);
 }
 
 .home-hero-card__visual-badges {

@@ -1,56 +1,82 @@
 /* ==========================================================================
-   JedaIn Traveler Package Detail Visual System (P9 Revision)
-   Transitions from discovery to decision:
-   - Editorial, image-led hero with overlay trust badge and rating
-   - Integrated title, meta, value proposition, and starting price
-   - Factor-based personalized context matching
-   - Structured sections with rhythmic surfaces (clean borders, soft sand tints)
-   - Calming timeline itinerary, clear trust indicators, scannable facilities
-   - Session schedule preview with remaining slot clarity
-   - Non-intrusive sticky CTA bar coexisting with bottom nav
+   JedaIn Traveler Package Detail Visual System — Option B: Visual Composition
+   Experience story + buying clarity:
+   - Cinematic hero media framing with subtle frosted trust/rating overlay
+   - Open editorial header with prominent typography and starting price
+   - Intimate personal match explanation (clean checkmarks, no noisy pills)
+   - Scannable 2-column experience highlights
+   - Clean schedule rows with inline status dot and slot availability
+   - Seamless disclosure flow for facilities, logistics, and partner trust
+   - Non-intrusive floating booking CTA
    ========================================================================== */
 
 .package-detail-container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-8);
   width: 100%;
   max-width: 72rem; /* 1152px - matches Home & Explore container */
   margin-inline: auto;
-  padding: 0 0
+  padding: 0 var(--space-4)
     calc(
       var(--nav-bottom-height) + var(--sticky-cta-height) +
-        env(safe-area-inset-bottom) + var(--space-4)
+        env(safe-area-inset-bottom) + var(--space-6)
     );
   box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
   .package-detail-container {
-    gap: var(--space-8);
+    gap: var(--space-10);
+    padding: var(--space-2) var(--space-6)
+      calc(
+        var(--nav-bottom-height) + var(--sticky-cta-height) +
+          env(safe-area-inset-bottom) + var(--space-8)
+      );
   }
 }
 
+/* Page Context Label */
+.package-detail-context {
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding-top: var(--space-2);
+}
+
+.package-detail-context__label {
+  color: var(--color-stone-900);
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
 /* --------------------------------------------------------------------------
-   1. Hero Visual Media
+   1. Hero Visual Media & Gallery
    -------------------------------------------------------------------------- */
+.package-detail-media {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .package-detail-hero {
   position: relative;
   width: 100%;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
   background: var(--color-stone-100);
   display: flex;
   align-items: flex-end;
-  min-height: 18rem;
+  min-height: 20rem;
   box-sizing: border-box;
-  padding: var(--space-4);
+  padding: var(--space-5);
+  box-shadow: 0 4px 20px rgba(29, 29, 27, 0.05);
 }
 
 @media (min-width: 768px) {
   .package-detail-hero {
-    min-height: 24rem;
+    min-height: 28rem;
     padding: var(--space-6);
   }
 }
@@ -62,6 +88,9 @@
   height: 100%;
   display: block;
   object-fit: cover;
+  transition:
+    transform var(--motion-normal) var(--ease-standard),
+    transform-origin var(--motion-normal) var(--ease-standard);
 }
 
 .package-detail-hero__visual-scrim {
@@ -70,8 +99,8 @@
   z-index: 1;
   background: linear-gradient(
     to top,
-    rgba(15, 33, 23, 0.8) 0%,
-    rgba(15, 33, 23, 0.25) 50%,
+    rgba(15, 33, 23, 0.75) 0%,
+    rgba(15, 33, 23, 0.2) 40%,
     transparent 100%
   );
   pointer-events: none;
@@ -89,21 +118,22 @@
 }
 
 .package-detail-hero__trust-badge {
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
 }
 
 .package-detail-hero__rating-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.3125rem;
-  padding: 0.3125rem 0.6875rem;
-  background: rgb(15 33 23 / 85%);
+  gap: 0.375rem;
+  padding: 0.375rem 0.8125rem;
+  background: rgba(15, 33, 23, 0.85);
   color: var(--color-text-inverse);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: var(--radius-pill);
   font-size: var(--font-size-label-sm);
   font-weight: var(--font-weight-bold);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .package-detail-hero__rating-star {
@@ -111,27 +141,15 @@
   flex-shrink: 0;
 }
 
-.package-detail-media {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.package-detail-hero__visual {
-  transition:
-    transform var(--motion-normal) var(--ease-standard),
-    transform-origin var(--motion-normal) var(--ease-standard);
-}
-
+/* Gallery View Thumbnails */
 .package-detail-gallery {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-4);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-stone-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
 }
 
 @media (min-width: 768px) {
@@ -199,7 +217,7 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: 0.25rem;
-  border: 1.5px solid var(--color-stone-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-lg);
   background: var(--color-bg-surface);
   color: var(--color-stone-700);
@@ -208,7 +226,6 @@
   scroll-snap-align: start;
   transition:
     border-color var(--motion-fast) var(--ease-standard),
-    box-shadow var(--motion-fast) var(--ease-standard),
     color var(--motion-fast) var(--ease-standard);
 }
 
@@ -217,7 +234,7 @@
 }
 
 .package-detail-gallery__thumb:focus-visible {
-  outline: 3px solid var(--color-forest-600);
+  outline: 2px solid var(--color-forest-600);
   outline-offset: 2px;
 }
 
@@ -260,7 +277,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Layout Structure: Main Editorial Column & Desktop Support
+   2. Main Editorial Column
    -------------------------------------------------------------------------- */
 .package-detail-main {
   display: flex;
@@ -274,23 +291,22 @@
   }
 }
 
-/* --------------------------------------------------------------------------
-   2. Header & Title Integration
-   -------------------------------------------------------------------------- */
+/* Package Identity & Value Proposition */
 .package-detail-header-card {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-6);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-stone-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 2px 12px rgba(29, 29, 27, 0.03);
 }
 
 @media (min-width: 768px) {
   .package-detail-header-card {
     padding: var(--space-8);
+    gap: var(--space-5);
   }
 }
 
@@ -301,31 +317,32 @@
   gap: var(--space-2);
   color: var(--color-stone-500);
   font-size: 0.8125rem;
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .package-detail-title {
   margin: 0;
   color: var(--color-stone-900);
-  font-size: var(--font-size-heading-lg);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-heading-lg);
-  letter-spacing: var(--letter-spacing-tight);
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
 }
 
 @media (min-width: 768px) {
   .package-detail-title {
-    font-size: 2rem;
-    line-height: 2.5rem;
+    font-size: 2.25rem;
+    line-height: 1.25;
   }
 }
 
 .package-detail-value-prop {
   margin: 0;
   color: var(--color-stone-600);
-  font-size: var(--font-size-body-md);
+  font-size: 1rem;
   line-height: 1.6;
+  max-width: 68ch;
 }
 
 .package-detail-price-badge {
@@ -333,44 +350,46 @@
   align-items: baseline;
   gap: var(--space-2);
   padding-top: var(--space-4);
-  border-top: 1px dashed var(--color-stone-200);
+  border-top: 1px solid var(--color-stone-100);
 }
 
 .package-detail-price-label {
   color: var(--color-stone-500);
   font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .package-detail-price-amount {
-  font-size: 1.375rem;
-  font-weight: var(--font-weight-bold);
+  font-size: 1.625rem;
+  font-weight: 700;
   color: var(--color-stone-950);
-  letter-spacing: var(--letter-spacing-tight);
+  letter-spacing: -0.02em;
 }
 
 .package-detail-price-unit {
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-body-sm);
   color: var(--color-stone-500);
 }
 
 /* --------------------------------------------------------------------------
-   3. Personalized Match Box (Factor List)
+   3. Personalized Match Explanation
    -------------------------------------------------------------------------- */
 .package-detail-personalized-box {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-5);
-  background: var(--color-sand-50);
-  border: 1px solid var(--color-sand-200);
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-stone-50);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
 }
 
 .package-detail-personalized-title {
   margin: 0;
   font-size: 0.75rem;
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
   color: var(--color-forest-800);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -378,22 +397,22 @@
 
 .package-detail-personalized-chips {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: 0.375rem;
 }
 
 .package-detail-personalized-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: var(--color-bg-surface);
-  color: var(--color-stone-800);
-  border: 1px solid var(--color-stone-200);
-  border-radius: var(--radius-pill);
-  font-size: 0.8125rem;
-  font-weight: var(--font-weight-semibold);
-  box-shadow: var(--shadow-xs);
+  gap: 0.5rem;
+  color: var(--color-stone-700);
+  font-size: 0.84375rem;
+  font-weight: 500;
+  line-height: 1.45;
+  background: transparent;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
 }
 
 .package-detail-personalized-chip-icon {
@@ -402,7 +421,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   4. Section Base Styling (Rhythmic Surfaces, Not a White-Card Wall)
+   4. Section Base Styling
    -------------------------------------------------------------------------- */
 .package-detail-section {
   display: flex;
@@ -410,9 +429,9 @@
   gap: var(--space-4);
   padding: var(--space-6);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-stone-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 2px 10px rgba(29, 29, 27, 0.02);
 }
 
 @media (min-width: 768px) {
@@ -424,9 +443,9 @@
 .package-detail-section__title {
   margin: 0;
   color: var(--color-stone-900);
-  font-size: 1.1875rem;
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--letter-spacing-tight);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 .package-detail-section__desc {
@@ -437,7 +456,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   5. Experience Highlights
+   5. Experience Highlights (Scannable 2-Column Desktop Flow)
    -------------------------------------------------------------------------- */
 .package-detail-highlights-list {
   display: grid;
@@ -445,6 +464,13 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+@media (min-width: 640px) {
+  .package-detail-highlights-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4) var(--space-6);
+  }
 }
 
 .package-detail-highlight-item {
@@ -468,8 +494,176 @@
 }
 
 /* --------------------------------------------------------------------------
-   6. Editorial Destination & Organizer Presentation (Flattened, No Card Wall)
+   6. Upcoming Sessions Schedule (Clean List Rows)
    -------------------------------------------------------------------------- */
+.package-detail-sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.package-detail-session-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-lg);
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+.package-detail-session-card:hover {
+  border-color: var(--color-forest-300);
+  background: var(--color-stone-50);
+}
+
+@media (min-width: 640px) {
+  .package-detail-session-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.package-detail-session-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.package-detail-session-card__date {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-stone-900);
+}
+
+.package-detail-session-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0;
+  background: transparent;
+  border: 0;
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-stone-600);
+}
+
+.package-detail-session-card__status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-stone-400);
+  flex-shrink: 0;
+}
+
+.package-detail-session-card__status--open {
+  color: var(--color-forest-800);
+}
+
+.package-detail-session-card__status--open
+  .package-detail-session-card__status-dot {
+  background: var(--color-forest-700);
+}
+
+.package-detail-session-card__slots {
+  font-size: var(--font-size-caption);
+  color: var(--color-stone-500);
+  font-weight: 500;
+}
+
+.package-detail-no-session-notice {
+  padding: var(--space-6);
+  background: var(--color-stone-50);
+  border: 1px dashed var(--color-stone-200);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-600);
+}
+
+.package-detail-no-session-notice p {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   7. Secondary Information Disclosures
+   -------------------------------------------------------------------------- */
+.package-detail-secondary {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-stone-200);
+}
+
+.package-detail-disclosure {
+  border-bottom: 1px solid var(--color-stone-200);
+}
+
+.package-detail-disclosure__summary {
+  display: flex;
+  min-height: 3.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-1);
+  cursor: pointer;
+  color: var(--color-stone-900);
+  font-size: var(--font-size-body-md);
+  font-weight: 700;
+  list-style: none;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.package-detail-disclosure__summary:hover {
+  color: var(--color-forest-800);
+}
+
+.package-detail-disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+
+.package-detail-disclosure__hint {
+  flex-shrink: 0;
+  color: var(--color-stone-500);
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+}
+
+.package-detail-disclosure__summary::after {
+  content: "+";
+  flex-shrink: 0;
+  color: var(--color-stone-500);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.package-detail-disclosure[open] > .package-detail-disclosure__summary::after {
+  content: "−";
+}
+
+.package-detail-disclosure__body {
+  padding: 0 0 var(--space-6);
+}
+
+.package-detail-disclosure__body > .package-detail-section {
+  padding: var(--space-5) 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-stone-100);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.package-detail-disclosure__body > .package-detail-section:first-child {
+  border-top: 0;
+}
+
+/* Destination & Organizer Trust Inside Disclosure */
 .package-detail-section__header {
   display: flex;
   flex-wrap: wrap;
@@ -495,13 +689,20 @@
   font-weight: var(--font-weight-regular);
 }
 
+.package-detail-identity-rating {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-stone-700);
+  font-weight: 500;
+}
+
 .package-detail-inline-trust {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   color: var(--color-stone-800);
   font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
 }
 
 .package-detail-trust-explanation {
@@ -516,7 +717,7 @@
 
 .package-detail-trust-explanation__title {
   display: block;
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
   color: var(--color-stone-900);
   margin-bottom: 0.125rem;
 }
@@ -547,7 +748,7 @@
   align-items: center;
   gap: 0.25rem;
   color: var(--color-stone-800);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
 }
 
 .package-detail-guide-meta__icon {
@@ -577,9 +778,7 @@
   flex-shrink: 0;
 }
 
-/* --------------------------------------------------------------------------
-   7. Itinerary Timeline Flow
-   -------------------------------------------------------------------------- */
+/* Itinerary Timeline Flow */
 .package-detail-itinerary-list {
   display: flex;
   flex-direction: column;
@@ -587,14 +786,12 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  position: relative;
 }
 
 .package-detail-itinerary-item {
   display: flex;
   align-items: flex-start;
   gap: var(--space-4);
-  position: relative;
 }
 
 .package-detail-itinerary-order {
@@ -608,8 +805,7 @@
   color: var(--color-text-inverse);
   border-radius: var(--radius-pill);
   font-size: 0.8125rem;
-  font-weight: var(--font-weight-bold);
-  box-shadow: var(--shadow-brand-sm);
+  font-weight: 700;
 }
 
 .package-detail-itinerary-content {
@@ -630,14 +826,14 @@
 .package-detail-itinerary-title {
   margin: 0;
   font-size: 0.9375rem;
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
   color: var(--color-stone-900);
 }
 
 .package-detail-itinerary-duration {
   font-size: var(--font-size-caption);
   color: var(--color-stone-500);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 500;
 }
 
 .package-detail-itinerary-desc {
@@ -647,9 +843,7 @@
   color: var(--color-stone-600);
 }
 
-/* --------------------------------------------------------------------------
-   8. Facilities: Included / Excluded Grid
-   -------------------------------------------------------------------------- */
+/* Inclusions & Exclusions Comparative Grid */
 .package-detail-in-out-grid {
   display: flex;
   flex-direction: column;
@@ -686,7 +880,7 @@
 .package-detail-in-out-heading {
   margin: 0;
   font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
   color: var(--color-stone-900);
 }
 
@@ -731,9 +925,7 @@
   margin: 0;
 }
 
-/* --------------------------------------------------------------------------
-   9. Safety and Policies
-   -------------------------------------------------------------------------- */
+/* Travel Logistics Facts */
 .package-detail-logistics-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -742,7 +934,7 @@
 
 @media (min-width: 640px) {
   .package-detail-logistics-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -759,7 +951,7 @@
 .package-detail-logistics-label {
   font-size: var(--font-size-caption);
   color: var(--color-stone-500);
-  font-weight: var(--font-weight-medium);
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -788,109 +980,14 @@
   line-height: 1.5;
 }
 
-/* --------------------------------------------------------------------------
-   10. Upcoming Session Previews
-   -------------------------------------------------------------------------- */
-.package-detail-sessions-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.package-detail-session-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-5);
-  background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-stone-200);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
-  transition: border-color var(--motion-fast) var(--ease-standard);
-}
-
-@media (min-width: 640px) {
-  .package-detail-session-card {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
-.package-detail-session-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.package-detail-session-card__date {
-  font-size: 0.9375rem;
-  font-weight: var(--font-weight-bold);
-  color: var(--color-stone-900);
-}
-
-.package-detail-session-card__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.125rem 0;
-  background: transparent;
-  border: 0;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-stone-600);
-}
-
-.package-detail-session-card__status-dot {
-  width: 0.4375rem;
-  height: 0.4375rem;
-  border-radius: var(--radius-pill);
-  background: var(--color-stone-400);
-  flex-shrink: 0;
-}
-
-.package-detail-session-card__status--open {
-  color: var(--color-forest-800);
-  background: transparent;
-  border: 0;
-}
-
-.package-detail-session-card__status--open
-  .package-detail-session-card__status-dot {
-  background: var(--color-forest-700);
-}
-
-.package-detail-session-card__slots {
-  font-size: var(--font-size-caption);
-  color: var(--color-stone-500);
-  font-weight: var(--font-weight-semibold);
-}
-
-.package-detail-no-session-notice {
-  padding: var(--space-6);
-  background: var(--color-stone-50);
-  border: 1px dashed var(--color-stone-200);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  font-size: var(--font-size-body-sm);
-  color: var(--color-stone-600);
-}
-
-.package-detail-no-session-notice p {
-  margin: 0;
-}
-
-/* --------------------------------------------------------------------------
-   11. Reviews Preview
-   -------------------------------------------------------------------------- */
+/* Reviews Summary */
 .package-detail-reviews-summary {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   font-size: 1rem;
   color: var(--color-stone-900);
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
 }
 
 .package-detail-reviews-star {
@@ -910,7 +1007,7 @@
 
 .package-detail-review-excerpt__author {
   font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
   color: var(--color-stone-800);
 }
 
@@ -923,7 +1020,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   12. Sticky Action Footer (Pilih Jadwal)
+   8. Sticky Action Footer (Pilih Jadwal)
    -------------------------------------------------------------------------- */
 .package-detail-sticky-bar {
   position: fixed;
@@ -938,6 +1035,7 @@
   padding: var(--space-3) var(--space-4);
   background: var(--color-surface-glass-strong);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--color-stone-200);
   box-shadow: var(--shadow-sm-top);
 }
@@ -958,7 +1056,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 72rem; /* 1152px - matches page max-width */
+  max-width: 72rem;
   margin-inline: auto;
   gap: var(--space-4);
 }
@@ -971,14 +1069,14 @@
 .package-detail-sticky-bar__price-label {
   font-size: 0.6875rem;
   color: var(--color-stone-500);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .package-detail-sticky-bar__price {
   font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
   color: var(--color-stone-900);
 }
 
@@ -996,23 +1094,23 @@
 .package-detail-sticky-bar__notice {
   font-size: 0.6875rem;
   color: var(--color-warning-text);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
 }
 
 /* --------------------------------------------------------------------------
-   13. Empty & Error States
+   9. Empty & Error States
    -------------------------------------------------------------------------- */
 .package-detail-state-box {
   padding: var(--space-10) var(--space-6);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-stone-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 16px rgba(29, 29, 27, 0.04);
   max-width: 32rem;
   margin: var(--space-8) auto;
 }
@@ -1020,7 +1118,7 @@
 .package-detail-state-box h2 {
   margin: 0;
   font-size: var(--font-size-heading-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
   color: var(--color-stone-900);
 }
 
@@ -1038,154 +1136,4 @@
 
 .package-detail-state-box--error h2 {
   color: var(--color-danger-text);
-}
-
-/* F5.1 Buyer-first hierarchy */
-.package-detail-context {
-  display: flex;
-  align-items: center;
-  min-height: 2.75rem;
-  padding-inline: var(--space-1);
-}
-
-.package-detail-context__label {
-  color: var(--color-stone-900);
-  font-size: var(--font-size-heading-sm);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--letter-spacing-tight);
-}
-
-.package-detail-rating-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-stone-600);
-  font-size: var(--font-size-body-sm);
-  line-height: 1.4;
-}
-
-.package-detail-rating-line__trust {
-  color: var(--color-forest-700);
-  font-weight: var(--font-weight-semibold);
-}
-
-.package-detail-rating-line__separator {
-  color: var(--color-stone-300);
-}
-
-.package-detail-secondary {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--color-stone-200);
-}
-
-.package-detail-disclosure {
-  border-bottom: 1px solid var(--color-stone-200);
-}
-
-.package-detail-disclosure__summary {
-  display: flex;
-  min-height: 3.5rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-1);
-  cursor: pointer;
-  color: var(--color-stone-900);
-  font-size: var(--font-size-body-md);
-  font-weight: var(--font-weight-bold);
-  list-style: none;
-}
-
-.package-detail-disclosure__summary::-webkit-details-marker {
-  display: none;
-}
-
-.package-detail-disclosure__hint {
-  flex-shrink: 0;
-  color: var(--color-stone-500);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
-}
-
-.package-detail-disclosure__summary::after {
-  content: "+";
-  flex-shrink: 0;
-  color: var(--color-stone-500);
-  font-size: 1.25rem;
-  font-weight: var(--font-weight-medium);
-  line-height: 1;
-}
-
-.package-detail-disclosure[open] > .package-detail-disclosure__summary::after {
-  content: "−";
-}
-
-.package-detail-disclosure__body {
-  padding: 0 0 var(--space-6);
-}
-
-.package-detail-disclosure__body > .package-detail-section {
-  padding: var(--space-5) 0;
-  background: transparent;
-  border: 0;
-  border-top: 1px solid var(--color-stone-100);
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.package-detail-disclosure__body > .package-detail-section:first-child {
-  border-top: 0;
-  padding-top: var(--space-2);
-}
-
-@media (max-width: 767px) {
-  .package-detail-header-card,
-  .package-detail-section {
-    padding: var(--space-5);
-    border-radius: var(--radius-lg);
-  }
-
-  .package-detail-disclosure__summary {
-    align-items: flex-start;
-  }
-
-  .package-detail-disclosure__hint {
-    display: none;
-  }
-}
-
-.package-detail-section--primary {
-  padding-inline: var(--space-1);
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.package-detail-organizer-rating {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  margin-top: var(--space-2);
-}
-
-.package-detail-organizer-rating__label {
-  color: var(--color-stone-500);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-}
-
-.package-detail-organizer-rating__value {
-  color: var(--color-stone-800);
-  font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.package-detail-identity-rating {
-  margin: var(--space-2) 0 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-body-sm);
-  line-height: 1.4;
 }

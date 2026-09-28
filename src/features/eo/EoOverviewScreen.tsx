@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { Button, InlineStatus } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
@@ -317,9 +317,11 @@ export function EoOverviewScreen() {
                       <span className="eo-overview-list-row__meta">
                         Sisa {s.remainingSlots} dari {s.capacity} slot
                       </span>
-                      <Badge tone={s.status === "OPEN" ? "success" : "neutral"}>
+                      <InlineStatus
+                        tone={s.status === "OPEN" ? "success" : "neutral"}
+                      >
                         {s.status}
-                      </Badge>
+                      </InlineStatus>
                     </div>
                   </div>
                 );
@@ -369,7 +371,7 @@ export function EoOverviewScreen() {
                       </span>
                     </div>
                     <div className="eo-overview-list-row__secondary">
-                      <Badge
+                      <InlineStatus
                         tone={
                           b.status === "PAID" || b.status === "COMPLETED"
                             ? "success"
@@ -379,7 +381,7 @@ export function EoOverviewScreen() {
                         }
                       >
                         {b.status}
-                      </Badge>
+                      </InlineStatus>
                     </div>
                   </div>
                 );

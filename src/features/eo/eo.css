@@ -550,7 +550,7 @@
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
   padding: var(--space-5) var(--space-4);
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
 }
 
 .eo-overview-metric-item {
@@ -566,10 +566,10 @@
 
 .eo-overview-metric-label {
   font-size: var(--font-size-label-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 500;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 .eo-overview-metric-value {
@@ -606,13 +606,12 @@
 
 .eo-overview-attention__tag {
   font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--color-warning-text);
-  background: var(--color-warning-border);
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 0;
 }
 
 .eo-overview-attention__title {

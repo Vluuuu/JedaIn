@@ -5,6 +5,9 @@ import { getSupabaseClient } from "./client";
 import { isSupabaseMode } from "./config";
 import type { PartnerProfileRow } from "./database.types";
 
+const PROFILE_SELECT =
+  "id, auth_user_id, role, display_name, business_name, email, guide_status, organizer_review_ref, destination_identity_id";
+
 export const DEMO_EO_CREDENTIALS = {
   email: "partner@jedaalam.id",
   password: "JedaInDemo2026!",
@@ -145,42 +148,21 @@ export async function ensureDemoEoSession(): Promise<DemoAuthResult> {
       };
     }
 
-    // 4. Link partner_profiles.auth_user_id with Supabase auth UID
-    let isLinked = false;
-    try {
-      const { data: profile } = await supabase
-        .from("partner_profiles")
-        .select("id, auth_user_id, role")
-        .eq("id", DEMO_EO_CREDENTIALS.partnerId)
-        .maybeSingle();
-
-      if (profile) {
-        if ((profile as PartnerProfileRow).auth_user_id === authUser.id) {
-          isLinked = true;
-        } else {
-          const { error: updateErr } = await supabase
-            .from("partner_profiles")
-            .update({
-              auth_user_id: authUser.id,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", DEMO_EO_CREDENTIALS.partnerId);
-
-          if (!updateErr) {
-            isLinked = true;
-          } else {
-            console.warn(
-              "Notice: Link auth_user_id in partner_profiles warning:",
-              updateErr.message,
-            );
-          }
-        }
-      }
-    } catch (err) {
-      console.warn("Notice: partner_profiles lookup/link error:", err);
+    const linked = await requireAuthenticatedUser("EO");
+    if (
+      !linked.success ||
+      linked.partnerUser?.id !== DEMO_EO_CREDENTIALS.partnerId
+    ) {
+      partnerSessionStore.logout();
+      return {
+        success: false,
+        mode: "supabase",
+        error:
+          linked.error ??
+          "Profil demo Travel Organizer tidak tertaut ke akun Supabase ini.",
+      };
     }
 
-    // 5. Update application memory partner state
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
     return {
@@ -191,7 +173,7 @@ export async function ensureDemoEoSession(): Promise<DemoAuthResult> {
         email: authUser.email || DEMO_EO_CREDENTIALS.email,
       },
       partnerId: DEMO_EO_CREDENTIALS.partnerId,
-      isLinked,
+      isLinked: true,
     };
   } catch (err: unknown) {
     return {
@@ -301,38 +283,19 @@ export async function ensureDemoDestinationSession(): Promise<DemoAuthResult> {
       };
     }
 
-    let isLinked = false;
-    try {
-      const { data: profile } = await supabase
-        .from("partner_profiles")
-        .select("id, auth_user_id, role")
-        .eq("id", DEMO_DESTINATION_CREDENTIALS.partnerId)
-        .maybeSingle();
-
-      if (profile) {
-        if ((profile as PartnerProfileRow).auth_user_id === authUser.id) {
-          isLinked = true;
-        } else {
-          const { error: updateErr } = await supabase
-            .from("partner_profiles")
-            .update({
-              auth_user_id: authUser.id,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", DEMO_DESTINATION_CREDENTIALS.partnerId);
-
-          if (!updateErr) {
-            isLinked = true;
-          } else {
-            console.warn(
-              "Notice: Link auth_user_id in partner_profiles warning:",
-              updateErr.message,
-            );
-          }
-        }
-      }
-    } catch (err) {
-      console.warn("Notice: partner_profiles lookup/link error:", err);
+    const linked = await requireAuthenticatedUser("DESTINATION");
+    if (
+      !linked.success ||
+      linked.partnerUser?.id !== DEMO_DESTINATION_CREDENTIALS.partnerId
+    ) {
+      partnerSessionStore.logout();
+      return {
+        success: false,
+        mode: "supabase",
+        error:
+          linked.error ??
+          "Profil demo Destinasi tidak tertaut ke akun Supabase ini.",
+      };
     }
 
     partnerSessionStore.loginAsDemoDestination();
@@ -345,7 +308,7 @@ export async function ensureDemoDestinationSession(): Promise<DemoAuthResult> {
         email: authUser.email || DEMO_DESTINATION_CREDENTIALS.email,
       },
       partnerId: DEMO_DESTINATION_CREDENTIALS.partnerId,
-      isLinked,
+      isLinked: true,
     };
   } catch (err: unknown) {
     return {
@@ -469,7 +432,15 @@ export async function requireAuthenticatedUser(
 
   const {
     data: { session },
+    error: sessionError,
   } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    return {
+      success: false,
+      error: `Gagal membaca sesi Supabase: ${sessionError.message}`,
+    };
+  }
 
   if (!session?.user) {
     return {
@@ -479,28 +450,83 @@ export async function requireAuthenticatedUser(
     };
   }
 
-  // Check matching profile by auth_user_id or email
-  let { data: profile } = await supabase
+  // A linked profile is authoritative. An unlinked profile may be claimed by email.
+  const { data: initialProfile, error: profileError } = await supabase
     .from("partner_profiles")
-    .select("*")
+    .select(PROFILE_SELECT)
     .eq("auth_user_id", session.user.id)
     .maybeSingle();
+  let profile = initialProfile;
+
+  if (profileError) {
+    return {
+      success: false,
+      error: `Gagal membaca profil partner: ${profileError.message}`,
+    };
+  }
 
   if (!profile && session.user.email) {
-    // Attempt fallback lookup by email and auto-link
-    const { data: byEmail } = await supabase
+    const { data: byEmail, error: lookupError } = await supabase
       .from("partner_profiles")
-      .select("*")
-      .eq("email", session.user.email)
+      .select(PROFILE_SELECT)
+      .ilike("email", session.user.email)
       .maybeSingle();
 
+    if (lookupError) {
+      return {
+        success: false,
+        error: `Gagal mencari profil partner: ${lookupError.message}`,
+      };
+    }
+
     if (byEmail) {
-      profile = byEmail;
-      // Proactively link
-      await supabase
+      const candidate = byEmail as PartnerProfileRow;
+      if (
+        candidate.email?.toLowerCase() !== session.user.email.toLowerCase() ||
+        candidate.auth_user_id !== null
+      ) {
+        return {
+          success: false,
+          error: "Profil partner tidak dapat diklaim oleh akun ini.",
+        };
+      }
+      if (requiredRole && candidate.role !== requiredRole) {
+        return {
+          success: false,
+          error: `Akses ditolak: Peran akun (${candidate.role}) tidak memiliki izin sebagai ${requiredRole}.`,
+        };
+      }
+
+      const { error: updateError } = await supabase
         .from("partner_profiles")
         .update({ auth_user_id: session.user.id })
-        .eq("id", (byEmail as PartnerProfileRow).id);
+        .eq("id", candidate.id)
+        .is("auth_user_id", null);
+
+      if (updateError) {
+        return {
+          success: false,
+          error: `Gagal menautkan profil partner: ${updateError.message}`,
+        };
+      }
+
+      const verified = await supabase
+        .from("partner_profiles")
+        .select(PROFILE_SELECT)
+        .eq("auth_user_id", session.user.id)
+        .maybeSingle();
+
+      if (
+        verified.error ||
+        !verified.data ||
+        (verified.data as PartnerProfileRow).id !== candidate.id
+      ) {
+        return {
+          success: false,
+          error: `Profil partner belum terverifikasi setelah claim${verified.error ? `: ${verified.error.message}` : "."}`,
+        };
+      }
+      profile = verified.data;
     }
   }
 
@@ -512,6 +538,12 @@ export async function requireAuthenticatedUser(
   }
 
   const pRow = profile as PartnerProfileRow;
+  if (pRow.auth_user_id !== session.user.id) {
+    return {
+      success: false,
+      error: "Profil partner belum tertaut ke sesi Supabase ini.",
+    };
+  }
   if (requiredRole && pRow.role !== requiredRole) {
     return {
       success: false,
@@ -521,8 +553,8 @@ export async function requireAuthenticatedUser(
 
   const mappedPartnerUser: PartnerUser = {
     id: pRow.id,
-    email: pRow.email,
-    name: pRow.name,
+    email: pRow.email ?? session.user.email ?? "",
+    name: pRow.display_name,
     role: pRow.role,
     businessName: pRow.business_name,
     guideStatus: pRow.guide_status ?? undefined,

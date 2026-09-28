@@ -24,15 +24,15 @@ export type Json =
 export interface PartnerProfileRow {
   id: string;
   auth_user_id: string | null;
-  name: string;
-  email: string;
   role: "EO" | "DESTINATION" | "ADMIN";
+  display_name: string;
   business_name: string;
+  email: string | null;
   guide_status: EoGuideStatus | null;
   organizer_review_ref: string | null;
   destination_identity_id: string | null;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface DestinationRow {

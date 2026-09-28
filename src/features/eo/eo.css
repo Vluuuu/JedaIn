@@ -4707,3 +4707,97 @@
   padding: var(--space-5) 0;
   text-align: left;
 }
+
+/* ==========================================================================
+   VISUAL PILOT V2 — BRANDED TO WORKSPACE
+   Make the role identity obvious: one branded header, one opportunity anchor,
+   then calm operational data.
+   ========================================================================== */
+
+.eo-overview-header {
+  padding: var(--space-8);
+  background:
+    radial-gradient(circle at 86% 10%, rgb(255 255 255 / 9%), transparent 32%),
+    var(--color-forest-950);
+  border-radius: var(--radius-2xl);
+  color: var(--color-stone-0);
+}
+
+.eo-overview-header__main h1 {
+  color: var(--color-stone-0);
+  font-size: var(--font-size-heading-xl);
+  line-height: var(--line-height-heading-xl);
+}
+
+.eo-overview-header__main p {
+  color: var(--color-forest-100);
+}
+
+.eo-overview-header .ui-button,
+.eo-overview-header button {
+  box-shadow: none;
+}
+
+.eo-overview-metric-band {
+  margin-top: calc(var(--space-5) * -1);
+  width: calc(100% - var(--space-8));
+  align-self: center;
+  position: relative;
+  z-index: 2;
+  padding: var(--space-5) var(--space-3);
+  background: var(--color-stone-0);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.eo-overview-metric-value {
+  color: var(--color-forest-900);
+}
+
+.eo-overview-attention {
+  max-width: 100%;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-left: 4px solid var(--color-warning-solid);
+  border-radius: var(--radius-lg);
+}
+
+.eo-overview-demand-hero {
+  padding: var(--space-8);
+  border-radius: var(--radius-2xl);
+  background:
+    radial-gradient(circle at 92% 8%, rgb(255 255 255 / 10%), transparent 30%),
+    var(--color-forest-900);
+}
+
+.eo-overview-demand-hero__headline h2 {
+  max-width: 22ch;
+  font-size: var(--font-size-heading-xl);
+  line-height: 1.1;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.eo-overview-ops-grid {
+  gap: var(--space-8);
+}
+
+.eo-overview-panel {
+  padding-top: var(--space-6);
+}
+
+.eo-overview-panel__header h2 {
+  font-size: var(--font-size-heading-md);
+}
+
+@media (max-width: 48rem) {
+  .eo-overview-header {
+    padding: var(--space-6);
+  }
+
+  .eo-overview-metric-band {
+    margin-top: calc(var(--space-4) * -1);
+    width: calc(100% - var(--space-4));
+  }
+}

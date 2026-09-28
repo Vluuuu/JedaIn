@@ -1,4 +1,4 @@
-import { InlineStatus } from "../../components/ui";
+import { StatusMeta } from "../../components/ui";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
@@ -41,8 +41,7 @@ export function DestinationVerificationBadgeScreen() {
               <h2>Aktif sebagai Mitra Destinasi JedaIn</h2>
             </div>
             <span className="dest-verification-single__app-status">
-              Status pengajuan ·{" "}
-              <InlineStatus tone="success">Disetujui</InlineStatus>
+              <StatusMeta label="Status pengajuan">Disetujui</StatusMeta>
             </span>
           </div>
 

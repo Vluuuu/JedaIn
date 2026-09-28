@@ -98,6 +98,12 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
     expect(
       view.querySelector(".dest-readiness__status-meta .ui-badge"),
     ).toBeNull();
+    expect(
+      view.querySelector(".dest-readiness__status-meta .status-meta"),
+    ).not.toBeNull();
+    expect(
+      view.querySelector(".dest-readiness__status-meta .inline-status"),
+    ).toBeNull();
     expect(view.textContent).toContain(
       "Profil destinasi siap digunakan Travel Organizer",
     );
@@ -136,9 +142,14 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
     ).toContain("Disetujui");
     expect(
       badgeView.querySelector(
-        ".dest-verification-single__app-status .inline-status",
+        ".dest-verification-single__app-status .status-meta",
       ),
     ).not.toBeNull();
+    expect(
+      badgeView.querySelector(
+        ".dest-verification-single__app-status .inline-status",
+      ),
+    ).toBeNull();
     expect(badgeView.textContent).toContain(
       "Destinasi Anda telah disetujui dan dapat digunakan EO untuk merancang experience.",
     );

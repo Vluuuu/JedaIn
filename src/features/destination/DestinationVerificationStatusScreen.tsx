@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router";
-import { Button, InlineStatus } from "../../components/ui";
+import { Button, StatusMeta } from "../../components/ui";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
 import "./destination.css";
@@ -39,8 +39,9 @@ export function DestinationVerificationStatusScreen() {
               <strong>{partner?.businessName ?? "Destinasi Baru"}</strong>
             </p>
             <p className="dest-verification-status-line">
-              Status pengajuan ·{" "}
-              <InlineStatus>Belum ada pengajuan</InlineStatus>
+              <StatusMeta label="Status pengajuan">
+                Belum ada pengajuan
+              </StatusMeta>
             </p>
           </div>
         </header>
@@ -107,22 +108,13 @@ export function DestinationVerificationStatusScreen() {
             Kawasan: <strong>{app.name}</strong> ({app.locationLabel})
           </p>
           <p className="dest-verification-status-line">
-            Status pengajuan ·{" "}
-            <InlineStatus
-              tone={
-                status === "APPROVED"
-                  ? "success"
-                  : status === "REJECTED"
-                    ? "danger"
-                    : "warning"
-              }
-            >
+            <StatusMeta label="Status pengajuan">
               {status === "APPROVED"
                 ? "Disetujui"
                 : status === "REJECTED"
                   ? "Perlu perbaikan"
                   : "Menunggu verifikasi Admin"}
-            </InlineStatus>
+            </StatusMeta>
           </p>
         </div>
       </header>

@@ -10,10 +10,10 @@
 }
 
 .inline-status__dot {
-  width: 0.4375rem;
-  height: 0.4375rem;
+  width: 0.4rem;
+  height: 0.4rem;
   flex: none;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-pill);
   background: var(--color-stone-400);
 }
 
@@ -27,4 +27,27 @@
 
 .inline-status--danger .inline-status__dot {
   background: var(--color-danger-text);
+}
+
+.status-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.status-meta__label {
+  color: var(--color-text-muted);
+}
+
+.status-meta strong {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }

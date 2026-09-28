@@ -4,6 +4,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { InlineStatus, StatusMeta } from "../../components/ui";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
 import { DestinationOverviewScreen } from "./DestinationOverviewScreen";
 import { DestinationVerificationStatusScreen } from "./DestinationVerificationStatusScreen";
@@ -54,6 +55,12 @@ describe("Mitra destination status presentation", () => {
       overview.querySelector(".dest-readiness__status-meta .ui-badge"),
     ).toBeNull();
     expect(
+      overview.querySelector(".dest-readiness__status-meta .status-meta"),
+    ).not.toBeNull();
+    expect(
+      overview.querySelector(".dest-readiness__status-meta .inline-status"),
+    ).toBeNull();
+    expect(
       overview.querySelectorAll(".dest-session-row__status .inline-status")
         .length,
     ).toBeGreaterThan(0);
@@ -68,6 +75,14 @@ describe("Mitra destination status presentation", () => {
     expect(
       verification.querySelector(".dest-verification-status-line .ui-badge"),
     ).toBeNull();
+    expect(
+      verification.querySelector(".dest-verification-status-line .status-meta"),
+    ).not.toBeNull();
+    expect(
+      verification.querySelector(
+        ".dest-verification-status-line .inline-status",
+      ),
+    ).toBeNull();
     await clear();
 
     const activeVerification = await render(
@@ -79,9 +94,14 @@ describe("Mitra destination status presentation", () => {
     ).toContain("Disetujui");
     expect(
       activeVerification.querySelector(
-        ".dest-verification-single__app-status .inline-status",
+        ".dest-verification-single__app-status .status-meta",
       ),
     ).not.toBeNull();
+    expect(
+      activeVerification.querySelector(
+        ".dest-verification-single__app-status .inline-status",
+      ),
+    ).toBeNull();
   });
 
   it("removes decorative headers and keeps session status in human language", async () => {
@@ -118,5 +138,24 @@ describe("Mitra destination status presentation", () => {
       CLOSED: "Ditutup",
       CANCELLED: "Dibatalkan",
     });
+  });
+
+  it("renders quiet status metadata without dots and lifecycle status with circular dot", async () => {
+    const metaView = await render(
+      createElement(StatusMeta, { label: "Status", children: "Aktif" }),
+    );
+    expect(metaView.querySelector(".status-meta__label")?.textContent).toBe(
+      "Status",
+    );
+    expect(metaView.querySelector("strong")?.textContent).toBe("Aktif");
+    expect(metaView.querySelector(".inline-status__dot")).toBeNull();
+    await clear();
+
+    const inlineView = await render(
+      createElement(InlineStatus, { tone: "success", children: "Live" }),
+    );
+    expect(inlineView.querySelector(".inline-status__dot")).not.toBeNull();
+    expect(inlineView.textContent).toBe("Live");
+    await clear();
   });
 });

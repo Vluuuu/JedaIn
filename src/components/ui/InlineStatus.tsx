@@ -1,7 +1,7 @@
 import "./inlineStatus.css";
 
 export interface InlineStatusProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   tone?: "neutral" | "success" | "warning" | "danger";
 }
 
@@ -13,6 +13,26 @@ export function InlineStatus({
     <span className={`inline-status inline-status--${tone}`}>
       <span className="inline-status__dot" aria-hidden="true" />
       <span>{children}</span>
+    </span>
+  );
+}
+
+export interface StatusMetaProps {
+  label?: string;
+  children?: React.ReactNode;
+  className?: string;
+}
+
+export function StatusMeta({
+  label = "Status",
+  children,
+  className = "",
+}: StatusMetaProps) {
+  return (
+    <span className={`status-meta${className ? ` ${className}` : ""}`}>
+      <span className="status-meta__label">{label}</span>
+      <span aria-hidden="true">·</span>
+      <strong>{children}</strong>
     </span>
   );
 }

@@ -414,7 +414,14 @@ export const packageRepository = {
         app?.guideStatus ??
         authCheck.partnerUser?.guideStatus ??
         "CERTIFIED_GUIDE";
-      const validationResult = validateEoPackage(pkg, authorGuideStatus);
+      const destination = pkg.destinationId
+        ? await destinationRepository.getById(pkg.destinationId)
+        : undefined;
+      const validationResult = validateEoPackage(
+        pkg,
+        authorGuideStatus,
+        destination,
+      );
 
       if (!validationResult.valid) {
         return { success: false, package: pkg, validationResult };

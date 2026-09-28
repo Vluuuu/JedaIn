@@ -310,6 +310,122 @@ describe("Supabase Backend Guards, Auth Enforcement & Authoritative Pricing", ()
       expect(savedRow?.eo_margin).toBe(120000);
       expect(savedRow?.customer_price).toBe(360000);
     });
+
+    it("validates submitForReview using live destinationRepository destination rather than stale mock store", async () => {
+      const liveDestination = {
+        ...mockDestinationStore.getById("dest_lereng_hijau")!,
+        baseCostPerPerson: 125000,
+        localGuideFeePerPerson: 100000,
+      };
+      vi.spyOn(destinationRepository, "getById").mockResolvedValue(
+        liveDestination,
+      );
+
+      const validPackageRow: PackageRow = {
+        id: "pkg_test_submit_live",
+        eo_id: "eo_jeda_alam",
+        eo_display_name: "Jeda Alam Nusantara",
+        title: "Paket Live Destination Submit",
+        short_summary: "Ringkasan paket bernilai mindful untuk traveler.",
+        value_proposition: "Pengalaman santai di alam.",
+        destination_id: "dest_lereng_hijau",
+        image_url: null,
+        image_urls: null,
+        insight_id: null,
+        duration_label: "1 hari",
+        suitable_group_types: ["SOLO"],
+        highlights: ["Highlight 1"],
+        itinerary: [
+          { order: 1, title: "Sesi Pagi", description: "Jalan santai" },
+        ],
+        included_items: ["Transportasi PP"],
+        excluded_items: [],
+        safety_notes: ["Catatan keselamatan."],
+        meeting_point_label: "Stasiun Malang",
+        departure_time_label: "07.00 WIB",
+        outbound_transport: "Minibus",
+        return_transport: "Minibus",
+        access_notes: null,
+        destination_base_cost: 125000,
+        local_guide_fee: 100000,
+        eo_margin: 150000,
+        customer_price: 375000,
+        guide_status: "CERTIFIED_GUIDE",
+        guide_source: "DESTINATION",
+        status: "DRAFT",
+        validation_result: null,
+        submitted_at: null,
+        reviewed_at: null,
+        rejection_reason: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      let updatedRow: Record<string, unknown> | null = null;
+
+      const mockSupabase = {
+        auth: {
+          getSession: vi.fn().mockResolvedValue({
+            data: {
+              session: {
+                user: { id: "eo_uid_123", email: "partner@jedaalam.id" },
+              },
+            },
+          }),
+        },
+        from: vi.fn().mockImplementation((table: string) => {
+          if (table === "partner_profiles") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: {
+                  id: "eo_jeda_alam",
+                  role: "EO",
+                  auth_user_id: "eo_uid_123",
+                  email: "partner@jedaalam.id",
+                },
+              }),
+            };
+          }
+          if (table === "packages") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: validPackageRow,
+              }),
+              update: vi.fn().mockImplementation((payload) => {
+                updatedRow = payload;
+                return {
+                  eq: vi.fn().mockReturnThis(),
+                  select: vi.fn().mockReturnThis(),
+                  single: vi.fn().mockResolvedValue({
+                    data: { ...validPackageRow, ...payload },
+                    error: null,
+                  }),
+                };
+              }),
+            };
+          }
+          return {};
+        }),
+      };
+      vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue(
+        mockSupabase as unknown as SupabaseClient,
+      );
+
+      const submitRes = await packageRepository.submitForReview(
+        "pkg_test_submit_live",
+      );
+
+      expect(destinationRepository.getById).toHaveBeenCalledWith(
+        "dest_lereng_hijau",
+      );
+      expect(submitRes.success).toBe(true);
+      expect(submitRes.validationResult.valid).toBe(true);
+      expect(updatedRow).toMatchObject({ status: "PENDING_ADMIN_REVIEW" });
+    });
   });
 
   describe("4. Role & Ownership Guards", () => {

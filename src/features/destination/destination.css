@@ -1730,3 +1730,137 @@
     border-left: 0;
   }
 }
+
+/* ==========================================================================
+   VISUAL PILOT V2 — HOSPITALITY IDENTITY
+   The destination itself becomes the visual anchor; operational information
+   then follows in a quiet hospitality workspace.
+   ========================================================================== */
+
+.dest-identity {
+  min-height: 280px;
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr);
+  border: 0;
+  border-radius: var(--radius-2xl);
+  background: var(--color-forest-950);
+  overflow: hidden;
+}
+
+.dest-identity__content {
+  padding: var(--space-8);
+  background:
+    radial-gradient(circle at 10% 10%, rgb(255 255 255 / 9%), transparent 32%),
+    var(--color-forest-950);
+}
+
+.dest-identity__heading .dest-page-title {
+  color: var(--color-stone-0);
+  font-size: var(--font-size-heading-xl);
+  line-height: 1.08;
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.dest-identity__location,
+.dest-identity__manager {
+  color: var(--color-forest-200);
+}
+
+.dest-identity__manager strong {
+  color: var(--color-stone-0);
+}
+
+.dest-identity__media,
+.dest-identity__media img {
+  min-height: 280px;
+}
+
+.dest-identity__media::after {
+  background: linear-gradient(
+    90deg,
+    var(--color-forest-950) 0%,
+    rgb(10 28 18 / 38%) 18%,
+    transparent 48%
+  );
+}
+
+.dest-metric-band {
+  margin-top: calc(var(--space-5) * -1);
+  width: calc(100% - var(--space-8));
+  align-self: center;
+  position: relative;
+  z-index: 2;
+  padding: var(--space-5) var(--space-3);
+  background: var(--color-stone-0);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.dest-metric-value {
+  color: var(--color-forest-900);
+}
+
+.dest-quick-actions {
+  padding-top: var(--space-4);
+  border-top: 0;
+}
+
+.dest-quick-actions__grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--color-stone-200);
+  border-bottom: 1px solid var(--color-stone-200);
+}
+
+.dest-quick-action-card {
+  min-height: 5.5rem;
+  padding: var(--space-4);
+  border-bottom: 0;
+  border-left: 1px solid var(--color-stone-200);
+}
+
+.dest-quick-action-card:first-child {
+  border-left: 0;
+}
+
+.dest-readiness-layout {
+  gap: var(--space-8);
+}
+
+.dest-partners {
+  padding: var(--space-6);
+  background:
+    radial-gradient(circle at 90% 10%, rgb(255 255 255 / 8%), transparent 28%),
+    var(--color-forest-900);
+  border-radius: var(--radius-2xl);
+}
+
+.dest-partners h2 {
+  font-size: var(--font-size-heading-md);
+  line-height: var(--line-height-heading-md);
+}
+
+@media (max-width: 760px) {
+  .dest-identity {
+    grid-template-columns: 1fr;
+  }
+
+  .dest-identity__media {
+    order: -1;
+  }
+
+  .dest-identity__content {
+    padding: var(--space-6);
+  }
+
+  .dest-metric-band {
+    width: calc(100% - var(--space-4));
+  }
+
+  .dest-quick-actions__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dest-quick-action-card:nth-child(odd) {
+    border-left: 0;
+  }
+}

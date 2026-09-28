@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import JedaInLogo from "../../JedaIn_logo_vector.svg";
+import PlanMascot from "../../assets/mascot/plan.png";
 import { partnerSessionStore } from "../../features/eo/partnerSessionStore";
 import { Button } from "../ui";
 import {
@@ -183,6 +184,11 @@ export function WorkspaceShell({
               </NavLink>
             ))}
           </nav>
+          {surface === "partner" && !sidebarCollapsed && (
+            <div className="workspace-sidebar__mascot" aria-hidden="true">
+              <img src={PlanMascot} alt="" width="535" height="633" />
+            </div>
+          )}
         </div>
       </aside>
       <div className="workspace-main">

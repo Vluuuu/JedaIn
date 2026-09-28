@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
+import RestMascot from "../../assets/mascot/rest.png";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import { formatRupiah, getBookingPaymentBreakdown } from "../checkout/pricing";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
@@ -268,6 +269,14 @@ export function MyTripsScreen({
       >
         {currentTabList.length === 0 ? (
           <div className="my-trips-empty-state">
+            <img
+              className="my-trips-empty-state__mascot"
+              src={RestMascot}
+              alt=""
+              aria-hidden="true"
+              width="538"
+              height="648"
+            />
             <h2 className="my-trips-empty-state__title">
               {activeTab === "UPCOMING"
                 ? "Belum ada trip mendatang."

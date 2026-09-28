@@ -1,0 +1,677 @@
+/* Logged-in visual direction. Public landing and login keep their existing design. */
+.traveler-app-shell,
+.workspace-shell {
+  --color-bg-page: var(--redesign-canvas);
+  --color-bg-surface: var(--redesign-paper);
+  --color-bg-surface-subtle: var(--color-stone-50);
+  --color-border-default: var(--redesign-line);
+  --color-text-primary: var(--redesign-ink);
+  --color-text-secondary: var(--redesign-muted);
+  --color-brand-primary: var(--redesign-deep);
+  --color-brand-primary-hover: var(--redesign-deep-hover);
+  --color-brand-primary-soft: var(--redesign-mist);
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+}
+
+.traveler-app-shell {
+  background: var(--redesign-canvas);
+}
+
+.traveler-app-header {
+  min-height: 4.75rem;
+  background: var(--redesign-header-glass);
+  border-bottom-color: var(--redesign-line);
+  box-shadow: none;
+}
+
+.traveler-app-header__inner {
+  min-height: 4.75rem;
+  gap: var(--space-6);
+}
+
+.traveler-app-logo {
+  width: 7.5rem;
+}
+
+.traveler-header-nav {
+  display: none;
+}
+
+.traveler-app-content {
+  width: min(100%, 78rem);
+  padding-block: var(--space-6) var(--space-16);
+}
+
+.traveler-bottom-nav {
+  background: var(--redesign-nav-glass);
+  border-top-color: var(--redesign-line);
+  box-shadow: var(--redesign-nav-shadow);
+}
+
+.traveler-bottom-nav__item {
+  color: var(--redesign-muted);
+  border-radius: var(--radius-lg);
+}
+
+.traveler-bottom-nav__item--active {
+  color: var(--redesign-deep);
+  background: var(--redesign-mist);
+}
+
+.traveler-app-shell .ui-button--primary,
+.workspace-shell .ui-button--primary {
+  border-radius: var(--radius-pill);
+  box-shadow: none;
+}
+
+.traveler-app-shell .ui-button--secondary,
+.workspace-shell .ui-button--secondary,
+.traveler-app-shell .ui-input,
+.workspace-shell .ui-input {
+  border-color: var(--redesign-line);
+}
+
+.traveler-app-shell .ui-card,
+.workspace-shell .ui-card {
+  border-color: var(--redesign-line);
+  box-shadow: none;
+}
+
+/* A proper desktop navigation lets the content use the full screen height. */
+@media (min-width: 64rem) {
+  .traveler-header-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-left: auto;
+  }
+
+  .traveler-header-nav a {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-4);
+    color: var(--redesign-muted);
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-label-md);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .traveler-header-nav a:hover,
+  .traveler-header-nav a[aria-current="page"] {
+    color: var(--redesign-deep);
+    background: var(--redesign-mist);
+  }
+
+  .traveler-header-nav svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .traveler-bottom-nav {
+    display: none;
+  }
+
+  .traveler-app-content {
+    padding-top: var(--space-10);
+  }
+}
+
+/* Home opens with a calm, illustrated invitation; its data sections stay in order. */
+.traveler-app-shell .home-container {
+  max-width: 76rem;
+  gap: var(--space-10);
+  padding-inline: 0;
+}
+
+.traveler-app-shell .home-greeting-row {
+  position: relative;
+  min-height: 12rem;
+  align-items: center;
+  overflow: hidden;
+  padding: var(--space-6) 9rem var(--space-6) var(--space-6);
+  color: var(--redesign-paper);
+  background:
+    radial-gradient(
+      circle at 82% 22%,
+      var(--redesign-hero-glow),
+      transparent 28%
+    ),
+    linear-gradient(
+      112deg,
+      var(--redesign-hero-start),
+      var(--redesign-hero-end)
+    );
+  border-radius: 2rem;
+}
+
+.traveler-app-shell .home-greeting-row::after {
+  position: absolute;
+  right: -3rem;
+  bottom: -9rem;
+  width: 19rem;
+  height: 19rem;
+  border: 1px solid var(--redesign-hero-ring);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.home-greeting-eyebrow {
+  color: var(--redesign-hero-kicker);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.traveler-app-shell .home-greeting-title {
+  color: var(--redesign-paper);
+  font-size: clamp(2rem, 5vw, 3.3rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.traveler-app-shell .home-greeting-subtitle {
+  color: var(--redesign-hero-copy);
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+}
+
+.home-greeting-mascot {
+  position: absolute;
+  z-index: 1;
+  right: 0.5rem;
+  bottom: -3.5rem;
+  width: clamp(10rem, 19vw, 15rem);
+  height: auto;
+  filter: drop-shadow(0 12px 13px var(--redesign-mascot-shadow));
+  pointer-events: none;
+}
+
+.traveler-app-shell .home-section-header {
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.traveler-app-shell .home-recommendation-section .home-section-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+}
+
+.traveler-app-shell .home-section-title {
+  font-size: clamp(1.35rem, 2.3vw, 1.8rem);
+  letter-spacing: -0.035em;
+}
+
+.traveler-app-shell .home-hero-card {
+  border: 1px solid var(--redesign-line);
+  border-radius: 1.75rem;
+  box-shadow: var(--redesign-shadow);
+}
+
+.traveler-app-shell .home-hero-card__visual {
+  min-height: 17rem;
+}
+
+.traveler-app-shell .home-hero-card__body {
+  gap: var(--space-4);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  background: var(--redesign-paper);
+}
+
+.traveler-app-shell .home-hero-card__title {
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.16;
+  letter-spacing: -0.035em;
+}
+
+.traveler-app-shell .home-hero-card__summary {
+  max-width: 38rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.traveler-app-shell .home-hero-card__chip,
+.traveler-app-shell .home-preference-bar__chip {
+  border-color: transparent;
+  background: var(--redesign-mist);
+}
+
+.traveler-app-shell .home-preference-bar {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--redesign-line);
+  border-radius: 0;
+  padding-inline: 0;
+}
+
+.traveler-app-shell .home-search-bar__input {
+  background: var(--redesign-paper);
+  border-color: var(--redesign-line);
+  border-radius: var(--radius-pill);
+  box-shadow: none;
+}
+
+.traveler-app-shell .home-search-bar__submit {
+  background: var(--redesign-deep);
+  border-radius: var(--radius-pill);
+  box-shadow: none;
+}
+
+.traveler-app-shell .home-mood-chip {
+  border-color: var(--redesign-line);
+  background: var(--redesign-paper);
+  box-shadow: none;
+}
+
+.traveler-app-shell .home-package-card,
+.traveler-app-shell .home-destination-card {
+  border: 1px solid var(--redesign-line);
+  border-radius: 1.5rem;
+  box-shadow: none;
+}
+
+.traveler-app-shell .home-package-card__body,
+.traveler-app-shell .home-destination-card__body {
+  background: var(--redesign-paper);
+}
+
+.traveler-app-shell .home-package-card__visual,
+.traveler-app-shell .home-destination-card__visual {
+  aspect-ratio: 4 / 3;
+}
+
+.traveler-app-shell .home-upcoming-card {
+  background: var(--redesign-upcoming-bg);
+  border-color: var(--redesign-upcoming-border);
+  box-shadow: none;
+}
+
+.traveler-app-shell .home-payment-banner {
+  box-shadow: none;
+}
+
+/* Explore is a discovery surface, so its introduction has a distinct visual cue. */
+.traveler-app-shell .explore-container {
+  max-width: 76rem;
+  gap: var(--space-8);
+  padding-inline: 0;
+}
+
+.traveler-app-shell .explore-header {
+  position: relative;
+  min-height: 12rem;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-6) 10rem var(--space-6) var(--space-6);
+  background: linear-gradient(
+    115deg,
+    var(--redesign-explore-start),
+    var(--redesign-explore-mid) 72%,
+    var(--redesign-explore-end)
+  );
+  border: 1px solid var(--redesign-explore-border);
+  border-radius: 2rem;
+}
+
+.explore-header__eyebrow {
+  color: var(--redesign-deep);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.traveler-app-shell .explore-header__title {
+  color: var(--redesign-ink);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.traveler-app-shell .explore-header__subtitle {
+  max-width: 34rem;
+  color: var(--redesign-muted);
+  line-height: 1.5;
+}
+
+.explore-header__mascot {
+  position: absolute;
+  right: 1.25rem;
+  bottom: -4rem;
+  width: clamp(9rem, 17vw, 13rem);
+  height: auto;
+  filter: drop-shadow(0 10px 12px var(--redesign-explore-shadow));
+  pointer-events: none;
+}
+
+.traveler-app-shell
+  :is(
+    .explore-search-input,
+    .explore-search-submit,
+    .explore-filter-btn,
+    .explore-sort-select
+  ) {
+  border-radius: var(--radius-pill);
+  box-shadow: none;
+}
+
+.traveler-app-shell .explore-search-submit {
+  background: var(--redesign-deep);
+}
+
+.traveler-app-shell .explore-package-card {
+  border-color: var(--redesign-line);
+  border-radius: var(--radius-xl);
+  box-shadow: none;
+}
+
+.traveler-app-shell .package-detail-hero {
+  border-radius: var(--radius-xl);
+  box-shadow: none;
+}
+
+.traveler-app-shell .package-detail-gallery {
+  border-color: var(--redesign-line);
+  background: var(--redesign-paper);
+  box-shadow: none;
+}
+
+/* Shared post-login screen rhythm, without removing secondary details. */
+.traveler-app-shell
+  :is(
+    .my-trips-title,
+    .trip-detail-title,
+    .profile-subpage-title,
+    .payment-title
+  ) {
+  color: var(--redesign-ink);
+  letter-spacing: -0.035em;
+}
+
+.traveler-app-shell
+  :is(
+    .my-trip-card,
+    .my-trips-pending-card,
+    .trip-detail-hero,
+    .payment-summary-card
+  ) {
+  border-color: var(--redesign-line);
+  border-radius: var(--radius-xl);
+  box-shadow: none;
+}
+
+.traveler-app-shell .my-trips-tabs {
+  border-color: var(--redesign-line);
+}
+
+.traveler-app-shell .my-trips-empty-state {
+  border-color: var(--redesign-line);
+  background: var(--redesign-paper);
+  box-shadow: none;
+}
+
+.my-trips-empty-state__mascot {
+  display: block;
+  width: 7.5rem;
+  height: auto;
+  margin: 0 auto var(--space-3);
+}
+
+.payment-result-mascot {
+  display: block;
+  width: 8rem;
+  height: auto;
+  margin-bottom: var(--space-3);
+}
+
+/* Onboarding screens sit after authentication and use the same softer shape. */
+.consent-card,
+.quiz-card,
+.recommendation-hero-card {
+  border-radius: var(--radius-xl);
+}
+
+.recommendation-header__mascot {
+  display: block;
+  width: 5.5rem;
+  height: auto;
+  margin: 0 auto var(--space-2);
+  filter: drop-shadow(0 10px 12px var(--redesign-mascot-shadow));
+}
+
+/* The operational surfaces share JedaIn's palette, with denser information. */
+.workspace-shell {
+  background: var(--redesign-canvas);
+}
+
+.workspace-sidebar {
+  background: var(--redesign-paper);
+  border-right-color: var(--redesign-line);
+}
+
+.workspace-sidebar__brand {
+  border-bottom-color: var(--redesign-line);
+}
+
+.workspace-sidebar__role-tag {
+  color: var(--redesign-muted);
+}
+
+.workspace-navigation {
+  gap: 0.25rem;
+}
+
+.workspace-navigation a {
+  min-height: 2.9rem;
+  height: auto;
+  color: var(--redesign-muted);
+  border-radius: 0.875rem;
+}
+
+.workspace-navigation a[aria-current="page"] {
+  color: var(--redesign-deep);
+  background: var(--redesign-mist);
+  font-weight: 700;
+}
+
+.workspace-shell--admin .workspace-navigation a[aria-current="page"] {
+  color: var(--redesign-deep);
+  background: var(--redesign-mist);
+}
+
+.workspace-sidebar__mascot {
+  display: flex;
+  min-height: 0;
+  justify-content: center;
+  margin-top: auto;
+  overflow: hidden;
+  border-top: 1px solid var(--redesign-line);
+}
+
+.workspace-sidebar__mascot img {
+  width: min(9rem, 55%);
+  height: auto;
+  margin-bottom: -2rem;
+  object-fit: contain;
+  object-position: bottom;
+  opacity: 0.88;
+}
+
+.workspace-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--redesign-header-glass);
+  border-bottom-color: var(--redesign-line);
+  backdrop-filter: blur(12px);
+}
+
+.workspace-topbar p {
+  color: var(--redesign-muted);
+}
+
+.workspace-topbar__title {
+  color: var(--redesign-ink);
+  letter-spacing: -0.025em;
+}
+
+.workspace-identity > span,
+.workspace-shell--admin .workspace-identity > span {
+  color: var(--redesign-deep);
+  background: var(--redesign-mist);
+}
+
+.workspace-content {
+  max-width: 100rem;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.workspace-shell :is(.eo-page-title, .dest-page-title, .admin-page-title) {
+  color: var(--redesign-ink);
+  letter-spacing: -0.035em;
+}
+
+.workspace-shell :is(.eo-page-header, .dest-page-header, .admin-page-header) {
+  margin-bottom: var(--space-8);
+}
+
+.workspace-shell
+  :is(
+    .eo-overview-header,
+    .eo-demand-header,
+    .eo-packages-header,
+    .dest-page-header,
+    .admin-page-header
+  ) {
+  border-bottom-color: var(--redesign-line);
+}
+
+.workspace-shell
+  :is(.eo-overview-header h1, .eo-demand-header h1, .eo-packages-header h1) {
+  color: var(--redesign-ink);
+  letter-spacing: -0.035em;
+}
+
+.workspace-shell :is(.eo-overview-metric-band, .dest-metric-band) {
+  border-color: var(--redesign-line);
+  background: var(--redesign-paper);
+  box-shadow: none;
+}
+
+.workspace-shell .eo-overview-demand-hero {
+  background: linear-gradient(
+    115deg,
+    var(--redesign-demand-start),
+    var(--redesign-demand-end)
+  );
+  border-color: var(--redesign-demand-border);
+  box-shadow: none;
+}
+
+.workspace-shell .dest-identity {
+  border-color: var(--redesign-line);
+  background: var(--redesign-paper);
+  box-shadow: none;
+}
+
+.workspace-shell :is(.eo-section, .admin-section, .dest-readiness) {
+  border-color: var(--redesign-line);
+  background: var(--redesign-paper);
+  box-shadow: none;
+}
+
+.workspace-shell :is(.eo-table-wrapper, .admin-table-wrapper) {
+  border-color: var(--redesign-line);
+  border-radius: var(--radius-lg);
+}
+
+.workspace-shell :is(.eo-table th, .admin-table th) {
+  background: var(--redesign-table-head);
+}
+
+.workspace-shell
+  :is(
+    .eo-stat-card,
+    .dest-stat-card,
+    .admin-queue-card,
+    .dest-quick-action-card
+  ) {
+  border-color: var(--redesign-line);
+  border-radius: var(--radius-lg);
+  background: var(--redesign-paper);
+  box-shadow: none;
+}
+
+.workspace-shell :is(.admin-table-wrapper, .dest-session-summary-card) {
+  border-color: var(--redesign-line);
+  border-radius: var(--radius-lg);
+  background: var(--redesign-paper);
+}
+
+.workspace-shell :is(.admin-table th, .dest-table th) {
+  background: var(--redesign-mist);
+}
+
+@media (max-width: 47.99rem) {
+  .traveler-app-shell .home-greeting-row {
+    min-height: 11rem;
+    padding: var(--space-5) 7rem var(--space-5) var(--space-5);
+    border-radius: 1.5rem;
+  }
+
+  .home-greeting-mascot {
+    right: -1.5rem;
+    bottom: -2rem;
+    width: 10rem;
+  }
+
+  .traveler-app-shell .home-hero-card__body {
+    padding: var(--space-5);
+  }
+
+  .traveler-app-shell .explore-header {
+    min-height: 11rem;
+    padding: var(--space-5) 7.25rem var(--space-5) var(--space-5);
+    border-radius: 1.5rem;
+  }
+
+  .explore-header__mascot {
+    right: -0.7rem;
+    bottom: -2.5rem;
+    width: 9rem;
+  }
+}
+
+@media (max-width: 22rem) {
+  .traveler-app-shell .home-greeting-row {
+    padding-right: 5rem;
+  }
+
+  .home-greeting-mascot {
+    right: -3rem;
+    opacity: 0.75;
+  }
+
+  .traveler-app-shell .explore-header {
+    padding-right: 5rem;
+  }
+
+  .explore-header__mascot {
+    right: -2.5rem;
+    opacity: 0.8;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .traveler-app-shell *,
+  .workspace-shell * {
+    scroll-behavior: auto;
+  }
+}

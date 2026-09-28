@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import PlanMascot from "../../assets/mascot/plan.png";
 import { useSearchParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import {
@@ -178,11 +179,22 @@ export function ExploreScreen({
     <div className="explore-container">
       {/* Page Header */}
       <header className="explore-header">
+        <span className="explore-header__eyebrow">
+          Cari ruang untuk bernapas
+        </span>
         <h1 className="explore-header__title">Jelajahi Experience</h1>
         <p className="explore-header__subtitle">
           Temukan wellness experience terkurasi dari destinasi lokal
           terverifikasi.
         </p>
+        <img
+          className="explore-header__mascot"
+          src={PlanMascot}
+          alt=""
+          aria-hidden="true"
+          width="535"
+          height="633"
+        />
       </header>
 
       {/* Controls row: Search + Filter & Sort Toolbar */}

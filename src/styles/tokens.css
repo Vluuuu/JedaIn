@@ -169,4 +169,36 @@
   --motion-normal: 180ms;
   --motion-slow: 280ms;
   --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Logged-in visual direction */
+  --redesign-canvas: #f5f3eb;
+  --redesign-paper: #fffefa;
+  --redesign-mist: #e8eee6;
+  --redesign-line: #dce4d8;
+  --redesign-ink: #1d352b;
+  --redesign-muted: #53665b;
+  --redesign-deep: #254b3d;
+  --redesign-deep-hover: #193d30;
+  --redesign-header-glass: rgb(255 254 250 / 94%);
+  --redesign-nav-glass: rgb(255 254 250 / 96%);
+  --redesign-shadow: 0 16px 42px rgb(32 62 45 / 8%);
+  --redesign-nav-shadow: 0 -8px 30px rgb(35 66 49 / 7%);
+  --redesign-hero-start: #244c3a;
+  --redesign-hero-end: #497356;
+  --redesign-hero-glow: rgb(218 233 177 / 30%);
+  --redesign-hero-ring: rgb(255 255 255 / 16%);
+  --redesign-hero-kicker: #e4eec5;
+  --redesign-hero-copy: #edf4e8;
+  --redesign-mascot-shadow: rgb(17 44 27 / 22%);
+  --redesign-explore-start: #e2eacd;
+  --redesign-explore-mid: #f0f1df;
+  --redesign-explore-end: #d8e5cb;
+  --redesign-explore-border: #d5e0c8;
+  --redesign-explore-shadow: rgb(51 81 47 / 15%);
+  --redesign-upcoming-bg: #edf3ea;
+  --redesign-upcoming-border: #cfddcb;
+  --redesign-table-head: #edf2e9;
+  --redesign-demand-start: #1e4032;
+  --redesign-demand-end: #3a6148;
+  --redesign-demand-border: #29513c;
 }

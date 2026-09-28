@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button, Skeleton } from "../../components/ui";
+import ExploreMascot from "../../assets/mascot/explore.png";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import {
   QUIZ_DEPARTURE_OPTIONS,
@@ -134,11 +135,20 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
       {/* 1. Greeting / App Header context */}
       <header className="home-greeting-row">
         <div className="home-greeting-content">
+          <span className="home-greeting-eyebrow">Waktunya menemukan jeda</span>
           <h1 className="home-greeting-title">{greetingText}</h1>
           <p className="home-greeting-subtitle">
             Mau jeda seperti apa hari ini?
           </p>
         </div>
+        <img
+          className="home-greeting-mascot"
+          src={ExploreMascot}
+          alt=""
+          aria-hidden="true"
+          width="520"
+          height="634"
+        />
       </header>
 
       {/* 2. Pending Payment Banner (conditional) */}

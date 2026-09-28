@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import ExploreMascot from "../../assets/mascot/explore.png";
 import {
   LOGIN_ATMOSPHERE_VISUAL,
   getPackageVisual,
@@ -184,6 +185,14 @@ export function RecommendationResultScreen({
       <div className="recommendation-screen__container">
         {/* Editorial Heading */}
         <header className="recommendation-header">
+          <img
+            className="recommendation-header__mascot"
+            src={ExploreMascot}
+            alt=""
+            aria-hidden="true"
+            width="520"
+            height="634"
+          />
           {isFallback ? (
             <>
               <h1 className="recommendation-header__title">

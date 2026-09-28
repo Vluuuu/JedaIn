@@ -1,10 +1,14 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { packageRepository } from "../../data/packageRepository";
+import { sessionRepository } from "../../data/sessionRepository";
 import { Badge, Button } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
 import { partnerSessionStore } from "./partnerSessionStore";
+import type { EoPackageRecord, EoSessionRecord } from "./types";
 import "./eo.css";
 
 export function EoOverviewScreen() {
@@ -13,15 +17,36 @@ export function EoOverviewScreen() {
   const eoId = partner?.id ?? "eo_jeda_alam";
   const organizerReviewRef = partner?.organizerReviewRef ?? "org_lereng_batu";
 
-  // EO Packages & derived metrics
-  const packages = mockEoPackageStore.getPackagesByEo(eoId);
+  // EO Packages & derived metrics (reactive state initialized with local cache)
+  const [packages, setPackages] = useState<EoPackageRecord[]>(() => [
+    ...mockEoPackageStore.getPackagesByEo(eoId),
+  ]);
+  const [sessions, setSessions] = useState<EoSessionRecord[]>(() => [
+    ...mockEoPackageStore.getSessionsByEo(eoId),
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      packageRepository.getPackagesByEo(eoId),
+      sessionRepository.getSessionsByEo(eoId),
+    ]).then(([pkgRes, sessRes]) => {
+      if (isMounted) {
+        setPackages(pkgRes);
+        setSessions(sessRes);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [eoId]);
+
   const livePackages = packages.filter((p) => p.status === "LIVE");
   const pendingPackage = packages.find(
     (p) => p.status === "PENDING_ADMIN_REVIEW",
   );
 
   // EO Sessions
-  const sessions = mockEoPackageStore.getSessionsByEo(eoId);
   const upcomingSessions = sessions.filter((s) => s.status === "OPEN");
 
   // Bookings strictly isolated to this EO's packages

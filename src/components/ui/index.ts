@@ -13,3 +13,4 @@ export {
   type InlineStatusProps,
   type StatusMetaProps,
 } from "./InlineStatus";
+export { DataModeNotice } from "./DataModeNotice";

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { destinationRepository } from "../../data/destinationRepository";
+import { packageRepository } from "../../data/packageRepository";
 import { Badge, Button, Dialog } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
@@ -52,8 +54,19 @@ export function EoPackageBuilderScreen() {
   );
 
   // Available data - Step 1 uses authoritative eligible destinations
-  const eligibleDestinations =
-    mockDestinationStore.getEligibleForEo(guideStatus);
+  const [eligibleDestinations, setEligibleDestinations] = useState<
+    DestinationRecord[]
+  >(() => [...mockDestinationStore.getEligibleForEo(guideStatus)]);
+
+  useEffect(() => {
+    let isMounted = true;
+    destinationRepository.getEligibleForEo(guideStatus).then((res) => {
+      if (isMounted) setEligibleDestinations(res);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [guideStatus]);
   const allInsights = mockInsightStore.getAllInsights();
   const pricingBudgetDistribution = mockInsightStore.getBudgetDistribution({
     period: "ALL",
@@ -355,7 +368,7 @@ export function EoPackageBuilderScreen() {
       ? selectedDestination.destinationId
       : "";
 
-    const res = mockEoPackageStore.saveDraft({
+    const draftPayload = {
       packageId,
       title,
       shortSummary,
@@ -381,9 +394,16 @@ export function EoPackageBuilderScreen() {
         eoMargin,
         customerPrice,
       },
-    });
-    if (res.success && res.package && !packageId) {
-      setPackageId(res.package.packageId);
+    };
+
+    const res = mockEoPackageStore.saveDraft(draftPayload);
+    if (res.success && res.package) {
+      if (!packageId) {
+        setPackageId(res.package.packageId);
+      }
+      packageRepository.saveDraft(draftPayload).catch((err) => {
+        console.warn("Async packageRepository.saveDraft failed:", err);
+      });
     }
     return res.package;
   };
@@ -470,7 +490,7 @@ export function EoPackageBuilderScreen() {
     setItinerary(updated);
   };
 
-  const handleSubmitForReview = () => {
+  const handleSubmitForReview = async () => {
     setIsSubmitting(true);
     setValidationErrors([]);
 
@@ -480,7 +500,7 @@ export function EoPackageBuilderScreen() {
       return;
     }
 
-    const res = mockEoPackageStore.submitForReview(savedPkg.packageId);
+    const res = await packageRepository.submitForReview(savedPkg.packageId);
     setIsSubmitting(false);
 
     if (res.success) {

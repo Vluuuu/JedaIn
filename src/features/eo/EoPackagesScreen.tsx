@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { packageRepository } from "../../data/packageRepository";
 import { Button, InlineStatus } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
+import { useRealtimeSubscription } from "../../lib/supabase/realtime";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { getHumanStatusLabel, getStatusBadgeTone } from "./packageHelpers";
@@ -31,7 +33,23 @@ export function EoPackagesScreen() {
   const [filterStatus, setFilterStatus] = useState<"ALL" | EoPackageStatus>(
     "ALL",
   );
-  const allPackages = mockEoPackageStore.getPackagesByEo(eoId);
+  const [allPackages, setAllPackages] = useState<EoPackageRecord[]>(() => [
+    ...mockEoPackageStore.getPackagesByEo(eoId),
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    packageRepository.getPackagesByEo(eoId).then((res) => {
+      if (isMounted) setAllPackages(res);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [eoId]);
+
+  useRealtimeSubscription("packages", () => {
+    packageRepository.getPackagesByEo(eoId).then(setAllPackages);
+  });
 
   const filteredPackages =
     filterStatus === "ALL"

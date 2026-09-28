@@ -991,4 +991,22 @@ export const mockEoPackageStore = {
       : undefined;
     return true;
   },
+
+  upsertPackage(record: EoPackageRecord): void {
+    const idx = packages.findIndex((p) => p.packageId === record.packageId);
+    if (idx >= 0) {
+      packages[idx] = clonePackage(record);
+    } else {
+      packages.push(clonePackage(record));
+    }
+  },
+
+  upsertSession(record: EoSessionRecord): void {
+    const idx = sessions.findIndex((s) => s.sessionId === record.sessionId);
+    if (idx >= 0) {
+      sessions[idx] = { ...record };
+    } else {
+      sessions.push({ ...record });
+    }
+  },
 };

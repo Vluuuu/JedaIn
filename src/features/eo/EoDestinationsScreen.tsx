@@ -1,15 +1,34 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { destinationRepository } from "../../data/destinationRepository";
 import { Button } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
+import { useRealtimeSubscription } from "../../lib/supabase/realtime";
 import { mockDestinationStore } from "./mockDestinationStore";
+import type { DestinationRecord } from "./types";
 import "./eo.css";
 
 export function EoDestinationsScreen() {
   const navigate = useNavigate();
   // EO catalog contains only active destinations that have passed the unified
   // JedaIn verification, including mandatory local-guide readiness.
-  const destinations = mockDestinationStore.getEligibleForEo();
+  const [destinations, setDestinations] = useState<DestinationRecord[]>(() => [
+    ...mockDestinationStore.getEligibleForEo(),
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    destinationRepository.getEligibleForEo().then((res) => {
+      if (isMounted) setDestinations(res);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useRealtimeSubscription("destinations", () => {
+    destinationRepository.getEligibleForEo().then(setDestinations);
+  });
 
   const [searchQuery, setSearchQuery] = useState("");
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Badge, Button, Skeleton } from "../../components/ui";
+import { Button, Skeleton } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import {
   QUIZ_DEPARTURE_OPTIONS,
@@ -197,11 +197,11 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
                 aria-hidden="true"
               />
               <div className="home-hero-card__visual-badges">
-                <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>
+                <span className="home-hero-card__signal">
                   {recMode === "FALLBACK"
                     ? "Pilihan terdekat"
                     : "Pilihan utama"}
-                </Badge>
+                </span>
               </div>
             </div>
             <div className="home-hero-card__body">

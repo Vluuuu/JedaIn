@@ -4610,3 +4610,194 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ==========================================================================
+   VISUAL PILOT — TO OVERVIEW
+   Creative operations workspace: flat metrics, one dark insight anchor,
+   quieter operational panels.
+   ========================================================================== */
+
+.eo-overview-container {
+  gap: var(--space-8);
+}
+
+.eo-overview-header {
+  padding-bottom: var(--space-2);
+  border-bottom: 0;
+}
+
+.eo-overview-header__main h1 {
+  font-size: var(--font-size-heading-xl);
+  line-height: var(--line-height-heading-xl);
+}
+
+.eo-overview-header__main p {
+  max-width: 62ch;
+}
+
+.eo-overview-metric-band {
+  padding: var(--space-5) 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.eo-overview-metric-label {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: var(--font-size-caption);
+}
+
+.eo-overview-attention {
+  padding: var(--space-3) 0 var(--space-3) var(--space-4);
+  background: transparent;
+  border: 0;
+  border-left: 2px solid var(--color-warning-solid);
+  border-radius: 0;
+}
+
+.eo-overview-attention__tag {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.eo-overview-demand-hero {
+  border: 0;
+  box-shadow: none;
+}
+
+.eo-overview-demand-hero__eyebrow {
+  letter-spacing: 0.04em;
+}
+
+.eo-overview-demand-hero__eyebrow-badge {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+}
+
+.eo-overview-panel {
+  padding: var(--space-5) 0 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-border-default);
+  border-radius: 0;
+}
+
+.eo-overview-panel__header {
+  padding-bottom: var(--space-2);
+  border-bottom: 0;
+}
+
+.eo-overview-panel__sub {
+  color: var(--color-text-muted);
+}
+
+.eo-overview-list-row {
+  padding-block: var(--space-4);
+}
+
+.eo-overview-empty {
+  padding: var(--space-5) 0;
+  text-align: left;
+}
+
+/* ==========================================================================
+   VISUAL PILOT V2 — BRANDED TO WORKSPACE
+   Make the role identity obvious: one branded header, one opportunity anchor,
+   then calm operational data.
+   ========================================================================== */
+
+.eo-overview-header {
+  padding: var(--space-8);
+  background:
+    radial-gradient(circle at 86% 10%, rgb(255 255 255 / 9%), transparent 32%),
+    var(--color-forest-950);
+  border-radius: var(--radius-2xl);
+  color: var(--color-stone-0);
+}
+
+.eo-overview-header__main h1 {
+  color: var(--color-stone-0);
+  font-size: var(--font-size-heading-xl);
+  line-height: var(--line-height-heading-xl);
+}
+
+.eo-overview-header__main p {
+  color: var(--color-forest-100);
+}
+
+.eo-overview-header .ui-button,
+.eo-overview-header button {
+  box-shadow: none;
+}
+
+.eo-overview-metric-band {
+  margin-top: calc(var(--space-5) * -1);
+  width: calc(100% - var(--space-8));
+  align-self: center;
+  position: relative;
+  z-index: 2;
+  padding: var(--space-5) var(--space-3);
+  background: var(--color-stone-0);
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.eo-overview-metric-value {
+  color: var(--color-forest-900);
+}
+
+.eo-overview-attention {
+  max-width: 100%;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-left: 4px solid var(--color-warning-solid);
+  border-radius: var(--radius-lg);
+}
+
+.eo-overview-demand-hero {
+  padding: var(--space-8);
+  border-radius: var(--radius-2xl);
+  background:
+    radial-gradient(circle at 92% 8%, rgb(255 255 255 / 10%), transparent 30%),
+    var(--color-forest-900);
+}
+
+.eo-overview-demand-hero__headline h2 {
+  max-width: 22ch;
+  font-size: var(--font-size-heading-xl);
+  line-height: 1.1;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.eo-overview-ops-grid {
+  gap: var(--space-8);
+}
+
+.eo-overview-panel {
+  padding-top: var(--space-6);
+}
+
+.eo-overview-panel__header h2 {
+  font-size: var(--font-size-heading-md);
+}
+
+@media (max-width: 48rem) {
+  .eo-overview-header {
+    padding: var(--space-6);
+  }
+
+  .eo-overview-metric-band {
+    margin-top: calc(var(--space-4) * -1);
+    width: calc(100% - var(--space-4));
+  }
+}

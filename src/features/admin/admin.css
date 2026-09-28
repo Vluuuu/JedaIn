@@ -415,8 +415,11 @@
 
 .admin-page-header {
   padding: var(--space-8);
-  background:
-    linear-gradient(135deg, var(--color-forest-950), var(--color-forest-900));
+  background: linear-gradient(
+    135deg,
+    var(--color-forest-950),
+    var(--color-forest-900)
+  );
   border-radius: var(--radius-2xl);
   color: var(--color-stone-0);
 }

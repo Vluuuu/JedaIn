@@ -1599,7 +1599,7 @@
    ========================================================================== */
 
 .dest-overview {
-  gap: var(--space-7);
+  gap: var(--space-8);
 }
 
 .dest-identity {
@@ -1660,7 +1660,7 @@
   background: transparent;
   border: 0;
   border-radius: 0;
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
 }
 
 .dest-readiness {
@@ -1707,7 +1707,7 @@
   color: var(--color-forest-100);
   background: transparent;
   border-radius: 0;
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
 }
 
 .dest-partners__list li + li::before {

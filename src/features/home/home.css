@@ -1032,7 +1032,7 @@
   border: 0;
   border-radius: 0;
   font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
 }
 
 .home-hero-card__chip svg {
@@ -1110,6 +1110,6 @@
   }
 
   .home-hero-card__body {
-    padding: var(--space-7);
+    padding: var(--space-8);
   }
 }

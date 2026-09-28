@@ -1336,3 +1336,162 @@
   border: 0;
   border-radius: 0;
 }
+
+/* ==========================================================================
+   VISUAL PILOT V2 — EDITORIAL DETAIL
+   A deliberate magazine-like composition with a large hero and an overlapping
+   decision panel for title, value, and price.
+   ========================================================================== */
+
+.package-detail-container {
+  max-width: 76rem;
+}
+
+.package-detail-context {
+  padding-inline: var(--space-4);
+}
+
+.package-detail-hero {
+  min-height: 24rem;
+  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+}
+
+.package-detail-main {
+  position: relative;
+  gap: var(--space-10);
+  padding-inline: var(--space-4);
+}
+
+.package-detail-header-card {
+  width: min(66rem, calc(100% - var(--space-4)));
+  margin: -5.5rem auto 0;
+  padding: var(--space-6);
+  position: relative;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "meta price"
+    "title price"
+    "value value";
+  gap: var(--space-3) var(--space-8);
+  background: color-mix(in srgb, var(--color-stone-0) 96%, transparent);
+  border: 1px solid rgb(255 255 255 / 65%);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+}
+
+.package-detail-meta-row {
+  grid-area: meta;
+  align-self: end;
+}
+
+.package-detail-title {
+  grid-area: title;
+  max-width: 18ch;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.package-detail-price-badge {
+  grid-area: price;
+  align-self: center;
+  min-width: 11rem;
+  padding-left: var(--space-6);
+  border-left: 1px solid var(--color-stone-200);
+}
+
+.package-detail-price-label {
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.package-detail-price-amount {
+  display: block;
+  font-size: var(--font-size-heading-lg);
+  line-height: var(--line-height-heading-lg);
+}
+
+.package-detail-value-prop {
+  grid-area: value;
+  max-width: 62ch;
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-stone-200);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-md);
+}
+
+.package-detail-personalized-box {
+  max-width: 64rem;
+  margin-inline: auto;
+}
+
+.package-detail-section--primary,
+.package-detail-secondary,
+.package-detail-gallery {
+  max-width: 64rem;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.package-detail-section__title {
+  font-size: var(--font-size-heading-md);
+  line-height: var(--line-height-heading-md);
+}
+
+.package-detail-highlights-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-8);
+}
+
+.package-detail-highlight-item {
+  padding-block: var(--space-3);
+}
+
+.package-detail-session-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.package-detail-disclosure__summary {
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+@media (min-width: 768px) {
+  .package-detail-hero {
+    min-height: 31rem;
+    border-radius: var(--radius-2xl);
+    margin-inline: var(--space-6);
+    width: calc(100% - (var(--space-6) * 2));
+  }
+}
+
+@media (max-width: 680px) {
+  .package-detail-header-card {
+    margin-top: -3.5rem;
+    padding: var(--space-5);
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "meta"
+      "title"
+      "price"
+      "value";
+  }
+
+  .package-detail-price-badge {
+    padding: var(--space-3) 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--color-stone-200);
+  }
+
+  .package-detail-highlights-list {
+    grid-template-columns: 1fr;
+  }
+}

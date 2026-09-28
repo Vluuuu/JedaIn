@@ -470,13 +470,23 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
       "/packages/slow_green_day",
     );
 
-    // Top dual trust cards
-    expect(view.textContent).toContain("Destinasi");
-    expect(view.textContent).toContain("★ 5.0 · 1 ulasan destinasi");
-    expect(view.textContent).toContain("Travel Organizer");
-    expect(view.textContent).toContain("★ 4.0 · 1 ulasan pascatrip");
+    expect(view.querySelector(".package-detail-trust-cards")).toBeNull();
+    const destinationSection = view.querySelector(
+      '[aria-labelledby="dest-trust-heading"]',
+    );
+    const organizerSection = view.querySelector(
+      '[aria-labelledby="organizer-heading"]',
+    );
+    expect(destinationSection?.textContent).toContain(
+      "★ 5.0 · 1 ulasan destinasi",
+    );
+    expect(destinationSection?.textContent).not.toContain("ulasan pascatrip");
+    expect(organizerSection?.textContent).toContain(
+      "★ 4.0 · 1 ulasan pascatrip",
+    );
+    expect(organizerSection?.textContent).not.toContain("ulasan destinasi");
 
-    // Detailed section below: clean, no duplicate ratings, no technical badge explanation
+    // Separate review domains and existing trust explanations remain intact.
     expect(view.textContent).toContain(
       "Destinasi ini telah melalui proses verifikasi JedaIn.",
     );

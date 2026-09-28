@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Badge } from "../../components/ui";
+import { InlineStatus } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import type { EoSessionStatus } from "../eo/types";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
@@ -201,9 +201,8 @@ export function DestinationOverviewScreen() {
         <section className="dest-readiness" aria-labelledby="dest-status-title">
           <div className="dest-readiness__header">
             <div className="dest-readiness__status-meta">
-              <span className="dest-readiness__status-badge">
-                Status: Aktif
-              </span>
+              <span>Status destinasi · </span>
+              <InlineStatus tone="success">Aktif</InlineStatus>
             </div>
             <div className="dest-readiness__title-block">
               <h2 id="dest-status-title" className="dest-readiness__title">
@@ -403,12 +402,9 @@ export function DestinationOverviewScreen() {
                   </div>
 
                   <div className="dest-session-row__status">
-                    <Badge
-                      tone={statusTones[session.status]}
-                      showSymbol={false}
-                    >
+                    <InlineStatus tone={statusTones[session.status]}>
                       {destinationSessionStatusLabels[session.status]}
-                    </Badge>
+                    </InlineStatus>
                     <span>Alokasi sesi {session.capacity} orang</span>
                   </div>
                 </article>

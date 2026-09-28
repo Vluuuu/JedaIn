@@ -1,4 +1,4 @@
-import { Badge } from "../../components/ui";
+import { InlineStatus } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import { mockEoPackageStore } from "./mockEoPackageStore";
@@ -21,10 +21,7 @@ export function EoBookingsScreen() {
     <div className="eo-container">
       <header className="eo-page-header">
         <div>
-          <Badge tone="info">Operasional Pemesanan</Badge>
-          <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Daftar Booking & Peserta
-          </h1>
+          <h1 className="eo-page-title">Daftar Booking & Peserta</h1>
           <p className="eo-page-subtitle">
             Pantau status transaksi traveler, jadwal sesi keberangkatan, dan
             kesiapan operasional peserta.
@@ -109,7 +106,7 @@ export function EoBookingsScreen() {
                       </td>
                       <td>Rp{b.totalAmount.toLocaleString("id-ID")}</td>
                       <td>
-                        <Badge
+                        <InlineStatus
                           tone={
                             isPaid
                               ? "success"
@@ -122,8 +119,12 @@ export function EoBookingsScreen() {
                             ? "Terkonfirmasi"
                             : b.status === "PENDING_PAYMENT"
                               ? "Menunggu Bayar"
-                              : b.status}
-                        </Badge>
+                              : b.status === "COMPLETED"
+                                ? "Selesai"
+                                : b.status === "CANCELLED"
+                                  ? "Dibatalkan"
+                                  : "Kedaluwarsa"}
+                        </InlineStatus>
                       </td>
                       <td>
                         {new Date(b.createdAt).toLocaleDateString("id-ID")}

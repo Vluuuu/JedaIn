@@ -741,7 +741,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const pendingView = await renderComponent(
         createElement(DestinationVerificationStatusScreen),
       );
-      expect(pendingView.textContent).toContain("Menunggu Verifikasi Admin");
+      expect(pendingView.textContent).toContain("Menunggu verifikasi Admin");
 
       // Rejected
       partnerSessionStore.setPartner({
@@ -756,7 +756,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const rejView = await renderComponent(
         createElement(DestinationVerificationStatusScreen),
       );
-      expect(rejView.textContent).toContain("Perlu Perbaikan");
+      expect(rejView.textContent).toContain("Perlu perbaikan");
       expect(rejView.textContent).toContain(
         "Akses evakuasi darurat belum memadai",
       );
@@ -774,11 +774,11 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const view = await renderComponent(
         createElement(DestinationVerificationStatusScreen),
       );
-      expect(view.textContent).toContain("Belum Ada Pengajuan");
+      expect(view.textContent).toContain("Belum ada pengajuan");
       expect(view.textContent).toContain(
         "Belum Ada Formulir Pengajuan Verifikasi",
       );
-      expect(view.textContent).not.toContain("Menunggu Verifikasi Admin");
+      expect(view.textContent).not.toContain("Menunggu verifikasi Admin");
     });
 
     it("S. UI reapply pre-populates existing application data", async () => {
@@ -953,7 +953,12 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).toContain(
         "Profil destinasi siap digunakan Travel Organizer",
       );
-      expect(view.textContent).toContain("Status: Aktif");
+      expect(
+        view.querySelector(".dest-readiness__status-meta")?.textContent,
+      ).toContain("Aktif");
+      expect(
+        view.querySelector(".dest-readiness__status-meta .ui-badge"),
+      ).toBeNull();
       expect(view.textContent).not.toContain("Guide Ready ✓");
       expect(view.textContent).not.toContain("Non-Guide Ready");
       expect(view.textContent).not.toContain("Tanpa Guide Lokal");

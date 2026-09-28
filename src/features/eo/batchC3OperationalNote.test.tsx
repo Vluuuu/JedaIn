@@ -80,7 +80,7 @@ describe("Batch C3 — Latest Operational Update (P1-M04)", () => {
 
     expect(view.textContent).toContain("Diperbarui: 10 Agu 2026");
     expect(view.textContent).not.toContain("Dikonfirmasi");
-    expect(view.textContent).not.toContain("Disetujui");
+    expect(view.textContent).not.toContain("Catatan Disetujui");
     expect(view.textContent).not.toContain("Konfirmasi Operasional");
     expect(view.textContent).not.toContain("Persetujuan Operasional");
     expect(view.textContent).not.toContain("Session Readiness");

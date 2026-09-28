@@ -91,8 +91,13 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
       expect(view.textContent).toContain(label);
     }
 
-    // 3. Status Mitra is not a large redundant hero card, but subtle Status: Aktif
-    expect(view.textContent).toContain("Status: Aktif");
+    // 3. Status Mitra is plain inline metadata.
+    expect(
+      view.querySelector(".dest-readiness__status-meta")?.textContent,
+    ).toContain("Aktif");
+    expect(
+      view.querySelector(".dest-readiness__status-meta .ui-badge"),
+    ).toBeNull();
     expect(view.textContent).toContain(
       "Profil destinasi siap digunakan Travel Organizer",
     );
@@ -125,7 +130,15 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
     );
     expect(badgeView.textContent).not.toContain("Pemandu lokal tersedia");
     expect(badgeView.textContent).toContain("Status Destinasi");
-    expect(badgeView.textContent).toContain("Status pengajuan: Disetujui");
+    expect(
+      badgeView.querySelector(".dest-verification-single__app-status")
+        ?.textContent,
+    ).toContain("Disetujui");
+    expect(
+      badgeView.querySelector(
+        ".dest-verification-single__app-status .inline-status",
+      ),
+    ).not.toBeNull();
     expect(badgeView.textContent).toContain(
       "Destinasi Anda telah disetujui dan dapat digunakan EO untuk merancang experience.",
     );

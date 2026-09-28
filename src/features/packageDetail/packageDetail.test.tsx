@@ -104,7 +104,13 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
 
   it("F5.1 organizer rating stays truthful: zero state first, runtime post-trip aggregate when available", async () => {
     let view = await renderPackageDetail("slow_green_day");
-    expect(view.textContent).toContain("Belum ada ulasan pascatrip");
+    expect(view.querySelector(".package-detail-trust-cards")).toBeNull();
+    expect(
+      view.querySelector('[aria-labelledby="dest-trust-heading"]')?.textContent,
+    ).toContain("Belum ada ulasan destinasi.");
+    expect(
+      view.querySelector('[aria-labelledby="organizer-heading"]')?.textContent,
+    ).toContain("Belum ada ulasan pascatrip.");
 
     await act(async () => {
       root.unmount();
@@ -129,7 +135,12 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     });
 
     view = await renderPackageDetail("slow_green_day");
-    expect(view.textContent).toContain("★ 4.5 · 2 ulasan pascatrip");
+    expect(
+      view.querySelector('[aria-labelledby="organizer-heading"]')?.textContent,
+    ).toContain("★ 4.5 · 2 ulasan pascatrip");
+    expect(
+      view.querySelector('[aria-labelledby="dest-trust-heading"]')?.textContent,
+    ).toContain("Belum ada ulasan destinasi.");
   });
 
   it.each([

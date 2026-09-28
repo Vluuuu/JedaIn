@@ -198,60 +198,6 @@ export function PackageDetailScreen({
           <p className="package-detail-value-prop">{detail.valueProposition}</p>
         </section>
 
-        {/* Dual Trust Identity: Destinasi & Travel Organizer */}
-        <section
-          className="package-detail-trust-cards"
-          aria-label="Identitas Destinasi dan Travel Organizer"
-        >
-          {/* Destinasi */}
-          <div className="package-detail-trust-card">
-            <span className="package-detail-trust-card__badge">Destinasi</span>
-            <h3 className="package-detail-trust-card__name">
-              {pkg.destinationName}
-            </h3>
-            <p className="package-detail-trust-card__claim">
-              Destinasi ini telah melalui proses verifikasi JedaIn.
-            </p>
-            <div className="package-detail-trust-card__rating">
-              {destinationReviewSummary ? (
-                <span>
-                  ★ {destinationReviewSummary.averageRating.toFixed(1)} ·{" "}
-                  {destinationReviewSummary.reviewCount} ulasan destinasi
-                </span>
-              ) : (
-                <span className="package-detail-trust-card__rating--empty">
-                  Belum ada ulasan destinasi.
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Travel Organizer */}
-          <div className="package-detail-trust-card">
-            <span className="package-detail-trust-card__badge">
-              Travel Organizer
-            </span>
-            <h3 className="package-detail-trust-card__name">
-              {detail.organizer.displayName}
-            </h3>
-            <p className="package-detail-trust-card__claim">
-              Travel Organizer JedaIn
-            </p>
-            <div className="package-detail-trust-card__rating">
-              {organizerReviewSummary ? (
-                <span>
-                  ★ {organizerReviewSummary.averageRating.toFixed(1)} ·{" "}
-                  {organizerReviewSummary.reviewCount} ulasan pascatrip
-                </span>
-              ) : (
-                <span className="package-detail-trust-card__rating--empty">
-                  Belum ada ulasan pascatrip.
-                </span>
-              )}
-            </div>
-          </div>
-        </section>
-
         {/* 3. Optional Personalized Match Explanation */}
         {personalizedContext && personalizedContext.reasons.length > 0 && (
           <section
@@ -431,6 +377,11 @@ export function PackageDetailScreen({
                     <p className="package-detail-section__subtitle">
                       {pkg.locationLabel}
                     </p>
+                    <p className="package-detail-identity-rating">
+                      {destinationReviewSummary
+                        ? `★ ${destinationReviewSummary.averageRating.toFixed(1)} · ${destinationReviewSummary.reviewCount} ulasan destinasi`
+                        : "Belum ada ulasan destinasi."}
+                    </p>
                   </div>
                 </div>
                 <p className="package-detail-editorial-text">
@@ -479,6 +430,11 @@ export function PackageDetailScreen({
                         {detail.organizer.roleDescription}
                       </p>
                     )}
+                    <p className="package-detail-identity-rating">
+                      {organizerReviewSummary
+                        ? `★ ${organizerReviewSummary.averageRating.toFixed(1)} · ${organizerReviewSummary.reviewCount} ulasan pascatrip`
+                        : "Belum ada ulasan pascatrip."}
+                    </p>
                   </div>
                 </div>
                 {detail.organizer.bioSummary && (

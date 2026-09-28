@@ -1,4 +1,3 @@
-import { Badge } from "../../components/ui";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import {
   getDestinationReviewTargetRef,
@@ -42,13 +41,7 @@ export function DestinationReviewsScreen() {
     <div className="dest-container">
       <header className="dest-page-header">
         <div>
-          <Badge tone="info">Evaluasi Kualitas Kawasan</Badge>
-          <h1
-            className="dest-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
-            Ulasan & Rating Destinasi
-          </h1>
+          <h1 className="dest-page-title">Ulasan & Rating Destinasi</h1>
           <p className="dest-page-subtitle">
             Ulasan traveler terpisah mengenai keindahan alam, ketenangan,
             kebersihan, dan fasilitas kawasan Anda.

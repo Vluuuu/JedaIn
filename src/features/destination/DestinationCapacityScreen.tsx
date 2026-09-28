@@ -1,4 +1,3 @@
-import { Badge } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
@@ -40,11 +39,7 @@ export function DestinationCapacityScreen() {
     <div className="dest-container">
       <header className="dest-page-header">
         <div>
-          <Badge tone="info">Pengawasan Kapasitas Kawasan</Badge>
-          <h1
-            className="dest-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
+          <h1 className="dest-page-title">
             Kapasitas & Alokasi Pengunjung Venue
           </h1>
           <p className="dest-page-subtitle">
@@ -234,9 +229,9 @@ export function DestinationCapacityScreen() {
                         </div>
                       </td>
                       <td>
-                        <Badge tone="neutral">
+                        <span className="dest-capacity-headroom">
                           Selisih operasional: {headroom} orang
-                        </Badge>
+                        </span>
                         <div
                           style={{
                             fontSize: "var(--font-size-caption)",

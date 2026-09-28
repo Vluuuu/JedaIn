@@ -1,0 +1,30 @@
+.inline-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.inline-status__dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--color-stone-400);
+}
+
+.inline-status--success .inline-status__dot {
+  background: var(--color-forest-700);
+}
+
+.inline-status--warning .inline-status__dot {
+  background: var(--color-warning-text);
+}
+
+.inline-status--danger .inline-status__dot {
+  background: var(--color-danger-text);
+}

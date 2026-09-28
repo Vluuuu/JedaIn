@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { Button, InlineStatus } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
@@ -415,9 +415,9 @@ export function EoPackagesScreen() {
                       </div>
 
                       <div className="eo-pkg-card__status-col">
-                        <Badge tone={getStatusBadgeTone(pkg.status)}>
+                        <InlineStatus tone={getStatusBadgeTone(pkg.status)}>
                           {getHumanStatusLabel(pkg.status)}
-                        </Badge>
+                        </InlineStatus>
                         {renderStatusContext(pkg)}
                       </div>
                     </div>

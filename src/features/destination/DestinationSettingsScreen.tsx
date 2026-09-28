@@ -1,4 +1,3 @@
-import { Badge } from "../../components/ui";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
@@ -21,13 +20,7 @@ export function DestinationSettingsScreen() {
     <div className="dest-container" style={{ maxWidth: "800px" }}>
       <header className="dest-page-header">
         <div>
-          <Badge tone="info">Pengaturan Akun & Kemitraan</Badge>
-          <h1
-            className="dest-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
-            Profil Kemitraan Destinasi
-          </h1>
+          <h1 className="dest-page-title">Profil Kemitraan Destinasi</h1>
           <p className="dest-page-subtitle">
             Informasi entitas pengelola, penanggung jawab operasional, dan
             status relasi kemitraan JedaIn.

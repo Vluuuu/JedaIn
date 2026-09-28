@@ -436,18 +436,20 @@
 .dest-readiness__status-meta {
   display: flex;
   align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
 }
 
-.dest-readiness__status-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-forest-700);
-  background: var(--color-forest-50);
-  border: 1px solid var(--color-forest-200);
-  padding: 0.125rem 0.5rem;
-  border-radius: var(--radius-full);
+.dest-verification-status-line {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+}
+
+.dest-capacity-headroom {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
 }
 
 .dest-readiness__title {
@@ -691,7 +693,7 @@
 
 .dest-session-row__date span,
 .dest-session-row__experience p,
-.dest-session-row__status > span,
+.dest-session-row__status > span:not(.inline-status),
 .dest-session-row__capacity-note {
   margin: 0;
   color: var(--color-text-muted);
@@ -1399,13 +1401,11 @@
 }
 
 .dest-verification-single__app-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-forest-700);
-  background: var(--color-forest-50);
-  border: 1px solid var(--color-forest-200);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
 }
 
 /* Facility media upload and grouped presentation */

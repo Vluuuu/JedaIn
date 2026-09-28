@@ -1,5 +1,6 @@
 import { Fragment, useState } from "react";
-import { Badge, Button } from "../../components/ui";
+import { Button, InlineStatus } from "../../components/ui";
+import { destinationSessionStatusLabels } from "./destinationOverviewData";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
@@ -46,13 +47,7 @@ export function DestinationScheduleScreen() {
     <div className="dest-container">
       <header className="dest-page-header">
         <div>
-          <Badge tone="info">Jadwal Operasional Venue</Badge>
-          <h1
-            className="dest-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
-            Jadwal Sesi Perjalanan di Lokasi
-          </h1>
+          <h1 className="dest-page-title">Jadwal Sesi Perjalanan di Lokasi</h1>
           <p className="dest-page-subtitle">
             Daftar sesi perjalanan yang diselenggarakan oleh mitra Travel
             Organizer di kawasan {destination?.name ?? "Anda"} (Read-Only).
@@ -159,17 +154,19 @@ export function DestinationScheduleScreen() {
                           </div>
                         </td>
                         <td>
-                          <Badge
+                          <InlineStatus
                             tone={
                               s.status === "OPEN"
                                 ? "success"
                                 : s.status === "FULL"
                                   ? "warning"
-                                  : "neutral"
+                                  : s.status === "CANCELLED"
+                                    ? "danger"
+                                    : "neutral"
                             }
                           >
-                            {s.status}
-                          </Badge>
+                            {destinationSessionStatusLabels[s.status]}
+                          </InlineStatus>
                         </td>
                         <td>
                           <Button
@@ -260,7 +257,7 @@ export function DestinationScheduleScreen() {
                                     Status Sesi
                                   </span>
                                   <strong className="dest-session-summary-val">
-                                    {s.status}
+                                    {destinationSessionStatusLabels[s.status]}
                                   </strong>
                                 </div>
 

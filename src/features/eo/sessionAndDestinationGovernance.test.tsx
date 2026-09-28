@@ -597,7 +597,7 @@ describe("F5.2 — EO Destination Discovery & Builder Clarity", () => {
     });
 
     expect(view.textContent).toContain(
-      "Sesi baru hanya dapat dibuat setelah paket APPROVED atau LIVE",
+      "Sesi baru hanya dapat dibuat setelah paket Disetujui atau Live",
     );
     expect(
       view.querySelector<HTMLButtonElement>(".eo-action-spotlight__btn")

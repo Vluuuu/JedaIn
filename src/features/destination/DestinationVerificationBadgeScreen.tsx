@@ -1,3 +1,4 @@
+import { InlineStatus } from "../../components/ui";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import "./destination.css";
 
@@ -19,12 +20,7 @@ export function DestinationVerificationBadgeScreen() {
     <div className="dest-container" style={{ maxWidth: "760px" }}>
       <header className="dest-page-header">
         <div>
-          <h1
-            className="dest-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
-            Status Destinasi
-          </h1>
+          <h1 className="dest-page-title">Status Destinasi</h1>
           <p className="dest-page-subtitle">
             Destinasi Anda telah disetujui dan dapat digunakan EO untuk
             merancang experience.
@@ -45,7 +41,8 @@ export function DestinationVerificationBadgeScreen() {
               <h2>Aktif sebagai Mitra Destinasi JedaIn</h2>
             </div>
             <span className="dest-verification-single__app-status">
-              Status pengajuan: Disetujui
+              Status pengajuan ·{" "}
+              <InlineStatus tone="success">Disetujui</InlineStatus>
             </span>
           </div>
 

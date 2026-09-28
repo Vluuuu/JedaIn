@@ -2063,6 +2063,11 @@
   flex-shrink: 0;
 }
 
+.eo-session-slots {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+}
+
 .eo-pkg-card__status-context {
   display: flex;
   flex-direction: column;

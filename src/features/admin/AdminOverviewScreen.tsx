@@ -153,13 +153,17 @@ export function AdminOverviewScreen() {
 
         <div className="admin-overview-stats">
           <div className="admin-overview-stat">
-            <span className="admin-overview-stat__label">Sesi Aktif Terbuka</span>
+            <span className="admin-overview-stat__label">
+              Sesi Aktif Terbuka
+            </span>
             <strong>{openSessionsCount}</strong>
             <small>Tersedia untuk traveler</small>
           </div>
 
           <div className="admin-overview-stat">
-            <span className="admin-overview-stat__label">Transaksi Terbayar</span>
+            <span className="admin-overview-stat__label">
+              Transaksi Terbayar
+            </span>
             <strong>{paidBookingsCount}</strong>
             <small>Terkonfirmasi & selesai</small>
           </div>

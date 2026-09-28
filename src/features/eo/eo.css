@@ -4610,3 +4610,100 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ==========================================================================
+   VISUAL PILOT — TO OVERVIEW
+   Creative operations workspace: flat metrics, one dark insight anchor,
+   quieter operational panels.
+   ========================================================================== */
+
+.eo-overview-container {
+  gap: var(--space-7);
+}
+
+.eo-overview-header {
+  padding-bottom: var(--space-2);
+  border-bottom: 0;
+}
+
+.eo-overview-header__main h1 {
+  font-size: var(--font-size-heading-xl);
+  line-height: var(--line-height-heading-xl);
+}
+
+.eo-overview-header__main p {
+  max-width: 62ch;
+}
+
+.eo-overview-metric-band {
+  padding: var(--space-5) 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.eo-overview-metric-label {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: var(--font-size-caption);
+}
+
+.eo-overview-attention {
+  padding: var(--space-3) 0 var(--space-3) var(--space-4);
+  background: transparent;
+  border: 0;
+  border-left: 2px solid var(--color-warning-solid);
+  border-radius: 0;
+}
+
+.eo-overview-attention__tag {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.eo-overview-demand-hero {
+  border: 0;
+  box-shadow: none;
+}
+
+.eo-overview-demand-hero__eyebrow {
+  letter-spacing: 0.04em;
+}
+
+.eo-overview-demand-hero__eyebrow-badge {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+}
+
+.eo-overview-panel {
+  padding: var(--space-5) 0 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-border-default);
+  border-radius: 0;
+}
+
+.eo-overview-panel__header {
+  padding-bottom: var(--space-2);
+  border-bottom: 0;
+}
+
+.eo-overview-panel__sub {
+  color: var(--color-text-muted);
+}
+
+.eo-overview-list-row {
+  padding-block: var(--space-4);
+}
+
+.eo-overview-empty {
+  padding: var(--space-5) 0;
+  text-align: left;
+}

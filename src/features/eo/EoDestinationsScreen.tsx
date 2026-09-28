@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { Button } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import "./eo.css";
@@ -12,18 +12,10 @@ export function EoDestinationsScreen() {
   const destinations = mockDestinationStore.getEligibleForEo();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [levelFilter, setLevelFilter] = useState<"ALL" | "BASIC" | "PLUS">(
-    "ALL",
-  );
 
   const filteredDestinations = useMemo(() => {
     return destinations.filter((dest) => {
       if (dest.status !== "ACTIVE") return false;
-
-      // Filter verification level
-      if (levelFilter !== "ALL" && dest.verificationLevel !== levelFilter) {
-        return false;
-      }
 
       // Search matching name, city, locationLabel
       if (searchQuery.trim()) {
@@ -36,7 +28,7 @@ export function EoDestinationsScreen() {
 
       return true;
     });
-  }, [destinations, levelFilter, searchQuery]);
+  }, [destinations, searchQuery]);
 
   return (
     <div className="eo-destinations-container">
@@ -63,36 +55,6 @@ export function EoDestinationsScreen() {
             aria-label="Cari destinasi"
           />
         </div>
-
-        <div className="eo-destinations-filter-chips" role="tablist">
-          <button
-            type="button"
-            className={`eo-dest-chip ${levelFilter === "ALL" ? "eo-dest-chip--active" : ""}`}
-            onClick={() => setLevelFilter("ALL")}
-            role="tab"
-            aria-selected={levelFilter === "ALL"}
-          >
-            Semua
-          </button>
-          <button
-            type="button"
-            className={`eo-dest-chip ${levelFilter === "PLUS" ? "eo-dest-chip--active" : ""}`}
-            onClick={() => setLevelFilter("PLUS")}
-            role="tab"
-            aria-selected={levelFilter === "PLUS"}
-          >
-            Terverifikasi Plus
-          </button>
-          <button
-            type="button"
-            className={`eo-dest-chip ${levelFilter === "BASIC" ? "eo-dest-chip--active" : ""}`}
-            onClick={() => setLevelFilter("BASIC")}
-            role="tab"
-            aria-selected={levelFilter === "BASIC"}
-          >
-            Terverifikasi Dasar
-          </button>
-        </div>
       </div>
 
       {/* 3. Destination Cards Grid */}
@@ -109,7 +71,6 @@ export function EoDestinationsScreen() {
               size="sm"
               onClick={() => {
                 setSearchQuery("");
-                setLevelFilter("ALL");
               }}
             >
               Reset Filter
@@ -135,19 +96,6 @@ export function EoDestinationsScreen() {
                 <div className="eo-dest-card__header-info">
                   <h2 className="eo-dest-card__title">{dest.name}</h2>
 
-                  <div className="eo-dest-card__meta-badges">
-                    <Badge
-                      tone={
-                        dest.verificationLevel === "PLUS" ? "info" : "success"
-                      }
-                      showSymbol={false}
-                    >
-                      {dest.verificationLevel === "PLUS"
-                        ? "Terverifikasi Plus"
-                        : "Terverifikasi Dasar"}
-                    </Badge>
-                  </div>
-
                   <p className="eo-dest-card__location">{dest.locationLabel}</p>
                   <p className="eo-dest-card__desc">{dest.description}</p>
 
@@ -169,7 +117,7 @@ export function EoDestinationsScreen() {
                   </span>
                   <span className="eo-dest-card__capacity-hint">
                     Kapasitas umum destinasi per sesi, bukan kuota otomatis per
-                    paket EO.
+                    paket Travel Organizer.
                   </span>
                 </div>
 
@@ -183,6 +131,13 @@ export function EoDestinationsScreen() {
                       Rp{dest.baseCostPerPerson.toLocaleString("id-ID")}
                       <small> / orang</small>
                     </strong>
+                    <span>
+                      Tarif pemandu lokal: Rp
+                      {(dest.localGuideFeePerPerson ?? 0).toLocaleString(
+                        "id-ID",
+                      )}{" "}
+                      / orang
+                    </span>
                   </div>
 
                   <div className="eo-dest-card__actions">

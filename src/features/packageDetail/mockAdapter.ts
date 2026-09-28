@@ -1,4 +1,5 @@
 import { prototypeClock } from "../../lib/clock";
+import { resolveDestinationReviewRef } from "../identity/identityResolvers";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
@@ -115,6 +116,18 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
           }
         : undefined;
 
+    const destRef = resolveDestinationReviewRef(pkg.destinationName);
+    const destReviews = mockReviewStore.getReviewsForDestination(destRef);
+    const destinationReviewSummary =
+      destReviews.length > 0
+        ? {
+            averageRating:
+              destReviews.reduce((sum, review) => sum + review.rating, 0) /
+              destReviews.length,
+            reviewCount: destReviews.length,
+          }
+        : undefined;
+
     return {
       state: "READY",
       package: pkg,
@@ -124,6 +137,7 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
       },
       hasOpenSession,
       organizerReviewSummary,
+      destinationReviewSummary,
       personalizedContext: options?.personalizedContext,
     };
   }

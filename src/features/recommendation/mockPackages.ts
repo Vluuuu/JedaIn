@@ -15,7 +15,7 @@ export const MOCK_RECOMMENDATION_PACKAGES: PackageRecommendationSource[] = [
     visualAsset: "/assets/packages/slow_green_day.jpg",
     status: "LIVE",
     verificationLevel: "BASIC",
-    pricePerPerson: 275000,
+    pricePerPerson: 300000,
     durationType: "FULL_DAY",
     departureAreas: ["MALANG"],
     experienceIntents: ["RECHARGE", "NATURE", "REFLECTION"],

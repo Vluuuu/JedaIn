@@ -1,5 +1,9 @@
 # JedaIn — UI Specification
 
+## Kontrak UI aktif: final Destination dan Travel Organizer (27 September 2026)
+
+Terminologi antarmuka resmi menggunakan **Travel Organizer** (dengan identifier internal tetap `EO`). Tidak ada badge/filter BASIC/PLUS atau Guide Ready di permukaan produk. Halaman status pengajuan menampilkan `Status pengajuan: Disetujui` dan status `Aktif sebagai Mitra Destinasi JedaIn` tanpa copy teknis lencana/internal rule. Overview Mitra menampilkan Status Destinasi kompak (`Profil destinasi siap digunakan Travel Organizer`), ringkasan operasional card/grid (Biaya dasar, Pemandu lokal, Kapasitas umum), status kecil `Status: Aktif`, serta sembilan informasi inti di balik disclosure checklist jelas (✓/○) tanpa bullet kosong, bukan skor kualitas. Profil Mitra mengizinkan Ringkasan 2x2 facts rapi, edit deskripsi (minimal 20 karakter) dengan feedback inline, tarif pemandu lokal dalam currency group input `Rp ... / orang` dengan feedback inline dan tampilan tarif aktif, upload foto fasilitas yang terhubung ke fasilitas terdaftar (`destination.facilities`) dan terkelompok per fasilitas di profil & Travel Organizer detail, serta upload galeri destinasi tanpa batas jumlah (JPG/PNG/WebP, maksimal 5 MB per file); visual prototype bawaan tidak dapat dihapus. Builder Travel Organizer menampilkan biaya dasar, tarif pemandu kanonikal (tersinkronisasi same-runtime dari update Mitra), formula harga, pengaturan perjalanan & logistik lengkap di Langkah 3 (titik kumpul, waktu kumpul, transportasi menuju destinasi dan kembali yang dikelola Travel Organizer, cakupan termasuk misal transportasi PP, belum termasuk misal transportasi ke titik kumpul awal, catatan keselamatan & akses tanpa default sintetis); memilih banyak media dan satu cover; serta stepper dengan angka hanya pada badge. Tombol insight `Terapkan ke draft` memberi arahan sekaligus mengisi judul, ringkasan, durasi, dan ide itinerary awal ke draft secara editable tanpa menimpa bagian yang telah diedit manual oleh Travel Organizer, dengan tombol `Arahan digunakan ✓` dan opsi unselect tanpa menghapus draft. Traveler Package Hero memakai galeri media pilihan Travel Organizer. Traveler Package Detail menampilkan **Dual Trust Identity** terpisah (Destinasi dengan verifikasi JedaIn + ulasan destinasi, serta Travel Organizer dengan status Travel Organizer JedaIn + ulasan pascatrip organizer aktual) dan rincian titik kumpul/perjalanan yang authored tanpa fallback sintetis. Kontrak tier dan satu foto di bagian lama digantikan oleh keputusan ini. 360° tidak dibuat.
+
 **Version:** 0.1  
 **Date:** 30 Agustus 2026  
 **Product Source of Truth:** [`../PRD.md`](../PRD.md)  
@@ -1037,7 +1041,7 @@ verification_level: BASIC | PLUS
 guide_ready: true (required for verified destinations)
 ```
 
-UI renders one `Terverifikasi Dasar` or `Terverifikasi Plus` badge. Guide availability may appear as ordinary profile detail.
+UI menampilkan status pengajuan/aktif sebagai teks biasa. `verification_level` di atas hanya field legacy internal; tidak ada badge BASIC/PLUS.
 
 ## Schedule
 

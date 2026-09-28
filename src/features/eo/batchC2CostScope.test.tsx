@@ -60,9 +60,9 @@ describe("Batch C2 — Destination Cost Scope Clarity (P1-E01)", () => {
 
     expect(view.textContent).toContain("Cakupan Biaya Dasar Destinasi");
     expect(view.textContent).toContain("Rp125.000 / orang");
-    expect(view.textContent).toContain("Termasuk Biaya Dasar:");
+    expect(view.textContent).toContain("Termasuk Biaya Dasar");
     expect(view.textContent).toContain("Tiket masuk kawasan Lereng Hijau");
-    expect(view.textContent).toContain("Belum Termasuk:");
+    expect(view.textContent).toContain("Belum Termasuk");
     expect(view.textContent).toContain("Transportasi menuju titik kumpul awal");
   });
 
@@ -118,9 +118,9 @@ describe("Batch C2 — Destination Cost Scope Clarity (P1-E01)", () => {
       "Biaya Dasar Destinasi (Lereng Hijau Batu):",
     );
     expect(view.textContent).toContain("Rp125.000");
-    expect(view.textContent).toContain("Margin EO:");
+    expect(view.textContent).toContain("Margin Travel Organizer:");
     expect(view.textContent).toContain("Rp150.000");
-    expect(view.textContent).toContain("Rp275.000 / orang");
+    expect(view.textContent).toContain("Rp300.000 / orang");
 
     // Compact cost scope note is displayed
     expect(view.textContent).toContain("Cakupan biaya dasar destinasi:");
@@ -155,11 +155,11 @@ describe("Batch C2 — Destination Cost Scope Clarity (P1-E01)", () => {
 
     const view = await renderComponent(createElement(DestinationProfileScreen));
 
-    expect(view.textContent).toContain("Modal Dasar per Orang:");
+    expect(view.textContent).toContain("Biaya Dasar");
     expect(view.textContent).toContain("Rp125.000");
-    expect(view.textContent).toContain("Termasuk Biaya Dasar:");
+    expect(view.textContent).toContain("Termasuk Biaya Dasar");
     expect(view.textContent).toContain("Tiket masuk kawasan Lereng Hijau");
-    expect(view.textContent).toContain("Belum Termasuk:");
+    expect(view.textContent).toContain("Belum Termasuk");
     expect(view.textContent).toContain("Transportasi menuju titik kumpul awal");
   });
 

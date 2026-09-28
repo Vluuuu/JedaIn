@@ -66,9 +66,9 @@ describe("App shell routing", () => {
     for (const path of ["/partner/eo/login", "/eo/login"]) {
       const markup = renderRoute(path);
 
-      expect(markup).toContain("Event Organizer");
+      expect(markup).toContain("Travel Organizer");
       expect(markup).toContain("Masuk ke JedaIn");
-      expect(markup).toContain("Gunakan akun EO yang terdaftar.");
+      expect(markup).toContain("Gunakan akun Travel Organizer yang terdaftar.");
       expect(markup).toContain("Coba akun demo");
       expect(markup).not.toContain("Mitra Destinasi");
       expect(markup).not.toContain("BNSP Certified");

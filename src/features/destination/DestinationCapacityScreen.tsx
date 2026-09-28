@@ -1,4 +1,3 @@
-import { Badge } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
@@ -40,17 +39,13 @@ export function DestinationCapacityScreen() {
     <div className="dest-container">
       <header className="dest-page-header">
         <div>
-          <Badge tone="info">Pengawasan Kapasitas Kawasan</Badge>
-          <h1
-            className="dest-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
+          <h1 className="dest-page-title">
             Kapasitas & Alokasi Pengunjung Venue
           </h1>
           <p className="dest-page-subtitle">
             Memantau daya tampung kawasan per sesi di{" "}
-            {destination?.name ?? "lokasi"}, alokasi kuota yang dibuka EO, dan
-            jumlah peserta terkonfirmasi.
+            {destination?.name ?? "lokasi"}, alokasi kuota yang dibuka Travel
+            Organizer, dan jumlah peserta terkonfirmasi.
           </p>
         </div>
       </header>
@@ -70,11 +65,15 @@ export function DestinationCapacityScreen() {
         </div>
 
         <div className="dest-stat-card">
-          <span className="dest-stat-label">Total Alokasi Sesi EO</span>
+          <span className="dest-stat-label">
+            Total Alokasi Sesi Travel Organizer
+          </span>
           <strong className="dest-stat-value">
             {venueSessions.reduce((sum, s) => sum + s.capacity, 0)}
           </strong>
-          <span className="dest-stat-desc">Slot dibuka oleh mitra EO</span>
+          <span className="dest-stat-desc">
+            Slot dibuka oleh mitra Travel Organizer
+          </span>
         </div>
 
         <div className="dest-stat-card">
@@ -109,8 +108,8 @@ export function DestinationCapacityScreen() {
             >
               Perbedaan konsep: (1) <strong>Batas Venue</strong> (
               {baseVenueCapacity} orang) adalah kapasitas umum destinasi per
-              sesi; (2) <strong>Alokasi Kuota EO</strong> adalah kuota yang
-              dibuka EO untuk sesi tersebut; (3){" "}
+              sesi; (2) <strong>Alokasi Kuota Travel Organizer</strong> adalah
+              kuota yang dibuka Travel Organizer untuk sesi tersebut; (3){" "}
               <strong>Peserta Terkonfirmasi</strong> adalah traveler yang telah
               menyelesaikan pembayaran. Selisih operasional menunjukkan selisih
               kapasitas umum destinasi terhadap peserta terkonfirmasi, bukan
@@ -127,7 +126,10 @@ export function DestinationCapacityScreen() {
               color: "var(--color-text-muted)",
             }}
           >
-            <p>Belum ada sesi perjalanan EO yang dijadwalkan di kawasan ini.</p>
+            <p>
+              Belum ada sesi perjalanan Travel Organizer yang dijadwalkan di
+              kawasan ini.
+            </p>
           </div>
         ) : (
           <div className="eo-table-wrapper">
@@ -135,9 +137,9 @@ export function DestinationCapacityScreen() {
               <thead>
                 <tr>
                   <th>Sesi Jadwal</th>
-                  <th>Paket & EO</th>
+                  <th>Paket & Travel Organizer</th>
                   <th>Batas Venue</th>
-                  <th>Alokasi Kuota EO</th>
+                  <th>Alokasi Kuota Travel Organizer</th>
                   <th>Peserta Terkonfirmasi</th>
                   <th>Selisih Operasional</th>
                 </tr>
@@ -190,7 +192,7 @@ export function DestinationCapacityScreen() {
                             color: "var(--color-text-secondary)",
                           }}
                         >
-                          EO: {pkg?.eoDisplayName ?? s.eoId}
+                          Travel Organizer: {pkg?.eoDisplayName ?? s.eoId}
                         </div>
                       </td>
                       <td>
@@ -212,7 +214,7 @@ export function DestinationCapacityScreen() {
                             color: "var(--color-text-muted)",
                           }}
                         >
-                          Kuota sesi EO
+                          Kuota sesi Travel Organizer
                         </div>
                       </td>
                       <td>
@@ -227,9 +229,9 @@ export function DestinationCapacityScreen() {
                         </div>
                       </td>
                       <td>
-                        <Badge tone="neutral">
+                        <span className="dest-capacity-headroom">
                           Selisih operasional: {headroom} orang
-                        </Badge>
+                        </span>
                         <div
                           style={{
                             fontSize: "var(--font-size-caption)",

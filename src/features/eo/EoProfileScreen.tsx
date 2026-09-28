@@ -1,4 +1,4 @@
-import { Badge } from "../../components/ui";
+import { InlineStatus } from "../../components/ui";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
@@ -13,10 +13,7 @@ export function EoProfileScreen() {
     <div className="eo-container" style={{ maxWidth: "800px" }}>
       <header className="eo-page-header">
         <div>
-          <Badge tone="success">Identitas Terverifikasi</Badge>
-          <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Profil Mitra Event Organizer
-          </h1>
+          <h1 className="eo-page-title">Profil Mitra Travel Organizer</h1>
           <p className="eo-page-subtitle">
             Informasi entitas bisnis dan detail operasional kemitraan.
           </p>
@@ -24,7 +21,7 @@ export function EoProfileScreen() {
       </header>
 
       <section className="eo-section">
-        <h2 className="eo-section-title">Informasi Profil EO</h2>
+        <h2 className="eo-section-title">Informasi Profil Travel Organizer</h2>
 
         <div
           style={{
@@ -72,7 +69,7 @@ export function EoProfileScreen() {
             >
               Kapabilitas Pemanduan EO:
             </small>
-            <Badge
+            <InlineStatus
               tone={
                 partner?.guideStatus === "CERTIFIED_GUIDE"
                   ? "success"
@@ -82,7 +79,7 @@ export function EoProfileScreen() {
               {partner?.guideStatus === "CERTIFIED_GUIDE"
                 ? "Memiliki sertifikasi pemanduan"
                 : "Tidak menggunakan sertifikasi pemanduan EO"}
-            </Badge>
+            </InlineStatus>
           </div>
         </div>
 

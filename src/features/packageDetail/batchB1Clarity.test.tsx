@@ -97,20 +97,18 @@ describe("Batch B1 — Existing-Data Clarity Improvements", () => {
         ["/packages/slow_green_day"],
       );
 
-      // Destination verification explanation
-      expect(view.textContent).toContain("Tentang Terverifikasi Dasar:");
+      // Destination verification statement
       expect(view.textContent).toContain(
-        "bukan konfirmasi ketersediaan tanggal/sesi",
+        "Destinasi ini telah melalui proses verifikasi JedaIn.",
       );
+      expect(view.textContent).not.toContain("Tentang verifikasi destinasi:");
 
-      // Guide status explanation
-      expect(view.textContent).toContain("Tentang Certified Guide:");
+      // Travel Organizer identity and role
+      expect(view.textContent).toContain("Travel Organizer JedaIn");
       expect(view.textContent).toContain(
-        "Certified Guide menunjukkan status kepemanduan berlisensi milik penyelenggara",
+        "Penyelenggara terdaftar di JedaIn Partner Portal.",
       );
-      expect(view.textContent).toContain(
-        "Status ini tidak menunjukkan pemandu individu tertentu untuk jadwal sesi",
-      );
+      expect(view.textContent).not.toContain("Tentang Certified Guide:");
     });
   });
 
@@ -126,7 +124,7 @@ describe("Batch B1 — Existing-Data Clarity Improvements", () => {
         "Kapasitas umum destinasi: 20 orang/sesi",
       );
       expect(catalogView.textContent).toContain(
-        "Kapasitas umum destinasi per sesi, bukan kuota otomatis per paket EO",
+        "Kapasitas umum destinasi per sesi, bukan kuota otomatis per paket Travel Organizer",
       );
 
       // Destination detail
@@ -145,7 +143,7 @@ describe("Batch B1 — Existing-Data Clarity Improvements", () => {
       expect(detailView.textContent).toContain("Kapasitas umum destinasi");
       expect(detailView.textContent).toContain("20 orang/sesi");
       expect(detailView.textContent).toContain(
-        "Alokasi kuota paket aktual ditentukan oleh EO saat membuka jadwal sesi",
+        "Alokasi kuota paket aktual ditentukan oleh Travel Organizer saat membuka jadwal sesi",
       );
       expect(detailView.textContent).toContain(
         "bukan penugasan pemandu individu untuk jadwal tertentu",
@@ -159,7 +157,7 @@ describe("Batch B1 — Existing-Data Clarity Improvements", () => {
         createElement(EoPackageBuilderScreen),
       );
       expect(builderView.textContent).toContain(
-        "Pilihan ini menunjukkan sumber pemandu untuk package (Destinasi atau EO), bukan penugasan pemandu individu pada sesi tertentu",
+        "Pilihan ini menunjukkan sumber pemandu untuk package (Destinasi atau Travel Organizer), bukan penugasan pemandu individu pada sesi tertentu",
       );
     });
   });
@@ -185,7 +183,7 @@ describe("Batch B1 — Existing-Data Clarity Improvements", () => {
         "Perbedaan konsep: (1) Batas Venue",
       );
       expect(capView.textContent).toContain("Kapasitas umum destinasi");
-      expect(capView.textContent).toContain("Kuota sesi EO");
+      expect(capView.textContent).toContain("Kuota sesi Travel Organizer");
       expect(capView.textContent).toContain("Peserta terkonfirmasi");
 
       // Schedule screen
@@ -193,9 +191,9 @@ describe("Batch B1 — Existing-Data Clarity Improvements", () => {
         createElement(DestinationScheduleScreen),
       );
       expect(schedView.textContent).toContain(
-        "Alokasi kuota per sesi merupakan kapasitas trip yang dibuka EO, terpisah dari kapasitas umum destinasi",
+        "Alokasi kuota per sesi merupakan kapasitas trip yang dibuka Travel Organizer, terpisah dari kapasitas umum destinasi",
       );
-      expect(schedView.textContent).toContain("Kuota sesi EO");
+      expect(schedView.textContent).toContain("Kuota sesi Travel Organizer");
       expect(schedView.textContent).toContain("Peserta terkonfirmasi");
     });
   });

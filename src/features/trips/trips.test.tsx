@@ -13,6 +13,8 @@ import { MockTripsAdapter } from "./mockAdapter";
 import { MyTripsScreen } from "./MyTripsScreen";
 import { TripDetailScreen } from "./TripDetailScreen";
 import type { TripsAdapter } from "./types";
+import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
+import { getCombinedPackageDetails } from "../marketplace/marketplaceAdapter";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -208,9 +210,9 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(container.textContent).toContain("Trip Selesai");
     expect(container.textContent).toContain("Penilaian Pengalaman");
     expect(container.textContent).toContain("Nilai Destinasi");
-    expect(container.textContent).toContain("Nilai EO / Guide");
+    expect(container.textContent).toContain("Nilai Travel Organizer");
     expect(container.textContent).toContain("Beri Nilai Destinasi");
-    expect(container.textContent).toContain("Beri Nilai EO / Guide");
+    expect(container.textContent).toContain("Beri Nilai Travel Organizer");
   });
 
   it("F5.1 active Trip Detail keeps meeting point primary and EO contact inside the main disclosure", async () => {
@@ -236,7 +238,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
 
     expect(container.textContent).toContain("Detail Perjalanan");
     expect(container.textContent).toContain(
-      "Area titik kumpul Lereng Hijau Batu",
+      "Area keberangkatan Alun-Alun Kota Batu",
     );
 
     const disclosure = container.querySelector<HTMLDetailsElement>(
@@ -273,7 +275,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
 
     expect(container.textContent).toContain("Perjalanan Selesai");
     expect(container.textContent).toContain("Beri Nilai Destinasi");
-    expect(container.textContent).toContain("Beri Nilai EO / Guide");
+    expect(container.textContent).toContain("Beri Nilai Travel Organizer");
 
     const reviews = container.querySelector(".trip-detail-section--reviews");
     const disclosure = container.querySelector<HTMLDetailsElement>(
@@ -656,14 +658,14 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       expect(container.textContent).toContain("Budi Santoso");
       expect(container.textContent).toContain("081234567890");
       expect(container.textContent).toContain("partner@jedaalam.id");
-      expect(container.textContent).toContain("Hubungi EO");
+      expect(container.textContent).toContain("Hubungi Travel Organizer");
 
       // Verify tel link
       const telLink = container.querySelector(
         'a[href="tel:081234567890"]',
       ) as HTMLAnchorElement;
       expect(telLink).not.toBeNull();
-      expect(telLink.textContent).toContain("Hubungi EO");
+      expect(telLink.textContent).toContain("Hubungi Travel Organizer");
 
       // Verify mailto link
       const mailtoLink = container.querySelector(
@@ -675,7 +677,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       expect(container.textContent).toContain("Termasuk dalam Paket");
       expect(container.textContent).toContain("Tidak Termasuk");
       expect(container.textContent).toContain(
-        "Transportasi menuju titik kumpul awal",
+        "Transportasi peserta menuju titik kumpul awal",
       );
       expect(container.textContent).toContain("Sebelum Berangkat");
       expect(container.textContent).toContain(
@@ -699,7 +701,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       expect(container.textContent).toContain("Trip Selesai");
       expect(container.textContent).toContain("Budi Santoso");
       expect(container.textContent).toContain("081234567890");
-      expect(container.textContent).toContain("Hubungi EO");
+      expect(container.textContent).toContain("Hubungi Travel Organizer");
     });
 
     it("V3. Wrong-owner Trip Detail is blocked and does not expose contact", async () => {
@@ -970,7 +972,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
         (b) => b.textContent?.trim() === "Beri Nilai Destinasi",
       );
       const eoBtn = Array.from(container.querySelectorAll("button")).find(
-        (b) => b.textContent?.trim() === "Beri Nilai EO / Guide",
+        (b) => b.textContent?.trim() === "Beri Nilai Travel Organizer",
       );
       expect(destBtn).toBeDefined();
       expect(eoBtn).toBeDefined();
@@ -1000,7 +1002,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
 
       // EO CTA now becomes primary!
       const eoBtn2 = Array.from(container2.querySelectorAll("button")).find(
-        (b) => b.textContent?.trim() === "Beri Nilai EO / Guide",
+        (b) => b.textContent?.trim() === "Beri Nilai Travel Organizer",
       );
       expect(eoBtn2).toBeDefined();
       expect(eoBtn2?.className).toContain("ui-button--primary");
@@ -1120,7 +1122,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       // Meeting point rendered from source fixture
       expect(container.textContent).toContain("Titik Kumpul");
       expect(container.textContent).toContain(
-        "Area titik kumpul Lereng Hijau Batu",
+        "Area keberangkatan Alun-Alun Kota Batu",
       );
 
       // Departure time & location rendered in brief
@@ -1152,10 +1154,10 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
 
       expect(container.textContent).toContain("Catatan Akses Lokasi");
       expect(container.textContent).toContain(
-        "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
+        "Area keberangkatan mudah diakses kendaraan pribadi di pusat Kota Batu.",
       );
       expect(container.textContent).toContain(
-        "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
+        "Titik kumpul berada di sisi timur Alun-Alun Kota Batu dengan penanda JedaIn.",
       );
     });
 
@@ -1166,7 +1168,21 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       };
       sessionStore.setUser(traveler);
 
-      // light_mountain_explore has no meetingPointLabel and no accessNotes
+      // Package with explicitly omitted meetingPointLabel and accessNotes
+      const customAdapter = new MockTripsAdapter({
+        details: {
+          ...getCombinedPackageDetails(),
+          light_mountain_explore: {
+            ...MOCK_PACKAGE_DETAILS["light_mountain_explore"],
+            meetingPointLabel: undefined,
+            accessNotes: undefined,
+            includedItems: ["Tiket masuk"],
+            outboundTransport: undefined,
+            returnTransport: undefined,
+          },
+        },
+      });
+
       const tx = mockTransactionStore.createTransaction({
         travelerId: traveler.id,
         packageId: "light_mountain_explore",
@@ -1179,7 +1195,9 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       const bId = (tx as { booking: { bookingId: string } }).booking.bookingId;
       mockTransactionStore.executePaymentSuccess({ bookingId: bId });
 
-      const { container } = await renderMyTrips({}, [`/trips/${bId}`]);
+      const { container } = await renderMyTrips({ adapter: customAdapter }, [
+        `/trips/${bId}`,
+      ]);
 
       expect(container.textContent).toContain("Informasi Keberangkatan");
 

@@ -228,8 +228,11 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const badgeView = await renderComponent(
         createElement(DestinationVerificationBadgeScreen),
       );
-      expect(badgeView.textContent).toContain("Terverifikasi Dasar");
       expect(badgeView.textContent).toContain(
+        "Destinasi Anda telah disetujui dan dapat digunakan EO untuk merancang experience.",
+      );
+      expect(badgeView.textContent).not.toContain("Terverifikasi Dasar");
+      expect(badgeView.textContent).not.toContain(
         "Pemandu lokal adalah bagian dari syarat verifikasi destinasi",
       );
       expect(badgeView.textContent).not.toContain("Dimensi 2");
@@ -717,8 +720,10 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const view = await renderComponent(
         createElement(DestinationVerificationStatusScreen),
       );
-      expect(view.textContent).toContain("Destinasi Terverifikasi");
-      expect(view.textContent).toContain("Terverifikasi Dasar");
+      expect(view.textContent).toContain(
+        "aktif sebagai Mitra Destinasi JedaIn",
+      );
+      expect(view.textContent).not.toContain("Terverifikasi Dasar");
       expect(view.textContent).not.toContain("Guide Ready");
     });
 
@@ -736,7 +741,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const pendingView = await renderComponent(
         createElement(DestinationVerificationStatusScreen),
       );
-      expect(pendingView.textContent).toContain("Menunggu Verifikasi Admin");
+      expect(pendingView.textContent).toContain("Menunggu verifikasi Admin");
 
       // Rejected
       partnerSessionStore.setPartner({
@@ -751,7 +756,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const rejView = await renderComponent(
         createElement(DestinationVerificationStatusScreen),
       );
-      expect(rejView.textContent).toContain("Perlu Perbaikan");
+      expect(rejView.textContent).toContain("Perlu perbaikan");
       expect(rejView.textContent).toContain(
         "Akses evakuasi darurat belum memadai",
       );
@@ -769,11 +774,11 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const view = await renderComponent(
         createElement(DestinationVerificationStatusScreen),
       );
-      expect(view.textContent).toContain("Belum Ada Pengajuan");
+      expect(view.textContent).toContain("Belum ada pengajuan");
       expect(view.textContent).toContain(
         "Belum Ada Formulir Pengajuan Verifikasi",
       );
-      expect(view.textContent).not.toContain("Menunggu Verifikasi Admin");
+      expect(view.textContent).not.toContain("Menunggu verifikasi Admin");
     });
 
     it("S. UI reapply pre-populates existing application data", async () => {
@@ -944,10 +949,16 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).toContain("Lereng Hijau Batu");
       expect(view.textContent).toContain("Batu / Malang Raya");
       expect(view.textContent).toContain("Pokdarwis Lereng Hijau");
-      expect(view.textContent).toContain("Terverifikasi Dasar");
+      expect(view.textContent).not.toContain("Terverifikasi Dasar");
       expect(view.textContent).toContain(
-        "Tersedia sebagai bagian dari standar verifikasi",
+        "Profil destinasi siap digunakan Travel Organizer",
       );
+      expect(
+        view.querySelector(".dest-readiness__status-meta")?.textContent,
+      ).toContain("Aktif");
+      expect(
+        view.querySelector(".dest-readiness__status-meta .ui-badge"),
+      ).toBeNull();
       expect(view.textContent).not.toContain("Guide Ready ✓");
       expect(view.textContent).not.toContain("Non-Guide Ready");
       expect(view.textContent).not.toContain("Tanpa Guide Lokal");
@@ -956,14 +967,19 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(view.textContent).not.toContain("PAID");
       expect(view.textContent).not.toContain("sessionId");
       expect(view.textContent).not.toContain("packageId");
-      expect(view.textContent).toContain("9/9 informasi lengkap");
+      expect(view.textContent).toContain("Informasi profil lengkap");
+      expect(view.textContent).toContain("Lihat 9 informasi inti");
       expect(view.textContent).toContain("Rp125.000 / orang");
       expect(view.textContent).toContain("20 orang / sesi");
       expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
       expect(view.textContent).toContain("Jeda Alam Nusantara");
       expect(view.querySelectorAll(".dest-session-row")).toHaveLength(2);
-      expect(view.textContent).toContain("Kuota Sesi EO: 6 orang");
-      expect(view.textContent).toContain("0% Kuota Sesi EO terisi");
+      expect(view.textContent).toContain(
+        "Kuota Sesi Travel Organizer: 6 orang",
+      );
+      expect(view.textContent).toContain(
+        "0% Kuota Sesi Travel Organizer terisi",
+      );
       expect(view.textContent).not.toContain("kapasitas destinasi terisi");
       expect(view.textContent).toContain("Walking tour kebun teh lereng bukit");
       expect(view.textContent).toContain("Saung istirahat bambu");

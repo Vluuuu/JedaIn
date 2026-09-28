@@ -1,5 +1,9 @@
 # JedaIn — System Flow
 
+## Alur aktif prototype: verifikasi, media, logistik, dan harga (27 September 2026)
+
+Terminologi antarmuka menggunakan **Travel Organizer** (identifier internal `EO`). Application destinasi → review Admin → `APPROVED` atau `REJECTED`; persetujuan dengan bukti pemandu lokal mengaktifkan destinasi kanonikal. Travel Organizer hanya melihat destinasi `ACTIVE` dan `guideReady=true`, tanpa filter BASIC/PLUS. Mitra boleh mengubah deskripsi dan tarif pemandu Rp/orang serta menambah foto destinasi/fasilitas; perubahan ini dibaca Travel Organizer dalam runtime yang sama. Builder menerima authoring logistik perjalanan lengkap di Langkah 3 (titik kumpul, waktu kumpul, transportasi menuju destinasi dan kembali yang dikelola Travel Organizer, cakupan termasuk misal transportasi PP, belum termasuk misal transportasi ke titik kumpul awal, persiapan & akses tanpa default sintetis), menerima beberapa foto destinasi dan foto Travel Organizer, menyimpan cover dan koleksi media. Harga per orang memasukkan tarif pemandu destinasi hanya saat `guideSource=DESTINATION`; service fee Traveler tetap terpisah di checkout. Traveler Package Detail menampilkan **Dual Trust Identity** terpisah (Destinasi & Travel Organizer) dengan rating masing-masing tanpa percampuran dan logistik perjalanan yang authored tanpa fallback sintetis. Pemilihan insight menyimpan arahan yang terlihat dan mengisi draft awal secara terproteksi tanpa menimpa bagian yang telah diedit manual oleh Travel Organizer. Alur BASIC/PLUS di bawah adalah riwayat sebelum keputusan ini. 360° ditunda.
+
 **Version:** 0.1
 **Date:** 30 Agustus 2026
 **Source of Truth:** [`../PRD.md`](../PRD.md)
@@ -501,7 +505,7 @@ flowchart TD
     L -- Fail --> M[Specific Reason]
     M --> E
 
-    L -- Pass, including local guide evidence --> N[Verification Level BASIC, guide_ready = true]
+    L -- Pass, including local guide evidence --> N[APPROVED, ACTIVE destination, guide_ready = true]
     N --> R[Destination Dashboard]
 
     C -- Yes --> R
@@ -578,7 +582,7 @@ flowchart TD
     D --> E[Guide Readiness]
     E --> F{Pass?}
     F -- No --> G[Reject + Specific Reason]
-    F -- Yes, with local guide evidence --> H[Set BASIC Verification and guide_ready = true]
+    F -- Yes, with local guide evidence --> H[Approve application and activate destination with guide_ready = true]
 ```
 
 ---

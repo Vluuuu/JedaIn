@@ -23,7 +23,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         order: 1,
         title: "Pagi - Berkumpul & Perjalanan Santai",
         description:
-          "Tiba di lokasi titik kumpul Lereng Hijau Batu, perkenalan hangat dengan pemandu lokal, dan menikmati teh sambutan hangat.",
+          "Berkumpul di titik kumpul Alun-Alun Kota Batu, perkenalan hangat dengan tim Travel Organizer, dan perjalanan bersama menuju Lereng Hijau Batu.",
         timeOfDayLabel: "Pagi",
         durationLabel: "1 jam",
       },
@@ -45,13 +45,14 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul",
       "Tiket masuk kawasan Lereng Hijau Batu",
       "Pemandu lokal selama sesi kegiatan",
       "Seduhan teh herbal dan kudapan lokal",
       "Santap siang menu pedesaan",
     ],
     excludedItems: [
-      "Transportasi menuju titik kumpul awal",
+      "Transportasi peserta menuju titik kumpul awal",
       "Pengeluaran dan belanja pribadi di luar paket",
       "Perlengkapan cuaca tambahan (jas hujan/jaket pribadi)",
     ],
@@ -61,17 +62,23 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Aktivitas berjalan santai dengan intensitas ringan dan jalur relatif datar.",
       "Ikuti arahan pemandu demi kenyamanan dan kelestarian perkebunan.",
     ],
-    meetingPointLabel: "Area titik kumpul Lereng Hijau Batu",
+    meetingPointLabel: "Area keberangkatan Alun-Alun Kota Batu",
+    departureTimeLabel:
+      "Peserta berkumpul pukul 07.00 WIB sebelum keberangkatan.",
+    outboundTransport:
+      "Minibus Travel Organizer dari titik kumpul Batu menuju Lereng Hijau Batu.",
+    returnTransport:
+      "Minibus kembali ke titik kumpul Batu setelah seluruh kegiatan selesai.",
     accessNotes: [
-      "Dapat diakses dengan kendaraan roda dua maupun roda empat melalui jalur utama Batu.",
-      "Titik kumpul berada di area gerbang masuk kawasan lereng dengan penanda JedaIn.",
+      "Area keberangkatan mudah diakses kendaraan pribadi di pusat Kota Batu.",
+      "Titik kumpul berada di sisi timur Alun-Alun Kota Batu dengan penanda JedaIn.",
     ],
     cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_lereng_batu",
       displayName: "Jeda Alam Nusantara",
       guideStatus: "CERTIFIED_GUIDE",
-      roleDescription: "Event Organizer Komunitas Wellness Lokal",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Merancang pengalaman perjalanan berbasis kesadaran penuh dan kearifan alam lokal di Jawa Timur.",
     },
@@ -86,7 +93,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         startAt: "2026-10-10T08:00:00+07:00",
         endAt: "2026-10-10T14:00:00+07:00",
         status: "OPEN",
-        pricePerPerson: 275000,
+        pricePerPerson: 300000,
         remainingSlots: 6,
       },
       {
@@ -95,7 +102,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
         startAt: "2026-10-17T08:00:00+07:00",
         endAt: "2026-10-17T14:00:00+07:00",
         status: "OPEN",
-        pricePerPerson: 275000,
+        pricePerPerson: 300000,
         remainingSlots: 4,
       },
     ],
@@ -151,17 +158,27 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul Malang",
       "Bahan tanah liat dan peralatan workshop lengkap",
       "Bimbingan langsung perajin desa",
       "Karya kerajinan yang dibuat dapat dibawa pulang",
       "Kudapan dan minuman herbal tradisional",
     ],
-    excludedItems: ["Transportasi menuju desa", "Pengeluaran pribadi tambahan"],
+    excludedItems: [
+      "Transportasi peserta menuju titik kumpul awal",
+      "Pengeluaran pribadi tambahan",
+    ],
     safetyNotes: [
       "Pakaian santai yang nyaman dan tidak masalah jika terkena percikan tanah liat (celemek disediakan).",
       "Aktivitas ramah anak-anak dan keluarga.",
     ],
-    meetingPointLabel: "Pendopo Desa Wisata Budaya",
+    meetingPointLabel: "Pendopo Alun-Alun Kota Malang",
+    departureTimeLabel:
+      "Peserta berkumpul pukul 08.15 WIB sebelum keberangkatan.",
+    outboundTransport:
+      "Shuttle minibus Travel Organizer dari titik kumpul Malang menuju desa wisata.",
+    returnTransport:
+      "Shuttle kembali ke titik kumpul Malang setelah kegiatan selesai.",
     accessNotes: [
       "Akses jalan desa beraspal dan dapat dilalui kendaraan pribadi.",
     ],
@@ -170,7 +187,7 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       id: "org_desa_budaya",
       displayName: "Ruang Rupa Desa",
       guideStatus: "CONCEPT_ONLY",
-      roleDescription: "Pengelola Workshop Budaya & Komunitas",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Menjembatani wisatawan dengan kearifan tangan perajin lokal di desa-desa Jawa Timur.",
     },
@@ -241,23 +258,35 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul Surabaya",
       "Akses area Oase Hening Trawas",
       "Pemandu sesi meditasi dan jalan hening",
       "Sarapan pagi sehat dan minuman hangat",
     ],
-    excludedItems: ["Transportasi menuju lokasi", "Kebutuhan pribadi tambahan"],
+    excludedItems: [
+      "Transportasi peserta menuju titik kumpul awal",
+      "Kebutuhan pribadi tambahan",
+    ],
     safetyNotes: [
       "Disarankan membawa alas kaki yang nyaman untuk berjalan di jalur berbatu.",
       "Harap menjaga ketenangan selama sesi jalan hening berlangsung.",
     ],
-    meetingPointLabel: "Titik kumpul area gerbang Oase Hening Trawas",
-    accessNotes: ["Disarankan tiba 15 menit sebelum waktu mulai sesi."],
+    meetingPointLabel: "Area keberangkatan Stasiun Surabaya Gubeng",
+    departureTimeLabel:
+      "Peserta berkumpul pukul 05.15 WIB sebelum keberangkatan.",
+    outboundTransport:
+      "Shuttle Travel Organizer dari titik kumpul Surabaya menuju Oase Hening Trawas.",
+    returnTransport:
+      "Shuttle kembali ke titik kumpul Surabaya setelah kegiatan selesai.",
+    accessNotes: [
+      "Perjalanan darat estimasi 1 jam 15 menit melalui jalur tol Surabaya–Mojokerto.",
+    ],
     cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_mindful_life",
       displayName: "Mindful Living Project",
       guideStatus: "CERTIFIED_GUIDE",
-      roleDescription: "Fasilitator Wellness & Mindfulness",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Menghadirkan ruang jeda dan latihan mindfulness yang ramah pemula di alam terbuka.",
     },
@@ -328,13 +357,14 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul Surabaya",
       "Tiket masuk kawasan Taman Alam Prigen",
       "Pemandu trek lokal berpengalaman",
       "Santap siang dan air mineral selama perjalanan",
       "Pertolongan pertama standar pendampingan",
     ],
     excludedItems: [
-      "Transportasi menuju titik kumpul",
+      "Transportasi peserta menuju titik kumpul awal",
       "Perlengkapan trekking pribadi",
     ],
     safetyNotes: [
@@ -342,12 +372,20 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       "Bawa botol minum pribadi dan pelindung matahari (topi/tabir surya).",
       "Jalur memiliki tanjakan landai hingga sedang, cocok untuk yang ingin bergerak aktif.",
     ],
+    meetingPointLabel: "Rest Area KM 26 Tol Surabaya–Gempol",
+    departureTimeLabel:
+      "Peserta berkumpul pukul 06.30 WIB sebelum keberangkatan.",
+    outboundTransport:
+      "Minibus Travel Organizer dari titik kumpul menuju kaki gunung Prigen.",
+    returnTransport:
+      "Minibus kembali ke titik kumpul setelah seluruh rangkaian jelajah selesai.",
+    accessNotes: ["Jalur pegunungan beraspal hingga titik pos awal briefing."],
     cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_jejak_alam",
       displayName: "Jejak Langkah Pasuruan",
       guideStatus: "CERTIFIED_GUIDE",
-      roleDescription: "Komunitas Pemandu Alam Terbuka",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Fokus mendampingi petualangan alam ringan yang aman dan ramah bagi pemula.",
     },
@@ -418,25 +456,36 @@ export const MOCK_PACKAGE_DETAILS: Record<string, PackageDetailSource> = {
       },
     ],
     includedItems: [
+      "Transportasi PP dari titik kumpul Surabaya",
       "Akomodasi 1 malam di pondok kayu Lembah Alam Pacet",
       "Makan malam dan sarapan pagi lokal",
       "Fasilitator pendamping kegiatan",
       "Tiket masuk kawasan wisata lembah",
     ],
     excludedItems: [
-      "Transportasi pulang-pergi",
+      "Transportasi peserta menuju titik kumpul awal",
       "Belanja pribadi dan makanan di luar jadwal",
     ],
     safetyNotes: [
       "Bawa pakaian tebal dan jaket karena suhu malam di Pacet bisa cukup dingin.",
       "Perhatikan langkah saat berjalan di dekat aliran sungai berbatu.",
     ],
+    meetingPointLabel:
+      "Terminal Purabaya (Bungurasih) Shelter Keberangkatan Khusus",
+    departureTimeLabel: "Peserta berkumpul Hari 1 pukul 13.00 WIB.",
+    outboundTransport:
+      "Armada van Travel Organizer dari Surabaya menuju pondok Lembah Alam Pacet.",
+    returnTransport:
+      "Armada van kembali mengantar peserta ke Terminal Purabaya di Hari 2 siang.",
+    accessNotes: [
+      "Jalur pegunungan Pacet beraspal mulus dengan estimasi tempuh 1,5 jam.",
+    ],
     cancellationPolicySummary: PROTOTYPE_CANCELLATION_POLICY_SUMMARY,
     organizer: {
       id: "org_pacet_retreat",
       displayName: "Lembah Teduh Retreats",
       guideStatus: "CERTIFIED_GUIDE",
-      roleDescription: "Spesialis Penginapan & Retret Alam",
+      roleDescription: "Travel Organizer JedaIn",
       bioSummary:
         "Menyediakan ruang peristirahatan akhir pekan yang hangat, tenang, dan dekat dengan alam.",
     },

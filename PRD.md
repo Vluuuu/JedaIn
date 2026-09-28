@@ -1,5 +1,9 @@
 # PRD JedaIn
 
+## Pembaruan prototype HOLOGY (27 September 2026)
+
+Untuk implementasi kompetisi, aturan aktif mengikuti `PRD_HOLOGY_PROTOTYPE.md`. Verifikasi destinasi tetap gate Admin dengan pemandu lokal wajib sebelum destinasi `ACTIVE`; BASIC/PLUS di bagian historis dokumen ini hanya kompatibilitas internal dan tidak ditampilkan sebagai tier, filter, atau badge. Mitra mengelola deskripsi, tarif pemandu lokal Rp/orang, foto destinasi, dan foto fasilitas tanpa batas jumlah galeri (JPG/PNG/WebP, maksimal 5 MB per file). EO memilih banyak media dan cover package; Traveler melihat media pilihan itu. Harga package adalah biaya dasar + margin EO, ditambah tarif pemandu lokal hanya bila EO memakai pemandu destinasi. Service fee Rp7.500 per booking tetap di checkout dan komisi 10% GMV tetap. Insight simulasi adalah arahan kreatif yang terlihat, tidak menimpa karya EO. 360° tetap ditunda.
+
 **Nama Produk:** JedaIn
 **Kompetisi:** HoloBiz – ICT Business Plan Competition, HOLOGY 9.0, Universitas Brawijaya
 **Subtema:** Ekonomi Digital
@@ -95,7 +99,7 @@ Minimal:
 
 - 1 EO pilot,
 - 1 paket wellness tourism lengkap,
-- 1–2 Mitra Destinasi berstatus **Terverifikasi Dasar**,
+- 1–2 Mitra Destinasi yang telah melalui verifikasi JedaIn,
 - minimal 1 mitra pilot berstatus **Siap sebagai Guide**,
 - demo end-to-end:
 
@@ -451,13 +455,10 @@ Recommended interaction:
 
 ## FR-2.5 Select Destination & Guide Source — UPDATED FOR MVP
 
-EO hanya dapat memilih destination dengan verification level:
-
-- `BASIC`, atau
-- `PLUS`.
+EO hanya dapat memilih destinasi kanonikal `ACTIVE` dengan pemandu lokal siap. Field `verificationLevel` lama tidak dipakai sebagai filter.
 
 **MVP Product Rule (Locked):**
-Setiap Destinasi Terverifikasi (`ACTIVE` dengan verification `BASIC`/`PLUS`) yang tersedia untuk perancangan paket EO wajib menyediakan akses pemandu lokal (`guideReady = true`).
+Setiap destinasi `ACTIVE` yang tersedia untuk EO wajib memiliki `guideReady = true`.
 
 Package menyimpan sumber kepemanduan secara eksplisit (`guideSource`):
 - `DESTINATION`: Pemanduan disediakan oleh pemandu lokal dari pihak destinasi.
@@ -483,7 +484,7 @@ Builder menggunakan stepper minimum:
 
 Formula MVP:
 
-`Customer Price = Destination Base Cost + EO Margin`
+`Customer Price = Destination Base Cost + EO Margin + (guideSource = DESTINATION ? localGuideFeePerPerson : 0)`
 
 Platform commission diambil secara **deductive dari EO Margin**, bukan menambahkan biaya baru ke traveler.
 
@@ -596,7 +597,7 @@ Untuk 1–2 pilot destination, tim internal melakukan verifikasi manual terhadap
 
 ## FR-3.4 Destination Status Model & EO Availability — UPDATED FOR MVP
 
-Tingkat verifikasi destinasi:
+Field tingkat verifikasi destinasi lama, hanya untuk kompatibilitas internal:
 
 - `BASIC`
 - `PLUS`
@@ -609,14 +610,11 @@ Kesiapan pemandu lokal adalah syarat di dalam verifikasi, bukan dimensi badge te
 **Aturan Ketersediaan untuk EO (Locked):**
 Dalam MVP JedaIn, sebuah destinasi hanya dapat berstatus `ACTIVE` dan tersedia untuk perancangan paket EO (`EO-available`) apabila:
 1. Berstatus aktif (`status = ACTIVE`),
-2. Memiliki verifikasi `BASIC` atau `PLUS`, dan
-3. Memiliki pemandu lokal siap (`guide_ready = true`).
+2. Memiliki pemandu lokal siap (`guide_ready = true`).
 
 Destinasi dengan `guide_ready = false` dapat tetap disimpan dalam data domain untuk asesmen atau perbaikan, tetapi tidak dapat `ACTIVE` terverifikasi dan **tidak ditampilkan pada direktori destinasi EO maupun pilihan destinasi di Trip Builder**.
 
-Badge pada surface EO disederhanakan tanpa duplikasi:
-- Terverifikasi Dasar
-- Terverifikasi Plus
+BASIC/PLUS tidak ditampilkan sebagai badge atau filter pada surface EO; verifikasi tetap proses internal Admin.
 
 Ketersediaan pemandu lokal dapat ditampilkan sebagai fakta profil biasa, bukan badge verifikasi kedua.
 
@@ -1135,7 +1133,7 @@ Keputusan berikut belum boleh diasumsikan developer sebagai final:
 4. Exact EO margin lower/upper bounds.
 5. Platform flat commission rate MVP.
 6. Certified Guide rating threshold + minimum trip.
-7. Terverifikasi Plus threshold.
+7. Kriteria kualitas internal destinasi setelah approval.
 8. Default payment expiration duration — proposal awal **15 menit**.
 9. Payment gateway final: Midtrans/Xendit/alternatif.
 10. Cancellation/refund matrix per waktu sebelum trip.

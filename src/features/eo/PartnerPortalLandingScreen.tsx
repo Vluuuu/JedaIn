@@ -52,9 +52,9 @@ export function PartnerPortalLandingScreen() {
           <Badge tone="warning">Simulasi Juri & Evaluasi</Badge>
           <h2>Akses Cepat Demo Workspace</h2>
           <p>
-            Masuk langsung ke operational dashboard Event Organizer (EO) atau
-            Mitra Destinasi yang telah disetujui untuk mencoba seluruh alur tiga
-            sisi JedaIn.
+            Masuk langsung ke operational dashboard Travel Organizer atau Mitra
+            Destinasi yang telah disetujui untuk mencoba seluruh alur tiga sisi
+            JedaIn.
           </p>
         </div>
         <div
@@ -71,7 +71,7 @@ export function PartnerPortalLandingScreen() {
             size="md"
             onClick={() => handleDemoLogin("CERTIFIED_GUIDE")}
           >
-            Masuk sebagai EO Demo (Certified)
+            Masuk sebagai Travel Organizer Demo (Certified)
           </Button>
           <Button
             type="button"
@@ -79,7 +79,7 @@ export function PartnerPortalLandingScreen() {
             size="md"
             onClick={() => handleDemoLogin("CONCEPT_ONLY")}
           >
-            Masuk sebagai EO Demo (Concept)
+            Masuk sebagai Travel Organizer Demo (Concept)
           </Button>
           <Button
             type="button"
@@ -117,14 +117,14 @@ export function PartnerPortalLandingScreen() {
       <div className="partner-portal-card-grid">
         <article className="partner-role-card">
           <div>
-            <Badge tone="info">Event Organizer</Badge>
+            <Badge tone="info">Travel Organizer</Badge>
             <h2
               style={{
                 fontSize: "var(--font-size-heading-md)",
                 margin: "var(--space-2) 0 var(--space-1)",
               }}
             >
-              Mitra Event Organizer
+              Mitra Travel Organizer
             </h2>
             <p
               style={{
@@ -149,7 +149,7 @@ export function PartnerPortalLandingScreen() {
               size="md"
               onClick={() => navigate("/partner/apply/eo")}
             >
-              Daftar sebagai EO Baru
+              Daftar sebagai Travel Organizer Baru
             </Button>
             <Button
               type="button"
@@ -157,7 +157,7 @@ export function PartnerPortalLandingScreen() {
               size="md"
               onClick={() => navigate("/partner/login")}
             >
-              Masuk Akun EO
+              Masuk Akun Travel Organizer
             </Button>
           </div>
         </article>

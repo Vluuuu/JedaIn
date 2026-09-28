@@ -195,10 +195,8 @@ export function AdminPackageReviewChecklistScreen() {
                 }}
               >
                 {destination
-                  ? destination.verificationLevel === "PLUS"
-                    ? "Terverifikasi Plus · pemandu lokal tersedia"
-                    : "Terverifikasi Dasar · pemandu lokal tersedia"
-                  : "Status verifikasi tidak valid"}
+                  ? "Destinasi aktif · pemandu lokal tersedia"
+                  : "Status destinasi tidak valid"}
               </p>
             </div>
           </div>
@@ -244,8 +242,11 @@ export function AdminPackageReviewChecklistScreen() {
               >
                 Modal Destinasi: Rp
                 {pkg.pricing.destinationBaseCost.toLocaleString("id-ID")} +
-                Margin EO: Rp{pkg.pricing.eoMargin.toLocaleString("id-ID")} =
-                Total Rp{pkg.pricing.customerPrice.toLocaleString("id-ID")}
+                Pemandu Lokal: Rp
+                {pkg.pricing.localGuideFee.toLocaleString("id-ID")} + Margin
+                Travel Organizer: Rp
+                {pkg.pricing.eoMargin.toLocaleString("id-ID")} = Total Rp
+                {pkg.pricing.customerPrice.toLocaleString("id-ID")}
               </p>
             </div>
           </div>
@@ -300,6 +301,97 @@ export function AdminPackageReviewChecklistScreen() {
             </div>
           </section>
 
+          {/* Logistics & Arrangements */}
+          <section className="admin-section">
+            <h2 className="admin-section-title">
+              Pengaturan Perjalanan & Logistik
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "var(--space-3)",
+                fontSize: "var(--font-size-body-sm)",
+              }}
+            >
+              <div>
+                <span style={{ color: "var(--color-text-muted)" }}>
+                  Titik Kumpul:{" "}
+                </span>
+                <strong>{pkg.meetingPointLabel || "-"}</strong>
+              </div>
+              <div>
+                <span style={{ color: "var(--color-text-muted)" }}>
+                  Waktu Kumpul / Keberangkatan:{" "}
+                </span>
+                <strong>{pkg.departureTimeLabel || "-"}</strong>
+              </div>
+              {pkg.outboundTransport && (
+                <div>
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    Transportasi Menuju Destinasi:{" "}
+                  </span>
+                  <span>{pkg.outboundTransport}</span>
+                </div>
+              )}
+              {pkg.returnTransport && (
+                <div>
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    Transportasi Kembali:{" "}
+                  </span>
+                  <span>{pkg.returnTransport}</span>
+                </div>
+              )}
+            </div>
+
+            {(pkg.includedItems.length > 0 || pkg.excludedItems.length > 0) && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "var(--space-3)",
+                  marginTop: "var(--space-3)",
+                  paddingTop: "var(--space-3)",
+                  borderTop: "1px solid var(--color-border-default)",
+                  fontSize: "var(--font-size-body-sm)",
+                }}
+              >
+                <div>
+                  <strong style={{ color: "var(--color-success-text)" }}>
+                    Sudah Termasuk:
+                  </strong>
+                  <ul
+                    style={{
+                      margin: "var(--space-1) 0 0",
+                      paddingLeft: "1.2rem",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {pkg.includedItems.map((inc, i) => (
+                      <li key={i}>{inc}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <strong style={{ color: "var(--color-text-muted)" }}>
+                    Belum Termasuk:
+                  </strong>
+                  <ul
+                    style={{
+                      margin: "var(--space-1) 0 0",
+                      paddingLeft: "1.2rem",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {pkg.excludedItems.map((exc, i) => (
+                      <li key={i}>{exc}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </section>
+
           <section className="admin-section">
             <h2 className="admin-section-title">
               Catatan Keselamatan & Perlengkapan
@@ -343,8 +435,8 @@ export function AdminPackageReviewChecklistScreen() {
                 }}
               >
                 Persetujuan akan mengubah status menjadi{" "}
-                <strong>APPROVED</strong> agar EO dapat membuka jadwal sesi.
-                Paket tidak langsung LIVE otomatis.
+                <strong>APPROVED</strong> agar Travel Organizer dapat membuka
+                jadwal sesi. Paket tidak langsung LIVE otomatis.
               </p>
 
               {/* Approve Box */}
@@ -400,7 +492,7 @@ export function AdminPackageReviewChecklistScreen() {
                   className="eo-form-textarea"
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="Jelaskan alasan perbaikan untuk EO..."
+                  placeholder="Jelaskan alasan perbaikan untuk Travel Organizer..."
                 />
                 <Button
                   type="button"

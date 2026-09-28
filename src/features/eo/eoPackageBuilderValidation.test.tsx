@@ -71,7 +71,7 @@ describe("P1 EO Package Builder Validation Visibility & Focus Regression", () =>
     // Jump directly to Step 5 (Tinjau & Submit)
     const step5Button = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((btn) => btn.textContent?.includes("5. Tinjau & Submit"));
+    ).find((btn) => btn.textContent?.includes("Tinjau & Submit"));
     expect(step5Button).toBeDefined();
 
     await act(async () => {

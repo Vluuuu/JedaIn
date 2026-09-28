@@ -206,7 +206,7 @@ export function WorkspaceShell({
                 ? "Admin Trust & Governance"
                 : partner?.role === "DESTINATION"
                   ? "Destination Partner"
-                  : "EO Partner"}
+                  : "Travel Organizer Partner"}
             </p>
             <span className="workspace-topbar__title">
               {partner?.businessName ??

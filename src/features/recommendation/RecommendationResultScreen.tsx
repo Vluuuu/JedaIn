@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Badge } from "../../components/ui";
 import {
   LOGIN_ATMOSPHERE_VISUAL,
   getPackageVisual,
@@ -232,11 +231,6 @@ export function RecommendationResultScreen({
               >
                 {isFallback ? "Pilihan terdekat" : "Pilihan utama"}
               </span>
-              <Badge tone="success">
-                {topPkg.verificationLevel === "PLUS"
-                  ? "Terverifikasi Plus"
-                  : "Terverifikasi Dasar"}
-              </Badge>
             </div>
           </div>
 

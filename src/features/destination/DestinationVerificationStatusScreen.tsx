@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { Button, StatusMeta } from "../../components/ui";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
 import "./destination.css";
@@ -33,16 +33,15 @@ export function DestinationVerificationStatusScreen() {
       >
         <header className="dest-page-header">
           <div>
-            <Badge tone="neutral">Belum Ada Pengajuan</Badge>
-            <h1
-              className="dest-page-title"
-              style={{ marginTop: "var(--space-2)" }}
-            >
-              Status Verifikasi Destinasi
-            </h1>
+            <h1 className="dest-page-title">Status Verifikasi Destinasi</h1>
             <p className="dest-page-subtitle">
               Akun Mitra:{" "}
               <strong>{partner?.businessName ?? "Destinasi Baru"}</strong>
+            </p>
+            <p className="dest-verification-status-line">
+              <StatusMeta label="Status pengajuan">
+                Belum ada pengajuan
+              </StatusMeta>
             </p>
           </div>
         </header>
@@ -104,29 +103,18 @@ export function DestinationVerificationStatusScreen() {
     >
       <header className="dest-page-header">
         <div>
-          <Badge
-            tone={
-              status === "APPROVED"
-                ? "success"
-                : status === "REJECTED"
-                  ? "danger"
-                  : "warning"
-            }
-          >
-            {status === "APPROVED"
-              ? "Destinasi Terverifikasi"
-              : status === "REJECTED"
-                ? "Perlu Perbaikan"
-                : "Menunggu Verifikasi Admin"}
-          </Badge>
-          <h1
-            className="dest-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
-            Status Verifikasi Destinasi
-          </h1>
+          <h1 className="dest-page-title">Status Verifikasi Destinasi</h1>
           <p className="dest-page-subtitle">
             Kawasan: <strong>{app.name}</strong> ({app.locationLabel})
+          </p>
+          <p className="dest-verification-status-line">
+            <StatusMeta label="Status pengajuan">
+              {status === "APPROVED"
+                ? "Disetujui"
+                : status === "REJECTED"
+                  ? "Perlu perbaikan"
+                  : "Menunggu verifikasi Admin"}
+            </StatusMeta>
           </p>
         </div>
       </header>
@@ -141,25 +129,12 @@ export function DestinationVerificationStatusScreen() {
                 margin: "0 0 var(--space-1)",
               }}
             >
-              Selamat! Destinasi Anda Telah Terverifikasi JedaIn
+              Destinasi Anda Disetujui JedaIn
             </h2>
             <p style={{ margin: "0 0 var(--space-2)" }}>
-              Lokasi Anda telah disetujui sebagai destinasi terkurasi dengan
-              status:
+              Lokasi Anda telah melalui proses verifikasi dan aktif sebagai
+              Mitra Destinasi JedaIn.
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "var(--space-2)",
-                flexWrap: "wrap",
-              }}
-            >
-              <Badge tone="success">
-                {app.approvedLevel === "BASIC"
-                  ? "Terverifikasi Dasar"
-                  : "Terverifikasi"}
-              </Badge>
-            </div>
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end" }}>

@@ -57,7 +57,12 @@ export const mockDestinationPartnerService = {
     return context?.destination;
   },
 
-  addGalleryMedia(input: { url: string; label: string }): {
+  addGalleryMedia(input: {
+    url: string;
+    label: string;
+    category?: "DESTINATION" | "FACILITY";
+    facilityLabel?: string;
+  }): {
     success: boolean;
     message?: string;
     media?: DestinationMediaItem;
@@ -68,6 +73,25 @@ export const mockDestinationPartnerService = {
         success: false,
         message:
           "Akses galeri hanya tersedia untuk Mitra Destinasi terverifikasi.",
+      };
+    }
+
+    if (input.category === "FACILITY" && !input.facilityLabel?.trim()) {
+      return {
+        success: false,
+        message:
+          "Pilih fasilitas terlebih dahulu sebelum menambahkan foto fasilitas.",
+      };
+    }
+
+    if (
+      input.category === "FACILITY" &&
+      !context.destination.facilities?.includes(input.facilityLabel!.trim())
+    ) {
+      return {
+        success: false,
+        message:
+          "Fasilitas yang dipilih tidak terdaftar pada profil destinasi.",
       };
     }
 
@@ -89,18 +113,19 @@ export const mockDestinationPartnerService = {
     }
 
     const currentGallery = context.destination.mediaGallery ?? [];
-    if (currentGallery.length >= 6) {
-      return {
-        success: false,
-        message: "Galeri prototype dibatasi maksimal 6 visual per destinasi.",
-      };
-    }
 
     const media: DestinationMediaItem = {
       mediaId: `media_${context.destination.destinationId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       url: input.url,
-      label: input.label.trim() || "Visual destinasi",
+      label:
+        input.label.trim() ||
+        (input.facilityLabel
+          ? `Foto ${input.facilityLabel}`
+          : "Visual destinasi"),
       provenance: "DESTINATION_SOURCE",
+      category: input.category ?? "DESTINATION",
+      facilityLabel:
+        input.category === "FACILITY" ? input.facilityLabel?.trim() : undefined,
     };
 
     mockDestinationStore.updateMediaGallery(context.destination.destinationId, [
@@ -109,6 +134,64 @@ export const mockDestinationPartnerService = {
     ]);
 
     return { success: true, media };
+  },
+
+  updateDescription(description: string): {
+    success: boolean;
+    message?: string;
+  } {
+    const context = resolveAuthenticatedDestinationContext();
+    if (!context) {
+      return {
+        success: false,
+        message:
+          "Akses perubahan profil hanya tersedia untuk Mitra Destinasi aktif.",
+      };
+    }
+
+    const normalized = description.trim();
+    if (normalized.length < 20) {
+      return {
+        success: false,
+        message: "Deskripsi destinasi minimal 20 karakter.",
+      };
+    }
+
+    mockDestinationStore.updateDescription(
+      context.destination.destinationId,
+      normalized,
+    );
+    return { success: true };
+  },
+
+  updateLocalGuideFee(localGuideFeePerPerson: number): {
+    success: boolean;
+    message?: string;
+  } {
+    const context = resolveAuthenticatedDestinationContext();
+    if (!context) {
+      return {
+        success: false,
+        message:
+          "Akses tarif pemandu hanya tersedia untuk Mitra Destinasi aktif.",
+      };
+    }
+
+    if (
+      !Number.isFinite(localGuideFeePerPerson) ||
+      localGuideFeePerPerson < 0
+    ) {
+      return {
+        success: false,
+        message: "Tarif pemandu lokal harus bernilai 0 atau lebih.",
+      };
+    }
+
+    mockDestinationStore.updateLocalGuideFee(
+      context.destination.destinationId,
+      localGuideFeePerPerson,
+    );
+    return { success: true };
   },
 
   removeGalleryMedia(mediaId: string): { success: boolean; message?: string } {

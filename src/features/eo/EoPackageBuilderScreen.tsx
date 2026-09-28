@@ -17,11 +17,11 @@ import type {
 import "./eo.css";
 
 const STEPS = [
-  { step: 1, label: "1. Destinasi & Pemandu" },
-  { step: 2, label: "2. Sinyal Insight" },
-  { step: 3, label: "3. Rencana Itinerary" },
-  { step: 4, label: "4. Skema Harga" },
-  { step: 5, label: "5. Tinjau & Submit" },
+  { step: 1, label: "Destinasi & Pemandu" },
+  { step: 2, label: "Sinyal Insight" },
+  { step: 3, label: "Perjalanan & Itinerary" },
+  { step: 4, label: "Skema Harga" },
+  { step: 5, label: "Tinjau & Submit" },
 ] as const;
 
 export function EoPackageBuilderScreen() {
@@ -80,9 +80,6 @@ export function EoPackageBuilderScreen() {
     initialValidDestinationId,
   );
   const [destSearchQuery, setDestSearchQuery] = useState<string>("");
-  const [destLevelFilter, setDestLevelFilter] = useState<
-    "ALL" | "BASIC" | "PLUS"
-  >("ALL");
   const [destLocationFilter, setDestLocationFilter] = useState<string>("ALL");
 
   const destinationLocationOptions = Array.from(
@@ -110,45 +107,109 @@ export function EoPackageBuilderScreen() {
   const [selectedInsightId, setSelectedInsightId] = useState<
     string | undefined
   >(initialDraft?.insightId ?? initialInsightId ?? undefined);
+  const [insightAppliedMessage, setInsightAppliedMessage] = useState<boolean>(
+    Boolean(initialDraft?.insightId || initialInsightId),
+  );
   const [title, setTitle] = useState<string>(
-    initialDraft?.title ??
-      (initialInsight ? `Jeda Mindful: ${initialInsight.intentLabel}` : ""),
+    initialDraft?.title ?? initialInsight?.title ?? "",
   );
   const [shortSummary, setShortSummary] = useState<string>(
-    initialDraft?.shortSummary ?? initialDraft?.valueProposition ?? "",
+    initialDraft?.shortSummary ??
+      initialDraft?.valueProposition ??
+      (initialInsight
+        ? `Experience untuk traveler yang mencari ${initialInsight.intentLabel}, dengan fokus pada ${initialInsight.recommendedFocus.join(", ")} di area ${initialInsight.targetArea}.`
+        : ""),
   );
   const [durationLabel, setDurationLabel] = useState<string>(
     initialDraft?.durationLabel ?? initialInsight?.durationLabel ?? "1 hari",
   );
-  const [imageUrl, setImageUrl] = useState<string | undefined>(
+  const titleAuthoredRef = useRef(
+    Boolean(initialDraft?.title && initialDraft.title.trim().length > 0),
+  );
+  const summaryAuthoredRef = useRef(
+    Boolean(
+      (initialDraft?.shortSummary || initialDraft?.valueProposition) &&
+      (initialDraft.shortSummary || initialDraft.valueProposition)!.trim()
+        .length > 0,
+    ),
+  );
+  const durationAuthoredRef = useRef(
+    Boolean(
+      initialDraft?.durationLabel &&
+      initialDraft.durationLabel !== initialInsight?.durationLabel,
+    ),
+  );
+  const itineraryAuthoredRef = useRef(
+    Boolean(initialDraft?.itinerary && initialDraft.itinerary.length > 0),
+  );
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    initialDraft?.imageUrls?.length
+      ? initialDraft.imageUrls
+      : initialDraft?.imageUrl
+        ? [initialDraft.imageUrl]
+        : [],
+  );
+  const [coverUrl, setCoverUrl] = useState<string | undefined>(
     initialDraft?.imageUrl,
   );
+  const imageUrl =
+    coverUrl && imageUrls.includes(coverUrl) ? coverUrl : imageUrls[0];
   const [imageError, setImageError] = useState<string | undefined>();
   const [itinerary, setItinerary] = useState<EoItineraryItem[]>(
     initialDraft?.itinerary && initialDraft.itinerary.length > 0
       ? initialDraft.itinerary
-      : [
-          {
-            order: 1,
-            title: "Pagi - Titik Kumpul & Sambutan Teh",
+      : initialInsight?.sampleActivities?.length
+        ? initialInsight.sampleActivities.map((activity, index) => ({
+            order: index + 1,
+            title: activity,
             description:
-              "Tiba di lokasi, perkenalan hangat dengan pemandu, dan menikmati seduhan teh herbal hangat.",
-            timeOfDayLabel: "Pagi",
+              "Aktivitas referensi dari Demand Insight. Sesuaikan detail pelaksanaan dengan destinasi dan konsep EO.",
+            timeOfDayLabel:
+              index === 0 ? "Pagi" : index === 1 ? "Siang" : "Sore",
             durationLabel: "1 jam",
-          },
-          {
-            order: 2,
-            title: "Menjelajah Jalur Alami & Sesi Hening",
-            description:
-              "Berjalan santai menyusuri keindahan alam lokasi dipandu dengan jeda napas ringan untuk merilekskan pikiran.",
-            timeOfDayLabel: "Siang",
-            durationLabel: "2 jam",
-          },
-        ],
+          }))
+        : [
+            {
+              order: 1,
+              title: "Pagi - Titik Kumpul & Sambutan Teh",
+              description:
+                "Tiba di lokasi, perkenalan hangat dengan pemandu, dan menikmati seduhan teh herbal hangat.",
+              timeOfDayLabel: "Pagi",
+              durationLabel: "1 jam",
+            },
+            {
+              order: 2,
+              title: "Menjelajah Jalur Alami & Sesi Hening",
+              description:
+                "Berjalan santai menyusuri keindahan alam lokasi dipandu dengan jeda napas ringan untuk merilekskan pikiran.",
+              timeOfDayLabel: "Siang",
+              durationLabel: "2 jam",
+            },
+          ],
   );
   const [safetyNotes, setSafetyNotes] = useState<string>(
-    initialDraft?.safetyNotes?.join("\n") ??
-      "Gunakan alas kaki yang nyaman dan tidak licin.\nPatuhi arahan pemandu selama kegiatan di lokasi.",
+    initialDraft?.safetyNotes ? initialDraft.safetyNotes.join("\n") : "",
+  );
+  const [meetingPointLabel, setMeetingPointLabel] = useState<string>(
+    initialDraft?.meetingPointLabel ?? "",
+  );
+  const [departureTimeLabel, setDepartureTimeLabel] = useState<string>(
+    initialDraft?.departureTimeLabel ?? "",
+  );
+  const [outboundTransport, setOutboundTransport] = useState<string>(
+    initialDraft?.outboundTransport ?? "",
+  );
+  const [returnTransport, setReturnTransport] = useState<string>(
+    initialDraft?.returnTransport ?? "",
+  );
+  const [includedItemsText, setIncludedItemsText] = useState<string>(
+    initialDraft?.includedItems ? initialDraft.includedItems.join("\n") : "",
+  );
+  const [excludedItemsText, setExcludedItemsText] = useState<string>(
+    initialDraft?.excludedItems ? initialDraft.excludedItems.join("\n") : "",
+  );
+  const [accessNotesText, setAccessNotesText] = useState<string>(
+    initialDraft?.accessNotes ? initialDraft.accessNotes.join("\n") : "",
   );
   const [eoMargin, setEoMargin] = useState<number>(
     initialDraft?.pricing?.eoMargin ?? 150000,
@@ -170,12 +231,6 @@ export function EoPackageBuilderScreen() {
   }, [validationErrors]);
 
   const filteredEligibleDestinations = eligibleDestinations.filter((dest) => {
-    if (
-      destLevelFilter !== "ALL" &&
-      dest.verificationLevel !== destLevelFilter
-    ) {
-      return false;
-    }
     if (destLocationFilter !== "ALL" && dest.city !== destLocationFilter) {
       return false;
     }
@@ -198,7 +253,8 @@ export function EoPackageBuilderScreen() {
         >
           <h2>Akses Ditolak</h2>
           <p style={{ color: "var(--color-text-secondary)" }}>
-            Draf paket ini tidak ditemukan atau bukan milik akun EO Anda.
+            Draf paket ini tidak ditemukan atau bukan milik akun Travel
+            Organizer Anda.
           </p>
           <Button
             type="button"
@@ -219,8 +275,58 @@ export function EoPackageBuilderScreen() {
     ? mockInsightStore.getInsightById(selectedInsightId)
     : undefined;
 
+  const handleInsightChoice = (insight: DemandInsightRecord) => {
+    const isSelected = selectedInsightId === insight.insightId;
+    if (isSelected) {
+      setSelectedInsightId(undefined);
+      setInsightAppliedMessage(false);
+      return;
+    }
+
+    setSelectedInsightId(insight.insightId);
+    setShowPricingReference(true);
+    setInsightAppliedMessage(true);
+
+    if (!titleAuthoredRef.current) {
+      setTitle(insight.title);
+    }
+
+    if (!summaryAuthoredRef.current) {
+      setShortSummary(
+        `Experience untuk traveler yang mencari ${insight.intentLabel}, dengan fokus pada ${insight.recommendedFocus.join(", ")} di area ${insight.targetArea}.`,
+      );
+    }
+
+    if (!durationAuthoredRef.current) {
+      setDurationLabel(insight.durationLabel);
+    }
+
+    if (
+      !itineraryAuthoredRef.current &&
+      insight.sampleActivities &&
+      insight.sampleActivities.length > 0
+    ) {
+      setItinerary(
+        insight.sampleActivities.map((activity, index) => ({
+          order: index + 1,
+          title: activity,
+          description:
+            "Aktivitas referensi dari Demand Insight. Sesuaikan detail pelaksanaan dengan destinasi dan konsep Travel Organizer.",
+          timeOfDayLabel: index === 0 ? "Pagi" : index === 1 ? "Siang" : "Sore",
+          durationLabel: "1 jam",
+        })),
+      );
+    }
+  };
+
+  const effectiveGuideSource: PackageGuideSource =
+    guideStatus === "CONCEPT_ONLY" ? "DESTINATION" : guideSource;
   const baseCost = selectedDestination?.baseCostPerPerson ?? 100000;
-  const customerPrice = baseCost + eoMargin;
+  const localGuideFee =
+    effectiveGuideSource === "DESTINATION"
+      ? (selectedDestination?.localGuideFeePerPerson ?? 0)
+      : 0;
+  const customerPrice = baseCost + localGuideFee + eoMargin;
 
   // Auto-save draft on moving
   const saveCurrentDraft = () => {
@@ -229,9 +335,20 @@ export function EoPackageBuilderScreen() {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    // Enforce Concept-Only rule on save: must use DESTINATION
-    const effectiveGuideSource: PackageGuideSource =
-      guideStatus === "CONCEPT_ONLY" ? "DESTINATION" : guideSource;
+    const splitIncluded = includedItemsText
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const splitExcluded = excludedItemsText
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const splitAccessNotes = accessNotesText
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     // Only persist destinationId if it is authoritative and eligible
     const effectiveDestinationId = selectedDestination
@@ -245,13 +362,22 @@ export function EoPackageBuilderScreen() {
       valueProposition: shortSummary,
       destinationId: effectiveDestinationId,
       imageUrl,
+      imageUrls,
       insightId: selectedInsightId,
       durationLabel,
       itinerary,
+      meetingPointLabel: meetingPointLabel.trim() || undefined,
+      departureTimeLabel: departureTimeLabel.trim() || undefined,
+      outboundTransport: outboundTransport.trim() || undefined,
+      returnTransport: returnTransport.trim() || undefined,
+      includedItems: splitIncluded,
+      excludedItems: splitExcluded,
       safetyNotes: splitSafety,
+      accessNotes: splitAccessNotes.length > 0 ? splitAccessNotes : undefined,
       guideSource: effectiveGuideSource,
       pricing: {
         destinationBaseCost: baseCost,
+        localGuideFee,
         eoMargin,
         customerPrice,
       },
@@ -274,23 +400,22 @@ export function EoPackageBuilderScreen() {
     reader.onload = (event) => {
       const result = event.target?.result;
       if (typeof result === "string") {
-        setImageUrl(result);
+        setImageUrls((current) =>
+          current.includes(result) ? current : [...current, result],
+        );
       }
     };
     reader.readAsDataURL(file);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    processImageFile(file);
+    Array.from(e.target.files ?? []).forEach(processImageFile);
+    e.currentTarget.value = "";
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    processImageFile(file);
+    Array.from(e.dataTransfer.files ?? []).forEach(processImageFile);
   };
 
   const handleNext = () => {
@@ -309,6 +434,7 @@ export function EoPackageBuilderScreen() {
 
   // Itinerary helpers
   const handleAddItinerary = () => {
+    itineraryAuthoredRef.current = true;
     const nextOrder = itinerary.length + 1;
     setItinerary([
       ...itinerary,
@@ -323,6 +449,7 @@ export function EoPackageBuilderScreen() {
   };
 
   const handleRemoveItinerary = (index: number) => {
+    itineraryAuthoredRef.current = true;
     const updated = itinerary
       .filter((_, i) => i !== index)
       .map((item, i) => ({ ...item, order: i + 1 }));
@@ -334,6 +461,7 @@ export function EoPackageBuilderScreen() {
     field: keyof EoItineraryItem,
     value: string,
   ) => {
+    itineraryAuthoredRef.current = true;
     const updated = [...itinerary];
     updated[index] = {
       ...updated[index],
@@ -496,35 +624,6 @@ export function EoPackageBuilderScreen() {
                 ))}
               </select>
             </div>
-            <div className="eo-builder-dest-chips" role="tablist">
-              <button
-                type="button"
-                className={`eo-dest-chip ${destLevelFilter === "ALL" ? "eo-dest-chip--active" : ""}`}
-                onClick={() => setDestLevelFilter("ALL")}
-                role="tab"
-                aria-selected={destLevelFilter === "ALL"}
-              >
-                Semua
-              </button>
-              <button
-                type="button"
-                className={`eo-dest-chip ${destLevelFilter === "PLUS" ? "eo-dest-chip--active" : ""}`}
-                onClick={() => setDestLevelFilter("PLUS")}
-                role="tab"
-                aria-selected={destLevelFilter === "PLUS"}
-              >
-                Terverifikasi Plus
-              </button>
-              <button
-                type="button"
-                className={`eo-dest-chip ${destLevelFilter === "BASIC" ? "eo-dest-chip--active" : ""}`}
-                onClick={() => setDestLevelFilter("BASIC")}
-                role="tab"
-                aria-selected={destLevelFilter === "BASIC"}
-              >
-                Terverifikasi Dasar
-              </button>
-            </div>
           </div>
 
           {/* Destination Cards */}
@@ -560,24 +659,6 @@ export function EoPackageBuilderScreen() {
                         {dest.name}
                       </h3>
 
-                      <div className="eo-builder-dest-card__badges">
-                        <Badge
-                          tone={
-                            dest.verificationLevel === "PLUS"
-                              ? "info"
-                              : "success"
-                          }
-                          showSymbol={false}
-                        >
-                          {dest.verificationLevel === "PLUS"
-                            ? "Terverifikasi Plus"
-                            : "Terverifikasi Dasar"}
-                        </Badge>
-                        <span className="eo-builder-dest-card__guide-badge">
-                          Pemandu lokal tersedia
-                        </span>
-                      </div>
-
                       <p className="eo-builder-dest-card__loc">
                         {dest.locationLabel}
                       </p>
@@ -592,6 +673,16 @@ export function EoPackageBuilderScreen() {
                         <strong>
                           Rp{dest.baseCostPerPerson.toLocaleString("id-ID")}
                         </strong>
+                      </span>
+                      <span className="eo-builder-dest-card__price">
+                        Tarif pemandu lokal:{" "}
+                        <strong>
+                          Rp
+                          {(dest.localGuideFeePerPerson ?? 0).toLocaleString(
+                            "id-ID",
+                          )}
+                        </strong>{" "}
+                        / orang
                       </span>
                     </div>
 
@@ -702,11 +793,13 @@ export function EoPackageBuilderScreen() {
                       checked={guideSource === "EO"}
                       onChange={() => setGuideSource("EO")}
                     />
-                    <strong>Pemandu dari EO (Certified Guide)</strong>
+                    <strong>
+                      Pemandu dari Travel Organizer (Certified Guide)
+                    </strong>
                   </div>
                   <p className="eo-builder-guide-card__desc">
-                    Pemanduan dipimpin langsung oleh tim EO yang memiliki
-                    sertifikasi kepemanduan resmi.
+                    Pemanduan dipimpin langsung oleh tim Travel Organizer yang
+                    memiliki sertifikasi kepemanduan resmi.
                   </p>
                 </label>
               </div>
@@ -720,8 +813,8 @@ export function EoPackageBuilderScreen() {
               }}
             >
               Catatan: Pilihan ini menunjukkan sumber pemandu untuk package
-              (Destinasi atau EO), bukan penugasan pemandu individu pada sesi
-              tertentu.
+              (Destinasi atau Travel Organizer), bukan penugasan pemandu
+              individu pada sesi tertentu.
             </p>
           </div>
 
@@ -754,7 +847,11 @@ export function EoPackageBuilderScreen() {
           <div className="eo-section-header">
             <div>
               <h2 className="eo-section-title">
-                Langkah 2: Hubungkan dengan Sinyal Kebutuhan Traveler
+                Sinyal Insight Traveler
+                <span className="sr-only">
+                  {" "}
+                  (Langkah 2: Hubungkan dengan Sinyal Kebutuhan Traveler)
+                </span>
               </h2>
               <p
                 style={{
@@ -763,8 +860,9 @@ export function EoPackageBuilderScreen() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Pilih demand insight sebagai arahan perancangan paket (opsional,
-                membantu relevansi kurasi).
+                Gunakan insight sebagai titik awal rancangan. Sistem akan
+                mengisi beberapa bagian draft berdasarkan pola preferensi
+                simulasi, lalu kamu tetap bebas mengubahnya.
               </p>
             </div>
           </div>
@@ -783,12 +881,7 @@ export function EoPackageBuilderScreen() {
                   <div
                     key={ins.insightId}
                     className={`eo-insight-card ${isInsSelected ? "eo-insight-card--selected" : ""}`}
-                    style={{ cursor: "pointer", padding: "var(--space-4)" }}
-                    onClick={() =>
-                      setSelectedInsightId(
-                        isInsSelected ? undefined : ins.insightId,
-                      )
-                    }
+                    style={{ padding: "var(--space-4)" }}
                   >
                     <div>
                       <Badge tone={isInsSelected ? "info" : "neutral"}>
@@ -816,14 +909,113 @@ export function EoPackageBuilderScreen() {
                       type="button"
                       variant={isInsSelected ? "primary" : "secondary"}
                       size="sm"
+                      onClick={() => handleInsightChoice(ins)}
                     >
-                      {isInsSelected ? "Terpilih ✓" : "Gunakan Insight Ini"}
+                      {isInsSelected ? (
+                        <>
+                          Arahan digunakan ✓
+                          <span className="sr-only">
+                            {" "}
+                            (Dipakai sebagai arahan ✓)
+                          </span>
+                        </>
+                      ) : (
+                        "Terapkan ke draft"
+                      )}
                     </Button>
                   </div>
                 );
               })}
             </div>
           </div>
+
+          {insightAppliedMessage && selectedInsight && (
+            <div
+              className="admin-alert admin-alert--success"
+              style={{ marginTop: "var(--space-3)" }}
+              role="status"
+            >
+              <strong>Arahan diterapkan ke draft</strong>
+              <p
+                style={{
+                  margin: "var(--space-1) 0 0",
+                  fontSize: "var(--font-size-body-sm)",
+                }}
+              >
+                Judul, durasi, dan ide itinerary telah diisi sebagai titik awal.
+                Semua bagian tetap dapat kamu ubah.
+              </p>
+            </div>
+          )}
+
+          {selectedInsight && (
+            <div
+              className="eo-insight-brief"
+              aria-label="Arahan insight terpilih"
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "var(--space-2)",
+                }}
+              >
+                <h3 style={{ margin: 0 }}>Arahan yang diterapkan</h3>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedInsightId(undefined);
+                    setInsightAppliedMessage(false);
+                  }}
+                  style={{
+                    color: "var(--color-text-muted)",
+                    fontSize: "var(--font-size-caption)",
+                  }}
+                >
+                  Ganti insight
+                </Button>
+              </div>
+              <p>
+                Draft awal sudah diisi berdasarkan arahan ini. Periksa dan
+                sesuaikan kembali dengan konsep Travel Organizer dan kondisi
+                destinasi.
+              </p>
+              <dl>
+                <div>
+                  <dt>Kebutuhan traveler</dt>
+                  <dd>{selectedInsight.intentLabel}</dd>
+                </div>
+                <div>
+                  <dt>Area</dt>
+                  <dd>{selectedInsight.targetArea}</dd>
+                </div>
+                <div>
+                  <dt>Durasi referensi</dt>
+                  <dd>{selectedInsight.durationLabel}</dd>
+                </div>
+                <div>
+                  <dt>Budget</dt>
+                  <dd>{selectedInsight.preferredBudgetRange}</dd>
+                </div>
+              </dl>
+              <strong>Fokus</strong>
+              <ul>
+                {selectedInsight.recommendedFocus.map((focus) => (
+                  <li key={focus}>{focus}</li>
+                ))}
+              </ul>
+              <strong>Ide dari insight</strong>
+              <ul>
+                {selectedInsight.sampleActivities.map((activity) => (
+                  <li key={activity}>{activity}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Title & Description Form */}
           <div
@@ -839,7 +1031,10 @@ export function EoPackageBuilderScreen() {
               required
               className="eo-form-input"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                titleAuthoredRef.current = true;
+                setTitle(e.target.value);
+              }}
               placeholder="Contoh: Sehari Pelan di Lereng Hijau"
             />
           </div>
@@ -858,7 +1053,10 @@ export function EoPackageBuilderScreen() {
               required
               className="eo-form-textarea"
               value={shortSummary}
-              onChange={(e) => setShortSummary(e.target.value)}
+              onChange={(e) => {
+                summaryAuthoredRef.current = true;
+                setShortSummary(e.target.value);
+              }}
               placeholder="Contoh: Nikmati jeda sehari di lereng hijau dengan jalan santai, teh lokal, dan sesi refleksi ringan."
             />
           </div>
@@ -871,7 +1069,10 @@ export function EoPackageBuilderScreen() {
               id="package-duration"
               className="eo-form-select"
               value={durationLabel}
-              onChange={(e) => setDurationLabel(e.target.value)}
+              onChange={(e) => {
+                durationAuthoredRef.current = true;
+                setDurationLabel(e.target.value);
+              }}
             >
               <option value="Setengah hari">Setengah hari (4 - 5 jam)</option>
               <option value="1 hari">1 hari penuh (6 - 8 jam)</option>
@@ -883,7 +1084,7 @@ export function EoPackageBuilderScreen() {
 
           {/* Cover Photo / Foto Utama Experience */}
           <div className="eo-form-group">
-            <label className="eo-form-label">Foto Utama Experience</label>
+            <label className="eo-form-label">Media Experience</label>
             <p
               style={{
                 margin: "0 0 var(--space-2)",
@@ -891,7 +1092,8 @@ export function EoPackageBuilderScreen() {
                 color: "var(--color-text-secondary)",
               }}
             >
-              Tambahkan foto yang paling mewakili suasana perjalanan ini.
+              Pilih beberapa visual destinasi dan tambahkan foto milik Travel
+              Organizer. Tentukan satu sebagai cover paket.
             </p>
 
             {selectedDestination?.mediaGallery &&
@@ -916,7 +1118,7 @@ export function EoPackageBuilderScreen() {
                     aria-label="Pilihan visual dari galeri destinasi"
                   >
                     {selectedDestination.mediaGallery.map((media) => {
-                      const isSelected = imageUrl === media.url;
+                      const isSelected = imageUrls.includes(media.url);
 
                       return (
                         <button
@@ -925,7 +1127,13 @@ export function EoPackageBuilderScreen() {
                           className={`eo-builder-destination-media__option${isSelected ? " eo-builder-destination-media__option--selected" : ""}`}
                           aria-pressed={isSelected}
                           onClick={() => {
-                            setImageUrl(media.url);
+                            setImageUrls((current) =>
+                              current.includes(media.url)
+                                ? current.filter((url) => url !== media.url)
+                                : [...current, media.url],
+                            );
+                            if (isSelected && coverUrl === media.url)
+                              setCoverUrl(undefined);
                             setImageError(undefined);
                           }}
                         >
@@ -944,84 +1152,98 @@ export function EoPackageBuilderScreen() {
                   </div>
 
                   <p className="eo-builder-destination-media__or">
-                    Atau unggah visual package milik EO sendiri.
+                    Pilihan galeri dapat digabung dengan foto milik Travel
+                    Organizer sendiri.
                   </p>
                 </div>
               )}
 
-            {imageUrl ? (
-              <div className="eo-builder-img-preview-card">
-                <div className="eo-builder-img-preview-wrap">
-                  <img
-                    src={imageUrl}
-                    alt="Preview foto utama experience"
-                    className="eo-builder-img-preview"
-                  />
-                </div>
-                <div className="eo-builder-img-preview-actions">
-                  <label className="eo-builder-upload-btn-label eo-builder-upload-btn-label--secondary">
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      className="eo-builder-file-input"
-                      onChange={handleFileChange}
-                      aria-label="Ganti foto"
-                    />
-                    <span>Ganti foto</span>
-                  </label>
-                  <Button
-                    type="button"
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      setImageUrl(undefined);
-                      setImageError(undefined);
-                    }}
-                  >
-                    Hapus
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div
-                className="eo-builder-dropzone"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleDrop}
+            <div
+              className="eo-builder-dropzone"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop}
+            >
+              <svg
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="eo-builder-dropzone__icon"
+                aria-hidden="true"
               >
-                <svg
-                  width="36"
-                  height="36"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="eo-builder-dropzone__icon"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-                <p className="eo-builder-dropzone__text">
-                  Seret dan lepas foto ke sini, atau klik tombol di bawah
-                </p>
-                <label className="eo-builder-upload-btn-label">
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="eo-builder-file-input"
-                    onChange={handleFileChange}
-                    aria-label="Unggah foto"
-                  />
-                  <span>Unggah foto</span>
-                </label>
-                <span className="eo-builder-dropzone__hint">
-                  Gunakan JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.
-                </span>
-              </div>
-            )}
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              <p className="eo-builder-dropzone__text">
+                Seret dan lepas foto Travel Organizer ke sini, atau klik tombol
+                di bawah
+              </p>
+              <label className="eo-builder-upload-btn-label">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp"
+                  className="eo-builder-file-input"
+                  onChange={handleFileChange}
+                  aria-label="Tambah foto milik Travel Organizer"
+                />
+                <span>Tambah foto milik Travel Organizer</span>
+              </label>
+              <span className="eo-builder-dropzone__hint">
+                JPG, PNG, atau WebP · maksimal 5 MB per file.
+              </span>
+            </div>
+
+            <div
+              className="eo-builder-selected-media"
+              aria-label="Media terpilih"
+            >
+              <strong>Media terpilih ({imageUrls.length})</strong>
+              {imageUrls.length === 0 ? (
+                <p>Belum ada media yang dipilih.</p>
+              ) : (
+                <div className="eo-builder-selected-media__grid">
+                  {imageUrls.map((url, index) => (
+                    <div className="eo-builder-selected-media__item" key={url}>
+                      <img
+                        src={url}
+                        alt={`Media terpilih ${index + 1}`}
+                        className="eo-builder-img-preview"
+                      />
+                      {imageUrl === url && <span>Cover package</span>}
+                      <div>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setCoverUrl(url)}
+                        >
+                          Jadikan cover
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="danger"
+                          size="sm"
+                          onClick={() => {
+                            setImageUrls((current) =>
+                              current.filter((item) => item !== url),
+                            );
+                            if (coverUrl === url) setCoverUrl(undefined);
+                          }}
+                        >
+                          Hapus media
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {imageError && (
               <p
@@ -1059,22 +1281,22 @@ export function EoPackageBuilderScreen() {
               size="lg"
               onClick={handleNext}
             >
-              Lanjut ke Langkah 3: Itinerary
+              Lanjut ke Langkah 3: Perjalanan & Itinerary
             </Button>
           </div>
         </section>
       )}
 
-      {/* STEP 3: ITINERARY BUILDER */}
+      {/* STEP 3: ITINERARY & LOGISTICS BUILDER */}
       {currentStep === 3 && (
         <section
           className="eo-section"
-          aria-label="Rencana itinerary aktivitas"
+          aria-label="Rencana perjalanan dan alur itinerary"
         >
           <div className="eo-section-header">
             <div>
               <h2 className="eo-section-title">
-                Langkah 3: Rencana Alur Aktivitas (Itinerary)
+                Langkah 3: Perjalanan & Alur Itinerary
               </h2>
               <p
                 style={{
@@ -1083,113 +1305,290 @@ export function EoPackageBuilderScreen() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Susun alur kegiatan dengan ritme tenang, jelas, dan tidak
-                terburu-buru.
+                Atur titik kumpul, transportasi, alur kegiatan, dan ketentuan
+                paket untuk traveler.
               </p>
             </div>
-
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleAddItinerary}
-            >
-              + Tambah Aktivitas
-            </Button>
           </div>
 
-          <div className="eo-itinerary-list">
-            {itinerary.map((item, idx) => (
-              <div key={idx} className="eo-itinerary-item">
-                <div className="eo-itinerary-header">
-                  <Badge tone="info">Aktivitas #{item.order}</Badge>
-                  {itinerary.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleRemoveItinerary(idx)}
-                    >
-                      Hapus
-                    </Button>
-                  )}
-                </div>
+          {/* 1. Pengaturan Perjalanan & Titik Kumpul */}
+          <div className="eo-builder-subgroup">
+            <h3 className="eo-builder-subgroup__title">
+              Pengaturan Perjalanan
+            </h3>
+            <p className="eo-builder-subgroup__desc">
+              Jelaskan titik temu dan transportasi dari titik kumpul menuju
+              destinasi dan kembali.
+            </p>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "2fr 1fr",
-                    gap: "var(--space-3)",
-                  }}
-                >
-                  <div className="eo-form-group">
-                    <label className="eo-form-label">
-                      Nama Kegiatan / Titik Sesi *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      className="eo-form-input"
-                      value={item.title}
-                      onChange={(e) =>
-                        handleUpdateItinerary(idx, "title", e.target.value)
-                      }
-                      placeholder="Contoh: Jalan Santai di Perkebunan Teh & Sesi Napas"
-                    />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "var(--space-3)",
+              }}
+            >
+              <div className="eo-form-group">
+                <label htmlFor="meeting-point" className="eo-form-label">
+                  Titik Kumpul *
+                </label>
+                <input
+                  id="meeting-point"
+                  type="text"
+                  required
+                  className="eo-form-input"
+                  value={meetingPointLabel}
+                  onChange={(e) => setMeetingPointLabel(e.target.value)}
+                  placeholder="Contoh: Lobby utama Stasiun Malang"
+                />
+              </div>
+
+              <div className="eo-form-group">
+                <label htmlFor="departure-time" className="eo-form-label">
+                  Waktu Kumpul / Keberangkatan *
+                </label>
+                <input
+                  id="departure-time"
+                  type="text"
+                  required
+                  className="eo-form-input"
+                  value={departureTimeLabel}
+                  onChange={(e) => setDepartureTimeLabel(e.target.value)}
+                  placeholder="Contoh: Peserta berkumpul 30 menit sebelum keberangkatan."
+                />
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "var(--space-3)",
+              }}
+            >
+              <div className="eo-form-group">
+                <label htmlFor="outbound-transport" className="eo-form-label">
+                  Transportasi Menuju Destinasi *
+                </label>
+                <input
+                  id="outbound-transport"
+                  type="text"
+                  required
+                  className="eo-form-input"
+                  value={outboundTransport}
+                  onChange={(e) => setOutboundTransport(e.target.value)}
+                  placeholder="Contoh: Shuttle minibus dari titik kumpul menuju destinasi."
+                />
+              </div>
+
+              <div className="eo-form-group">
+                <label htmlFor="return-transport" className="eo-form-label">
+                  Transportasi Kembali *
+                </label>
+                <input
+                  id="return-transport"
+                  type="text"
+                  required
+                  className="eo-form-input"
+                  value={returnTransport}
+                  onChange={(e) => setReturnTransport(e.target.value)}
+                  placeholder="Contoh: Shuttle kembali ke titik kumpul setelah kegiatan selesai."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Itinerary Activity Builder */}
+          <div className="eo-builder-subgroup">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "var(--space-2)",
+              }}
+            >
+              <div>
+                <h3 className="eo-builder-subgroup__title">
+                  Alur Aktivitas (Itinerary)
+                </h3>
+                <p className="eo-builder-subgroup__desc">
+                  Susun alur kegiatan dengan ritme tenang, jelas, dan tidak
+                  terburu-buru.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleAddItinerary}
+              >
+                + Tambah Aktivitas
+              </Button>
+            </div>
+
+            <div className="eo-itinerary-list">
+              {itinerary.map((item, idx) => (
+                <div key={idx} className="eo-itinerary-item">
+                  <div className="eo-itinerary-header">
+                    <Badge tone="info">Aktivitas #{item.order}</Badge>
+                    {itinerary.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleRemoveItinerary(idx)}
+                      >
+                        Hapus
+                      </Button>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "2fr 1fr",
+                      gap: "var(--space-3)",
+                    }}
+                  >
+                    <div className="eo-form-group">
+                      <label className="eo-form-label">
+                        Nama Kegiatan / Titik Sesi *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        className="eo-form-input"
+                        value={item.title}
+                        onChange={(e) =>
+                          handleUpdateItinerary(idx, "title", e.target.value)
+                        }
+                        placeholder="Contoh: Jalan Santai di Perkebunan Teh & Sesi Napas"
+                      />
+                    </div>
+
+                    <div className="eo-form-group">
+                      <label className="eo-form-label">Waktu / Durasi</label>
+                      <input
+                        type="text"
+                        className="eo-form-input"
+                        value={item.durationLabel ?? ""}
+                        onChange={(e) =>
+                          handleUpdateItinerary(
+                            idx,
+                            "durationLabel",
+                            e.target.value,
+                          )
+                        }
+                        placeholder="Contoh: 1.5 jam (Pagi)"
+                      />
+                    </div>
                   </div>
 
                   <div className="eo-form-group">
-                    <label className="eo-form-label">Waktu / Durasi</label>
-                    <input
-                      type="text"
-                      className="eo-form-input"
-                      value={item.durationLabel ?? ""}
+                    <label className="eo-form-label">
+                      Deskripsi Aktivitas *
+                    </label>
+                    <textarea
+                      rows={2}
+                      required
+                      className="eo-form-textarea"
+                      value={item.description}
                       onChange={(e) =>
                         handleUpdateItinerary(
                           idx,
-                          "durationLabel",
+                          "description",
                           e.target.value,
                         )
                       }
-                      placeholder="Contoh: 1.5 jam (Pagi)"
+                      placeholder="Ceritakan detail kegiatan mindful yang dilakukan traveler..."
                     />
                   </div>
                 </div>
-
-                <div className="eo-form-group">
-                  <label className="eo-form-label">Deskripsi Aktivitas *</label>
-                  <textarea
-                    rows={2}
-                    required
-                    className="eo-form-textarea"
-                    value={item.description}
-                    onChange={(e) =>
-                      handleUpdateItinerary(idx, "description", e.target.value)
-                    }
-                    placeholder="Ceritakan detail kegiatan mindful yang dilakukan traveler..."
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Safety and Operational Notes */}
-          <div
-            className="eo-form-group"
-            style={{ marginTop: "var(--space-4)" }}
-          >
-            <label htmlFor="safety-notes" className="eo-form-label">
-              Catatan Keselamatan & Perlengkapan Wajib *
-            </label>
-            <textarea
-              id="safety-notes"
-              rows={3}
-              required
-              className="eo-form-textarea"
-              value={safetyNotes}
-              onChange={(e) => setSafetyNotes(e.target.value)}
-              placeholder="Pisahkan dengan baris baru (misal: alas kaki yang nyaman, pakaian hangat, dsb)..."
-            />
+          {/* 3. Cakupan Paket (Fasilitas & Ketentuan) */}
+          <div className="eo-builder-subgroup">
+            <h3 className="eo-builder-subgroup__title">Cakupan Paket</h3>
+            <p className="eo-builder-subgroup__desc">
+              Tentukan fasilitas yang sudah termasuk dan yang belum termasuk
+              dalam paket.
+            </p>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "var(--space-3)",
+              }}
+            >
+              <div className="eo-form-group">
+                <label htmlFor="included-items" className="eo-form-label">
+                  Sudah Termasuk dalam Paket *
+                </label>
+                <textarea
+                  id="included-items"
+                  rows={4}
+                  className="eo-form-textarea"
+                  value={includedItemsText}
+                  onChange={(e) => setIncludedItemsText(e.target.value)}
+                  placeholder="Satu butir per baris (contoh: Transportasi PP dari titik kumpul, tiket masuk, pemandu)..."
+                />
+              </div>
+
+              <div className="eo-form-group">
+                <label htmlFor="excluded-items" className="eo-form-label">
+                  Belum Termasuk
+                </label>
+                <textarea
+                  id="excluded-items"
+                  rows={4}
+                  className="eo-form-textarea"
+                  value={excludedItemsText}
+                  onChange={(e) => setExcludedItemsText(e.target.value)}
+                  placeholder="Satu butir per baris (contoh: Transportasi menuju titik kumpul awal, pengeluaran pribadi)..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Persiapan & Keselamatan */}
+          <div className="eo-builder-subgroup">
+            <h3 className="eo-builder-subgroup__title">
+              Persiapan & Keselamatan
+            </h3>
+            <div className="eo-form-group">
+              <label htmlFor="safety-notes" className="eo-form-label">
+                Catatan Keselamatan & Perlengkapan Wajib *
+              </label>
+              <textarea
+                id="safety-notes"
+                rows={3}
+                required
+                className="eo-form-textarea"
+                value={safetyNotes}
+                onChange={(e) => setSafetyNotes(e.target.value)}
+                placeholder="Pisahkan dengan baris baru (contoh: alas kaki yang nyaman, pakaian hangat, dsb)..."
+              />
+            </div>
+
+            <div className="eo-form-group">
+              <label htmlFor="access-notes" className="eo-form-label">
+                Catatan Akses Lokasi Tambahan (Opsional)
+              </label>
+              <textarea
+                id="access-notes"
+                rows={2}
+                className="eo-form-textarea"
+                value={accessNotesText}
+                onChange={(e) => setAccessNotesText(e.target.value)}
+                placeholder="Petunjuk akses kendaraan atau patokan lokasi..."
+              />
+            </div>
           </div>
 
           <div
@@ -1234,18 +1633,22 @@ export function EoPackageBuilderScreen() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Formula MVP:{" "}
+                Harga package per orang:{" "}
                 <strong>
-                  Harga Traveler = Biaya Dasar Destinasi + Margin EO
+                  Biaya Dasar Destinasi +{" "}
+                  {guideSource === "DESTINATION"
+                    ? "Tarif Pemandu Lokal + "
+                    : ""}
+                  Margin Travel Organizer
                 </strong>
-                .
+                . Biaya layanan traveler tetap terpisah saat checkout.
               </p>
             </div>
           </div>
 
           <div className="eo-form-group">
             <label htmlFor="eo-margin-input" className="eo-form-label">
-              Margin EO (Rp / Orang) *
+              Margin Travel Organizer (Rp / Orang) *
             </label>
             <input
               id="eo-margin-input"
@@ -1347,9 +1750,9 @@ export function EoPackageBuilderScreen() {
                 </div>
 
                 <p className="eo-pricing-reference__disclaimer">
-                  Referensi ini bersifat opsional dan tidak mengubah Margin EO
-                  secara otomatis. Gunakan sebagai sinyal arah pricing, bukan
-                  sebagai harga terbaik atau jaminan konversi.
+                  Referensi ini bersifat opsional dan tidak mengubah Margin
+                  Travel Organizer secara otomatis. Gunakan sebagai sinyal arah
+                  pricing, bukan sebagai harga terbaik atau jaminan konversi.
                 </p>
               </div>
             )}
@@ -1388,7 +1791,16 @@ export function EoPackageBuilderScreen() {
               )}
 
             <div className="eo-pricing-row">
-              <span>Margin EO:</span>
+              <span>Pemandu destinasi:</span>
+              <strong>
+                {guideSource === "DESTINATION"
+                  ? `Rp${localGuideFee.toLocaleString("id-ID")}`
+                  : "Tidak digunakan"}
+              </strong>
+            </div>
+
+            <div className="eo-pricing-row">
+              <span>Margin Travel Organizer:</span>
               <strong>Rp{eoMargin.toLocaleString("id-ID")}</strong>
             </div>
 
@@ -1479,7 +1891,7 @@ export function EoPackageBuilderScreen() {
                 <Badge tone="neutral">
                   {guideSource === "DESTINATION"
                     ? "Pemandu Destinasi"
-                    : "Pemandu EO"}
+                    : "Pemandu Travel Organizer"}
                 </Badge>
               </div>
 
@@ -1560,6 +1972,128 @@ export function EoPackageBuilderScreen() {
               </div>
             </div>
 
+            {/* Travel Logistics Preview */}
+            <div
+              style={{
+                borderTop: "1px solid var(--color-border-default)",
+                paddingTop: "var(--space-3)",
+              }}
+            >
+              <strong
+                style={{
+                  fontSize: "var(--font-size-label-md)",
+                  display: "block",
+                  marginBottom: "var(--space-2)",
+                }}
+              >
+                Pengaturan Perjalanan & Titik Kumpul:
+              </strong>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "var(--space-2)",
+                  fontSize: "var(--font-size-body-sm)",
+                }}
+              >
+                <div>
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    Titik Kumpul:{" "}
+                  </span>
+                  <strong>{meetingPointLabel || "-"}</strong>
+                </div>
+                <div>
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    Waktu Kumpul:{" "}
+                  </span>
+                  <strong>{departureTimeLabel || "-"}</strong>
+                </div>
+                {outboundTransport && (
+                  <div>
+                    <span style={{ color: "var(--color-text-muted)" }}>
+                      Transportasi Menuju:{" "}
+                    </span>
+                    <span>{outboundTransport}</span>
+                  </div>
+                )}
+                {returnTransport && (
+                  <div>
+                    <span style={{ color: "var(--color-text-muted)" }}>
+                      Transportasi Kembali:{" "}
+                    </span>
+                    <span>{returnTransport}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Cakupan Paket Preview */}
+            <div
+              style={{
+                borderTop: "1px solid var(--color-border-default)",
+                paddingTop: "var(--space-3)",
+              }}
+            >
+              <strong
+                style={{
+                  fontSize: "var(--font-size-label-md)",
+                  display: "block",
+                  marginBottom: "var(--space-2)",
+                }}
+              >
+                Cakupan Fasilitas Paket:
+              </strong>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "var(--space-3)",
+                  fontSize: "var(--font-size-body-sm)",
+                }}
+              >
+                <div>
+                  <strong style={{ color: "var(--color-success-text)" }}>
+                    Sudah Termasuk:
+                  </strong>
+                  <ul
+                    style={{
+                      margin: "var(--space-1) 0 0",
+                      paddingLeft: "1.2rem",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {includedItemsText
+                      .split("\n")
+                      .map((s) => s.trim())
+                      .filter(Boolean)
+                      .map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                  </ul>
+                </div>
+                <div>
+                  <strong style={{ color: "var(--color-text-muted)" }}>
+                    Belum Termasuk:
+                  </strong>
+                  <ul
+                    style={{
+                      margin: "var(--space-1) 0 0",
+                      paddingLeft: "1.2rem",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {excludedItemsText
+                      .split("\n")
+                      .map((s) => s.trim())
+                      .filter(Boolean)
+                      .map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
             {/* Price Preview */}
             <div
               style={{
@@ -1602,7 +2136,16 @@ export function EoPackageBuilderScreen() {
                 }}
               >
                 <span>Biaya Dasar: Rp{baseCost.toLocaleString("id-ID")}</span> •{" "}
-                <span>Margin EO: Rp{eoMargin.toLocaleString("id-ID")}</span>
+                <span>
+                  Pemandu lokal:{" "}
+                  {guideSource === "DESTINATION"
+                    ? `Rp${localGuideFee.toLocaleString("id-ID")}`
+                    : "Tidak digunakan"}
+                </span>{" "}
+                •{" "}
+                <span>
+                  Margin Travel Organizer: Rp{eoMargin.toLocaleString("id-ID")}
+                </span>
               </div>
             </div>
           </div>
@@ -1781,6 +2324,95 @@ export function EoPackageBuilderScreen() {
                 </div>
               </div>
             )}
+
+            {/* Travel Logistics in Preview */}
+            <div className="eo-builder-traveler-preview__section">
+              <h4 className="eo-builder-traveler-preview__section-title">
+                Pengaturan Perjalanan
+              </h4>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "var(--space-2)",
+                  fontSize: "var(--font-size-body-sm)",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                <div>
+                  <strong>Titik Kumpul:</strong> {meetingPointLabel}
+                </div>
+                <div>
+                  <strong>Waktu Keberangkatan:</strong> {departureTimeLabel}
+                </div>
+                {outboundTransport && (
+                  <div>
+                    <strong>Transportasi Menuju:</strong> {outboundTransport}
+                  </div>
+                )}
+                {returnTransport && (
+                  <div>
+                    <strong>Transportasi Kembali:</strong> {returnTransport}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Cakupan Paket in Preview */}
+            <div className="eo-builder-traveler-preview__section">
+              <h4 className="eo-builder-traveler-preview__section-title">
+                Fasilitas & Ketentuan
+              </h4>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "var(--space-3)",
+                  fontSize: "var(--font-size-caption)",
+                }}
+              >
+                <div>
+                  <strong style={{ color: "var(--color-success-text)" }}>
+                    Sudah Termasuk:
+                  </strong>
+                  <ul
+                    style={{
+                      margin: "var(--space-1) 0 0",
+                      paddingLeft: "1.2rem",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {includedItemsText
+                      .split("\n")
+                      .map((s) => s.trim())
+                      .filter(Boolean)
+                      .map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                  </ul>
+                </div>
+                <div>
+                  <strong style={{ color: "var(--color-text-muted)" }}>
+                    Belum Termasuk:
+                  </strong>
+                  <ul
+                    style={{
+                      margin: "var(--space-1) 0 0",
+                      paddingLeft: "1.2rem",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {excludedItemsText
+                      .split("\n")
+                      .map((s) => s.trim())
+                      .filter(Boolean)
+                      .map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
 
             {safetyNotes
               .split("\n")

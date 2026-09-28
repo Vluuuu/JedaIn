@@ -196,7 +196,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       );
     });
 
-    it("11 & 12 & 13. Starting Package Builder from Insight keeps insightId but does NOT prefill shortSummary with unmetDemandDescription", async () => {
+    it("11 & 12 & 13. Starting Package Builder from Insight applies editable source-backed draft without copying unmet-demand claims", async () => {
       partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
       const view = await renderComponent(
@@ -214,7 +214,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       // Navigate to Step 2 (Sinyal Insight)
       const step2Btn = Array.from(
         view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-      ).find((b) => b.textContent?.includes("2. Sinyal Insight"))!;
+      ).find((b) => b.textContent?.includes("Sinyal Insight"))!;
       await act(async () => {
         step2Btn.click();
       });
@@ -223,18 +223,22 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       expect(view.textContent).toContain(
         "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
       );
-      expect(view.textContent).toContain("Terpilih ✓");
+      expect(view.textContent).toContain("Dipakai sebagai arahan ✓");
 
-      // Title concept hint may be present
+      // Source-backed starting draft is applied from the selected insight.
       const titleInput = view.querySelector<HTMLInputElement>(
         'input[placeholder*="Sehari Pelan di Lereng Hijau"]',
       )!;
-      expect(titleInput.value).toContain("Jeda Mindful: Dekat dengan alam");
+      expect(titleInput.value).toBe(
+        "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
+      );
 
-      // Short summary / value proposition must NOT be auto-filled with the unmet demand description
+      // Summary may be auto-filled, but must not copy the simulated unmet-demand claim.
       const summaryInput =
         view.querySelector<HTMLTextAreaElement>("#package-summary")!;
-      expect(summaryInput.value).toBe("");
+      expect(summaryInput.value).toContain(
+        "Experience untuk traveler yang mencari",
+      );
       expect(summaryInput.value).not.toContain(
         "Traveler dari Malang & Surabaya mencari",
       );
@@ -242,7 +246,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       // Jump to Step 5 and open Traveler preview
       const step5Btn = Array.from(
         view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-      ).find((b) => b.textContent?.includes("5. Tinjau & Submit"))!;
+      ).find((b) => b.textContent?.includes("Tinjau & Submit"))!;
       await act(async () => {
         step5Btn.click();
       });
@@ -260,7 +264,9 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       expect(dialog.textContent).not.toContain(
         "Traveler dari Malang & Surabaya mencari",
       );
-      expect(dialog.textContent).toContain("Belum ada ringkasan pengalaman.");
+      expect(dialog.textContent).toContain(
+        "Experience untuk traveler yang mencari",
+      );
     });
 
     it("14. Editing existing draft preserves its authored shortSummary", async () => {
@@ -289,7 +295,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
 
       const step2Btn = Array.from(
         view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-      ).find((b) => b.textContent?.includes("2. Sinyal Insight"))!;
+      ).find((b) => b.textContent?.includes("Sinyal Insight"))!;
       await act(async () => {
         step2Btn.click();
       });
@@ -392,11 +398,15 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       // 20. Overview no longer says 'kapasitas destinasi terisi'
       expect(view.textContent).not.toContain("kapasitas destinasi terisi");
 
-      // 21. Clearly labels Kuota Sesi EO
-      expect(view.textContent).toContain("Kuota Sesi EO: 6 orang");
+      // 21. Clearly labels Kuota Sesi Travel Organizer
+      expect(view.textContent).toContain(
+        "Kuota Sesi Travel Organizer: 6 orang",
+      );
 
-      // 22. Progress percentage corresponds to EO Session quota
-      expect(view.textContent).toContain("0% Kuota Sesi EO terisi");
+      // 22. Progress percentage corresponds to Travel Organizer Session quota
+      expect(view.textContent).toContain(
+        "0% Kuota Sesi Travel Organizer terisi",
+      );
 
       // 23. General Destination capacity remains separately visible as venue context
       expect(view.textContent).toContain(
@@ -438,12 +448,8 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       );
 
       // 28. Uses conditional wording
-      expect(view.textContent).toContain(
-        "Perubahan informasi inti destinasi dapat memerlukan peninjauan ulang oleh Tim Kurator Admin JedaIn.",
-      );
-      expect(view.textContent).toContain(
-        "Aturan field dan proses final belum dikunci dalam prototype.",
-      );
+      expect(view.textContent).toContain("Simpan deskripsi");
+      expect(view.textContent).not.toContain("memerlukan verifikasi ulang");
     });
   });
 });

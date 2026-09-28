@@ -73,7 +73,7 @@ describe("Batch B2 — Operational Summary & Insight Context", () => {
       // 5. Biaya Dasar Destinasi (per-person semantic)
       expect(view.textContent).toContain("Biaya Dasar Destinasi");
       expect(view.textContent).toContain("Rp125.000 / orang");
-      expect(view.textContent).toContain("Harga traveler: Rp275.000 / orang");
+      expect(view.textContent).toContain("Harga traveler: Rp300.000 / orang");
 
       // 6. Alur & Durasi
       expect(view.textContent).toContain("Alur & Durasi");
@@ -122,11 +122,11 @@ describe("Batch B2 — Operational Summary & Insight Context", () => {
       expect(view.textContent).toContain("ID Sesi: ses_sgd_1");
       expect(view.textContent).toContain("Paket Experience");
       expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
-      expect(view.textContent).toContain("Penyelenggara (EO)");
+      expect(view.textContent).toContain("Penyelenggara (Travel Organizer)");
       expect(view.textContent).toContain("Jeda Alam Nusantara");
 
       // Clear separation of session quota and general destination capacity
-      expect(view.textContent).toContain("Kuota Sesi EO");
+      expect(view.textContent).toContain("Kuota Sesi Travel Organizer");
       expect(view.textContent).toContain("6 Orang");
       expect(view.textContent).toContain(
         "Kapasitas umum destinasi per sesi: 20 orang",

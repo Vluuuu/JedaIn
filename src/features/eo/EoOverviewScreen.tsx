@@ -51,12 +51,12 @@ export function EoOverviewScreen() {
               Overview
               <span className="sr-only">
                 {" "}
-                {partner?.businessName ?? "Mitra EO"}
+                {partner?.businessName ?? "Mitra Travel Organizer"}
               </span>
             </h1>
             <p>
               Orientasi operasional dan sinyal kebutuhan traveler untuk{" "}
-              {partner?.businessName ?? "Mitra EO"}.
+              {partner?.businessName ?? "Mitra Travel Organizer"}.
             </p>
           </div>
           <Button

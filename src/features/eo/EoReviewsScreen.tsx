@@ -1,4 +1,3 @@
-import { Badge } from "../../components/ui";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
@@ -21,10 +20,7 @@ export function EoReviewsScreen() {
     <div className="eo-container">
       <header className="eo-page-header">
         <div>
-          <Badge tone="info">Evaluasi Traveler</Badge>
-          <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Ulasan & Rating Kepemanduan
-          </h1>
+          <h1 className="eo-page-title">Ulasan & Rating Kepemanduan</h1>
           <p className="eo-page-subtitle">
             Ulasan traveler terpisah untuk pendampingan, pelayanan, dan
             kejelasan alur trip dari traveler yang telah menyelesaikan

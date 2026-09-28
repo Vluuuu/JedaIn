@@ -1,5 +1,20 @@
 # JedaIn — PRD HOLOGY Competition Prototype
 
+## Keputusan final Destination dan Travel Organizer (27 September 2026)
+
+Bagian ini menggantikan aturan BASIC/PLUS, batas enam media, dan rumus harga lama yang masih tercatat di riwayat implementasi di bawah.
+
+- **Terminologi Product-Facing**: Istilah resmi peran perancang pengalaman perjalanan adalah **Travel Organizer** (dengan identifier internal kode tetap `EO` demi stabilitas dan non-breaking migration).
+- **Tanggung Jawab Logistik Travel Organizer**: Travel Organizer bertanggung jawab atas rancangan pengalaman dan pengaturan perjalanan menyeluruh: menetapkan titik kumpul, waktu kumpul/keberangkatan, transportasi menuju destinasi, dan transportasi kembali ke titik kumpul, alur itinerary, fasilitas termasuk (misal transportasi PP dari titik kumpul), belum termasuk (misal transportasi peserta menuju titik kumpul awal), catatan keselamatan, dan catatan akses. Traveler bertanggung jawab mencapai titik kumpul awal sendiri, sedangkan transportasi dari titik kumpul menuju destinasi dan kembali dikelola oleh Travel Organizer. Seluruh rincian ini diauthoring di Langkah 3 Builder (Perjalanan & Itinerary) tanpa default sintetis otomatis.
+- **Dual Trust Identity & Rating di Traveler Package Detail**: Traveler Package Detail menampilkan identitas dan rating terpisah untuk Destinasi (verifikasi JedaIn + ulasan destinasi pascatrip) dan Travel Organizer (status Travel Organizer JedaIn + ulasan pascatrip organizer aktual). Rating kedua pihak tidak dicampuradukkan dan zero-state ditampilkan jujur ("Belum ada ulasan destinasi." / "Belum ada ulasan pascatrip.").
+- Verifikasi aplikasi destinasi tetap gate internal Admin. Persetujuan menghasilkan `APPROVED` dan destinasi kanonikal `ACTIVE` bila bukti pemandu lokal memenuhi syarat. `BASIC`/`PLUS` boleh bertahan sebagai field kompatibilitas internal, tetapi bukan tier, filter, atau badge produk. Semua destinasi yang tersedia untuk Travel Organizer adalah `ACTIVE` dan `guideReady=true`.
+- Status Destinasi Mitra diringkas menjadi status operasional kompak (`Profil destinasi siap digunakan Travel Organizer`), ringkasan operasional card/grid (Biaya dasar, Pemandu lokal, Kapasitas umum), serta status kecil `Status: Aktif`. Sembilan informasi inti profil (nama, lokasi, deskripsi, aktivitas, fasilitas, catatan operasional, informasi pemandu lokal, biaya dasar, dan kapasitas umum) ditampilkan di balik disclosure checklist jelas (✓/○) tanpa bullet kosong, bukan skor kualitas.
+- Profil Mitra menampilkan Ringkasan 2x2 facts rapi. Mitra dapat menyimpan deskripsi yang di-trim dengan minimum 20 karakter dengan feedback inline, serta menetapkan `localGuideFeePerPerson` dalam currency group input `Rp ... / orang` dengan feedback inline dan tampilan tarif aktif. Nilai tarif pemandu lokal langsung tersinkronisasi dalam same-runtime ke detail, katalog, dan builder Travel Organizer.
+- Foto fasilitas wajib diasosiasikan dengan fasilitas yang terdaftar (`destination.facilities`) melalui `facilityLabel` dan ditampilkan terkelompok per fasilitas pada Profil Mitra dan Travel Organizer Destination Detail. Galeri destinasi tetap terpisah untuk suasana umum tanpa batas jumlah. Per file hanya JPG/PNG/WebP hingga 5 MB. Media bawaan `PROTOTYPE_ILLUSTRATION` tidak dapat dihapus Mitra; media `DESTINATION_SOURCE` dapat dihapus. Sinkronisasi berlaku dalam runtime memori modul tanpa persistensi database produksi.
+- Untuk `guideSource=DESTINATION`, harga package per orang = biaya dasar destinasi + tarif pemandu lokal kanonikal + margin Travel Organizer. Untuk `guideSource=EO`, kontribusi tarif pemandu destinasi = Rp0. Service fee Traveler Rp7.500 per booking tetap item checkout terpisah; komisi platform 10% GMV tidak berubah.
+- Travel Organizer dapat memilih beberapa foto galeri destinasi, menggabungkannya dengan beberapa foto milik Travel Organizer, dan memilih cover. `imageUrls` menyimpan koleksi, `imageUrl` menyimpan cover; Traveler menampilkan media package aktual. Fallback crop ilustrasi tunggal hanya untuk fixture lama, dengan penjelasan eksplisit.
+- Demand Insight adalah sinyal preferensi simulasi prototype (bukan validasi pasar aktual atau jaminan penjualan). Tombol `Terapkan ke draft` memberi arahan sekaligus mengisi judul, ringkasan pengalaman, durasi, dan ide itinerary awal ke draft secara terproteksi tanpa menimpa bagian yang telah diedit manual oleh Travel Organizer. Melepas arahan insight tidak membatalkan draft. Tampilan 360° tetap `DEFERRED`.
+
 **Nama Produk:** JedaIn  
 **Kompetisi:** HoloBiz — HOLOGY 9.0  
 **Dokumen:** Product Requirements Document untuk prototype lomba  
@@ -558,7 +573,7 @@ Status:
 Current competition prototype behavior:
 
 Package unit price:
-Destination Base Cost + EO Margin.
+Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin.
 
 Checkout menampilkan:
 
@@ -1253,7 +1268,7 @@ Criticality: MUST.
 
 Current package formula yang dipertahankan di prototype:
 
-Customer Package Price = Destination Base Cost + EO Margin
+Customer Package Price = Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin
 
 Formula ini adalah harga paket sebelum traveler service fee.
 
@@ -1671,7 +1686,7 @@ Implemented and verified:
 - final live-user UX cleanup: redundant landing CTA dihapus sehingga swipe-up menjadi primary start interaction, dan redundant Home "JedaIn Traveler" chip dihapus (PR #94),
 - F5.1 Traveler Buyer Experience: Package Detail buyer-first dengan progressive disclosure, Trip Detail summary-first dengan satu `Lihat Detail Perjalanan`, completed-trip review CTA diprioritaskan, dan organizer rating hanya berasal dari actual EO/Guide post-trip review records (PR #97),
 - F5.2 EO Destination Discovery & Builder Clarity: filter lokasi destinasi eksplisit, dedicated Destination Detail decision page dari Builder, copy `Ringkasan Pengalaman`, visual package selector di EO Sessions, dan wording netral `Tentang Destinasi` pada profil Mitra (PR #99),
-- F5.3 Demand-Assisted Pricing Reference: Step 4 Builder memiliki optional reference dari canonical simulated budget distribution, menampilkan `respons simulasi` + selected Insight `preferredBudgetRange`, tidak mengubah EO Margin otomatis, dan mempertahankan formula `Destination Base Cost + EO Margin` (PR #101),
+- F5.3 Demand-Assisted Pricing Reference: Step 4 Builder memiliki optional reference dari canonical simulated budget distribution, menampilkan `respons simulasi` + selected Insight `preferredBudgetRange`, tidak mengubah EO Margin otomatis, dan mempertahankan formula `Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin` (PR #101),
 - media renderer/source priority,
 - destination cost scope,
 - session operational note,
@@ -1751,7 +1766,7 @@ Draf PROPOSAL saat ini secara eksplisit menggunakan dua sumber pendapatan:
 
 Canonical competition narrative:
 
-- harga package berasal dari Destination Base Cost + EO Margin,
+- harga package berasal dari Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin,
 - commission 10% adalah economics platform dan tidak ditambahkan sebagai commission line item ke Traveler,
 - service fee Rp7.500 ditampilkan transparan kepada Traveler,
 - prototype checkout tidak perlu mensimulasikan settlement/payout EO.
@@ -1974,7 +1989,7 @@ Quality gate setelah F3.1:
 Business rule impact:
 
 - NONE.
-- Package Price tetap Destination Base Cost + EO Margin.
+- Package Price tetap Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin.
 - Traveler Service Fee tetap Rp7.500 / booking.
 - Platform Commission tetap 10% GMV dan bukan Traveler line item.
 - Tidak ada perubahan role authority, refund policy, payment simulation boundary, atau cross-role persistence architecture.
@@ -2006,7 +2021,7 @@ Quality gate setelah F3.2:
 Business rule impact:
 
 - NONE.
-- Package Price tetap Destination Base Cost + EO Margin.
+- Package Price tetap Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin.
 - Traveler Service Fee tetap Rp7.500 / booking dan hanya checkout-level line item.
 - Platform Commission tetap 10% GMV dan bukan Traveler line item.
 - Admin tetap package approval authority.
@@ -2147,7 +2162,7 @@ Perubahan canonical:
 - Package `APPROVED` maupun `LIVE` tetap dapat menyiapkan future Session; `APPROVED` tetap tidak berarti marketplace `LIVE`.
 - Pada F4.2, `dest_hutan_trawas` sempat `ACTIVE` + `BASIC` dengan `guideReady=false`; keputusan produk berikutnya pada PR #105 mengganti state ini menjadi application `REJECTED` dan destinasi kanonikal `INACTIVE`.
 - Copy yang mengklaim kesiapan pemandu pada Hutan Bambu dihapus/diturunkan menjadi not-ready factual context.
-- Existing EO eligibility tetap membutuhkan `ACTIVE` + BASIC/PLUS + `guideReady=true`; Hutan Bambu tidak lagi EO-eligible selama `guideReady=false`.
+- Existing EO eligibility membutuhkan `ACTIVE` + `guideReady=true`; BASIC/PLUS hanya field kompatibilitas internal; Hutan Bambu tidak lagi EO-eligible selama `guideReady=false`.
 - Direct EO destination detail untuk destination yang tidak eligible tetap dapat dibaca sebagai context, tetapi tidak menawarkan active create-package CTA.
 - Admin Trust dan katalog EO hanya menampilkan destinasi aktif terverifikasi yang memenuhi syarat pemandu lokal.
 - Test temporal yang berhasil dibuat calendar-safe agar tidak kedaluwarsa karena tanggal tetap.
@@ -2214,7 +2229,7 @@ Quality gate setelah F4.3:
 Business / authority impact:
 
 - NONE.
-- Package Price tetap Destination Base Cost + EO Margin.
+- Package Price tetap Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin.
 - Traveler Service Fee tetap Rp7.500 per booking.
 - Platform Commission tetap 10% GMV dan bukan Traveler checkout line item.
 - Tidak ada perubahan payment/refund semantics, F4.1 transaction persistence, F4.2 Session temporal guard, review target separation, Admin approval authority, EO publish authority, atau Mitra read-only authority.

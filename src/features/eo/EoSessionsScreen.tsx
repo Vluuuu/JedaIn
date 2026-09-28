@@ -1,12 +1,21 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { ArrowLeftIcon } from "../../components/shells/icons";
-import { Badge, Button } from "../../components/ui";
+import { Button, InlineStatus } from "../../components/ui";
+import { getHumanStatusLabel, getStatusBadgeTone } from "./packageHelpers";
+import type { EoSessionStatus } from "./types";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
+
+const sessionStatusLabels: Record<EoSessionStatus, string> = {
+  OPEN: "Terbuka",
+  FULL: "Penuh",
+  CLOSED: "Ditutup",
+  CANCELLED: "Dibatalkan",
+};
 
 function getFutureDefaultDateTimes() {
   const tomorrow = new Date();
@@ -74,7 +83,8 @@ export function EoSessionsScreen() {
         >
           <h2>Akses Ditolak</h2>
           <p style={{ color: "var(--color-text-secondary)" }}>
-            Paket ini tidak ditemukan atau bukan milik akun EO Anda.
+            Paket ini tidak ditemukan atau bukan milik akun Travel Organizer
+            Anda.
           </p>
           <Link to="/partner/eo/packages" className="eo-back-btn">
             <ArrowLeftIcon className="eo-back-icon" />
@@ -128,7 +138,7 @@ export function EoSessionsScreen() {
       startAt: startIso,
       endAt: endIso,
       capacity,
-      pricePerPerson: selectedPkg?.pricing.customerPrice ?? 275000,
+      pricePerPerson: selectedPkg?.pricing.customerPrice ?? 300000,
       operationalNote: operationalNote.trim() || undefined,
     });
 
@@ -184,13 +194,10 @@ export function EoSessionsScreen() {
 
       <header className="eo-page-header">
         <div className="eo-page-header__main">
-          <Badge tone="info">Manajemen Jadwal Keberangkatan</Badge>
-          <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Jadwal Sesi Perjalanan
-          </h1>
+          <h1 className="eo-page-title">Jadwal Sesi Perjalanan</h1>
           <p className="eo-page-subtitle">
-            Buka jadwal sesi keberangkatan untuk paket yang telah disetujui
-            (APPROVED / LIVE).
+            Buka jadwal sesi keberangkatan untuk paket berstatus Disetujui atau
+            Live.
           </p>
         </div>
 
@@ -245,7 +252,7 @@ export function EoSessionsScreen() {
               <h2>Pilih Paket</h2>
               <p>
                 Pilih paket untuk melihat jadwalnya. Sesi baru hanya dapat
-                dibuka untuk paket APPROVED atau LIVE.
+                dibuka untuk paket yang Disetujui atau Live.
               </p>
             </div>
           </div>
@@ -269,7 +276,7 @@ export function EoSessionsScreen() {
               </span>
               <span className="eo-session-package-card__content">
                 <strong>Semua Sesi</strong>
-                <span>Lihat seluruh jadwal milik EO</span>
+                <span>Lihat seluruh jadwal milik Travel Organizer</span>
               </span>
             </button>
 
@@ -304,9 +311,9 @@ export function EoSessionsScreen() {
                   <span className="eo-session-package-card__content">
                     <span className="eo-session-package-card__topline">
                       <strong>{pkg.title}</strong>
-                      <Badge tone={canOpenSession ? "success" : "neutral"}>
-                        {pkg.status}
-                      </Badge>
+                      <InlineStatus tone={getStatusBadgeTone(pkg.status)}>
+                        {getHumanStatusLabel(pkg.status)}
+                      </InlineStatus>
                     </span>
                     <span className="eo-session-package-card__destination">
                       {destination
@@ -326,8 +333,8 @@ export function EoSessionsScreen() {
 
           {selectedPkg && !selectedPkgIsEligible && (
             <p className="eo-session-package-selector__notice" role="status">
-              Paket ini berstatus {selectedPkg.status}. Sesi baru hanya dapat
-              dibuat setelah paket APPROVED atau LIVE.
+              Paket ini berstatus {getHumanStatusLabel(selectedPkg.status)}.
+              Sesi baru hanya dapat dibuat setelah paket Disetujui atau Live.
             </p>
           )}
         </section>
@@ -374,8 +381,8 @@ export function EoSessionsScreen() {
                   color: "var(--color-warning-text)",
                 }}
               >
-                Sesi hanya dapat dibuka untuk paket yang sudah disetujui
-                (APPROVED / LIVE).
+                Sesi hanya dapat dibuka untuk paket berstatus Disetujui atau
+                Live.
               </p>
             )}
           </div>
@@ -477,25 +484,25 @@ export function EoSessionsScreen() {
                     </td>
                     <td>{ses.capacity} orang</td>
                     <td>
-                      <Badge
-                        tone={ses.remainingSlots === 0 ? "danger" : "info"}
-                      >
-                        {ses.remainingSlots} tersisa
-                      </Badge>
+                      <span className="eo-session-slots">
+                        {ses.remainingSlots} slot tersisa
+                      </span>
                     </td>
                     <td>Rp{ses.pricePerPerson.toLocaleString("id-ID")}</td>
                     <td>
-                      <Badge
+                      <InlineStatus
                         tone={
                           ses.status === "OPEN"
                             ? "success"
                             : ses.status === "FULL"
                               ? "warning"
-                              : "neutral"
+                              : ses.status === "CANCELLED"
+                                ? "danger"
+                                : "neutral"
                         }
                       >
-                        {ses.status}
-                      </Badge>
+                        {sessionStatusLabels[ses.status]}
+                      </InlineStatus>
                     </td>
                     <td>
                       <div

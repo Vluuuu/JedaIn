@@ -1,5 +1,9 @@
 # JedaIn — Wireframe Specification
 
+## Wireframe aktif: final Destination dan Travel Organizer (27 September 2026)
+
+Terminologi antarmuka menggunakan **Travel Organizer** (identifier internal `EO`). Overview Mitra: Status Destinasi kompak (`Profil destinasi siap digunakan Travel Organizer`), ringkasan operasional card/grid (Biaya dasar, Pemandu lokal, Kapasitas umum), status kecil `Status: Aktif`, serta `Informasi profil lengkap` dengan disclosure `Lihat 9 informasi inti` berupa checklist rapi tanpa bullet kosong. Profil: Ringkasan 2x2 facts rapi, editor `Tentang Destinasi` dengan feedback inline, `Tarif Pemandu Lokal` dalam currency group input `Rp ... / orang` dengan feedback inline dan tampilan tarif aktif, `Galeri Destinasi`, dan `Foto Fasilitas` yang terhubung ke daftar fasilitas (`destination.facilities`) terkelompok per fasilitas di profil & Travel Organizer detail. Directory/Detail/Builder tidak menampilkan badge atau filter BASIC/PLUS. Builder: badge langkah 1–5 dan label tanpa angka; Step 2 memberi pilihan banyak media destinasi, upload foto Travel Organizer, daftar media terpilih, dan `Jadikan cover`. Step 3 (Perjalanan & Itinerary) memfasilitasi authoring logistik perjalanan lengkap (titik kumpul, waktu kumpul, transportasi menuju destinasi dan kembali yang dikelola Travel Organizer, alur itinerary, fasilitas termasuk misal transportasi PP, belum termasuk misal transportasi ke titik kumpul awal, catatan persiapan & akses tanpa default sintetis). Tombol insight `Terapkan ke draft` memberi arahan sekaligus mengisi judul, ringkasan, durasi, dan ide itinerary awal ke draft secara editable tanpa menimpa bagian yang telah diedit manual oleh Travel Organizer, dengan tombol `Arahan digunakan ✓` dan opsi unselect tanpa membatalkan draft. Step 4 menampilkan biaya dasar + tarif pemandu destinasi kanonikal (tersinkronisasi same-runtime dari update Mitra) + margin Travel Organizer. Traveler Package Detail menampilkan **Dual Trust Identity** terpisah (Destinasi dengan verifikasi JedaIn + ulasan destinasi, serta Travel Organizer dengan status Travel Organizer JedaIn + ulasan pascatrip organizer aktual) dan logistik perjalanan yang authored tanpa fallback sintetis. Traveler Hero menampilkan foto package aktual. Wireframe tier di bawah adalah baseline lama yang digantikan bagian ini. 360° ditunda.
+
 **Version:** 0.1  
 **Date:** 30 Agustus 2026  
 **Source of Truth:** [`../PRD.md`](../PRD.md)  
@@ -1511,7 +1515,7 @@ States:
 
 - pending field/manual verification
 - rejected + specific reason
-- BASIC verified
+- approved and active destination
 - guide readiness status
 
 CTA rejected:
@@ -1545,16 +1549,11 @@ Operational profile fields; edits to verified-critical fields may require re-rev
 
 ---
 
-# DP07 — Verification & Badge
+# DP07 — Verification Status
 
 **Priority:** Must
 
-Explain separately:
-
-- Verification Level: BASIC / PLUS
-- Guide Capability: ready / not ready
-
-Avoid representing them as one opaque backend state.
+Explain application approval and active destination status in plain language. Pemandu lokal wajib untuk destinasi aktif yang tersedia bagi EO; no tier badge is shown.
 
 ---
 
@@ -1702,9 +1701,7 @@ Sections:
 Decision:
 
 - Reject + reason
-- Setujui Verifikasi Destinasi (BASIC; pemandu lokal dan bukti wajib tersedia)
-
-PLUS status comes from later trust lifecycle, not initial application.
+- Setujui Verifikasi Destinasi (pemandu lokal dan bukti wajib tersedia; destinasi menjadi `ACTIVE`).
 
 ---
 
@@ -1909,8 +1906,7 @@ Backend enum tidak harus ditampilkan mentah kepada user.
 | REJECTED | Perlu Diperbaiki / Ditolak sesuai context |
 | APPROVED | Disetujui |
 | LIVE | Tayang |
-| BASIC | Terverifikasi Dasar |
-| PLUS | Terverifikasi Plus |
+| ACTIVE | Aktif sebagai Mitra Destinasi JedaIn |
 | CONCEPT_ONLY | Concept Only — UI needs explanatory tooltip |
 | CERTIFIED_GUIDE | Certified Guide |
 

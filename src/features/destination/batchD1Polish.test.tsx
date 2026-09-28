@@ -66,7 +66,7 @@ describe("Batch D1 — Low-Risk UI & Accessibility Polish", () => {
         th.textContent?.trim(),
       );
 
-      expect(ths).toContain("Kuota Sesi EO");
+      expect(ths).toContain("Kuota Sesi Travel Organizer");
       expect(ths).not.toContain("Alokasi Kapasitas");
     });
   });

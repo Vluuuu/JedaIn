@@ -181,7 +181,11 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
             <div className="home-hero-card__visual">
               <img
                 src={
-                  getPackageVisual(recPkg.id, recPkg.destinationName).svgDataUri
+                  getPackageVisual(
+                    recPkg.id,
+                    recPkg.destinationName,
+                    recPkg.visualAsset,
+                  ).svgDataUri
                 }
                 alt={`Ilustrasi suasana ${recPkg.title}`}
                 width={800}
@@ -197,11 +201,6 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
                   {recMode === "FALLBACK"
                     ? "Pilihan terdekat"
                     : "Pilihan utama"}
-                </Badge>
-                <Badge tone="success">
-                  {recPkg.verificationLevel === "PLUS"
-                    ? "Terverifikasi Plus"
-                    : "Terverifikasi Dasar"}
                 </Badge>
               </div>
             </div>

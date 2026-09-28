@@ -52,6 +52,9 @@ export interface PackageDetailSource {
   excludedItems: string[];
   safetyNotes: string[];
   meetingPointLabel?: string;
+  departureTimeLabel?: string;
+  outboundTransport?: string;
+  returnTransport?: string;
   accessNotes?: string[];
   cancellationPolicySummary: string;
   organizer: PackageOrganizerProfile;
@@ -76,12 +79,18 @@ export interface OrganizerReviewSummary {
   reviewCount: number;
 }
 
+export interface DestinationReviewSummary {
+  averageRating: number;
+  reviewCount: number;
+}
+
 export interface PackageDetailViewModel {
   state: PackageDetailState;
   package?: PackageRecommendationSource;
   detail?: PackageDetailSource;
   hasOpenSession: boolean;
   organizerReviewSummary?: OrganizerReviewSummary;
+  destinationReviewSummary?: DestinationReviewSummary;
   personalizedContext?: PersonalizedContext;
   errorMessage?: string;
 }

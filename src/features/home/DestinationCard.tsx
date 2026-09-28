@@ -1,5 +1,4 @@
 import { Link } from "react-router";
-import { Badge } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import type { VerifiedDestinationItem } from "./types";
 
@@ -27,13 +26,6 @@ export function DestinationCard({ destination }: DestinationCardProps) {
           className="home-destination-card__visual-scrim"
           aria-hidden="true"
         />
-        <span className="home-destination-card__badge">
-          <Badge tone="success">
-            {destination.verificationLevel === "PLUS"
-              ? "Terverifikasi Plus"
-              : "Terverifikasi Dasar"}
-          </Badge>
-        </span>
       </div>
       <div className="home-destination-card__body">
         <div className="home-destination-card__meta">

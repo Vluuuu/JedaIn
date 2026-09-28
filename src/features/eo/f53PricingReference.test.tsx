@@ -52,7 +52,7 @@ async function renderBuilder(initialEntry: string) {
 async function openPricingStep(view: HTMLElement) {
   const stepFour = Array.from(
     view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-  ).find((button) => button.textContent?.includes("4. Skema Harga"));
+  ).find((button) => button.textContent?.includes("Skema Harga"));
 
   expect(stepFour).toBeDefined();
 
@@ -80,9 +80,7 @@ describe("F5.3 — Demand-Assisted Pricing Reference", () => {
     expect(toggle?.getAttribute("aria-expanded")).toBe("false");
     expect(view.querySelector("#eo-pricing-reference-panel")).toBeNull();
 
-    expect(view.textContent).toContain(
-      "Harga Traveler = Biaya Dasar Destinasi + Margin EO",
-    );
+    expect(view.textContent).toContain("Tarif Pemandu Lokal");
   });
 
   it("2. exposes only source-backed prototype budget distribution when opened", async () => {
@@ -130,7 +128,7 @@ describe("F5.3 — Demand-Assisted Pricing Reference", () => {
 
     expect(panel.textContent).toContain("Rentang budget paling banyak dipilih");
     expect(panel.textContent).toContain(
-      "tidak mengubah Margin EO secara otomatis",
+      "tidak mengubah Margin Travel Organizer secara otomatis",
     );
     expect(panel.textContent).toContain(
       "bukan sebagai harga terbaik atau jaminan konversi",
@@ -180,7 +178,7 @@ describe("F5.3 — Demand-Assisted Pricing Reference", () => {
     const marginInput =
       view.querySelector<HTMLInputElement>("#eo-margin-input")!;
     expect(marginInput.value).toBe("150000");
-    expect(view.textContent).toContain("Rp275.000 / orang");
+    expect(view.textContent).toContain("Rp300.000 / orang");
 
     const toggle = Array.from(
       view.querySelectorAll<HTMLButtonElement>("button"),
@@ -193,6 +191,6 @@ describe("F5.3 — Demand-Assisted Pricing Reference", () => {
     });
 
     expect(marginInput.value).toBe("150000");
-    expect(view.textContent).toContain("Rp275.000 / orang");
+    expect(view.textContent).toContain("Rp300.000 / orang");
   });
 });

@@ -73,7 +73,10 @@ export function EoLoginScreen() {
     <div className="eo-login-layout">
       <div className="eo-login-container">
         {/* Area Kiri: Visual Identity JedaIn yang Tenang */}
-        <section className="eo-login-hero" aria-label="Identitas EO JedaIn">
+        <section
+          className="eo-login-hero"
+          aria-label="Identitas Travel Organizer JedaIn"
+        >
           <div className="eo-login-hero__brand">
             <img
               src={JedaInLogo}
@@ -82,7 +85,7 @@ export function EoLoginScreen() {
               width="1407"
               height="768"
             />
-            <span className="eo-login-hero__role">Event Organizer</span>
+            <span className="eo-login-hero__role">Travel Organizer</span>
           </div>
 
           <div className="eo-login-hero__visual">
@@ -105,7 +108,10 @@ export function EoLoginScreen() {
         </section>
 
         {/* Area Kanan: Login Form */}
-        <section className="eo-login-panel" aria-label="Form Masuk EO">
+        <section
+          className="eo-login-panel"
+          aria-label="Form Masuk Travel Organizer"
+        >
           {/* Mobile-only brand header */}
           <div className="eo-login-mobile-brand">
             <img
@@ -115,13 +121,13 @@ export function EoLoginScreen() {
               width="1407"
               height="768"
             />
-            <span className="eo-login-mobile-brand__tag">Event Organizer</span>
+            <span className="eo-login-mobile-brand__tag">Travel Organizer</span>
           </div>
 
           <div className="eo-login-panel__header">
             <h1 className="eo-login-panel__title">Masuk ke JedaIn</h1>
             <p className="eo-login-panel__subtitle">
-              Gunakan akun EO yang terdaftar.
+              Gunakan akun Travel Organizer yang terdaftar.
             </p>
           </div>
 

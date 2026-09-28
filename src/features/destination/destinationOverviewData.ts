@@ -37,6 +37,7 @@ export interface DestinationOverviewData {
   averageRating?: string;
   profileCompletedItems: number;
   profileTotalItems: number;
+  profileChecklist: { label: string; complete: boolean }[];
 }
 
 export function getDestinationOverviewData(
@@ -102,15 +103,36 @@ export function getDestinationOverviewData(
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
     .slice(0, 3);
   const profileChecklist = [
-    destination.name,
-    destination.locationLabel,
-    destination.description,
-    destination.availableActivities?.length,
-    destination.facilities?.length,
-    destination.operationalNotes?.length,
-    destination.localGuideSummary,
-    destination.baseCostPerPerson > 0,
-    destination.capacityPerSession > 0,
+    { label: "Nama destinasi", complete: Boolean(destination.name.trim()) },
+    { label: "Lokasi", complete: Boolean(destination.locationLabel.trim()) },
+    {
+      label: "Deskripsi destinasi",
+      complete: Boolean(destination.description.trim()),
+    },
+    {
+      label: "Aktivitas yang tersedia",
+      complete: Boolean(destination.availableActivities?.length),
+    },
+    {
+      label: "Fasilitas destinasi",
+      complete: Boolean(destination.facilities?.length),
+    },
+    {
+      label: "Catatan operasional",
+      complete: Boolean(destination.operationalNotes?.length),
+    },
+    {
+      label: "Informasi pemandu lokal",
+      complete: Boolean(destination.localGuideSummary?.trim()),
+    },
+    {
+      label: "Biaya dasar destinasi",
+      complete: destination.baseCostPerPerson > 0,
+    },
+    {
+      label: "Kapasitas umum destinasi",
+      complete: destination.capacityPerSession > 0,
+    },
   ];
 
   return {
@@ -131,7 +153,9 @@ export function getDestinationOverviewData(
             reviews.length
           ).toFixed(1)
         : undefined,
-    profileCompletedItems: profileChecklist.filter(Boolean).length,
+    profileCompletedItems: profileChecklist.filter((item) => item.complete)
+      .length,
     profileTotalItems: profileChecklist.length,
+    profileChecklist,
   };
 }

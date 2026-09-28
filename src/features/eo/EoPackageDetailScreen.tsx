@@ -29,7 +29,8 @@ export function EoPackageDetailScreen() {
         <div className="eo-pkg-detail-empty">
           <h2>Paket Tidak Ditemukan</h2>
           <p>
-            Rancangan paket ini tidak tersedia atau bukan milik akun EO Anda.
+            Rancangan paket ini tidak tersedia atau bukan milik akun Travel
+            Organizer Anda.
           </p>
           <Button
             type="button"
@@ -310,7 +311,7 @@ export function EoPackageDetailScreen() {
                 <strong className="eo-pkg-op-value">
                   {pkg.guideSource === "DESTINATION"
                     ? "Pemandu dari Destinasi"
-                    : "Pemandu dari EO (Certified Guide)"}
+                    : "Pemandu dari Travel Organizer (Certified Guide)"}
                 </strong>
                 {destination?.localGuideSummary &&
                   pkg.guideSource === "DESTINATION" && (
@@ -368,6 +369,60 @@ export function EoPackageDetailScreen() {
                   </ul>
                 </div>
               )}
+          </section>
+
+          {/* Pengaturan Perjalanan & Titik Kumpul */}
+          <section
+            className="eo-pkg-detail-section"
+            aria-labelledby="travel-arrangements-heading"
+          >
+            <h2
+              id="travel-arrangements-heading"
+              className="eo-pkg-detail-section-title"
+            >
+              Pengaturan Perjalanan & Titik Kumpul
+            </h2>
+            <div className="eo-pkg-op-grid">
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">Titik Kumpul</span>
+                <strong className="eo-pkg-op-value">
+                  {pkg.meetingPointLabel || "Belum diisi"}
+                </strong>
+              </div>
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">Waktu Keberangkatan</span>
+                <strong className="eo-pkg-op-value">
+                  {pkg.departureTimeLabel || "Belum diisi"}
+                </strong>
+              </div>
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">
+                  Transportasi Menuju Destinasi
+                </span>
+                <span className="eo-pkg-op-value">
+                  {pkg.outboundTransport || "Belum diisi"}
+                </span>
+              </div>
+              <div className="eo-pkg-op-item">
+                <span className="eo-pkg-op-label">Transportasi Kembali</span>
+                <span className="eo-pkg-op-value">
+                  {pkg.returnTransport || "Belum diisi"}
+                </span>
+              </div>
+            </div>
+            {pkg.accessNotes && pkg.accessNotes.length > 0 && (
+              <div
+                className="eo-pkg-op-notes"
+                style={{ marginTop: "var(--space-3)" }}
+              >
+                <span className="eo-pkg-op-label">Catatan Akses Lokasi:</span>
+                <ul className="eo-pkg-op-notes-list">
+                  {pkg.accessNotes.map((note, idx) => (
+                    <li key={idx}>{note}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </section>
 
           {/* Itinerary */}
@@ -452,7 +507,17 @@ export function EoPackageDetailScreen() {
                 </strong>
               </div>
               <div className="eo-pkg-price-row">
-                <span className="eo-pkg-price-label">Margin EO</span>
+                <span className="eo-pkg-price-label">Pemandu destinasi</span>
+                <strong className="eo-pkg-price-val">
+                  {pkg.guideSource === "DESTINATION"
+                    ? `Rp${pkg.pricing.localGuideFee.toLocaleString("id-ID")}`
+                    : "Tidak digunakan"}
+                </strong>
+              </div>
+              <div className="eo-pkg-price-row">
+                <span className="eo-pkg-price-label">
+                  Margin Travel Organizer
+                </span>
                 <strong className="eo-pkg-price-val">
                   Rp{pkg.pricing.eoMargin.toLocaleString("id-ID")}
                 </strong>

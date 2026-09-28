@@ -69,7 +69,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     // Navigate to Step 5
     const step5Button = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((btn) => btn.textContent?.includes("5. Tinjau & Submit"));
+    ).find((btn) => btn.textContent?.includes("Tinjau & Submit"));
     expect(step5Button).toBeDefined();
 
     await act(async () => {
@@ -96,7 +96,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     // Set fields in Step 2
     const step2Button = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((btn) => btn.textContent?.includes("2. Sinyal Insight"));
+    ).find((btn) => btn.textContent?.includes("Sinyal Insight"));
     await act(async () => {
       step2Button!.click();
     });
@@ -129,10 +129,32 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
       summaryInput.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
+    // Set fields in Step 3
+    const step3Button = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
+    ).find((btn) => btn.textContent?.includes("Perjalanan & Itinerary"));
+    await act(async () => {
+      step3Button!.click();
+    });
+
+    const safetyInput =
+      view.querySelector<HTMLTextAreaElement>("#safety-notes")!;
+    await act(async () => {
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype,
+        "value",
+      )?.set;
+      nativeSetter?.call(
+        safetyInput,
+        "Gunakan alas kaki yang nyaman dan tidak licin.",
+      );
+      safetyInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
     // Navigate to Step 5
     const step5Button = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((btn) => btn.textContent?.includes("5. Tinjau & Submit"));
+    ).find((btn) => btn.textContent?.includes("Tinjau & Submit"));
     await act(async () => {
       step5Button!.click();
     });
@@ -164,8 +186,8 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     expect(dialog.textContent).toContain("Mojokerto");
     expect(dialog.textContent).toContain("1 hari");
 
-    // 3. Customer Price (base cost 160.000 + default eoMargin 150.000 = 310.000)
-    expect(dialog.textContent).toContain("Rp310.000");
+    // 3. Customer Price (base 160.000 + local guide 30.000 + margin 150.000)
+    expect(dialog.textContent).toContain("Rp340.000");
     expect(dialog.textContent).toContain("/ orang");
 
     // 4. Itinerary
@@ -192,7 +214,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     // Jump to Step 5 and open preview
     const step5Button = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((btn) => btn.textContent?.includes("5. Tinjau & Submit"))!;
+    ).find((btn) => btn.textContent?.includes("Tinjau & Submit"))!;
     await act(async () => {
       step5Button.click();
     });
@@ -250,7 +272,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     // Open Step 5 with default draft (no imageUrl uploaded)
     const step5Button = Array.from(
       viewNoImg.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((btn) => btn.textContent?.includes("5. Tinjau & Submit"))!;
+    ).find((btn) => btn.textContent?.includes("Tinjau & Submit"))!;
     await act(async () => {
       step5Button.click();
     });
@@ -292,7 +314,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
 
     const step5ButtonWithImg = Array.from(
       viewWithImg.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((btn) => btn.textContent?.includes("5. Tinjau & Submit"))!;
+    ).find((btn) => btn.textContent?.includes("Tinjau & Submit"))!;
     await act(async () => {
       step5ButtonWithImg.click();
     });
@@ -327,7 +349,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     // Go to Step 5
     const step5Button = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((btn) => btn.textContent?.includes("5. Tinjau & Submit"))!;
+    ).find((btn) => btn.textContent?.includes("Tinjau & Submit"))!;
     await act(async () => {
       step5Button.click();
     });
@@ -386,7 +408,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     // Navigate to Step 5 with empty title
     const step5Button = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
-    ).find((btn) => btn.textContent?.includes("5. Tinjau & Submit"))!;
+    ).find((btn) => btn.textContent?.includes("Tinjau & Submit"))!;
     await act(async () => {
       step5Button.click();
     });

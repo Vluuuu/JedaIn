@@ -1,5 +1,9 @@
 # JedaIn — Traveler Package Detail Contract
 
+## Keputusan media dan trust aktif (27 September 2026)
+
+Traveler Package Hero tidak menampilkan label BASIC/PLUS. Bila package dinamis punya `visualAssets`, tampilkan cover `visualAsset` dan setiap media pilihan EO yang unik sebagai galeri aktual. Untuk fixture lama dengan satu ilustrasi, beberapa crop boleh ditampilkan hanya dengan penjelasan bahwa itu satu ilustrasi prototype. Harga package sudah mencakup tarif pemandu destinasi saat pemandu tersebut dipilih; service fee Rp7.500/booking ditampilkan terpisah di checkout. Mapping tier dan tes badge pada bagian historis di bawah digantikan keputusan ini; verifikasi tetap gate internal. 360° ditunda.
+
 **Version:** 1.0  
 **Date:** 31 Agustus 2026  
 **Status:** MVP Prototype Contract  
@@ -363,22 +367,9 @@ Destination information minimum:
 
 - destination name,
 - location label,
-- verification level.
+- penjelasan singkat bahwa destinasi melalui verifikasi JedaIn bila konteks trust memerlukannya.
 
-User-facing verification treatment:
-
-```text
-BASIC → Terverifikasi Dasar
-PLUS  → Terverifikasi Plus
-```
-
-Important:
-
-Verification badge represents **JedaIn destination-partner verification/trust state**, not government certification and not an external tourism certification unless explicitly sourced later.
-
-Tooltip/details may explain that status is a JedaIn trust signal.
-
-Do not invent a detailed difference between BASIC and PLUS that is not defined by higher sources.
+User-facing verification treatment: no BASIC/PLUS badge. Where helpful, plain copy may state that the destination passed JedaIn verification, without implying a government or external tourism certification.
 
 Do not change destination verification state from frontend display logic.
 
@@ -881,8 +872,8 @@ At minimum cover:
 4. detail adapter reuses centralized package catalog rather than duplicated base fields,
 5. all current LIVE catalog packages used by Explore resolve to detail data,
 6. starting price uses package traveler-facing `pricePerPerson`,
-7. destination verification BASIC label is correct,
-8. destination verification PLUS label is correct when fixture uses PLUS,
+7. no BASIC/PLUS label appears in Traveler UI,
+8. package gallery uses each selected EO media item once,
 9. trust copy does not present government/external certification,
 10. guide status is separate from destination verification,
 11. itinerary order is deterministic,

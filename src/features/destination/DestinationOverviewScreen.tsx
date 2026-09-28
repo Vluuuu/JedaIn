@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Badge } from "../../components/ui";
+import { InlineStatus, StatusMeta } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import type { EoSessionStatus } from "../eo/types";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
@@ -61,10 +61,6 @@ export function DestinationOverviewScreen() {
 
   const { destination, partner, application } = context;
   const data = getDestinationOverviewData(destination);
-  const verificationLabel =
-    destination.verificationLevel === "PLUS"
-      ? "Terverifikasi Plus"
-      : "Terverifikasi Dasar";
   const visual = getDestinationVisual(destination.name, destination.imageUrl);
 
   return (
@@ -86,12 +82,6 @@ export function DestinationOverviewScreen() {
                 "Pengelola kawasan"}
             </strong>
           </p>
-
-          <div className="dest-identity__badges" aria-label="Status destinasi">
-            <Badge tone="success" showSymbol={false}>
-              {verificationLabel}
-            </Badge>
-          </div>
         </div>
 
         <div className="dest-identity__media" aria-hidden="true">
@@ -153,7 +143,7 @@ export function DestinationOverviewScreen() {
             <h2 id="dest-quick-actions-title">Akses Cepat</h2>
             <p>
               Buka rincian operasional destinasi tanpa mengubah kewenangan sesi
-              EO.
+              Travel Organizer.
             </p>
           </div>
         </div>
@@ -177,7 +167,7 @@ export function DestinationOverviewScreen() {
               Lihat Rincian Kapasitas
             </span>
             <span className="dest-quick-action-card__desc">
-              Konteks daya tampung venue dan alokasi sesi EO
+              Konteks daya tampung venue dan alokasi sesi Travel Organizer
             </span>
           </Link>
 
@@ -209,46 +199,111 @@ export function DestinationOverviewScreen() {
 
       <div className="dest-readiness-layout">
         <section className="dest-readiness" aria-labelledby="dest-status-title">
-          <div className="dest-section-heading">
-            <div>
-              <h2 id="dest-status-title">Status Destinasi</h2>
-              <p>
-                Kesiapan yang digunakan JedaIn untuk operasional pengalaman.
+          <div className="dest-readiness__header">
+            <div className="dest-readiness__status-meta">
+              <StatusMeta label="Status">Aktif</StatusMeta>
+            </div>
+            <div className="dest-readiness__title-block">
+              <h2 id="dest-status-title" className="dest-readiness__title">
+                Status Destinasi
+              </h2>
+              <p className="dest-readiness__lead">
+                Profil destinasi siap digunakan Travel Organizer
+              </p>
+              <p className="dest-readiness__subcopy">
+                Informasi ini menjadi acuan Travel Organizer saat memilih
+                destinasi dan merancang experience.
               </p>
             </div>
-            <span className="dest-readiness__completeness">
-              {data.profileCompletedItems}/{data.profileTotalItems} informasi
-              lengkap
-            </span>
+
+            <div className="dest-readiness__disclosure-card">
+              <div className="dest-readiness__disclosure-status">
+                <strong>
+                  {data.profileCompletedItems === data.profileTotalItems
+                    ? "Informasi profil lengkap"
+                    : `${data.profileCompletedItems}/${data.profileTotalItems} informasi inti lengkap`}
+                </strong>
+                <span>
+                  {data.profileCompletedItems === data.profileTotalItems
+                    ? "9 dari 9 informasi inti sudah tersedia"
+                    : `${data.profileCompletedItems} dari ${data.profileTotalItems} informasi inti sudah tersedia`}
+                </span>
+              </div>
+              <details className="dest-readiness__completeness">
+                <summary>Lihat 9 informasi inti</summary>
+                <ul
+                  className="dest-readiness__checklist"
+                  aria-label="Daftar 9 informasi inti"
+                >
+                  {data.profileChecklist.map((item) => (
+                    <li
+                      key={item.label}
+                      className={`dest-readiness__checklist-item ${
+                        item.complete
+                          ? "dest-readiness__checklist-item--complete"
+                          : "dest-readiness__checklist-item--incomplete"
+                      }`}
+                    >
+                      <span
+                        className="dest-readiness__check-icon"
+                        aria-hidden="true"
+                      >
+                        {item.complete ? "✓" : "○"}
+                      </span>
+                      <span>
+                        {item.complete
+                          ? item.label
+                          : `${item.label} belum lengkap`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
           </div>
 
-          <dl className="dest-readiness__facts">
-            <div>
-              <dt>Status Verifikasi</dt>
-              <dd>{verificationLabel}</dd>
+          <div
+            className="dest-readiness__operational-summary"
+            aria-label="Ringkasan operasional destinasi"
+          >
+            <div className="dest-readiness__summary-card">
+              <span className="dest-readiness__summary-label">Biaya dasar</span>
+              <strong className="dest-readiness__summary-value">
+                {formatCurrency(destination.baseCostPerPerson)} / orang
+              </strong>
             </div>
-            <div>
-              <dt>Pemandu Lokal</dt>
-              <dd>Tersedia sebagai bagian dari standar verifikasi</dd>
+
+            <div className="dest-readiness__summary-card">
+              <span className="dest-readiness__summary-label">
+                Pemandu lokal
+              </span>
+              <strong className="dest-readiness__summary-value">
+                {destination.localGuideFeePerPerson
+                  ? `${formatCurrency(destination.localGuideFeePerPerson)} / orang`
+                  : "Rp0 / orang"}
+              </strong>
             </div>
-            <div>
-              <dt>Biaya Dasar</dt>
-              <dd>{formatCurrency(destination.baseCostPerPerson)} / orang</dd>
+
+            <div className="dest-readiness__summary-card">
+              <span className="dest-readiness__summary-label">
+                Kapasitas umum
+              </span>
+              <strong className="dest-readiness__summary-value">
+                {destination.capacityPerSession} orang / sesi
+              </strong>
             </div>
-            <div>
-              <dt>Kapasitas Umum Destinasi</dt>
-              <dd>{destination.capacityPerSession} orang / sesi</dd>
-            </div>
-          </dl>
+          </div>
         </section>
 
         <aside className="dest-partners" aria-labelledby="dest-partners-title">
-          <span className="dest-partners__label">Kolaborasi EO</span>
+          <span className="dest-partners__label">
+            Kolaborasi Travel Organizer
+          </span>
           <h2 id="dest-partners-title">Pengalaman yang hadir di sini</h2>
           {data.eoPartners.length > 0 ? (
             <>
               <strong className="dest-partners__count">
-                {data.eoPartners.length} EO aktif
+                {data.eoPartners.length} Travel Organizer aktif
               </strong>
               <ul className="dest-partners__list">
                 {data.eoPartners.map((eoName) => (
@@ -256,13 +311,14 @@ export function DestinationOverviewScreen() {
                 ))}
               </ul>
               <p>
-                EO merancang experience, destinasi menyiapkan ruang dan
-                pemanduan, traveler hadir melalui sesi terjadwal.
+                Travel Organizer merancang experience, destinasi menyiapkan
+                ruang dan pemanduan, traveler hadir melalui sesi terjadwal.
               </p>
             </>
           ) : (
             <p className="dest-partners__empty">
-              Belum ada EO dengan jadwal mendatang di destinasi ini.
+              Belum ada Travel Organizer dengan jadwal mendatang di destinasi
+              ini.
             </p>
           )}
         </aside>
@@ -273,7 +329,8 @@ export function DestinationOverviewScreen() {
           <div>
             <h2 id="dest-sessions-title">Jadwal Keberangkatan Mendatang</h2>
             <p>
-              Pantau experience dari EO yang akan berlangsung di destinasi ini.
+              Pantau experience dari Travel Organizer yang akan berlangsung di
+              destinasi ini.
             </p>
           </div>
           <span className="dest-section-heading__summary">
@@ -286,8 +343,8 @@ export function DestinationOverviewScreen() {
           <div className="dest-empty-state">
             <strong>Belum ada jadwal keberangkatan mendatang.</strong>
             <p>
-              Sesi akan muncul di sini saat EO menjadwalkan experience di
-              destinasi ini.
+              Sesi akan muncul di sini saat Travel Organizer menjadwalkan
+              experience di destinasi ini.
             </p>
           </div>
         ) : (
@@ -327,27 +384,26 @@ export function DestinationOverviewScreen() {
                         <strong>{confirmedParticipants}</strong> peserta
                         terkonfirmasi
                       </span>
-                      <span>Kuota Sesi EO: {session.capacity} orang</span>
+                      <span>
+                        Kuota Sesi Travel Organizer: {session.capacity} orang
+                      </span>
                     </div>
                     <progress
                       max={session.capacity}
                       value={Math.min(confirmedParticipants, session.capacity)}
-                      aria-label={`${confirmedParticipants} dari ${session.capacity} kuota sesi EO terisi`}
+                      aria-label={`${confirmedParticipants} dari ${session.capacity} kuota sesi Travel Organizer terisi`}
                     />
                     <span className="dest-session-row__capacity-note">
                       {exceedsDestinationCapacity
-                        ? `Alokasi EO ${session.capacity} orang melebihi kapasitas umum destinasi (${destination.capacityPerSession} orang).`
-                        : `${usagePercent}% Kuota Sesi EO terisi`}
+                        ? `Alokasi Travel Organizer ${session.capacity} orang melebihi kapasitas umum destinasi (${destination.capacityPerSession} orang).`
+                        : `${usagePercent}% Kuota Sesi Travel Organizer terisi`}
                     </span>
                   </div>
 
                   <div className="dest-session-row__status">
-                    <Badge
-                      tone={statusTones[session.status]}
-                      showSymbol={false}
-                    >
+                    <InlineStatus tone={statusTones[session.status]}>
                       {destinationSessionStatusLabels[session.status]}
-                    </Badge>
+                    </InlineStatus>
                     <span>Alokasi sesi {session.capacity} orang</span>
                   </div>
                 </article>
@@ -361,7 +417,10 @@ export function DestinationOverviewScreen() {
         <div className="dest-section-heading">
           <div>
             <h2 id="dest-profile-title">Profil Destinasi</h2>
-            <p>Informasi yang dipahami dan digunakan oleh EO serta JedaIn.</p>
+            <p>
+              Informasi yang dipahami dan digunakan oleh Travel Organizer serta
+              JedaIn.
+            </p>
           </div>
           <span className="dest-section-heading__summary">
             {destination.city}, {destination.province}
@@ -435,7 +494,7 @@ export function DestinationOverviewScreen() {
             <h2 id="dest-reviews-title">Ulasan Traveler</h2>
             <p>
               Penilaian khusus untuk kualitas destinasi, terpisah dari penilaian
-              EO dan pemandu.
+              Travel Organizer dan pemandu.
             </p>
           </div>
         </div>

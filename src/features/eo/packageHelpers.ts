@@ -5,9 +5,9 @@ export function getHumanStatusLabel(status: EoPackageStatus): string {
     case "DRAFT":
       return "Draf";
     case "PENDING_ADMIN_REVIEW":
-      return "Menunggu Review";
+      return "Menunggu review";
     case "REJECTED":
-      return "Perlu Perbaikan";
+      return "Perlu perbaikan";
     case "APPROVED":
       return "Disetujui";
     case "LIVE":

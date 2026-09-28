@@ -91,7 +91,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       expect(view.textContent).toContain("Sedang Dalam Proses Kurasi");
       expect(view.textContent).not.toContain("Setujui & Buka Dashboard");
-      expect(view.textContent).toContain("Lihat Workspace EO Demo (Approved)");
+      expect(view.textContent).toContain(
+        "Lihat Workspace Travel Organizer Demo (Approved)",
+      );
     });
 
     it("B. separate approved demo identity can open workspace", async () => {
@@ -118,7 +120,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       const view = await renderComponent(createElement(App), ["/partner/eo"]);
 
-      expect(view.textContent).toContain("Status Pengajuan Mitra EO");
+      expect(view.textContent).toContain(
+        "Status Pengajuan Mitra Travel Organizer",
+      );
       expect(view.textContent).toContain("Perlu Perbaikan");
     });
 
@@ -196,7 +200,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       );
 
       expect(view.textContent).toContain("Paket Tidak Ditemukan");
-      expect(view.textContent).toContain("bukan milik akun EO Anda");
+      expect(view.textContent).toContain(
+        "bukan milik akun Travel Organizer Anda",
+      );
     });
 
     it("F. EO B cannot load EO A draftId in builder", async () => {
@@ -208,7 +214,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       );
 
       expect(view.textContent).toContain("Akses Ditolak");
-      expect(view.textContent).toContain("bukan milik akun EO Anda");
+      expect(view.textContent).toContain(
+        "bukan milik akun Travel Organizer Anda",
+      );
     });
 
     it("G. authenticated EO B saveDraft on EO A package fails even if caller supplies forged eoId", () => {
@@ -254,6 +262,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         guideSource: "EO", // Forbidden for Concept-Only!
         pricing: {
           destinationBaseCost: 95000,
+          localGuideFee: 0,
           eoMargin: 100000,
           customerPrice: 195000,
         },
@@ -350,9 +359,15 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         destinationId: "dest_lereng_hijau",
         durationLabel: "1 hari",
         itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi sesi" }],
+        meetingPointLabel: "Stasiun Malang",
+        departureTimeLabel: "07.00 WIB",
+        outboundTransport: "Minibus",
+        returnTransport: "Minibus",
+        includedItems: ["Transportasi PP"],
         safetyNotes: ["Pakai sepatu."],
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 150000,
           customerPrice: 275000,
         },
@@ -380,9 +395,15 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         destinationId: "dest_lereng_hijau",
         durationLabel: "1 hari",
         itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi sesi" }],
+        meetingPointLabel: "Stasiun Malang",
+        departureTimeLabel: "07.00 WIB",
+        outboundTransport: "Minibus",
+        returnTransport: "Minibus",
+        includedItems: ["Transportasi PP"],
         safetyNotes: ["Pakai sepatu."],
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 150000,
           customerPrice: 275000,
         },
@@ -411,6 +432,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           safetyNotes: ["Catatan keselamatan."],
           pricing: {
             destinationBaseCost: 1000, // Manipulated!
+            localGuideFee: 0,
             eoMargin: 150000,
             customerPrice: 151000,
           },
@@ -435,6 +457,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           safetyNotes: ["Catatan keselamatan."],
           pricing: {
             destinationBaseCost: 125000,
+            localGuideFee: 0,
             eoMargin: 150000,
             customerPrice: 400000, // Not 125000 + 150000 = 275000!
           },
@@ -454,12 +477,18 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           destinationId: "dest_lereng_hijau", // 125000
           durationLabel: "1 hari",
           itinerary: [{ order: 1, title: "Sesi", description: "Deskripsi" }],
+          meetingPointLabel: "Stasiun Malang",
+          departureTimeLabel: "07.00 WIB",
+          outboundTransport: "Minibus",
+          returnTransport: "Minibus",
+          includedItems: ["Transportasi PP"],
           safetyNotes: ["Catatan keselamatan."],
           guideSource: "DESTINATION",
           pricing: {
             destinationBaseCost: 125000,
+            localGuideFee: 25000,
             eoMargin: 150000,
-            customerPrice: 275000,
+            customerPrice: 300000,
           },
         },
         "CERTIFIED_GUIDE",
@@ -479,6 +508,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           safetyNotes: ["Catatan keselamatan."],
           pricing: {
             destinationBaseCost: 125000,
+            localGuideFee: 0,
             eoMargin: 150000,
             customerPrice: 275000,
           },
@@ -501,6 +531,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           safetyNotes: [], // Explicitly empty/cleared safety notes
           pricing: {
             destinationBaseCost: 125000,
+            localGuideFee: 0,
             eoMargin: 150000,
             customerPrice: 275000,
           },
@@ -1541,6 +1572,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         safetyNotes: ["Aman"],
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 75000,
           customerPrice: 200000,
         },
@@ -1553,9 +1585,15 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         destinationId: "dest_lereng_hijau",
         durationLabel: "1 hari",
         itinerary: [{ order: 1, title: "Sesi", description: "Desc" }],
+        meetingPointLabel: "Stasiun Malang",
+        departureTimeLabel: "07.00 WIB",
+        outboundTransport: "Minibus",
+        returnTransport: "Minibus",
+        includedItems: ["Transportasi PP"],
         safetyNotes: ["Aman"],
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 75000,
           customerPrice: 200000,
         },
@@ -1648,11 +1686,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       // Accurate pricing terminology
       expect(view.textContent).toContain("Biaya dasar destinasi");
-      expect(view.textContent).toContain("Margin EO");
+      expect(view.textContent).toContain("Margin Travel Organizer");
       expect(view.textContent).toContain("Harga traveler");
       expect(view.textContent).toContain("Rp125.000");
       expect(view.textContent).toContain("Rp150.000");
-      expect(view.textContent).toContain("Rp275.000");
+      expect(view.textContent).toContain("Rp300.000");
       expect(view.textContent).not.toContain("Modal Destinasi");
       expect(view.textContent).not.toContain("Harga Jual");
       expect(view.textContent).not.toContain("Margin Layanan & Kepemanduan EO");
@@ -1708,8 +1746,8 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         ".eo-destinations-search-input",
       );
       expect(searchInput).not.toBeNull();
-      expect(view.textContent).toContain("Terverifikasi Plus");
-      expect(view.textContent).toContain("Terverifikasi Dasar");
+      expect(view.textContent).not.toContain("Terverifikasi Plus");
+      expect(view.textContent).not.toContain("Terverifikasi Dasar");
 
       // Destination cards: eligible guide-ready destinations are listed
       expect(view.textContent).toContain("Lereng Hijau Batu");
@@ -1762,7 +1800,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(view.textContent).toContain("Aktivitas yang Tersedia");
       expect(view.textContent).toContain("Fasilitas di Lokasi");
       expect(view.textContent).toContain("Pemanduan Lokal");
-      expect(view.textContent).toContain("Pemandu Lokal Siap");
+      expect(view.textContent).toContain("Pemandu lokal");
       expect(view.textContent).toContain("Biaya dasar destinasi");
 
       // CTA
@@ -1816,7 +1854,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       expect(viewCertified.textContent).toContain("Pemandu dari Destinasi");
       expect(viewCertified.textContent).toContain(
-        "Pemandu dari EO (Certified Guide)",
+        "Pemandu dari Travel Organizer (Certified Guide)",
       );
     });
 
@@ -1954,9 +1992,18 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
     it("BP. Package guideSource is strictly validated: missing rejected, Concept Only locked, Certified Guide flexible", () => {
       partnerSessionStore.loginAsDemoApproved("CONCEPT_ONLY");
 
+      const commonLogistics = {
+        meetingPointLabel: "Stasiun Malang",
+        departureTimeLabel: "07.00 WIB",
+        outboundTransport: "Minibus",
+        returnTransport: "Minibus",
+        includedItems: ["Transportasi PP"],
+      };
+
       // 1. Missing guideSource is rejected
       const missingRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
@@ -1965,6 +2012,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           safetyNotes: ["Aman"],
           pricing: {
             destinationBaseCost: 125000,
+            localGuideFee: 0,
             eoMargin: 75000,
             customerPrice: 200000,
           },
@@ -1980,6 +2028,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // 2. Concept Only with DESTINATION passes
       const conceptDestRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
@@ -1988,8 +2037,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           safetyNotes: ["Aman"],
           pricing: {
             destinationBaseCost: 125000,
+            localGuideFee: 25000,
             eoMargin: 75000,
-            customerPrice: 200000,
+            customerPrice: 225000,
           },
           guideSource: "DESTINATION",
         },
@@ -2000,6 +2050,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // 3. Concept Only with EO fails
       const conceptEoRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
@@ -2008,6 +2059,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           safetyNotes: ["Aman"],
           pricing: {
             destinationBaseCost: 125000,
+            localGuideFee: 0,
             eoMargin: 75000,
             customerPrice: 200000,
           },
@@ -2023,6 +2075,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // 4. Certified Guide with DESTINATION passes
       const certDestRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
@@ -2031,8 +2084,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           safetyNotes: ["Aman"],
           pricing: {
             destinationBaseCost: 125000,
+            localGuideFee: 25000,
             eoMargin: 75000,
-            customerPrice: 200000,
+            customerPrice: 225000,
           },
           guideSource: "DESTINATION",
         },
@@ -2043,6 +2097,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // 5. Certified Guide with EO passes
       const certEoRes = validateEoPackage(
         {
+          ...commonLogistics,
           destinationId: "dest_lereng_hijau",
           title: "Paket Uji Coba",
           shortSummary: "Ringkasan pengalaman valid minimal 10 chars.",
@@ -2051,6 +2106,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
           safetyNotes: ["Aman"],
           pricing: {
             destinationBaseCost: 125000,
+            localGuideFee: 0,
             eoMargin: 75000,
             customerPrice: 200000,
           },
@@ -2081,6 +2137,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         guideSource: "EO",
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 75000,
           customerPrice: 200000,
         },
@@ -2132,9 +2189,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       // Canonical logo and identity
       const logo = view.querySelector<HTMLImageElement>(".eo-login-hero__logo");
       expect(logo).not.toBeNull();
-      expect(view.textContent).toContain("Event Organizer");
+      expect(view.textContent).toContain("Travel Organizer");
       expect(view.textContent).toContain("Masuk ke JedaIn");
-      expect(view.textContent).toContain("Gunakan akun EO yang terdaftar.");
+      expect(view.textContent).toContain(
+        "Gunakan akun Travel Organizer yang terdaftar.",
+      );
       expect(view.textContent).toContain("Masuk");
       expect(view.textContent).toContain("Coba akun demo");
 
@@ -2359,12 +2418,10 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
 
       // Step 2 heading and image upload zone
-      expect(view.textContent).toContain("Foto Utama Experience");
-      expect(view.textContent).toContain(
-        "Tambahkan foto yang paling mewakili suasana perjalanan ini.",
-      );
+      expect(view.textContent).toContain("Media Experience");
+      expect(view.textContent).toContain("Tentukan satu sebagai cover paket.");
       expect(view.querySelector(".eo-builder-dropzone")).not.toBeNull();
-      expect(view.textContent).toContain("Unggah foto");
+      expect(view.textContent).toContain("Tambah foto milik Travel Organizer");
 
       // Select image file via change event
       const fileInput = view.querySelector<HTMLInputElement>(
@@ -2404,12 +2461,12 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       );
       expect(previewImg).not.toBeNull();
       expect(previewImg?.src).toBe(mockDataUrl);
-      expect(view.textContent).toContain("Ganti foto");
+      expect(view.textContent).toContain("Jadikan cover");
       expect(view.textContent).toContain("Hapus");
 
       // Test invalid upload does NOT overwrite existing image and displays natural error
       const replaceInput = view.querySelector<HTMLInputElement>(
-        ".eo-builder-img-preview-actions .eo-builder-file-input",
+        ".eo-builder-file-input",
       )!;
       expect(replaceInput).not.toBeNull();
 
@@ -2434,7 +2491,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       // Test remove button
       const removeBtn = Array.from(view.querySelectorAll("button")).find(
-        (b) => b.textContent === "Hapus",
+        (b) => b.textContent === "Hapus media",
       )!;
       await act(async () => {
         removeBtn.click();
@@ -2496,6 +2553,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         safetyNotes: ["Aman"],
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 100000,
           customerPrice: 225000,
         },
@@ -2543,6 +2601,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         safetyNotes: ["Aman"],
         pricing: {
           destinationBaseCost: 125000,
+          localGuideFee: 0,
           eoMargin: 75000,
           customerPrice: 200000,
         },

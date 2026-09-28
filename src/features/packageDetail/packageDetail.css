@@ -1182,3 +1182,10 @@
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-semibold);
 }
+
+.package-detail-identity-rating {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.4;
+}

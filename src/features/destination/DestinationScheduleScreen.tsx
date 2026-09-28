@@ -1,5 +1,6 @@
 import { Fragment, useState } from "react";
-import { Badge, Button } from "../../components/ui";
+import { Button, InlineStatus } from "../../components/ui";
+import { destinationSessionStatusLabels } from "./destinationOverviewData";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
@@ -46,18 +47,12 @@ export function DestinationScheduleScreen() {
     <div className="dest-container">
       <header className="dest-page-header">
         <div>
-          <Badge tone="info">Jadwal Operasional Venue</Badge>
-          <h1
-            className="dest-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
-            Jadwal Sesi Perjalanan di Lokasi
-          </h1>
+          <h1 className="dest-page-title">Jadwal Sesi Perjalanan di Lokasi</h1>
           <p className="dest-page-subtitle">
-            Daftar sesi perjalanan yang diselenggarakan oleh mitra Event
+            Daftar sesi perjalanan yang diselenggarakan oleh mitra Travel
             Organizer di kawasan {destination?.name ?? "Anda"} (Read-Only).
-            Alokasi kuota per sesi merupakan kapasitas trip yang dibuka EO,
-            terpisah dari kapasitas umum destinasi.
+            Alokasi kuota per sesi merupakan kapasitas trip yang dibuka Travel
+            Organizer, terpisah dari kapasitas umum destinasi.
           </p>
         </div>
       </header>
@@ -73,7 +68,8 @@ export function DestinationScheduleScreen() {
             }}
           >
             <p>
-              Belum ada sesi perjalanan EO yang dijadwalkan di kawasan Anda.
+              Belum ada sesi perjalanan Travel Organizer yang dijadwalkan di
+              kawasan Anda.
             </p>
           </div>
         ) : (
@@ -82,9 +78,9 @@ export function DestinationScheduleScreen() {
               <thead>
                 <tr>
                   <th>Paket Experience</th>
-                  <th>Penyelenggara (EO)</th>
+                  <th>Penyelenggara (Travel Organizer)</th>
                   <th>Waktu Pelaksanaan</th>
-                  <th>Kuota Sesi EO</th>
+                  <th>Kuota Sesi Travel Organizer</th>
                   <th>Peserta Terkonfirmasi</th>
                   <th>Status Sesi</th>
                   <th>Ringkasan</th>
@@ -143,7 +139,7 @@ export function DestinationScheduleScreen() {
                               color: "var(--color-text-muted)",
                             }}
                           >
-                            Kuota sesi EO
+                            Kuota sesi Travel Organizer
                           </div>
                         </td>
                         <td>
@@ -158,17 +154,19 @@ export function DestinationScheduleScreen() {
                           </div>
                         </td>
                         <td>
-                          <Badge
+                          <InlineStatus
                             tone={
                               s.status === "OPEN"
                                 ? "success"
                                 : s.status === "FULL"
                                   ? "warning"
-                                  : "neutral"
+                                  : s.status === "CANCELLED"
+                                    ? "danger"
+                                    : "neutral"
                             }
                           >
-                            {s.status}
-                          </Badge>
+                            {destinationSessionStatusLabels[s.status]}
+                          </InlineStatus>
                         </td>
                         <td>
                           <Button
@@ -211,7 +209,7 @@ export function DestinationScheduleScreen() {
 
                                 <div className="dest-session-summary-item">
                                   <span className="dest-session-summary-label">
-                                    Penyelenggara (EO)
+                                    Penyelenggara (Travel Organizer)
                                   </span>
                                   <strong className="dest-session-summary-val">
                                     {pkg?.eoDisplayName ?? s.eoId}
@@ -229,7 +227,7 @@ export function DestinationScheduleScreen() {
 
                                 <div className="dest-session-summary-item">
                                   <span className="dest-session-summary-label">
-                                    Kuota Sesi EO
+                                    Kuota Sesi Travel Organizer
                                   </span>
                                   <strong className="dest-session-summary-val">
                                     {s.capacity} Orang
@@ -259,7 +257,7 @@ export function DestinationScheduleScreen() {
                                     Status Sesi
                                   </span>
                                   <strong className="dest-session-summary-val">
-                                    {s.status}
+                                    {destinationSessionStatusLabels[s.status]}
                                   </strong>
                                 </div>
 
@@ -270,7 +268,7 @@ export function DestinationScheduleScreen() {
                                   <strong className="dest-session-summary-val">
                                     {pkg?.guideSource === "DESTINATION"
                                       ? "Pemandu dari Destinasi"
-                                      : "Pemandu dari EO (Certified Guide)"}
+                                      : "Pemandu dari Travel Organizer (Certified Guide)"}
                                   </strong>
                                   <span className="dest-session-summary-hint">
                                     Pilihan sumber pemandu pada rancangan paket

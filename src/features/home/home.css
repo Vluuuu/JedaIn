@@ -1113,3 +1113,217 @@
     padding: var(--space-8);
   }
 }
+
+/* ==========================================================================
+   VISUAL PILOT V2 — IMMERSIVE HOME
+   A deliberately visible redesign: the recommendation becomes a full-image
+   editorial hero rather than a conventional split card.
+   ========================================================================== */
+
+.home-greeting-row {
+  padding-top: var(--space-8);
+}
+
+.home-greeting-title {
+  max-width: 16ch;
+  font-size: var(--font-size-heading-xl);
+  line-height: 1.08;
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.home-greeting-subtitle {
+  margin-top: var(--space-2);
+  color: var(--color-stone-500);
+  font-size: var(--font-size-body-lg);
+}
+
+.home-recommendation-section {
+  gap: var(--space-3);
+}
+
+.home-hero-card {
+  min-height: 31rem;
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  border: 0;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  background: var(--color-forest-950);
+  box-shadow: var(--shadow-md);
+}
+
+.home-hero-card:hover {
+  border-color: transparent;
+  box-shadow: var(--shadow-lg);
+}
+
+.home-hero-card__visual {
+  position: absolute;
+  inset: 0;
+  min-height: 100%;
+  height: 100%;
+  padding: var(--space-5);
+}
+
+.home-hero-card__visual-scrim {
+  background:
+    linear-gradient(
+      90deg,
+      rgb(10 28 18 / 82%) 0%,
+      rgb(10 28 18 / 48%) 48%,
+      rgb(10 28 18 / 8%) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgb(10 28 18 / 70%) 0%,
+      transparent 58%
+    );
+}
+
+.home-hero-card__visual-badges {
+  align-self: flex-start;
+}
+
+.home-hero-card__signal {
+  padding: var(--space-2) var(--space-3);
+  background: rgb(255 255 255 / 12%);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(10px);
+  color: var(--color-stone-0);
+  text-shadow: none;
+}
+
+.home-hero-card__body {
+  position: relative;
+  z-index: 2;
+  width: min(36rem, 100%);
+  margin-top: auto;
+  padding: var(--space-8);
+  background: transparent;
+  gap: var(--space-4);
+}
+
+.home-hero-card__meta,
+.home-hero-card__summary,
+.home-hero-card__price-label,
+.home-hero-card__why,
+.home-hero-card__chip {
+  color: var(--color-forest-100);
+}
+
+.home-hero-card__title {
+  color: var(--color-stone-0);
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.02;
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.home-hero-card__summary {
+  max-width: 46ch;
+  font-size: var(--font-size-body-md);
+  line-height: 1.6;
+}
+
+.home-hero-card__price {
+  color: var(--color-stone-0);
+}
+
+.home-hero-card__price strong {
+  color: var(--color-stone-0);
+  font-size: var(--font-size-heading-lg);
+}
+
+.home-hero-card__chip svg {
+  color: var(--color-forest-300);
+}
+
+.home-hero-card__cta {
+  width: auto;
+  align-self: flex-start;
+}
+
+.home-recommendation-section + .home-search-section {
+  margin-top: var(--space-2);
+}
+
+.home-search-bar {
+  max-width: 46rem;
+}
+
+.home-search-bar__input {
+  min-height: 3.5rem;
+  background: color-mix(in srgb, var(--color-stone-0) 92%, transparent);
+  border-color: var(--color-stone-300);
+  border-radius: var(--radius-pill);
+}
+
+.home-search-bar__submit {
+  min-height: 3.5rem;
+  border-radius: var(--radius-pill);
+  padding-inline: var(--space-6);
+}
+
+.home-mood-row {
+  gap: var(--space-3);
+}
+
+.home-mood-chip {
+  min-height: 3rem;
+  padding-inline: var(--space-5);
+  background: var(--color-stone-0);
+  border-color: var(--color-stone-200);
+}
+
+.home-cards-scroll-row,
+.home-destinations-scroll-row {
+  gap: var(--space-5);
+}
+
+.home-package-card {
+  flex-basis: 19rem;
+  border: 0;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+}
+
+.home-package-card__visual {
+  aspect-ratio: 4 / 3;
+}
+
+.home-package-card__body {
+  padding: var(--space-4) var(--space-4) var(--space-5);
+}
+
+.home-package-card__title {
+  font-size: var(--font-size-body-md);
+}
+
+.home-destination-card {
+  flex-basis: 16rem;
+  border: 0;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+}
+
+@media (min-width: 768px) {
+  .home-container {
+    max-width: 76rem;
+  }
+
+  .home-greeting-title {
+    font-size: var(--font-size-display-lg);
+    line-height: 1.05;
+  }
+
+  .home-hero-card {
+    min-height: 34rem;
+    display: flex;
+  }
+
+  .home-hero-card__body {
+    margin-right: auto;
+    padding: var(--space-10);
+  }
+}

@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router";
 import App from "./App.tsx";
 import "./index.css";
 import "./styles/redesign.css";
+import "./styles/redesign-depth.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -206,6 +206,9 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
                 className="home-hero-card__visual-scrim"
                 aria-hidden="true"
               />
+              <span className="home-hero-card__visual-index" aria-hidden="true">
+                01 / PILIHAN JEDA
+              </span>
               <div className="home-hero-card__visual-badges">
                 <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>
                   {recMode === "FALLBACK"
@@ -215,6 +218,9 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
               </div>
             </div>
             <div className="home-hero-card__body">
+              <span className="home-hero-card__body-kicker">
+                Untuk jedamu berikutnya
+              </span>
               <div className="home-hero-card__meta">
                 <span className="home-hero-card__meta-item">
                   <svg

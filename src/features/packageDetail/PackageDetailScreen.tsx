@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
+import PlanMascot from "../../assets/mascot/plan.png";
 import { Button, Skeleton } from "../../components/ui";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
 import { formatSessionDateTimeRange } from "./formatSessionDate";
@@ -165,16 +166,18 @@ export function PackageDetailScreen({
         <span className="package-detail-context__label">Detail Experience</span>
       </div>
 
-      {/* 1. Hero Media */}
-      <PackageHero packageData={pkg} />
+      <div className="package-detail-intro">
+        {/* 1. Hero Media */}
+        <PackageHero packageData={pkg} />
 
-      {/* Main Content Sections in locked contract order */}
-      <div className="package-detail-main">
         {/* 2. Title, Value Proposition & Starting Price */}
         <section
           className="package-detail-header-card"
           aria-labelledby="package-title"
         >
+          <span className="package-detail-header-card__kicker">
+            Jeda yang layak dinanti
+          </span>
           <div className="package-detail-meta-row">
             <span>{pkg.destinationName}</span>
             <span>•</span>
@@ -196,8 +199,19 @@ export function PackageDetailScreen({
           </div>
 
           <p className="package-detail-value-prop">{detail.valueProposition}</p>
+          <img
+            className="package-detail-header-card__mascot"
+            src={PlanMascot}
+            alt=""
+            aria-hidden="true"
+            width="520"
+            height="634"
+          />
         </section>
+      </div>
 
+      {/* Main Content Sections in locked contract order */}
+      <div className="package-detail-main">
         {/* 3. Optional Personalized Match Explanation */}
         {personalizedContext && personalizedContext.reasons.length > 0 && (
           <section

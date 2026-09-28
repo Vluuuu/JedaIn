@@ -201,4 +201,22 @@
   --redesign-demand-start: #1e4032;
   --redesign-demand-end: #3a6148;
   --redesign-demand-border: #29513c;
+  --redesign-meadow: #dce8bb;
+  --redesign-meadow-light: #f0f3dd;
+  --redesign-leaf: #8da85d;
+  --redesign-forest-dark: #173e32;
+  --redesign-forest-ink: #12332a;
+  --redesign-cream: #fbf5e8;
+  --redesign-warm-line: #d9dfc3;
+  --redesign-feature-shadow: 0 22px 54px rgb(22 57 41 / 14%);
+  --redesign-light-rule: rgb(255 255 255 / 21%);
+  --redesign-light-ink: #f8f9ec;
+  --redesign-light-muted: #dde8d8;
+  --redesign-orbit-inner: rgb(255 255 255 / 8%);
+  --redesign-orbit-outer: rgb(255 255 255 / 6%);
+  --redesign-visual-shade: rgb(18 51 42 / 32%);
+  --redesign-visual-shade-strong: rgb(18 51 42 / 72%);
+  --redesign-leaf-glow: rgb(141 168 93 / 23%);
+  --redesign-leaf-glow-soft: rgb(141 168 93 / 22%);
+  --redesign-chip-glass: rgb(255 255 255 / 8%);
 }

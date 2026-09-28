@@ -1189,3 +1189,150 @@
   font-size: var(--font-size-body-sm);
   line-height: 1.4;
 }
+
+/* ==========================================================================
+   VISUAL PILOT — PACKAGE DETAIL
+   Editorial buying flow: imagery and type lead; sections use rhythm, not cards.
+   ========================================================================== */
+
+.package-detail-container {
+  gap: var(--space-7);
+}
+
+.package-detail-hero {
+  box-shadow: none;
+}
+
+.package-detail-gallery {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.package-detail-main {
+  gap: var(--space-8);
+}
+
+.package-detail-header-card {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.package-detail-meta-row {
+  color: var(--color-text-muted);
+}
+
+.package-detail-title {
+  max-width: 24ch;
+}
+
+.package-detail-price-badge {
+  padding-top: var(--space-2);
+}
+
+.package-detail-price-label {
+  color: var(--color-text-muted);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.package-detail-price-amount {
+  color: var(--color-forest-800);
+}
+
+.package-detail-value-prop {
+  max-width: 68ch;
+  line-height: 1.7;
+}
+
+.package-detail-personalized-box {
+  padding: var(--space-3) 0 var(--space-3) var(--space-4);
+  background: transparent;
+  border: 0;
+  border-left: 2px solid var(--color-forest-300);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.package-detail-personalized-chip {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: var(--color-text-secondary);
+}
+
+.package-detail-section--primary {
+  padding: var(--space-6) 0 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-stone-200);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.package-detail-session-card {
+  padding: var(--space-4) 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.package-detail-session-card + .package-detail-session-card {
+  border-top: 1px solid var(--color-stone-200);
+}
+
+.package-detail-secondary {
+  gap: 0;
+}
+
+.package-detail-disclosure {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-stone-200);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.package-detail-disclosure:last-child {
+  border-bottom: 1px solid var(--color-stone-200);
+}
+
+.package-detail-disclosure__summary {
+  padding: var(--space-5) 0;
+}
+
+.package-detail-disclosure__body {
+  padding-inline: 0;
+  padding-bottom: var(--space-6);
+}
+
+.package-detail-disclosure__body .package-detail-section {
+  padding-inline: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.package-detail-section__eyebrow {
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+}
+
+.package-detail-identity-rating {
+  color: var(--color-text-secondary);
+}
+
+.package-detail-no-session-notice {
+  padding: var(--space-4) 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}

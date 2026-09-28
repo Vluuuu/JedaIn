@@ -1196,7 +1196,7 @@
    ========================================================================== */
 
 .package-detail-container {
-  gap: var(--space-7);
+  gap: var(--space-8);
 }
 
 .package-detail-hero {

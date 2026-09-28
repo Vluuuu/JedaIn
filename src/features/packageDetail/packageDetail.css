@@ -39,18 +39,18 @@
   width: 100%;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   background: var(--color-stone-100);
   display: flex;
   align-items: flex-end;
-  min-height: 18rem;
+  min-height: 20rem;
   box-sizing: border-box;
   padding: var(--space-4);
 }
 
 @media (min-width: 768px) {
   .package-detail-hero {
-    min-height: 24rem;
+    min-height: 26rem;
     padding: var(--space-6);
   }
 }
@@ -129,9 +129,9 @@
   gap: var(--space-3);
   padding: var(--space-4);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-stone-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
 }
 
 @media (min-width: 768px) {
@@ -283,9 +283,9 @@
   gap: var(--space-4);
   padding: var(--space-6);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-stone-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
 }
 
 @media (min-width: 768px) {
@@ -301,8 +301,8 @@
   gap: var(--space-2);
   color: var(--color-stone-500);
   font-size: 0.8125rem;
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .package-detail-title {
@@ -316,8 +316,8 @@
 
 @media (min-width: 768px) {
   .package-detail-title {
-    font-size: 2rem;
-    line-height: 2.5rem;
+    font-size: 2.125rem;
+    line-height: 2.625rem;
   }
 }
 
@@ -332,19 +332,21 @@
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
-  padding-top: var(--space-4);
-  border-top: 1px dashed var(--color-stone-200);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-stone-100);
 }
 
 .package-detail-price-label {
   color: var(--color-stone-500);
   font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .package-detail-price-amount {
-  font-size: 1.375rem;
-  font-weight: var(--font-weight-bold);
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--color-stone-950);
   letter-spacing: var(--letter-spacing-tight);
 }
@@ -362,15 +364,15 @@
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-5);
-  background: var(--color-sand-50);
-  border: 1px solid var(--color-sand-200);
+  background: var(--color-stone-50);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
 }
 
 .package-detail-personalized-title {
   margin: 0;
   font-size: 0.75rem;
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
   color: var(--color-forest-800);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -378,22 +380,21 @@
 
 .package-detail-personalized-chips {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: 0.375rem;
 }
 
 .package-detail-personalized-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: var(--color-bg-surface);
-  color: var(--color-stone-800);
-  border: 1px solid var(--color-stone-200);
-  border-radius: var(--radius-pill);
+  gap: 0.5rem;
+  color: var(--color-stone-700);
   font-size: 0.8125rem;
-  font-weight: var(--font-weight-semibold);
-  box-shadow: var(--shadow-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .package-detail-personalized-chip-icon {
@@ -410,9 +411,9 @@
   gap: var(--space-4);
   padding: var(--space-6);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-stone-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
 }
 
 @media (min-width: 768px) {
@@ -803,10 +804,17 @@
   gap: var(--space-2);
   padding: var(--space-4) var(--space-5);
   background: var(--color-bg-surface);
-  border: 1.5px solid var(--color-stone-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: var(--radius-lg);
+  box-shadow: none;
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+.package-detail-session-card:hover {
+  border-color: var(--color-forest-300);
   box-shadow: var(--shadow-xs);
-  transition: border-color var(--motion-fast) var(--ease-standard);
 }
 
 @media (min-width: 640px) {

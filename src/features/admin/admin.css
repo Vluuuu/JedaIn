@@ -50,25 +50,25 @@
   flex-direction: column;
   justify-content: space-between;
   gap: var(--space-3);
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
   transition:
-    transform var(--motion-normal) var(--ease-standard),
+    border-color var(--motion-normal) var(--ease-standard),
     box-shadow var(--motion-normal) var(--ease-standard);
   text-decoration: none;
   color: inherit;
 }
 
 .admin-queue-card:hover {
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
   border-color: var(--color-brand-primary);
 }
 
 .admin-queue-label {
   font-size: var(--font-size-label-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 500;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-caps);
+  letter-spacing: 0.05em;
 }
 
 .admin-queue-value {
@@ -94,7 +94,7 @@
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
   padding: var(--space-6);
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -114,6 +114,41 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
+}
+
+.admin-ecosystem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.admin-ecosystem-card {
+  padding: var(--space-4);
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.admin-ecosystem-value {
+  font-size: var(--font-size-heading-md);
+  font-weight: 700;
+  color: var(--color-brand-primary);
+  margin: 0.125rem 0;
+}
+
+.admin-ecosystem-desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+.admin-audit-actor {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 /* Admin Tables */

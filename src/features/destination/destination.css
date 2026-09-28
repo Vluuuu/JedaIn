@@ -156,7 +156,7 @@
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
 }
 
 .dest-identity__content {
@@ -236,7 +236,7 @@
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
   padding: var(--space-5) var(--space-4);
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
 }
 
 .dest-metric-item {
@@ -254,10 +254,10 @@
 .dest-metric-label,
 .dest-partners__label {
   font-size: var(--font-size-label-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 500;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 .dest-metric-value {
@@ -292,7 +292,7 @@
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
 }
 
 .dest-quick-actions,

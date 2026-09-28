@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { Button } from "../../components/ui";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockApplicationStore } from "../eo/mockApplicationStore";
 import { mockEoPackageStore } from "../eo/mockEoPackageStore";
@@ -68,11 +68,7 @@ export function AdminOverviewScreen() {
     <div className="admin-container">
       <header className="admin-page-header">
         <div>
-          <Badge tone="info">Trust & Governance Console</Badge>
-          <h1
-            className="admin-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
+          <h1 className="admin-page-title">
             Overview Operasional Kurasi & Tata Kelola
           </h1>
           <p className="admin-page-subtitle">
@@ -158,80 +154,29 @@ export function AdminOverviewScreen() {
           </span>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "var(--space-4)",
-          }}
-        >
-          <div
-            style={{
-              padding: "var(--space-4)",
-              background: "var(--color-bg-surface-subtle)",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
+        <div className="admin-ecosystem-grid">
+          <div className="admin-ecosystem-card">
             <span className="admin-queue-label">Sesi Aktif Terbuka</span>
-            <div
-              style={{
-                fontSize: "var(--font-size-heading-md)",
-                fontWeight: "bold",
-                color: "var(--color-brand-primary)",
-                margin: "0.25rem 0",
-              }}
-            >
-              {openSessionsCount}
-            </div>
-            <small style={{ color: "var(--color-text-secondary)" }}>
+            <div className="admin-ecosystem-value">{openSessionsCount}</div>
+            <span className="admin-ecosystem-desc">
               Tersedia untuk traveler
-            </small>
+            </span>
           </div>
 
-          <div
-            style={{
-              padding: "var(--space-4)",
-              background: "var(--color-bg-surface-subtle)",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
+          <div className="admin-ecosystem-card">
             <span className="admin-queue-label">Transaksi Terbayar</span>
-            <div
-              style={{
-                fontSize: "var(--font-size-heading-md)",
-                fontWeight: "bold",
-                color: "var(--color-brand-primary)",
-                margin: "0.25rem 0",
-              }}
-            >
-              {paidBookingsCount}
-            </div>
-            <small style={{ color: "var(--color-text-secondary)" }}>
+            <div className="admin-ecosystem-value">{paidBookingsCount}</div>
+            <span className="admin-ecosystem-desc">
               Terkonfirmasi & selesai
-            </small>
+            </span>
           </div>
 
-          <div
-            style={{
-              padding: "var(--space-4)",
-              background: "var(--color-bg-surface-subtle)",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
+          <div className="admin-ecosystem-card">
             <span className="admin-queue-label">Total Log Audit</span>
-            <div
-              style={{
-                fontSize: "var(--font-size-heading-md)",
-                fontWeight: "bold",
-                color: "var(--color-brand-primary)",
-                margin: "0.25rem 0",
-              }}
-            >
+            <div className="admin-ecosystem-value">
               {mockAdminAuditStore.getAll().length}
             </div>
-            <small style={{ color: "var(--color-text-secondary)" }}>
-              Aksi manual terekam
-            </small>
+            <span className="admin-ecosystem-desc">Aksi manual terekam</span>
           </div>
         </div>
       </section>
@@ -277,7 +222,7 @@ export function AdminOverviewScreen() {
                   Catatan: "{ev.reason}"
                 </p>
               </div>
-              <Badge tone="neutral">{ev.actorLabel}</Badge>
+              <span className="admin-audit-actor">{ev.actorLabel}</span>
             </div>
           ))}
         </div>

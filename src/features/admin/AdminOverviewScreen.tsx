@@ -68,11 +68,8 @@ export function AdminOverviewScreen() {
     <div className="admin-container">
       <header className="admin-page-header">
         <div>
-          <Badge tone="info">Trust & Governance Console</Badge>
-          <h1
-            className="admin-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
+          <span className="admin-page-eyebrow">Kurasi & Tata Kelola</span>
+          <h1 className="admin-page-title">
             Overview Operasional Kurasi & Tata Kelola
           </h1>
           <p className="admin-page-subtitle">
@@ -93,14 +90,10 @@ export function AdminOverviewScreen() {
 
       {/* Priority Queues Grid (A02 Core) */}
       <section aria-label="Antrean prioritas peninjauan">
-        <h2
-          style={{
-            fontSize: "var(--font-size-heading-sm)",
-            marginBottom: "var(--space-3)",
-          }}
-        >
-          Antrean Peninjauan Utama
-        </h2>
+        <div className="admin-overview-section-heading">
+          <h2>Antrean Peninjauan Utama</h2>
+          <p>Prioritas yang membutuhkan keputusan Admin JedaIn.</p>
+        </div>
 
         <div className="admin-queues-grid">
           <Link to="/admin/eo-approvals" className="admin-queue-card">
@@ -158,80 +151,23 @@ export function AdminOverviewScreen() {
           </span>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "var(--space-4)",
-          }}
-        >
-          <div
-            style={{
-              padding: "var(--space-4)",
-              background: "var(--color-bg-surface-subtle)",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
-            <span className="admin-queue-label">Sesi Aktif Terbuka</span>
-            <div
-              style={{
-                fontSize: "var(--font-size-heading-md)",
-                fontWeight: "bold",
-                color: "var(--color-brand-primary)",
-                margin: "0.25rem 0",
-              }}
-            >
-              {openSessionsCount}
-            </div>
-            <small style={{ color: "var(--color-text-secondary)" }}>
-              Tersedia untuk traveler
-            </small>
+        <div className="admin-overview-stats">
+          <div className="admin-overview-stat">
+            <span className="admin-overview-stat__label">Sesi Aktif Terbuka</span>
+            <strong>{openSessionsCount}</strong>
+            <small>Tersedia untuk traveler</small>
           </div>
 
-          <div
-            style={{
-              padding: "var(--space-4)",
-              background: "var(--color-bg-surface-subtle)",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
-            <span className="admin-queue-label">Transaksi Terbayar</span>
-            <div
-              style={{
-                fontSize: "var(--font-size-heading-md)",
-                fontWeight: "bold",
-                color: "var(--color-brand-primary)",
-                margin: "0.25rem 0",
-              }}
-            >
-              {paidBookingsCount}
-            </div>
-            <small style={{ color: "var(--color-text-secondary)" }}>
-              Terkonfirmasi & selesai
-            </small>
+          <div className="admin-overview-stat">
+            <span className="admin-overview-stat__label">Transaksi Terbayar</span>
+            <strong>{paidBookingsCount}</strong>
+            <small>Terkonfirmasi & selesai</small>
           </div>
 
-          <div
-            style={{
-              padding: "var(--space-4)",
-              background: "var(--color-bg-surface-subtle)",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
-            <span className="admin-queue-label">Total Log Audit</span>
-            <div
-              style={{
-                fontSize: "var(--font-size-heading-md)",
-                fontWeight: "bold",
-                color: "var(--color-brand-primary)",
-                margin: "0.25rem 0",
-              }}
-            >
-              {mockAdminAuditStore.getAll().length}
-            </div>
-            <small style={{ color: "var(--color-text-secondary)" }}>
-              Aksi manual terekam
-            </small>
+          <div className="admin-overview-stat">
+            <span className="admin-overview-stat__label">Total Log Audit</span>
+            <strong>{mockAdminAuditStore.getAll().length}</strong>
+            <small>Aksi manual terekam</small>
           </div>
         </div>
       </section>

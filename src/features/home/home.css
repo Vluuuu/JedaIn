@@ -916,3 +916,200 @@
     flex: auto;
   }
 }
+
+/* ==========================================================================
+   VISUAL PILOT — HOME
+   Calm editorial discovery: stronger imagery, quieter metadata, fewer chips.
+   ========================================================================== */
+
+.home-container {
+  gap: var(--space-8);
+}
+
+.home-greeting-row {
+  padding: var(--space-6) 0 0;
+}
+
+.home-greeting-title {
+  max-width: 18ch;
+  font-size: var(--font-size-heading-lg);
+  line-height: var(--line-height-heading-lg);
+}
+
+.home-greeting-subtitle {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-body-md);
+}
+
+.home-recommendation-section,
+.home-mood-section,
+.home-discovery-section {
+  gap: var(--space-4);
+}
+
+.home-section-header__tag {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+}
+
+.home-section-title {
+  font-size: var(--font-size-heading-sm);
+  line-height: var(--line-height-heading-sm);
+}
+
+.home-hero-card {
+  border: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
+  box-shadow: none;
+}
+
+.home-hero-card:hover {
+  border-color: var(--color-stone-300);
+  box-shadow: none;
+}
+
+.home-hero-card__visual {
+  min-height: 15rem;
+}
+
+.home-hero-card__visual-badges {
+  align-self: flex-end;
+}
+
+.home-hero-card__signal {
+  color: var(--color-stone-0);
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 45%);
+}
+
+.home-hero-card__body {
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.home-hero-card__title {
+  font-size: var(--font-size-heading-md);
+  line-height: var(--line-height-heading-md);
+}
+
+.home-hero-card__summary {
+  max-width: 58ch;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.6;
+}
+
+.home-hero-card__price-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.home-hero-card__price {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body-sm);
+}
+
+.home-hero-card__price strong {
+  color: var(--color-forest-800);
+  font-size: var(--font-size-heading-md);
+}
+
+.home-hero-card__why {
+  gap: var(--space-2) var(--space-4);
+}
+
+.home-hero-card__chip {
+  gap: var(--space-1);
+  padding: 0;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.home-hero-card__chip svg {
+  color: var(--color-forest-700);
+}
+
+.home-preference-bar {
+  padding: var(--space-3) 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-stone-200);
+  border-bottom: 1px solid var(--color-stone-200);
+  border-radius: 0;
+  font-size: var(--font-size-caption);
+}
+
+.home-preference-bar__chip {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: var(--color-text-secondary);
+}
+
+.home-preference-bar__chip + .home-preference-bar__chip::before {
+  content: "·";
+  margin-right: var(--space-2);
+  color: var(--color-stone-400);
+}
+
+.home-search-bar__input {
+  border-width: 1px;
+  box-shadow: none;
+}
+
+.home-search-bar__submit {
+  box-shadow: none;
+}
+
+.home-search-bar__submit:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.home-mood-chip {
+  border-width: 1px;
+  box-shadow: none;
+}
+
+.home-mood-chip:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.home-package-card,
+.home-destination-card {
+  border-width: 1px;
+  box-shadow: none;
+}
+
+.home-package-card:hover,
+.home-destination-card:hover {
+  box-shadow: var(--shadow-xs);
+  transform: none;
+}
+
+@media (min-width: 768px) {
+  .home-greeting-title {
+    font-size: var(--font-size-heading-xl);
+    line-height: var(--line-height-heading-xl);
+  }
+
+  .home-hero-card {
+    grid-template-columns: minmax(20rem, 42%) 1fr;
+  }
+
+  .home-hero-card__body {
+    padding: var(--space-7);
+  }
+}

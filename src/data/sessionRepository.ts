@@ -5,6 +5,7 @@ import type { EoSessionRecord, EoSessionStatus } from "../features/eo/types";
 import { getSupabaseClient } from "../lib/supabase/client";
 import { isSupabaseMode } from "../lib/supabase/config";
 import type { SessionRow } from "../lib/supabase/database.types";
+import { requireAuthenticatedUser } from "../lib/supabase/demoAuth";
 import {
   mapSessionRecordToRow,
   mapSessionRowToRecord,
@@ -123,16 +124,37 @@ export const sessionRepository = {
     session?: EoSessionRecord;
     message?: string;
   }> {
-    const actor = partnerSessionStore.get();
-    if (!actor || actor.role !== "EO") {
+    if (!isSupabaseMode()) {
+      const actor = partnerSessionStore.get();
+      if (!actor || actor.role !== "EO") {
+        return {
+          success: false,
+          message:
+            "Akses ditolak: Hanya EO terautentikasi yang dapat membuka sesi.",
+        };
+      }
+
+      const actorEoId = actor.id;
+      const app = mockApplicationStore.getBySellerId(actorEoId);
+      if (!app || app.status !== "APPROVED") {
+        return {
+          success: false,
+          message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+        };
+      }
+      return mockEoPackageStore.createSession(input);
+    }
+
+    // Supabase mode requires authenticated EO session
+    const authCheck = await requireAuthenticatedUser("EO");
+    if (!authCheck.success) {
       return {
         success: false,
-        message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat membuka sesi.",
+        message: authCheck.error,
       };
     }
 
-    const actorEoId = actor.id;
+    const actorEoId = authCheck.partnerUser?.id || "eo_jeda_alam";
     const app = mockApplicationStore.getBySellerId(actorEoId);
     if (!app || app.status !== "APPROVED") {
       return {
@@ -188,13 +210,12 @@ export const sessionRepository = {
       };
     }
 
-    if (!isSupabaseMode()) {
-      return mockEoPackageStore.createSession(input);
-    }
-
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return mockEoPackageStore.createSession(input);
+      return {
+        success: false,
+        message: "Klien Supabase tidak tersedia untuk membuat sesi.",
+      };
     }
 
     try {
@@ -232,8 +253,8 @@ export const sessionRepository = {
       }
 
       const created = mapSessionRowToRecord(data as SessionRow);
-      // Synchronize in-memory fallback
-      mockEoPackageStore.createSession(input);
+      // Synchronize in-memory fallback cache on success
+      mockEoPackageStore.upsertSession(created);
       return { success: true, session: created };
     } catch (err: unknown) {
       return {
@@ -252,16 +273,16 @@ export const sessionRepository = {
     session?: EoSessionRecord;
     message?: string;
   }> {
-    const actor = partnerSessionStore.get();
-    if (!actor || actor.role !== "EO") {
-      return {
-        success: false,
-        message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat mengubah status sesi.",
-      };
-    }
-
     if (!isSupabaseMode()) {
+      const actor = partnerSessionStore.get();
+      if (!actor || actor.role !== "EO") {
+        return {
+          success: false,
+          message:
+            "Akses ditolak: Hanya EO terautentikasi yang dapat mengubah status sesi.",
+        };
+      }
+
       const ok = mockEoPackageStore.updateSessionStatus(
         sessionId,
         status,
@@ -278,30 +299,28 @@ export const sessionRepository = {
         .getAllSessions()
         .find((item) => item.sessionId === sessionId);
       return { success: true, session: found };
+    }
+
+    const authCheck = await requireAuthenticatedUser("EO");
+    if (!authCheck.success) {
+      return {
+        success: false,
+        message: authCheck.error,
+      };
     }
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      const ok = mockEoPackageStore.updateSessionStatus(
-        sessionId,
-        status,
-        nowMs,
-      );
-      if (!ok) {
-        return {
-          success: false,
-          message:
-            "Sesi yang sudah berlangsung atau berlalu tidak dapat dibuka kembali (OPEN).",
-        };
-      }
-      const found = mockEoPackageStore
-        .getAllSessions()
-        .find((item) => item.sessionId === sessionId);
-      return { success: true, session: found };
+      return {
+        success: false,
+        message: "Klien Supabase tidak tersedia untuk mengubah status sesi.",
+      };
     }
 
+    const actorEoId = authCheck.partnerUser?.id || "eo_jeda_alam";
+
     try {
-      // Find existing session
+      // Find existing session in Supabase
       const { data: existingData, error: fetchErr } = await supabase
         .from("sessions")
         .select("*")
@@ -309,11 +328,11 @@ export const sessionRepository = {
         .maybeSingle();
 
       if (fetchErr || !existingData) {
-        return { success: false, message: "Sesi tidak ditemukan." };
+        return { success: false, message: "Sesi tidak ditemukan di Supabase." };
       }
 
       const existing = mapSessionRowToRecord(existingData as SessionRow);
-      if (existing.eoId !== actor.id) {
+      if (existing.eoId !== actorEoId) {
         return {
           success: false,
           message: "Akses ditolak: Anda bukan pemilik sesi ini.",
@@ -336,6 +355,7 @@ export const sessionRepository = {
           updated_at: new Date(nowMs).toISOString(),
         })
         .eq("id", sessionId)
+        .eq("eo_id", actorEoId)
         .select()
         .single();
 
@@ -347,7 +367,7 @@ export const sessionRepository = {
       }
 
       const updated = mapSessionRowToRecord(data as SessionRow);
-      mockEoPackageStore.updateSessionStatus(sessionId, status, nowMs);
+      mockEoPackageStore.upsertSession(updated);
       return { success: true, session: updated };
     } catch (err: unknown) {
       return {
@@ -366,16 +386,16 @@ export const sessionRepository = {
     session?: EoSessionRecord;
     message?: string;
   }> {
-    const actor = partnerSessionStore.get();
-    if (!actor || actor.role !== "EO") {
-      return {
-        success: false,
-        message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat mengubah catatan operasional sesi.",
-      };
-    }
-
     if (!isSupabaseMode()) {
+      const actor = partnerSessionStore.get();
+      if (!actor || actor.role !== "EO") {
+        return {
+          success: false,
+          message:
+            "Akses ditolak: Hanya EO terautentikasi yang dapat mengubah catatan operasional sesi.",
+        };
+      }
+
       const ok = mockEoPackageStore.updateSessionOperationalNote(
         sessionId,
         operationalNote,
@@ -390,25 +410,26 @@ export const sessionRepository = {
         .getAllSessions()
         .find((item) => item.sessionId === sessionId);
       return { success: true, session: found };
+    }
+
+    const authCheck = await requireAuthenticatedUser("EO");
+    if (!authCheck.success) {
+      return {
+        success: false,
+        message: authCheck.error,
+      };
     }
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      const ok = mockEoPackageStore.updateSessionOperationalNote(
-        sessionId,
-        operationalNote,
-      );
-      if (!ok) {
-        return {
-          success: false,
-          message: "Sesi tidak ditemukan atau bukan milik EO ini.",
-        };
-      }
-      const found = mockEoPackageStore
-        .getAllSessions()
-        .find((item) => item.sessionId === sessionId);
-      return { success: true, session: found };
+      return {
+        success: false,
+        message:
+          "Klien Supabase tidak tersedia untuk memperbarui catatan sesi.",
+      };
     }
+
+    const actorEoId = authCheck.partnerUser?.id || "eo_jeda_alam";
 
     try {
       const cleanNote = operationalNote.trim();
@@ -422,6 +443,7 @@ export const sessionRepository = {
           updated_at: nowIso,
         })
         .eq("id", sessionId)
+        .eq("eo_id", actorEoId)
         .select()
         .single();
 
@@ -435,10 +457,7 @@ export const sessionRepository = {
       }
 
       const updated = mapSessionRowToRecord(data as SessionRow);
-      mockEoPackageStore.updateSessionOperationalNote(
-        sessionId,
-        operationalNote,
-      );
+      mockEoPackageStore.upsertSession(updated);
       return { success: true, session: updated };
     } catch (err: unknown) {
       return {

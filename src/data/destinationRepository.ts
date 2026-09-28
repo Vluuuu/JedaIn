@@ -6,6 +6,7 @@ import type {
 import { getSupabaseClient } from "../lib/supabase/client";
 import { isSupabaseMode } from "../lib/supabase/config";
 import type { DestinationRow } from "../lib/supabase/database.types";
+import { requireAuthenticatedUser } from "../lib/supabase/demoAuth";
 import { mapDestinationRowToRecord } from "../lib/supabase/mappers";
 
 export const destinationRepository = {
@@ -118,13 +119,18 @@ export const destinationRepository = {
       return { success: true, destination: updated };
     }
 
+    // In Supabase mode, verify authenticated session
+    const authCheck = await requireAuthenticatedUser("DESTINATION");
+    if (!authCheck.success) {
+      return { success: false, message: authCheck.error };
+    }
+
     const supabase = getSupabaseClient();
     if (!supabase) {
-      const updated = mockDestinationStore.updateDescription(
-        destinationId,
-        trimmed,
-      );
-      return { success: Boolean(updated), destination: updated };
+      return {
+        success: false,
+        message: "Klien Supabase tidak tersedia untuk menyimpan perubahan.",
+      };
     }
 
     try {
@@ -141,7 +147,9 @@ export const destinationRepository = {
       if (error || !data) {
         return {
           success: false,
-          message: error?.message || "Gagal memperbarui deskripsi destinasi.",
+          message:
+            error?.message ||
+            "Gagal memperbarui deskripsi destinasi di Supabase.",
         };
       }
 
@@ -177,13 +185,18 @@ export const destinationRepository = {
       return { success: true, destination: updated };
     }
 
+    // In Supabase mode, verify authenticated session
+    const authCheck = await requireAuthenticatedUser("DESTINATION");
+    if (!authCheck.success) {
+      return { success: false, message: authCheck.error };
+    }
+
     const supabase = getSupabaseClient();
     if (!supabase) {
-      const updated = mockDestinationStore.updateLocalGuideFee(
-        destinationId,
-        cleanFee,
-      );
-      return { success: Boolean(updated), destination: updated };
+      return {
+        success: false,
+        message: "Klien Supabase tidak tersedia untuk menyimpan perubahan.",
+      };
     }
 
     try {
@@ -200,7 +213,9 @@ export const destinationRepository = {
       if (error || !data) {
         return {
           success: false,
-          message: error?.message || "Gagal memperbarui tarif pemandu lokal.",
+          message:
+            error?.message ||
+            "Gagal memperbarui tarif pemandu lokal di Supabase.",
         };
       }
 
@@ -234,13 +249,18 @@ export const destinationRepository = {
       return { success: true, destination: updated };
     }
 
+    // In Supabase mode, verify authenticated session
+    const authCheck = await requireAuthenticatedUser("DESTINATION");
+    if (!authCheck.success) {
+      return { success: false, message: authCheck.error };
+    }
+
     const supabase = getSupabaseClient();
     if (!supabase) {
-      const updated = mockDestinationStore.updateMediaGallery(
-        destinationId,
-        mediaGallery,
-      );
-      return { success: Boolean(updated), destination: updated };
+      return {
+        success: false,
+        message: "Klien Supabase tidak tersedia untuk menyimpan perubahan.",
+      };
     }
 
     try {
@@ -257,7 +277,8 @@ export const destinationRepository = {
       if (error || !data) {
         return {
           success: false,
-          message: error?.message || "Gagal memperbarui galeri destinasi.",
+          message:
+            error?.message || "Gagal memperbarui galeri destinasi di Supabase.",
         };
       }
 

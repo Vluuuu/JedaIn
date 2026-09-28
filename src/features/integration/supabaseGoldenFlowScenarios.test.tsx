@@ -11,7 +11,7 @@ import { defaultExploreAdapter } from "../explore/mockAdapter";
 import { MockPackageDetailAdapter } from "../packageDetail/mockAdapter";
 import { MockSessionSelectionAdapter } from "../sessionSelection/mockAdapter";
 
-describe("Cross-Surface Backend Sync Golden Scenarios (Scenarios A, B, C)", () => {
+describe("Cross-Surface Repository Integration & Fallback Scenarios (Unit / Mock Flow Simulation)", () => {
   beforeEach(() => {
     mockDestinationStore.reset();
     mockEoPackageStore.reset();
@@ -24,7 +24,7 @@ describe("Cross-Surface Backend Sync Golden Scenarios (Scenarios A, B, C)", () =
     partnerSessionStore.reset();
   });
 
-  it("SCENARIO A — DESTINATION SYNC: Destination Partner edits description & guide fee -> TO views updated destination", async () => {
+  it("Scenario A (Mock Repository Flow) — Destination Partner edits description & guide fee -> TO views updated destination", async () => {
     // 1. Destination Partner login
     partnerSessionStore.loginAsDemoDestination();
     const partner = partnerSessionStore.get();
@@ -60,7 +60,7 @@ describe("Cross-Surface Backend Sync Golden Scenarios (Scenarios A, B, C)", () =
     expect(toViewedDest?.localGuideFeePerPerson).toBe(updatedFee);
   });
 
-  it("SCENARIO B — PACKAGE LIFECYCLE: TO selects destination -> saves draft -> submits -> ACC demo -> publishes LIVE", async () => {
+  it("Scenario B (Mock Repository Flow) — Package Lifecycle: TO selects destination -> saves draft -> submits -> ACC demo -> publishes LIVE", async () => {
     // 1. TO selects active destination
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 
@@ -122,7 +122,7 @@ describe("Cross-Surface Backend Sync Golden Scenarios (Scenarios A, B, C)", () =
     expect(livePkg?.status).toBe("LIVE");
   });
 
-  it("SCENARIO C — TRAVELER CROSS DEVICE: TO opens future session -> Traveler Explore, Detail, and Session Selection see it", async () => {
+  it("Scenario C (Mock Repository Flow) — Session & Traveler Catalog: TO opens future session -> Traveler Explore, Detail, and Session Selection see it", async () => {
     // 1. TO creates a future OPEN session for LIVE package slow_green_day
     partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
 

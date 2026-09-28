@@ -1,11 +1,18 @@
 export type DataMode = "mock" | "supabase";
 
 let dataModeOverride: DataMode | null = null;
+let configOverride: { url?: string; publishableKey?: string } | null = null;
 
 export const DEFAULT_SUPABASE_URL = "https://yykgpvgwougibnhhxttw.supabase.co";
 
 export function setDataModeOverride(mode: DataMode | null): void {
   dataModeOverride = mode;
+}
+
+export function setSupabaseConfigOverride(
+  override: { url?: string; publishableKey?: string } | null,
+): void {
+  configOverride = override;
 }
 
 export function getDataMode(): DataMode {
@@ -27,10 +34,12 @@ export function getSupabaseConfig(): {
   isConfigured: boolean;
 } {
   const url =
+    configOverride?.url ||
     (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.trim() ||
     DEFAULT_SUPABASE_URL;
 
   const publishableKey =
+    configOverride?.publishableKey ||
     (
       import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined
     )?.trim() ||

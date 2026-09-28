@@ -1,5 +1,4 @@
 import { mockApplicationStore } from "../features/eo/mockApplicationStore";
-import { mockDestinationStore } from "../features/eo/mockDestinationStore";
 import {
   mockEoPackageStore,
   validateEoPackage,
@@ -13,10 +12,12 @@ import type {
 import { getSupabaseClient } from "../lib/supabase/client";
 import { isSupabaseMode } from "../lib/supabase/config";
 import type { PackageRow } from "../lib/supabase/database.types";
+import { requireAuthenticatedUser } from "../lib/supabase/demoAuth";
 import {
   mapPackageRecordToRow,
   mapPackageRowToRecord,
 } from "../lib/supabase/mappers";
+import { destinationRepository } from "./destinationRepository";
 
 export const packageRepository = {
   async getAllPackages(): Promise<EoPackageRecord[]> {
@@ -141,32 +142,37 @@ export const packageRepository = {
     package?: EoPackageRecord;
     message?: string;
   }> {
-    const actor = partnerSessionStore.get();
-    if (!actor || actor.role !== "EO") {
-      return {
-        success: false,
-        message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat mengelola draf paket.",
-      };
-    }
-
-    const actorEoId = actor.id;
-    const app = mockApplicationStore.getBySellerId(actorEoId);
-    if (!app || app.status !== "APPROVED") {
-      return {
-        success: false,
-        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
-      };
-    }
-
     if (!isSupabaseMode()) {
+      const actor = partnerSessionStore.get();
+      if (!actor || actor.role !== "EO") {
+        return {
+          success: false,
+          message:
+            "Akses ditolak: Hanya EO terautentikasi yang dapat mengelola draf paket.",
+        };
+      }
       return mockEoPackageStore.saveDraft(draft);
+    }
+
+    // Supabase mode requires authenticated EO session
+    const authCheck = await requireAuthenticatedUser("EO");
+    if (!authCheck.success) {
+      return {
+        success: false,
+        message: authCheck.error,
+      };
     }
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return mockEoPackageStore.saveDraft(draft);
+      return {
+        success: false,
+        message: "Klien Supabase tidak tersedia untuk menyimpan draf paket.",
+      };
     }
+
+    const actorEoId = authCheck.partnerUser?.id || "eo_jeda_alam";
+    const app = mockApplicationStore.getBySellerId(actorEoId);
 
     try {
       // Check existing package in Supabase if updating
@@ -193,12 +199,17 @@ export const packageRepository = {
         `pkg_eo_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
       const actorDisplayName =
-        actor.businessName || app.businessName || "EO Partner";
+        authCheck.partnerUser?.businessName ||
+        app?.businessName ||
+        "EO Partner";
       const authorGuideStatus: EoGuideStatus =
-        app.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
+        app?.guideStatus ??
+        authCheck.partnerUser?.guideStatus ??
+        "CERTIFIED_GUIDE";
 
+      // Authoritative pricing: query live destination from destinationRepository
       const dest = draft.destinationId
-        ? mockDestinationStore.getById(draft.destinationId)
+        ? await destinationRepository.getById(draft.destinationId)
         : undefined;
       const baseCost = dest?.baseCostPerPerson ?? 100000;
       const margin = draft.pricing?.eoMargin ?? 150000;
@@ -295,8 +306,8 @@ export const packageRepository = {
       }
 
       const saved = mapPackageRowToRecord(data as PackageRow);
-      // Synchronize in-memory fallback
-      mockEoPackageStore.saveDraft(saved);
+      // Synchronize in-memory fallback cache on success
+      mockEoPackageStore.upsertPackage(saved);
       return { success: true, package: saved };
     } catch (err: unknown) {
       return {
@@ -312,49 +323,47 @@ export const packageRepository = {
     validationResult: EoValidationResult;
     message?: string;
   }> {
-    const actor = partnerSessionStore.get();
-    if (!actor || actor.role !== "EO") {
-      return {
-        success: false,
-        validationResult: {
-          valid: false,
-          errors: [
-            {
-              step: 1,
-              field: "auth",
-              message: "Pengguna belum terautentikasi sebagai EO.",
-            },
-          ],
-        },
-      };
-    }
-
-    const actorEoId = actor.id;
-    const app = mockApplicationStore.getBySellerId(actorEoId);
-    if (!app || app.status !== "APPROVED") {
-      return {
-        success: false,
-        validationResult: {
-          valid: false,
-          errors: [
-            {
-              step: 1,
-              field: "auth",
-              message: "Akun EO belum berstatus APPROVED.",
-            },
-          ],
-        },
-      };
-    }
-
     if (!isSupabaseMode()) {
       return mockEoPackageStore.submitForReview(packageId);
     }
 
+    const authCheck = await requireAuthenticatedUser("EO");
+    if (!authCheck.success) {
+      return {
+        success: false,
+        validationResult: {
+          valid: false,
+          errors: [
+            {
+              step: 1,
+              field: "auth",
+              message:
+                authCheck.error || "Pengguna belum terautentikasi sebagai EO.",
+            },
+          ],
+        },
+      };
+    }
+
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return mockEoPackageStore.submitForReview(packageId);
+      return {
+        success: false,
+        validationResult: {
+          valid: false,
+          errors: [
+            {
+              step: 1,
+              field: "system",
+              message: "Klien Supabase tidak tersedia.",
+            },
+          ],
+        },
+      };
     }
+
+    const actorEoId = authCheck.partnerUser?.id || "eo_jeda_alam";
+    const app = mockApplicationStore.getBySellerId(actorEoId);
 
     try {
       const pkg = await this.getPackageForEo(packageId, actorEoId);
@@ -402,7 +411,9 @@ export const packageRepository = {
       }
 
       const authorGuideStatus: EoGuideStatus =
-        app.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
+        app?.guideStatus ??
+        authCheck.partnerUser?.guideStatus ??
+        "CERTIFIED_GUIDE";
       const validationResult = validateEoPackage(pkg, authorGuideStatus);
 
       if (!validationResult.valid) {
@@ -432,7 +443,8 @@ export const packageRepository = {
               {
                 step: 1,
                 field: "database",
-                message: error?.message || "Gagal mengajukan paket.",
+                message:
+                  error?.message || "Gagal mengajukan paket ke Supabase.",
               },
             ],
           },
@@ -440,7 +452,7 @@ export const packageRepository = {
       }
 
       const updated = mapPackageRowToRecord(data as PackageRow);
-      mockEoPackageStore.submitForReview(packageId);
+      mockEoPackageStore.upsertPackage(updated);
       return { success: true, package: updated, validationResult };
     } catch (err: unknown) {
       return {
@@ -469,16 +481,61 @@ export const packageRepository = {
     package?: EoPackageRecord;
     message?: string;
   }> {
-    const actor = partnerSessionStore.get();
-    if (!actor || actor.role !== "EO") {
+    if (!isSupabaseMode()) {
+      const actor = partnerSessionStore.get();
+      if (!actor || actor.role !== "EO") {
+        return {
+          success: false,
+          message:
+            "Akses ditolak: Hanya EO terautentikasi yang dapat melakukan ACC Paket (Demo).",
+        };
+      }
+
+      const actorEoId = actor.id;
+      const pkg = await this.getPackageForEo(packageId, actorEoId);
+      if (!pkg) {
+        return {
+          success: false,
+          message:
+            "Akses ditolak: Paket tidak ditemukan atau bukan milik EO ini.",
+        };
+      }
+
+      if (pkg.status !== "PENDING_ADMIN_REVIEW") {
+        return {
+          success: false,
+          message: `Hanya paket dengan status PENDING_ADMIN_REVIEW yang dapat disetujui. Status saat ini: ${pkg.status}`,
+        };
+      }
+
+      const ok = mockEoPackageStore.approvePackage(packageId);
+      if (!ok) {
+        return {
+          success: false,
+          message: "Gagal menyetujui paket di mock store.",
+        };
+      }
+      const updated = mockEoPackageStore.getPackageById(packageId);
+      return { success: true, package: updated };
+    }
+
+    const authCheck = await requireAuthenticatedUser("EO");
+    if (!authCheck.success) {
       return {
         success: false,
-        message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat melakukan ACC Paket (Demo).",
+        message: authCheck.error,
       };
     }
 
-    const actorEoId = actor.id;
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return {
+        success: false,
+        message: "Klien Supabase tidak tersedia untuk ACC Paket.",
+      };
+    }
+
+    const actorEoId = authCheck.partnerUser?.id || "eo_jeda_alam";
     const pkg = await this.getPackageForEo(packageId, actorEoId);
     if (!pkg) {
       return {
@@ -496,25 +553,6 @@ export const packageRepository = {
     }
 
     const nowIso = new Date().toISOString();
-
-    if (!isSupabaseMode()) {
-      const ok = mockEoPackageStore.approvePackage(packageId);
-      if (!ok) {
-        return {
-          success: false,
-          message: "Gagal menyetujui paket di mock store.",
-        };
-      }
-      const updated = mockEoPackageStore.getPackageById(packageId);
-      return { success: true, package: updated };
-    }
-
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      mockEoPackageStore.approvePackage(packageId);
-      const updated = mockEoPackageStore.getPackageById(packageId);
-      return { success: true, package: updated };
-    }
 
     try {
       const { data, error } = await supabase
@@ -538,7 +576,7 @@ export const packageRepository = {
       }
 
       const updated = mapPackageRowToRecord(data as PackageRow);
-      mockEoPackageStore.approvePackage(packageId);
+      mockEoPackageStore.upsertPackage(updated);
       return { success: true, package: updated };
     } catch (err: unknown) {
       return {
@@ -553,16 +591,27 @@ export const packageRepository = {
     package?: EoPackageRecord;
     message?: string;
   }> {
-    const actor = partnerSessionStore.get();
-    if (!actor || actor.role !== "EO") {
+    if (!isSupabaseMode()) {
+      return mockEoPackageStore.publishApprovedPackage(packageId);
+    }
+
+    const authCheck = await requireAuthenticatedUser("EO");
+    if (!authCheck.success) {
       return {
         success: false,
-        message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat mempublikasikan paket.",
+        message: authCheck.error,
       };
     }
 
-    const actorEoId = actor.id;
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return {
+        success: false,
+        message: "Klien Supabase tidak tersedia untuk mempublikasikan paket.",
+      };
+    }
+
+    const actorEoId = authCheck.partnerUser?.id || "eo_jeda_alam";
     const pkg = await this.getPackageForEo(packageId, actorEoId);
     if (!pkg) {
       return {
@@ -589,15 +638,6 @@ export const packageRepository = {
 
     const nowIso = new Date().toISOString();
 
-    if (!isSupabaseMode()) {
-      return mockEoPackageStore.publishApprovedPackage(packageId);
-    }
-
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      return mockEoPackageStore.publishApprovedPackage(packageId);
-    }
-
     try {
       const { data, error } = await supabase
         .from("packages")
@@ -619,7 +659,7 @@ export const packageRepository = {
       }
 
       const updated = mapPackageRowToRecord(data as PackageRow);
-      mockEoPackageStore.publishApprovedPackage(packageId);
+      mockEoPackageStore.upsertPackage(updated);
       return { success: true, package: updated };
     } catch (err: unknown) {
       return {

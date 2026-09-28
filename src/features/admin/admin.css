@@ -228,3 +228,182 @@
   border: 1px solid var(--color-danger-border);
   color: var(--color-danger-text);
 }
+
+/* ==========================================================================
+   VISUAL PILOT — ADMIN OVERVIEW
+   Governance-first console: dense, calm, and intentionally low-decoration.
+   ========================================================================== */
+
+.admin-container {
+  gap: var(--space-7);
+}
+
+.admin-page-header {
+  padding-bottom: var(--space-2);
+  border-bottom: 0;
+}
+
+.admin-page-eyebrow {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+}
+
+.admin-page-title {
+  max-width: 24ch;
+  font-size: var(--font-size-heading-xl);
+  line-height: var(--line-height-heading-xl);
+}
+
+.admin-page-subtitle {
+  max-width: 66ch;
+}
+
+.admin-overview-section-heading {
+  margin-bottom: var(--space-4);
+}
+
+.admin-overview-section-heading h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-heading-sm);
+}
+
+.admin-overview-section-heading p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+}
+
+.admin-queues-grid {
+  gap: 0;
+  padding-block: var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.admin-queue-card {
+  min-height: 8rem;
+  padding: var(--space-2) var(--space-5);
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--color-border-default);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.admin-queue-card:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.admin-queue-card:hover {
+  background: transparent;
+  border-color: var(--color-border-default);
+  box-shadow: none;
+}
+
+.admin-queue-label {
+  color: var(--color-text-secondary);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.admin-queue-value {
+  font-size: var(--font-size-display-lg);
+  line-height: var(--line-height-display-lg);
+}
+
+.admin-section {
+  padding: var(--space-6) 0 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-border-default);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.admin-section-header {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.admin-overview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  padding-block: var(--space-2);
+}
+
+.admin-overview-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-5);
+  border-left: 1px solid var(--color-border-default);
+}
+
+.admin-overview-stat:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.admin-overview-stat__label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+}
+
+.admin-overview-stat strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-heading-lg);
+  line-height: var(--line-height-heading-lg);
+}
+
+.admin-overview-stat small {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.admin-audit-row {
+  padding-inline: 0;
+}
+
+.admin-audit-row .ui-badge {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.admin-audit-row .ui-badge__symbol {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .admin-queues-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-queue-card:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .admin-overview-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-overview-stat {
+    padding-inline: 0;
+    border-left: 0;
+    border-top: 1px solid var(--color-border-default);
+  }
+
+  .admin-overview-stat:first-child {
+    border-top: 0;
+  }
+}

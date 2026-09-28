@@ -407,3 +407,116 @@
     border-top: 0;
   }
 }
+
+/* ==========================================================================
+   VISUAL PILOT V2 — COMMAND CONSOLE
+   A stronger governance identity while keeping the content dense and sober.
+   ========================================================================== */
+
+.admin-page-header {
+  padding: var(--space-8);
+  background:
+    linear-gradient(135deg, var(--color-forest-950), var(--color-forest-900));
+  border-radius: var(--radius-2xl);
+  color: var(--color-stone-0);
+}
+
+.admin-page-eyebrow {
+  color: var(--color-forest-300);
+}
+
+.admin-page-title {
+  color: var(--color-stone-0);
+  font-size: var(--font-size-heading-xl);
+  line-height: 1.08;
+}
+
+.admin-page-subtitle {
+  color: var(--color-forest-100);
+}
+
+.admin-page-header .ui-button,
+.admin-page-header button {
+  box-shadow: none;
+}
+
+.admin-overview-section-heading h2,
+.admin-section-title {
+  font-size: var(--font-size-heading-md);
+  line-height: var(--line-height-heading-md);
+}
+
+.admin-queues-grid {
+  padding: 0;
+  border: 0;
+  gap: var(--space-3);
+}
+
+.admin-queue-card {
+  min-height: 9.5rem;
+  padding: var(--space-5);
+  background: var(--color-stone-0);
+  border: 1px solid var(--color-stone-200);
+  border-left: 1px solid var(--color-stone-200);
+  border-radius: var(--radius-xl);
+  box-shadow: none;
+}
+
+.admin-queue-card:first-child {
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--color-stone-200);
+}
+
+.admin-queue-card:hover {
+  background: var(--color-stone-0);
+  border-color: var(--color-forest-400);
+  box-shadow: var(--shadow-xs);
+}
+
+.admin-queue-value {
+  color: var(--color-forest-900);
+  font-size: 3.25rem;
+  line-height: 1;
+}
+
+.admin-section {
+  padding-top: var(--space-8);
+}
+
+.admin-overview-stats {
+  margin-top: var(--space-2);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-stone-200);
+  border-bottom: 1px solid var(--color-stone-200);
+}
+
+.admin-overview-stat strong {
+  color: var(--color-forest-900);
+  font-size: var(--font-size-heading-xl);
+}
+
+.admin-audit-row {
+  min-height: 4.5rem;
+  align-items: center;
+}
+
+@media (max-width: 760px) {
+  .admin-page-header {
+    padding: var(--space-6);
+  }
+
+  .admin-queues-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-queue-card:nth-child(3) {
+    padding-left: var(--space-5);
+    border-left: 1px solid var(--color-stone-200);
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-queues-grid {
+    grid-template-columns: 1fr;
+  }
+}

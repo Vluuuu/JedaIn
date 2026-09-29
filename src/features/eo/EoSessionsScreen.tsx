@@ -1,9 +1,16 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
+import { packageRepository } from "../../data/packageRepository";
+import { sessionRepository } from "../../data/sessionRepository";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Button, InlineStatus } from "../../components/ui";
+import { useRealtimeSubscription } from "../../lib/supabase/realtime";
 import { getHumanStatusLabel, getStatusBadgeTone } from "./packageHelpers";
-import type { EoSessionStatus } from "./types";
+import type {
+  EoPackageRecord,
+  EoSessionRecord,
+  EoSessionStatus,
+} from "./types";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
@@ -34,7 +41,20 @@ export function EoSessionsScreen() {
   const partner = partnerSessionStore.get();
   const eoId = partner?.id ?? "eo_jeda_alam";
 
-  const allEoPackages = mockEoPackageStore.getPackagesByEo(eoId);
+  const [allEoPackages, setAllEoPackages] = useState<EoPackageRecord[]>(() => [
+    ...mockEoPackageStore.getPackagesByEo(eoId),
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    packageRepository.getPackagesByEo(eoId).then((res) => {
+      if (isMounted) setAllEoPackages(res);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [eoId]);
+
   const eligiblePackages = allEoPackages.filter(
     (p) => p.status === "APPROVED" || p.status === "LIVE",
   );
@@ -63,16 +83,40 @@ export function EoSessionsScreen() {
   const [editingNoteText, setEditingNoteText] = useState<string>("");
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | undefined>();
+  const [actionError, setActionError] = useState<string | undefined>();
   const [refreshVersion, setRefreshVersion] = useState<number>(0);
 
-  const sessions = useMemo(() => {
+  const [sessions, setSessions] = useState<EoSessionRecord[]>(() => {
     if (isForeignPackage) return [];
     if (selectedPackageId) {
-      return mockEoPackageStore.getSessionsByPackage(selectedPackageId);
+      return [...mockEoPackageStore.getSessionsByPackage(selectedPackageId)];
     }
-    return mockEoPackageStore.getSessionsByEo(eoId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return [...mockEoPackageStore.getSessionsByEo(eoId)];
+  });
+
+  useEffect(() => {
+    if (isForeignPackage) return;
+
+    let isMounted = true;
+    const fetcher = selectedPackageId
+      ? sessionRepository.getSessionsByPackage(selectedPackageId)
+      : sessionRepository.getSessionsByEo(eoId);
+
+    fetcher.then((res) => {
+      if (isMounted) setSessions(res);
+    });
+    return () => {
+      isMounted = false;
+    };
   }, [selectedPackageId, eoId, refreshVersion, isForeignPackage]);
+
+  useRealtimeSubscription("sessions", () => {
+    if (isForeignPackage) return;
+    const fetcher = selectedPackageId
+      ? sessionRepository.getSessionsByPackage(selectedPackageId)
+      : sessionRepository.getSessionsByEo(eoId);
+    fetcher.then(setSessions);
+  });
 
   if (isForeignPackage) {
     return (
@@ -114,7 +158,7 @@ export function EoSessionsScreen() {
     setShowAddModal(true);
   };
 
-  const handleCreateSession = (e: React.FormEvent) => {
+  const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(undefined);
 
@@ -133,7 +177,7 @@ export function EoSessionsScreen() {
     const startIso = new Date(startMs).toISOString();
     const endIso = new Date(endMs).toISOString();
 
-    const res = mockEoPackageStore.createSession({
+    const res = await sessionRepository.createSession({
       packageId: selectedPackageId,
       startAt: startIso,
       endAt: endIso,
@@ -154,20 +198,26 @@ export function EoSessionsScreen() {
     }
   };
 
-  const handleToggleStatus = (
+  const handleToggleStatus = async (
     sessionId: string,
     newStatus: "OPEN" | "CLOSED",
   ) => {
-    const ok = mockEoPackageStore.updateSessionStatus(sessionId, newStatus);
-    if (ok) {
+    const res = await sessionRepository.updateSessionStatus(
+      sessionId,
+      newStatus,
+    );
+    if (res.success) {
+      setActionError(undefined);
       setRefreshVersion((v) => v + 1);
+    } else {
+      setActionError(res.message || "Gagal mengubah status sesi.");
     }
   };
 
-  const handleSaveSessionNote = (sessionId: string) => {
-    mockEoPackageStore.updateSessionOperationalNote(
+  const handleSaveSessionNote = async (sessionId: string) => {
+    await sessionRepository.updateSessionOperationalNote(
       sessionId,
-      editingNoteText.trim() || undefined,
+      editingNoteText.trim() || "",
     );
     setEditingNoteSessionId(null);
     setEditingNoteText("");
@@ -342,6 +392,16 @@ export function EoSessionsScreen() {
 
       {/* Sessions List */}
       <section className="eo-section" aria-label="Daftar sesi">
+        {actionError && (
+          <div
+            className="eo-alert eo-alert--error"
+            role="alert"
+            style={{ marginBottom: "var(--space-4)" }}
+          >
+            {actionError}
+          </div>
+        )}
+
         <div className="eo-section-header">
           <h2 className="eo-section-title">
             Daftar Sesi ({selectedPkg ? selectedPkg.title : "Semua Sesi"})

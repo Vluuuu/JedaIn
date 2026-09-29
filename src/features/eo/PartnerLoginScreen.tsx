@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import {
+  ensureDemoDestinationSession,
+  ensureDemoEoSession,
+} from "../../lib/supabase/demoAuth";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { generateUniqueDestinationPartnerId } from "../destination/destinationContext";
 import { mockApplicationStore } from "./mockApplicationStore";
@@ -11,13 +16,29 @@ export function PartnerLoginScreen() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("destinasi@lerenghijau.id");
   const [role, setRole] = useState<"EO" | "DESTINATION">("DESTINATION");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError(null);
     const cleanEmail = email.trim();
     const normalizedEmail = cleanEmail.toLowerCase();
 
     if (role === "DESTINATION") {
+      if (isSupabaseMode()) {
+        setIsAuthLoading(true);
+        const res = await ensureDemoDestinationSession();
+        setIsAuthLoading(false);
+        if (!res.success) {
+          setAuthError(
+            res.error ||
+              "Gagal menghubungkan sesi Supabase untuk Mitra Destinasi.",
+          );
+          return;
+        }
+      }
+
       const destApp = mockDestinationVerificationStore
         .getAll()
         .find(
@@ -59,6 +80,19 @@ export function PartnerLoginScreen() {
     }
 
     // EO Login flow
+    if (isSupabaseMode()) {
+      setIsAuthLoading(true);
+      const res = await ensureDemoEoSession();
+      setIsAuthLoading(false);
+      if (!res.success) {
+        setAuthError(
+          res.error ||
+            "Gagal menghubungkan sesi Supabase untuk Travel Organizer.",
+        );
+        return;
+      }
+    }
+
     const app = mockApplicationStore
       .getAll()
       .find((a) => a.email === cleanEmail);
@@ -88,16 +122,48 @@ export function PartnerLoginScreen() {
     navigate("/partner/eo");
   };
 
-  const handleDemoApprovedEo = (
+  const handleDemoApprovedEo = async (
     guideStatus: "CERTIFIED_GUIDE" | "CONCEPT_ONLY",
   ) => {
-    partnerSessionStore.loginAsDemoApproved(guideStatus);
-    navigate("/partner/eo");
+    setAuthError(null);
+    setIsAuthLoading(true);
+    try {
+      const res = await ensureDemoEoSession();
+      if (!res.success) {
+        setAuthError(res.error || "Gagal membuat sesi demo EO di Supabase.");
+        setIsAuthLoading(false);
+        return;
+      }
+      partnerSessionStore.loginAsDemoApproved(guideStatus);
+      navigate("/partner/eo");
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : "Gagal masuk demo EO.");
+    } finally {
+      setIsAuthLoading(false);
+    }
   };
 
-  const handleDemoApprovedDestination = () => {
-    partnerSessionStore.loginAsDemoDestination();
-    navigate("/partner/destination");
+  const handleDemoApprovedDestination = async () => {
+    setAuthError(null);
+    setIsAuthLoading(true);
+    try {
+      const res = await ensureDemoDestinationSession();
+      if (!res.success) {
+        setAuthError(
+          res.error || "Gagal membuat sesi demo Destinasi di Supabase.",
+        );
+        setIsAuthLoading(false);
+        return;
+      }
+      partnerSessionStore.loginAsDemoDestination();
+      navigate("/partner/destination");
+    } catch (err: unknown) {
+      setAuthError(
+        err instanceof Error ? err.message : "Gagal masuk demo Destinasi.",
+      );
+    } finally {
+      setIsAuthLoading(false);
+    }
   };
 
   const handleDemoPendingDestination = () => {
@@ -158,14 +224,18 @@ export function PartnerLoginScreen() {
             variant="primary"
             size="sm"
             onClick={handleDemoApprovedDestination}
+            disabled={isAuthLoading}
           >
-            Destinasi Approved (Lereng Hijau)
+            {isAuthLoading
+              ? "Memproses..."
+              : "Destinasi Approved (Lereng Hijau)"}
           </Button>
           <Button
             type="button"
             variant="secondary"
             size="sm"
             onClick={handleDemoPendingDestination}
+            disabled={isAuthLoading}
           >
             Destinasi Pending (Coban Rondo)
           </Button>
@@ -174,6 +244,7 @@ export function PartnerLoginScreen() {
             variant="danger"
             size="sm"
             onClick={handleDemoRejectedDestination}
+            disabled={isAuthLoading}
           >
             Destinasi Rejected
           </Button>
@@ -182,11 +253,22 @@ export function PartnerLoginScreen() {
             variant="secondary"
             size="sm"
             onClick={() => handleDemoApprovedEo("CERTIFIED_GUIDE")}
+            disabled={isAuthLoading}
           >
-            EO Approved Demo
+            {isAuthLoading ? "Memproses..." : "EO Approved Demo"}
           </Button>
         </div>
       </div>
+
+      {authError && (
+        <div
+          className="eo-alert eo-alert--error"
+          role="alert"
+          style={{ marginBottom: "var(--space-4)" }}
+        >
+          <strong>Gagal Terhubung ke Backend:</strong> {authError}
+        </div>
+      )}
 
       <form
         className="eo-section"

@@ -3,6 +3,7 @@ import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
+  syncMarketplaceFromSupabase,
 } from "../marketplace/marketplaceAdapter";
 import type {
   PackageDetailSource,
@@ -88,6 +89,8 @@ export class MockSessionSelectionAdapter implements SessionSelectionAdapter {
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
+
+    await syncMarketplaceFromSupabase();
 
     if (this.failLoadCount > 0) {
       this.failLoadCount--;

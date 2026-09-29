@@ -191,7 +191,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     expect(dialog.textContent).toContain("/ orang");
 
     // 4. Itinerary
-    expect(dialog.textContent).toContain("Rencana Pengalaman");
+    expect(dialog.textContent).toContain("Rencana Perjalanan");
     expect(dialog.textContent).toContain("Pagi - Titik Kumpul & Sambutan Teh");
     expect(dialog.textContent).toContain(
       "Menjelajah Jalur Alami & Sesi Hening",

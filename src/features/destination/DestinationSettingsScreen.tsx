@@ -173,23 +173,6 @@ export function DestinationSettingsScreen() {
           </div>
         </dl>
       </section>
-
-      <section
-        className="partner-settings__section"
-        aria-labelledby="destination-standard-title"
-      >
-        <div>
-          <span className="partner-settings__index">03 / Kemitraan</span>
-          <h2 id="destination-standard-title">
-            Perjanjian Kemitraan Destinasi Aktif
-          </h2>
-          <p>
-            Pengelola kawasan menyatakan tunduk pada standar kurasi mindful
-            travel, menjaga ketenangan lingkungan dari polusi suara berlebih,
-            dan keterbukaan modal dasar per peserta.
-          </p>
-        </div>
-      </section>
     </div>
   );
 }

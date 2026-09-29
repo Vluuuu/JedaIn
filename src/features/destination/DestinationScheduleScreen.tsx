@@ -281,10 +281,7 @@ export function DestinationScheduleScreen() {
                                   style={{
                                     padding: "var(--space-3) var(--space-4)",
                                     background: "var(--color-bg-surface)",
-                                    borderLeft:
-                                      "3px solid var(--color-forest-700)",
-                                    borderRadius:
-                                      "0 var(--radius-md) var(--radius-md) 0",
+                                    borderRadius: "var(--radius-md)",
                                   }}
                                 >
                                   <span

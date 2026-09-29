@@ -527,8 +527,6 @@ export function EoSessionsScreen() {
                             padding: "var(--space-2) var(--space-3)",
                             background: "var(--color-bg-surface-subtle)",
                             borderRadius: "var(--radius-sm)",
-                            borderLeft:
-                              "2.5px solid var(--color-brand-primary)",
                             fontSize: "var(--font-size-caption)",
                             maxWidth: "340px",
                           }}

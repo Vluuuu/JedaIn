@@ -3,6 +3,7 @@ import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import type {
+  DestinationRecord,
   EoGuideStatus,
   EoPackageRecord,
   EoSessionRecord,
@@ -13,8 +14,15 @@ import type {
 export function validateEoPackage(
   pkg: Partial<EoPackageRecord>,
   eoGuideStatus: EoGuideStatus,
+  authoritativeDestination?: DestinationRecord,
 ): EoValidationResult {
   const errors: EoValidationError[] = [];
+  const destination =
+    authoritativeDestination?.destinationId === pkg.destinationId
+      ? authoritativeDestination
+      : pkg.destinationId
+        ? mockDestinationStore.getById(pkg.destinationId)
+        : undefined;
 
   // Step 1: Destination & Guide Source
   if (!pkg.destinationId) {
@@ -24,15 +32,14 @@ export function validateEoPackage(
       message: "Pilih destinasi terverifikasi untuk paket ini.",
     });
   } else {
-    const dest = mockDestinationStore.getById(pkg.destinationId);
-    if (!dest || dest.status !== "ACTIVE") {
+    if (!destination || destination.status !== "ACTIVE") {
       errors.push({
         step: 1,
         field: "destinationId",
         message:
           "Destinasi yang dipilih tidak terdaftar atau belum terverifikasi aktif.",
       });
-    } else if (!dest.guideReady) {
+    } else if (!destination.guideReady) {
       errors.push({
         step: 1,
         field: "destinationId",
@@ -164,9 +171,7 @@ export function validateEoPackage(
   }
 
   // Step 4: Pricing (Authoritative Base Cost and Exact Formula)
-  const dest = pkg.destinationId
-    ? mockDestinationStore.getById(pkg.destinationId)
-    : undefined;
+  const dest = destination;
   const authoritativeBaseCost = dest?.baseCostPerPerson ?? 100000;
 
   if (!pkg.pricing) {

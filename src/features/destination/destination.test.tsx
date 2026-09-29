@@ -1157,7 +1157,8 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       expect(settingsView.textContent).toContain("Pengaturan kemitraan");
       expect(settingsView.textContent).toContain("Pengelola Lereng Hijau Batu");
       expect(settingsView.textContent).toContain("Hadi Purnomo");
-      expect(settingsView.textContent).toContain(
+      expect(settingsView.textContent).toContain("Kapasitas & waktu kunjung");
+      expect(settingsView.textContent).not.toContain(
         "Perjanjian Kemitraan Destinasi Aktif",
       );
     });

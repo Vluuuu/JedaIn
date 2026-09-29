@@ -85,14 +85,7 @@ export function PartnerPortalLandingScreen() {
                       className="partner-entry__primary"
                       onClick={() => setLoginRole("EO")}
                     >
-                      Masuk
-                    </button>
-                    <button
-                      type="button"
-                      className="partner-entry__text-button"
-                      onClick={() => register("EO")}
-                    >
-                      Daftar sebagai TO <span aria-hidden="true">↗</span>
+                      Masuk sebagai TO
                     </button>
                   </div>
                 </article>
@@ -111,14 +104,7 @@ export function PartnerPortalLandingScreen() {
                       className="partner-entry__primary"
                       onClick={() => setLoginRole("DESTINATION")}
                     >
-                      Masuk
-                    </button>
-                    <button
-                      type="button"
-                      className="partner-entry__text-button"
-                      onClick={() => register("DESTINATION")}
-                    >
-                      Daftar sebagai destinasi <span aria-hidden="true">↗</span>
+                      Masuk sebagai Mitra Destinasi
                     </button>
                   </div>
                 </article>

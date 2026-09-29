@@ -321,6 +321,8 @@ export const MOCK_DEMAND_INSIGHT_METADATA: Omit<
   {
     insightId: "ins_nature_batu_1d",
     title: "Tingginya Permintaan Jeda Alam 1 Hari di Lereng Malang Raya",
+    destinationContext: "Lereng dan kebun teh Malang Raya",
+    relatedDestinationIds: ["dest_lereng_hijau"],
     intent: "NATURE",
     intentLabel: "Dekat dengan alam",
     targetArea: "Malang / Surabaya",
@@ -342,6 +344,8 @@ export const MOCK_DEMAND_INSIGHT_METADATA: Omit<
   {
     insightId: "ins_mindful_pacet_halfday",
     title: "Kebutuhan Retreat Singkat Setengah Hari di Mojokerto / Pacet",
+    destinationContext: "Sungai dan hutan pinus Pacet",
+    relatedDestinationIds: ["dest_lembah_pacet"],
     intent: "CALM",
     intentLabel: "Tenang & recharge",
     targetArea: "Surabaya / Sidoarjo",
@@ -363,6 +367,8 @@ export const MOCK_DEMAND_INSIGHT_METADATA: Omit<
   {
     insightId: "ins_workshop_culture_weekend",
     title: "Minat Belajar Kerajinan & Tradisi Lokal Akhir Pekan",
+    destinationContext: "Kerajinan dan desa di Malang Raya",
+    relatedDestinationIds: [],
     intent: "EXPLORATION",
     intentLabel: "Eksplorasi & suasana baru",
     targetArea: "Malang Raya",

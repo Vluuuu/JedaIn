@@ -52,13 +52,22 @@ describe("P0-04 Fix Destination Registration Loop", () => {
       );
     });
 
-    // Choose the destination registration path on the combined entry page.
+    // Select the destination role, then open its application path from the login form.
     const buttons = Array.from(
       container.querySelectorAll<HTMLButtonElement>("button"),
     );
-    const registerDestBtn = buttons.find((b) =>
-      b.textContent?.includes("Daftar sebagai destinasi"),
+    const enterDestBtn = buttons.find((b) =>
+      b.textContent?.includes("Masuk sebagai Mitra Destinasi"),
     );
+    expect(enterDestBtn).toBeDefined();
+
+    await act(async () => {
+      enterDestBtn!.click();
+    });
+
+    const registerDestBtn = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => b.textContent?.includes("Ajukan kemitraan"));
     expect(registerDestBtn).toBeDefined();
 
     await act(async () => {
@@ -148,7 +157,7 @@ describe("P0-04 Fix Destination Registration Loop", () => {
 
     const registerButton = Array.from(
       container.querySelectorAll("button"),
-    ).find((button) => button.textContent?.includes("Daftar sekarang"));
+    ).find((button) => button.textContent?.includes("Ajukan kemitraan"));
     expect(registerButton).toBeDefined();
 
     await act(async () => {

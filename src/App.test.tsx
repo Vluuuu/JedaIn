@@ -137,7 +137,7 @@ describe("App shell routing", () => {
       "Bookings",
       "Destinations",
       "Reviews",
-      "Pengaturan",
+      "Profil TO",
     ]);
   });
 

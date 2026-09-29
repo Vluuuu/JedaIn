@@ -223,7 +223,7 @@ export function PartnerLoginScreen({
       <p className="partner-entry__register">
         Belum menjadi mitra?{" "}
         <button type="button" onClick={register}>
-          Daftar sekarang
+          Ajukan kemitraan
         </button>
       </p>
       {!isSupabaseMode() && (

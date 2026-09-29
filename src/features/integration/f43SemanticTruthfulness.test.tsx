@@ -236,9 +236,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       // Summary may be auto-filled, but must not copy the simulated unmet-demand claim.
       const summaryInput =
         view.querySelector<HTMLTextAreaElement>("#package-summary")!;
-      expect(summaryInput.value).toContain(
-        "Experience untuk traveler yang mencari",
-      );
+      expect(summaryInput.value).toContain("Experience untuk traveler dari");
       expect(summaryInput.value).not.toContain(
         "Traveler dari Malang & Surabaya mencari",
       );
@@ -264,9 +262,7 @@ describe("F4.3 — Final Semantic Truthfulness Hardening", () => {
       expect(dialog.textContent).not.toContain(
         "Traveler dari Malang & Surabaya mencari",
       );
-      expect(dialog.textContent).toContain(
-        "Experience untuk traveler yang mencari",
-      );
+      expect(dialog.textContent).toContain("Experience untuk traveler dari");
     });
 
     it("14. Editing existing draft preserves its authored shortSummary", async () => {

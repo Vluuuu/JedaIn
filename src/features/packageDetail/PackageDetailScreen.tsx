@@ -210,7 +210,7 @@ export function PackageDetailScreen({
         </section>
       </div>
 
-      {/* Main Content Sections in locked contract order */}
+      {/* Main experience content */}
       <div className="package-detail-main">
         {/* 3. Optional Personalized Match Explanation */}
         {personalizedContext && personalizedContext.reasons.length > 0 && (
@@ -287,6 +287,66 @@ export function PackageDetailScreen({
                 </li>
               ))}
             </ul>
+          </section>
+        )}
+
+        {detail.itinerary.length > 0 && (
+          <section
+            className="package-detail-journey"
+            aria-labelledby="itinerary-heading"
+          >
+            <div className="package-detail-journey__header">
+              <div className="package-detail-journey__intro">
+                <span className="package-detail-journey__eyebrow">
+                  Alur pengalaman · {detail.itinerary.length} kegiatan
+                </span>
+                <h2 id="itinerary-heading">Rencana perjalanan</h2>
+                <p>
+                  Ikuti perjalanan dari kegiatan pertama hingga penutupannya.
+                </p>
+              </div>
+              <img
+                className="package-detail-journey__mascot"
+                src={PlanMascot}
+                alt=""
+                aria-hidden="true"
+                width="520"
+                height="634"
+                loading="lazy"
+              />
+            </div>
+            <ol className="package-detail-itinerary-list">
+              {detail.itinerary.map((item) => (
+                <li key={item.order} className="package-detail-itinerary-item">
+                  <span
+                    className="package-detail-itinerary-order"
+                    aria-hidden="true"
+                  >
+                    {item.order < 10 ? `0${item.order}` : item.order}
+                  </span>
+                  <div className="package-detail-itinerary-content">
+                    {(item.timeOfDayLabel || item.durationLabel) && (
+                      <div className="package-detail-itinerary-meta">
+                        {item.timeOfDayLabel && (
+                          <span>{item.timeOfDayLabel}</span>
+                        )}
+                        {item.durationLabel && (
+                          <span className="package-detail-itinerary-duration">
+                            {item.durationLabel}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <h3 className="package-detail-itinerary-title">
+                      {item.title}
+                    </h3>
+                    <p className="package-detail-itinerary-desc">
+                      {item.description}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </section>
         )}
 
@@ -476,64 +536,6 @@ export function PackageDetailScreen({
                   <span>Penyelenggara terdaftar di JedaIn Partner Portal.</span>
                 </p>
               </section>
-            </div>
-          </details>
-
-          <details className="package-detail-disclosure package-detail-disclosure--itinerary">
-            <summary className="package-detail-disclosure__summary">
-              <span>Rencana perjalanan</span>
-              <span className="package-detail-disclosure__hint">
-                Lihat alur kegiatan
-              </span>
-            </summary>
-            <div className="package-detail-disclosure__body">
-              {/* 7. Itinerary */}
-              {detail.itinerary.length > 0 && (
-                <section
-                  className="package-detail-section"
-                  aria-labelledby="itinerary-heading"
-                >
-                  <h2
-                    id="itinerary-heading"
-                    className="package-detail-section__title"
-                  >
-                    Rencana Perjalanan
-                  </h2>
-                  <p className="package-detail-section__desc">
-                    Garis besar alur kegiatan paket template:
-                  </p>
-                  <ol className="package-detail-itinerary-list">
-                    {detail.itinerary.map((item) => (
-                      <li
-                        key={item.order}
-                        className="package-detail-itinerary-item"
-                      >
-                        <span
-                          className="package-detail-itinerary-order"
-                          aria-hidden="true"
-                        >
-                          {item.order < 10 ? `0${item.order}` : item.order}
-                        </span>
-                        <div className="package-detail-itinerary-content">
-                          <div className="package-detail-itinerary-header">
-                            <h3 className="package-detail-itinerary-title">
-                              {item.title}
-                            </h3>
-                            {item.durationLabel && (
-                              <span className="package-detail-itinerary-duration">
-                                {item.durationLabel}
-                              </span>
-                            )}
-                          </div>
-                          <p className="package-detail-itinerary-desc">
-                            {item.description}
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                </section>
-              )}
             </div>
           </details>
 

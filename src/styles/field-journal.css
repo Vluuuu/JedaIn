@@ -840,30 +840,120 @@
   background: var(--journal-paper);
 }
 
-.traveler-app-shell .package-detail-disclosure--itinerary {
-  margin-block: 0;
+.traveler-app-shell .package-detail-journey {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  gap: var(--space-8);
+  min-width: 0;
+  overflow: hidden;
+  padding: var(--space-8);
+  border: 1px solid var(--journal-line);
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(
+      circle at 0 100%,
+      rgb(213 166 107 / 16%),
+      transparent 20rem
+    ),
+    var(--journal-linen);
+}
+
+.traveler-app-shell .package-detail-journey__header {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 24rem;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.traveler-app-shell .package-detail-journey__eyebrow {
+  display: block;
+  margin-bottom: var(--space-3);
+  color: var(--journal-earth);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.traveler-app-shell .package-detail-journey__header h2 {
+  max-width: 11ch;
+  margin: 0 0 var(--space-3);
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  line-height: 1.05;
+}
+
+.traveler-app-shell .package-detail-journey__header p {
+  max-width: 28ch;
+  margin: 0;
+  color: var(--journal-muted);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.6;
+}
+
+.traveler-app-shell .package-detail-journey__mascot {
+  width: min(10rem, 60%);
+  height: 11rem;
+  align-self: flex-end;
+  object-fit: contain;
+}
+
+.traveler-app-shell .package-detail-journey .package-detail-itinerary-list {
+  gap: var(--space-6);
+  min-width: 0;
+  margin: 0;
+}
+
+.traveler-app-shell .package-detail-journey .package-detail-itinerary-item {
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.traveler-app-shell
+  .package-detail-journey
+  .package-detail-itinerary-item:not(:last-child)::before {
+  top: 2.65rem;
+  bottom: calc(-1 * var(--space-6) - 0.25rem);
+  left: 1.35rem;
+  width: 2px;
+  background: var(--journal-moss);
+}
+
+.traveler-app-shell .package-detail-journey .package-detail-itinerary-content {
+  gap: var(--space-2);
+  padding: var(--space-1) 0 var(--space-5);
   border: 0;
   border-bottom: 1px solid var(--journal-line);
   border-radius: 0;
   background: transparent;
-  overflow: visible;
 }
 
 .traveler-app-shell
-  .package-detail-disclosure--itinerary
-  > .package-detail-disclosure__summary {
-  min-height: 3.5rem;
-  padding: var(--space-4) var(--space-1);
-  color: var(--journal-ink);
-  font-family: inherit;
-  font-size: var(--font-size-body-md);
-  font-weight: var(--font-weight-bold);
+  .package-detail-journey
+  .package-detail-itinerary-item:last-child
+  .package-detail-itinerary-content {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
-.traveler-app-shell
-  .package-detail-disclosure--itinerary
-  > .package-detail-disclosure__body {
-  padding: 0 0 var(--space-6);
+.traveler-app-shell .package-detail-itinerary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--journal-earth);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+}
+
+.traveler-app-shell .package-detail-itinerary-meta span + span::before {
+  margin-right: var(--space-2);
+  color: var(--journal-moss);
+  content: "·";
 }
 
 .traveler-app-shell .package-detail-session-card {
@@ -897,6 +987,37 @@
 
 .traveler-app-shell .package-detail-itinerary-duration {
   color: var(--journal-earth);
+}
+
+.traveler-app-shell .package-detail-journey .package-detail-itinerary-desc {
+  color: var(--journal-muted);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.6;
+}
+
+@media (max-width: 47.99rem) {
+  .traveler-app-shell .package-detail-journey {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    padding: var(--space-5);
+  }
+
+  .traveler-app-shell .package-detail-journey__header {
+    min-height: 0;
+    padding-right: 5.5rem;
+  }
+
+  .traveler-app-shell .package-detail-journey__header h2 {
+    font-size: clamp(1.75rem, 7vw, 2.2rem);
+  }
+
+  .traveler-app-shell .package-detail-journey__mascot {
+    position: absolute;
+    top: 0;
+    right: calc(-1 * var(--space-2));
+    width: 5.25rem;
+    height: 6.25rem;
+  }
 }
 
 /* The journey continues through sessions, checkout, trips, and profile. */

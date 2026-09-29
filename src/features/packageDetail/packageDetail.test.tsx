@@ -63,7 +63,7 @@ async function renderPackageDetail(
 }
 
 describe("PackageDetailScreen Data & Contract Tests", () => {
-  it("1. known LIVE package resolves to READY detail in locked contract order", async () => {
+  it("1. known LIVE package shows the main experience and itinerary", async () => {
     const view = await renderPackageDetail("slow_green_day");
 
     expect(view.textContent).toContain("Sehari Pelan di Lereng Hijau");
@@ -72,7 +72,7 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
     expect(view.textContent).toContain("Destinasi");
     expect(view.textContent).toContain("Penyelenggara & Pemandu");
     expect(view.textContent).toContain("Highlight Pengalaman");
-    expect(view.textContent).toContain("Rencana Perjalanan");
+    expect(view.textContent).toContain("Rencana perjalanan");
     expect(view.textContent).toContain("Fasilitas & Ketentuan");
     expect(view.textContent).toContain("Jadwal Terdekat");
     expect(view.textContent).toContain("Pilih Jadwal");
@@ -91,8 +91,21 @@ describe("PackageDetailScreen Data & Contract Tests", () => {
         "details.package-detail-disclosure",
       ),
     );
-    expect(disclosures).toHaveLength(6);
+    expect(disclosures).toHaveLength(5);
     expect(disclosures.every((detail) => detail.open === false)).toBe(true);
+
+    const journey = view.querySelector(".package-detail-journey");
+    expect(journey).not.toBeNull();
+    expect(journey?.closest("details")).toBeNull();
+    expect(journey?.textContent).toContain("Pagi - Siang");
+    expect(journey?.textContent).toContain("2.5 jam");
+    expect(
+      Boolean(
+        (journey?.compareDocumentPosition(
+          view.querySelector(".package-detail-section--sessions")!,
+        ) ?? 0) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+    ).toBe(true);
 
     expect(
       view.querySelector(".package-detail-secondary")?.textContent,

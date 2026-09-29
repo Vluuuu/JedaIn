@@ -41,13 +41,17 @@ export const destinationRepository = {
     }
   },
 
-  async getById(destinationId: string): Promise<DestinationRecord | undefined> {
+  async getById(
+    destinationId: string,
+    options?: { strict?: boolean },
+  ): Promise<DestinationRecord | undefined> {
     if (!isSupabaseMode()) {
       return mockDestinationStore.getById(destinationId);
     }
 
     const supabase = getSupabaseClient();
     if (!supabase) {
+      if (options?.strict) return undefined;
       return mockDestinationStore.getById(destinationId);
     }
 
@@ -59,13 +63,21 @@ export const destinationRepository = {
         .maybeSingle();
 
       if (error || !data) {
+        if (options?.strict) return undefined;
         return mockDestinationStore.getById(destinationId);
       }
 
       return mapDestinationRowToRecord(data as DestinationRow);
     } catch {
+      if (options?.strict) return undefined;
       return mockDestinationStore.getById(destinationId);
     }
+  },
+
+  async getAuthoritativeById(
+    destinationId: string,
+  ): Promise<DestinationRecord | undefined> {
+    return this.getById(destinationId, { strict: true });
   },
 
   async getEligibleForEo(

@@ -4,6 +4,7 @@ import { destinationRepository } from "../../data/destinationRepository";
 import { packageRepository } from "../../data/packageRepository";
 import { Badge, Button, Dialog } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
@@ -13,6 +14,7 @@ import type {
   DestinationRecord,
   DemandInsightRecord,
   EoItineraryItem,
+  EoPackageRecord,
   EoValidationError,
   PackageGuideSource,
 } from "./types";
@@ -50,8 +52,12 @@ export function EoPackageBuilderScreen() {
 
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [packageId, setPackageId] = useState<string | undefined>(
-    initialDraft?.packageId ?? undefined,
+    initialDraft?.packageId ?? draftId ?? undefined,
   );
+  const packageIdRef = useRef<string | undefined>(
+    initialDraft?.packageId ?? draftId ?? undefined,
+  );
+  const saveQueueRef = useRef<Promise<unknown>>(Promise.resolve());
 
   // Available data - Step 1 uses authoritative eligible destinations
   const [eligibleDestinations, setEligibleDestinations] = useState<
@@ -341,71 +347,93 @@ export function EoPackageBuilderScreen() {
       : 0;
   const customerPrice = baseCost + localGuideFee + eoMargin;
 
-  // Auto-save draft on moving
-  const saveCurrentDraft = () => {
-    const splitSafety = safetyNotes
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+  // Authoritative draft save serialized via promise chain to prevent race conditions & duplicate drafts
+  const saveCurrentDraft = async (): Promise<EoPackageRecord | undefined> => {
+    let savedRecord: EoPackageRecord | undefined;
 
-    const splitIncluded = includedItemsText
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const task = saveQueueRef.current
+      .catch(() => {})
+      .then(async () => {
+        const splitSafety = safetyNotes
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
 
-    const splitExcluded = excludedItemsText
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+        const splitIncluded = includedItemsText
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
 
-    const splitAccessNotes = accessNotesText
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+        const splitExcluded = excludedItemsText
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
 
-    // Only persist destinationId if it is authoritative and eligible
-    const effectiveDestinationId = selectedDestination
-      ? selectedDestination.destinationId
-      : "";
+        const splitAccessNotes = accessNotesText
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
 
-    const draftPayload = {
-      packageId,
-      title,
-      shortSummary,
-      valueProposition: shortSummary,
-      destinationId: effectiveDestinationId,
-      imageUrl,
-      imageUrls,
-      insightId: selectedInsightId,
-      durationLabel,
-      itinerary,
-      meetingPointLabel: meetingPointLabel.trim() || undefined,
-      departureTimeLabel: departureTimeLabel.trim() || undefined,
-      outboundTransport: outboundTransport.trim() || undefined,
-      returnTransport: returnTransport.trim() || undefined,
-      includedItems: splitIncluded,
-      excludedItems: splitExcluded,
-      safetyNotes: splitSafety,
-      accessNotes: splitAccessNotes.length > 0 ? splitAccessNotes : undefined,
-      guideSource: effectiveGuideSource,
-      pricing: {
-        destinationBaseCost: baseCost,
-        localGuideFee,
-        eoMargin,
-        customerPrice,
-      },
-    };
+        // Only persist destinationId if it is authoritative and eligible
+        const effectiveDestinationId = selectedDestination
+          ? selectedDestination.destinationId
+          : "";
 
-    const res = mockEoPackageStore.saveDraft(draftPayload);
-    if (res.success && res.package) {
-      if (!packageId) {
-        setPackageId(res.package.packageId);
-      }
-      packageRepository.saveDraft(draftPayload).catch((err) => {
-        console.warn("Async packageRepository.saveDraft failed:", err);
+        const currentPackageId = packageIdRef.current;
+
+        const draftPayload: Partial<EoPackageRecord> = {
+          packageId: currentPackageId,
+          title,
+          shortSummary,
+          valueProposition: shortSummary,
+          destinationId: effectiveDestinationId,
+          imageUrl,
+          imageUrls,
+          insightId: selectedInsightId,
+          durationLabel,
+          itinerary,
+          meetingPointLabel: meetingPointLabel.trim() || undefined,
+          departureTimeLabel: departureTimeLabel.trim() || undefined,
+          outboundTransport: outboundTransport.trim() || undefined,
+          returnTransport: returnTransport.trim() || undefined,
+          includedItems: splitIncluded,
+          excludedItems: splitExcluded,
+          safetyNotes: splitSafety,
+          accessNotes:
+            splitAccessNotes.length > 0 ? splitAccessNotes : undefined,
+          guideSource: effectiveGuideSource,
+          pricing: {
+            destinationBaseCost: baseCost,
+            localGuideFee,
+            eoMargin,
+            customerPrice,
+          },
+        };
+
+        const res = await packageRepository.saveDraft(draftPayload);
+        if (res.success && res.package) {
+          const authoritativeId = res.package.packageId;
+          packageIdRef.current = authoritativeId;
+          setPackageId(authoritativeId);
+          savedRecord = res.package;
+          return;
+        }
+
+        // Fallback for mock-only testing mode when repository session is unauthenticated
+        if (!isSupabaseMode()) {
+          const mockRes = mockEoPackageStore.saveDraft(draftPayload);
+          if (mockRes.success && mockRes.package) {
+            const fallbackId = mockRes.package.packageId;
+            packageIdRef.current = fallbackId;
+            setPackageId(fallbackId);
+            savedRecord = mockRes.package;
+          }
+        }
       });
-    }
-    return res.package;
+
+    saveQueueRef.current = task;
+    await task;
+    return savedRecord;
   };
 
   const processImageFile = (file: File) => {
@@ -438,15 +466,15 @@ export function EoPackageBuilderScreen() {
     Array.from(e.dataTransfer.files ?? []).forEach(processImageFile);
   };
 
-  const handleNext = () => {
-    saveCurrentDraft();
+  const handleNext = async () => {
+    await saveCurrentDraft();
     if (currentStep < 5) {
       setCurrentStep((prev) => prev + 1);
     }
   };
 
-  const handleBack = () => {
-    saveCurrentDraft();
+  const handleBack = async () => {
+    await saveCurrentDraft();
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
     }
@@ -491,30 +519,35 @@ export function EoPackageBuilderScreen() {
   };
 
   const handleSubmitForReview = async () => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
     setValidationErrors([]);
 
-    const savedPkg = saveCurrentDraft();
-    if (!savedPkg) {
-      setIsSubmitting(false);
-      return;
-    }
-
-    const res = await packageRepository.submitForReview(savedPkg.packageId);
-    setIsSubmitting(false);
-
-    if (res.success) {
-      navigate(`/partner/eo/packages/${savedPkg.packageId}`);
-    } else {
-      setValidationErrors(res.validationResult.errors);
-      if (res.validationResult.errors.length > 0) {
-        setCurrentStep(res.validationResult.errors[0].step);
+    try {
+      const savedPkg = await saveCurrentDraft();
+      if (!savedPkg) {
+        setIsSubmitting(false);
+        return;
       }
+
+      const res = await packageRepository.submitForReview(savedPkg.packageId);
+      setIsSubmitting(false);
+
+      if (res.success) {
+        navigate(`/partner/eo/packages/${savedPkg.packageId}`);
+      } else {
+        setValidationErrors(res.validationResult.errors);
+        if (res.validationResult.errors.length > 0) {
+          setCurrentStep(res.validationResult.errors[0].step);
+        }
+      }
+    } catch {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="eo-container">
+    <div className="eo-container" data-package-id={packageId}>
       {/* Page Header */}
       <header className="eo-page-header">
         <div>
@@ -539,8 +572,8 @@ export function EoPackageBuilderScreen() {
                   ? "eo-step-item--completed"
                   : ""
             }`}
-            onClick={() => {
-              saveCurrentDraft();
+            onClick={async () => {
+              await saveCurrentDraft();
               setCurrentStep(s.step);
             }}
           >
@@ -712,9 +745,9 @@ export function EoPackageBuilderScreen() {
                         type="button"
                         variant="secondary"
                         size="sm"
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          const savedPkg = saveCurrentDraft();
+                          const savedPkg = await saveCurrentDraft();
                           const params = new URLSearchParams({
                             from: "builder",
                           });

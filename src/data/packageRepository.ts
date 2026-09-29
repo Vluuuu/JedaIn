@@ -209,7 +209,7 @@ export const packageRepository = {
 
       // Authoritative pricing: query live destination from destinationRepository
       const dest = draft.destinationId
-        ? await destinationRepository.getById(draft.destinationId)
+        ? await destinationRepository.getAuthoritativeById(draft.destinationId)
         : undefined;
       const baseCost = dest?.baseCostPerPerson ?? 100000;
       const margin = draft.pricing?.eoMargin ?? 150000;
@@ -414,9 +414,43 @@ export const packageRepository = {
         app?.guideStatus ??
         authCheck.partnerUser?.guideStatus ??
         "CERTIFIED_GUIDE";
-      const destination = pkg.destinationId
-        ? await destinationRepository.getById(pkg.destinationId)
-        : undefined;
+      if (!pkg.destinationId) {
+        return {
+          success: false,
+          validationResult: {
+            valid: false,
+            errors: [
+              {
+                step: 1,
+                field: "destinationId",
+                message: "Pilih destinasi terverifikasi untuk paket ini.",
+              },
+            ],
+          },
+        };
+      }
+
+      const destination = await destinationRepository.getAuthoritativeById(
+        pkg.destinationId,
+      );
+
+      if (!destination) {
+        return {
+          success: false,
+          validationResult: {
+            valid: false,
+            errors: [
+              {
+                step: 1,
+                field: "destinationId",
+                message:
+                  "Data resmi destinasi live tidak dapat dibaca dari server.",
+              },
+            ],
+          },
+        };
+      }
+
       const validationResult = validateEoPackage(
         pkg,
         authorGuideStatus,

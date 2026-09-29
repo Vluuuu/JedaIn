@@ -370,4 +370,42 @@ describe("Regression Tests: Package Builder Single-Draft Lifecycle & Serializati
       ?.getAttribute("data-package-id");
     expect(updatedId).toBe(generatedId);
   });
+
+  it("Scenario F: displays save error banner and prevents step transition when saveDraft fails", async () => {
+    vi.spyOn(packageRepository, "saveDraft").mockResolvedValue({
+      success: false,
+      message: "Data resmi destinasi live tidak dapat dibaca dari server.",
+    });
+
+    const view = await renderPackageBuilder();
+
+    // Verify initially at Step 1
+    expect(view.textContent).toContain(
+      "Langkah 1: Pilih Destinasi & Status Pemanduan",
+    );
+
+    // Click "Lanjut ke Langkah 2: Sinyal Insight"
+    const nextBtn = Array.from(
+      view.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((btn) => btn.textContent?.includes("Lanjut ke Langkah 2"));
+    expect(nextBtn).toBeDefined();
+
+    await act(async () => {
+      await nextBtn!.click();
+    });
+
+    // Step should NOT advance: stays on Step 1
+    expect(view.textContent).toContain(
+      "Langkah 1: Pilih Destinasi & Status Pemanduan",
+    );
+    expect(view.textContent).not.toContain("Sinyal Insight Traveler");
+
+    // Save error banner must be rendered with message
+    const alertEl = view.querySelector<HTMLDivElement>(".eo-alert--error");
+    expect(alertEl).not.toBeNull();
+    expect(alertEl?.textContent).toContain("Gagal Menyimpan Draf");
+    expect(alertEl?.textContent).toContain(
+      "Data resmi destinasi live tidak dapat dibaca dari server.",
+    );
+  });
 });

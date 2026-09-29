@@ -4,7 +4,6 @@ import { destinationRepository } from "../../data/destinationRepository";
 import { packageRepository } from "../../data/packageRepository";
 import { Badge, Button, Dialog } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
-import { isSupabaseMode } from "../../lib/supabase/config";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
@@ -236,8 +235,10 @@ export function EoPackageBuilderScreen() {
   const [validationErrors, setValidationErrors] = useState<EoValidationError[]>(
     [],
   );
+  const [saveError, setSaveError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const validationAlertRef = useRef<HTMLDivElement | null>(null);
+  const saveAlertRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (validationErrors.length > 0 && validationAlertRef.current) {
@@ -248,6 +249,16 @@ export function EoPackageBuilderScreen() {
       validationAlertRef.current.focus?.();
     }
   }, [validationErrors]);
+
+  useEffect(() => {
+    if (saveError && saveAlertRef.current) {
+      saveAlertRef.current.scrollIntoView?.({
+        behavior: "smooth",
+        block: "start",
+      });
+      saveAlertRef.current.focus?.();
+    }
+  }, [saveError]);
 
   const filteredEligibleDestinations = eligibleDestinations.filter((dest) => {
     if (destLocationFilter !== "ALL" && dest.city !== destLocationFilter) {
@@ -415,20 +426,12 @@ export function EoPackageBuilderScreen() {
           const authoritativeId = res.package.packageId;
           packageIdRef.current = authoritativeId;
           setPackageId(authoritativeId);
+          setSaveError(undefined);
           savedRecord = res.package;
           return;
         }
 
-        // Fallback for mock-only testing mode when repository session is unauthenticated
-        if (!isSupabaseMode()) {
-          const mockRes = mockEoPackageStore.saveDraft(draftPayload);
-          if (mockRes.success && mockRes.package) {
-            const fallbackId = mockRes.package.packageId;
-            packageIdRef.current = fallbackId;
-            setPackageId(fallbackId);
-            savedRecord = mockRes.package;
-          }
-        }
+        setSaveError(res.message || "Gagal menyimpan draf paket.");
       });
 
     saveQueueRef.current = task;
@@ -467,14 +470,16 @@ export function EoPackageBuilderScreen() {
   };
 
   const handleNext = async () => {
-    await saveCurrentDraft();
+    const saved = await saveCurrentDraft();
+    if (!saved) return;
     if (currentStep < 5) {
       setCurrentStep((prev) => prev + 1);
     }
   };
 
   const handleBack = async () => {
-    await saveCurrentDraft();
+    const saved = await saveCurrentDraft();
+    if (!saved) return;
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
     }
@@ -573,7 +578,8 @@ export function EoPackageBuilderScreen() {
                   : ""
             }`}
             onClick={async () => {
-              await saveCurrentDraft();
+              const saved = await saveCurrentDraft();
+              if (!saved) return;
               setCurrentStep(s.step);
             }}
           >
@@ -584,6 +590,22 @@ export function EoPackageBuilderScreen() {
           </button>
         ))}
       </nav>
+
+      {/* Save Error Banner */}
+      {saveError && (
+        <div
+          ref={saveAlertRef}
+          tabIndex={-1}
+          className="eo-alert eo-alert--error"
+          role="alert"
+          style={{ outline: "none", marginBottom: "var(--space-4)" }}
+        >
+          <strong style={{ fontSize: "var(--font-size-body-md)" }}>
+            Gagal Menyimpan Draf:
+          </strong>{" "}
+          <span>{saveError}</span>
+        </div>
+      )}
 
       {/* Validation Error Banner */}
       {validationErrors.length > 0 && (
@@ -748,10 +770,11 @@ export function EoPackageBuilderScreen() {
                         onClick={async (e) => {
                           e.stopPropagation();
                           const savedPkg = await saveCurrentDraft();
+                          if (!savedPkg) return;
                           const params = new URLSearchParams({
                             from: "builder",
                           });
-                          if (savedPkg?.packageId) {
+                          if (savedPkg.packageId) {
                             params.set("draftId", savedPkg.packageId);
                           }
                           navigate(

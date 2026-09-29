@@ -193,6 +193,26 @@ describe("Supabase Backend Guards, Auth Enforcement & Authoritative Pricing", ()
               }),
             };
           }
+          if (table === "destinations") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: {
+                  id: "dest_lereng_hijau",
+                  name: "Lereng Hijau Batu",
+                  location_label: "Batu / Malang Raya",
+                  province: "Jawa Timur",
+                  city: "Batu",
+                  verification_level: "BASIC",
+                  guide_ready: true,
+                  base_cost_per_person: 125000,
+                  local_guide_fee_per_person: 25000,
+                  status: "ACTIVE",
+                },
+              }),
+            };
+          }
           if (table === "packages") {
             return {
               select: vi.fn().mockReturnThis(),
@@ -309,6 +329,68 @@ describe("Supabase Backend Guards, Auth Enforcement & Authoritative Pricing", ()
       expect(savedRow?.local_guide_fee).toBe(60000);
       expect(savedRow?.eo_margin).toBe(120000);
       expect(savedRow?.customer_price).toBe(360000);
+    });
+
+    it("fails saveDraft and prevents packages.upsert when draft has destinationId but live destination read fails", async () => {
+      vi.spyOn(destinationRepository, "getAuthoritativeById").mockResolvedValue(
+        undefined,
+      );
+
+      const upsertSpy = vi.fn();
+
+      const mockSupabase = {
+        auth: {
+          getSession: vi.fn().mockResolvedValue({
+            data: {
+              session: {
+                user: { id: "eo_uid_123", email: "partner@jedaalam.id" },
+              },
+            },
+          }),
+        },
+        from: vi.fn().mockImplementation((table: string) => {
+          if (table === "partner_profiles") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: {
+                  id: "eo_jeda_alam",
+                  role: "EO",
+                  auth_user_id: "eo_uid_123",
+                  email: "partner@jedaalam.id",
+                },
+              }),
+            };
+          }
+          if (table === "packages") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({ data: null }),
+              upsert: upsertSpy,
+            };
+          }
+          return {};
+        }),
+      };
+      vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue(
+        mockSupabase as unknown as SupabaseClient,
+      );
+
+      const draftRes = await packageRepository.saveDraft({
+        title: "Paket Draft Tujuan Gagal Baca",
+        destinationId: "dest_lereng_hijau",
+      });
+
+      expect(destinationRepository.getAuthoritativeById).toHaveBeenCalledWith(
+        "dest_lereng_hijau",
+      );
+      expect(draftRes.success).toBe(false);
+      expect(draftRes.message).toContain(
+        "Data resmi destinasi live tidak dapat dibaca dari server.",
+      );
+      expect(upsertSpy).not.toHaveBeenCalled();
     });
 
     it("validates submitForReview using live destinationRepository destination rather than stale mock store", async () => {

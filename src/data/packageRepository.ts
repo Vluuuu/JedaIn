@@ -211,6 +211,13 @@ export const packageRepository = {
       const dest = draft.destinationId
         ? await destinationRepository.getAuthoritativeById(draft.destinationId)
         : undefined;
+
+      if (draft.destinationId && !dest) {
+        return {
+          success: false,
+          message: "Data resmi destinasi live tidak dapat dibaca dari server.",
+        };
+      }
       const baseCost = dest?.baseCostPerPerson ?? 100000;
       const margin = draft.pricing?.eoMargin ?? 150000;
       const effectiveGuideSource = draft.guideSource || "DESTINATION";

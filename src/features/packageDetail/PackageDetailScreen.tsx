@@ -476,7 +476,7 @@ export function PackageDetailScreen({
             </div>
           </details>
 
-          <details className="package-detail-disclosure">
+          <details className="package-detail-disclosure package-detail-disclosure--itinerary">
             <summary className="package-detail-disclosure__summary">
               <span>Rencana perjalanan</span>
               <span className="package-detail-disclosure__hint">

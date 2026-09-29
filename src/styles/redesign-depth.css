@@ -688,7 +688,7 @@
 
 .traveler-app-shell .explore-header__mascot {
   right: 6%;
-  bottom: 0;
+  bottom: -5rem;
   width: clamp(11rem, 21vw, 16rem);
 }
 

@@ -1054,6 +1054,17 @@ export const mockEoPackageStore = {
       }
     }
 
+    // Active session status (OPEN, FULL, CLOSED) must not exceed destination capacity limit
+    if (status !== "CANCELLED") {
+      const pkg = packages.find((p) => p.packageId === s.packageId);
+      if (pkg) {
+        const dest = mockDestinationStore.getById(pkg.destinationId);
+        if (dest && s.capacity > dest.capacityPerSession) {
+          return false;
+        }
+      }
+    }
+
     // Reopening a CANCELLED session must respect destination schedule conflict
     if (s.status === "CANCELLED" && status !== "CANCELLED") {
       const pkg = packages.find((p) => p.packageId === s.packageId);

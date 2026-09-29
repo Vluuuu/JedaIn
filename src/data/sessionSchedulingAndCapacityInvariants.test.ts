@@ -563,4 +563,113 @@ describe("Regression Tests: Destination Capacity & Schedule Conflict Invariants"
       expect(res.message).not.toContain("ERROR:");
     });
   });
+
+  describe("E. Over-Capacity Session Cancellation & Legacy Exemption", () => {
+    it("12. existing legacy session with capacity 30 (max: 20) OPEN -> CANCELLED passes", async () => {
+      // Seed a legacy session with capacity = 30
+      mockEoPackageStore.upsertSession({
+        sessionId: "ses_legacy_overcap_30",
+        packageId: "slow_green_day",
+        eoId: "eo_jeda_alam",
+        startAt: slot_08_14_start,
+        endAt: slot_08_14_end,
+        capacity: 30, // exceeds dest_lereng_hijau max (20)
+        remainingSlots: 30,
+        pricePerPerson: 375000,
+        status: "OPEN",
+        createdAt: new Date().toISOString(),
+      });
+
+      // Cancellation must succeed despite capacity exceeding destination max
+      const cancelRes = await sessionRepository.updateSessionStatus(
+        "ses_legacy_overcap_30",
+        "CANCELLED",
+        baseNow,
+      );
+      expect(cancelRes.success).toBe(true);
+      expect(cancelRes.session?.status).toBe("CANCELLED");
+      expect(cancelRes.session?.capacity).toBe(30); // original capacity preserved
+    });
+
+    it("13. existing legacy session with capacity 30 OPEN -> FULL fails", async () => {
+      mockEoPackageStore.upsertSession({
+        sessionId: "ses_legacy_overcap_30",
+        packageId: "slow_green_day",
+        eoId: "eo_jeda_alam",
+        startAt: slot_08_14_start,
+        endAt: slot_08_14_end,
+        capacity: 30,
+        remainingSlots: 0,
+        pricePerPerson: 375000,
+        status: "OPEN",
+        createdAt: new Date().toISOString(),
+      });
+
+      // Updating to active status FULL must fail because capacity 30 > 20
+      const fullRes = await sessionRepository.updateSessionStatus(
+        "ses_legacy_overcap_30",
+        "FULL",
+        baseNow,
+      );
+      expect(fullRes.success).toBe(false);
+      expect(fullRes.message).toContain(
+        "Kapasitas sesi (30) melebihi batas maksimal",
+      );
+    });
+
+    it("14. existing legacy session with capacity 30 OPEN -> CLOSED fails", async () => {
+      mockEoPackageStore.upsertSession({
+        sessionId: "ses_legacy_overcap_30",
+        packageId: "slow_green_day",
+        eoId: "eo_jeda_alam",
+        startAt: slot_08_14_start,
+        endAt: slot_08_14_end,
+        capacity: 30,
+        remainingSlots: 30,
+        pricePerPerson: 375000,
+        status: "OPEN",
+        createdAt: new Date().toISOString(),
+      });
+
+      // Updating to active status CLOSED must fail because capacity 30 > 20
+      const closedRes = await sessionRepository.updateSessionStatus(
+        "ses_legacy_overcap_30",
+        "CLOSED",
+        baseNow,
+      );
+      expect(closedRes.success).toBe(false);
+      expect(closedRes.message).toContain(
+        "Kapasitas sesi (30) melebihi batas maksimal",
+      );
+    });
+
+    it("15. session CANCELLED with capacity 30 does not block a new valid session at the same time", async () => {
+      // 1. Seed CANCELLED session with capacity 30
+      mockEoPackageStore.upsertSession({
+        sessionId: "ses_legacy_overcap_30",
+        packageId: "slow_green_day",
+        eoId: "eo_jeda_alam",
+        startAt: slot_08_14_start,
+        endAt: slot_08_14_end,
+        capacity: 30,
+        remainingSlots: 30,
+        pricePerPerson: 375000,
+        status: "CANCELLED",
+        createdAt: new Date().toISOString(),
+      });
+
+      // 2. Creating a new valid session (capacity 20) on same destination & time must SUCCEED
+      const newRes = await sessionRepository.createSession({
+        packageId: "slow_green_day",
+        startAt: slot_08_14_start,
+        endAt: slot_08_14_end,
+        capacity: 20,
+        pricePerPerson: 375000,
+        nowMs: baseNow,
+      });
+      expect(newRes.success).toBe(true);
+      expect(newRes.session?.capacity).toBe(20);
+      expect(newRes.session?.status).toBe("OPEN");
+    });
+  });
 });

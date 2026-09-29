@@ -1,4 +1,5 @@
 import { mockApplicationStore } from "../features/eo/mockApplicationStore";
+import { mockDestinationStore } from "../features/eo/mockDestinationStore";
 import {
   formatSessionTimeWindow,
   mockEoPackageStore,
@@ -387,6 +388,23 @@ export const sessionRepository = {
               "Sesi yang sudah berlangsung atau berlalu tidak dapat dibuka kembali (OPEN).",
           };
         }
+        const pkg = s
+          ? mockEoPackageStore.getPackageById(s.packageId)
+          : undefined;
+        const dest = pkg
+          ? mockDestinationStore.getById(pkg.destinationId)
+          : undefined;
+        if (
+          dest &&
+          s &&
+          s.capacity > dest.capacityPerSession &&
+          status !== "CANCELLED"
+        ) {
+          return {
+            success: false,
+            message: `Kapasitas sesi (${s.capacity}) melebihi batas maksimal destinasi ${dest.name} (${dest.capacityPerSession} orang).`,
+          };
+        }
         return {
           success: false,
           message:
@@ -496,6 +514,18 @@ export const sessionRepository = {
 
       if (error || !data) {
         const errLower = (error?.message || "").toLowerCase();
+        if (
+          errLower.includes("kapasitas") ||
+          errLower.includes("melebihi batas") ||
+          error?.code === "23514"
+        ) {
+          return {
+            success: false,
+            message:
+              error?.message ||
+              "Kapasitas sesi melebihi batas maksimal destinasi.",
+          };
+        }
         if (
           errLower.includes("bertabrakan") ||
           errLower.includes("sudah memiliki sesi") ||

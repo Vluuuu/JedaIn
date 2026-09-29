@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import type { PackageRecommendationSource } from "../recommendation/types";
 
@@ -31,7 +31,12 @@ export function PackageHero({ packageData }: PackageHeroProps) {
     packageData.visualAsset,
   );
   const [activeViewIndex, setActiveViewIndex] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryTab, setGalleryTab] = useState<"photos" | "videos">("photos");
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const galleryOpener = useRef<HTMLButtonElement | null>(null);
+  const galleryBack = useRef<HTMLButtonElement | null>(null);
+  const galleryPanel = useRef<HTMLDivElement | null>(null);
   const packageImages = packageData.visualAssets?.length
     ? [
         ...new Set(
@@ -60,6 +65,43 @@ export function PackageHero({ packageData }: PackageHeroProps) {
       (current) => (current + direction + views.length) % views.length,
     );
   };
+  const openGallery = (tab: "photos" | "videos", opener: HTMLButtonElement) => {
+    galleryOpener.current = opener;
+    setGalleryTab(tab);
+    setGalleryOpen(true);
+  };
+
+  useEffect(() => {
+    if (!galleryOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    galleryBack.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setGalleryOpen(false);
+      if (event.key !== "Tab" || !galleryPanel.current) return;
+      const focusable = Array.from(
+        galleryPanel.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+      galleryOpener.current?.focus();
+    };
+  }, [galleryOpen]);
 
   return (
     <section
@@ -123,112 +165,199 @@ export function PackageHero({ packageData }: PackageHeroProps) {
           </span>
         </div>
         {views.length > 1 && (
-          <div className="package-detail-hero__carousel">
-            <span
-              className="package-detail-hero__slide-count"
-              aria-live="polite"
-            >
-              {safeIndex + 1} / {views.length}
-            </span>
-            <div className="package-detail-hero__slide-actions">
+          <div
+            className="package-detail-hero__dots"
+            role="group"
+            aria-label="Pilih foto cover"
+          >
+            {views.map((view, index) => (
               <button
+                key={`${view.url}-${index}`}
                 type="button"
-                className="package-detail-hero__slide-button"
-                aria-label="Foto sebelumnya"
-                onClick={() => moveView(-1)}
+                className={`package-detail-hero__dot${index === safeIndex ? " package-detail-hero__dot--active" : ""}`}
+                aria-label={`Tampilkan foto ${index + 1} dari ${views.length}`}
+                aria-current={index === safeIndex ? "true" : undefined}
+                onClick={() => setActiveViewIndex(index)}
               >
-                ←
+                <span aria-hidden="true" />
               </button>
-              <button
-                type="button"
-                className="package-detail-hero__slide-button"
-                aria-label="Foto berikutnya"
-                onClick={() => moveView(1)}
-              >
-                →
-              </button>
-            </div>
+            ))}
           </div>
         )}
       </header>
 
-      <details className="package-detail-gallery">
-        <summary className="package-detail-gallery__heading-row">
+      <div className="package-detail-gallery">
+        <div className="package-detail-gallery__heading-row">
           <div>
             <h2
               id="package-gallery-heading"
               className="package-detail-gallery__title"
             >
-              Galeri suasana
+              Galeri destinasi
             </h2>
-            <span className="package-detail-gallery__eyebrow">
-              Lihat gambaran pengalaman
-            </span>
+            <p className="package-detail-gallery__eyebrow">
+              Jelajahi media pengalaman
+            </p>
           </div>
-          <span className="package-detail-gallery__summary-end">
-            <span
-              className="package-detail-gallery__counter"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              {safeIndex + 1}/{views.length}
+        </div>
+        <div className="package-detail-gallery__entry-grid">
+          <button
+            type="button"
+            className="package-detail-gallery__entry package-detail-gallery__entry--photos"
+            onClick={(event) => openGallery("photos", event.currentTarget)}
+          >
+            <img
+              src={activeView.url}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+            />
+            <span className="package-detail-gallery__entry-content">
+              <strong>Foto</strong>
+              <span>{views.length} tampilan · Lihat semua</span>
             </span>
+          </button>
+          <button
+            type="button"
+            className="package-detail-gallery__entry package-detail-gallery__entry--videos"
+            onClick={(event) => openGallery("videos", event.currentTarget)}
+          >
             <span
-              className="package-detail-gallery__chevron"
+              className="package-detail-gallery__video-icon"
               aria-hidden="true"
             >
-              ⌄
+              ▶
             </span>
-          </span>
-        </summary>
+            <span className="package-detail-gallery__entry-content">
+              <strong>Video</strong>
+              <span>Belum tersedia</span>
+            </span>
+          </button>
+        </div>
+      </div>
 
+      {galleryOpen && (
         <div
-          className="package-detail-gallery__thumbnails"
-          role="group"
-          aria-label="Pilihan visual suasana experience"
+          ref={galleryPanel}
+          className="package-detail-gallery-view"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="package-gallery-view-title"
         >
-          {views.map((view, index) => {
-            const isActive = index === safeIndex;
-
-            return (
+          <div className="package-detail-gallery-view__inner">
+            <div className="package-detail-gallery-view__topbar">
               <button
-                key={`${view.url}-${index}`}
+                ref={galleryBack}
                 type="button"
-                className={`package-detail-gallery__thumb${
-                  isActive ? " package-detail-gallery__thumb--active" : ""
-                }`}
-                aria-pressed={isActive}
-                aria-label={`Tampilkan ${view.label.toLowerCase()}`}
-                onClick={() => setActiveViewIndex(index)}
+                className="package-detail-gallery-view__back"
+                onClick={() => setGalleryOpen(false)}
               >
-                <span className="package-detail-gallery__thumb-media">
+                ← Kembali ke paket
+              </button>
+              <span>JedaIn / Galeri</span>
+            </div>
+            <header className="package-detail-gallery-view__header">
+              <span className="package-detail-gallery-view__kicker">
+                {packageData.destinationName}
+              </span>
+              <h2 id="package-gallery-view-title">Galeri destinasi</h2>
+              <p>{packageData.title}</p>
+            </header>
+            <div
+              className="package-detail-gallery-view__tabs"
+              role="group"
+              aria-label="Jenis media"
+            >
+              <button
+                type="button"
+                aria-pressed={galleryTab === "photos"}
+                onClick={() => setGalleryTab("photos")}
+              >
+                Foto <span>{views.length}</span>
+              </button>
+              <button
+                type="button"
+                aria-pressed={galleryTab === "videos"}
+                onClick={() => setGalleryTab("videos")}
+              >
+                Video <span>0</span>
+              </button>
+            </div>
+            {galleryTab === "photos" ? (
+              <div
+                className="package-detail-gallery-view__photos"
+                aria-label="Foto destinasi"
+              >
+                <div className="package-detail-gallery-view__featured">
                   <img
-                    src={view.url}
-                    alt=""
-                    aria-hidden="true"
-                    width={240}
-                    height={150}
-                    loading="lazy"
+                    src={activeView.url}
+                    alt={`${activeView.label} — ${packageData.title}`}
                     style={{
-                      transform: `scale(${view.scale})`,
-                      transformOrigin: view.transformOrigin,
+                      transform: `scale(${activeView.scale})`,
+                      transformOrigin: activeView.transformOrigin,
                     }}
                   />
+                  <span>
+                    {activeView.label} · {safeIndex + 1}/{views.length}
+                  </span>
+                </div>
+                <div className="package-detail-gallery-view__grid">
+                  {views.map((view, index) => (
+                    <button
+                      key={`${view.url}-${index}`}
+                      type="button"
+                      className={
+                        index === safeIndex
+                          ? "package-detail-gallery-view__photo package-detail-gallery-view__photo--active"
+                          : "package-detail-gallery-view__photo"
+                      }
+                      aria-label={`Lihat ${view.label.toLowerCase()}`}
+                      aria-pressed={index === safeIndex}
+                      onClick={() => setActiveViewIndex(index)}
+                    >
+                      <img
+                        src={view.url}
+                        alt=""
+                        aria-hidden="true"
+                        loading="lazy"
+                        style={{
+                          transform: `scale(${view.scale})`,
+                          transformOrigin: view.transformOrigin,
+                        }}
+                      />
+                      <span>{view.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="package-detail-gallery__note">
+                  {isPackageGallery
+                    ? "Media paket dipilih Travel Organizer. Ketersediaan foto aktual bergantung pada media yang mereka unggah; ilustrasi prototipe bukan dokumentasi kondisi destinasi."
+                    : "Tiga tampilan ini berasal dari satu ilustrasi prototipe dengan crop berbeda, bukan tiga foto aktual destinasi."}
+                </p>
+              </div>
+            ) : (
+              <div
+                className="package-detail-gallery-view__empty"
+                aria-label="Video destinasi"
+              >
+                <span
+                  className="package-detail-gallery-view__empty-icon"
+                  aria-hidden="true"
+                >
+                  ▶
                 </span>
-                <span className="package-detail-gallery__thumb-label">
-                  {view.label}
-                </span>
-              </button>
-            );
-          })}
+                <h3>Belum ada video untuk pengalaman ini</h3>
+                <p>
+                  Jelajahi foto yang tersedia untuk melihat gambaran suasananya.
+                </p>
+                <button type="button" onClick={() => setGalleryTab("photos")}>
+                  Lihat foto
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-
-        <p className="package-detail-gallery__note">
-          {isPackageGallery
-            ? "Media package dipilih Travel Organizer. Visual prototype dalam galeri tetap merupakan ilustrasi, bukan foto kondisi aktual destinasi."
-            : "Satu ilustrasi prototype ditampilkan dalam beberapa crop untuk memberi gambaran suasana, bukan foto kondisi aktual destinasi."}
-        </p>
-      </details>
+      )}
     </section>
   );
 }

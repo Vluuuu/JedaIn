@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
-  LeafIcon,
   MilestoneMapPinIcon,
   MilestoneReflectionStarIcon,
   MilestoneSproutIcon,
@@ -10,8 +9,6 @@ import {
   SearchIcon,
   SettingsIcon,
 } from "../../components/shells/icons";
-import { QUIZ_INTENT_OPTIONS } from "../quiz/config";
-import { isCompletedQuizDraft } from "../recommendation/mockAdapter";
 import { defaultProfileAdapter } from "./mockAdapter";
 import type { ProfileAdapter, TravelerProfileData } from "./types";
 import "./profile.css";
@@ -117,7 +114,6 @@ export function ProfileScreen({
     achievements,
     recentActivities,
     moments,
-    quizDraft,
     isPhoneVerified,
   } = data;
 
@@ -131,14 +127,6 @@ export function ProfileScreen({
   const monogram = displayName.charAt(0).toUpperCase() || "J";
   const avatarUrl = presentation?.avatarUrl;
   const bioText = presentation?.bio?.trim() || null;
-
-  // Resolve human-readable labels from quiz draft
-  const hasValidPreferences = isCompletedQuizDraft(quizDraft);
-
-  const intentLabel = quizDraft?.current_intent
-    ? (QUIZ_INTENT_OPTIONS.find((opt) => opt.value === quizDraft.current_intent)
-        ?.label ?? quizDraft.current_intent)
-    : null;
 
   // Phone nudge condition: user has phone AND phone is unverified
   const showPhoneNudge = Boolean(user.phone && !isPhoneVerified);
@@ -186,21 +174,6 @@ export function ProfileScreen({
           </div>
           <h1 className="profile-hero-name">{displayName}</h1>
           {bioText && <p className="profile-hero-bio">{bioText}</p>}
-
-          {/* Micro-identity: Current Jeda intent */}
-          {hasValidPreferences && intentLabel && (
-            <div className="profile-current-jeda-pill">
-              <span className="profile-current-jeda-prefix">Lagi butuh:</span>
-              <div className="profile-current-jeda-badge">
-                <LeafIcon
-                  width={14}
-                  height={14}
-                  className="profile-current-jeda-icon"
-                />
-                <span>{intentLabel}</span>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* 2. Journey + Social Stat Row (Interactive) */}

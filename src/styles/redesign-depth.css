@@ -260,84 +260,166 @@
 }
 
 .traveler-app-shell .home-mood-row {
+  flex-wrap: wrap;
   gap: var(--space-2);
-  padding-block: var(--space-1) var(--space-2);
+  overflow: visible;
+  padding: var(--space-1) 0;
+}
+
+.traveler-app-shell .home-mood-section {
+  padding-top: var(--space-5);
+}
+
+.traveler-app-shell .home-mood-section .home-section-title {
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  letter-spacing: -0.025em;
 }
 
 .traveler-app-shell .home-mood-chip {
+  display: inline-grid;
+  grid-template-columns: 1.75rem max-content;
+  flex: 0 0 auto;
+  width: max-content;
   min-width: 0;
   min-height: 2.75rem;
-  flex-direction: row;
   align-items: center;
-  justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-2);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
   border: 1px solid var(--redesign-warm-line);
   border-radius: var(--radius-pill);
   background: var(--redesign-paper);
   color: var(--redesign-forest-ink);
   font-size: var(--font-size-body-sm);
+  line-height: 1.2;
   box-shadow: none;
 }
 
 .traveler-app-shell .home-mood-chip__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
   width: 1.75rem;
   height: 1.75rem;
+  min-width: 1.75rem;
   border-radius: 50%;
   background: var(--redesign-meadow-light);
   color: var(--redesign-deep);
+}
+
+.traveler-app-shell .home-mood-chip__icon svg {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+.traveler-app-shell .home-mood-chip__label {
+  display: block;
+  white-space: nowrap;
+}
+
+.traveler-app-shell .home-mood-chip:hover {
+  border-color: var(--redesign-leaf);
+  background: var(--redesign-meadow-light);
+  box-shadow: none;
+}
+
+.traveler-app-shell .home-cards-scroll-row {
+  gap: var(--space-4);
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--space-1);
+  scrollbar-width: none;
+}
+
+.traveler-app-shell .home-cards-scroll-row::-webkit-scrollbar {
+  display: none;
 }
 
 .traveler-app-shell .home-package-card,
 .traveler-app-shell .home-destination-card {
   position: relative;
   isolation: isolate;
-  border: 0;
   border-radius: 1.5rem;
-  background: var(--redesign-forest-dark);
-  box-shadow: var(--redesign-shadow);
+  box-shadow: none;
 }
 
 .traveler-app-shell .home-package-card {
-  flex-basis: 20rem;
-  min-height: 20rem;
+  flex: 0 0 min(19rem, 84vw);
+  min-height: 0;
+  scroll-snap-align: start;
+  border: 1px solid var(--redesign-warm-line);
+  background: var(--redesign-paper);
+}
+
+.traveler-app-shell .home-package-card__visual {
+  position: relative;
+  inset: auto;
+  display: block;
+  width: 100%;
+  height: 10.5rem;
+  flex: none;
+  padding: 0;
+  aspect-ratio: auto;
+}
+
+.traveler-app-shell .home-package-card__visual img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.traveler-app-shell .home-package-card__visual-scrim {
+  display: none;
 }
 
 .traveler-app-shell .home-package-card__body {
   position: relative;
   z-index: 1;
-  min-height: 20rem;
-  justify-content: flex-end;
+  min-height: 0;
+  gap: var(--space-2);
+  justify-content: flex-start;
   padding: var(--space-5);
-  background: linear-gradient(
-    180deg,
-    transparent 16%,
-    var(--redesign-visual-shade) 40%,
-    var(--redesign-forest-ink) 100%
-  );
+  background: var(--redesign-paper);
 }
 
-.traveler-app-shell .home-package-card__meta,
-.traveler-app-shell .home-package-card__summary,
-.traveler-app-shell .home-package-card__price,
-.traveler-app-shell .home-package-card__unit,
-.traveler-app-shell .home-package-card__link {
-  color: var(--redesign-light-muted);
+.traveler-app-shell .home-package-card__meta {
+  flex-wrap: wrap;
+  color: var(--redesign-muted);
 }
 
 .traveler-app-shell .home-package-card__title {
-  color: var(--redesign-light-ink);
-  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  color: var(--redesign-forest-ink);
+  font-size: var(--font-size-body-lg);
+  line-height: 1.3;
+}
+
+.traveler-app-shell .home-package-card__summary {
+  display: block;
+  overflow: visible;
+  color: var(--redesign-muted);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.5;
 }
 
 .traveler-app-shell .home-package-card__footer {
-  margin-top: var(--space-2);
-  border-top-color: var(--redesign-light-rule);
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--redesign-warm-line);
 }
 
 .traveler-app-shell .home-package-card__price strong {
-  color: var(--redesign-light-ink);
+  color: var(--redesign-forest-ink);
   font-size: var(--font-size-body-md);
+}
+
+.traveler-app-shell .home-package-card__unit {
+  color: var(--redesign-muted);
+}
+
+.traveler-app-shell .home-package-card__link {
+  color: var(--redesign-deep);
 }
 
 .traveler-app-shell .home-destination-card {
@@ -369,7 +451,20 @@
 
 @media (min-width: 64rem) {
   .traveler-app-shell .home-cards-scroll-row {
+    overflow: visible;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    scroll-snap-type: none;
+  }
+
+  .traveler-app-shell .home-package-card {
+    display: grid;
+    grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+    min-height: 14rem;
+  }
+
+  .traveler-app-shell .home-package-card__visual {
+    height: 100%;
+    min-height: 14rem;
   }
 
   .traveler-app-shell .home-destinations-scroll-row {
@@ -567,6 +662,20 @@
   font-size: var(--font-size-body-lg);
 }
 
+.package-detail-itinerary-lead {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.traveler-app-shell .package-detail-itinerary-preview {
+  color: var(--redesign-muted);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.4;
+}
+
 .traveler-app-shell
   .package-detail-disclosure--itinerary
   .package-detail-disclosure__hint {
@@ -583,8 +692,12 @@
 .traveler-app-shell
   .package-detail-disclosure--itinerary
   .package-detail-section__title {
-  color: var(--redesign-forest-ink);
-  font-size: var(--font-size-heading-sm);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .traveler-app-shell .package-detail-itinerary-list {

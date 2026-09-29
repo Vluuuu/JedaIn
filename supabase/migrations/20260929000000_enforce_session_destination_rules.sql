@@ -111,3 +111,6 @@ on public.packages (destination_id);
 
 create index if not exists idx_sessions_package_status_timerange
 on public.sessions (package_id, status, start_at, end_at);
+
+-- Security hardening: revoke direct RPC execution from public/anon/authenticated roles
+revoke execute on function public.enforce_session_destination_rules() from public, anon, authenticated;

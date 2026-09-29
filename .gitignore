@@ -20,6 +20,7 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .playwright-mcp/
+supabase/.temp/
 .DS_Store
 *.suo
 *.ntvs*

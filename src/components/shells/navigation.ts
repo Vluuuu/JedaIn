@@ -6,7 +6,7 @@ export const partnerEoNavigation = [
   { to: "/partner/eo/bookings", label: "Bookings" },
   { to: "/partner/eo/destinations", label: "Destinations" },
   { to: "/partner/eo/reviews", label: "Reviews" },
-  { to: "/partner/eo/profile", label: "Profile" },
+  { to: "/partner/eo/profile", label: "Pengaturan" },
 ] as const;
 
 export const partnerDestinationNavigation = [
@@ -33,7 +33,7 @@ export const partnerDestinationNavigation = [
   },
   {
     to: "/partner/destination/profile-settings",
-    label: "Profile",
+    label: "Pengaturan",
   },
 ] as const;
 

@@ -1,0 +1,384 @@
+.partner-entry {
+  --entry-ink: var(--journal-ink);
+  --entry-forest: var(--journal-forest);
+  --entry-earth: var(--journal-earth);
+  --entry-paper: var(--journal-paper);
+  --entry-sage: var(--journal-sage);
+  min-height: 100svh;
+  color: var(--entry-ink);
+  background: var(--entry-paper);
+}
+
+.distraction-free-shell--no-header > main:has(.partner-entry) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.partner-entry :is(button, input, summary):focus-visible {
+  outline: 3px solid var(--entry-earth);
+  outline-offset: 3px;
+}
+
+.partner-entry__masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 5.25rem;
+  padding-inline: clamp(1.25rem, 4vw, 4.5rem);
+}
+
+.partner-entry__logo {
+  width: 6.6rem;
+  height: 3.65rem;
+  object-fit: contain;
+}
+
+.partner-entry__masthead span,
+.partner-entry__eyebrow,
+.partner-entry__role-number {
+  color: var(--entry-earth);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.partner-entry__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+  min-height: calc(100svh - 5.25rem);
+}
+
+.partner-entry__intro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(2rem, 5.5vw, 6rem) clamp(1.5rem, 5.5vw, 6rem) 17rem;
+  color: var(--journal-inverse);
+  background:
+    radial-gradient(circle at 75% 85%, #527961, transparent 42%),
+    var(--entry-forest);
+}
+
+.partner-entry__intro .partner-entry__eyebrow {
+  color: var(--journal-sun);
+}
+
+.partner-entry__intro h1 {
+  position: relative;
+  z-index: 1;
+  max-width: 11ch;
+  margin: 1.15rem 0;
+  font-family: var(--font-family-editorial);
+  font-size: clamp(2.8rem, 5.1vw, 5.7rem);
+  font-weight: 600;
+  line-height: 1.03;
+  letter-spacing: -0.055em;
+}
+
+.partner-entry__intro > p {
+  position: relative;
+  z-index: 1;
+  max-width: 39ch;
+  margin: 0;
+  color: color-mix(in srgb, var(--journal-inverse) 78%, transparent);
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  line-height: 1.7;
+}
+
+.partner-entry__scene {
+  position: absolute;
+  inset: auto 0 0;
+  height: 17rem;
+  pointer-events: none;
+}
+
+.partner-entry__sun {
+  position: absolute;
+  right: 11%;
+  bottom: 6rem;
+  width: 8rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--journal-sun) 55%, transparent);
+  filter: blur(1px);
+}
+
+.partner-entry__hill {
+  position: absolute;
+  right: -10%;
+  bottom: -11rem;
+  width: 130%;
+  height: 18rem;
+  border-radius: 50%;
+  background: #426953;
+  transform: rotate(-9deg);
+}
+
+.partner-entry__hill--front {
+  right: -45%;
+  bottom: -12rem;
+  background: #709475;
+  transform: rotate(10deg);
+}
+
+.partner-entry__scene img {
+  position: absolute;
+  z-index: 1;
+  left: clamp(1.5rem, 6vw, 6rem);
+  bottom: 0.5rem;
+  width: clamp(8.5rem, 16vw, 14rem);
+  height: 15rem;
+  object-fit: contain;
+  object-position: bottom;
+  filter: drop-shadow(0 12px 15px rgb(23 54 45 / 22%));
+}
+
+.partner-entry__choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  padding: clamp(2rem, 5vw, 5rem);
+  background:
+    radial-gradient(circle at 100% 0, var(--entry-sage), transparent 24rem),
+    var(--entry-paper);
+}
+
+.partner-entry__choice-heading {
+  max-width: 34rem;
+}
+.partner-entry__choice-heading h2,
+.partner-entry__login h2 {
+  margin: 0.7rem 0 0.45rem;
+  font-family: var(--font-family-editorial);
+  font-size: clamp(2.1rem, 3vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+.partner-entry__choice-heading p,
+.partner-entry__login > p {
+  margin: 0;
+  color: var(--journal-muted);
+  line-height: 1.6;
+}
+
+.partner-entry__roles {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0;
+}
+.partner-entry__role {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem 1.25rem;
+  padding: clamp(1.25rem, 2vw, 2rem) 0;
+  border-top: 1px solid var(--journal-line);
+}
+.partner-entry__role:last-child {
+  border-bottom: 1px solid var(--journal-line);
+}
+.partner-entry__role-number,
+.partner-entry__role h3,
+.partner-entry__role p {
+  grid-column: 1;
+}
+.partner-entry__role h3 {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.65rem, 2vw, 2.1rem);
+  line-height: 1.14;
+}
+.partner-entry__role p {
+  max-width: 44ch;
+  margin: 0;
+  color: var(--journal-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.partner-entry__actions {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.partner-entry__primary {
+  min-height: 2.75rem;
+  padding: 0.65rem 1.3rem;
+  color: var(--journal-inverse);
+  background: var(--entry-forest);
+  border: 1px solid var(--entry-forest);
+  border-radius: 0.55rem;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+.partner-entry__primary:hover {
+  background: var(--entry-ink);
+}
+.partner-entry__primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.partner-entry__text-button,
+.partner-entry__back,
+.partner-entry__register button {
+  padding: 0.4rem 0;
+  color: var(--entry-forest);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+.partner-entry__text-button:hover,
+.partner-entry__back:hover,
+.partner-entry__register button:hover {
+  text-decoration: underline;
+}
+.partner-entry__corner-mascot {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 0;
+  width: 4.7rem;
+  height: 5.6rem;
+  object-fit: contain;
+  object-position: bottom;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.partner-entry__login {
+  width: min(100%, 30rem);
+  margin-inline: auto;
+}
+.partner-entry__back {
+  display: block;
+  margin-bottom: clamp(2rem, 5vw, 4rem);
+}
+.partner-entry__login > p {
+  margin-bottom: 2rem;
+}
+.partner-entry__form {
+  display: grid;
+  gap: 0.65rem;
+}
+.partner-entry__form label {
+  margin-top: 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+.partner-entry__form input {
+  width: 100%;
+  min-height: 3.2rem;
+  box-sizing: border-box;
+  padding: 0.75rem 0.9rem;
+  color: var(--entry-ink);
+  background: color-mix(in srgb, var(--entry-paper) 65%, white);
+  border: 1px solid var(--journal-line);
+  border-radius: 0.6rem;
+  font: inherit;
+}
+.partner-entry__password {
+  position: relative;
+}
+.partner-entry__password input {
+  padding-right: 7rem;
+}
+.partner-entry__password button {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  min-height: 2.4rem;
+  color: var(--entry-forest);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.partner-entry__form > .partner-entry__primary {
+  margin-top: 0.8rem;
+}
+.partner-entry__error {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-size: 0.85rem;
+}
+.partner-entry__register {
+  margin-top: 1.5rem !important;
+  font-size: 0.9rem;
+}
+.partner-entry__preview {
+  padding-top: 1rem;
+  color: var(--journal-muted);
+  font-size: 0.78rem;
+}
+.partner-entry__preview summary {
+  cursor: pointer;
+}
+.partner-entry__preview p {
+  line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+  .partner-entry__layout {
+    grid-template-columns: 1fr;
+  }
+  .partner-entry__intro {
+    min-height: 25rem;
+    padding-bottom: 9rem;
+  }
+  .partner-entry__intro h1 {
+    max-width: 16ch;
+  }
+  .partner-entry__scene {
+    height: 10rem;
+  }
+  .partner-entry__scene img {
+    height: 9rem;
+  }
+  .partner-entry__choice {
+    min-height: 35rem;
+  }
+}
+@media (max-width: 540px) {
+  .partner-entry__masthead {
+    min-height: 4.5rem;
+  }
+  .partner-entry__masthead span {
+    font-size: 0.62rem;
+  }
+  .partner-entry__intro {
+    min-height: 22rem;
+    padding: 2rem 1.25rem 9rem;
+  }
+  .partner-entry__intro h1 {
+    font-size: clamp(2.5rem, 12vw, 3.5rem);
+  }
+  .partner-entry__choice {
+    padding: 2.5rem 1.25rem 4rem;
+  }
+  .partner-entry__role {
+    grid-template-columns: 1fr;
+  }
+  .partner-entry__actions {
+    grid-column: 1;
+    grid-row: auto;
+    align-items: stretch;
+    margin-top: 0.75rem;
+  }
+  .partner-entry__corner-mascot {
+    width: 3.5rem;
+  }
+}

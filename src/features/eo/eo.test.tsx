@@ -688,15 +688,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       );
     });
 
-    it("AI. DESTINATION role login routes to destination application entry, never /partner/eo", async () => {
+    it("AI. Destination login requires email and password and never opens /partner/eo", async () => {
       const view = await renderComponent(createElement(PartnerLoginScreen));
 
-      const roleSelect =
-        view.querySelector<HTMLSelectElement>("#partner-role")!;
-      await act(async () => {
-        roleSelect.value = "DESTINATION";
-        roleSelect.dispatchEvent(new Event("change", { bubbles: true }));
-      });
+      expect(view.querySelector("#partner-email")).not.toBeNull();
+      expect(view.querySelector("#partner-password")).not.toBeNull();
 
       const submitBtn = view.querySelector<HTMLButtonElement>(
         "button[type='submit']",
@@ -2399,7 +2395,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       const view = await renderComponent(createElement(App), ["/partner/eo"]);
       // On standard hostname in test, PartnerRouteGuard redirects to partner login
-      expect(view.textContent).toContain("Masuk ke Portal Partner");
+      expect(view.textContent).toContain("Mari tumbuh bersama JedaIn");
     });
 
     it("BY. Package Builder Step 2 renders cover image upload dropzone and accepts file input", async () => {

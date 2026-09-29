@@ -13,6 +13,113 @@ import {
 import { packageRepository } from "./packageRepository";
 
 export const sessionRepository = {
+  async updateSessionSchedule(input: {
+    sessionId: string;
+    startAt: string;
+    endAt: string;
+    capacity: number;
+    nowMs?: number;
+  }): Promise<{
+    success: boolean;
+    session?: EoSessionRecord;
+    message?: string;
+  }> {
+    if (!isSupabaseMode())
+      return mockEoPackageStore.updateSessionSchedule(input);
+    const actor = await requireAuthenticatedUser("EO");
+    if (!actor.success || !actor.partnerUser) {
+      return { success: false, message: actor.error ?? "Akses ditolak." };
+    }
+    const supabase = getSupabaseClient();
+    if (!supabase)
+      return { success: false, message: "Layanan penyimpanan tidak tersedia." };
+    const { data: row, error: fetchError } = await supabase
+      .from("sessions")
+      .select("*")
+      .eq("id", input.sessionId)
+      .maybeSingle();
+    if (fetchError || !row)
+      return { success: false, message: "Sesi tidak ditemukan." };
+    const previous = mapSessionRowToRecord(row as SessionRow);
+    const nowMs = input.nowMs ?? Date.now();
+    const startMs = Date.parse(input.startAt);
+    const endMs = Date.parse(input.endAt);
+    if (previous.eoId !== actor.partnerUser.id)
+      return { success: false, message: "Sesi bukan milik akun ini." };
+    if (
+      !["OPEN", "FULL", "CLOSED"].includes(previous.status) ||
+      Date.parse(previous.startAt) <= nowMs
+    ) {
+      return {
+        success: false,
+        message:
+          "Hanya sesi mendatang yang tidak dibatalkan yang dapat diubah.",
+      };
+    }
+    if (!Number.isInteger(input.capacity) || input.capacity < 1) {
+      return { success: false, message: "Kapasitas peserta minimal 1 orang." };
+    }
+    if (
+      Number.isNaN(startMs) ||
+      Number.isNaN(endMs) ||
+      startMs <= nowMs ||
+      endMs <= startMs
+    ) {
+      return {
+        success: false,
+        message:
+          "Waktu mulai harus di masa depan dan waktu selesai setelahnya.",
+      };
+    }
+    const booked = previous.capacity - previous.remainingSlots;
+    if (input.capacity < booked) {
+      return {
+        success: false,
+        message: `Kapasitas tidak boleh kurang dari ${booked} peserta yang sudah memesan.`,
+      };
+    }
+    if (
+      booked > 0 &&
+      (input.startAt !== previous.startAt || input.endAt !== previous.endAt)
+    ) {
+      return {
+        success: false,
+        message:
+          "Waktu sesi dengan peserta terdaftar belum dapat diubah di prototipe.",
+      };
+    }
+    const { data, error } = await supabase
+      .from("sessions")
+      .update({
+        start_at: input.startAt,
+        end_at: input.endAt,
+        capacity: input.capacity,
+        remaining_slots: input.capacity - booked,
+        status:
+          previous.status === "CLOSED"
+            ? "CLOSED"
+            : input.capacity === booked
+              ? "FULL"
+              : "OPEN",
+        updated_at: new Date(nowMs).toISOString(),
+      })
+      .eq("id", input.sessionId)
+      .eq("eo_id", actor.partnerUser.id)
+      .eq("remaining_slots", previous.remainingSlots)
+      .eq("capacity", previous.capacity)
+      .eq("status", previous.status)
+      .select()
+      .single();
+    if (error || !data)
+      return {
+        success: false,
+        message: error?.message ?? "Sesi berubah. Muat ulang dan coba lagi.",
+      };
+    const updated = mapSessionRowToRecord(data as SessionRow);
+    mockEoPackageStore.upsertSession(updated);
+    return { success: true, session: updated };
+  },
+
   async getAllSessions(): Promise<EoSessionRecord[]> {
     if (!isSupabaseMode()) {
       return [...mockEoPackageStore.getAllSessions()];

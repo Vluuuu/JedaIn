@@ -992,6 +992,86 @@ export const mockEoPackageStore = {
     return true;
   },
 
+  updateSessionSchedule(input: {
+    sessionId: string;
+    startAt: string;
+    endAt: string;
+    capacity: number;
+    nowMs?: number;
+  }): { success: boolean; session?: EoSessionRecord; message?: string } {
+    const actor = partnerSessionStore.get();
+    if (!actor || actor.role !== "EO") {
+      return {
+        success: false,
+        message: "Hanya Travel Organizer yang dapat mengubah sesi.",
+      };
+    }
+    const app = mockApplicationStore.getBySellerId(actor.id);
+    if (!app || app.status !== "APPROVED") {
+      return {
+        success: false,
+        message: "Akun Travel Organizer belum disetujui.",
+      };
+    }
+    const session = sessions.find(
+      (item) => item.sessionId === input.sessionId && item.eoId === actor.id,
+    );
+    if (!session) return { success: false, message: "Sesi tidak ditemukan." };
+    const nowMs = input.nowMs ?? Date.now();
+    const startMs = Date.parse(input.startAt);
+    const endMs = Date.parse(input.endAt);
+    if (
+      !["OPEN", "FULL", "CLOSED"].includes(session.status) ||
+      Date.parse(session.startAt) <= nowMs
+    ) {
+      return {
+        success: false,
+        message:
+          "Hanya sesi mendatang yang tidak dibatalkan yang dapat diubah.",
+      };
+    }
+    if (!Number.isInteger(input.capacity) || input.capacity < 1) {
+      return { success: false, message: "Kapasitas peserta minimal 1 orang." };
+    }
+    if (
+      Number.isNaN(startMs) ||
+      Number.isNaN(endMs) ||
+      startMs <= nowMs ||
+      endMs <= startMs
+    ) {
+      return {
+        success: false,
+        message:
+          "Waktu mulai harus di masa depan dan waktu selesai setelahnya.",
+      };
+    }
+    const booked = session.capacity - session.remainingSlots;
+    if (input.capacity < booked) {
+      return {
+        success: false,
+        message: `Kapasitas tidak boleh kurang dari ${booked} peserta yang sudah memesan.`,
+      };
+    }
+    if (
+      booked > 0 &&
+      (input.startAt !== session.startAt || input.endAt !== session.endAt)
+    ) {
+      return {
+        success: false,
+        message:
+          "Waktu sesi dengan peserta terdaftar belum dapat diubah di prototipe.",
+      };
+    }
+    session.startAt = input.startAt;
+    session.endAt = input.endAt;
+    session.capacity = input.capacity;
+    session.remainingSlots = input.capacity - booked;
+    if (session.status !== "CLOSED") {
+      session.status = session.remainingSlots === 0 ? "FULL" : "OPEN";
+    }
+    return { success: true, session: { ...session } };
+  },
+
   upsertPackage(record: EoPackageRecord): void {
     const idx = packages.findIndex((p) => p.packageId === record.packageId);
     if (idx >= 0) {

@@ -55,7 +55,6 @@ import {
   EoReviewsScreen,
   EoSessionsScreen,
   PartnerApplicationStatusScreen,
-  PartnerLoginScreen,
   PartnerPortalLandingScreen,
   PartnerRouteGuard,
 } from "./features/eo";
@@ -283,12 +282,13 @@ export function App() {
         </Route>
 
         {/* Partner Entry & Application Routes */}
-        <Route path="partner" element={<TravelerPublicShell />}>
+        <Route path="partner" element={<DistractionFreeShell hideHeader />}>
           <Route index element={<PartnerPortalLandingScreen />} />
         </Route>
-        <Route path="partner/login" element={<DistractionFreeShell />}>
-          <Route index element={<PartnerLoginScreen />} />
-        </Route>
+        <Route
+          path="partner/login"
+          element={<Navigate to="/partner" replace />}
+        />
         <Route path="partner/eo/login" element={<DistractionFreeShell />}>
           <Route index element={<EoLoginScreen />} />
         </Route>

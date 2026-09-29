@@ -1,228 +1,138 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
-import { resetCompetitionDemoState } from "../demo/demoReset";
+import JedaInLogo from "../../JedaIn_logo_vector.svg";
+import ExploreMascot from "../../assets/mascot/explore.png";
+import PlanMascot from "../../assets/mascot/plan.png";
 import { generateUniqueDestinationPartnerId } from "../destination/destinationContext";
 import { partnerSessionStore } from "./partnerSessionStore";
-import "./eo.css";
+import { PartnerLoginScreen } from "./PartnerLoginScreen";
+import "./partnerPortal.css";
+
+type PartnerRole = "EO" | "DESTINATION";
 
 export function PartnerPortalLandingScreen() {
   const navigate = useNavigate();
-  const [resetMessage, setResetMessage] = useState<string | null>(null);
+  const [loginRole, setLoginRole] = useState<PartnerRole | null>(null);
 
-  const handleDemoLogin = (
-    guideStatus: "CERTIFIED_GUIDE" | "CONCEPT_ONLY" = "CERTIFIED_GUIDE",
-  ) => {
-    partnerSessionStore.loginAsDemoApproved(guideStatus);
-    navigate("/partner/eo");
-  };
-
-  const handleDemoDestinationLogin = () => {
-    partnerSessionStore.loginAsDemoDestination();
-    navigate("/partner/destination");
-  };
-
-  const handleResetDemo = () => {
-    resetCompetitionDemoState();
-    setResetMessage("State demo berhasil direset ke kondisi awal baseline.");
-    setTimeout(() => setResetMessage(null), 3500);
+  const register = (role: PartnerRole) => {
+    if (role === "EO") {
+      navigate("/partner/apply/eo");
+      return;
+    }
+    if (partnerSessionStore.get()?.role !== "DESTINATION") {
+      partnerSessionStore.setPartner({
+        id: generateUniqueDestinationPartnerId("mitra.destinasi@jedain.id"),
+        email: "mitra.destinasi@jedain.id",
+        name: "Mitra Destinasi Baru",
+        role: "DESTINATION",
+        businessName: "Pengelola Kawasan Destinasi",
+      });
+    }
+    navigate("/partner/apply/destination");
   };
 
   return (
-    <div
-      className="eo-container"
-      style={{ padding: "var(--space-6) var(--space-4)" }}
-    >
-      <header className="eo-page-header">
-        <div>
-          <Badge tone="success">JedaIn Partner Portal</Badge>
-          <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-            Bermitra dengan JedaIn
-          </h1>
-          <p className="eo-page-subtitle">
-            Rancang pengalaman perjalanan mindful dengan sinyal kebutuhan
-            traveler bersama destinasi terverifikasi.
-          </p>
-        </div>
-      </header>
-
-      {/* Demo Quick Entry Banner for Juror / Competition Evaluation */}
-      <section className="eo-banner-card" aria-label="Akses Cepat Demo Juri">
-        <div className="eo-banner-content">
-          <Badge tone="warning">Simulasi Juri & Evaluasi</Badge>
-          <h2>Akses Cepat Demo Workspace</h2>
-          <p>
-            Masuk langsung ke operational dashboard Travel Organizer atau Mitra
-            Destinasi yang telah disetujui untuk mencoba seluruh alur tiga sisi
-            JedaIn.
-          </p>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-3)",
-            flexWrap: "wrap",
-            alignItems: "center",
-          }}
-        >
-          <Button
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={() => handleDemoLogin("CERTIFIED_GUIDE")}
-          >
-            Masuk sebagai Travel Organizer Demo (Certified)
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            onClick={() => handleDemoLogin("CONCEPT_ONLY")}
-          >
-            Masuk sebagai Travel Organizer Demo (Concept)
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            onClick={handleDemoDestinationLogin}
-          >
-            Masuk sebagai Mitra Destinasi Demo
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            style={{ color: "var(--color-text-muted)" }}
-            onClick={handleResetDemo}
-          >
-            ↺ Reset Demo State
-          </Button>
-        </div>
-        {resetMessage && (
-          <div
-            className="eo-alert eo-alert--success"
-            style={{
-              marginTop: "var(--space-2)",
-              padding: "var(--space-2) var(--space-3)",
-            }}
-            role="status"
-          >
-            {resetMessage}
-          </div>
-        )}
-      </section>
-
-      {/* Partner Registration Cards */}
-      <div className="partner-portal-card-grid">
-        <article className="partner-role-card">
-          <div>
-            <Badge tone="info">Travel Organizer</Badge>
-            <h2
-              style={{
-                fontSize: "var(--font-size-heading-md)",
-                margin: "var(--space-2) 0 var(--space-1)",
-              }}
-            >
-              Mitra Travel Organizer
-            </h2>
-            <p
-              style={{
-                color: "var(--color-text-secondary)",
-                fontSize: "var(--font-size-body-sm)",
-              }}
-            >
-              Manfaatkan wawasan kebutuhan traveler untuk merancang retreat
-              alam, mindfulness, dan workshop terkurasi.
-            </p>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-2)",
-            }}
-          >
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={() => navigate("/partner/apply/eo")}
-            >
-              Daftar sebagai Travel Organizer Baru
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={() => navigate("/partner/login")}
-            >
-              Masuk Akun Travel Organizer
-            </Button>
-          </div>
-        </article>
-
-        <article className="partner-role-card">
-          <div>
-            <Badge tone="neutral">Destinasi Lokal</Badge>
-            <h2
-              style={{
-                fontSize: "var(--font-size-heading-md)",
-                margin: "var(--space-2) 0 var(--space-1)",
-              }}
-            >
-              Mitra Destinasi
-            </h2>
-            <p
-              style={{
-                color: "var(--color-text-secondary)",
-                fontSize: "var(--font-size-body-sm)",
-              }}
-            >
-              Daftarkan lokasi alam atau ruang tenangmu untuk diverifikasi dan
-              dijadikan lokasi paket wellness oleh para EO.
-            </p>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-2)",
-            }}
-          >
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={() => {
-                if (partnerSessionStore.get()?.role !== "DESTINATION") {
-                  const uniquePartnerId = generateUniqueDestinationPartnerId(
-                    "mitra.destinasi@jedain.id",
-                  );
-                  partnerSessionStore.setPartner({
-                    id: uniquePartnerId,
-                    email: "mitra.destinasi@jedain.id",
-                    name: "Mitra Destinasi Baru",
-                    role: "DESTINATION",
-                    businessName: "Pengelola Kawasan Destinasi",
-                  });
-                }
-                navigate("/partner/apply/destination");
-              }}
-            >
-              Daftar sebagai Destinasi
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={() => navigate("/partner/login")}
-            >
-              Masuk Akun Destinasi
-            </Button>
-          </div>
-        </article>
+    <div className="partner-entry">
+      <div className="partner-entry__masthead">
+        <img src={JedaInLogo} alt="JedaIn" className="partner-entry__logo" />
+        <span>Ruang kerja mitra</span>
       </div>
+      <main className="partner-entry__layout">
+        <div className="partner-entry__intro">
+          <span className="partner-entry__eyebrow">Bertemu di titik jeda</span>
+          <h1>Perjalanan yang berarti, dirancang bersama.</h1>
+          <p>
+            Bawa keahlianmu sebagai Travel Organizer atau pesona tempatmu
+            sebagai Mitra Destinasi. JedaIn membantu keduanya bertemu dalam
+            pengalaman yang lebih tenang dan terarah.
+          </p>
+          <div className="partner-entry__scene" aria-hidden="true">
+            <span className="partner-entry__sun" />
+            <span className="partner-entry__hill partner-entry__hill--back" />
+            <span className="partner-entry__hill partner-entry__hill--front" />
+            <img src={ExploreMascot} alt="" />
+          </div>
+        </div>
+        <div className="partner-entry__choice">
+          {loginRole ? (
+            <PartnerLoginScreen
+              role={loginRole}
+              onBack={() => setLoginRole(null)}
+              onRegister={() => register(loginRole)}
+            />
+          ) : (
+            <>
+              <div className="partner-entry__choice-heading">
+                <span className="partner-entry__eyebrow">Pilih peranmu</span>
+                <h2>Mari tumbuh bersama JedaIn</h2>
+                <p>
+                  Dua peran, satu tujuan: memberi ruang untuk berhenti sejenak.
+                </p>
+              </div>
+              <div className="partner-entry__roles">
+                <article className="partner-entry__role">
+                  <span className="partner-entry__role-number">
+                    01 / Perancang pengalaman
+                  </span>
+                  <h3>Travel Organizer</h3>
+                  <p>
+                    Rancang perjalanan mindful, atur paket dan jadwal, lalu
+                    temukan destinasi yang tepat untuk traveler.
+                  </p>
+                  <div className="partner-entry__actions">
+                    <button
+                      type="button"
+                      className="partner-entry__primary"
+                      onClick={() => setLoginRole("EO")}
+                    >
+                      Masuk
+                    </button>
+                    <button
+                      type="button"
+                      className="partner-entry__text-button"
+                      onClick={() => register("EO")}
+                    >
+                      Daftar sebagai TO <span aria-hidden="true">↗</span>
+                    </button>
+                  </div>
+                </article>
+                <article className="partner-entry__role">
+                  <span className="partner-entry__role-number">
+                    02 / Penjaga tempat
+                  </span>
+                  <h3>Mitra Destinasi</h3>
+                  <p>
+                    Kenalkan ruang alam dan aktivitas lokalmu kepada Travel
+                    Organizer yang ingin menghadirkan pengalaman bermakna.
+                  </p>
+                  <div className="partner-entry__actions">
+                    <button
+                      type="button"
+                      className="partner-entry__primary"
+                      onClick={() => setLoginRole("DESTINATION")}
+                    >
+                      Masuk
+                    </button>
+                    <button
+                      type="button"
+                      className="partner-entry__text-button"
+                      onClick={() => register("DESTINATION")}
+                    >
+                      Daftar sebagai destinasi <span aria-hidden="true">↗</span>
+                    </button>
+                  </div>
+                </article>
+              </div>
+              <img
+                src={PlanMascot}
+                alt=""
+                aria-hidden="true"
+                className="partner-entry__corner-mascot"
+              />
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

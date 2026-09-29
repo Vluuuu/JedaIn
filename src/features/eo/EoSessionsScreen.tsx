@@ -36,7 +36,22 @@ function getFutureDefaultDateTimes() {
   };
 }
 
+function toLocalDateTimeInput(iso: string): string {
+  const date = new Date(iso);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
+
 export function EoSessionsScreen() {
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
   const { packageId } = useParams<{ packageId?: string }>();
   const partner = partnerSessionStore.get();
   const eoId = partner?.id ?? "eo_jeda_alam";
@@ -82,6 +97,7 @@ export function EoSessionsScreen() {
   >(null);
   const [editingNoteText, setEditingNoteText] = useState<string>("");
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | undefined>();
   const [refreshVersion, setRefreshVersion] = useState<number>(0);
 
@@ -92,6 +108,12 @@ export function EoSessionsScreen() {
     }
     return [...mockEoPackageStore.getSessionsByEo(eoId)];
   });
+  const editingSession = sessions.find(
+    (session) => session.sessionId === editingSessionId,
+  );
+  const editingBookedCount = editingSession
+    ? editingSession.capacity - editingSession.remainingSlots
+    : 0;
 
   useEffect(() => {
     if (isForeignPackage) return;
@@ -154,6 +176,16 @@ export function EoSessionsScreen() {
     setStartDate(defaults.start);
     setEndDate(defaults.end);
     setFormError(undefined);
+    setEditingSessionId(null);
+    setShowAddModal(true);
+  };
+
+  const openEditModal = (session: EoSessionRecord) => {
+    setEditingSessionId(session.sessionId);
+    setStartDate(toLocalDateTimeInput(session.startAt));
+    setEndDate(toLocalDateTimeInput(session.endAt));
+    setCapacity(session.capacity);
+    setFormError(undefined);
     setShowAddModal(true);
   };
 
@@ -161,7 +193,7 @@ export function EoSessionsScreen() {
     e.preventDefault();
     setFormError(undefined);
 
-    if (!selectedPackageId) {
+    if (!editingSessionId && !selectedPackageId) {
       setFormError("Pilih paket experience terlebih dahulu.");
       return;
     }
@@ -173,20 +205,34 @@ export function EoSessionsScreen() {
       return;
     }
 
-    const startIso = new Date(startMs).toISOString();
-    const endIso = new Date(endMs).toISOString();
+    const startIso =
+      editingSession && editingBookedCount > 0
+        ? editingSession.startAt
+        : new Date(startMs).toISOString();
+    const endIso =
+      editingSession && editingBookedCount > 0
+        ? editingSession.endAt
+        : new Date(endMs).toISOString();
 
-    const res = await sessionRepository.createSession({
-      packageId: selectedPackageId,
-      startAt: startIso,
-      endAt: endIso,
-      capacity,
-      pricePerPerson: selectedPkg?.pricing.customerPrice ?? 300000,
-      operationalNote: operationalNote.trim() || undefined,
-    });
+    const res = editingSessionId
+      ? await sessionRepository.updateSessionSchedule({
+          sessionId: editingSessionId,
+          startAt: startIso,
+          endAt: endIso,
+          capacity,
+        })
+      : await sessionRepository.createSession({
+          packageId: selectedPackageId,
+          startAt: startIso,
+          endAt: endIso,
+          capacity,
+          pricePerPerson: selectedPkg?.pricing.customerPrice ?? 300000,
+          operationalNote: operationalNote.trim() || undefined,
+        });
 
     if (res.success) {
       setShowAddModal(false);
+      setEditingSessionId(null);
       setOperationalNote("");
       const defaults = getFutureDefaultDateTimes();
       setStartDate(defaults.start);
@@ -595,6 +641,18 @@ export function EoSessionsScreen() {
                           type="button"
                           variant="ghost"
                           size="sm"
+                          disabled={
+                            !["OPEN", "FULL", "CLOSED"].includes(ses.status) ||
+                            Date.parse(ses.startAt) <= nowMs
+                          }
+                          onClick={() => openEditModal(ses)}
+                        >
+                          Ubah jadwal & kapasitas
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             if (editingNoteSessionId === ses.sessionId) {
                               setEditingNoteSessionId(null);
@@ -663,7 +721,11 @@ export function EoSessionsScreen() {
         <div className="eo-modal-backdrop" role="dialog" aria-modal="true">
           <div className="eo-modal">
             <div className="eo-modal-header">
-              <h2 className="eo-modal-title">Buka Sesi Keberangkatan Baru</h2>
+              <h2 className="eo-modal-title">
+                {editingSessionId
+                  ? "Ubah Jadwal & Kapasitas"
+                  : "Buka Sesi Keberangkatan Baru"}
+              </h2>
               <button
                 type="button"
                 className="eo-modal-close"
@@ -685,28 +747,30 @@ export function EoSessionsScreen() {
             )}
 
             <form onSubmit={handleCreateSession} className="eo-modal-body">
-              <div className="eo-form-group">
-                <label
-                  htmlFor="session-package-select"
-                  className="eo-form-label"
-                >
-                  Paket Experience *
-                </label>
-                <select
-                  id="session-package-select"
-                  required
-                  className="eo-form-select"
-                  value={selectedPackageId}
-                  onChange={(e) => setSelectedPackageId(e.target.value)}
-                >
-                  {eligiblePackages.map((p) => (
-                    <option key={p.packageId} value={p.packageId}>
-                      {p.title} (Harga: Rp
-                      {p.pricing.customerPrice.toLocaleString("id-ID")})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {!editingSessionId && (
+                <div className="eo-form-group">
+                  <label
+                    htmlFor="session-package-select"
+                    className="eo-form-label"
+                  >
+                    Paket Experience *
+                  </label>
+                  <select
+                    id="session-package-select"
+                    required
+                    className="eo-form-select"
+                    value={selectedPackageId}
+                    onChange={(e) => setSelectedPackageId(e.target.value)}
+                  >
+                    {eligiblePackages.map((p) => (
+                      <option key={p.packageId} value={p.packageId}>
+                        {p.title} (Harga: Rp
+                        {p.pricing.customerPrice.toLocaleString("id-ID")})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="eo-form-group">
                 <label htmlFor="session-start-input" className="eo-form-label">
@@ -716,6 +780,7 @@ export function EoSessionsScreen() {
                   id="session-start-input"
                   type="datetime-local"
                   required
+                  disabled={editingBookedCount > 0}
                   className="eo-form-input"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
@@ -730,6 +795,7 @@ export function EoSessionsScreen() {
                   id="session-end-input"
                   type="datetime-local"
                   required
+                  disabled={editingBookedCount > 0}
                   className="eo-form-input"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
@@ -752,23 +818,33 @@ export function EoSessionsScreen() {
                 />
               </div>
 
-              <div className="eo-form-group">
-                <label htmlFor="session-op-note" className="eo-form-label">
-                  Catatan Operasional Terbaru (Opsional)
-                </label>
-                <textarea
-                  id="session-op-note"
-                  rows={2}
-                  className="eo-form-textarea"
-                  value={operationalNote}
-                  onChange={(e) => setOperationalNote(e.target.value)}
-                  placeholder="Contoh: Rute jalan kaki menggunakan jalur kebun teh sisi barat."
-                />
-                <span className="eo-form-helper">
-                  Catatan informasi terbaru untuk pelaksanaan sesi. Catatan ini
-                  tidak mengubah status atau aturan sesi.
-                </span>
-              </div>
+              {!editingSessionId && (
+                <div className="eo-form-group">
+                  <label htmlFor="session-op-note" className="eo-form-label">
+                    Catatan Operasional Terbaru (Opsional)
+                  </label>
+                  <textarea
+                    id="session-op-note"
+                    rows={2}
+                    className="eo-form-textarea"
+                    value={operationalNote}
+                    onChange={(e) => setOperationalNote(e.target.value)}
+                    placeholder="Contoh: Rute jalan kaki menggunakan jalur kebun teh sisi barat."
+                  />
+                  <span className="eo-form-helper">
+                    Catatan informasi terbaru untuk pelaksanaan sesi. Catatan
+                    ini tidak mengubah status atau aturan sesi.
+                  </span>
+                </div>
+              )}
+
+              {editingBookedCount > 0 && (
+                <p className="eo-form-helper">
+                  {editingBookedCount} peserta sudah terdaftar. Waktu sesi
+                  tetap; kapasitas dapat disesuaikan tanpa mengurangi kursi yang
+                  telah terisi.
+                </p>
+              )}
 
               <div className="eo-modal-footer">
                 <Button
@@ -780,7 +856,7 @@ export function EoSessionsScreen() {
                   Batal
                 </Button>
                 <Button type="submit" variant="primary" size="md">
-                  Simpan & Buka Sesi
+                  {editingSessionId ? "Simpan Perubahan" : "Simpan & Buka Sesi"}
                 </Button>
               </div>
             </form>

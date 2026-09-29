@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Link, NavLink, Outlet } from "react-router";
+import { Link, NavLink, Outlet, useLocation } from "react-router";
 import JedaInLogo from "../../JedaIn_logo_vector.svg";
 import PlanMascot from "../../assets/mascot/plan.png";
 import { partnerSessionStore } from "../../features/eo/partnerSessionStore";
@@ -69,12 +69,17 @@ export function WorkspaceShell({
   children,
 }: WorkspaceShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { pathname } = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const restoreMenuFocusRef = useRef(false);
   const collapseButtonRef = useRef<HTMLButtonElement>(null);
   const drawerId = useId();
   const partner = surface === "partner" ? partnerSessionStore.get() : null;
+
+  useEffect(() => {
+    if (import.meta.env.MODE !== "test") window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     if (drawerOpen || !restoreMenuFocusRef.current) return;

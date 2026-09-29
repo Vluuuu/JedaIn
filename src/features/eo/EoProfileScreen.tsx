@@ -1,4 +1,6 @@
+import { Link } from "react-router";
 import { InlineStatus } from "../../components/ui";
+import PlanMascot from "../../assets/mascot/plan.png";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
@@ -13,12 +15,34 @@ export function EoProfileScreen() {
     <div className="eo-container" style={{ maxWidth: "800px" }}>
       <header className="eo-page-header">
         <div>
-          <h1 className="eo-page-title">Profil Mitra Travel Organizer</h1>
+          <h1 className="eo-page-title">Pengaturan Travel Organizer</h1>
           <p className="eo-page-subtitle">
-            Informasi entitas bisnis dan detail operasional kemitraan.
+            Kelola sesi perjalanan dan lihat informasi kemitraanmu.
           </p>
         </div>
       </header>
+
+      <section
+        className="partner-settings__section"
+        aria-labelledby="eo-operation-title"
+      >
+        <div>
+          <span className="partner-settings__index">01 / Operasional</span>
+          <h2 id="eo-operation-title">Pengaturan sesi perjalanan</h2>
+          <p>
+            Atur jam keberangkatan, estimasi selesai, kapasitas peserta, dan
+            catatan operasional pada setiap sesi. Kapasitas sesi milik Travel
+            Organizer terpisah dari kapasitas umum destinasi.
+          </p>
+          <Link className="partner-settings__link" to="/partner/eo/sessions">
+            Kelola jadwal & kapasitas sesi ↗
+          </Link>
+        </div>
+        <div className="partner-settings__mascot-art" aria-hidden="true">
+          <span>Ruang untuk merencanakan jeda.</span>
+          <img src={PlanMascot} alt="" />
+        </div>
+      </section>
 
       <section className="eo-section">
         <h2 className="eo-section-title">Informasi Profil Travel Organizer</h2>

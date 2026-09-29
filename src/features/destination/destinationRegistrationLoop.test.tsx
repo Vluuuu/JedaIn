@@ -52,12 +52,12 @@ describe("P0-04 Fix Destination Registration Loop", () => {
       );
     });
 
-    // Find "Daftar sebagai Destinasi" button
+    // Choose the destination registration path on the combined entry page.
     const buttons = Array.from(
       container.querySelectorAll<HTMLButtonElement>("button"),
     );
     const registerDestBtn = buttons.find((b) =>
-      b.textContent?.includes("Daftar sebagai Destinasi"),
+      b.textContent?.includes("Daftar sebagai destinasi"),
     );
     expect(registerDestBtn).toBeDefined();
 
@@ -118,7 +118,7 @@ describe("P0-04 Fix Destination Registration Loop", () => {
     expect(container.textContent).toContain("1. Pengelola & Legalitas");
   });
 
-  it("Check 1c: Partner Login link 'Daftar Verifikasi Destinasi' establishes DESTINATION session and reaches application", async () => {
+  it("Check 1c: registration from the partner login form establishes a destination identity", async () => {
     partnerSessionStore.logout();
 
     container = document.createElement("div");
@@ -146,18 +146,17 @@ describe("P0-04 Fix Destination Registration Loop", () => {
       );
     });
 
-    // Role defaults to DESTINATION
-    const link = container.querySelector<HTMLAnchorElement>(
-      "a[href='/partner/apply/destination']",
-    );
-    expect(link).toBeDefined();
-    expect(link?.textContent).toContain("Daftar Verifikasi Destinasi");
+    const registerButton = Array.from(
+      container.querySelectorAll("button"),
+    ).find((button) => button.textContent?.includes("Daftar sekarang"));
+    expect(registerButton).toBeDefined();
 
     await act(async () => {
-      link!.click();
+      registerButton!.click();
     });
 
     expect(partnerSessionStore.get()?.role).toBe("DESTINATION");
+    expect(container.textContent).toContain("Pengajuan Mitra Destinasi Lokal");
   });
 
   it("Check 2: Existing destination account logs in to destination workspace", async () => {
@@ -190,6 +189,8 @@ describe("P0-04 Fix Destination Registration Loop", () => {
 
     const emailInput =
       container.querySelector<HTMLInputElement>("#partner-email")!;
+    const passwordInput =
+      container.querySelector<HTMLInputElement>("#partner-password")!;
     await act(async () => {
       const setter = Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
@@ -197,6 +198,8 @@ describe("P0-04 Fix Destination Registration Loop", () => {
       )?.set;
       setter?.call(emailInput, "destinasi@lerenghijau.id");
       emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+      setter?.call(passwordInput, "JedaInDemo2026!");
+      passwordInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
     const submitBtn = container.querySelector<HTMLButtonElement>(

@@ -1,4 +1,5 @@
 import { mockDestinationStore } from "../features/eo/mockDestinationStore";
+import { mockDestinationVerificationStore } from "../features/admin/mockDestinationVerificationStore";
 import type {
   DestinationMediaItem,
   DestinationRecord,
@@ -10,6 +11,79 @@ import { requireAuthenticatedUser } from "../lib/supabase/demoAuth";
 import { mapDestinationRowToRecord } from "../lib/supabase/mappers";
 
 export const destinationRepository = {
+  async updateOperationalSettings(
+    destinationId: string,
+    capacityPerSession: number,
+    operationalNotes: string[],
+  ): Promise<{
+    success: boolean;
+    destination?: DestinationRecord;
+    message?: string;
+  }> {
+    if (!Number.isInteger(capacityPerSession) || capacityPerSession < 1) {
+      return { success: false, message: "Kapasitas umum minimal 1 orang." };
+    }
+    if (operationalNotes.some((note) => note.length > 160)) {
+      return {
+        success: false,
+        message: "Setiap catatan operasional maksimal 160 karakter.",
+      };
+    }
+    const actor = await requireAuthenticatedUser("DESTINATION");
+    if (!actor.success || !actor.partnerUser) {
+      return { success: false, message: actor.error ?? "Akses ditolak." };
+    }
+    const context = mockDestinationVerificationStore.getByPartnerId(
+      actor.partnerUser.id,
+    );
+    if (
+      !context ||
+      context.status !== "APPROVED" ||
+      context.destinationIdentityId !== destinationId
+    ) {
+      return {
+        success: false,
+        message: "Destinasi ini bukan milik akun mitra aktif.",
+      };
+    }
+    if (!isSupabaseMode()) {
+      const updated = mockDestinationStore.updateOperationalSettings(
+        destinationId,
+        capacityPerSession,
+        operationalNotes,
+      );
+      return updated
+        ? { success: true, destination: updated }
+        : { success: false, message: "Destinasi tidak ditemukan." };
+    }
+    const supabase = getSupabaseClient();
+    if (!supabase)
+      return { success: false, message: "Layanan penyimpanan tidak tersedia." };
+    const { data, error } = await supabase
+      .from("destinations")
+      .update({
+        capacity_per_session: capacityPerSession,
+        operational_notes: operationalNotes,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", destinationId)
+      .select()
+      .single();
+    if (error || !data) {
+      return {
+        success: false,
+        message: error?.message ?? "Gagal menyimpan pengaturan.",
+      };
+    }
+    const updated = mapDestinationRowToRecord(data as DestinationRow);
+    mockDestinationStore.updateOperationalSettings(
+      destinationId,
+      capacityPerSession,
+      operationalNotes,
+    );
+    return { success: true, destination: updated };
+  },
+
   async getAll(): Promise<DestinationRecord[]> {
     if (!isSupabaseMode()) {
       return [...mockDestinationStore.getAll()];

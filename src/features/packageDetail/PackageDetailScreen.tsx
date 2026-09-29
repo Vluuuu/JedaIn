@@ -481,18 +481,7 @@ export function PackageDetailScreen({
 
           <details className="package-detail-disclosure package-detail-disclosure--itinerary">
             <summary className="package-detail-disclosure__summary">
-              <span className="package-detail-itinerary-lead">
-                <span>Rencana perjalanan</span>
-                {detail.itinerary.length > 0 && (
-                  <span className="package-detail-itinerary-preview">
-                    {detail.itinerary.length} langkah ·{" "}
-                    {detail.itinerary[0].title}
-                  </span>
-                )}
-              </span>
-              <span className="package-detail-disclosure__hint">
-                Lihat itinerary
-              </span>
+              <span>Rencana perjalanan</span>
             </summary>
             <div className="package-detail-disclosure__body">
               {/* 7. Itinerary */}

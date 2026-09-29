@@ -139,7 +139,8 @@
 }
 
 .traveler-app-shell .home-recommendation-section .home-section-header {
-  border-left-color: var(--journal-earth);
+  border-left: 0;
+  padding-left: 0;
 }
 
 .traveler-app-shell .home-section-header__tag {
@@ -416,15 +417,73 @@
 
 .traveler-app-shell .package-detail-intro {
   grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-  gap: var(--space-4);
+  grid-template-rows: auto;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.traveler-app-shell .package-detail-media {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-3);
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .traveler-app-shell .package-detail-hero {
-  grid-column: 1;
-  grid-row: 1;
+  grid-column: auto;
+  grid-row: auto;
   min-height: 21rem;
   border: 1px solid var(--journal-line);
   border-radius: 1.75rem 1.75rem 0.65rem 1.75rem;
+  touch-action: pan-y;
+}
+
+.traveler-app-shell .package-detail-hero__carousel {
+  position: absolute;
+  z-index: 3;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.traveler-app-shell .package-detail-hero__badges {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  width: auto;
+}
+
+.traveler-app-shell .package-detail-hero__slide-count {
+  color: var(--journal-inverse);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  text-shadow: 0 1px 3px var(--journal-ink);
+}
+
+.traveler-app-shell .package-detail-hero__slide-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.traveler-app-shell .package-detail-hero__slide-button {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid rgb(255 253 247 / 65%);
+  border-radius: 50%;
+  color: var(--journal-ink);
+  background: var(--journal-paper);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.traveler-app-shell .package-detail-hero__slide-button:hover {
+  background: var(--journal-sage);
 }
 
 .traveler-app-shell .package-detail-header-card {
@@ -462,8 +521,80 @@
 }
 
 .traveler-app-shell .package-detail-gallery {
-  border: 1px solid var(--journal-line);
-  background: var(--journal-linen);
+  display: block;
+  grid-column: auto;
+  grid-row: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.traveler-app-shell .package-detail-gallery:not([open]) > :not(summary) {
+  display: none;
+}
+
+.traveler-app-shell .package-detail-gallery__heading-row {
+  display: flex;
+  min-height: 3.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--journal-line);
+  cursor: pointer;
+  list-style: none;
+}
+
+.traveler-app-shell
+  .package-detail-gallery__heading-row::-webkit-details-marker {
+  display: none;
+}
+
+.traveler-app-shell .package-detail-gallery__title {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.traveler-app-shell .package-detail-gallery__eyebrow {
+  margin: 0;
+  color: var(--journal-muted);
+  font-size: var(--font-size-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.traveler-app-shell .package-detail-gallery__summary-end {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.traveler-app-shell .package-detail-gallery__chevron {
+  color: var(--journal-forest);
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.traveler-app-shell
+  .package-detail-gallery[open]
+  .package-detail-gallery__chevron {
+  transform: rotate(180deg);
+}
+
+.traveler-app-shell .package-detail-gallery__thumbnails {
+  margin-top: var(--space-4);
+}
+
+.traveler-app-shell .package-detail-gallery__note {
+  margin-top: var(--space-3);
+  color: var(--journal-muted);
 }
 
 .traveler-app-shell .package-detail-section--highlights {
@@ -500,7 +631,54 @@
 }
 
 .traveler-app-shell .package-detail-disclosure--itinerary {
-  background: var(--journal-linen);
+  margin-block: var(--space-3);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.traveler-app-shell
+  .package-detail-disclosure--itinerary
+  > .package-detail-disclosure__summary {
+  min-height: 3.75rem;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--journal-line);
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.35rem, 2vw, 1.6rem);
+  font-weight: 600;
+}
+
+.traveler-app-shell
+  .package-detail-disclosure--itinerary
+  > .package-detail-disclosure__summary::after {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-right: 2px solid var(--journal-forest);
+  border-bottom: 2px solid var(--journal-forest);
+  content: "";
+  transform: rotate(45deg);
+}
+
+.traveler-app-shell
+  .package-detail-disclosure--itinerary[open]
+  > .package-detail-disclosure__summary::after {
+  transform: rotate(225deg);
+}
+
+.traveler-app-shell
+  .package-detail-disclosure--itinerary
+  > .package-detail-disclosure__body {
+  padding: var(--space-5) 0 0;
+}
+
+.traveler-app-shell
+  .package-detail-disclosure--itinerary
+  .package-detail-section {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .traveler-app-shell .package-detail-itinerary-content {
@@ -628,6 +806,7 @@
   border-bottom: 1px solid var(--journal-line);
   border-radius: 0;
   background: transparent;
+  overflow-x: auto;
 }
 
 .traveler-app-shell .my-trips-tab-btn {
@@ -650,11 +829,57 @@
   font-family: var(--font-family-editorial);
   font-size: clamp(1.2rem, 2vw, 1.5rem);
   font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell :is(.my-trip-card__body, .my-trips-pending-card__body) {
+  min-width: 0;
+}
+
+.traveler-app-shell .my-trip-card__facts {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--journal-line);
+  border-radius: 0.9rem;
+  background: var(--journal-linen);
+}
+
+.traveler-app-shell
+  :is(
+    .my-trip-card__fact-meta,
+    .my-trip-card__fact-item,
+    .my-trips-pending-card__footer
+  ) {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.traveler-app-shell .my-trip-card__fact-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .traveler-app-shell .trip-detail-hero {
   overflow: hidden;
   border-radius: 1.75rem;
+}
+
+.traveler-app-shell .trip-detail-hero__body {
+  min-width: 0;
+  padding: var(--space-6);
+}
+
+.traveler-app-shell
+  :is(.trip-detail-title, .trip-detail-meta, .trip-detail-departure-text) {
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .trip-detail-departure-banner {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--journal-line);
+  border-radius: 0.9rem;
+  background: var(--journal-sage);
 }
 
 .traveler-app-shell
@@ -671,9 +896,46 @@
 }
 
 .traveler-app-shell .trip-detail-primary-summary {
-  border-color: var(--journal-line);
+  padding: var(--space-5);
+  border: 1px solid var(--journal-line);
   border-radius: 1.25rem;
   background: var(--journal-sage);
+}
+
+.traveler-app-shell .trip-detail-disclosure {
+  padding: 0 var(--space-5);
+  border: 1px solid var(--journal-line);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .trip-detail-disclosure__body > .trip-detail-section {
+  padding: var(--space-5) 0;
+  border: 0;
+  border-top: 1px solid var(--journal-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.traveler-app-shell .trip-detail-container > .trip-detail-section {
+  padding: var(--space-5);
+  border: 1px solid var(--journal-line);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .trip-detail-fact {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--journal-line);
+  border-radius: 0.8rem;
+  background: var(--journal-canvas);
+}
+
+.traveler-app-shell .trip-detail-fact__value {
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .trip-detail-fact__value--break {
+  word-break: normal;
 }
 
 .traveler-app-shell .trip-detail-timeline-marker {
@@ -696,18 +958,33 @@
   color: var(--journal-inverse);
 }
 
-.traveler-app-shell
-  :is(
-    .profile-warm-content,
-    .profile-section,
-    .profile-nudge-card,
-    .profile-traveler-card,
-    .profile-activity-row
-  ) {
+.traveler-app-shell :is(.profile-section, .profile-traveler-card) {
   border-color: var(--journal-line);
   border-radius: 1.5rem;
   background: var(--journal-paper);
   box-shadow: none;
+}
+
+.traveler-app-shell .profile-warm-content {
+  border: 0;
+  background: transparent;
+}
+
+.traveler-app-shell .profile-section {
+  margin-bottom: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--journal-line);
+}
+
+.traveler-app-shell .profile-nudge-card {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+}
+
+.traveler-app-shell .profile-activity-row {
+  border-bottom-color: var(--journal-line);
+  border-radius: 0;
+  background: transparent;
 }
 
 .traveler-app-shell .profile-stats-row {
@@ -715,11 +992,64 @@
   background: var(--journal-sage);
 }
 
+.traveler-app-shell .profile-stat-label {
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .profile-stat-divider {
+  background: var(--journal-line);
+}
+
+.traveler-app-shell .profile-stat-link:hover {
+  background: rgb(33 74 60 / 9%);
+}
+
+.traveler-app-shell .profile-stat-col,
+.traveler-app-shell .profile-milestone-item {
+  min-width: 0;
+}
+
+.traveler-app-shell
+  :is(.profile-stat-label, .profile-milestone-name, .profile-milestone-status) {
+  max-width: 100%;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .profile-current-jeda-pill {
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .traveler-app-shell .profile-stat-number,
 .traveler-app-shell .profile-subpage-title {
   color: var(--journal-ink);
   font-family: var(--font-family-editorial);
   font-weight: 600;
+}
+
+.traveler-app-shell
+  :is(
+    .profile-section-header-split,
+    .profile-activity-text,
+    .profile-nudge-text
+  ) {
+  min-width: 0;
+}
+
+.traveler-app-shell
+  :is(.profile-section-title, .profile-activity-title, .profile-nudge-title) {
+  color: var(--journal-ink);
+}
+
+.traveler-app-shell
+  :is(
+    .profile-activity-subtitle,
+    .profile-empty-subtext,
+    .profile-subpage-lead
+  ) {
+  color: var(--journal-muted);
 }
 
 .traveler-app-shell .profile-moment-card {
@@ -805,26 +1135,35 @@
 @media (max-width: 59.99rem) {
   .traveler-app-shell .package-detail-intro {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
   }
 
-  .traveler-app-shell .package-detail-hero,
-  .traveler-app-shell .package-detail-header-card,
-  .traveler-app-shell .package-detail-gallery {
+  .traveler-app-shell .package-detail-media,
+  .traveler-app-shell .package-detail-header-card {
     grid-column: 1;
     grid-row: auto;
   }
 
   .traveler-app-shell .package-detail-header-card {
-    z-index: 2;
-    margin: -1.5rem var(--space-3) 0;
-  }
-
-  .traveler-app-shell .package-detail-gallery {
-    margin-top: var(--space-4);
+    margin: 0;
   }
 }
 
 @media (max-width: 47.99rem) {
+  .traveler-app-shell .my-trip-card__action {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .traveler-app-shell .my-trip-card__action button {
+    width: 100%;
+  }
+
+  .traveler-app-shell .profile-section-header-split {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
   .traveler-app-shell .home-container {
     gap: var(--space-8);
   }

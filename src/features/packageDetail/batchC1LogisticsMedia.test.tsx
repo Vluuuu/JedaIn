@@ -191,6 +191,10 @@ describe("Batch C1 — Media Source Consistency & Traveler Logistics", () => {
 
       expect(view.textContent).toContain("Galeri suasana");
       expect(view.textContent).toContain("Lihat gambaran pengalaman");
+      const gallery = view.querySelector<HTMLDetailsElement>(
+        "details.package-detail-gallery",
+      );
+      expect(gallery?.open).toBe(false);
       expect(view.textContent).toContain(
         "Satu ilustrasi prototype ditampilkan dalam beberapa crop untuk memberi gambaran suasana, bukan foto kondisi aktual destinasi.",
       );
@@ -209,6 +213,23 @@ describe("Batch C1 — Media Source Consistency & Traveler Logistics", () => {
       expect(galleryButtons[0]?.getAttribute("aria-pressed")).toBe("false");
       expect(galleryButtons[1]?.getAttribute("aria-pressed")).toBe("true");
       expect(view.textContent).toContain("2/3");
+
+      const previous = view.querySelector<HTMLButtonElement>(
+        '[aria-label="Foto sebelumnya"]',
+      );
+      const next = view.querySelector<HTMLButtonElement>(
+        '[aria-label="Foto berikutnya"]',
+      );
+      expect(previous).not.toBeNull();
+      expect(next).not.toBeNull();
+      await act(async () => {
+        next?.click();
+      });
+      expect(galleryButtons[2]?.getAttribute("aria-pressed")).toBe("true");
+      await act(async () => {
+        previous?.click();
+      });
+      expect(galleryButtons[1]?.getAttribute("aria-pressed")).toBe("true");
       expect(view.textContent).not.toContain("foto aktual");
       expect(view.textContent).not.toContain("kondisi terbaru");
     });

@@ -162,6 +162,9 @@ describe("HomeScreen State Matrix & Module Composition", () => {
       getPackageVisual("slow_green_day").svgDataUri,
     );
     expect(hero?.getAttribute("fetchpriority")).toBe("high");
+    expect(view.querySelector(".home-section-header__tag")).toBeNull();
+    expect(view.querySelector(".home-hero-card__visual-badges")).toBeNull();
+    expect(view.textContent).not.toContain("Pilihan utama");
     const heroTrustBadge = view.querySelector(
       ".home-hero-card__visual-badges .ui-badge--success:nth-child(2)",
     );

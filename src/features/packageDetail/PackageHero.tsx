@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import type { PackageRecommendationSource } from "../recommendation/types";
 
@@ -31,6 +31,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
     packageData.visualAsset,
   );
   const [activeViewIndex, setActiveViewIndex] = useState(0);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
   const packageImages = packageData.visualAssets?.length
     ? [
         ...new Set(
@@ -54,13 +55,39 @@ export function PackageHero({ packageData }: PackageHeroProps) {
       }));
   const safeIndex = Math.min(activeViewIndex, views.length - 1);
   const activeView = views[safeIndex];
+  const moveView = (direction: number) => {
+    setActiveViewIndex(
+      (current) => (current + direction + views.length) % views.length,
+    );
+  };
 
   return (
     <section
       className="package-detail-media"
       aria-labelledby="package-gallery-heading"
     >
-      <header className="package-detail-hero">
+      <header
+        className="package-detail-hero"
+        onTouchStart={(event) => {
+          const touch = event.touches[0];
+          if (touch)
+            touchStart.current = { x: touch.clientX, y: touch.clientY };
+        }}
+        onTouchEnd={(event) => {
+          const start = touchStart.current;
+          const touch = event.changedTouches[0];
+          touchStart.current = null;
+          if (!start || !touch || views.length < 2) return;
+          const deltaX = touch.clientX - start.x;
+          const deltaY = touch.clientY - start.y;
+          if (Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            moveView(deltaX < 0 ? 1 : -1);
+          }
+        }}
+        onTouchCancel={() => {
+          touchStart.current = null;
+        }}
+      >
         <img
           className="package-detail-hero__visual"
           src={activeView.url}
@@ -95,29 +122,65 @@ export function PackageHero({ packageData }: PackageHeroProps) {
             </span>
           </span>
         </div>
+        {views.length > 1 && (
+          <div className="package-detail-hero__carousel">
+            <span
+              className="package-detail-hero__slide-count"
+              aria-live="polite"
+            >
+              {safeIndex + 1} / {views.length}
+            </span>
+            <div className="package-detail-hero__slide-actions">
+              <button
+                type="button"
+                className="package-detail-hero__slide-button"
+                aria-label="Foto sebelumnya"
+                onClick={() => moveView(-1)}
+              >
+                ←
+              </button>
+              <button
+                type="button"
+                className="package-detail-hero__slide-button"
+                aria-label="Foto berikutnya"
+                onClick={() => moveView(1)}
+              >
+                →
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
-      <div className="package-detail-gallery">
-        <div className="package-detail-gallery__heading-row">
+      <details className="package-detail-gallery">
+        <summary className="package-detail-gallery__heading-row">
           <div>
-            <span className="package-detail-gallery__eyebrow">
-              Galeri suasana
-            </span>
             <h2
               id="package-gallery-heading"
               className="package-detail-gallery__title"
             >
-              Lihat gambaran pengalaman
+              Galeri suasana
             </h2>
+            <span className="package-detail-gallery__eyebrow">
+              Lihat gambaran pengalaman
+            </span>
           </div>
-          <span
-            className="package-detail-gallery__counter"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {safeIndex + 1}/{views.length}
+          <span className="package-detail-gallery__summary-end">
+            <span
+              className="package-detail-gallery__counter"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {safeIndex + 1}/{views.length}
+            </span>
+            <span
+              className="package-detail-gallery__chevron"
+              aria-hidden="true"
+            >
+              ⌄
+            </span>
           </span>
-        </div>
+        </summary>
 
         <div
           className="package-detail-gallery__thumbnails"
@@ -165,7 +228,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
             ? "Media package dipilih Travel Organizer. Visual prototype dalam galeri tetap merupakan ilustrasi, bukan foto kondisi aktual destinasi."
             : "Satu ilustrasi prototype ditampilkan dalam beberapa crop untuk memberi gambaran suasana, bukan foto kondisi aktual destinasi."}
         </p>
-      </div>
+      </details>
     </section>
   );
 }

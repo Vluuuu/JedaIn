@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Badge, Button, Skeleton } from "../../components/ui";
+import { Button, Skeleton } from "../../components/ui";
 import ExploreMascot from "../../assets/mascot/explore.png";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import {
@@ -182,7 +182,6 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
         aria-labelledby="rec-section-title"
       >
         <div className="home-section-header">
-          <div className="home-section-header__tag">Personal</div>
           <h2 id="rec-section-title" className="home-section-title">
             {recommendationHeading}
           </h2>
@@ -218,13 +217,6 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
               <span className="home-hero-card__visual-index" aria-hidden="true">
                 01 / PILIHAN JEDA
               </span>
-              <div className="home-hero-card__visual-badges">
-                <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>
-                  {recMode === "FALLBACK"
-                    ? "Pilihan terdekat"
-                    : "Pilihan utama"}
-                </Badge>
-              </div>
             </div>
             <div className="home-hero-card__body">
               <span className="home-hero-card__body-kicker">

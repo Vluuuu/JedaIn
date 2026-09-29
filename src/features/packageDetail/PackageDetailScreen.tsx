@@ -175,9 +175,6 @@ export function PackageDetailScreen({
           className="package-detail-header-card"
           aria-labelledby="package-title"
         >
-          <span className="package-detail-header-card__kicker">
-            Jeda yang layak dinanti
-          </span>
           <div className="package-detail-meta-row">
             <span>{pkg.destinationName}</span>
             <span>•</span>

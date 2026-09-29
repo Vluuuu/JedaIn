@@ -365,6 +365,10 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
 
       {/* 5. Search Bar */}
       <section className="home-search-section" aria-label="Pencarian JedaIn">
+        <div className="home-search-section__intro">
+          <span>Jelajahi lebih jauh</span>
+          <h2>Cari jeda versimu</h2>
+        </div>
         <SearchBar />
       </section>
 

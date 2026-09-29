@@ -120,6 +120,7 @@ export function WorkspaceShell({
     <div
       className={`workspace-shell workspace-shell--${surface}`}
       data-sidebar-collapsed={sidebarCollapsed || undefined}
+      data-partner-role={partner?.role.toLowerCase()}
     >
       <button
         type="button"

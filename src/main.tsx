@@ -7,6 +7,7 @@ import "./styles/redesign.css";
 import "./styles/redesign-depth.css";
 import "./styles/field-journal.css";
 import "./styles/field-workspace.css";
+import "./styles/partner-studio.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

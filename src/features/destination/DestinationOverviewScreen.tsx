@@ -100,6 +100,9 @@ export function DestinationOverviewScreen() {
       <header className="dest-identity">
         <div className="dest-identity__content">
           <div className="dest-identity__heading">
+            <span className="dest-identity__eyebrow">
+              Ruang kerja · Mitra Destinasi
+            </span>
             <h1 className="dest-page-title">{destination.name}</h1>
             <p className="dest-identity__location">
               {destination.locationLabel}

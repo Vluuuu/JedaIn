@@ -1,15 +1,36 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import PlanMascot from "../../assets/mascot/plan.png";
 import { packageRepository } from "../../data/packageRepository";
 import { sessionRepository } from "../../data/sessionRepository";
-import { Badge, Button } from "../../components/ui";
+import { Button, InlineStatus } from "../../components/ui";
+import type { BookingStatus } from "../checkout/types";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
 import { partnerSessionStore } from "./partnerSessionStore";
-import type { EoPackageRecord, EoSessionRecord } from "./types";
+import type {
+  EoPackageRecord,
+  EoSessionRecord,
+  EoSessionStatus,
+} from "./types";
 import "./eo.css";
+
+const sessionStatusLabels: Record<EoSessionStatus, string> = {
+  OPEN: "Terbuka",
+  FULL: "Penuh",
+  CLOSED: "Ditutup",
+  CANCELLED: "Dibatalkan",
+};
+
+const bookingStatusLabels: Record<BookingStatus, string> = {
+  PENDING_PAYMENT: "Menunggu pembayaran",
+  PAID: "Terbayar",
+  COMPLETED: "Selesai",
+  CANCELLED: "Dibatalkan",
+  EXPIRED: "Kedaluwarsa",
+};
 
 export function EoOverviewScreen() {
   const navigate = useNavigate();
@@ -72,6 +93,9 @@ export function EoOverviewScreen() {
       <div className="eo-overview-container">
         <header className="eo-overview-header">
           <div className="eo-overview-header__main">
+            <span className="eo-overview-header__eyebrow">
+              Ruang kerja · Travel Organizer
+            </span>
             <h1>
               Overview
               <span className="sr-only">
@@ -140,6 +164,9 @@ export function EoOverviewScreen() {
       {/* Page Header without redundant badges */}
       <header className="eo-overview-header">
         <div className="eo-overview-header__main">
+          <span className="eo-overview-header__eyebrow">
+            Ruang kerja · Travel Organizer
+          </span>
           <h1>
             Overview
             <span className="sr-only">
@@ -247,6 +274,15 @@ export function EoOverviewScreen() {
           className="eo-overview-demand-hero"
           aria-label="Peluang dari kebutuhan traveler"
         >
+          <img
+            className="eo-overview-demand-hero__mascot"
+            src={PlanMascot}
+            alt=""
+            aria-hidden="true"
+            width="535"
+            height="633"
+            decoding="async"
+          />
           <div className="eo-overview-demand-hero__eyebrow">
             <span>Peluang dari Kebutuhan Traveler</span>
             <span className="eo-overview-demand-hero__eyebrow-badge">
@@ -342,9 +378,11 @@ export function EoOverviewScreen() {
                       <span className="eo-overview-list-row__meta">
                         Sisa {s.remainingSlots} dari {s.capacity} slot
                       </span>
-                      <Badge tone={s.status === "OPEN" ? "success" : "neutral"}>
-                        {s.status}
-                      </Badge>
+                      <InlineStatus
+                        tone={s.status === "OPEN" ? "success" : "neutral"}
+                      >
+                        {sessionStatusLabels[s.status]}
+                      </InlineStatus>
                     </div>
                   </div>
                 );
@@ -394,7 +432,7 @@ export function EoOverviewScreen() {
                       </span>
                     </div>
                     <div className="eo-overview-list-row__secondary">
-                      <Badge
+                      <InlineStatus
                         tone={
                           b.status === "PAID" || b.status === "COMPLETED"
                             ? "success"
@@ -403,8 +441,8 @@ export function EoOverviewScreen() {
                               : "neutral"
                         }
                       >
-                        {b.status}
-                      </Badge>
+                        {bookingStatusLabels[b.status]}
+                      </InlineStatus>
                     </div>
                   </div>
                 );

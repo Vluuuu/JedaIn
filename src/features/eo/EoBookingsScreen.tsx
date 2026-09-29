@@ -1,4 +1,6 @@
+import { Link } from "react-router";
 import { InlineStatus } from "../../components/ui";
+import { PartnerEmptyState } from "../../components/ui/PartnerEmptyState";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import { mockEoPackageStore } from "./mockEoPackageStore";
@@ -32,17 +34,14 @@ export function EoBookingsScreen() {
       {/* Bookings Table */}
       <section className="eo-section" aria-label="Tabel pesanan traveler">
         {eoBookings.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "var(--space-8)",
-              color: "var(--color-text-muted)",
-            }}
+          <PartnerEmptyState
+            title="Belum ada booking"
+            action={
+              <Link to="/partner/eo/packages">Lihat paket experience →</Link>
+            }
           >
-            <p>
-              Belum ada transaksi pemesanan masuk untuk paket-paket milikmu.
-            </p>
-          </div>
+            Belum ada transaksi pemesanan masuk untuk paket-paket milikmu.
+          </PartnerEmptyState>
         ) : (
           <div className="eo-table-wrapper">
             <table className="eo-table">

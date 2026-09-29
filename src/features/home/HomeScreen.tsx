@@ -167,7 +167,16 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
         </div>
       )}
 
-      {/* 4. Personalized Recommendation + Preference Summary */}
+      {/* 4. Start with the traveler's own search, then offer a curated path. */}
+      <section className="home-search-section" aria-label="Pencarian JedaIn">
+        <div className="home-search-section__intro">
+          <span>Jelajahi lebih jauh</span>
+          <h2>Cari jeda versimu</h2>
+        </div>
+        <SearchBar />
+      </section>
+
+      {/* 5. Personalized Recommendation + Preference Summary */}
       <section
         className="home-recommendation-section"
         aria-labelledby="rec-section-title"
@@ -361,15 +370,6 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
             </Link>
           </div>
         )}
-      </section>
-
-      {/* 5. Search Bar */}
-      <section className="home-search-section" aria-label="Pencarian JedaIn">
-        <div className="home-search-section__intro">
-          <span>Jelajahi lebih jauh</span>
-          <h2>Cari jeda versimu</h2>
-        </div>
-        <SearchBar />
       </section>
 
       {/* 6. Explore by Mood */}

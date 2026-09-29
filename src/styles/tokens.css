@@ -87,6 +87,23 @@
   --font-family-sans:
     Inter, Geist, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
+  --font-family-editorial:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+
+  /* JedaIn field journal palette, used on signed-in surfaces only. */
+  --journal-canvas: #f5f1e8;
+  --journal-paper: #fffdf7;
+  --journal-linen: #ebe3d2;
+  --journal-sage: #dce6d1;
+  --journal-ink: #17362d;
+  --journal-forest: #214a3c;
+  --journal-moss: #38614c;
+  --journal-earth: #9a5c38;
+  --journal-sun: #d5a66b;
+  --journal-line: #d7d8c8;
+  --journal-muted: #52675c;
+  --journal-inverse: #fbf8ec;
+  --journal-shadow: 0 16px 42px rgb(32 56 42 / 9%);
   --font-size-display-lg: 3rem;
   --line-height-display-lg: 3.5rem;
   --font-weight-display-lg: 700;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import PlanMascot from "../../assets/mascot/plan.png";
 import { Button, Skeleton } from "../../components/ui";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
@@ -163,6 +163,9 @@ export function PackageDetailScreen({
   return (
     <div className="package-detail-container">
       <div className="package-detail-context" aria-label="Konteks halaman">
+        <Link className="package-detail-context__back" to="/explore">
+          ← Explore
+        </Link>
         <span className="package-detail-context__label">Detail Experience</span>
       </div>
 
@@ -251,7 +254,7 @@ export function PackageDetailScreen({
         {/* 6. Experience Highlights */}
         {detail.highlights.length > 0 && (
           <section
-            className="package-detail-section package-detail-section--primary"
+            className="package-detail-section package-detail-section--primary package-detail-section--highlights"
             aria-labelledby="highlights-heading"
           >
             <h2
@@ -289,7 +292,7 @@ export function PackageDetailScreen({
 
         {/* 11. Upcoming Sessions Preview */}
         <section
-          className="package-detail-section package-detail-section--primary"
+          className="package-detail-section package-detail-section--primary package-detail-section--sessions"
           aria-labelledby="sessions-preview-heading"
         >
           <h2

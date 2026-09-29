@@ -197,10 +197,13 @@ describe("F4.2 — Part A: EO Session Temporal Integrity (EO-F01)", () => {
     mockEoPackageStore.submitForReview("pkg_approved_future_test");
     mockEoPackageStore.approvePackage("pkg_approved_future_test");
 
+    const futureStart2 = new Date(baseNow + 48 * 3600 * 1000).toISOString();
+    const futureEnd2 = new Date(baseNow + 54 * 3600 * 1000).toISOString();
+
     const approvedRes = mockEoPackageStore.createSession({
       packageId: "pkg_approved_future_test",
-      startAt: futureStart,
-      endAt: futureEnd,
+      startAt: futureStart2,
+      endAt: futureEnd2,
       capacity: 8,
       pricePerPerson: 200000,
       nowMs: baseNow,

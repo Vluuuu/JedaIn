@@ -83,6 +83,7 @@ export function EoSessionsScreen() {
   const [editingNoteText, setEditingNoteText] = useState<string>("");
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | undefined>();
+  const [actionError, setActionError] = useState<string | undefined>();
   const [refreshVersion, setRefreshVersion] = useState<number>(0);
 
   const [sessions, setSessions] = useState<EoSessionRecord[]>(() => {
@@ -206,7 +207,10 @@ export function EoSessionsScreen() {
       newStatus,
     );
     if (res.success) {
+      setActionError(undefined);
       setRefreshVersion((v) => v + 1);
+    } else {
+      setActionError(res.message || "Gagal mengubah status sesi.");
     }
   };
 
@@ -388,6 +392,16 @@ export function EoSessionsScreen() {
 
       {/* Sessions List */}
       <section className="eo-section" aria-label="Daftar sesi">
+        {actionError && (
+          <div
+            className="eo-alert eo-alert--error"
+            role="alert"
+            style={{ marginBottom: "var(--space-4)" }}
+          >
+            {actionError}
+          </div>
+        )}
+
         <div className="eo-section-header">
           <h2 className="eo-section-title">
             Daftar Sesi ({selectedPkg ? selectedPkg.title : "Semua Sesi"})

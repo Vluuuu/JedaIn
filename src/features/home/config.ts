@@ -1,4 +1,6 @@
-import { MOCK_RECOMMENDATION_PACKAGES } from "../recommendation/mockPackages";
+import { getCombinedCatalogPackages } from "../marketplace/marketplaceAdapter";
+import { mockDestinationStore } from "../eo/mockDestinationStore";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import type { MoodPresetItem, VerifiedDestinationItem } from "./types";
 
 /**
@@ -16,10 +18,18 @@ export const HOME_MOOD_PRESETS: MoodPresetItem[] = [
  * Derive de-duplicated verified destinations from LIVE prototype package catalog.
  */
 export function getDerivedVerifiedDestinations(): VerifiedDestinationItem[] {
+  if (isSupabaseMode()) {
+    return mockDestinationStore.getEligibleForEo().map((destination) => ({
+      destinationName: destination.name,
+      locationLabel: destination.locationLabel,
+      verificationLevel: destination.verificationLevel,
+      visualAsset: destination.imageUrl,
+    }));
+  }
   const seen = new Set<string>();
   const destinations: VerifiedDestinationItem[] = [];
 
-  for (const pkg of MOCK_RECOMMENDATION_PACKAGES) {
+  for (const pkg of getCombinedCatalogPackages()) {
     if (pkg.status === "LIVE" && !seen.has(pkg.destinationName)) {
       seen.add(pkg.destinationName);
       destinations.push({

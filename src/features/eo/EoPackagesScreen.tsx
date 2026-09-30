@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { useNavigate } from "react-router";
 import { packageRepository } from "../../data/packageRepository";
 import { Button, InlineStatus } from "../../components/ui";
@@ -34,7 +35,7 @@ export function EoPackagesScreen() {
     "ALL",
   );
   const [allPackages, setAllPackages] = useState<EoPackageRecord[]>(() => [
-    ...mockEoPackageStore.getPackagesByEo(eoId),
+    ...(!isSupabaseMode() ? mockEoPackageStore.getPackagesByEo(eoId) : []),
   ]);
 
   useEffect(() => {

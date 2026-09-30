@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { useNavigate, useSearchParams } from "react-router";
 import { destinationRepository } from "../../data/destinationRepository";
 import { packageRepository } from "../../data/packageRepository";
@@ -15,6 +16,7 @@ import type {
   DestinationRecord,
   DemandInsightRecord,
   EoItineraryItem,
+  EoPackageRecord,
   EoValidationError,
   PackageGuideSource,
 } from "./types";
@@ -29,6 +31,36 @@ const STEPS = [
 ] as const;
 
 export function EoPackageBuilderScreen() {
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get("draftId");
+  const [draftReady, setDraftReady] = useState(
+    () => !isSupabaseMode() || !draftId,
+  );
+
+  useEffect(() => {
+    if (!isSupabaseMode() || !draftId) return;
+    let mounted = true;
+    const eoId = partnerSessionStore.get()?.id ?? "eo_jeda_alam";
+    packageRepository.getPackageForEo(draftId, eoId).then((draft) => {
+      if (draft) mockEoPackageStore.upsertPackage(draft);
+      if (mounted) setDraftReady(true);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [draftId]);
+
+  if (!draftReady) {
+    return (
+      <div className="eo-container" role="status">
+        Memuat draf paket...
+      </div>
+    );
+  }
+  return <EoPackageBuilderBody />;
+}
+
+function EoPackageBuilderBody() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialInsightId = searchParams.get("insightId");
@@ -51,12 +83,21 @@ export function EoPackageBuilderScreen() {
     : undefined;
 
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const packageIdRef = useRef<string | undefined>(initialDraft?.packageId);
+  const [packageId, setPackageId] = useState<string | undefined>(
+    initialDraft?.packageId ?? draftId ?? undefined,
+  );
+  const packageIdRef = useRef<string | undefined>(
+    initialDraft?.packageId ?? draftId ?? undefined,
+  );
 
   // Available data - Step 1 uses authoritative eligible destinations
   const [eligibleDestinations, setEligibleDestinations] = useState<
     DestinationRecord[]
-  >(() => [...mockDestinationStore.getEligibleForEo(guideStatus)]);
+  >(() =>
+    isSupabaseMode()
+      ? []
+      : [...mockDestinationStore.getEligibleForEo(guideStatus)],
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -92,6 +133,13 @@ export function EoPackageBuilderScreen() {
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(
     initialValidDestinationId,
   );
+  const effectiveDestinationId =
+    selectedDestinationId ||
+    (eligibleDestinations.some(
+      (destination) => destination.destinationId === candidateDestinationId,
+    )
+      ? candidateDestinationId
+      : "");
   const [destSearchQuery, setDestSearchQuery] = useState<string>("");
   const [destLocationFilter, setDestLocationFilter] = useState<string>("ALL");
 
@@ -285,7 +333,9 @@ export function EoPackageBuilderScreen() {
   }
 
   const selectedDestination: DestinationRecord | undefined =
-    eligibleDestinations.find((d) => d.destinationId === selectedDestinationId);
+    eligibleDestinations.find(
+      (d) => d.destinationId === effectiveDestinationId,
+    );
   const selectedInsight: DemandInsightRecord | undefined = selectedInsightId
     ? mockInsightStore.getInsightById(selectedInsightId)
     : undefined;
@@ -380,100 +430,91 @@ export function EoPackageBuilderScreen() {
     returnTransport,
   });
 
-  // Auto-save draft on moving
-  const saveCurrentDraft = () => {
-    const splitSafety = safetyNotes
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+  // Authoritative draft save serialized via promise chain to prevent race conditions & duplicate drafts
+  const saveCurrentDraft = async (): Promise<EoPackageRecord | undefined> => {
+    let savedRecord: EoPackageRecord | undefined;
 
-    const splitIncluded = includedItemsText
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const task = saveQueueRef.current
+      .catch(() => {})
+      .then(async () => {
+        const splitSafety = safetyNotes
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
 
-    const splitExcluded = excludedItemsText
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+        const splitIncluded = includedItemsText
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
 
-    const splitAccessNotes = accessNotesText
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+        const splitExcluded = excludedItemsText
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
 
-    // Only persist destinationId if it is authoritative and eligible
-    const effectiveDestinationId = selectedDestination
-      ? selectedDestination.destinationId
-      : "";
+        const splitAccessNotes = accessNotesText
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
 
-    const draftPayload = {
-      packageId: packageIdRef.current,
-      title,
-      shortSummary,
-      valueProposition: shortSummary,
-      destinationId: effectiveDestinationId,
-      imageUrl,
-      imageUrls,
-      insightId: selectedInsightId,
-      durationLabel,
-      itinerary,
-      meetingPointLabel: meetingPointLabel.trim() || undefined,
-      departureTimeLabel: departureTimeLabel.trim() || undefined,
-      outboundTransport: outboundTransport.trim() || undefined,
-      returnTransport: returnTransport.trim() || undefined,
-      includedItems: splitIncluded,
-      excludedItems: splitExcluded,
-      safetyNotes: splitSafety,
-      accessNotes: splitAccessNotes.length > 0 ? splitAccessNotes : undefined,
-      guideSource: effectiveGuideSource,
-      pricing: {
-        destinationBaseCost: baseCost,
-        localGuideFee,
-        eoMargin,
-        customerPrice,
-      },
-    };
+        // Only persist destinationId if it is authoritative and eligible
+        const effectiveDestinationId = selectedDestination
+          ? selectedDestination.destinationId
+          : "";
 
-    const res = mockEoPackageStore.saveDraft(draftPayload);
-    if (res.success && res.package) {
-      packageIdRef.current = res.package.packageId;
-    }
-    return res.package;
-  };
+        const currentPackageId = packageIdRef.current;
 
-  const persistCurrentDraft = async () => {
-    const savedPkg = saveCurrentDraft();
-    if (!savedPkg) return undefined;
-    const pendingSave = saveQueueRef.current.then(() =>
-      packageRepository.saveDraft(savedPkg),
-    );
-    saveQueueRef.current = pendingSave.catch(() => undefined);
-    let result: Awaited<ReturnType<typeof packageRepository.saveDraft>>;
-    try {
-      result = await pendingSave;
-    } catch {
-      setValidationErrors([
-        {
-          step: currentStep,
-          field: "save",
-          message: "Draf belum berhasil disimpan. Coba lagi.",
-        },
-      ]);
-      return undefined;
-    }
-    if (!result.success) {
-      setValidationErrors([
-        {
-          step: currentStep,
-          field: "save",
-          message: result.message ?? "Draf belum berhasil disimpan.",
-        },
-      ]);
-      return undefined;
-    }
-    setValidationErrors([]);
-    return result.package;
+        const draftPayload: Partial<EoPackageRecord> = {
+          packageId: currentPackageId,
+          title,
+          shortSummary,
+          valueProposition: shortSummary,
+          destinationId: effectiveDestinationId,
+          imageUrl,
+          imageUrls,
+          insightId: selectedInsightId,
+          durationLabel,
+          itinerary,
+          meetingPointLabel: meetingPointLabel.trim() || undefined,
+          departureTimeLabel: departureTimeLabel.trim() || undefined,
+          outboundTransport: outboundTransport.trim() || undefined,
+          returnTransport: returnTransport.trim() || undefined,
+          includedItems: splitIncluded,
+          excludedItems: splitExcluded,
+          safetyNotes: splitSafety,
+          accessNotes:
+            splitAccessNotes.length > 0 ? splitAccessNotes : undefined,
+          guideSource: effectiveGuideSource,
+          pricing: {
+            destinationBaseCost: baseCost,
+            localGuideFee,
+            eoMargin,
+            customerPrice,
+          },
+        };
+
+        const res = await packageRepository.saveDraft(draftPayload);
+        if (res.success && res.package) {
+          const authoritativeId = res.package.packageId;
+          packageIdRef.current = authoritativeId;
+          setPackageId(authoritativeId);
+          setValidationErrors([]);
+          savedRecord = res.package;
+          return;
+        }
+
+        setValidationErrors([
+          {
+            step: currentStep,
+            field: "save",
+            message: res.message || "Gagal menyimpan draf paket.",
+          },
+        ]);
+      });
+
+    saveQueueRef.current = task;
+    await task;
+    return savedRecord;
   };
 
   const processImageFile = (file: File) => {
@@ -507,14 +548,14 @@ export function EoPackageBuilderScreen() {
   };
 
   const handleNext = async () => {
-    if (!(await persistCurrentDraft())) return;
+    if (!(await saveCurrentDraft())) return;
     if (currentStep < 5) {
       setCurrentStep((prev) => prev + 1);
     }
   };
 
   const handleBack = async () => {
-    if (!(await persistCurrentDraft())) return;
+    if (!(await saveCurrentDraft())) return;
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
     }
@@ -562,7 +603,7 @@ export function EoPackageBuilderScreen() {
     setIsSubmitting(true);
     setValidationErrors([]);
 
-    const savedPkg = await persistCurrentDraft();
+    const savedPkg = await saveCurrentDraft();
     if (!savedPkg) {
       setIsSubmitting(false);
       return;
@@ -582,7 +623,7 @@ export function EoPackageBuilderScreen() {
   };
 
   return (
-    <div className="eo-container">
+    <div className="eo-container" data-package-id={packageId}>
       {/* Page Header */}
       <header className="eo-page-header">
         <div>
@@ -608,7 +649,7 @@ export function EoPackageBuilderScreen() {
                   : ""
             }`}
             onClick={async () => {
-              if (!(await persistCurrentDraft())) return;
+              if (!(await saveCurrentDraft())) return;
               setCurrentStep(s.step);
             }}
           >
@@ -630,8 +671,9 @@ export function EoPackageBuilderScreen() {
           style={{ outline: "none" }}
         >
           <strong style={{ fontSize: "var(--font-size-body-md)" }}>
-            Paket belum memenuhi standar kurasi ({validationErrors.length}{" "}
-            kendala ditemukan):
+            {validationErrors.some((error) => error.field === "save")
+              ? "Gagal Menyimpan Draf"
+              : `Paket belum memenuhi standar kurasi (${validationErrors.length} kendala ditemukan):`}
           </strong>
           <ul style={{ margin: "var(--space-2) 0 0", paddingLeft: "1.25rem" }}>
             {validationErrors.map((err, i) => (
@@ -717,7 +759,7 @@ export function EoPackageBuilderScreen() {
           {/* Destination Cards */}
           <div className="eo-builder-dest-grid">
             {filteredEligibleDestinations.map((dest) => {
-              const isSelected = selectedDestinationId === dest.destinationId;
+              const isSelected = effectiveDestinationId === dest.destinationId;
 
               return (
                 <article
@@ -782,7 +824,7 @@ export function EoPackageBuilderScreen() {
                         size="sm"
                         onClick={async (e) => {
                           e.stopPropagation();
-                          const savedPkg = await persistCurrentDraft();
+                          const savedPkg = await saveCurrentDraft();
                           if (!savedPkg) return;
                           const params = new URLSearchParams({
                             from: "builder",

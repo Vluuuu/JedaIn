@@ -193,6 +193,26 @@ describe("Supabase Backend Guards, Auth Enforcement & Authoritative Pricing", ()
               }),
             };
           }
+          if (table === "destinations") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: {
+                  id: "dest_lereng_hijau",
+                  name: "Lereng Hijau Batu",
+                  location_label: "Batu / Malang Raya",
+                  province: "Jawa Timur",
+                  city: "Batu",
+                  verification_level: "BASIC",
+                  guide_ready: true,
+                  base_cost_per_person: 125000,
+                  local_guide_fee_per_person: 25000,
+                  status: "ACTIVE",
+                },
+              }),
+            };
+          }
           if (table === "packages") {
             return {
               select: vi.fn().mockReturnThis(),
@@ -224,14 +244,14 @@ describe("Supabase Backend Guards, Auth Enforcement & Authoritative Pricing", ()
   });
 
   describe("3. Authoritative destination pricing in Supabase mode", () => {
-    it("reads destination pricing from destinationRepository.getById rather than stale mock store", async () => {
-      // Spy on destinationRepository.getById to return updated live Supabase destination
+    it("reads destination pricing from destinationRepository.getAuthoritativeById rather than stale mock store", async () => {
+      // Spy on destinationRepository.getAuthoritativeById to return updated live Supabase destination
       const liveDestination = {
         ...mockDestinationStore.getById("dest_lereng_hijau")!,
         baseCostPerPerson: 180000,
         localGuideFeePerPerson: 60000,
       };
-      vi.spyOn(destinationRepository, "getById").mockResolvedValue(
+      vi.spyOn(destinationRepository, "getAuthoritativeById").mockResolvedValue(
         liveDestination,
       );
 
@@ -298,7 +318,7 @@ describe("Supabase Backend Guards, Auth Enforcement & Authoritative Pricing", ()
         },
       });
 
-      expect(destinationRepository.getById).toHaveBeenCalledWith(
+      expect(destinationRepository.getAuthoritativeById).toHaveBeenCalledWith(
         "dest_lereng_hijau",
       );
       expect(draftRes.success).toBe(true);
@@ -309,6 +329,286 @@ describe("Supabase Backend Guards, Auth Enforcement & Authoritative Pricing", ()
       expect(savedRow?.local_guide_fee).toBe(60000);
       expect(savedRow?.eo_margin).toBe(120000);
       expect(savedRow?.customer_price).toBe(360000);
+    });
+
+    it("fails saveDraft and prevents packages.upsert when draft has destinationId but live destination read fails", async () => {
+      vi.spyOn(destinationRepository, "getAuthoritativeById").mockResolvedValue(
+        undefined,
+      );
+
+      const upsertSpy = vi.fn();
+
+      const mockSupabase = {
+        auth: {
+          getSession: vi.fn().mockResolvedValue({
+            data: {
+              session: {
+                user: { id: "eo_uid_123", email: "partner@jedaalam.id" },
+              },
+            },
+          }),
+        },
+        from: vi.fn().mockImplementation((table: string) => {
+          if (table === "partner_profiles") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: {
+                  id: "eo_jeda_alam",
+                  role: "EO",
+                  auth_user_id: "eo_uid_123",
+                  email: "partner@jedaalam.id",
+                },
+              }),
+            };
+          }
+          if (table === "packages") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({ data: null }),
+              upsert: upsertSpy,
+            };
+          }
+          return {};
+        }),
+      };
+      vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue(
+        mockSupabase as unknown as SupabaseClient,
+      );
+
+      const draftRes = await packageRepository.saveDraft({
+        title: "Paket Draft Tujuan Gagal Baca",
+        destinationId: "dest_lereng_hijau",
+      });
+
+      expect(destinationRepository.getAuthoritativeById).toHaveBeenCalledWith(
+        "dest_lereng_hijau",
+      );
+      expect(draftRes.success).toBe(false);
+      expect(draftRes.message).toContain(
+        "Data resmi destinasi live tidak dapat dibaca dari server.",
+      );
+      expect(upsertSpy).not.toHaveBeenCalled();
+    });
+
+    it("validates submitForReview using live destinationRepository destination rather than stale mock store", async () => {
+      const liveDestination = {
+        ...mockDestinationStore.getById("dest_lereng_hijau")!,
+        baseCostPerPerson: 125000,
+        localGuideFeePerPerson: 100000,
+      };
+      vi.spyOn(destinationRepository, "getAuthoritativeById").mockResolvedValue(
+        liveDestination,
+      );
+
+      const validPackageRow: PackageRow = {
+        id: "pkg_test_submit_live",
+        eo_id: "eo_jeda_alam",
+        eo_display_name: "Jeda Alam Nusantara",
+        title: "Paket Live Destination Submit",
+        short_summary: "Ringkasan paket bernilai mindful untuk traveler.",
+        value_proposition: "Pengalaman santai di alam.",
+        destination_id: "dest_lereng_hijau",
+        image_url: null,
+        image_urls: null,
+        insight_id: null,
+        duration_label: "1 hari",
+        suitable_group_types: ["SOLO"],
+        highlights: ["Highlight 1"],
+        itinerary: [
+          { order: 1, title: "Sesi Pagi", description: "Jalan santai" },
+        ],
+        included_items: ["Transportasi PP"],
+        excluded_items: [],
+        safety_notes: ["Catatan keselamatan."],
+        meeting_point_label: "Stasiun Malang",
+        departure_time_label: "07.00 WIB",
+        outbound_transport: "Minibus",
+        return_transport: "Minibus",
+        access_notes: null,
+        destination_base_cost: 125000,
+        local_guide_fee: 100000,
+        eo_margin: 150000,
+        customer_price: 375000,
+        guide_status: "CERTIFIED_GUIDE",
+        guide_source: "DESTINATION",
+        status: "DRAFT",
+        validation_result: null,
+        submitted_at: null,
+        reviewed_at: null,
+        rejection_reason: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      let updatedRow: Record<string, unknown> | null = null;
+
+      const mockSupabase = {
+        auth: {
+          getSession: vi.fn().mockResolvedValue({
+            data: {
+              session: {
+                user: { id: "eo_uid_123", email: "partner@jedaalam.id" },
+              },
+            },
+          }),
+        },
+        from: vi.fn().mockImplementation((table: string) => {
+          if (table === "partner_profiles") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: {
+                  id: "eo_jeda_alam",
+                  role: "EO",
+                  auth_user_id: "eo_uid_123",
+                  email: "partner@jedaalam.id",
+                },
+              }),
+            };
+          }
+          if (table === "packages") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: validPackageRow,
+              }),
+              update: vi.fn().mockImplementation((payload) => {
+                updatedRow = payload;
+                return {
+                  eq: vi.fn().mockReturnThis(),
+                  select: vi.fn().mockReturnThis(),
+                  single: vi.fn().mockResolvedValue({
+                    data: { ...validPackageRow, ...payload },
+                    error: null,
+                  }),
+                };
+              }),
+            };
+          }
+          return {};
+        }),
+      };
+      vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue(
+        mockSupabase as unknown as SupabaseClient,
+      );
+
+      const submitRes = await packageRepository.submitForReview(
+        "pkg_test_submit_live",
+      );
+
+      expect(destinationRepository.getAuthoritativeById).toHaveBeenCalledWith(
+        "dest_lereng_hijau",
+      );
+      expect(submitRes.success).toBe(true);
+      expect(submitRes.validationResult.valid).toBe(true);
+      expect(updatedRow).toMatchObject({ status: "PENDING_ADMIN_REVIEW" });
+    });
+
+    it("fails submitForReview with clear error when live destination read fails", async () => {
+      vi.spyOn(destinationRepository, "getAuthoritativeById").mockResolvedValue(
+        undefined,
+      );
+
+      const validPackageRow: PackageRow = {
+        id: "pkg_test_fail_live_read",
+        eo_id: "eo_jeda_alam",
+        eo_display_name: "Jeda Alam Nusantara",
+        title: "Paket Live Read Fail",
+        short_summary: "Ringkasan paket bernilai mindful untuk traveler.",
+        value_proposition: "Pengalaman santai di alam.",
+        destination_id: "dest_lereng_hijau",
+        image_url: null,
+        image_urls: null,
+        insight_id: null,
+        duration_label: "1 hari",
+        suitable_group_types: ["SOLO"],
+        highlights: ["Highlight 1"],
+        itinerary: [
+          { order: 1, title: "Sesi Pagi", description: "Jalan santai" },
+        ],
+        included_items: ["Transportasi PP"],
+        excluded_items: [],
+        safety_notes: ["Catatan keselamatan."],
+        meeting_point_label: "Stasiun Malang",
+        departure_time_label: "07.00 WIB",
+        outbound_transport: "Minibus",
+        return_transport: "Minibus",
+        access_notes: null,
+        destination_base_cost: 125000,
+        local_guide_fee: 100000,
+        eo_margin: 150000,
+        customer_price: 375000,
+        guide_status: "CERTIFIED_GUIDE",
+        guide_source: "DESTINATION",
+        status: "DRAFT",
+        validation_result: null,
+        submitted_at: null,
+        reviewed_at: null,
+        rejection_reason: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const mockSupabase = {
+        auth: {
+          getSession: vi.fn().mockResolvedValue({
+            data: {
+              session: {
+                user: { id: "eo_uid_123", email: "partner@jedaalam.id" },
+              },
+            },
+          }),
+        },
+        from: vi.fn().mockImplementation((table: string) => {
+          if (table === "partner_profiles") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: {
+                  id: "eo_jeda_alam",
+                  role: "EO",
+                  auth_user_id: "eo_uid_123",
+                  email: "partner@jedaalam.id",
+                },
+              }),
+            };
+          }
+          if (table === "packages") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: validPackageRow,
+              }),
+            };
+          }
+          return {};
+        }),
+      };
+      vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue(
+        mockSupabase as unknown as SupabaseClient,
+      );
+
+      const submitRes = await packageRepository.submitForReview(
+        "pkg_test_fail_live_read",
+      );
+
+      expect(submitRes.success).toBe(false);
+      expect(submitRes.validationResult.valid).toBe(false);
+      expect(
+        submitRes.validationResult.errors.some(
+          (e) => e.field === "destinationId",
+        ),
+      ).toBe(true);
+      expect(submitRes.validationResult.errors[0].message).toContain(
+        "Data resmi destinasi live tidak dapat dibaca dari server.",
+      );
     });
   });
 

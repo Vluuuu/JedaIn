@@ -1,8 +1,11 @@
 import { sessionStore } from "../onboarding/sessionStore";
+import {
+  getCombinedCatalogPackages,
+  syncMarketplaceFromSupabase,
+} from "../marketplace/marketplaceAdapter";
 import type { QuizDraft } from "../quiz/types";
 import { isValidGroupContext } from "../quiz/validation";
 import { evaluateRecommendations } from "./engine";
-import { MOCK_RECOMMENDATION_PACKAGES } from "./mockPackages";
 import type {
   PackageRecommendationSource,
   RecommendationAdapter,
@@ -94,7 +97,8 @@ export class MockRecommendationAdapter implements RecommendationAdapter {
       );
     }
 
-    const catalog = this.options.catalog ?? MOCK_RECOMMENDATION_PACKAGES;
+    await syncMarketplaceFromSupabase();
+    const catalog = this.options.catalog ?? getCombinedCatalogPackages();
     const result = evaluateRecommendations(quiz, catalog);
 
     if (result.state === "FALLBACK") {

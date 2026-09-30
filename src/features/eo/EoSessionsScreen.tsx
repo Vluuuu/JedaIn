@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { packageRepository } from "../../data/packageRepository";
 import { sessionRepository } from "../../data/sessionRepository";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Button, InlineStatus } from "../../components/ui";
 import { useRealtimeSubscription } from "../../lib/supabase/realtime";
@@ -57,13 +58,17 @@ export function EoSessionsScreen() {
   const eoId = partner?.id ?? "eo_jeda_alam";
 
   const [allEoPackages, setAllEoPackages] = useState<EoPackageRecord[]>(() => [
-    ...mockEoPackageStore.getPackagesByEo(eoId),
+    ...(!isSupabaseMode() ? mockEoPackageStore.getPackagesByEo(eoId) : []),
   ]);
+  const [packagesLoaded, setPackagesLoaded] = useState(() => !isSupabaseMode());
 
   useEffect(() => {
     let isMounted = true;
     packageRepository.getPackagesByEo(eoId).then((res) => {
-      if (isMounted) setAllEoPackages(res);
+      if (isMounted) {
+        setAllEoPackages(res);
+        setPackagesLoaded(true);
+      }
     });
     return () => {
       isMounted = false;
@@ -76,14 +81,18 @@ export function EoSessionsScreen() {
 
   // Security check: if packageId param is passed, ensure it belongs to current EO
   const isForeignPackage = Boolean(
-    packageId && !allEoPackages.some((p) => p.packageId === packageId),
+    packageId &&
+    packagesLoaded &&
+    !allEoPackages.some((p) => p.packageId === packageId),
   );
 
-  const [selectedPackageId, setSelectedPackageId] = useState<string>(
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
     packageId && !isForeignPackage
       ? packageId
-      : (eligiblePackages[0]?.packageId ?? ""),
+      : (eligiblePackages[0]?.packageId ?? (isSupabaseMode() ? null : "")),
   );
+  const effectivePackageId =
+    selectedPackageId ?? eligiblePackages[0]?.packageId ?? "";
   const [startDate, setStartDate] = useState<string>(
     () => getFutureDefaultDateTimes().start,
   );
@@ -102,9 +111,9 @@ export function EoSessionsScreen() {
   const [refreshVersion, setRefreshVersion] = useState<number>(0);
 
   const [sessions, setSessions] = useState<EoSessionRecord[]>(() => {
-    if (isForeignPackage) return [];
-    if (selectedPackageId) {
-      return [...mockEoPackageStore.getSessionsByPackage(selectedPackageId)];
+    if (isForeignPackage || isSupabaseMode()) return [];
+    if (effectivePackageId) {
+      return [...mockEoPackageStore.getSessionsByPackage(effectivePackageId)];
     }
     return [...mockEoPackageStore.getSessionsByEo(eoId)];
   });
@@ -119,8 +128,8 @@ export function EoSessionsScreen() {
     if (isForeignPackage) return;
 
     let isMounted = true;
-    const fetcher = selectedPackageId
-      ? sessionRepository.getSessionsByPackage(selectedPackageId)
+    const fetcher = effectivePackageId
+      ? sessionRepository.getSessionsByPackage(effectivePackageId)
       : sessionRepository.getSessionsByEo(eoId);
 
     fetcher.then((res) => {
@@ -129,15 +138,23 @@ export function EoSessionsScreen() {
     return () => {
       isMounted = false;
     };
-  }, [selectedPackageId, eoId, refreshVersion, isForeignPackage]);
+  }, [effectivePackageId, eoId, refreshVersion, isForeignPackage]);
 
   useRealtimeSubscription("sessions", () => {
     if (isForeignPackage) return;
-    const fetcher = selectedPackageId
-      ? sessionRepository.getSessionsByPackage(selectedPackageId)
+    const fetcher = effectivePackageId
+      ? sessionRepository.getSessionsByPackage(effectivePackageId)
       : sessionRepository.getSessionsByEo(eoId);
     fetcher.then(setSessions);
   });
+
+  if (!packagesLoaded) {
+    return (
+      <div className="eo-container" role="status">
+        Memuat paket dan jadwal...
+      </div>
+    );
+  }
 
   if (isForeignPackage) {
     return (
@@ -161,7 +178,7 @@ export function EoSessionsScreen() {
   }
 
   const selectedPkg = allEoPackages.find(
-    (p) => p.packageId === selectedPackageId,
+    (p) => p.packageId === effectivePackageId,
   );
 
   const selectedPkgIsEligible =
@@ -193,7 +210,7 @@ export function EoSessionsScreen() {
     e.preventDefault();
     setFormError(undefined);
 
-    if (!editingSessionId && !selectedPackageId) {
+    if (!editingSessionId && !effectivePackageId) {
       setFormError("Pilih paket experience terlebih dahulu.");
       return;
     }
@@ -222,7 +239,7 @@ export function EoSessionsScreen() {
           capacity,
         })
       : await sessionRepository.createSession({
-          packageId: selectedPackageId,
+          packageId: effectivePackageId,
           startAt: startIso,
           endAt: endIso,
           capacity,
@@ -353,12 +370,12 @@ export function EoSessionsScreen() {
             <button
               type="button"
               className={`eo-session-package-card eo-session-package-card--all ${
-                selectedPackageId === ""
+                effectivePackageId === ""
                   ? "eo-session-package-card--selected"
                   : ""
               }`}
               onClick={() => setSelectedPackageId("")}
-              aria-pressed={selectedPackageId === ""}
+              aria-pressed={effectivePackageId === ""}
             >
               <span
                 className="eo-session-package-card__all-icon"
@@ -380,7 +397,7 @@ export function EoSessionsScreen() {
                 destination?.name ?? pkg.title,
                 destination?.imageUrl,
               );
-              const isSelected = selectedPackageId === pkg.packageId;
+              const isSelected = effectivePackageId === pkg.packageId;
               const canOpenSession =
                 pkg.status === "APPROVED" || pkg.status === "LIVE";
 
@@ -757,7 +774,7 @@ export function EoSessionsScreen() {
                     id="session-package-select"
                     required
                     className="eo-form-select"
-                    value={selectedPackageId}
+                    value={effectivePackageId}
                     onChange={(e) => setSelectedPackageId(e.target.value)}
                   >
                     {eligiblePackages.map((p) => (

@@ -1,5 +1,9 @@
 import { mockApplicationStore } from "../features/eo/mockApplicationStore";
-import { mockEoPackageStore } from "../features/eo/mockEoPackageStore";
+import { mockDestinationStore } from "../features/eo/mockDestinationStore";
+import {
+  formatSessionTimeWindow,
+  mockEoPackageStore,
+} from "../features/eo/mockEoPackageStore";
 import { partnerSessionStore } from "../features/eo/partnerSessionStore";
 import type { EoSessionRecord, EoSessionStatus } from "../features/eo/types";
 import { getSupabaseClient } from "../lib/supabase/client";
@@ -10,6 +14,7 @@ import {
   mapSessionRecordToRow,
   mapSessionRowToRecord,
 } from "../lib/supabase/mappers";
+import { destinationRepository } from "./destinationRepository";
 import { packageRepository } from "./packageRepository";
 
 export const sessionRepository = {
@@ -88,6 +93,22 @@ export const sessionRepository = {
           "Waktu sesi dengan peserta terdaftar belum dapat diubah di prototipe.",
       };
     }
+    const pkg = await packageRepository.getPackageById(previous.packageId);
+    const dest = pkg?.destinationId
+      ? await destinationRepository.getAuthoritativeById(pkg.destinationId)
+      : undefined;
+    if (!dest) {
+      return {
+        success: false,
+        message: "Data resmi destinasi live tidak dapat dibaca dari server.",
+      };
+    }
+    if (input.capacity > dest.capacityPerSession) {
+      return {
+        success: false,
+        message: `Kapasitas sesi maksimal untuk ${dest.name} adalah ${dest.capacityPerSession} orang.`,
+      };
+    }
     const { data, error } = await supabase
       .from("sessions")
       .update({
@@ -110,6 +131,19 @@ export const sessionRepository = {
       .eq("status", previous.status)
       .select()
       .single();
+    if (error?.code === "23514") {
+      return {
+        success: false,
+        message: `Kapasitas sesi maksimal untuk ${dest.name} adalah ${dest.capacityPerSession} orang.`,
+      };
+    }
+    if (error?.code === "23P01") {
+      return {
+        success: false,
+        message:
+          "Destinasi ini sudah memiliki sesi terjadwal pada waktu tersebut. Pilih waktu lain.",
+      };
+    }
     if (error || !data)
       return {
         success: false,
@@ -127,7 +161,7 @@ export const sessionRepository = {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return [...mockEoPackageStore.getAllSessions()];
+      return [];
     }
 
     try {
@@ -137,16 +171,13 @@ export const sessionRepository = {
         .order("start_at", { ascending: true });
 
       if (error || !data) {
-        console.warn(
-          "Supabase sessions fetch failed, using fallback:",
-          error?.message,
-        );
-        return [...mockEoPackageStore.getAllSessions()];
+        console.warn("Supabase sessions fetch failed:", error?.message);
+        return [];
       }
 
       return (data as SessionRow[]).map(mapSessionRowToRecord);
     } catch {
-      return [...mockEoPackageStore.getAllSessions()];
+      return [];
     }
   },
 
@@ -157,7 +188,7 @@ export const sessionRepository = {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return [...mockEoPackageStore.getSessionsByEo(eoId)];
+      return [];
     }
 
     try {
@@ -168,12 +199,12 @@ export const sessionRepository = {
         .order("start_at", { ascending: true });
 
       if (error || !data) {
-        return [...mockEoPackageStore.getSessionsByEo(eoId)];
+        return [];
       }
 
       return (data as SessionRow[]).map(mapSessionRowToRecord);
     } catch {
-      return [...mockEoPackageStore.getSessionsByEo(eoId)];
+      return [];
     }
   },
 
@@ -184,7 +215,7 @@ export const sessionRepository = {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return [...mockEoPackageStore.getSessionsByPackage(packageId)];
+      return [];
     }
 
     try {
@@ -195,12 +226,12 @@ export const sessionRepository = {
         .order("start_at", { ascending: true });
 
       if (error || !data) {
-        return [...mockEoPackageStore.getSessionsByPackage(packageId)];
+        return [];
       }
 
       return (data as SessionRow[]).map(mapSessionRowToRecord);
     } catch {
-      return [...mockEoPackageStore.getSessionsByPackage(packageId)];
+      return [];
     }
   },
 
@@ -317,12 +348,71 @@ export const sessionRepository = {
       };
     }
 
+    // Authoritative destination resolution
+    if (!pkg.destinationId) {
+      return {
+        success: false,
+        message: "Paket tidak memiliki destinasi yang valid.",
+      };
+    }
+
+    const dest = await destinationRepository.getAuthoritativeById(
+      pkg.destinationId,
+    );
+    if (!dest) {
+      return {
+        success: false,
+        message: "Data resmi destinasi live tidak dapat dibaca dari server.",
+      };
+    }
+
+    // Destination capacity limit check
+    if (input.capacity > dest.capacityPerSession) {
+      return {
+        success: false,
+        message: `Kapasitas sesi maksimal untuk ${dest.name} adalah ${dest.capacityPerSession} orang.`,
+      };
+    }
+
     const supabase = getSupabaseClient();
     if (!supabase) {
       return {
         success: false,
         message: "Klien Supabase tidak tersedia untuk membuat sesi.",
       };
+    }
+
+    // Preflight conflict check across all packages & EOs for this destination
+    try {
+      const { data: destPackages } = await supabase
+        .from("packages")
+        .select("id")
+        .eq("destination_id", pkg.destinationId);
+
+      const destPkgIds = (destPackages || []).map((p: { id: string }) => p.id);
+      if (destPkgIds.length > 0) {
+        const { data: conflicts } = await supabase
+          .from("sessions")
+          .select("id, start_at, end_at, status")
+          .in("package_id", destPkgIds)
+          .neq("status", "CANCELLED")
+          .lt("start_at", input.endAt)
+          .gt("end_at", input.startAt)
+          .limit(1);
+
+        if (conflicts && conflicts.length > 0) {
+          const conflictWindow = formatSessionTimeWindow(
+            conflicts[0].start_at,
+            conflicts[0].end_at,
+          );
+          return {
+            success: false,
+            message: `Destinasi sudah digunakan pada ${conflictWindow}. Pilih waktu lain.`,
+          };
+        }
+      }
+    } catch (preflightErr) {
+      console.warn("Preflight session conflict check skipped:", preflightErr);
     }
 
     try {
@@ -353,6 +443,30 @@ export const sessionRepository = {
         .single();
 
       if (error || !data) {
+        // Map database-level trigger rejections into clean, user-friendly messages
+        const errLower = (error?.message || "").toLowerCase();
+        if (
+          errLower.includes("kapasitas") ||
+          errLower.includes("melebihi batas") ||
+          error?.code === "23514"
+        ) {
+          return {
+            success: false,
+            message: `Kapasitas sesi maksimal untuk ${dest.name} adalah ${dest.capacityPerSession} orang.`,
+          };
+        }
+        if (
+          errLower.includes("bertabrakan") ||
+          errLower.includes("sudah memiliki sesi") ||
+          error?.code === "23P01"
+        ) {
+          return {
+            success: false,
+            message:
+              "Destinasi ini sudah memiliki sesi terjadwal pada waktu tersebut. Pilih waktu lain.",
+          };
+        }
+
         return {
           success: false,
           message: error?.message || "Gagal membuat sesi di Supabase.",
@@ -396,10 +510,38 @@ export const sessionRepository = {
         nowMs,
       );
       if (!ok) {
+        const s = mockEoPackageStore
+          .getAllSessions()
+          .find((item) => item.sessionId === sessionId);
+        const sStartMs = s ? Date.parse(s.startAt) : NaN;
+        if (!Number.isNaN(sStartMs) && sStartMs <= (nowMs ?? Date.now())) {
+          return {
+            success: false,
+            message:
+              "Sesi yang sudah berlangsung atau berlalu tidak dapat dibuka kembali (OPEN).",
+          };
+        }
+        const pkg = s
+          ? mockEoPackageStore.getPackageById(s.packageId)
+          : undefined;
+        const dest = pkg
+          ? mockDestinationStore.getById(pkg.destinationId)
+          : undefined;
+        if (
+          dest &&
+          s &&
+          s.capacity > dest.capacityPerSession &&
+          status !== "CANCELLED"
+        ) {
+          return {
+            success: false,
+            message: `Kapasitas sesi (${s.capacity}) melebihi batas maksimal destinasi ${dest.name} (${dest.capacityPerSession} orang).`,
+          };
+        }
         return {
           success: false,
           message:
-            "Sesi yang sudah berlangsung atau berlalu tidak dapat dibuka kembali (OPEN).",
+            "Destinasi ini sudah memiliki sesi terjadwal pada waktu tersebut. Pilih waktu lain.",
         };
       }
       const found = mockEoPackageStore
@@ -455,6 +597,43 @@ export const sessionRepository = {
         };
       }
 
+      // When reopening a cancelled session, check for schedule conflicts on destination
+      if (existing.status === "CANCELLED" && status !== "CANCELLED") {
+        const pkg = await packageRepository.getPackageById(existing.packageId);
+        if (pkg?.destinationId) {
+          const { data: destPackages } = await supabase
+            .from("packages")
+            .select("id")
+            .eq("destination_id", pkg.destinationId);
+
+          const destPkgIds = (destPackages || []).map(
+            (p: { id: string }) => p.id,
+          );
+          if (destPkgIds.length > 0) {
+            const { data: conflicts } = await supabase
+              .from("sessions")
+              .select("id, start_at, end_at, status")
+              .in("package_id", destPkgIds)
+              .neq("id", sessionId)
+              .neq("status", "CANCELLED")
+              .lt("start_at", existing.endAt)
+              .gt("end_at", existing.startAt)
+              .limit(1);
+
+            if (conflicts && conflicts.length > 0) {
+              const conflictWindow = formatSessionTimeWindow(
+                conflicts[0].start_at,
+                conflicts[0].end_at,
+              );
+              return {
+                success: false,
+                message: `Destinasi sudah digunakan pada ${conflictWindow}. Pilih waktu lain.`,
+              };
+            }
+          }
+        }
+      }
+
       const { data, error } = await supabase
         .from("sessions")
         .update({
@@ -467,6 +646,31 @@ export const sessionRepository = {
         .single();
 
       if (error || !data) {
+        const errLower = (error?.message || "").toLowerCase();
+        if (
+          errLower.includes("kapasitas") ||
+          errLower.includes("melebihi batas") ||
+          error?.code === "23514"
+        ) {
+          return {
+            success: false,
+            message:
+              error?.message ||
+              "Kapasitas sesi melebihi batas maksimal destinasi.",
+          };
+        }
+        if (
+          errLower.includes("bertabrakan") ||
+          errLower.includes("sudah memiliki sesi") ||
+          error?.code === "23P01"
+        ) {
+          return {
+            success: false,
+            message:
+              "Destinasi ini sudah memiliki sesi terjadwal pada waktu tersebut. Pilih waktu lain.",
+          };
+        }
+
         return {
           success: false,
           message: error?.message || "Gagal mengubah status sesi di Supabase.",

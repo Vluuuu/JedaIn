@@ -234,6 +234,9 @@ function cloneDestination(dest: DestinationRecord): DestinationRecord {
 let destinations = MOCK_DESTINATION_DIRECTORY.map((d) => cloneDestination(d));
 
 export const mockDestinationStore = {
+  replaceFromBackend(records: DestinationRecord[]): void {
+    destinations = records.map(cloneDestination);
+  },
   reset(): void {
     destinations = MOCK_DESTINATION_DIRECTORY.map((d) => cloneDestination(d));
   },

@@ -171,18 +171,20 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     const dialog = view.querySelector<HTMLDialogElement>("dialog[open]")!;
     expect(dialog).not.toBeNull();
 
-    // 1. Draft disclosure
-    expect(dialog.textContent).toContain("Preview Draf");
-    expect(dialog.textContent).toContain(
-      "Tampilan perkiraan pengalaman sebelum diajukan ke review kurasi Admin",
-    );
+    // 1. The same package detail hierarchy used on the Traveler route
+    expect(dialog.querySelector(".package-detail-container")).not.toBeNull();
+    expect(dialog.querySelector(".package-detail-intro")).not.toBeNull();
+    expect(dialog.querySelector(".package-detail-header-card")).not.toBeNull();
+    expect(dialog.querySelector(".package-detail-journey")).not.toBeNull();
+    expect(dialog.querySelector(".eo-builder-traveler-preview")).toBeNull();
+    expect(dialog.textContent).toContain("Preview draf sebelum review Admin");
 
     // 2. Traveler-facing identity
     expect(dialog.textContent).toContain("Jeda Sejenak di Lembah Teduh Pacet");
     expect(dialog.textContent).toContain(
       "Pengalaman mindful di tengah sejuknya lembah pegunungan Pacet bersama warga lokal.",
     );
-    expect(dialog.textContent).toContain("Lembah Teduh Pacet");
+    expect(dialog.textContent).toContain("Lembah Alam Pacet");
     expect(dialog.textContent).toContain("Mojokerto");
     expect(dialog.textContent).toContain("1 hari");
 
@@ -191,20 +193,19 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     expect(dialog.textContent).toContain("/ orang");
 
     // 4. Itinerary
-    expect(dialog.textContent).toContain("Rencana Perjalanan");
+    expect(dialog.textContent).toContain("Rencana perjalanan");
     expect(dialog.textContent).toContain("Pagi - Titik Kumpul & Sambutan Teh");
     expect(dialog.textContent).toContain(
       "Menjelajah Jalur Alami & Sesi Hening",
     );
 
     // 5. Preparation & Safety
-    expect(dialog.textContent).toContain("Persiapan & Keselamatan");
+    expect(dialog.textContent).toContain("Catatan Keselamatan & Persiapan");
     expect(dialog.textContent).toContain("Gunakan alas kaki yang nyaman");
 
-    // 6. Footer note
-    expect(dialog.textContent).toContain(
-      "Preview ini menampilkan draf sebelum review Admin dan belum berarti package telah disetujui atau LIVE.",
-    );
+    // 6. Draft-only disclosures are absent from the traveler-facing surface
+    expect(dialog.textContent).not.toContain("Kebijakan pembatalan");
+    expect(dialog.textContent).not.toContain("Jadwal Terdekat");
   });
 
   it("3. Preview does NOT display EO margin, platform commission, Rp7.500 fee, fake approval/LIVE, fake ratings, or operational notes", async () => {
@@ -292,8 +293,11 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     expect(dialogNoImg.textContent).toContain(
       "Visual utama belum ditambahkan.",
     );
-    // No img element inside dialog
-    expect(dialogNoImg.querySelector("img")).toBeNull();
+    // Mascot illustrations remain, but no invented destination media is shown.
+    expect(
+      dialogNoImg.querySelector(".package-detail-hero__visual"),
+    ).toBeNull();
+    expect(dialogNoImg.querySelector(".package-detail-gallery")).toBeNull();
 
     // Clean up container
     container?.remove();
@@ -331,15 +335,58 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
     expect(dialogWithImg).not.toBeNull();
 
     const imgEl = dialogWithImg.querySelector<HTMLImageElement>(
-      ".eo-builder-traveler-preview__img",
+      ".package-detail-hero__visual",
     );
     expect(imgEl).not.toBeNull();
     expect(imgEl?.src).toBe("https://example.com/test-photo.jpg");
-    expect(imgEl?.alt).toBe("Visual utama Jeda Sejenak di Lembah Teduh");
+    expect(imgEl?.alt).toBe("Visual package Jeda Sejenak di Lembah Teduh");
     expect(imgEl?.alt).not.toContain("Foto utama");
     expect(dialogWithImg.textContent).not.toContain(
       "Visual utama belum ditambahkan.",
     );
+  });
+
+  it("uses the traveler cover carousel for the draft's selected media", async () => {
+    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+    mockEoPackageStore.saveDraft({
+      packageId: "pkg_draft_gallery",
+      title: "Jeda di Pacet",
+      destinationId: "dest_lembah_pacet",
+      imageUrl: "https://example.com/cover.jpg",
+      imageUrls: [
+        "https://example.com/cover.jpg",
+        "https://example.com/forest.jpg",
+      ],
+      status: "DRAFT",
+    });
+
+    const view = await renderPackageBuilder([
+      "/partner/eo/packages/new?draftId=pkg_draft_gallery",
+    ]);
+    const step5 = Array.from(
+      view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),
+    ).find((button) => button.textContent?.includes("Tinjau & Submit"))!;
+    await act(async () => step5.click());
+    const openPreview = Array.from(
+      view.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((button) =>
+      button.textContent?.includes("Preview sebagai Traveler"),
+    )!;
+    await act(async () => openPreview.click());
+
+    const dialog = view.querySelector<HTMLDialogElement>("dialog[open]")!;
+    const cover = dialog.querySelector<HTMLImageElement>(
+      ".package-detail-hero__visual",
+    )!;
+    expect(cover.src).toBe("https://example.com/cover.jpg");
+    const dots = dialog.querySelectorAll<HTMLButtonElement>(
+      ".package-detail-hero__dot",
+    );
+    expect(dots).toHaveLength(2);
+
+    await act(async () => dots[1].click());
+    expect(cover.src).toBe("https://example.com/forest.jpg");
+    expect(dialog.querySelector(".package-detail-gallery")).not.toBeNull();
   });
 
   it("5. Opening and closing preview does NOT save, submit, publish, or change step", async () => {

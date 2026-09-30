@@ -3,7 +3,9 @@ import { useNavigate, useSearchParams } from "react-router";
 import { destinationRepository } from "../../data/destinationRepository";
 import { packageRepository } from "../../data/packageRepository";
 import { Badge, Button, Dialog } from "../../components/ui";
+import { PackageDetailScreen } from "../packageDetail/PackageDetailScreen";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
+import { buildTravelerDraftPreview } from "./buildTravelerDraftPreview";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
@@ -356,6 +358,27 @@ export function EoPackageBuilderScreen() {
       ? (selectedDestination?.localGuideFeePerPerson ?? 0)
       : 0;
   const customerPrice = baseCost + localGuideFee + eoMargin;
+  const travelerDraftPreview = buildTravelerDraftPreview({
+    destination: selectedDestination,
+    organizerId: eoId,
+    organizerName: partner?.businessName ?? "Travel Organizer",
+    guideStatus,
+    title,
+    summary: shortSummary,
+    durationLabel,
+    imageUrl,
+    imageUrls,
+    itinerary,
+    customerPrice,
+    safetyNotes,
+    includedItems: includedItemsText,
+    excludedItems: excludedItemsText,
+    accessNotes: accessNotesText,
+    meetingPointLabel,
+    departureTimeLabel,
+    outboundTransport,
+    returnTransport,
+  });
 
   // Auto-save draft on moving
   const saveCurrentDraft = () => {
@@ -2323,7 +2346,8 @@ export function EoPackageBuilderScreen() {
         <Dialog
           open={showTravelerPreview}
           title="Preview sebagai Traveler"
-          description="Tampilan perkiraan draf paket dari sudut pandang traveler sebelum diajukan ke review kurasi Admin."
+          description="Preview draf sebelum review Admin. Tampilan paket menggunakan halaman detail traveler."
+          className="eo-traveler-preview-dialog"
           onClose={() => setShowTravelerPreview(false)}
           actions={
             <Button
@@ -2336,230 +2360,16 @@ export function EoPackageBuilderScreen() {
             </Button>
           }
         >
-          <div className="eo-builder-traveler-preview">
-            <div className="eo-builder-traveler-preview__draft-notice">
-              <span className="eo-builder-traveler-preview__draft-tag">
-                Preview Draf
-              </span>
-              <span className="eo-builder-traveler-preview__draft-desc">
-                Tampilan perkiraan pengalaman sebelum diajukan ke review kurasi
-                Admin.
-              </span>
-            </div>
-
-            {imageUrl ? (
-              <div className="eo-builder-traveler-preview__hero">
-                <img
-                  src={imageUrl}
-                  alt={`Visual utama ${title || "paket"}`}
-                  className="eo-builder-traveler-preview__img"
-                />
-              </div>
-            ) : (
-              <div className="eo-builder-traveler-preview__img-placeholder">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-                <span>Visual utama belum ditambahkan.</span>
-              </div>
-            )}
-
-            <div className="eo-builder-traveler-preview__header">
-              <div className="eo-builder-traveler-preview__meta">
-                {selectedDestination && (
-                  <span>
-                    {selectedDestination.name}
-                    {selectedDestination.locationLabel
-                      ? ` • ${selectedDestination.locationLabel}`
-                      : ""}
-                  </span>
-                )}
-                {selectedDestination && durationLabel && <span>•</span>}
-                {durationLabel && <span>{durationLabel}</span>}
-              </div>
-
-              <h3 className="eo-builder-traveler-preview__title">
-                {title || "Draf Tanpa Judul"}
-              </h3>
-
-              <p className="eo-builder-traveler-preview__summary">
-                {shortSummary || "Belum ada ringkasan pengalaman."}
-              </p>
-              <div className="eo-builder-traveler-preview__price-box">
-                <span className="eo-builder-traveler-preview__price-label">
-                  Mulai dari
-                </span>
-                <strong className="eo-builder-traveler-preview__price-amount">
-                  Rp{customerPrice.toLocaleString("id-ID")}
-                </strong>
-                <span className="eo-builder-traveler-preview__price-unit">
-                  / orang
-                </span>
-              </div>
-            </div>
-
-            {itinerary.length > 0 && (
-              <div className="eo-builder-traveler-preview__section">
-                <h4 className="eo-builder-traveler-preview__section-title">
-                  Rencana Perjalanan
-                </h4>
-                <div className="eo-builder-traveler-preview__timeline">
-                  {itinerary.map((item) => (
-                    <div
-                      key={item.order}
-                      className="eo-builder-traveler-preview__timeline-item"
-                    >
-                      <div className="eo-builder-traveler-preview__timeline-header">
-                        <span className="eo-builder-traveler-preview__timeline-title">
-                          <span className="eo-builder-traveler-preview__timeline-number">
-                            {String(item.order).padStart(2, "0")}
-                          </span>
-                          {item.title || "Aktivitas"}
-                        </span>
-                        {item.durationLabel && (
-                          <span className="eo-builder-traveler-preview__timeline-duration">
-                            {item.durationLabel}
-                          </span>
-                        )}
-                      </div>
-                      {item.description && (
-                        <p className="eo-builder-traveler-preview__timeline-desc">
-                          {item.description}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Travel Logistics in Preview */}
-            <div className="eo-builder-traveler-preview__section">
-              <h4 className="eo-builder-traveler-preview__section-title">
-                Pengaturan Perjalanan
-              </h4>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--space-2)",
-                  fontSize: "var(--font-size-body-sm)",
-                  color: "var(--color-text-secondary)",
+          <div className="traveler-app-shell eo-traveler-preview-shell">
+            <main className="traveler-app-content">
+              <PackageDetailScreen
+                preview={{
+                  viewModel: travelerDraftPreview,
+                  durationLabel,
+                  onClose: () => setShowTravelerPreview(false),
                 }}
-              >
-                <div>
-                  <strong>Titik Kumpul:</strong>{" "}
-                  {meetingPointLabel || "Belum diisi"}
-                </div>
-                <div>
-                  <strong>Waktu Keberangkatan:</strong>{" "}
-                  {departureTimeLabel || "Belum diisi"}
-                </div>
-                {outboundTransport && (
-                  <div>
-                    <strong>Transportasi Menuju:</strong> {outboundTransport}
-                  </div>
-                )}
-                {returnTransport && (
-                  <div>
-                    <strong>Transportasi Kembali:</strong> {returnTransport}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Cakupan Paket in Preview */}
-            <div className="eo-builder-traveler-preview__section">
-              <h4 className="eo-builder-traveler-preview__section-title">
-                Fasilitas & Ketentuan
-              </h4>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "var(--space-3)",
-                  fontSize: "var(--font-size-caption)",
-                }}
-              >
-                <div>
-                  <strong style={{ color: "var(--color-success-text)" }}>
-                    Sudah Termasuk:
-                  </strong>
-                  <ul
-                    style={{
-                      margin: "var(--space-1) 0 0",
-                      paddingLeft: "1.2rem",
-                      color: "var(--color-text-secondary)",
-                    }}
-                  >
-                    {includedItemsText
-                      .split("\n")
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                      .map((item, i) => (
-                        <li key={i}>{item}</li>
-                      ))}
-                  </ul>
-                </div>
-                <div>
-                  <strong style={{ color: "var(--color-text-muted)" }}>
-                    Belum Termasuk:
-                  </strong>
-                  <ul
-                    style={{
-                      margin: "var(--space-1) 0 0",
-                      paddingLeft: "1.2rem",
-                      color: "var(--color-text-secondary)",
-                    }}
-                  >
-                    {excludedItemsText
-                      .split("\n")
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                      .map((item, i) => (
-                        <li key={i}>{item}</li>
-                      ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {safetyNotes
-              .split("\n")
-              .map((s) => s.trim())
-              .filter(Boolean).length > 0 && (
-              <div className="eo-builder-traveler-preview__section">
-                <h4 className="eo-builder-traveler-preview__section-title">
-                  Persiapan & Keselamatan
-                </h4>
-                <ul className="eo-builder-traveler-preview__list">
-                  {safetyNotes
-                    .split("\n")
-                    .map((s) => s.trim())
-                    .filter(Boolean)
-                    .map((note, idx) => (
-                      <li key={idx}>{note}</li>
-                    ))}
-                </ul>
-              </div>
-            )}
-
-            <p className="eo-builder-traveler-preview__footer-note">
-              Preview ini menampilkan draf sebelum review Admin dan belum
-              berarti package telah disetujui atau LIVE.
-            </p>
+              />
+            </main>
           </div>
         </Dialog>
       )}

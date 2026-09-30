@@ -4,6 +4,7 @@ import type { PackageRecommendationSource } from "../recommendation/types";
 
 export interface PackageHeroProps {
   packageData: PackageRecommendationSource;
+  preview?: boolean;
 }
 
 const PROTOTYPE_GALLERY_VIEWS = [
@@ -24,7 +25,10 @@ const PROTOTYPE_GALLERY_VIEWS = [
   },
 ] as const;
 
-export function PackageHero({ packageData }: PackageHeroProps) {
+export function PackageHero({
+  packageData,
+  preview = false,
+}: PackageHeroProps) {
   const visual = getPackageVisual(
     packageData.id,
     packageData.destinationName,
@@ -47,6 +51,7 @@ export function PackageHero({ packageData }: PackageHeroProps) {
       ]
     : [];
   const isPackageGallery = packageImages.length > 0;
+  const hasPreviewMedia = !preview || isPackageGallery;
   const views = isPackageGallery
     ? packageImages.map((url, index) => ({
         label: index === 0 ? "Cover package" : `Media package ${index + 1}`,
@@ -106,7 +111,8 @@ export function PackageHero({ packageData }: PackageHeroProps) {
   return (
     <section
       className="package-detail-media"
-      aria-labelledby="package-gallery-heading"
+      aria-labelledby={hasPreviewMedia ? "package-gallery-heading" : undefined}
+      aria-label={hasPreviewMedia ? undefined : "Visual paket"}
     >
       <header
         className="package-detail-hero"
@@ -130,41 +136,54 @@ export function PackageHero({ packageData }: PackageHeroProps) {
           touchStart.current = null;
         }}
       >
-        <img
-          className="package-detail-hero__visual"
-          src={activeView.url}
-          alt={`${isPackageGallery ? "Visual package" : "Ilustrasi suasana"} ${packageData.title}`}
-          role="img"
-          aria-label={`${isPackageGallery ? "Visual package" : "Ilustrasi suasana"} ${packageData.title}`}
-          width={800}
-          height={500}
-          fetchPriority="high"
-          style={{
-            transform: `scale(${activeView.scale})`,
-            transformOrigin: activeView.transformOrigin,
-          }}
-        />
-        <div className="package-detail-hero__visual-scrim" aria-hidden="true" />
-        <div className="package-detail-hero__badges">
-          <span className="package-detail-hero__rating-pill">
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-              className="package-detail-hero__rating-star"
-            >
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-            <span>
-              {packageData.rating !== undefined && packageData.rating !== null
-                ? `${packageData.rating.toFixed(1)}${packageData.ratingProvenance === "SAMPLE" ? " (contoh)" : ""}`
-                : "Belum ada rating"}
+        {hasPreviewMedia ? (
+          <img
+            className="package-detail-hero__visual"
+            src={activeView.url}
+            alt={`${isPackageGallery ? "Visual package" : "Ilustrasi suasana"} ${packageData.title}`}
+            role="img"
+            aria-label={`${isPackageGallery ? "Visual package" : "Ilustrasi suasana"} ${packageData.title}`}
+            width={800}
+            height={500}
+            fetchPriority="high"
+            style={{
+              transform: `scale(${activeView.scale})`,
+              transformOrigin: activeView.transformOrigin,
+            }}
+          />
+        ) : (
+          <div className="package-detail-hero__placeholder">
+            Visual utama belum ditambahkan.
+          </div>
+        )}
+        {hasPreviewMedia && (
+          <div
+            className="package-detail-hero__visual-scrim"
+            aria-hidden="true"
+          />
+        )}
+        {!preview && (
+          <div className="package-detail-hero__badges">
+            <span className="package-detail-hero__rating-pill">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+                className="package-detail-hero__rating-star"
+              >
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              <span>
+                {packageData.rating !== undefined && packageData.rating !== null
+                  ? `${packageData.rating.toFixed(1)}${packageData.ratingProvenance === "SAMPLE" ? " (contoh)" : ""}`
+                  : "Belum ada rating"}
+              </span>
             </span>
-          </span>
-        </div>
-        {views.length > 1 && (
+          </div>
+        )}
+        {hasPreviewMedia && views.length > 1 && (
           <div
             className="package-detail-hero__dots"
             role="group"
@@ -186,55 +205,57 @@ export function PackageHero({ packageData }: PackageHeroProps) {
         )}
       </header>
 
-      <div className="package-detail-gallery">
-        <div className="package-detail-gallery__heading-row">
-          <div>
-            <h2
-              id="package-gallery-heading"
-              className="package-detail-gallery__title"
+      {hasPreviewMedia && (
+        <div className="package-detail-gallery">
+          <div className="package-detail-gallery__heading-row">
+            <div>
+              <h2
+                id="package-gallery-heading"
+                className="package-detail-gallery__title"
+              >
+                Galeri destinasi
+              </h2>
+              <p className="package-detail-gallery__eyebrow">
+                Jelajahi media pengalaman
+              </p>
+            </div>
+          </div>
+          <div className="package-detail-gallery__entry-grid">
+            <button
+              type="button"
+              className="package-detail-gallery__entry package-detail-gallery__entry--photos"
+              onClick={(event) => openGallery("photos", event.currentTarget)}
             >
-              Galeri destinasi
-            </h2>
-            <p className="package-detail-gallery__eyebrow">
-              Jelajahi media pengalaman
-            </p>
+              <img
+                src={activeView.url}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+              />
+              <span className="package-detail-gallery__entry-content">
+                <strong>Foto</strong>
+                <span>{views.length} tampilan · Lihat semua</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="package-detail-gallery__entry package-detail-gallery__entry--videos"
+              onClick={(event) => openGallery("videos", event.currentTarget)}
+            >
+              <span
+                className="package-detail-gallery__video-icon"
+                aria-hidden="true"
+              >
+                ▶
+              </span>
+              <span className="package-detail-gallery__entry-content">
+                <strong>Video</strong>
+                <span>Belum tersedia</span>
+              </span>
+            </button>
           </div>
         </div>
-        <div className="package-detail-gallery__entry-grid">
-          <button
-            type="button"
-            className="package-detail-gallery__entry package-detail-gallery__entry--photos"
-            onClick={(event) => openGallery("photos", event.currentTarget)}
-          >
-            <img
-              src={activeView.url}
-              alt=""
-              aria-hidden="true"
-              loading="lazy"
-            />
-            <span className="package-detail-gallery__entry-content">
-              <strong>Foto</strong>
-              <span>{views.length} tampilan · Lihat semua</span>
-            </span>
-          </button>
-          <button
-            type="button"
-            className="package-detail-gallery__entry package-detail-gallery__entry--videos"
-            onClick={(event) => openGallery("videos", event.currentTarget)}
-          >
-            <span
-              className="package-detail-gallery__video-icon"
-              aria-hidden="true"
-            >
-              ▶
-            </span>
-            <span className="package-detail-gallery__entry-content">
-              <strong>Video</strong>
-              <span>Belum tersedia</span>
-            </span>
-          </button>
-        </div>
-      </div>
+      )}
 
       {galleryOpen && (
         <div

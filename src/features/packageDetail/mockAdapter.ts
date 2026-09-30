@@ -3,6 +3,7 @@ import { resolveDestinationReviewRef } from "../identity/identityResolvers";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
+  syncMarketplaceFromSupabase,
 } from "../marketplace/marketplaceAdapter";
 import type { PackageRecommendationSource } from "../recommendation/types";
 import { mockReviewStore } from "../reviews/mockReviewStore";
@@ -59,6 +60,8 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
+
+    await syncMarketplaceFromSupabase();
 
     if (this.failCount > 0) {
       this.failCount--;

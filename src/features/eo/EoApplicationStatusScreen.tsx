@@ -155,7 +155,6 @@ export function EoApplicationStatusScreen() {
                 margin: 0,
                 padding: "var(--space-3)",
                 background: "var(--color-stone-0)",
-                borderLeft: "4px solid var(--color-danger-solid)",
                 borderRadius: "var(--radius-xs)",
                 fontStyle: "italic",
                 color: "var(--color-text-primary)",

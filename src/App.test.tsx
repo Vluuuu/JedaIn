@@ -114,7 +114,7 @@ describe("App shell routing", () => {
       },
       {
         to: "/partner/destination/profile-settings",
-        label: "Profile",
+        label: "Pengaturan",
       },
     ]);
 
@@ -137,7 +137,7 @@ describe("App shell routing", () => {
       "Bookings",
       "Destinations",
       "Reviews",
-      "Profile",
+      "Profil TO",
     ]);
   });
 
@@ -178,7 +178,6 @@ describe("App shell routing", () => {
     "/onboarding/consent",
     "/onboarding/quiz",
     "/payment/booking-1",
-    "/partner/login",
     "/partner/eo/login",
     "/eo/login",
     "/admin/login",

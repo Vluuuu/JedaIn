@@ -13,9 +13,9 @@ export function EoProfileScreen() {
     <div className="eo-container" style={{ maxWidth: "800px" }}>
       <header className="eo-page-header">
         <div>
-          <h1 className="eo-page-title">Profil Mitra Travel Organizer</h1>
+          <h1 className="eo-page-title">Profil Travel Organizer</h1>
           <p className="eo-page-subtitle">
-            Informasi entitas bisnis dan detail operasional kemitraan.
+            Identitas penyelenggara dan informasi kemitraanmu di JedaIn.
           </p>
         </div>
       </header>

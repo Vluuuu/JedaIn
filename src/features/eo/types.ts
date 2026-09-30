@@ -127,6 +127,8 @@ export interface DemandDistributionItem {
 export interface DemandInsightRecord {
   insightId: string;
   title: string;
+  destinationContext?: string;
+  relatedDestinationIds?: string[];
   intent: DemandIntent;
   intentLabel: string;
   targetArea: string;

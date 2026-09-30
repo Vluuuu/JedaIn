@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { destinationRepository } from "../../data/destinationRepository";
 import { InlineStatus, StatusMeta } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
-import type { EoSessionStatus } from "../eo/types";
+import { useRealtimeSubscription } from "../../lib/supabase/realtime";
+import type { DestinationRecord, EoSessionStatus } from "../eo/types";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
 import {
   destinationSessionStatusLabels,
@@ -45,6 +48,34 @@ const formatCurrency = (value: number) => `Rp${value.toLocaleString("id-ID")}`;
 
 export function DestinationOverviewScreen() {
   const context = resolveAuthenticatedDestinationContext();
+  const [destRecord, setDestRecord] = useState<DestinationRecord | undefined>(
+    () => context?.destination,
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+    if (context?.destination.destinationId) {
+      destinationRepository
+        .getById(context.destination.destinationId)
+        .then((res) => {
+          if (isMounted && res) setDestRecord(res);
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [context?.destination.destinationId]);
+
+  useRealtimeSubscription("destinations", () => {
+    if (context?.destination.destinationId) {
+      destinationRepository
+        .getById(context.destination.destinationId)
+        .then((res) => {
+          if (res) setDestRecord(res);
+        });
+    }
+  });
+
   if (!context) {
     return (
       <div className="dest-container dest-unavailable">
@@ -59,7 +90,8 @@ export function DestinationOverviewScreen() {
     );
   }
 
-  const { destination, partner, application } = context;
+  const destination = destRecord ?? context.destination;
+  const { partner, application } = context;
   const data = getDestinationOverviewData(destination);
   const visual = getDestinationVisual(destination.name, destination.imageUrl);
 
@@ -68,6 +100,9 @@ export function DestinationOverviewScreen() {
       <header className="dest-identity">
         <div className="dest-identity__content">
           <div className="dest-identity__heading">
+            <span className="dest-identity__eyebrow">
+              Ruang kerja · Mitra Destinasi
+            </span>
             <h1 className="dest-page-title">{destination.name}</h1>
             <p className="dest-identity__location">
               {destination.locationLabel}

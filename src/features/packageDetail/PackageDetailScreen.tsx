@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
+import PlanMascot from "../../assets/mascot/plan.png";
 import { Button, Skeleton } from "../../components/ui";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
 import { formatSessionDateTimeRange } from "./formatSessionDate";
@@ -14,10 +15,16 @@ import "./packageDetail.css";
 
 export interface PackageDetailScreenProps {
   adapter?: PackageDetailAdapter;
+  preview?: {
+    viewModel: PackageDetailViewModel;
+    durationLabel: string;
+    onClose: () => void;
+  };
 }
 
 export function PackageDetailScreen({
   adapter = defaultPackageDetailAdapter,
+  preview,
 }: PackageDetailScreenProps) {
   const { packageId } = useParams<{ packageId: string }>();
   const navigate = useNavigate();
@@ -31,7 +38,9 @@ export function PackageDetailScreen({
   // Extract optional real recommendation context passed through navigation state
   const navState = location.state as
     { personalizedContext?: PersonalizedContext } | undefined;
-  const personalizedContext = navState?.personalizedContext;
+  const personalizedContext = preview
+    ? undefined
+    : navState?.personalizedContext;
 
   const loadDetail = async (id: string) => {
     setIsLoading(true);
@@ -54,7 +63,7 @@ export function PackageDetailScreen({
 
   useEffect(() => {
     let isMounted = true;
-    if (!packageId) {
+    if (preview || !packageId) {
       return;
     }
 
@@ -81,9 +90,11 @@ export function PackageDetailScreen({
     return () => {
       isMounted = false;
     };
-  }, [packageId, adapter, personalizedContext]);
+  }, [packageId, adapter, personalizedContext, preview]);
 
-  if (isLoading) {
+  const displayedViewModel = preview?.viewModel ?? viewModel;
+
+  if (isLoading && !preview) {
     return (
       <div className="package-detail-container" aria-busy="true">
         <Skeleton height="18rem" />
@@ -100,7 +111,7 @@ export function PackageDetailScreen({
     );
   }
 
-  if (!viewModel || viewModel.state === "ERROR") {
+  if (!displayedViewModel || displayedViewModel.state === "ERROR") {
     return (
       <div className="package-detail-container">
         <div
@@ -122,9 +133,9 @@ export function PackageDetailScreen({
   }
 
   if (
-    viewModel.state === "NOT_FOUND" ||
-    !viewModel.package ||
-    !viewModel.detail
+    displayedViewModel.state === "NOT_FOUND" ||
+    !displayedViewModel.package ||
+    !displayedViewModel.detail
   ) {
     return (
       <div className="package-detail-container">
@@ -152,24 +163,40 @@ export function PackageDetailScreen({
     hasOpenSession,
     organizerReviewSummary,
     destinationReviewSummary,
-  } = viewModel;
+  } = displayedViewModel;
   const durationLabel =
+    preview?.durationLabel ??
     QUIZ_DURATION_OPTIONS.find((d) => d.value === pkg.durationType)?.label ??
     pkg.durationType;
 
-  const formattedPrice = `Rp${pkg.pricePerPerson.toLocaleString("id-ID")}`;
+  const formattedPrice =
+    preview && pkg.pricePerPerson <= 0
+      ? "Belum dihitung"
+      : `Rp${pkg.pricePerPerson.toLocaleString("id-ID")}`;
 
   return (
     <div className="package-detail-container">
       <div className="package-detail-context" aria-label="Konteks halaman">
+        {preview ? (
+          <button
+            type="button"
+            className="package-detail-context__back"
+            onClick={preview.onClose}
+          >
+            ← Kembali ke draf
+          </button>
+        ) : (
+          <Link className="package-detail-context__back" to="/explore">
+            ← Explore
+          </Link>
+        )}
         <span className="package-detail-context__label">Detail Experience</span>
       </div>
 
-      {/* 1. Hero Media */}
-      <PackageHero packageData={pkg} />
+      <div className="package-detail-intro">
+        {/* 1. Hero Media */}
+        <PackageHero packageData={pkg} preview={Boolean(preview)} />
 
-      {/* Main Content Sections in locked contract order */}
-      <div className="package-detail-main">
         {/* 2. Title, Value Proposition & Starting Price */}
         <section
           className="package-detail-header-card"
@@ -177,8 +204,12 @@ export function PackageDetailScreen({
         >
           <div className="package-detail-meta-row">
             <span>{pkg.destinationName}</span>
-            <span>•</span>
-            <span>{pkg.locationLabel}</span>
+            {pkg.locationLabel && (
+              <>
+                <span>•</span>
+                <span>{pkg.locationLabel}</span>
+              </>
+            )}
             <span>•</span>
             <span>{durationLabel}</span>
           </div>
@@ -192,12 +223,25 @@ export function PackageDetailScreen({
             <span className="package-detail-price-amount">
               {formattedPrice}
             </span>
-            <span className="package-detail-price-unit">/ orang</span>
+            {!(preview && pkg.pricePerPerson <= 0) && (
+              <span className="package-detail-price-unit">/ orang</span>
+            )}
           </div>
 
           <p className="package-detail-value-prop">{detail.valueProposition}</p>
+          <img
+            className="package-detail-header-card__mascot"
+            src={PlanMascot}
+            alt=""
+            aria-hidden="true"
+            width="520"
+            height="634"
+          />
         </section>
+      </div>
 
+      {/* Main experience content */}
+      <div className="package-detail-main">
         {/* 3. Optional Personalized Match Explanation */}
         {personalizedContext && personalizedContext.reasons.length > 0 && (
           <section
@@ -240,7 +284,7 @@ export function PackageDetailScreen({
         {/* 6. Experience Highlights */}
         {detail.highlights.length > 0 && (
           <section
-            className="package-detail-section package-detail-section--primary"
+            className="package-detail-section package-detail-section--primary package-detail-section--highlights"
             aria-labelledby="highlights-heading"
           >
             <h2
@@ -276,75 +320,137 @@ export function PackageDetailScreen({
           </section>
         )}
 
-        {/* 11. Upcoming Sessions Preview */}
-        <section
-          className="package-detail-section package-detail-section--primary"
-          aria-labelledby="sessions-preview-heading"
-        >
-          <h2
-            id="sessions-preview-heading"
-            className="package-detail-section__title"
+        {detail.itinerary.length > 0 && (
+          <section
+            className="package-detail-journey"
+            aria-labelledby="itinerary-heading"
           >
-            Jadwal Terdekat
-          </h2>
-          <p className="package-detail-section__desc">
-            Slot yang tertera merupakan kuota peserta per sesi perjalanan,
-            terpisah dari kapasitas umum kawasan destinasi.
-          </p>
-          {detail.upcomingSessionPreviews.length > 0 ? (
-            <div className="package-detail-sessions-list">
-              {detail.upcomingSessionPreviews.map((session) => {
-                const { dateLabel } = formatSessionDateTimeRange(
-                  session.startAt,
-                  session.endAt,
-                );
-
-                return (
-                  <div
-                    key={session.sessionId}
-                    className="package-detail-session-card"
+            <div className="package-detail-journey__header">
+              <div className="package-detail-journey__intro">
+                <span className="package-detail-journey__eyebrow">
+                  Alur pengalaman · {detail.itinerary.length} kegiatan
+                </span>
+                <h2 id="itinerary-heading">Rencana perjalanan</h2>
+                <p>
+                  Ikuti perjalanan dari kegiatan pertama hingga penutupannya.
+                </p>
+              </div>
+              <img
+                className="package-detail-journey__mascot"
+                src={PlanMascot}
+                alt=""
+                aria-hidden="true"
+                width="520"
+                height="634"
+                loading="lazy"
+              />
+            </div>
+            <ol className="package-detail-itinerary-list">
+              {detail.itinerary.map((item) => (
+                <li key={item.order} className="package-detail-itinerary-item">
+                  <span
+                    className="package-detail-itinerary-order"
+                    aria-hidden="true"
                   >
-                    <div className="package-detail-session-card__header">
-                      <div>
-                        <span className="package-detail-session-card__date">
-                          {dateLabel}
+                    {item.order < 10 ? `0${item.order}` : item.order}
+                  </span>
+                  <div className="package-detail-itinerary-content">
+                    {(item.timeOfDayLabel || item.durationLabel) && (
+                      <div className="package-detail-itinerary-meta">
+                        {item.timeOfDayLabel && (
+                          <span>{item.timeOfDayLabel}</span>
+                        )}
+                        {item.durationLabel && (
+                          <span className="package-detail-itinerary-duration">
+                            {item.durationLabel}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <h3 className="package-detail-itinerary-title">
+                      {item.title}
+                    </h3>
+                    <p className="package-detail-itinerary-desc">
+                      {item.description}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        {/* 11. Upcoming Sessions Preview */}
+        {!preview && (
+          <section
+            className="package-detail-section package-detail-section--primary package-detail-section--sessions"
+            aria-labelledby="sessions-preview-heading"
+          >
+            <h2
+              id="sessions-preview-heading"
+              className="package-detail-section__title"
+            >
+              Jadwal Terdekat
+            </h2>
+            <p className="package-detail-section__desc">
+              Slot yang tertera merupakan kuota peserta per sesi perjalanan,
+              terpisah dari kapasitas umum kawasan destinasi.
+            </p>
+            {detail.upcomingSessionPreviews.length > 0 ? (
+              <div className="package-detail-sessions-list">
+                {detail.upcomingSessionPreviews.map((session) => {
+                  const { dateLabel } = formatSessionDateTimeRange(
+                    session.startAt,
+                    session.endAt,
+                  );
+
+                  return (
+                    <div
+                      key={session.sessionId}
+                      className="package-detail-session-card"
+                    >
+                      <div className="package-detail-session-card__header">
+                        <div>
+                          <span className="package-detail-session-card__date">
+                            {dateLabel}
+                          </span>
+                        </div>
+                        <span
+                          className={`package-detail-session-card__status${
+                            session.status === "OPEN"
+                              ? " package-detail-session-card__status--open"
+                              : ""
+                          }`}
+                        >
+                          <span
+                            className="package-detail-session-card__status-dot"
+                            aria-hidden="true"
+                          />
+                          <span>
+                            {session.status === "OPEN"
+                              ? "Tersedia"
+                              : session.status === "FULL"
+                                ? "Penuh"
+                                : "Ditutup"}
+                          </span>
                         </span>
                       </div>
-                      <span
-                        className={`package-detail-session-card__status${
-                          session.status === "OPEN"
-                            ? " package-detail-session-card__status--open"
-                            : ""
-                        }`}
-                      >
-                        <span
-                          className="package-detail-session-card__status-dot"
-                          aria-hidden="true"
-                        />
-                        <span>
-                          {session.status === "OPEN"
-                            ? "Tersedia"
-                            : session.status === "FULL"
-                              ? "Penuh"
-                              : "Ditutup"}
+                      {session.remainingSlots !== undefined && (
+                        <span className="package-detail-session-card__slots">
+                          Sisa {session.remainingSlots} slot (kuota sesi)
                         </span>
-                      </span>
+                      )}
                     </div>
-                    {session.remainingSlots !== undefined && (
-                      <span className="package-detail-session-card__slots">
-                        Sisa {session.remainingSlots} slot (kuota sesi)
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="package-detail-no-session-notice">
-              <p>Belum ada jadwal terdekat yang dibuka untuk paket ini.</p>
-            </div>
-          )}
-        </section>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="package-detail-no-session-notice">
+                <p>Belum ada jadwal terdekat yang dibuka untuk paket ini.</p>
+              </div>
+            )}
+          </section>
+        )}
 
         <div
           className="package-detail-secondary"
@@ -377,36 +483,40 @@ export function PackageDetailScreen({
                     <p className="package-detail-section__subtitle">
                       {pkg.locationLabel}
                     </p>
-                    <p className="package-detail-identity-rating">
-                      {destinationReviewSummary
-                        ? `★ ${destinationReviewSummary.averageRating.toFixed(1)} · ${destinationReviewSummary.reviewCount} ulasan destinasi`
-                        : "Belum ada ulasan destinasi."}
-                    </p>
+                    {!preview && (
+                      <p className="package-detail-identity-rating">
+                        {destinationReviewSummary
+                          ? `★ ${destinationReviewSummary.averageRating.toFixed(1)} · ${destinationReviewSummary.reviewCount} ulasan destinasi`
+                          : "Belum ada ulasan destinasi."}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <p className="package-detail-editorial-text">
                   {detail.destinationDetail.overviewDescription}
                 </p>
-                <p className="package-detail-subtle-note">
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    className="package-detail-subtle-note__icon"
-                  >
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <polyline points="9 12 11 14 15 10" />
-                  </svg>
-                  <span>
-                    Destinasi ini telah melalui proses verifikasi JedaIn.
-                  </span>
-                </p>
+                {!preview && (
+                  <p className="package-detail-subtle-note">
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className="package-detail-subtle-note__icon"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <polyline points="9 12 11 14 15 10" />
+                    </svg>
+                    <span>
+                      Destinasi ini telah melalui proses verifikasi JedaIn.
+                    </span>
+                  </p>
+                )}
               </section>
 
               {/* 5. Travel Organizer Section */}
@@ -430,11 +540,13 @@ export function PackageDetailScreen({
                         {detail.organizer.roleDescription}
                       </p>
                     )}
-                    <p className="package-detail-identity-rating">
-                      {organizerReviewSummary
-                        ? `★ ${organizerReviewSummary.averageRating.toFixed(1)} · ${organizerReviewSummary.reviewCount} ulasan pascatrip`
-                        : "Belum ada ulasan pascatrip."}
-                    </p>
+                    {!preview && (
+                      <p className="package-detail-identity-rating">
+                        {organizerReviewSummary
+                          ? `★ ${organizerReviewSummary.averageRating.toFixed(1)} · ${organizerReviewSummary.reviewCount} ulasan pascatrip`
+                          : "Belum ada ulasan pascatrip."}
+                      </p>
+                    )}
                   </div>
                 </div>
                 {detail.organizer.bioSummary && (
@@ -442,419 +554,385 @@ export function PackageDetailScreen({
                     {detail.organizer.bioSummary}
                   </p>
                 )}
-                <p className="package-detail-subtle-note">
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    className="package-detail-subtle-note__icon"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="16" x2="12" y2="12" />
-                    <line x1="12" y1="8" x2="12.01" y2="8" />
-                  </svg>
-                  <span>Penyelenggara terdaftar di JedaIn Partner Portal.</span>
-                </p>
-              </section>
-            </div>
-          </details>
-
-          <details className="package-detail-disclosure">
-            <summary className="package-detail-disclosure__summary">
-              <span>Rencana perjalanan</span>
-              <span className="package-detail-disclosure__hint">
-                Lihat itinerary
-              </span>
-            </summary>
-            <div className="package-detail-disclosure__body">
-              {/* 7. Itinerary */}
-              {detail.itinerary.length > 0 && (
-                <section
-                  className="package-detail-section"
-                  aria-labelledby="itinerary-heading"
-                >
-                  <h2
-                    id="itinerary-heading"
-                    className="package-detail-section__title"
-                  >
-                    Rencana Perjalanan
-                  </h2>
-                  <p className="package-detail-section__desc">
-                    Garis besar alur kegiatan paket template:
-                  </p>
-                  <ol className="package-detail-itinerary-list">
-                    {detail.itinerary.map((item) => (
-                      <li
-                        key={item.order}
-                        className="package-detail-itinerary-item"
-                      >
-                        <span
-                          className="package-detail-itinerary-order"
-                          aria-hidden="true"
-                        >
-                          {item.order < 10 ? `0${item.order}` : item.order}
-                        </span>
-                        <div className="package-detail-itinerary-content">
-                          <div className="package-detail-itinerary-header">
-                            <h3 className="package-detail-itinerary-title">
-                              {item.title}
-                            </h3>
-                            {item.durationLabel && (
-                              <span className="package-detail-itinerary-duration">
-                                {item.durationLabel}
-                              </span>
-                            )}
-                          </div>
-                          <p className="package-detail-itinerary-desc">
-                            {item.description}
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                </section>
-              )}
-            </div>
-          </details>
-
-          <details className="package-detail-disclosure">
-            <summary className="package-detail-disclosure__summary">
-              <span>Yang kamu dapatkan</span>
-              <span className="package-detail-disclosure__hint">
-                Lihat fasilitas
-              </span>
-            </summary>
-            <div className="package-detail-disclosure__body">
-              {/* 8. What's Included / Excluded */}
-              <section
-                className="package-detail-section"
-                aria-labelledby="in-out-heading"
-              >
-                <h2
-                  id="in-out-heading"
-                  className="package-detail-section__title"
-                >
-                  Fasilitas & Ketentuan
-                </h2>
-                <div className="package-detail-in-out-grid">
-                  <div className="package-detail-in-out-col">
-                    <h3 className="package-detail-in-out-heading">
-                      Sudah Termasuk
-                    </h3>
-                    <ul className="package-detail-in-out-list">
-                      {detail.includedItems.map((item, idx) => (
-                        <li key={idx} className="package-detail-in-out-row">
-                          <span
-                            className="package-detail-in-out-icon package-detail-in-out-icon--included"
-                            aria-hidden="true"
-                          >
-                            <svg
-                              width="15"
-                              height="15"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                          </span>
-                          <span className="package-detail-in-out-text">
-                            {item}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div
-                    className="package-detail-in-out-divider"
-                    aria-hidden="true"
-                  />
-
-                  <div className="package-detail-in-out-col">
-                    <h3 className="package-detail-in-out-heading">
-                      Belum Termasuk
-                    </h3>
-                    <ul className="package-detail-in-out-list">
-                      {detail.excludedItems.map((item, idx) => (
-                        <li key={idx} className="package-detail-in-out-row">
-                          <span
-                            className="package-detail-in-out-icon package-detail-in-out-icon--excluded"
-                            aria-hidden="true"
-                          >
-                            <svg
-                              width="15"
-                              height="15"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
-                          </span>
-                          <span className="package-detail-in-out-text">
-                            {item}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </section>
-            </div>
-          </details>
-
-          <details className="package-detail-disclosure">
-            <summary className="package-detail-disclosure__summary">
-              <span>Persiapan, titik kumpul & akses</span>
-              <span className="package-detail-disclosure__hint">
-                Lihat detail
-              </span>
-            </summary>
-            <div className="package-detail-disclosure__body">
-              {/* 9. Safety & Basic Notes */}
-              {detail.safetyNotes.length > 0 && (
-                <section
-                  className="package-detail-section"
-                  aria-labelledby="safety-heading"
-                >
-                  <h2
-                    id="safety-heading"
-                    className="package-detail-section__title"
-                  >
-                    Catatan Keselamatan & Persiapan
-                  </h2>
-                  <ul className="package-detail-simple-list">
-                    {detail.safetyNotes.map((note, idx) => (
-                      <li key={idx}>{note}</li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-
-              {/* 10. Travel Logistics & Meeting Point */}
-              {(detail.meetingPointLabel ||
-                detail.departureTimeLabel ||
-                detail.outboundTransport ||
-                detail.returnTransport ||
-                (detail.accessNotes && detail.accessNotes.length > 0)) && (
-                <section
-                  className="package-detail-section"
-                  aria-labelledby="logistics-heading"
-                >
-                  <h2
-                    id="logistics-heading"
-                    className="package-detail-section__title"
-                  >
-                    Informasi Titik Kumpul & Akses
-                  </h2>
-                  <div className="package-detail-logistics-grid">
-                    {detail.meetingPointLabel && (
-                      <div className="package-detail-logistics-item">
-                        <span className="package-detail-logistics-label">
-                          Titik Kumpul
-                        </span>
-                        <strong className="package-detail-logistics-val">
-                          {detail.meetingPointLabel}
-                        </strong>
-                      </div>
-                    )}
-                    <div className="package-detail-logistics-item">
-                      <span className="package-detail-logistics-label">
-                        Lokasi Kawasan
-                      </span>
-                      <strong className="package-detail-logistics-val">
-                        {pkg.destinationName}, {pkg.locationLabel}
-                      </strong>
-                    </div>
-                    {detail.departureTimeLabel && (
-                      <div className="package-detail-logistics-item">
-                        <span className="package-detail-logistics-label">
-                          Waktu Kumpul / Keberangkatan
-                        </span>
-                        <span className="package-detail-logistics-val">
-                          {detail.departureTimeLabel}
-                        </span>
-                      </div>
-                    )}
-                    {detail.outboundTransport && (
-                      <div className="package-detail-logistics-item">
-                        <span className="package-detail-logistics-label">
-                          Transportasi Menuju Destinasi
-                        </span>
-                        <span className="package-detail-logistics-val">
-                          {detail.outboundTransport}
-                        </span>
-                      </div>
-                    )}
-                    {detail.returnTransport && (
-                      <div className="package-detail-logistics-item">
-                        <span className="package-detail-logistics-label">
-                          Transportasi Kembali
-                        </span>
-                        <span className="package-detail-logistics-val">
-                          {detail.returnTransport}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {detail.accessNotes && detail.accessNotes.length > 0 && (
-                    <div className="package-detail-logistics-notes">
-                      <span className="package-detail-logistics-label">
-                        Catatan Akses Lokasi:
-                      </span>
-                      <ul className="package-detail-simple-list">
-                        {detail.accessNotes.map((note, idx) => (
-                          <li key={idx}>{note}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </section>
-              )}
-            </div>
-          </details>
-
-          <details className="package-detail-disclosure">
-            <summary className="package-detail-disclosure__summary">
-              <span>Kebijakan pembatalan</span>
-              <span className="package-detail-disclosure__hint">
-                Lihat kebijakan
-              </span>
-            </summary>
-            <div className="package-detail-disclosure__body">
-              {/* 11. Cancellation & Refund Policy Summary */}
-              <section
-                className="package-detail-section"
-                aria-labelledby="policy-heading"
-              >
-                <h2
-                  id="policy-heading"
-                  className="package-detail-section__title"
-                >
-                  Kebijakan Pembatalan & Refund
-                </h2>
-                <p className="package-detail-editorial-text">
-                  {detail.cancellationPolicySummary}
-                </p>
-              </section>
-            </div>
-          </details>
-
-          <details className="package-detail-disclosure">
-            <summary className="package-detail-disclosure__summary">
-              <span>Ulasan & rating</span>
-              <span className="package-detail-disclosure__hint">
-                Lihat ulasan
-              </span>
-            </summary>
-            <div className="package-detail-disclosure__body">
-              {/* 12. Reviews Preview */}
-              <section
-                className="package-detail-section"
-                aria-labelledby="reviews-heading"
-              >
-                <h2
-                  id="reviews-heading"
-                  className="package-detail-section__title"
-                >
-                  {pkg.ratingProvenance === "SAMPLE"
-                    ? "Contoh Ulasan Paket"
-                    : "Ulasan Pascatrip"}
-                </h2>
-                <p className="package-detail-section__desc">
-                  {pkg.ratingProvenance === "SAMPLE"
-                    ? "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket. Ulasan Destinasi dan Travel Organizer pascatrip dicatat terpisah."
-                    : "Ulasan pascatrip dari traveler yang telah menyelesaikan perjalanan. Ulasan Destinasi dan Travel Organizer dicatat terpisah."}
-                </p>
-                <div className="package-detail-reviews-summary">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                    className="package-detail-reviews-star"
-                  >
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                  <span>
-                    {pkg.rating !== undefined && pkg.rating !== null
-                      ? pkg.ratingProvenance === "SAMPLE"
-                        ? `Rating paket contoh: ${pkg.rating.toFixed(1)} / 5.0`
-                        : `Rating paket: ${pkg.rating.toFixed(1)} / 5.0`
-                      : "Belum ada rating"}
-                  </span>
-                </div>
-                {detail.reviewPreview?.excerpts &&
-                detail.reviewPreview.excerpts.length > 0 ? (
-                  <div className="package-detail-review-excerpt">
-                    {detail.reviewPreview.excerpts.map((rev) => (
-                      <div key={rev.bookingId}>
-                        <span className="package-detail-review-excerpt__author">
-                          {rev.authorName} • {rev.tripDateLabel}
-                        </span>
-                        <p className="package-detail-review-excerpt__comment">
-                          "{rev.comment}"
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="package-detail-section__desc">
-                    Belum ada ulasan tertulis yang ditampilkan.
+                {!preview && (
+                  <p className="package-detail-subtle-note">
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className="package-detail-subtle-note__icon"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="16" x2="12" y2="12" />
+                      <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                    <span>
+                      Penyelenggara terdaftar di JedaIn Partner Portal.
+                    </span>
                   </p>
                 )}
               </section>
             </div>
           </details>
+
+          {(!preview ||
+            detail.includedItems.length > 0 ||
+            detail.excludedItems.length > 0) && (
+            <details className="package-detail-disclosure">
+              <summary className="package-detail-disclosure__summary">
+                <span>Yang kamu dapatkan</span>
+                <span className="package-detail-disclosure__hint">
+                  Lihat fasilitas
+                </span>
+              </summary>
+              <div className="package-detail-disclosure__body">
+                {/* 8. What's Included / Excluded */}
+                <section
+                  className="package-detail-section"
+                  aria-labelledby="in-out-heading"
+                >
+                  <h2
+                    id="in-out-heading"
+                    className="package-detail-section__title"
+                  >
+                    Fasilitas & Ketentuan
+                  </h2>
+                  <div className="package-detail-in-out-grid">
+                    <div className="package-detail-in-out-col">
+                      <h3 className="package-detail-in-out-heading">
+                        Sudah Termasuk
+                      </h3>
+                      <ul className="package-detail-in-out-list">
+                        {detail.includedItems.map((item, idx) => (
+                          <li key={idx} className="package-detail-in-out-row">
+                            <span
+                              className="package-detail-in-out-icon package-detail-in-out-icon--included"
+                              aria-hidden="true"
+                            >
+                              <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </span>
+                            <span className="package-detail-in-out-text">
+                              {item}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div
+                      className="package-detail-in-out-divider"
+                      aria-hidden="true"
+                    />
+
+                    <div className="package-detail-in-out-col">
+                      <h3 className="package-detail-in-out-heading">
+                        Belum Termasuk
+                      </h3>
+                      <ul className="package-detail-in-out-list">
+                        {detail.excludedItems.map((item, idx) => (
+                          <li key={idx} className="package-detail-in-out-row">
+                            <span
+                              className="package-detail-in-out-icon package-detail-in-out-icon--excluded"
+                              aria-hidden="true"
+                            >
+                              <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                              </svg>
+                            </span>
+                            <span className="package-detail-in-out-text">
+                              {item}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </details>
+          )}
+
+          {(!preview ||
+            detail.safetyNotes.length > 0 ||
+            Boolean(
+              detail.meetingPointLabel ||
+              detail.departureTimeLabel ||
+              detail.outboundTransport ||
+              detail.returnTransport ||
+              detail.accessNotes?.length,
+            )) && (
+            <details className="package-detail-disclosure">
+              <summary className="package-detail-disclosure__summary">
+                <span>Persiapan, titik kumpul & akses</span>
+                <span className="package-detail-disclosure__hint">
+                  Lihat detail
+                </span>
+              </summary>
+              <div className="package-detail-disclosure__body">
+                {/* 9. Safety & Basic Notes */}
+                {detail.safetyNotes.length > 0 && (
+                  <section
+                    className="package-detail-section"
+                    aria-labelledby="safety-heading"
+                  >
+                    <h2
+                      id="safety-heading"
+                      className="package-detail-section__title"
+                    >
+                      Catatan Keselamatan & Persiapan
+                    </h2>
+                    <ul className="package-detail-simple-list">
+                      {detail.safetyNotes.map((note, idx) => (
+                        <li key={idx}>{note}</li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+
+                {/* 10. Travel Logistics & Meeting Point */}
+                {(detail.meetingPointLabel ||
+                  detail.departureTimeLabel ||
+                  detail.outboundTransport ||
+                  detail.returnTransport ||
+                  (detail.accessNotes && detail.accessNotes.length > 0)) && (
+                  <section
+                    className="package-detail-section"
+                    aria-labelledby="logistics-heading"
+                  >
+                    <h2
+                      id="logistics-heading"
+                      className="package-detail-section__title"
+                    >
+                      Informasi Titik Kumpul & Akses
+                    </h2>
+                    <div className="package-detail-logistics-grid">
+                      {detail.meetingPointLabel && (
+                        <div className="package-detail-logistics-item">
+                          <span className="package-detail-logistics-label">
+                            Titik Kumpul
+                          </span>
+                          <strong className="package-detail-logistics-val">
+                            {detail.meetingPointLabel}
+                          </strong>
+                        </div>
+                      )}
+                      <div className="package-detail-logistics-item">
+                        <span className="package-detail-logistics-label">
+                          Lokasi Kawasan
+                        </span>
+                        <strong className="package-detail-logistics-val">
+                          {pkg.destinationName}, {pkg.locationLabel}
+                        </strong>
+                      </div>
+                      {detail.departureTimeLabel && (
+                        <div className="package-detail-logistics-item">
+                          <span className="package-detail-logistics-label">
+                            Waktu Kumpul / Keberangkatan
+                          </span>
+                          <span className="package-detail-logistics-val">
+                            {detail.departureTimeLabel}
+                          </span>
+                        </div>
+                      )}
+                      {detail.outboundTransport && (
+                        <div className="package-detail-logistics-item">
+                          <span className="package-detail-logistics-label">
+                            Transportasi Menuju Destinasi
+                          </span>
+                          <span className="package-detail-logistics-val">
+                            {detail.outboundTransport}
+                          </span>
+                        </div>
+                      )}
+                      {detail.returnTransport && (
+                        <div className="package-detail-logistics-item">
+                          <span className="package-detail-logistics-label">
+                            Transportasi Kembali
+                          </span>
+                          <span className="package-detail-logistics-val">
+                            {detail.returnTransport}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {detail.accessNotes && detail.accessNotes.length > 0 && (
+                      <div className="package-detail-logistics-notes">
+                        <span className="package-detail-logistics-label">
+                          Catatan Akses Lokasi:
+                        </span>
+                        <ul className="package-detail-simple-list">
+                          {detail.accessNotes.map((note, idx) => (
+                            <li key={idx}>{note}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </section>
+                )}
+              </div>
+            </details>
+          )}
+
+          {!preview && (
+            <details className="package-detail-disclosure">
+              <summary className="package-detail-disclosure__summary">
+                <span>Kebijakan pembatalan</span>
+                <span className="package-detail-disclosure__hint">
+                  Lihat kebijakan
+                </span>
+              </summary>
+              <div className="package-detail-disclosure__body">
+                {/* 11. Cancellation & Refund Policy Summary */}
+                <section
+                  className="package-detail-section"
+                  aria-labelledby="policy-heading"
+                >
+                  <h2
+                    id="policy-heading"
+                    className="package-detail-section__title"
+                  >
+                    Kebijakan Pembatalan & Refund
+                  </h2>
+                  <p className="package-detail-editorial-text">
+                    {detail.cancellationPolicySummary}
+                  </p>
+                </section>
+              </div>
+            </details>
+          )}
+
+          {!preview && (
+            <details className="package-detail-disclosure">
+              <summary className="package-detail-disclosure__summary">
+                <span>Ulasan & rating</span>
+                <span className="package-detail-disclosure__hint">
+                  Lihat ulasan
+                </span>
+              </summary>
+              <div className="package-detail-disclosure__body">
+                {/* 12. Reviews Preview */}
+                <section
+                  className="package-detail-section"
+                  aria-labelledby="reviews-heading"
+                >
+                  <h2
+                    id="reviews-heading"
+                    className="package-detail-section__title"
+                  >
+                    {pkg.ratingProvenance === "SAMPLE"
+                      ? "Contoh Ulasan Paket"
+                      : "Ulasan Pascatrip"}
+                  </h2>
+                  <p className="package-detail-section__desc">
+                    {pkg.ratingProvenance === "SAMPLE"
+                      ? "Data contoh pada prototype untuk menggambarkan tampilan ulasan paket. Ulasan Destinasi dan Travel Organizer pascatrip dicatat terpisah."
+                      : "Ulasan pascatrip dari traveler yang telah menyelesaikan perjalanan. Ulasan Destinasi dan Travel Organizer dicatat terpisah."}
+                  </p>
+                  <div className="package-detail-reviews-summary">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                      className="package-detail-reviews-star"
+                    >
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    <span>
+                      {pkg.rating !== undefined && pkg.rating !== null
+                        ? pkg.ratingProvenance === "SAMPLE"
+                          ? `Rating paket contoh: ${pkg.rating.toFixed(1)} / 5.0`
+                          : `Rating paket: ${pkg.rating.toFixed(1)} / 5.0`
+                        : "Belum ada rating"}
+                    </span>
+                  </div>
+                  {detail.reviewPreview?.excerpts &&
+                  detail.reviewPreview.excerpts.length > 0 ? (
+                    <div className="package-detail-review-excerpt">
+                      {detail.reviewPreview.excerpts.map((rev) => (
+                        <div key={rev.bookingId}>
+                          <span className="package-detail-review-excerpt__author">
+                            {rev.authorName} • {rev.tripDateLabel}
+                          </span>
+                          <p className="package-detail-review-excerpt__comment">
+                            "{rev.comment}"
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="package-detail-section__desc">
+                      Belum ada ulasan tertulis yang ditampilkan.
+                    </p>
+                  )}
+                </section>
+              </div>
+            </details>
+          )}
         </div>
       </div>
 
       {/* 13. Sticky Progression CTA */}
-      <div className="package-detail-sticky-bar">
-        <div className="package-detail-sticky-bar__container">
-          <div className="package-detail-sticky-bar__price-wrap">
-            <span className="package-detail-sticky-bar__price-label">
-              Mulai dari
-            </span>
-            <span className="package-detail-sticky-bar__price">
-              {formattedPrice} / orang
-            </span>
-          </div>
-
-          <div className="package-detail-sticky-bar__action-wrap">
-            <Button
-              type="button"
-              variant="primary"
-              size="lg"
-              className="package-detail-sticky-bar__cta"
-              disabled={!hasOpenSession}
-              onClick={() => navigate(`/packages/${pkg.id}/sessions`)}
-            >
-              Pilih Jadwal
-            </Button>
-            {!hasOpenSession && (
-              <span className="package-detail-sticky-bar__notice">
-                Belum ada jadwal tersedia
+      {!preview && (
+        <div className="package-detail-sticky-bar">
+          <div className="package-detail-sticky-bar__container">
+            <div className="package-detail-sticky-bar__price-wrap">
+              <span className="package-detail-sticky-bar__price-label">
+                Mulai dari
               </span>
-            )}
+              <span className="package-detail-sticky-bar__price">
+                {formattedPrice} / orang
+              </span>
+            </div>
+
+            <div className="package-detail-sticky-bar__action-wrap">
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                className="package-detail-sticky-bar__cta"
+                disabled={!hasOpenSession}
+                onClick={() => navigate(`/packages/${pkg.id}/sessions`)}
+              >
+                Pilih Jadwal
+              </Button>
+              {!hasOpenSession && (
+                <span className="package-detail-sticky-bar__notice">
+                  Belum ada jadwal tersedia
+                </span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

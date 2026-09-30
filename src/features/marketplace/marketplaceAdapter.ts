@@ -1,4 +1,8 @@
 import { prototypeClock } from "../../lib/clock";
+import { destinationRepository } from "../../data/destinationRepository";
+import { packageRepository } from "../../data/packageRepository";
+import { sessionRepository } from "../../data/sessionRepository";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockApplicationStore } from "../eo/mockApplicationStore";
 import { mockDestinationStore } from "../eo/mockDestinationStore";
@@ -314,4 +318,31 @@ export function getCombinedPackageDetails(
   }
 
   return combined;
+}
+
+/**
+ * Synchronizes Supabase destinations, packages, and sessions into the authoritative
+ * marketplace cache when running in Supabase mode.
+ */
+export async function syncMarketplaceFromSupabase(): Promise<void> {
+  if (!isSupabaseMode()) return;
+  try {
+    const [dests, pkgs, sess] = await Promise.all([
+      destinationRepository.getAll(),
+      packageRepository.getAllPackages(),
+      sessionRepository.getAllSessions(),
+    ]);
+
+    for (const dest of dests) {
+      mockDestinationStore.upsertVerifiedDestination(dest);
+    }
+    for (const pkg of pkgs) {
+      mockEoPackageStore.upsertPackage(pkg);
+    }
+    for (const s of sess) {
+      mockEoPackageStore.upsertSession(s);
+    }
+  } catch (err) {
+    console.warn("syncMarketplaceFromSupabase failed:", err);
+  }
 }

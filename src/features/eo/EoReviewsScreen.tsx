@@ -1,3 +1,4 @@
+import { PartnerEmptyState } from "../../components/ui/PartnerEmptyState";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import "./eo.css";
@@ -56,15 +57,9 @@ export function EoReviewsScreen() {
         <h2 className="eo-section-title">Ulasan Pengalaman Traveler</h2>
 
         {eoReviews.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "var(--space-8)",
-              color: "var(--color-text-muted)",
-            }}
-          >
-            <p>Belum ada ulasan kepemanduan untuk profil EO Anda.</p>
-          </div>
+          <PartnerEmptyState title="Belum ada ulasan">
+            Belum ada ulasan kepemanduan untuk profil EO Anda.
+          </PartnerEmptyState>
         ) : (
           <div
             style={{

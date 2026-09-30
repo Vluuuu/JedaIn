@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import JedaInLogo from "../../JedaIn_logo_vector.svg";
 import { Button } from "../../components/ui";
+import { ensureDemoEoSession } from "../../lib/supabase/demoAuth";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { LOGIN_ATMOSPHERE_VISUAL } from "../../lib/assets/packageImages";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
@@ -19,8 +21,9 @@ export function EoLoginScreen() {
   const [rememberMe, setRememberMe] = useState(true);
   const [forgotPasswordNotice, setForgotPasswordNotice] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRealLogin = (e: React.FormEvent) => {
+  const handleRealLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(undefined);
 
@@ -33,6 +36,18 @@ export function EoLoginScreen() {
     if (!password.trim()) {
       setErrorMessage("Kata sandi wajib diisi.");
       return;
+    }
+
+    if (isSupabaseMode()) {
+      setIsSubmitting(true);
+      const res = await ensureDemoEoSession();
+      setIsSubmitting(false);
+      if (!res.success) {
+        setErrorMessage(
+          res.error || "Gagal menghubungkan sesi Supabase untuk EO.",
+        );
+        return;
+      }
     }
 
     const app = mockApplicationStore
@@ -64,9 +79,27 @@ export function EoLoginScreen() {
     );
   };
 
-  const handleDemoLogin = () => {
-    partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
-    navigate("/partner/eo");
+  const handleDemoLogin = async () => {
+    setErrorMessage(undefined);
+    setIsSubmitting(true);
+    try {
+      const res = await ensureDemoEoSession();
+      if (!res.success) {
+        setErrorMessage(
+          res.error || "Gagal menghubungkan sesi demo EO ke Supabase.",
+        );
+        setIsSubmitting(false);
+        return;
+      }
+      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
+      navigate("/partner/eo");
+    } catch (err: unknown) {
+      setErrorMessage(
+        err instanceof Error ? err.message : "Gagal masuk demo EO.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -226,8 +259,9 @@ export function EoLoginScreen() {
               variant="primary"
               size="lg"
               className="eo-login-submit-btn"
+              disabled={isSubmitting}
             >
-              Masuk
+              {isSubmitting ? "Memproses..." : "Masuk"}
             </Button>
           </form>
 
@@ -249,8 +283,9 @@ export function EoLoginScreen() {
               size="md"
               className="eo-login-demo__btn"
               onClick={handleDemoLogin}
+              disabled={isSubmitting}
             >
-              Coba akun demo
+              {isSubmitting ? "Memproses..." : "Coba akun demo"}
             </Button>
           </div>
         </section>

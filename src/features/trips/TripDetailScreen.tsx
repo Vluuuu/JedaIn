@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
+import PlanMascot from "../../assets/mascot/plan.png";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { formatRupiah, getBookingPaymentBreakdown } from "../checkout/pricing";
 import { sessionStore } from "../onboarding/sessionStore";
@@ -187,6 +188,25 @@ export function TripDetailScreen({
     session?.startAt && session?.endAt
       ? formatSessionDateTimeRange(session.startAt, session.endAt).dateLabel
       : undefined;
+  const tripDate = session?.startAt ? new Date(session.startAt) : null;
+  const tripDateStamp =
+    tripDate && !Number.isNaN(tripDate.getTime())
+      ? {
+          weekday: tripDate.toLocaleDateString("id-ID", {
+            weekday: "long",
+            timeZone: "Asia/Jakarta",
+          }),
+          day: tripDate.toLocaleDateString("id-ID", {
+            day: "2-digit",
+            timeZone: "Asia/Jakarta",
+          }),
+          monthYear: tripDate.toLocaleDateString("id-ID", {
+            month: "short",
+            year: "numeric",
+            timeZone: "Asia/Jakarta",
+          }),
+        }
+      : null;
 
   const isCompleted = booking.status === "COMPLETED";
   const isPaid = booking.status === "PAID";
@@ -287,31 +307,6 @@ export function TripDetailScreen({
             <p className="trip-detail-meta">
               {pkg.destinationName} • {pkg.locationLabel}
             </p>
-          )}
-
-          {sessionDateLabel && (
-            <div className="trip-detail-departure-banner">
-              <span className="trip-detail-departure-icon" aria-hidden="true">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              </span>
-              <span className="trip-detail-departure-text">
-                {sessionDateLabel}
-              </span>
-            </div>
           )}
         </div>
       </header>
@@ -423,25 +418,51 @@ export function TripDetailScreen({
       )}
 
       <section
-        className="trip-detail-primary-summary"
+        className="trip-detail-journey-pass"
         aria-label="Ringkasan perjalanan utama"
       >
-        <div className="trip-detail-primary-summary__item">
-          <span className="trip-detail-primary-summary__label">
-            Tanggal perjalanan
-          </span>
-          <strong className="trip-detail-primary-summary__value">
-            {sessionDateLabel ?? "Jadwal belum tersedia"}
-          </strong>
+        <div className="trip-detail-journey-pass__heading">
+          <span>Catatan perjalananmu</span>
+          <img src={PlanMascot} alt="" aria-hidden="true" />
         </div>
-        <div className="trip-detail-primary-summary__item">
-          <span className="trip-detail-primary-summary__label">
-            Titik kumpul
-          </span>
-          <strong className="trip-detail-primary-summary__value">
-            {detail?.meetingPointLabel ??
-              "Belum dicantumkan pada detail experience."}
-          </strong>
+        <div className="trip-detail-journey-pass__date-row">
+          {tripDateStamp && (
+            <div
+              className="trip-detail-journey-pass__date-stamp"
+              aria-hidden="true"
+            >
+              <span>{tripDateStamp.weekday}</span>
+              <strong>{tripDateStamp.day}</strong>
+              <span>{tripDateStamp.monthYear}</span>
+            </div>
+          )}
+          <div className="trip-detail-journey-pass__date-copy">
+            <span>Tanggal perjalanan</span>
+            <strong>{sessionDateLabel ?? "Jadwal belum tersedia"}</strong>
+          </div>
+        </div>
+        <div className="trip-detail-journey-pass__meeting">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
+            <circle cx="12" cy="10" r="2.5" />
+          </svg>
+          <div>
+            <span>Titik kumpul</span>
+            <strong>
+              {detail?.meetingPointLabel ??
+                "Belum dicantumkan pada detail experience."}
+            </strong>
+          </div>
         </div>
       </section>
 

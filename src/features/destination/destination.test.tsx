@@ -131,6 +131,8 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const view = await renderComponent(createElement(PartnerLoginScreen));
       const emailInput =
         view.querySelector<HTMLInputElement>("#partner-email")!;
+      const passwordInput =
+        view.querySelector<HTMLInputElement>("#partner-password")!;
       await act(async () => {
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
           window.HTMLInputElement.prototype,
@@ -138,6 +140,8 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         )?.set;
         nativeInputValueSetter?.call(emailInput, "Case.Test@Example.Com");
         emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+        nativeInputValueSetter?.call(passwordInput, "JedaInDemo2026!");
+        passwordInput.dispatchEvent(new Event("change", { bubbles: true }));
       });
 
       const submitBtn = view.querySelector<HTMLButtonElement>(
@@ -151,9 +155,12 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
     });
 
     it("A. unknown destination email must NOT login as approved Lereng Hijau partner", async () => {
+      partnerSessionStore.logout();
       const view = await renderComponent(createElement(PartnerLoginScreen));
       const emailInput =
         view.querySelector<HTMLInputElement>("#partner-email")!;
+      const passwordInput =
+        view.querySelector<HTMLInputElement>("#partner-password")!;
       await act(async () => {
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
           window.HTMLInputElement.prototype,
@@ -161,6 +168,8 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         )?.set;
         nativeInputValueSetter?.call(emailInput, "randomdestinasi@example.com");
         emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+        nativeInputValueSetter?.call(passwordInput, "JedaInDemo2026!");
+        passwordInput.dispatchEvent(new Event("change", { bubbles: true }));
       });
 
       const submitBtn = view.querySelector<HTMLButtonElement>(
@@ -170,17 +179,18 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         submitBtn.click();
       });
 
-      // Must establish a separate new identity, not dest_partner_lereng_hijau
-      expect(partnerSessionStore.get()?.id).not.toBe(
-        "dest_partner_lereng_hijau",
+      expect(partnerSessionStore.get()).toBeNull();
+      expect(view.textContent).toContain(
+        "Akun Mitra Destinasi belum terdaftar",
       );
-      expect(partnerSessionStore.get()?.role).toBe("DESTINATION");
     });
 
     it("B. exact registered destination email logs in as the matching application partner", async () => {
       const view = await renderComponent(createElement(PartnerLoginScreen));
       const emailInput =
         view.querySelector<HTMLInputElement>("#partner-email")!;
+      const passwordInput =
+        view.querySelector<HTMLInputElement>("#partner-password")!;
       await act(async () => {
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
           window.HTMLInputElement.prototype,
@@ -188,6 +198,8 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         )?.set;
         nativeInputValueSetter?.call(emailInput, "destinasi@lerenghijau.id");
         emailInput.dispatchEvent(new Event("change", { bubbles: true }));
+        nativeInputValueSetter?.call(passwordInput, "JedaInDemo2026!");
+        passwordInput.dispatchEvent(new Event("change", { bubbles: true }));
       });
 
       const submitBtn = view.querySelector<HTMLButtonElement>(
@@ -1142,10 +1154,11 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const settingsView = await renderComponent(
         createElement(DestinationSettingsScreen),
       );
-      expect(settingsView.textContent).toContain("Profil Kemitraan Destinasi");
+      expect(settingsView.textContent).toContain("Pengaturan kemitraan");
       expect(settingsView.textContent).toContain("Pengelola Lereng Hijau Batu");
       expect(settingsView.textContent).toContain("Hadi Purnomo");
-      expect(settingsView.textContent).toContain(
+      expect(settingsView.textContent).toContain("Kapasitas & waktu kunjung");
+      expect(settingsView.textContent).not.toContain(
         "Perjanjian Kemitraan Destinasi Aktif",
       );
     });
@@ -1157,7 +1170,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         "/partner/destination",
       ]);
 
-      expect(view.textContent).toContain("Masuk ke Portal Partner");
+      expect(view.textContent).toContain("Mari tumbuh bersama JedaIn");
       expect(view.textContent).not.toContain("Jadwal Keberangkatan Mendatang");
     });
 

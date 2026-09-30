@@ -1,11 +1,36 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import PlanMascot from "../../assets/mascot/plan.png";
+import { packageRepository } from "../../data/packageRepository";
+import { sessionRepository } from "../../data/sessionRepository";
+import { Button, InlineStatus } from "../../components/ui";
+import type { BookingStatus } from "../checkout/types";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
 import { partnerSessionStore } from "./partnerSessionStore";
+import type {
+  EoPackageRecord,
+  EoSessionRecord,
+  EoSessionStatus,
+} from "./types";
 import "./eo.css";
+
+const sessionStatusLabels: Record<EoSessionStatus, string> = {
+  OPEN: "Terbuka",
+  FULL: "Penuh",
+  CLOSED: "Ditutup",
+  CANCELLED: "Dibatalkan",
+};
+
+const bookingStatusLabels: Record<BookingStatus, string> = {
+  PENDING_PAYMENT: "Menunggu pembayaran",
+  PAID: "Terbayar",
+  COMPLETED: "Selesai",
+  CANCELLED: "Dibatalkan",
+  EXPIRED: "Kedaluwarsa",
+};
 
 export function EoOverviewScreen() {
   const navigate = useNavigate();
@@ -13,15 +38,36 @@ export function EoOverviewScreen() {
   const eoId = partner?.id ?? "eo_jeda_alam";
   const organizerReviewRef = partner?.organizerReviewRef ?? "org_lereng_batu";
 
-  // EO Packages & derived metrics
-  const packages = mockEoPackageStore.getPackagesByEo(eoId);
+  // EO Packages & derived metrics (reactive state initialized with local cache)
+  const [packages, setPackages] = useState<EoPackageRecord[]>(() => [
+    ...mockEoPackageStore.getPackagesByEo(eoId),
+  ]);
+  const [sessions, setSessions] = useState<EoSessionRecord[]>(() => [
+    ...mockEoPackageStore.getSessionsByEo(eoId),
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      packageRepository.getPackagesByEo(eoId),
+      sessionRepository.getSessionsByEo(eoId),
+    ]).then(([pkgRes, sessRes]) => {
+      if (isMounted) {
+        setPackages(pkgRes);
+        setSessions(sessRes);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [eoId]);
+
   const livePackages = packages.filter((p) => p.status === "LIVE");
   const pendingPackage = packages.find(
     (p) => p.status === "PENDING_ADMIN_REVIEW",
   );
 
   // EO Sessions
-  const sessions = mockEoPackageStore.getSessionsByEo(eoId);
   const upcomingSessions = sessions.filter((s) => s.status === "OPEN");
 
   // Bookings strictly isolated to this EO's packages
@@ -47,6 +93,9 @@ export function EoOverviewScreen() {
       <div className="eo-overview-container">
         <header className="eo-overview-header">
           <div className="eo-overview-header__main">
+            <span className="eo-overview-header__eyebrow">
+              Ruang kerja · Travel Organizer
+            </span>
             <h1>
               Overview
               <span className="sr-only">
@@ -115,6 +164,9 @@ export function EoOverviewScreen() {
       {/* Page Header without redundant badges */}
       <header className="eo-overview-header">
         <div className="eo-overview-header__main">
+          <span className="eo-overview-header__eyebrow">
+            Ruang kerja · Travel Organizer
+          </span>
           <h1>
             Overview
             <span className="sr-only">
@@ -222,6 +274,15 @@ export function EoOverviewScreen() {
           className="eo-overview-demand-hero"
           aria-label="Peluang dari kebutuhan traveler"
         >
+          <img
+            className="eo-overview-demand-hero__mascot"
+            src={PlanMascot}
+            alt=""
+            aria-hidden="true"
+            width="535"
+            height="633"
+            decoding="async"
+          />
           <div className="eo-overview-demand-hero__eyebrow">
             <span>Peluang dari Kebutuhan Traveler</span>
             <span className="eo-overview-demand-hero__eyebrow-badge">
@@ -317,9 +378,11 @@ export function EoOverviewScreen() {
                       <span className="eo-overview-list-row__meta">
                         Sisa {s.remainingSlots} dari {s.capacity} slot
                       </span>
-                      <Badge tone={s.status === "OPEN" ? "success" : "neutral"}>
-                        {s.status}
-                      </Badge>
+                      <InlineStatus
+                        tone={s.status === "OPEN" ? "success" : "neutral"}
+                      >
+                        {sessionStatusLabels[s.status]}
+                      </InlineStatus>
                     </div>
                   </div>
                 );
@@ -369,7 +432,7 @@ export function EoOverviewScreen() {
                       </span>
                     </div>
                     <div className="eo-overview-list-row__secondary">
-                      <Badge
+                      <InlineStatus
                         tone={
                           b.status === "PAID" || b.status === "COMPLETED"
                             ? "success"
@@ -378,8 +441,8 @@ export function EoOverviewScreen() {
                               : "neutral"
                         }
                       >
-                        {b.status}
-                      </Badge>
+                        {bookingStatusLabels[b.status]}
+                      </InlineStatus>
                     </div>
                   </div>
                 );

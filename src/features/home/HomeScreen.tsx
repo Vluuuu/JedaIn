@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Badge, Button, Skeleton } from "../../components/ui";
+import { Button, Skeleton } from "../../components/ui";
+import ExploreMascot from "../../assets/mascot/explore.png";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import {
   QUIZ_DEPARTURE_OPTIONS,
@@ -134,11 +135,20 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
       {/* 1. Greeting / App Header context */}
       <header className="home-greeting-row">
         <div className="home-greeting-content">
+          <span className="home-greeting-eyebrow">Waktunya menemukan jeda</span>
           <h1 className="home-greeting-title">{greetingText}</h1>
           <p className="home-greeting-subtitle">
             Mau jeda seperti apa hari ini?
           </p>
         </div>
+        <img
+          className="home-greeting-mascot"
+          src={ExploreMascot}
+          alt=""
+          aria-hidden="true"
+          width="520"
+          height="634"
+        />
       </header>
 
       {/* 2. Pending Payment Banner (conditional) */}
@@ -157,13 +167,21 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
         </div>
       )}
 
-      {/* 4. Personalized Recommendation + Preference Summary */}
+      {/* 4. Start with the traveler's own search, then offer a curated path. */}
+      <section className="home-search-section" aria-label="Pencarian JedaIn">
+        <div className="home-search-section__intro">
+          <span>Jelajahi lebih jauh</span>
+          <h2>Cari jeda versimu</h2>
+        </div>
+        <SearchBar />
+      </section>
+
+      {/* 5. Personalized Recommendation + Preference Summary */}
       <section
         className="home-recommendation-section"
         aria-labelledby="rec-section-title"
       >
         <div className="home-section-header">
-          <div className="home-section-header__tag">Personal</div>
           <h2 id="rec-section-title" className="home-section-title">
             {recommendationHeading}
           </h2>
@@ -196,15 +214,14 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
                 className="home-hero-card__visual-scrim"
                 aria-hidden="true"
               />
-              <div className="home-hero-card__visual-badges">
-                <Badge tone={recMode === "FALLBACK" ? "neutral" : "success"}>
-                  {recMode === "FALLBACK"
-                    ? "Pilihan terdekat"
-                    : "Pilihan utama"}
-                </Badge>
-              </div>
+              <span className="home-hero-card__visual-index" aria-hidden="true">
+                01 / PILIHAN JEDA
+              </span>
             </div>
             <div className="home-hero-card__body">
+              <span className="home-hero-card__body-kicker">
+                Untuk jedamu berikutnya
+              </span>
               <div className="home-hero-card__meta">
                 <span className="home-hero-card__meta-item">
                   <svg
@@ -345,11 +362,6 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
             </Link>
           </div>
         )}
-      </section>
-
-      {/* 5. Search Bar */}
-      <section className="home-search-section" aria-label="Pencarian JedaIn">
-        <SearchBar />
       </section>
 
       {/* 6. Explore by Mood */}

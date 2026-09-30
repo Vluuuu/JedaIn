@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
+import RestMascot from "../../assets/mascot/rest.png";
+import PlanMascot from "../../assets/mascot/plan.png";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import { formatRupiah, getBookingPaymentBreakdown } from "../checkout/pricing";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
@@ -142,10 +144,21 @@ export function MyTripsScreen({
   return (
     <div className="my-trips-container">
       <header className="my-trips-header">
-        <h1 className="my-trips-title">My Trips</h1>
-        <p className="my-trips-subtitle">
-          Kelola perjalananmu, status pembayaran, dan riwayat trip.
-        </p>
+        <div className="my-trips-header__copy">
+          <span className="my-trips-header__eyebrow">Catatan perjalananmu</span>
+          <h1 className="my-trips-title">My Trips</h1>
+          <p className="my-trips-subtitle">
+            Kelola perjalananmu, status pembayaran, dan riwayat trip.
+          </p>
+        </div>
+        <img
+          className="my-trips-header__mascot"
+          src={PlanMascot}
+          alt=""
+          aria-hidden="true"
+          width="520"
+          height="634"
+        />
       </header>
 
       {/* Special Pending Payment Section (Outside Tabs) */}
@@ -268,6 +281,14 @@ export function MyTripsScreen({
       >
         {currentTabList.length === 0 ? (
           <div className="my-trips-empty-state">
+            <img
+              className="my-trips-empty-state__mascot"
+              src={RestMascot}
+              alt=""
+              aria-hidden="true"
+              width="538"
+              height="648"
+            />
             <h2 className="my-trips-empty-state__title">
               {activeTab === "UPCOMING"
                 ? "Belum ada trip mendatang."

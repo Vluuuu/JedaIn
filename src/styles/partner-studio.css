@@ -1,0 +1,1479 @@
+/* A quieter working desk for both partner roles. All accents stay local to the
+   signed-in partner shell so the public, traveler, and admin surfaces keep
+   their own visual language. */
+.workspace-shell--partner {
+  --studio-ink: var(--journal-ink);
+  --studio-forest: var(--journal-forest);
+  --studio-paper: var(--journal-paper);
+  --studio-canvas: var(--journal-canvas);
+  --studio-linen: var(--journal-linen);
+  --studio-sage: var(--journal-sage);
+  --studio-line: var(--journal-line);
+  --studio-muted: var(--journal-muted);
+  --studio-accent: var(--journal-earth);
+  --studio-accent-soft: color-mix(in srgb, var(--journal-earth) 17%, white);
+  --studio-shadow: 0 16px 42px
+    color-mix(in srgb, var(--journal-ink) 8%, transparent);
+  background: var(--studio-canvas);
+}
+
+.workspace-shell--partner .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.workspace-shell--partner[data-partner-role="destination"] {
+  --studio-accent: var(--journal-forest);
+  --studio-accent-soft: var(--journal-sage);
+}
+
+.workspace-shell--partner .workspace-main {
+  min-height: 100svh;
+  background:
+    radial-gradient(
+      circle at 88% 0,
+      color-mix(in srgb, var(--studio-sage) 60%, transparent),
+      transparent 27rem
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 39px,
+      color-mix(in srgb, var(--studio-line) 13%, transparent) 40px 41px
+    ),
+    var(--studio-canvas);
+}
+
+.workspace-shell--partner .workspace-content {
+  max-width: 96rem;
+  margin-inline: auto;
+  padding-block: clamp(1.5rem, 3.2vw, 3.25rem) 5rem;
+}
+
+.workspace-shell--partner .workspace-sidebar {
+  background:
+    radial-gradient(
+      circle at 110% 101%,
+      color-mix(in srgb, var(--journal-sun) 22%, transparent),
+      transparent 13rem
+    ),
+    linear-gradient(155deg, var(--studio-ink), var(--studio-forest));
+}
+
+.workspace-shell--partner .workspace-sidebar__brand {
+  border-bottom-color: color-mix(in srgb, var(--studio-paper) 20%, transparent);
+}
+
+.workspace-shell--partner .workspace-sidebar__logo-link {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.workspace-shell--partner .workspace-sidebar__logo {
+  filter: brightness(0) invert(0.96);
+}
+
+.workspace-shell--partner .workspace-sidebar__close {
+  color: var(--studio-paper);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.workspace-shell--partner .workspace-sidebar__close:hover {
+  background: color-mix(in srgb, var(--studio-paper) 12%, transparent);
+}
+
+.workspace-shell--partner .workspace-sidebar__role-slot {
+  height: auto;
+  min-height: 3.75rem;
+  align-items: end;
+}
+
+.workspace-shell--partner .workspace-sidebar__role-tag {
+  color: var(--journal-sun);
+  font-size: 0.6875rem;
+  letter-spacing: 0.15em;
+}
+
+.workspace-shell--partner .workspace-navigation {
+  gap: 0.125rem;
+  margin-top: var(--space-2);
+}
+
+.workspace-shell--partner .workspace-navigation a {
+  position: relative;
+  min-height: 2.9rem;
+  color: color-mix(in srgb, var(--studio-paper) 79%, transparent);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+}
+
+.workspace-shell--partner .workspace-navigation a:hover {
+  color: var(--studio-paper);
+  background: color-mix(in srgb, var(--studio-paper) 10%, transparent);
+}
+
+.workspace-shell--partner .workspace-navigation a[aria-current="page"] {
+  color: var(--studio-ink);
+  background: var(--studio-paper);
+  border-color: color-mix(in srgb, var(--studio-paper) 75%, var(--journal-sun));
+  box-shadow: 0 5px 12px color-mix(in srgb, var(--studio-ink) 13%, transparent);
+}
+
+.workspace-shell--partner .workspace-sidebar__mascot {
+  position: relative;
+  flex-shrink: 0;
+  max-height: none;
+  overflow: visible;
+  padding-block: var(--space-4) var(--space-3);
+  border-top: 0;
+}
+
+.workspace-shell--partner .workspace-sidebar__mascot img {
+  width: min(7rem, 45%);
+  max-height: 8.75rem;
+  margin: 0;
+  object-fit: contain;
+  transform: rotate(-7deg);
+}
+
+.workspace-shell--partner .workspace-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-color: var(--studio-line);
+  background: color-mix(in srgb, var(--studio-paper) 92%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 3px 14px color-mix(in srgb, var(--studio-ink) 5%, transparent);
+}
+
+.workspace-shell--partner .workspace-topbar p {
+  color: var(--studio-accent);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+}
+
+.workspace-shell--partner .workspace-topbar__title {
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+}
+
+.workspace-shell--partner .workspace-identity {
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--studio-line);
+}
+
+.workspace-shell--partner .workspace-identity > span {
+  width: 2.25rem;
+  height: 2.25rem;
+  background: var(--studio-accent);
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-container,
+    .dest-container,
+    .eo-overview-container,
+    .eo-packages-container,
+    .eo-destinations-container,
+    .eo-pkg-detail-container
+  ) {
+  max-width: 80rem;
+  gap: clamp(1.4rem, 2.5vw, 2.5rem);
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-page-header,
+    .dest-page-header,
+    .eo-packages-header,
+    .eo-destinations-header
+  ) {
+  position: relative;
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--studio-line);
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-page-header,
+    .dest-page-header,
+    .eo-packages-header,
+    .eo-destinations-header
+  )::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 3.5rem;
+  height: 2px;
+  background: var(--studio-accent);
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-page-title,
+    .dest-page-title,
+    .eo-packages-header h1,
+    .eo-destinations-header h1
+  ) {
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.9rem, 3.2vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-page-subtitle,
+    .dest-page-subtitle,
+    .eo-packages-header__subtitle,
+    .eo-destinations-header__subtitle
+  ) {
+  max-width: 68ch;
+  margin-top: var(--space-2);
+  line-height: 1.55;
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-section,
+    .dest-readiness,
+    .dest-sessions,
+    .dest-profile,
+    .dest-reviews,
+    .dest-quick-actions
+  ) {
+  border-color: var(--studio-line);
+  border-radius: 1.15rem;
+  background: var(--studio-paper);
+  box-shadow: 0 7px 20px color-mix(in srgb, var(--studio-ink) 4%, transparent);
+}
+
+.workspace-shell--partner
+  :is(.eo-section-title, .dest-section-heading h2, .dest-readiness__title) {
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.25rem, 1.9vw, 1.65rem);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.workspace-shell--partner :is(.eo-table-wrapper, .dest-table-wrapper) {
+  border: 0;
+  border-radius: 0.65rem;
+  background: var(--studio-paper);
+}
+
+.workspace-shell--partner :is(.eo-table, .dest-table) th {
+  padding-block: var(--space-4);
+  color: var(--studio-forest);
+  background: var(--studio-sage);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.workspace-shell--partner :is(.eo-table, .dest-table) td {
+  padding-block: var(--space-4);
+  line-height: 1.5;
+  vertical-align: top;
+}
+
+.workspace-shell--partner :is(.eo-table, .dest-table) tbody tr:hover td {
+  background: var(--studio-linen);
+}
+
+.workspace-shell--partner :is(.eo-table, .dest-table) td strong {
+  color: var(--studio-ink);
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-form-input,
+    .eo-form-select,
+    .eo-form-textarea,
+    .ui-input,
+    .eo-destinations-search-input,
+    .eo-builder-dest-search,
+    .eo-builder-dest-location-select
+  ) {
+  min-height: 2.75rem;
+  border-color: var(--studio-line);
+  border-radius: 0.65rem;
+  background: var(--studio-paper);
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-form-input,
+    .eo-form-select,
+    .eo-form-textarea,
+    .ui-input,
+    .eo-destinations-search-input,
+    .eo-builder-dest-search,
+    .eo-builder-dest-location-select
+  ):focus-visible {
+  outline: 3px solid var(--studio-accent);
+  outline-offset: 2px;
+}
+
+.workspace-shell--partner .eo-action-spotlight {
+  border: 0;
+  border-radius: 0.8rem;
+  background: var(--studio-sage);
+  box-shadow: none;
+}
+
+.workspace-shell--partner .eo-action-spotlight__btn {
+  border: 0;
+  border-radius: 0.6rem;
+  background: var(--studio-forest);
+  box-shadow: none;
+}
+
+.workspace-shell--partner .eo-stepper {
+  padding: var(--space-2);
+  border-color: var(--studio-line);
+  border-radius: 0.85rem;
+  background: var(--studio-paper);
+}
+
+.workspace-shell--partner .eo-step-item--active {
+  color: var(--studio-ink);
+  background: var(--studio-sage);
+}
+
+.workspace-shell--partner .eo-itinerary-item {
+  border-color: var(--studio-line);
+  border-radius: 0.75rem;
+  background: var(--studio-paper);
+}
+
+/* TO overview: one story, one operational ledger, and a calm metric rail. */
+.workspace-shell--partner .eo-overview-header {
+  align-items: end;
+  padding-bottom: var(--space-6);
+  border-bottom-color: var(--studio-line);
+}
+
+.eo-overview-header__eyebrow,
+.dest-identity__eyebrow {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--studio-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.workspace-shell--partner .eo-overview-header h1 {
+  font-family: var(--font-family-editorial);
+  font-size: clamp(2.4rem, 5vw, 4.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.workspace-shell--partner .eo-overview-header p {
+  max-width: 55ch;
+  margin-top: var(--space-3);
+  line-height: 1.55;
+}
+
+.workspace-shell--partner :is(.eo-overview-metric-band, .dest-metric-band) {
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border-color: var(--studio-line);
+  border-radius: 0.85rem;
+  background: var(--studio-paper);
+  box-shadow: none;
+}
+
+.workspace-shell--partner :is(.eo-overview-metric-item, .dest-metric-item) {
+  min-height: 9rem;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-left: 0;
+}
+
+.workspace-shell--partner
+  :is(.eo-overview-metric-item, .dest-metric-item):not(:first-child) {
+  border-left: 1px solid var(--studio-line);
+}
+
+.workspace-shell--partner
+  :is(.eo-overview-metric-item, .dest-metric-item):first-child {
+  color: var(--journal-inverse);
+  background: var(--studio-forest);
+}
+
+.workspace-shell--partner
+  :is(.eo-overview-metric-item, .dest-metric-item):first-child
+  :is(
+    .eo-overview-metric-label,
+    .eo-overview-metric-value,
+    .eo-overview-metric-desc,
+    .dest-metric-label,
+    .dest-metric-value,
+    .dest-metric-desc
+  ) {
+  color: var(--journal-inverse);
+}
+
+.workspace-shell--partner :is(.eo-overview-metric-label, .dest-metric-label) {
+  color: var(--studio-accent);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  letter-spacing: 0.09em;
+}
+
+.workspace-shell--partner :is(.eo-overview-metric-value, .dest-metric-value) {
+  font-family: var(--font-family-editorial);
+  font-size: clamp(2rem, 3vw, 2.85rem);
+  line-height: 1;
+}
+
+.workspace-shell--partner .eo-overview-attention {
+  border-color: color-mix(
+    in srgb,
+    var(--journal-earth) 35%,
+    var(--studio-line)
+  );
+  border-radius: 0.65rem;
+  background: var(--studio-accent-soft);
+}
+
+.workspace-shell--partner .eo-overview-attention__tag {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.workspace-shell--partner .eo-overview-demand-hero {
+  position: relative;
+  min-height: 21rem;
+  padding: clamp(1.5rem, 3.5vw, 3rem);
+  overflow: hidden;
+  border: 0;
+  border-radius: 1.1rem;
+  color: var(--journal-inverse);
+  background:
+    radial-gradient(
+      circle at 83% 12%,
+      color-mix(in srgb, var(--journal-sun) 24%, transparent),
+      transparent 19rem
+    ),
+    linear-gradient(125deg, var(--studio-ink), var(--studio-forest));
+  box-shadow: var(--studio-shadow);
+}
+
+.workspace-shell--partner
+  .eo-overview-demand-hero
+  > :not(.eo-overview-demand-hero__mascot) {
+  position: relative;
+  z-index: 1;
+  max-width: min(100%, 49rem);
+}
+
+.workspace-shell--partner .eo-overview-demand-hero__mascot {
+  position: absolute;
+  z-index: 0;
+  right: clamp(-2rem, 2vw, 2rem);
+  bottom: -3rem;
+  width: clamp(12rem, 25vw, 22rem);
+  height: auto;
+  opacity: 0.94;
+  transform: rotate(5deg);
+  pointer-events: none;
+}
+
+.workspace-shell--partner .eo-overview-demand-hero__eyebrow {
+  flex-wrap: wrap;
+  color: var(--journal-sun);
+}
+
+.workspace-shell--partner .eo-overview-demand-hero__eyebrow-badge {
+  padding: 0;
+  color: var(--journal-inverse);
+  background: transparent;
+  border-radius: 0;
+}
+
+.workspace-shell--partner .eo-overview-demand-hero__simulation-tag {
+  width: 100%;
+  margin-left: 0;
+  color: color-mix(in srgb, var(--journal-inverse) 72%, transparent);
+}
+
+.workspace-shell--partner .eo-overview-demand-hero h2 {
+  max-width: 18ch;
+  color: var(--journal-inverse);
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.8rem, 3.2vw, 3.15rem);
+  line-height: 1.08;
+}
+
+.workspace-shell--partner .eo-overview-demand-hero__headline p {
+  max-width: 57ch;
+  color: color-mix(in srgb, var(--journal-inverse) 88%, transparent);
+}
+
+.workspace-shell--partner .eo-overview-demand-hero__facts {
+  border-color: color-mix(in srgb, var(--journal-inverse) 26%, transparent);
+  color: var(--journal-inverse);
+}
+
+.workspace-shell--partner .eo-overview-demand-hero__cta {
+  background: var(--journal-sun);
+  color: var(--studio-ink);
+}
+
+.workspace-shell--partner .eo-overview-demand-hero__secondary {
+  color: var(--journal-inverse);
+}
+
+.workspace-shell--partner .eo-overview-panel {
+  padding: clamp(1.1rem, 2vw, 1.75rem);
+  border-color: var(--studio-line);
+  border-radius: 1rem;
+  background: var(--studio-paper);
+}
+
+.workspace-shell--partner .eo-overview-panel__header h2 {
+  font-family: var(--font-family-editorial);
+  font-size: 1.5rem;
+}
+
+.workspace-shell--partner .eo-overview-list-row {
+  align-items: start;
+  padding-block: var(--space-4);
+}
+
+.workspace-shell--partner .eo-overview-list-row__title {
+  white-space: normal;
+  line-height: 1.4;
+}
+
+/* Destination overview: an illustrated location header and clear work queue. */
+.workspace-shell--partner .dest-identity {
+  min-height: 18rem;
+  grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 0.8fr);
+  border-color: var(--studio-line);
+  border-radius: 1.1rem;
+  box-shadow: var(--studio-shadow);
+}
+
+.workspace-shell--partner .dest-identity__content {
+  position: relative;
+  z-index: 1;
+  padding: clamp(1.5rem, 3.5vw, 3rem);
+  background:
+    radial-gradient(
+      circle at 0 100%,
+      color-mix(in srgb, var(--studio-sage) 75%, transparent),
+      transparent 18rem
+    ),
+    var(--studio-paper);
+}
+
+.workspace-shell--partner .dest-identity h1 {
+  max-width: 17ch;
+  font-size: clamp(2.4rem, 4.3vw, 4.2rem);
+  line-height: 1;
+}
+
+.workspace-shell--partner .dest-identity__location {
+  color: var(--studio-muted);
+  font-size: 1rem;
+}
+
+.workspace-shell--partner .dest-identity__manager {
+  width: 100%;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--studio-line);
+}
+
+.workspace-shell--partner .dest-identity__media,
+.workspace-shell--partner .dest-identity__media img {
+  min-height: 18rem;
+}
+
+.workspace-shell--partner .dest-quick-actions {
+  gap: 0;
+}
+
+.workspace-shell--partner .dest-quick-actions__grid {
+  gap: var(--space-2) var(--space-4);
+  border: 0;
+}
+
+.workspace-shell--partner .dest-quick-action-card {
+  min-height: 6.25rem;
+  justify-content: center;
+  padding: var(--space-4) var(--space-5);
+  border: 0;
+  border-bottom: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.workspace-shell--partner .dest-quick-action-card:nth-child(odd) {
+  border-right: 0;
+}
+
+.workspace-shell--partner .dest-quick-action-card:hover {
+  background: color-mix(in srgb, var(--studio-sage) 52%, transparent);
+}
+
+.workspace-shell--partner .dest-quick-action-card__label {
+  color: var(--studio-ink);
+  font-family: var(--font-family-editorial);
+  font-size: 1.2rem;
+}
+
+.workspace-shell--partner .dest-quick-action-card__desc {
+  max-width: 36ch;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.workspace-shell--partner .dest-readiness__disclosure-card {
+  border: 0;
+  border-radius: 0.4rem;
+  background: var(--studio-sage);
+}
+
+.workspace-shell--partner .dest-readiness__summary-card {
+  border: 0;
+  padding: var(--space-2) 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.workspace-shell--partner .dest-partners {
+  border-radius: 1rem;
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      color-mix(in srgb, var(--journal-sun) 22%, transparent),
+      transparent 14rem
+    ),
+    var(--studio-forest);
+}
+
+.workspace-shell--partner .dest-session-row {
+  border-radius: 0.6rem;
+  background: var(--studio-linen);
+}
+
+.workspace-shell--partner .dest-session-summary-card {
+  border-radius: 0.7rem;
+  background: var(--studio-linen);
+}
+
+.workspace-shell--partner .dest-profile-fact-card {
+  border: 0;
+  padding: var(--space-2) 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.workspace-shell--partner .dest-media-gallery {
+  border-color: var(--studio-line);
+  background: var(--studio-paper);
+}
+
+/* Repeated work surfaces: catalogs, package details, reviews, and builder. */
+.workspace-shell--partner
+  :is(
+    .eo-pkg-card,
+    .eo-dest-card,
+    .eo-builder-dest-card,
+    .eo-dest-detail-hero
+  ) {
+  border-color: var(--studio-line);
+  border-radius: 1rem;
+  background: var(--studio-paper);
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--studio-ink) 5%, transparent);
+}
+
+.workspace-shell--partner
+  :is(.eo-pkg-card, .eo-dest-card, .eo-builder-dest-card):hover {
+  border-color: var(--studio-accent);
+  box-shadow: var(--studio-shadow);
+}
+
+.workspace-shell--partner .eo-builder-dest-card--selected {
+  border-color: var(--studio-forest);
+  box-shadow: 0 0 0 2px var(--studio-forest);
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-pkg-card__title,
+    .eo-dest-card__title,
+    .eo-dest-detail-hero__title,
+    .eo-builder-dest-card__title
+  ) {
+  color: var(--studio-ink);
+  font-family: var(--font-family-editorial);
+  letter-spacing: -0.025em;
+}
+
+.workspace-shell--partner .eo-packages-filter__track {
+  border: 0;
+  border-bottom: 1px solid var(--studio-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.workspace-shell--partner .eo-packages-filter__tab {
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.workspace-shell--partner .eo-packages-filter__tab--active {
+  color: var(--studio-ink);
+  background: var(--studio-sage);
+  box-shadow: inset 0 -2px var(--studio-forest);
+}
+
+.workspace-shell--partner .eo-dest-card__guide,
+.workspace-shell--partner .eo-builder-guide-section {
+  border-color: var(--studio-line);
+  background: var(--studio-linen);
+}
+
+.workspace-shell--partner .eo-dest-card__guide-badge,
+.workspace-shell--partner .eo-builder-dest-card__guide-badge,
+.workspace-shell--partner .eo-dest-badge-ready,
+.workspace-shell--partner .eo-dest-badge-not-ready {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-weight: 600;
+}
+
+.workspace-shell--partner
+  :is(.eo-dest-detail-card, .eo-dest-side-cta-card, .eo-builder-guide-card) {
+  border-color: var(--studio-line);
+  border-radius: 0.8rem;
+  background: var(--studio-paper);
+}
+
+.workspace-shell--partner .eo-builder-guide-card--active {
+  border-color: var(--studio-forest);
+  background: var(--studio-sage);
+}
+
+.workspace-shell--partner .eo-dest-side-cta-card {
+  border-top: 3px solid var(--studio-forest);
+  background: var(--studio-linen);
+}
+
+.workspace-shell--partner .eo-builder-dropzone {
+  border-color: var(--studio-accent);
+  background: var(--studio-linen);
+}
+
+.workspace-shell--partner .partner-empty-state {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  min-height: 13rem;
+  padding: var(--space-5);
+  overflow: hidden;
+  border: 1px solid var(--studio-line);
+  border-radius: 0.8rem;
+  background:
+    radial-gradient(
+      circle at 0 100%,
+      color-mix(in srgb, var(--studio-sage) 60%, transparent),
+      transparent 15rem
+    ),
+    var(--studio-linen);
+}
+
+.workspace-shell--partner .partner-empty-state__mascot {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 11rem;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.workspace-shell--partner .partner-empty-state__content {
+  min-width: 0;
+}
+
+.workspace-shell--partner .partner-empty-state__content strong {
+  display: block;
+  color: var(--studio-ink);
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.4rem, 2.3vw, 2rem);
+  line-height: 1.15;
+}
+
+.workspace-shell--partner .partner-empty-state__content p {
+  max-width: 47ch;
+  margin: var(--space-2) 0 var(--space-4);
+  color: var(--studio-muted);
+  line-height: 1.5;
+}
+
+.workspace-shell--partner .partner-empty-state__content a {
+  color: var(--studio-forest);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}
+
+@media (max-width: 80rem) {
+  .workspace-shell--partner
+    .eo-overview-demand-hero
+    > :not(.eo-overview-demand-hero__mascot) {
+    max-width: 72%;
+  }
+}
+
+@media (max-width: 64rem) {
+  .workspace-shell--partner :is(.eo-overview-metric-band, .dest-metric-band) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workspace-shell--partner
+    :is(.eo-overview-metric-item, .dest-metric-item):nth-child(3) {
+    border-left: 0;
+  }
+
+  .workspace-shell--partner
+    :is(.eo-overview-metric-item, .dest-metric-item):nth-child(n + 3) {
+    border-top: 1px solid var(--studio-line);
+  }
+}
+
+@media (max-width: 48rem) {
+  .workspace-shell--partner .dest-container .eo-table {
+    min-width: 65rem;
+  }
+
+  .workspace-shell--partner .dest-container .eo-table-wrapper {
+    scrollbar-color: var(--studio-accent) var(--studio-linen);
+    scrollbar-width: thin;
+  }
+
+  .workspace-shell--partner .workspace-content {
+    padding-bottom: var(--space-8);
+  }
+
+  .workspace-shell--partner .workspace-sidebar__mascot {
+    display: none;
+  }
+
+  .workspace-shell--partner .eo-overview-demand-hero {
+    padding-bottom: 9rem;
+  }
+
+  .workspace-shell--partner
+    .eo-overview-demand-hero
+    > :not(.eo-overview-demand-hero__mascot) {
+    max-width: 100%;
+  }
+
+  .workspace-shell--partner .eo-overview-demand-hero__mascot {
+    right: -1.5rem;
+    bottom: -5rem;
+    width: 14rem;
+    opacity: 0.65;
+  }
+
+  .workspace-shell--partner .dest-identity {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-shell--partner .dest-identity__media,
+  .workspace-shell--partner .dest-identity__media img {
+    height: 11rem;
+    min-height: 11rem;
+    max-height: 11rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .workspace-shell--partner .partner-empty-state {
+    grid-template-columns: 6rem minmax(0, 1fr);
+    padding: var(--space-4);
+  }
+
+  .workspace-shell--partner .eo-stepper {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  .workspace-shell--partner .eo-step-item {
+    min-height: 2.75rem;
+    flex: 1 1 9.5rem;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .workspace-shell--partner .eo-overview-ops-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-shell--partner .eo-overview-list-row {
+    flex-wrap: wrap;
+  }
+
+  .workspace-shell--partner .eo-overview-list-row__secondary {
+    flex-wrap: wrap;
+  }
+
+  .workspace-shell--partner .eo-packages-filter {
+    overflow: visible;
+  }
+
+  .workspace-shell--partner .eo-packages-filter__track {
+    flex-wrap: wrap;
+    border-bottom: 0;
+  }
+
+  .workspace-shell--partner .dest-quick-actions__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-shell--partner .dest-quick-action-card:nth-child(odd) {
+    border-right: 0;
+  }
+
+  .workspace-shell--partner :is(.eo-overview-metric-item, .dest-metric-item) {
+    min-height: 7.5rem;
+    padding: var(--space-4);
+  }
+}
+
+@media (max-width: 30rem) {
+  .workspace-shell--partner :is(.eo-overview-metric-band, .dest-metric-band) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workspace-shell--partner :is(.eo-overview-metric-item, .dest-metric-item) {
+    border-left: 0;
+  }
+
+  .workspace-shell--partner
+    :is(.eo-overview-metric-item, .dest-metric-item):nth-child(even) {
+    border-left: 1px solid var(--studio-line);
+  }
+
+  .workspace-shell--partner
+    :is(.eo-overview-metric-item, .dest-metric-item):nth-child(n + 3) {
+    border-top: 1px solid var(--studio-line);
+  }
+
+  .workspace-shell--partner :is(.eo-overview-metric-label, .dest-metric-label) {
+    font-size: 0.63rem;
+  }
+
+  .workspace-shell--partner :is(.eo-overview-metric-value, .dest-metric-value) {
+    font-size: clamp(1.7rem, 8vw, 2.2rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-shell--partner
+    :is(
+      .eo-pkg-card,
+      .eo-dest-card,
+      .eo-builder-dest-card,
+      .dest-quick-action-card
+    ) {
+    transition: none;
+  }
+}
+
+/* Let information breathe: work areas read as sections, not stacks of cards. */
+.workspace-shell--partner
+  :is(
+    .eo-section,
+    .dest-readiness,
+    .dest-sessions,
+    .dest-profile,
+    .dest-reviews,
+    .dest-quick-actions
+  ) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-page-header,
+    .dest-page-header,
+    .eo-packages-header,
+    .eo-destinations-header
+  ) {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.workspace-shell--partner
+  :is(
+    .eo-page-header,
+    .dest-page-header,
+    .eo-packages-header,
+    .eo-destinations-header
+  )::after {
+  display: none;
+}
+
+.workspace-shell--partner .dest-readiness__operational-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) clamp(1.5rem, 4vw, 4rem);
+  padding: var(--space-3) 0;
+}
+
+.workspace-shell--partner .dest-readiness__summary-card {
+  min-width: min(100%, 10rem);
+  flex: 1 1 10rem;
+}
+
+.workspace-shell--partner .dest-readiness__summary-value,
+.workspace-shell--partner .dest-profile-fact-value {
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.15rem, 1.5vw, 1.4rem);
+  line-height: 1.25;
+}
+
+.workspace-shell--partner .dest-profile-facts {
+  gap: var(--space-4) clamp(1.5rem, 4vw, 4rem);
+}
+
+.workspace-shell--partner :is(.eo-overview-metric-band, .dest-metric-band) {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.workspace-shell--partner :is(.eo-overview-metric-item, .dest-metric-item) {
+  min-height: 7rem;
+  padding: var(--space-3) var(--space-4);
+  border: 0 !important;
+  border-radius: 0;
+}
+
+.workspace-shell--partner
+  :is(.eo-overview-metric-item, .dest-metric-item):first-child {
+  border-radius: 0.85rem;
+}
+
+.workspace-shell--partner :is(.dest-session-row, .dest-session-summary-card) {
+  background: transparent;
+  border-color: var(--studio-line);
+  box-shadow: none;
+}
+
+.workspace-shell--partner .eo-session-package-selector {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.workspace-shell--partner .eo-session-package-selector__grid {
+  gap: var(--space-2);
+}
+
+.workspace-shell--partner .eo-session-package-card {
+  min-height: 5.5rem;
+  padding: var(--space-2);
+  overflow: visible;
+  border: 0;
+  border-radius: 0.65rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.workspace-shell--partner .eo-session-package-card:hover {
+  border: 0;
+  background: color-mix(in srgb, var(--studio-sage) 55%, transparent);
+  box-shadow: none;
+}
+
+.workspace-shell--partner .eo-session-package-card--selected {
+  border: 0;
+  background: var(--studio-sage);
+  box-shadow: none;
+}
+
+.workspace-shell--partner .eo-session-package-card__image {
+  width: 4.75rem;
+  min-height: 4.75rem;
+  border-radius: 0.45rem;
+}
+
+.workspace-shell--partner .eo-session-package-card__all-icon {
+  min-height: 4.75rem;
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--studio-sage) 65%, transparent);
+}
+
+.workspace-shell--partner .partner-settings {
+  max-width: 62rem;
+}
+
+.workspace-shell--partner .partner-settings__section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  padding-block: clamp(1.5rem, 3vw, 2.75rem);
+  border-top: 1px solid var(--studio-line);
+}
+
+.workspace-shell--partner .partner-settings__index {
+  color: var(--studio-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.workspace-shell--partner .partner-settings__section h2 {
+  margin: var(--space-2) 0;
+  color: var(--studio-ink);
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.45rem, 2.5vw, 2rem);
+  line-height: 1.15;
+}
+
+.workspace-shell--partner .partner-settings__section p {
+  max-width: 45ch;
+  margin: 0;
+  color: var(--studio-muted);
+  line-height: 1.6;
+}
+
+.workspace-shell--partner .partner-settings__form {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+}
+
+.workspace-shell--partner .partner-settings__form label {
+  margin-top: var(--space-2);
+  color: var(--studio-ink);
+  font-weight: 700;
+}
+
+.workspace-shell--partner .partner-settings__form small {
+  color: var(--studio-muted);
+  line-height: 1.5;
+}
+
+.workspace-shell--partner .partner-settings__field-with-unit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.workspace-shell--partner .partner-settings__field-with-unit input {
+  max-width: 9rem;
+}
+
+.workspace-shell--partner .partner-settings__form .ui-button {
+  justify-self: start;
+  margin-top: var(--space-3);
+}
+
+.workspace-shell--partner .partner-settings__error {
+  color: var(--color-danger-text);
+}
+
+.workspace-shell--partner .partner-settings__success {
+  color: var(--studio-forest);
+}
+
+.workspace-shell--partner .partner-settings__link {
+  display: inline-block;
+  margin-top: var(--space-4);
+  color: var(--studio-forest);
+  font-weight: 700;
+  text-underline-offset: 0.2rem;
+}
+
+.workspace-shell--partner .partner-settings__mascot-art {
+  position: relative;
+  display: flex;
+  min-height: 12rem;
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--space-3);
+  overflow: hidden;
+  padding: var(--space-4);
+  border-radius: 45% 55% 47% 53% / 58% 41% 59% 42%;
+  background: var(--studio-sage);
+}
+
+.workspace-shell--partner .partner-settings__mascot-art span {
+  max-width: 10ch;
+  color: var(--studio-forest);
+  font-family: var(--font-family-editorial);
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.workspace-shell--partner .partner-settings__mascot-art img {
+  width: 7rem;
+  max-height: 11rem;
+  object-fit: contain;
+}
+
+.workspace-shell--partner .partner-settings__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: 0;
+}
+
+.workspace-shell--partner .partner-settings__facts dt {
+  margin-bottom: var(--space-1);
+  color: var(--studio-muted);
+  font-size: 0.78rem;
+}
+
+.workspace-shell--partner .partner-settings__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--studio-ink);
+  font-weight: 700;
+}
+
+@media (max-width: 48rem) {
+  .workspace-shell--partner .partner-settings__section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 35rem) {
+  .workspace-shell--partner .partner-settings__facts {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Partner details use quiet separators instead of colored edge markers. */
+.workspace-shell--partner .eo-pkg-op-notes,
+.workspace-shell--partner .dest-session-summary-card {
+  border-left: 0;
+  border-radius: 0.7rem;
+}
+
+.workspace-shell--partner .eo-itinerary-index {
+  color: var(--studio-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.workspace-shell--partner .eo-builder-review-meta {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  color: var(--studio-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.workspace-shell--partner .eo-builder-review-meta span + span::before {
+  content: "·";
+  margin-right: var(--space-3);
+  color: var(--studio-accent);
+}
+
+.workspace-shell--partner .eo-insight-context {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--studio-line);
+}
+
+.workspace-shell--partner .eo-insight-context strong {
+  color: var(--studio-ink);
+  font-family: var(--font-family-editorial);
+  font-size: 1.2rem;
+}
+
+.workspace-shell--partner .eo-insight-context p {
+  max-width: 57ch;
+  margin: var(--space-1) 0 0;
+  color: var(--studio-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.workspace-shell--partner .eo-insight-context__toggle {
+  padding: 0.4rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--studio-forest);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.workspace-shell--partner .eo-insight-card__context {
+  display: grid;
+  gap: 0.45rem;
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--studio-line);
+  font-size: 0.77rem;
+}
+
+.workspace-shell--partner .eo-insight-card__context div {
+  display: grid;
+  grid-template-columns: minmax(6rem, 0.65fr) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.workspace-shell--partner .eo-insight-card__context dt {
+  color: var(--studio-muted);
+}
+
+.workspace-shell--partner .eo-insight-card__context dd {
+  margin: 0;
+  color: var(--studio-ink);
+  font-weight: 600;
+}
+
+.workspace-shell--partner .eo-insight-card__caution {
+  margin: var(--space-3) 0 0;
+  color: var(--studio-muted);
+  font-size: 0.77rem;
+  line-height: 1.45;
+}
+
+.workspace-shell--partner .partner-settings__section {
+  align-items: start;
+  gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+.workspace-shell--partner .partner-settings__index {
+  color: var(--studio-muted);
+}
+
+.workspace-shell--partner .partner-settings__facts > div {
+  min-width: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--studio-line);
+}
+
+.workspace-shell--partner .partner-settings__form {
+  max-width: 27rem;
+  gap: var(--space-2);
+}
+
+/* The builder preview renders the same package detail component as Traveler. */
+.eo-traveler-preview-dialog.ui-dialog {
+  width: min(calc(100% - var(--space-4)), 76rem);
+  max-width: 76rem;
+  max-height: calc(100dvh - var(--space-4));
+  padding: 0;
+  overflow: auto;
+  background: var(--journal-canvas);
+}
+
+.eo-traveler-preview-dialog .ui-dialog__header,
+.eo-traveler-preview-dialog > p,
+.eo-traveler-preview-dialog .ui-dialog__actions {
+  margin: 0;
+  padding: var(--space-3) clamp(var(--space-4), 4vw, var(--space-8));
+  background: var(--journal-paper);
+}
+
+.eo-traveler-preview-dialog .ui-dialog__header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  align-items: center;
+  border-bottom: 1px solid var(--journal-line);
+}
+
+.eo-traveler-preview-dialog .ui-dialog__header h2 {
+  margin: 0;
+}
+
+.eo-traveler-preview-dialog > p {
+  color: var(--journal-muted);
+}
+
+.eo-traveler-preview-dialog .ui-dialog__actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  border-top: 1px solid var(--journal-line);
+}
+
+.eo-traveler-preview-shell {
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+.eo-traveler-preview-shell .package-detail-container {
+  padding-bottom: var(--space-4);
+}
+
+.eo-traveler-preview-shell button.package-detail-context__back {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.eo-traveler-preview-shell .package-detail-hero__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  color: var(--journal-muted);
+  background: var(--journal-sage);
+  text-align: center;
+}
+
+@media (max-width: 40rem) {
+  .eo-traveler-preview-dialog.ui-dialog {
+    width: calc(100% - var(--space-2));
+    max-height: calc(100dvh - var(--space-2));
+  }
+}

@@ -407,16 +407,16 @@ describe("F5.4 — Destination Media & Package Visual Choice", () => {
       "/package-hero",
       "/package-hero",
     );
-    const thumbs = hero.querySelectorAll<HTMLButtonElement>(
-      ".package-detail-gallery__thumb",
+    const coverDots = hero.querySelectorAll<HTMLButtonElement>(
+      ".package-detail-hero__dot",
     );
-    expect(thumbs).toHaveLength(2);
+    expect(coverDots).toHaveLength(2);
     expect(
       hero
         .querySelector<HTMLImageElement>(".package-detail-hero__visual")
         ?.getAttribute("src"),
     ).toBe("data:image/png;base64,Yg==");
-    await act(async () => thumbs[1].click());
+    await act(async () => coverDots[1].click());
     expect(
       hero
         .querySelector<HTMLImageElement>(".package-detail-hero__visual")

@@ -309,6 +309,23 @@ export const mockDestinationStore = {
     return cloneDestination(destinations[existingIndex]);
   },
 
+  updateOperationalSettings(
+    destinationId: string,
+    capacityPerSession: number,
+    operationalNotes: string[],
+  ): DestinationRecord | undefined {
+    const index = destinations.findIndex(
+      (d) => d.destinationId === destinationId,
+    );
+    if (index < 0) return undefined;
+    destinations[index] = {
+      ...destinations[index],
+      capacityPerSession,
+      operationalNotes: [...operationalNotes],
+    };
+    return cloneDestination(destinations[index]);
+  },
+
   /**
    * Authoritative EO-available destination selector:
    * Only returns destinations that are ACTIVE and have local guide capability.

@@ -1,0 +1,249 @@
+/* Partner and admin keep the journal palette with a denser working rhythm. */
+.workspace-shell {
+  --color-bg-page: var(--journal-canvas);
+  --color-bg-surface: var(--journal-paper);
+  --color-bg-surface-subtle: var(--journal-linen);
+  --color-border-default: var(--journal-line);
+  --color-text-primary: var(--journal-ink);
+  --color-text-secondary: var(--journal-muted);
+  --color-brand-primary: var(--journal-forest);
+  --color-brand-primary-hover: var(--journal-ink);
+  --color-brand-primary-soft: var(--journal-sage);
+  --redesign-canvas: var(--journal-canvas);
+  --redesign-paper: var(--journal-paper);
+  --redesign-line: var(--journal-line);
+  --redesign-mist: var(--journal-sage);
+  --redesign-ink: var(--journal-ink);
+  --redesign-deep: var(--journal-forest);
+  --redesign-muted: var(--journal-muted);
+  color: var(--journal-ink);
+  background: var(--journal-canvas);
+}
+
+.workspace-shell
+  :is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--journal-earth);
+  outline-offset: 3px;
+}
+
+.workspace-shell .workspace-sidebar {
+  border-right: 0;
+  color: var(--journal-inverse);
+  background:
+    radial-gradient(circle at 0 90%, rgb(213 166 107 / 14%), transparent 15rem),
+    var(--journal-forest);
+  box-shadow: 8px 0 24px rgb(23 54 45 / 10%);
+}
+
+.workspace-shell .workspace-sidebar__brand {
+  border-bottom-color: rgb(251 248 236 / 18%);
+}
+
+.workspace-shell .workspace-sidebar__logo-link {
+  padding: 0.1rem 0.55rem;
+  border-radius: 0.85rem;
+  background: var(--journal-paper);
+}
+
+.workspace-shell .workspace-sidebar__role-tag {
+  color: var(--journal-sun);
+}
+
+.workspace-shell .workspace-navigation {
+  gap: var(--space-2);
+}
+
+.workspace-shell .workspace-navigation a {
+  color: rgb(251 248 236 / 78%);
+  border-radius: 0.9rem;
+  font-weight: 500;
+}
+
+.workspace-shell .workspace-navigation a:hover,
+.workspace-shell .workspace-navigation a[aria-current="page"],
+.workspace-shell--admin .workspace-navigation a[aria-current="page"] {
+  color: var(--journal-ink);
+  background: var(--journal-sage);
+}
+
+.workspace-shell .workspace-sidebar__mascot {
+  border-top-color: rgb(251 248 236 / 18%);
+}
+
+.workspace-shell .workspace-sidebar__mascot img {
+  opacity: 1;
+}
+
+.workspace-shell .workspace-topbar {
+  border-bottom-color: var(--journal-line);
+  background: rgb(255 253 247 / 93%);
+}
+
+.workspace-shell .workspace-topbar__title,
+.workspace-shell :is(.eo-page-title, .dest-page-title, .admin-page-title),
+.workspace-shell
+  :is(.eo-overview-header h1, .eo-demand-header h1, .eo-packages-header h1) {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.workspace-shell :is(.eo-page-header, .dest-page-header, .admin-page-header) {
+  border-bottom-color: var(--journal-line);
+  padding-bottom: var(--space-6);
+}
+
+.workspace-shell
+  :is(.eo-page-subtitle, .dest-page-subtitle, .admin-page-subtitle) {
+  max-width: 52rem;
+  color: var(--journal-muted);
+  line-height: 1.55;
+}
+
+.workspace-shell .workspace-identity > span,
+.workspace-shell--admin .workspace-identity > span {
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+}
+
+.workspace-shell :is(.eo-container, .dest-container, .admin-container) {
+  gap: var(--space-8);
+}
+
+.workspace-shell :is(.eo-stat-card, .dest-stat-card, .admin-queue-card) {
+  min-width: 0;
+  border: 1px solid var(--journal-line);
+  border-radius: 1.25rem;
+  background: var(--journal-paper);
+  box-shadow: none;
+}
+
+.workspace-shell
+  :is(.eo-stat-card, .dest-stat-card, .admin-queue-card):first-child {
+  border-color: var(--journal-forest);
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+}
+
+.workspace-shell
+  :is(.eo-stat-card, .dest-stat-card, .admin-queue-card):first-child
+  :is(
+    .eo-stat-label,
+    .eo-stat-value,
+    .eo-stat-desc,
+    .dest-stat-label,
+    .dest-stat-value,
+    .dest-stat-desc,
+    .admin-queue-label,
+    .admin-queue-value,
+    .admin-queue-desc
+  ) {
+  color: var(--journal-inverse);
+}
+
+.workspace-shell :is(.eo-stat-value, .dest-stat-value, .admin-queue-value) {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+}
+
+.workspace-shell :is(.eo-stat-label, .dest-stat-label, .admin-queue-label) {
+  color: var(--journal-earth);
+}
+
+.workspace-shell :is(.eo-banner-card, .eo-overview-demand-hero) {
+  border: 1px solid var(--journal-line);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgb(213 166 107 / 26%),
+      transparent 16rem
+    ),
+    linear-gradient(110deg, var(--journal-sage), var(--journal-paper));
+  box-shadow: none;
+}
+
+.workspace-shell :is(.eo-banner-content h2, .eo-overview-demand-hero h2) {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+}
+
+.workspace-shell
+  :is(
+    .eo-section,
+    .admin-section,
+    .dest-readiness,
+    .dest-identity,
+    .dest-session-summary-card
+  ) {
+  border: 1px solid var(--journal-line);
+  border-radius: 1.5rem;
+  background: var(--journal-paper);
+  box-shadow: none;
+}
+
+.workspace-shell
+  :is(
+    .eo-section-title,
+    .admin-section-title,
+    .dest-section-heading,
+    .dest-session-summary-title
+  ) {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+}
+
+.workspace-shell :is(.eo-table-wrapper, .admin-table-wrapper) {
+  overflow-x: auto;
+  border-color: var(--journal-line);
+  border-radius: 1rem;
+}
+
+.workspace-shell :is(.eo-table th, .admin-table th, .dest-table th) {
+  color: var(--journal-forest);
+  background: var(--journal-sage);
+}
+
+.workspace-shell :is(.eo-table td, .admin-table td, .dest-table td) {
+  border-bottom-color: var(--journal-line);
+}
+
+.workspace-shell
+  :is(.eo-form-input, .eo-form-select, .eo-form-textarea, .ui-input) {
+  border-color: var(--journal-line);
+  border-radius: 0.8rem;
+  color: var(--journal-ink);
+  background: var(--journal-paper);
+}
+
+.workspace-shell .ui-button--primary {
+  border-radius: 0.8rem;
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+  box-shadow: none;
+}
+
+.workspace-shell .ui-button--primary:hover:not(:disabled) {
+  background: var(--journal-ink);
+}
+
+.workspace-shell
+  :is(.dest-quick-action-card, .dest-session-row, .dest-review-card) {
+  border-color: var(--journal-line);
+  border-radius: 1.25rem;
+  background: var(--journal-paper);
+}
+
+@media (max-width: 47.99rem) {
+  .workspace-shell :is(.eo-container, .dest-container, .admin-container) {
+    gap: var(--space-6);
+  }
+
+  .workspace-shell :is(.eo-section, .admin-section, .dest-readiness) {
+    padding: var(--space-5);
+  }
+}

@@ -46,6 +46,19 @@ export function TravelerAppShell({
               loading="eager"
             />
           </Link>
+          {showBottomNav && (
+            <nav
+              className="traveler-header-nav"
+              aria-label="Navigasi traveler desktop"
+            >
+              {travelerNavigation.map(({ to, label, icon: Icon }) => (
+                <NavLink key={to} to={to}>
+                  <Icon />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
+            </nav>
+          )}
         </div>
       </header>
       <main className="traveler-app-content">{children ?? <Outlet />}</main>

@@ -94,8 +94,7 @@ describe("Traveler Profile Screen (T21) - Rebuilt V2 Identity & Journal", () => 
     // Identity in Forest hero
     expect(container.textContent).toContain("Budi Santoso");
     expect(container.textContent).toContain("B"); // Monogram
-    expect(container.textContent).toContain("Lagi butuh:");
-    expect(container.textContent).toContain("Dekat dengan alam");
+    expect(container.textContent).not.toContain("Lagi butuh:");
 
     // NEW APPROVED RULE: Full preference summary (Aktivitas, Budget, Durasi, Keberangkatan, Ubah Preferensi) is REMOVED from main Profile
     expect(container.textContent).not.toContain("Alam & pemandangan");

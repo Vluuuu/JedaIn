@@ -240,6 +240,12 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(container.textContent).toContain(
       "Area keberangkatan Alun-Alun Kota Batu",
     );
+    const journeyPass = container.querySelector(".trip-detail-journey-pass");
+    expect(journeyPass?.textContent).toContain("Tanggal perjalanan");
+    expect(journeyPass?.textContent).toContain("Titik kumpul");
+    expect(
+      journeyPass?.querySelector(".trip-detail-journey-pass__date-stamp"),
+    ).not.toBeNull();
 
     const disclosure = container.querySelector<HTMLDetailsElement>(
       "details.trip-detail-disclosure",

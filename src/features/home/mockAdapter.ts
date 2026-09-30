@@ -2,6 +2,7 @@ import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
+  syncMarketplaceFromSupabase,
 } from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
@@ -61,6 +62,7 @@ export class MockHomeAdapter implements HomeAdapter {
 
   async getHomeData(): Promise<HomeViewModel> {
     await this.delay();
+    await syncMarketplaceFromSupabase();
     const opts = this.getMergedOptions();
 
     const session = sessionStore.get();

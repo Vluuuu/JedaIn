@@ -15,7 +15,11 @@ import { buildTravelerPackageFromEo } from "../marketplace/marketplaceAdapter";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
-import { mockEoPackageStore, validateEoPackage } from "./mockEoPackageStore";
+import {
+  mockEoPackageStore,
+  SEEDED_LIVE_PACKAGE,
+  validateEoPackage,
+} from "./mockEoPackageStore";
 import {
   mockInsightStore,
   OPPORTUNITY_ALLOWED_ORIGINS,
@@ -676,6 +680,28 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
   });
 
   describe("8. Partner Routing & Bookings Sessions (AH–AK)", () => {
+    it("shows only role-specific sign-in actions at the partner entrance", async () => {
+      const view = await renderComponent(createElement(App), ["/partner"]);
+      const buttons = Array.from(view.querySelectorAll("button"));
+      expect(
+        buttons.some((button) => button.textContent === "Masuk sebagai TO"),
+      ).toBe(true);
+      expect(
+        buttons.some(
+          (button) => button.textContent === "Masuk sebagai Mitra Destinasi",
+        ),
+      ).toBe(true);
+      expect(view.textContent).not.toContain("Daftar sebagai");
+
+      await act(async () => {
+        buttons
+          .find((button) => button.textContent === "Masuk sebagai TO")
+          ?.click();
+      });
+      expect(view.textContent).toContain("Masuk sebagai Travel Organizer");
+      expect(view.querySelector("#partner-email")).not.toBeNull();
+    });
+
     it("AH. /partner/apply/destination renders destination application form for destination partner", async () => {
       partnerSessionStore.loginAsDemoDestination();
       const view = await renderComponent(createElement(App), [
@@ -688,15 +714,11 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       );
     });
 
-    it("AI. DESTINATION role login routes to destination application entry, never /partner/eo", async () => {
+    it("AI. Destination login requires email and password and never opens /partner/eo", async () => {
       const view = await renderComponent(createElement(PartnerLoginScreen));
 
-      const roleSelect =
-        view.querySelector<HTMLSelectElement>("#partner-role")!;
-      await act(async () => {
-        roleSelect.value = "DESTINATION";
-        roleSelect.dispatchEvent(new Event("change", { bubbles: true }));
-      });
+      expect(view.querySelector("#partner-email")).not.toBeNull();
+      expect(view.querySelector("#partner-password")).not.toBeNull();
 
       const submitBtn = view.querySelector<HTMLButtonElement>(
         "button[type='submit']",
@@ -2117,6 +2139,44 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       expect(certEoRes.valid).toBe(true);
     });
 
+    it("uses the selected destination's current tariff when validating a 100k EO margin", () => {
+      const destination = mockDestinationStore.getById("dest_lereng_hijau");
+      expect(destination).toBeDefined();
+
+      const standardTariff = validateEoPackage(
+        {
+          ...SEEDED_LIVE_PACKAGE,
+          pricing: {
+            destinationBaseCost: 125000,
+            localGuideFee: 25000,
+            eoMargin: 100000,
+            customerPrice: 250000,
+          },
+        },
+        "CERTIFIED_GUIDE",
+      );
+      expect(standardTariff.valid).toBe(true);
+
+      const updatedDestination = {
+        ...destination!,
+        localGuideFeePerPerson: 100000,
+      };
+      const currentTariff = validateEoPackage(
+        {
+          ...SEEDED_LIVE_PACKAGE,
+          pricing: {
+            destinationBaseCost: 125000,
+            localGuideFee: 100000,
+            eoMargin: 100000,
+            customerPrice: 325000,
+          },
+        },
+        "CERTIFIED_GUIDE",
+        updatedDestination,
+      );
+      expect(currentTariff.valid).toBe(true);
+    });
+
     it("BQ. Seeded LIVE and PENDING packages have valid DESTINATION guideSource and saveDraft persists guideSource", () => {
       const livePkg = mockEoPackageStore.getPackageById("slow_green_day");
       const pendingPkg = mockEoPackageStore.getPackageById(
@@ -2399,7 +2459,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       const view = await renderComponent(createElement(App), ["/partner/eo"]);
       // On standard hostname in test, PartnerRouteGuard redirects to partner login
-      expect(view.textContent).toContain("Masuk ke Portal Partner");
+      expect(view.textContent).toContain("Mari tumbuh bersama JedaIn");
     });
 
     it("BY. Package Builder Step 2 renders cover image upload dropzone and accepts file input", async () => {

@@ -1,0 +1,1658 @@
+/* Signed-in Traveler: a field journal for finding a slower rhythm. */
+.traveler-app-shell {
+  --color-bg-page: var(--journal-canvas);
+  --color-bg-surface: var(--journal-paper);
+  --color-bg-surface-subtle: var(--journal-linen);
+  --color-border-default: var(--journal-line);
+  --color-text-primary: var(--journal-ink);
+  --color-text-secondary: var(--journal-muted);
+  --color-brand-primary: var(--journal-forest);
+  --color-brand-primary-hover: var(--journal-ink);
+  --color-brand-primary-soft: var(--journal-sage);
+  --redesign-canvas: var(--journal-canvas);
+  --redesign-paper: var(--journal-paper);
+  --redesign-cream: var(--journal-linen);
+  --redesign-meadow-light: var(--journal-sage);
+  --redesign-warm-line: var(--journal-line);
+  --redesign-forest-ink: var(--journal-ink);
+  --redesign-forest-dark: var(--journal-forest);
+  --redesign-deep: var(--journal-forest);
+  --redesign-muted: var(--journal-muted);
+  --redesign-shadow: var(--journal-shadow);
+}
+
+.traveler-app-shell {
+  color: var(--journal-ink);
+  background:
+    radial-gradient(circle at 8% 6%, rgb(220 230 209 / 42%), transparent 24rem),
+    var(--journal-canvas);
+}
+
+.traveler-app-shell :is(h1, h2, h3),
+.distraction-free-shell
+  :is(
+    .quiz-question-header h1,
+    .recommendation-header__title,
+    .payment-title,
+    .payment-result-title
+  ) {
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.traveler-app-shell :is(.ui-button--primary, .ui-button--secondary) {
+  border-radius: 0.875rem;
+  box-shadow: none;
+}
+
+.traveler-app-shell .ui-button--primary {
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+}
+
+.traveler-app-shell .ui-button--primary:hover:not(:disabled) {
+  background: var(--journal-ink);
+  box-shadow: 0 8px 20px rgb(23 54 45 / 16%);
+}
+
+.traveler-app-shell :is(.ui-input, input[type="search"], select) {
+  border-color: var(--journal-line);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell :is(a, button, input, select, summary):focus-visible {
+  outline: 3px solid var(--journal-earth);
+  outline-offset: 3px;
+}
+
+/* The navigation stays familiar while the signed-in world changes around it. */
+.traveler-app-shell .traveler-app-header {
+  border-bottom: 1px solid var(--journal-line);
+  background: rgb(255 253 247 / 96%);
+}
+
+.traveler-app-shell .traveler-header-nav a {
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .traveler-header-nav a[aria-current="page"] {
+  color: var(--journal-ink);
+  background: var(--journal-sage);
+}
+
+.traveler-app-shell .traveler-bottom-nav {
+  border-top: 0;
+  border-radius: 1.4rem 1.4rem 0 0;
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+  box-shadow: 0 -10px 28px rgb(23 54 45 / 15%);
+}
+
+.traveler-app-shell .traveler-bottom-nav__item {
+  color: rgb(251 248 236 / 80%);
+}
+
+.traveler-app-shell .traveler-bottom-nav__item--active {
+  color: var(--journal-ink);
+  background: var(--journal-sage);
+}
+
+/* Home: the recommendation is a magazine cover; the search is a quiet pause. */
+.traveler-app-shell .home-container {
+  gap: var(--space-10);
+}
+
+.traveler-app-shell .home-greeting-row {
+  min-height: 8rem;
+  border: 1px solid var(--journal-line);
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(
+      circle at 87% 24%,
+      rgb(213 166 107 / 27%),
+      transparent 12rem
+    ),
+    linear-gradient(115deg, var(--journal-paper), var(--journal-sage));
+  box-shadow: none;
+}
+
+.traveler-app-shell .home-greeting-row::before {
+  border-color: rgb(33 74 60 / 12%);
+}
+
+.traveler-app-shell .home-greeting-eyebrow {
+  color: var(--journal-earth);
+}
+
+.traveler-app-shell .home-greeting-title {
+  color: var(--journal-ink);
+  font-size: clamp(1.7rem, 3vw, 2.15rem);
+}
+
+.traveler-app-shell .home-greeting-subtitle {
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .home-greeting-mascot {
+  filter: drop-shadow(0 9px 9px rgb(23 54 45 / 12%));
+}
+
+.traveler-app-shell .home-recommendation-section .home-section-header {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.traveler-app-shell .home-section-header__tag {
+  color: var(--journal-earth);
+}
+
+.traveler-app-shell .home-section-title,
+.traveler-app-shell .home-recommendation-section .home-section-title {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+  line-height: 1.12;
+}
+
+.traveler-app-shell .home-hero-card {
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  min-height: 25rem;
+  border: 1px solid var(--journal-line);
+  border-radius: 2rem;
+  background: var(--journal-paper);
+  box-shadow: var(--journal-shadow);
+}
+
+.traveler-app-shell .home-hero-card__visual {
+  min-height: 25rem;
+}
+
+.traveler-app-shell .home-hero-card__visual-scrim {
+  background: linear-gradient(
+    180deg,
+    rgb(23 54 45 / 42%),
+    transparent 34%,
+    rgb(23 54 45 / 30%)
+  );
+}
+
+.traveler-app-shell .home-hero-card__body {
+  gap: var(--space-4);
+  padding: clamp(1.5rem, 3.3vw, 3rem);
+  color: var(--journal-ink);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .home-hero-card__body-kicker {
+  color: var(--journal-earth);
+}
+
+.traveler-app-shell
+  :is(
+    .home-hero-card__meta,
+    .home-hero-card__summary,
+    .home-hero-card__price-label,
+    .home-hero-card__price
+  ) {
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .home-hero-card__title {
+  color: var(--journal-ink);
+  font-size: clamp(2rem, 3.4vw, 3.3rem);
+}
+
+.traveler-app-shell .home-hero-card__price-box {
+  border-top: 1px solid var(--journal-line);
+}
+
+.traveler-app-shell .home-hero-card__price strong {
+  color: var(--journal-ink);
+}
+
+.traveler-app-shell .home-hero-card__chip {
+  border: 1px solid var(--journal-line);
+  color: var(--journal-forest);
+  background: var(--journal-sage);
+}
+
+.traveler-app-shell .home-hero-card__cta.ui-button--primary {
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+}
+
+.traveler-app-shell
+  .home-hero-card__cta.ui-button--primary:hover:not(:disabled) {
+  color: var(--journal-inverse);
+  background: var(--journal-ink);
+}
+
+.traveler-app-shell .home-search-section {
+  border: 0;
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgb(213 166 107 / 18%),
+      transparent 17rem
+    ),
+    var(--journal-forest);
+  box-shadow: var(--journal-shadow);
+}
+
+.traveler-app-shell .home-search-section__intro span {
+  color: var(--journal-sun);
+}
+
+.traveler-app-shell .home-search-section__intro h2 {
+  color: var(--journal-inverse);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+}
+
+.traveler-app-shell .home-search-bar__input {
+  min-height: 3.25rem;
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .home-search-bar__submit {
+  color: var(--journal-ink);
+  background: var(--journal-sun);
+}
+
+.traveler-app-shell .home-mood-section,
+.traveler-app-shell .home-discovery-section {
+  border-top-color: var(--journal-line);
+}
+
+.traveler-app-shell .home-mood-chip {
+  border-color: var(--journal-line);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .home-mood-chip__icon {
+  background: var(--journal-sage);
+}
+
+.traveler-app-shell .home-package-card {
+  border-color: var(--journal-line);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .home-package-card__body {
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .home-destination-card {
+  border: 1px solid var(--journal-line);
+  border-radius: 1.75rem 1.75rem 0.75rem 1.75rem;
+}
+
+/* Explore: open imagery, visible details, and search before filtering. */
+.traveler-app-shell .explore-header {
+  border: 1px solid var(--journal-line);
+  background:
+    radial-gradient(
+      circle at 75% 28%,
+      rgb(213 166 107 / 32%),
+      transparent 13rem
+    ),
+    linear-gradient(105deg, var(--journal-sage), var(--journal-paper));
+}
+
+.traveler-app-shell :is(.explore-header__eyebrow, .explore-header__title) {
+  color: var(--journal-ink);
+}
+
+.traveler-app-shell .explore-header__eyebrow {
+  color: var(--journal-earth);
+}
+
+.traveler-app-shell .explore-header__subtitle {
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .explore-header__title {
+  max-width: 10ch;
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+  line-height: 1.02;
+}
+
+.traveler-app-shell .explore-controls-section {
+  border: 1px solid var(--journal-line);
+  background: var(--journal-paper);
+  box-shadow: 0 10px 24px rgb(23 54 45 / 5%);
+}
+
+.traveler-app-shell .explore-results-count {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  font-weight: 600;
+}
+
+.traveler-app-shell .explore-packages-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.traveler-app-shell .explore-package-card {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  border: 1px solid var(--journal-line);
+  border-radius: 1.75rem;
+  background: var(--journal-paper);
+  box-shadow: none;
+}
+
+.traveler-app-shell .explore-package-card:hover {
+  border-color: var(--journal-moss);
+  box-shadow: var(--journal-shadow);
+}
+
+.traveler-app-shell .explore-package-card__visual {
+  min-height: 0;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+.traveler-app-shell .explore-package-card__visual-scrim {
+  background: linear-gradient(180deg, transparent 48%, rgb(23 54 45 / 46%));
+}
+
+.traveler-app-shell .explore-package-card__body {
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.traveler-app-shell .explore-package-card__title {
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+  font-weight: 600;
+}
+
+.traveler-app-shell .explore-package-card__summary {
+  display: block;
+  overflow: visible;
+  color: var(--journal-muted);
+  line-height: 1.5;
+}
+
+.traveler-app-shell .explore-package-card__footer {
+  border-top: 1px solid var(--journal-line);
+}
+
+/* Package Detail: a compact cover, then a readable decision path. */
+.traveler-app-shell .package-detail-container {
+  gap: var(--space-6);
+}
+
+.traveler-app-shell .package-detail-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.traveler-app-shell .package-detail-context__back {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  color: var(--journal-forest);
+  font-size: var(--font-size-body-sm);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.traveler-app-shell .package-detail-context__back:hover {
+  text-decoration: underline;
+}
+
+.traveler-app-shell .package-detail-context__label {
+  color: var(--journal-earth);
+}
+
+.traveler-app-shell .package-detail-intro {
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  grid-template-rows: auto;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.traveler-app-shell .package-detail-media {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-3);
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.traveler-app-shell .package-detail-hero {
+  grid-column: auto;
+  grid-row: auto;
+  min-height: 21rem;
+  border: 1px solid var(--journal-line);
+  border-radius: 1.75rem 1.75rem 0.65rem 1.75rem;
+  touch-action: pan-y;
+}
+
+.traveler-app-shell .package-detail-hero__dots {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  transform: translateX(-50%);
+}
+
+.traveler-app-shell .package-detail-hero__badges {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  width: auto;
+}
+
+.traveler-app-shell .package-detail-hero__dot {
+  display: grid;
+  width: 2rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.traveler-app-shell .package-detail-hero__dot span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--journal-paper);
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 1px 4px var(--journal-ink);
+  transition: width var(--motion-fast) var(--ease-standard);
+}
+
+.traveler-app-shell .package-detail-hero__dot--active span {
+  width: 1.2rem;
+  border-radius: var(--radius-pill);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .package-detail-header-card {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 21rem;
+  border: 1px solid var(--journal-line);
+  border-radius: 1.75rem;
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .package-detail-title {
+  color: var(--journal-ink);
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  line-height: 1.06;
+}
+
+.traveler-app-shell .package-detail-value-prop,
+.traveler-app-shell .package-detail-meta-row {
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .package-detail-price-badge {
+  border-top-color: var(--journal-line);
+}
+
+.traveler-app-shell .package-detail-price-amount {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.5rem, 2.3vw, 2rem);
+}
+
+.traveler-app-shell .package-detail-header-card__mascot {
+  opacity: 0.1;
+}
+
+.traveler-app-shell .package-detail-gallery {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.traveler-app-shell .package-detail-gallery__heading-row {
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.traveler-app-shell .package-detail-gallery__title {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.traveler-app-shell .package-detail-gallery__eyebrow {
+  margin: 0;
+  color: var(--journal-muted);
+  font-size: var(--font-size-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.traveler-app-shell .package-detail-gallery__entry-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.traveler-app-shell .package-detail-gallery__entry {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 7rem;
+  align-items: flex-end;
+  overflow: hidden;
+  padding: var(--space-3);
+  border: 1px solid var(--journal-line);
+  border-radius: 1rem;
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+  cursor: pointer;
+  text-align: left;
+}
+
+.traveler-app-shell .package-detail-gallery__entry--photos img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.traveler-app-shell .package-detail-gallery__entry--photos::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(transparent 20%, var(--journal-ink));
+  opacity: 0.75;
+}
+
+.traveler-app-shell .package-detail-gallery__entry--videos {
+  justify-content: space-between;
+  background: var(--journal-sage);
+  color: var(--journal-ink);
+}
+
+.traveler-app-shell .package-detail-gallery__entry-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.traveler-app-shell .package-detail-gallery__entry-content strong {
+  font-family: var(--font-family-editorial);
+  font-size: 1.2rem;
+}
+
+.traveler-app-shell .package-detail-gallery__entry-content span {
+  font-size: var(--font-size-caption);
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .package-detail-gallery__video-icon {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid var(--journal-line);
+  border-radius: 50%;
+  font-size: 0.75rem;
+}
+
+.traveler-app-shell .package-detail-gallery__note {
+  margin: var(--space-4) 0 0;
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .package-detail-gallery-view {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  overflow-y: auto;
+  background: var(--journal-canvas);
+}
+
+.traveler-app-shell .package-detail-gallery-view__inner {
+  width: min(100% - 2rem, 70rem);
+  margin-inline: auto;
+  padding-block: var(--space-4) var(--space-10);
+}
+
+.traveler-app-shell .package-detail-gallery-view__topbar {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  color: var(--journal-muted);
+  background: var(--journal-canvas);
+  font-size: var(--font-size-caption);
+}
+
+.traveler-app-shell .package-detail-gallery-view__back {
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  color: var(--journal-forest);
+  background: transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.traveler-app-shell .package-detail-gallery-view__header {
+  padding-block: var(--space-8) var(--space-4);
+}
+
+.traveler-app-shell .package-detail-gallery-view__kicker {
+  color: var(--journal-earth);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+}
+
+.traveler-app-shell .package-detail-gallery-view__header h2 {
+  margin: var(--space-2) 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.traveler-app-shell .package-detail-gallery-view__header p {
+  margin: 0;
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .package-detail-gallery-view__tabs {
+  display: flex;
+  gap: var(--space-4);
+  border-bottom: 1px solid var(--journal-line);
+}
+
+.traveler-app-shell .package-detail-gallery-view__tabs button {
+  min-height: 3rem;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--journal-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.traveler-app-shell
+  .package-detail-gallery-view__tabs
+  button[aria-pressed="true"] {
+  border-bottom-color: var(--journal-forest);
+  color: var(--journal-ink);
+  font-weight: 700;
+}
+
+.traveler-app-shell .package-detail-gallery-view__tabs span {
+  margin-left: var(--space-1);
+  font-size: var(--font-size-caption);
+}
+
+.traveler-app-shell .package-detail-gallery-view__featured {
+  position: relative;
+  height: clamp(16rem, 47vw, 34rem);
+  margin-top: var(--space-5);
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: var(--journal-sage);
+}
+
+.traveler-app-shell .package-detail-gallery-view__featured img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.traveler-app-shell .package-detail-gallery-view__featured span {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+  font-size: var(--font-size-caption);
+}
+
+.traveler-app-shell .package-detail-gallery-view__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.traveler-app-shell .package-detail-gallery-view__photo {
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 0 var(--space-2);
+  border: 2px solid transparent;
+  border-radius: 0.875rem;
+  color: var(--journal-ink);
+  background: var(--journal-paper);
+  cursor: pointer;
+  text-align: left;
+}
+
+.traveler-app-shell .package-detail-gallery-view__photo--active {
+  border-color: var(--journal-forest);
+}
+
+.traveler-app-shell .package-detail-gallery-view__photo img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.traveler-app-shell .package-detail-gallery-view__photo span {
+  display: block;
+  padding: var(--space-2) var(--space-3) 0;
+  font-size: var(--font-size-caption);
+}
+
+.traveler-app-shell .package-detail-gallery-view__empty {
+  display: grid;
+  min-height: 20rem;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.traveler-app-shell .package-detail-gallery-view__empty-icon {
+  display: grid;
+  width: 3.75rem;
+  height: 3.75rem;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--journal-forest);
+  background: var(--journal-sage);
+}
+
+.traveler-app-shell .package-detail-gallery-view__empty h3,
+.traveler-app-shell .package-detail-gallery-view__empty p {
+  margin: 0;
+}
+
+.traveler-app-shell .package-detail-gallery-view__empty button {
+  min-height: 2.75rem;
+  padding-inline: var(--space-4);
+  border: 0;
+  border-radius: 0.75rem;
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+  cursor: pointer;
+}
+
+.traveler-app-shell .package-detail-section--highlights {
+  border: 0;
+  color: var(--journal-inverse);
+  background:
+    radial-gradient(circle at 95% 0, rgb(213 166 107 / 19%), transparent 17rem),
+    var(--journal-forest);
+}
+
+.traveler-app-shell
+  .package-detail-section--highlights
+  .package-detail-section__title,
+.traveler-app-shell
+  .package-detail-section--highlights
+  .package-detail-highlight-item {
+  color: var(--journal-inverse);
+}
+
+.traveler-app-shell
+  .package-detail-section--highlights
+  .package-detail-highlight-bullet {
+  color: var(--journal-sun);
+}
+
+.traveler-app-shell .package-detail-section--sessions {
+  border-color: var(--journal-line);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .package-detail-journey {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  gap: var(--space-8);
+  min-width: 0;
+  overflow: hidden;
+  padding: var(--space-8);
+  border: 1px solid var(--journal-line);
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(
+      circle at 0 100%,
+      rgb(213 166 107 / 16%),
+      transparent 20rem
+    ),
+    var(--journal-linen);
+}
+
+.traveler-app-shell .package-detail-journey__header {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 24rem;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.traveler-app-shell .package-detail-journey__eyebrow {
+  display: block;
+  margin-bottom: var(--space-3);
+  color: var(--journal-earth);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.traveler-app-shell .package-detail-journey__header h2 {
+  max-width: 11ch;
+  margin: 0 0 var(--space-3);
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  line-height: 1.05;
+}
+
+.traveler-app-shell .package-detail-journey__header p {
+  max-width: 28ch;
+  margin: 0;
+  color: var(--journal-muted);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.6;
+}
+
+.traveler-app-shell .package-detail-journey__mascot {
+  width: min(10rem, 60%);
+  height: 11rem;
+  align-self: flex-end;
+  object-fit: contain;
+}
+
+.traveler-app-shell .package-detail-journey .package-detail-itinerary-list {
+  gap: var(--space-6);
+  min-width: 0;
+  margin: 0;
+}
+
+.traveler-app-shell .package-detail-journey .package-detail-itinerary-item {
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.traveler-app-shell
+  .package-detail-journey
+  .package-detail-itinerary-item:not(:last-child)::before {
+  top: 2.65rem;
+  bottom: calc(-1 * var(--space-6) - 0.25rem);
+  left: 1.35rem;
+  width: 2px;
+  background: var(--journal-moss);
+}
+
+.traveler-app-shell .package-detail-journey .package-detail-itinerary-content {
+  gap: var(--space-2);
+  padding: var(--space-1) 0 var(--space-5);
+  border: 0;
+  border-bottom: 1px solid var(--journal-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.traveler-app-shell
+  .package-detail-journey
+  .package-detail-itinerary-item:last-child
+  .package-detail-itinerary-content {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.traveler-app-shell .package-detail-itinerary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--journal-earth);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+}
+
+.traveler-app-shell .package-detail-itinerary-meta span + span::before {
+  margin-right: var(--space-2);
+  color: var(--journal-moss);
+  content: "·";
+}
+
+.traveler-app-shell .package-detail-session-card {
+  border-color: var(--journal-line);
+  background: var(--journal-canvas);
+}
+
+.traveler-app-shell .package-detail-itinerary-content {
+  border-color: var(--journal-line);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .package-detail-itinerary-order {
+  border-color: var(--journal-forest);
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+  font-family: var(--font-family-editorial);
+  font-size: 1rem;
+}
+
+.traveler-app-shell .package-detail-itinerary-item:not(:last-child)::before {
+  background: var(--journal-moss);
+}
+
+.traveler-app-shell .package-detail-itinerary-title {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.traveler-app-shell .package-detail-itinerary-duration {
+  color: var(--journal-earth);
+}
+
+.traveler-app-shell .package-detail-journey .package-detail-itinerary-desc {
+  color: var(--journal-muted);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.6;
+}
+
+@media (max-width: 47.99rem) {
+  .traveler-app-shell .package-detail-journey {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    padding: var(--space-5);
+  }
+
+  .traveler-app-shell .package-detail-journey__header {
+    min-height: 0;
+    padding-right: 5.5rem;
+  }
+
+  .traveler-app-shell .package-detail-journey__header h2 {
+    font-size: clamp(1.75rem, 7vw, 2.2rem);
+  }
+
+  .traveler-app-shell .package-detail-journey__mascot {
+    position: absolute;
+    top: 0;
+    right: calc(-1 * var(--space-2));
+    width: 5.25rem;
+    height: 6.25rem;
+  }
+}
+
+/* The journey continues through sessions, checkout, trips, and profile. */
+.traveler-app-shell
+  :is(
+    .session-selection-title,
+    .checkout-title,
+    .trip-detail-title,
+    .my-trips-title,
+    .review-title,
+    .profile-hero-name
+  ) {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+}
+
+.traveler-app-shell
+  :is(
+    .session-card,
+    .session-selection-pkg-summary,
+    .checkout-section,
+    .checkout-summary-card,
+    .checkout-price-card,
+    .my-trip-card,
+    .my-trips-pending-card,
+    .trip-detail-hero,
+    .review-card
+  ) {
+  border-color: var(--journal-line);
+  border-radius: 1.5rem;
+  background: var(--journal-paper);
+  box-shadow: none;
+}
+
+.traveler-app-shell .session-card--selected {
+  border-color: var(--journal-forest);
+  background: var(--journal-sage);
+  box-shadow: 0 0 0 2px rgb(33 74 60 / 12%);
+}
+
+.traveler-app-shell
+  :is(.session-selection-header, .checkout-header, .review-header) {
+  padding: var(--space-6);
+  border: 1px solid var(--journal-line);
+  border-radius: 1.5rem;
+  background: linear-gradient(
+    110deg,
+    var(--journal-sage),
+    var(--journal-paper)
+  );
+}
+
+.traveler-app-shell
+  :is(.session-selection-subtitle, .checkout-subtitle, .review-subtitle) {
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell
+  :is(.session-selection-pkg-summary, .checkout-summary-card) {
+  border-top: 4px solid var(--journal-sun);
+}
+
+.traveler-app-shell
+  :is(
+    .checkout-section__title,
+    .checkout-price-card__title,
+    .trip-detail-section__title,
+    .profile-section-title
+  ) {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+}
+
+.traveler-app-shell
+  :is(
+    .checkout-price-row--total,
+    .checkout-sticky-bar,
+    .session-selection-sticky-bar
+  ) {
+  border-color: var(--journal-line);
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .my-trips-header {
+  border-color: var(--journal-line);
+  background: linear-gradient(
+    115deg,
+    var(--journal-linen),
+    var(--journal-sage)
+  );
+}
+
+.traveler-app-shell .my-trips-tabs {
+  border: 0;
+  border-bottom: 1px solid var(--journal-line);
+  border-radius: 0;
+  background: transparent;
+  overflow-x: auto;
+}
+
+.traveler-app-shell .my-trips-tab-btn {
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.traveler-app-shell .my-trips-tab-btn--active {
+  color: var(--journal-inverse);
+  background: var(--journal-forest);
+}
+
+.traveler-app-shell .my-trip-card,
+.traveler-app-shell .my-trips-pending-card {
+  border-left: 1px solid var(--journal-line);
+}
+
+.traveler-app-shell .my-trip-card__title,
+.traveler-app-shell .my-trips-pending-card__title {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell :is(.my-trip-card__body, .my-trips-pending-card__body) {
+  min-width: 0;
+}
+
+.traveler-app-shell .my-trip-card__facts {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--journal-line);
+  border-radius: 0.9rem;
+  background: var(--journal-linen);
+}
+
+.traveler-app-shell
+  :is(
+    .my-trip-card__fact-meta,
+    .my-trip-card__fact-item,
+    .my-trips-pending-card__footer
+  ) {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.traveler-app-shell .my-trip-card__fact-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .trip-detail-hero {
+  overflow: hidden;
+  border-radius: 1.75rem;
+}
+
+.traveler-app-shell .trip-detail-hero__body {
+  min-width: 0;
+  padding: var(--space-6);
+}
+
+.traveler-app-shell
+  :is(.trip-detail-title, .trip-detail-meta, .trip-detail-departure-text) {
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .trip-detail-departure-banner {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--journal-line);
+  border-radius: 0.9rem;
+  background: var(--journal-sage);
+}
+
+.traveler-app-shell
+  :is(
+    .trip-detail-brief-card,
+    .trip-detail-contact-card,
+    .trip-detail-section,
+    .trip-detail-disclosure
+  ) {
+  border-color: var(--journal-line);
+  border-radius: 1.5rem;
+  background: var(--journal-paper);
+  box-shadow: none;
+}
+
+.traveler-app-shell .trip-detail-journey-pass {
+  position: relative;
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+  overflow: hidden;
+  padding: var(--space-6);
+  border: 1px solid var(--journal-forest);
+  border-radius: 1.25rem;
+  color: var(--journal-inverse);
+  background:
+    radial-gradient(circle at 95% 0, rgb(213 166 107 / 20%), transparent 14rem),
+    var(--journal-forest);
+}
+
+.traveler-app-shell .trip-detail-journey-pass__heading {
+  display: flex;
+  min-height: 3rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-family: var(--font-family-editorial);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.traveler-app-shell .trip-detail-journey-pass__heading img {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-2))
+    calc(-1 * var(--space-6));
+  object-fit: contain;
+}
+
+.traveler-app-shell .trip-detail-journey-pass__date-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px dashed var(--journal-moss);
+}
+
+.traveler-app-shell .trip-detail-journey-pass__date-stamp {
+  display: grid;
+  flex: 0 0 6.2rem;
+  justify-items: center;
+  gap: 0.1rem;
+  padding: var(--space-2);
+  border-radius: 0.75rem;
+  color: var(--journal-ink);
+  background: var(--journal-paper);
+  text-align: center;
+}
+
+.traveler-app-shell .trip-detail-journey-pass__date-stamp span {
+  font-size: var(--font-size-caption);
+  line-height: 1.2;
+}
+
+.traveler-app-shell .trip-detail-journey-pass__date-stamp strong {
+  font-family: var(--font-family-editorial);
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.traveler-app-shell .trip-detail-journey-pass__date-copy,
+.traveler-app-shell .trip-detail-journey-pass__meeting > div {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.traveler-app-shell .trip-detail-journey-pass__date-copy span,
+.traveler-app-shell .trip-detail-journey-pass__meeting span {
+  color: var(--journal-sage);
+  font-size: var(--font-size-caption);
+}
+
+.traveler-app-shell .trip-detail-journey-pass__date-copy strong,
+.traveler-app-shell .trip-detail-journey-pass__meeting strong {
+  color: var(--journal-inverse);
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .trip-detail-journey-pass__meeting {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.traveler-app-shell .trip-detail-journey-pass__meeting svg {
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+  color: var(--journal-sun);
+}
+
+.traveler-app-shell .trip-detail-disclosure {
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--journal-line);
+  border-bottom: 1px solid var(--journal-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.traveler-app-shell .trip-detail-disclosure__body > .trip-detail-section {
+  padding: var(--space-5) 0;
+  border: 0;
+  border-top: 1px solid var(--journal-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.traveler-app-shell .trip-detail-container > .trip-detail-section {
+  padding: var(--space-5) 0;
+  border: 0;
+  border-bottom: 1px solid var(--journal-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.traveler-app-shell .trip-detail-fact {
+  min-width: 0;
+  padding: var(--space-3) 0;
+  border: 0;
+  border-bottom: 1px solid var(--journal-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.traveler-app-shell .trip-detail-fact__value {
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .trip-detail-fact__value--break {
+  word-break: normal;
+}
+
+.traveler-app-shell .trip-detail-brief-grid {
+  gap: 0;
+  border-top: 1px solid var(--journal-line);
+}
+
+.traveler-app-shell .trip-detail-brief-card {
+  min-width: 0;
+  padding: var(--space-4) 0;
+  border: 0;
+  border-bottom: 1px solid var(--journal-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.traveler-app-shell .trip-detail-brief-val {
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .trip-detail-timeline-marker {
+  border-color: var(--journal-forest);
+  background: var(--journal-forest);
+}
+
+.traveler-app-shell .profile-hero-forest {
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgb(213 166 107 / 22%),
+      transparent 20rem
+    ),
+    var(--journal-forest);
+  box-shadow: var(--journal-shadow);
+}
+
+.traveler-app-shell .profile-hero-name {
+  color: var(--journal-inverse);
+}
+
+.traveler-app-shell :is(.profile-section, .profile-traveler-card) {
+  border-color: var(--journal-line);
+  border-radius: 1.5rem;
+  background: var(--journal-paper);
+  box-shadow: none;
+}
+
+.traveler-app-shell .profile-warm-content {
+  border: 0;
+  background: transparent;
+}
+
+.traveler-app-shell .profile-section {
+  margin-bottom: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--journal-line);
+}
+
+.traveler-app-shell .profile-nudge-card {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+}
+
+.traveler-app-shell .profile-activity-row {
+  border-bottom-color: var(--journal-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.traveler-app-shell .profile-stats-row {
+  border-color: var(--journal-line);
+  background: var(--journal-sage);
+}
+
+.traveler-app-shell .profile-stat-label {
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .profile-stat-divider {
+  background: var(--journal-line);
+}
+
+.traveler-app-shell .profile-stat-link:hover {
+  background: rgb(33 74 60 / 9%);
+}
+
+.traveler-app-shell .profile-stat-col,
+.traveler-app-shell .profile-milestone-item {
+  min-width: 0;
+}
+
+.traveler-app-shell
+  :is(.profile-stat-label, .profile-milestone-name, .profile-milestone-status) {
+  max-width: 100%;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.traveler-app-shell .profile-current-jeda-pill {
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.traveler-app-shell .profile-stat-number,
+.traveler-app-shell .profile-subpage-title {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+}
+
+.traveler-app-shell
+  :is(
+    .profile-section-header-split,
+    .profile-activity-text,
+    .profile-nudge-text
+  ) {
+  min-width: 0;
+}
+
+.traveler-app-shell
+  :is(.profile-section-title, .profile-activity-title, .profile-nudge-title) {
+  color: var(--journal-ink);
+}
+
+.traveler-app-shell
+  :is(
+    .profile-activity-subtitle,
+    .profile-empty-subtext,
+    .profile-subpage-lead
+  ) {
+  color: var(--journal-muted);
+}
+
+.traveler-app-shell .profile-moment-card {
+  overflow: hidden;
+  border: 1px solid var(--journal-line);
+  border-radius: 1.25rem;
+  background: var(--journal-paper);
+}
+
+.traveler-app-shell .review-card {
+  border-top: 4px solid var(--journal-sun);
+}
+
+/* Focused post-login steps keep their immersive backdrop and readable contrast. */
+.distraction-free-shell :is(.quiz-card, .recommendation-hero-card) {
+  border-color: rgb(251 248 236 / 22%);
+  border-radius: 1.75rem;
+  background: rgb(23 54 45 / 92%);
+  box-shadow: 0 24px 48px rgb(11 33 21 / 25%);
+}
+
+.distraction-free-shell
+  :is(
+    .quiz-question-header h1,
+    .recommendation-header__title,
+    .recommendation-title
+  ) {
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.distraction-free-shell .quiz-option-card[aria-checked="true"],
+.distraction-free-shell .quiz-option-card--selected {
+  border-color: var(--journal-sun);
+  background: var(--journal-moss);
+}
+
+.distraction-free-shell .recommendation-alt-card {
+  border-color: rgb(251 248 236 / 17%);
+  border-radius: 1.25rem;
+  background: rgb(23 54 45 / 92%);
+}
+
+.distraction-free-shell:has(.payment-container) {
+  background: var(--journal-canvas);
+}
+
+.distraction-free-shell
+  .payment-container
+  :is(.payment-title, .payment-result-title, .payment-summary-card__title) {
+  color: var(--journal-ink);
+  font-family: var(--font-family-editorial);
+  font-weight: 600;
+}
+
+.distraction-free-shell .payment-summary-card {
+  border-color: var(--journal-line);
+  border-radius: 1.5rem;
+  background: var(--journal-paper);
+  box-shadow: var(--journal-shadow);
+}
+
+.distraction-free-shell
+  .payment-container
+  :is(.payment-timer-card, .payment-method-box) {
+  border-color: var(--journal-line);
+  background: var(--journal-sage);
+}
+
+@media (min-width: 48rem) {
+  .traveler-app-shell .explore-packages-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 72rem) {
+  .traveler-app-shell .explore-packages-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 59.99rem) {
+  .traveler-app-shell .package-detail-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+
+  .traveler-app-shell .package-detail-media,
+  .traveler-app-shell .package-detail-header-card {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .traveler-app-shell .package-detail-header-card {
+    margin: 0;
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .traveler-app-shell .trip-detail-journey-pass {
+    padding: var(--space-5);
+  }
+
+  .traveler-app-shell .trip-detail-journey-pass__date-stamp {
+    flex-basis: 5.25rem;
+  }
+
+  .traveler-app-shell .my-trip-card__action {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .traveler-app-shell .my-trip-card__action button {
+    width: 100%;
+  }
+
+  .traveler-app-shell .profile-section-header-split {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .traveler-app-shell .home-container {
+    gap: var(--space-8);
+  }
+
+  .traveler-app-shell .home-greeting-row {
+    min-height: 8rem;
+  }
+
+  .traveler-app-shell .home-hero-card {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .traveler-app-shell .home-hero-card__visual {
+    min-height: 13rem;
+    height: 13rem;
+  }
+
+  .traveler-app-shell .home-hero-card__body {
+    padding: var(--space-6);
+  }
+
+  .traveler-app-shell .home-hero-card__title {
+    font-size: clamp(2rem, 8vw, 2.6rem);
+  }
+
+  .traveler-app-shell .explore-header {
+    min-height: 11rem;
+  }
+
+  .traveler-app-shell .explore-header__title {
+    font-size: clamp(2rem, 7vw, 2.4rem);
+  }
+
+  .traveler-app-shell .package-detail-hero {
+    min-height: 15rem;
+  }
+
+  .traveler-app-shell .package-detail-header-card {
+    min-height: 0;
+  }
+
+  .traveler-app-shell .package-detail-title {
+    font-size: clamp(1.9rem, 8vw, 2.4rem);
+  }
+
+  .traveler-app-shell .explore-package-card__visual {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .traveler-app-shell .home-hero-card__visual img {
+    transition: none;
+  }
+}

@@ -1,4 +1,7 @@
-import { getCombinedCatalogPackages } from "../marketplace/marketplaceAdapter";
+import {
+  getCombinedCatalogPackages,
+  syncMarketplaceFromSupabase,
+} from "../marketplace/marketplaceAdapter";
 import type { PackageRecommendationSource } from "../recommendation/types";
 import {
   extractAvailableDestinations,
@@ -34,6 +37,8 @@ export class MockExploreAdapter implements ExploreAdapter {
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
+
+    await syncMarketplaceFromSupabase();
 
     if (this.failExploreCount > 0) {
       this.failExploreCount--;

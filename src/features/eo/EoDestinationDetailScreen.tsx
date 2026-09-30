@@ -1,8 +1,12 @@
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams, Link } from "react-router";
+import { destinationRepository } from "../../data/destinationRepository";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Button } from "../../components/ui";
 import { getDestinationVisual } from "../../lib/assets/packageImages";
+import { useRealtimeSubscription } from "../../lib/supabase/realtime";
 import { mockDestinationStore } from "./mockDestinationStore";
+import type { DestinationRecord } from "./types";
 import "./eo.css";
 
 export function EoDestinationDetailScreen() {
@@ -12,9 +16,32 @@ export function EoDestinationDetailScreen() {
   const openedFromBuilder = searchParams.get("from") === "builder";
   const builderDraftId = searchParams.get("draftId");
 
-  const destination = destinationId
-    ? mockDestinationStore.getById(destinationId)
-    : undefined;
+  const [destination, setDestination] = useState<DestinationRecord | undefined>(
+    () =>
+      destinationId ? mockDestinationStore.getById(destinationId) : undefined,
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+    if (destinationId) {
+      destinationRepository.getById(destinationId).then((res) => {
+        if (isMounted && res) {
+          setDestination(res);
+        }
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [destinationId]);
+
+  useRealtimeSubscription("destinations", () => {
+    if (destinationId) {
+      destinationRepository.getById(destinationId).then((res) => {
+        if (res) setDestination(res);
+      });
+    }
+  });
 
   if (!destination) {
     return (

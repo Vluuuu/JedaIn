@@ -171,7 +171,7 @@ describe("Batch C1 — Media Source Consistency & Traveler Logistics", () => {
   });
 
   describe("GALLERY: judge-facing prototype clarity", () => {
-    it("renders three selectable prototype-safe gallery views without claiming actual photos", async () => {
+    it("opens photo and video gallery views while keeping prototype media labels honest", async () => {
       const adapter = new MockPackageDetailAdapter({
         packages: [basePkg],
         details: { pkg_logistics_demo: baseDetail },
@@ -189,26 +189,71 @@ describe("Batch C1 — Media Source Consistency & Traveler Logistics", () => {
         ["/packages/pkg_logistics_demo"],
       );
 
-      expect(view.textContent).toContain("Galeri suasana");
-      expect(view.textContent).toContain("Lihat gambaran pengalaman");
-      expect(view.textContent).toContain(
-        "Satu ilustrasi prototype ditampilkan dalam beberapa crop untuk memberi gambaran suasana, bukan foto kondisi aktual destinasi.",
-      );
+      expect(view.textContent).toContain("Galeri destinasi");
+      expect(view.textContent).toContain("Belum tersedia");
+      expect(view.querySelector("details.package-detail-gallery")).toBeNull();
+      expect(view.querySelector('[aria-label="Foto sebelumnya"]')).toBeNull();
+      expect(view.querySelector('[aria-label="Foto berikutnya"]')).toBeNull();
 
-      const galleryButtons = view.querySelectorAll<HTMLButtonElement>(
-        ".package-detail-gallery__thumb",
+      const coverDots = view.querySelectorAll<HTMLButtonElement>(
+        ".package-detail-hero__dot",
       );
-      expect(galleryButtons).toHaveLength(3);
-      expect(galleryButtons[0]?.getAttribute("aria-pressed")).toBe("true");
-      expect(galleryButtons[1]?.getAttribute("aria-pressed")).toBe("false");
+      expect(coverDots).toHaveLength(3);
+      expect(coverDots[0]?.getAttribute("aria-current")).toBe("true");
 
       await act(async () => {
-        galleryButtons[1]?.click();
+        coverDots[1]?.click();
       });
+      expect(coverDots[1]?.getAttribute("aria-current")).toBe("true");
 
-      expect(galleryButtons[0]?.getAttribute("aria-pressed")).toBe("false");
-      expect(galleryButtons[1]?.getAttribute("aria-pressed")).toBe("true");
-      expect(view.textContent).toContain("2/3");
+      const cover = view.querySelector(".package-detail-hero");
+      const swipeStart = new Event("touchstart", { bubbles: true });
+      Object.defineProperty(swipeStart, "touches", {
+        value: [{ clientX: 240, clientY: 120 }],
+      });
+      const swipeEnd = new Event("touchend", { bubbles: true });
+      Object.defineProperty(swipeEnd, "changedTouches", {
+        value: [{ clientX: 110, clientY: 126 }],
+      });
+      await act(async () => {
+        cover?.dispatchEvent(swipeStart);
+        cover?.dispatchEvent(swipeEnd);
+      });
+      expect(coverDots[2]?.getAttribute("aria-current")).toBe("true");
+
+      const photoEntry = view.querySelector<HTMLButtonElement>(
+        ".package-detail-gallery__entry--photos",
+      );
+      await act(async () => {
+        photoEntry?.click();
+      });
+      expect(view.querySelector('[role="dialog"]')).not.toBeNull();
+      expect(view.textContent).toContain(
+        "Tiga tampilan ini berasal dari satu ilustrasi prototipe",
+      );
+      const galleryButtons = view.querySelectorAll<HTMLButtonElement>(
+        ".package-detail-gallery-view__photo",
+      );
+      expect(galleryButtons).toHaveLength(3);
+      await act(async () => {
+        galleryButtons[2]?.click();
+      });
+      expect(galleryButtons[2]?.getAttribute("aria-pressed")).toBe("true");
+      const videoTab = view.querySelector<HTMLButtonElement>(
+        '.package-detail-gallery-view__tabs button[aria-pressed="false"]',
+      );
+      await act(async () => videoTab?.click());
+      expect(view.textContent).toContain(
+        "Belum ada video untuk pengalaman ini",
+      );
+      await act(async () => {
+        view
+          .querySelector<HTMLButtonElement>(
+            ".package-detail-gallery-view__back",
+          )
+          ?.click();
+      });
+      expect(view.querySelector('[role="dialog"]')).toBeNull();
       expect(view.textContent).not.toContain("foto aktual");
       expect(view.textContent).not.toContain("kondisi terbaru");
     });

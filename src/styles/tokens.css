@@ -87,6 +87,23 @@
   --font-family-sans:
     Inter, Geist, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
+  --font-family-editorial:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+
+  /* JedaIn field journal palette, used on signed-in surfaces only. */
+  --journal-canvas: #f5f1e8;
+  --journal-paper: #fffdf7;
+  --journal-linen: #ebe3d2;
+  --journal-sage: #dce6d1;
+  --journal-ink: #17362d;
+  --journal-forest: #214a3c;
+  --journal-moss: #38614c;
+  --journal-earth: #9a5c38;
+  --journal-sun: #d5a66b;
+  --journal-line: #d7d8c8;
+  --journal-muted: #52675c;
+  --journal-inverse: #fbf8ec;
+  --journal-shadow: 0 16px 42px rgb(32 56 42 / 9%);
   --font-size-display-lg: 3rem;
   --line-height-display-lg: 3.5rem;
   --font-weight-display-lg: 700;
@@ -169,4 +186,54 @@
   --motion-normal: 180ms;
   --motion-slow: 280ms;
   --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Logged-in visual direction */
+  --redesign-canvas: #f5f3eb;
+  --redesign-paper: #fffefa;
+  --redesign-mist: #e8eee6;
+  --redesign-line: #dce4d8;
+  --redesign-ink: #1d352b;
+  --redesign-muted: #53665b;
+  --redesign-deep: #254b3d;
+  --redesign-deep-hover: #193d30;
+  --redesign-header-glass: rgb(255 254 250 / 94%);
+  --redesign-nav-glass: rgb(255 254 250 / 96%);
+  --redesign-shadow: 0 16px 42px rgb(32 62 45 / 8%);
+  --redesign-nav-shadow: 0 -8px 30px rgb(35 66 49 / 7%);
+  --redesign-hero-start: #244c3a;
+  --redesign-hero-end: #497356;
+  --redesign-hero-glow: rgb(218 233 177 / 30%);
+  --redesign-hero-ring: rgb(255 255 255 / 16%);
+  --redesign-hero-kicker: #e4eec5;
+  --redesign-hero-copy: #edf4e8;
+  --redesign-mascot-shadow: rgb(17 44 27 / 22%);
+  --redesign-explore-start: #e2eacd;
+  --redesign-explore-mid: #f0f1df;
+  --redesign-explore-end: #d8e5cb;
+  --redesign-explore-border: #d5e0c8;
+  --redesign-explore-shadow: rgb(51 81 47 / 15%);
+  --redesign-upcoming-bg: #edf3ea;
+  --redesign-upcoming-border: #cfddcb;
+  --redesign-table-head: #edf2e9;
+  --redesign-demand-start: #1e4032;
+  --redesign-demand-end: #3a6148;
+  --redesign-demand-border: #29513c;
+  --redesign-meadow: #dce8bb;
+  --redesign-meadow-light: #f0f3dd;
+  --redesign-leaf: #8da85d;
+  --redesign-forest-dark: #173e32;
+  --redesign-forest-ink: #12332a;
+  --redesign-cream: #fbf5e8;
+  --redesign-warm-line: #d9dfc3;
+  --redesign-feature-shadow: 0 22px 54px rgb(22 57 41 / 14%);
+  --redesign-light-rule: rgb(255 255 255 / 21%);
+  --redesign-light-ink: #f8f9ec;
+  --redesign-light-muted: #dde8d8;
+  --redesign-orbit-inner: rgb(255 255 255 / 8%);
+  --redesign-orbit-outer: rgb(255 255 255 / 6%);
+  --redesign-visual-shade: rgb(18 51 42 / 32%);
+  --redesign-visual-shade-strong: rgb(18 51 42 / 72%);
+  --redesign-leaf-glow: rgb(141 168 93 / 23%);
+  --redesign-leaf-glow-soft: rgb(141 168 93 / 22%);
+  --redesign-chip-glass: rgb(255 255 255 / 8%);
 }

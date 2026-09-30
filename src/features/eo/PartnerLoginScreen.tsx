@@ -1,281 +1,244 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { useState, type FormEvent } from "react";
+import { useNavigate } from "react-router";
+import { getSupabaseClient } from "../../lib/supabase/client";
+import { isSupabaseMode } from "../../lib/supabase/config";
+import {
+  DEMO_DESTINATION_CREDENTIALS,
+  DEMO_EO_CREDENTIALS,
+  requireAuthenticatedUser,
+} from "../../lib/supabase/demoAuth";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { generateUniqueDestinationPartnerId } from "../destination/destinationContext";
 import { mockApplicationStore } from "./mockApplicationStore";
-import { partnerSessionStore } from "./partnerSessionStore";
-import "./eo.css";
+import {
+  DEMO_CONCEPT_EO_USER,
+  DEMO_DESTINATION_USER,
+  DEMO_EO_USER,
+  partnerSessionStore,
+} from "./partnerSessionStore";
+import "./partnerPortal.css";
 
-export function PartnerLoginScreen() {
+type PartnerRole = "EO" | "DESTINATION";
+
+interface PartnerLoginScreenProps {
+  role?: PartnerRole;
+  onBack?: () => void;
+  onRegister?: () => void;
+}
+
+export function PartnerLoginScreen({
+  role = "DESTINATION",
+  onBack,
+  onRegister,
+}: PartnerLoginScreenProps) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("destinasi@lerenghijau.id");
-  const [role, setRole] = useState<"EO" | "DESTINATION">("DESTINATION");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanEmail = email.trim();
-    const normalizedEmail = cleanEmail.toLowerCase();
-
-    if (role === "DESTINATION") {
-      const destApp = mockDestinationVerificationStore
-        .getAll()
-        .find(
-          (a) =>
-            a.partnerIdentityId.toLowerCase() === normalizedEmail ||
-            a.applicationId.toLowerCase() === normalizedEmail ||
-            a.contactEmail?.trim().toLowerCase() === normalizedEmail,
-        );
-
-      if (destApp) {
-        partnerSessionStore.setPartner({
-          id: destApp.partnerIdentityId,
-          email: destApp.contactEmail ?? cleanEmail,
-          name: destApp.name,
-          role: "DESTINATION",
-          businessName: destApp.managementName ?? `Pengelola ${destApp.name}`,
-          destinationIdentityId: destApp.destinationIdentityId,
-        });
-
-        if (destApp.status === "APPROVED") {
-          navigate("/partner/destination");
-        } else {
-          navigate("/partner/application");
-        }
-        return;
-      }
-
-      // If new/unknown destination identity: establish collision-safe prototype DESTINATION session first
-      const uniquePartnerId = generateUniqueDestinationPartnerId(cleanEmail);
+  const register = () => {
+    if (onRegister) {
+      onRegister();
+      return;
+    }
+    if (
+      role === "DESTINATION" &&
+      partnerSessionStore.get()?.role !== "DESTINATION"
+    ) {
+      const targetEmail =
+        email.trim().toLowerCase() || "mitra.destinasi@jedain.id";
       partnerSessionStore.setPartner({
-        id: uniquePartnerId,
-        email: cleanEmail,
+        id: generateUniqueDestinationPartnerId(targetEmail),
+        email: targetEmail,
         name: "Mitra Destinasi Baru",
         role: "DESTINATION",
         businessName: "Pengelola Kawasan Destinasi",
       });
-      navigate("/partner/apply/destination");
-      return;
     }
+    navigate(
+      role === "EO" ? "/partner/apply/eo" : "/partner/apply/destination",
+    );
+  };
 
-    // EO Login flow
-    const app = mockApplicationStore
-      .getAll()
-      .find((a) => a.email === cleanEmail);
-
-    if (app) {
-      partnerSessionStore.setPartner({
-        id: app.identityId,
-        email: app.email,
-        name: app.contactPerson,
-        role: "EO",
-        businessName: app.businessName,
-        guideStatus: app.guideStatus,
-        organizerReviewRef:
-          app.identityId === "eo_jeda_alam" ? "org_lereng_batu" : undefined,
-      });
-
-      if (app.status === "APPROVED") {
-        navigate("/partner/eo");
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    const normalizedEmail = email.trim().toLowerCase();
+    try {
+      if (isSupabaseMode()) {
+        const supabase = getSupabaseClient();
+        if (!supabase) throw new Error("Layanan masuk belum tersedia.");
+        const signedIn = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
+        if (signedIn.error)
+          throw new Error("Email atau kata sandi tidak sesuai.");
+        const verified = await requireAuthenticatedUser(role);
+        if (!verified.success || !verified.partnerUser) {
+          await supabase.auth.signOut();
+          partnerSessionStore.logout();
+          throw new Error(
+            verified.error ?? "Profil mitra belum terverifikasi.",
+          );
+        }
+        partnerSessionStore.setPartner(verified.partnerUser);
       } else {
-        navigate("/partner/application");
+        if (password !== DEMO_EO_CREDENTIALS.password) {
+          throw new Error("Email atau kata sandi tidak sesuai.");
+        }
+        if (role === "EO") {
+          const account = [DEMO_EO_USER, DEMO_CONCEPT_EO_USER].find(
+            (user) => user.email.toLowerCase() === normalizedEmail,
+          );
+          const application = mockApplicationStore
+            .getAll()
+            .find((item) => item.email.toLowerCase() === normalizedEmail);
+          if (account) partnerSessionStore.setPartner(account);
+          else if (application) {
+            partnerSessionStore.setPartner({
+              id: application.identityId,
+              email: application.email,
+              name: application.contactPerson,
+              role: "EO",
+              businessName: application.businessName,
+              guideStatus: application.guideStatus,
+            });
+          } else throw new Error("Akun Travel Organizer belum terdaftar.");
+        } else {
+          const application = mockDestinationVerificationStore
+            .getAll()
+            .find(
+              (item) =>
+                item.contactEmail?.trim().toLowerCase() === normalizedEmail,
+            );
+          if (DEMO_DESTINATION_USER.email.toLowerCase() === normalizedEmail) {
+            partnerSessionStore.setPartner(DEMO_DESTINATION_USER);
+          } else if (application) {
+            partnerSessionStore.setPartner({
+              id: application.partnerIdentityId,
+              email: application.contactEmail ?? normalizedEmail,
+              name: application.name,
+              role: "DESTINATION",
+              businessName: application.managementName ?? application.name,
+              destinationIdentityId: application.destinationIdentityId,
+            });
+          } else throw new Error("Akun Mitra Destinasi belum terdaftar.");
+        }
       }
-      return;
+
+      const partner = partnerSessionStore.get();
+      if (!partner || partner.role !== role)
+        throw new Error("Peran akun tidak sesuai.");
+      if (role === "EO") {
+        const application = mockApplicationStore.getBySellerId(partner.id);
+        navigate(
+          application && application.status !== "APPROVED"
+            ? "/partner/application"
+            : "/partner/eo",
+        );
+      } else {
+        const application = mockDestinationVerificationStore
+          .getAll()
+          .find((item) => item.partnerIdentityId === partner.id);
+        navigate(
+          application && application.status !== "APPROVED"
+            ? "/partner/application"
+            : "/partner/destination",
+        );
+      }
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Gagal masuk. Coba lagi.",
+      );
+    } finally {
+      setSubmitting(false);
     }
-
-    // Default demo EO login
-    partnerSessionStore.loginAsDemoApproved();
-    navigate("/partner/eo");
-  };
-
-  const handleDemoApprovedEo = (
-    guideStatus: "CERTIFIED_GUIDE" | "CONCEPT_ONLY",
-  ) => {
-    partnerSessionStore.loginAsDemoApproved(guideStatus);
-    navigate("/partner/eo");
-  };
-
-  const handleDemoApprovedDestination = () => {
-    partnerSessionStore.loginAsDemoDestination();
-    navigate("/partner/destination");
-  };
-
-  const handleDemoPendingDestination = () => {
-    partnerSessionStore.setPartner({
-      id: "dest_partner_coban_rondo",
-      email: "partner@cobanrondo.id",
-      name: "Pengelola Hutan Pinus Coban Rondo",
-      role: "DESTINATION",
-      businessName: "Pengelola Coban Rondo",
-      destinationIdentityId: "dest_coban_rondo",
-    });
-    navigate("/partner/application");
-  };
-
-  const handleDemoRejectedDestination = () => {
-    partnerSessionStore.setPartner({
-      id: "dest_partner_rejected",
-      email: "partner@curahrawan.id",
-      name: "Pengelola Curah Rawan",
-      role: "DESTINATION",
-      businessName: "Pengelola Lembah Curah Rawan",
-      destinationIdentityId: "dest_curah_rawan",
-    });
-    navigate("/partner/application");
   };
 
   return (
-    <div
-      className="eo-container"
-      style={{ padding: "var(--space-8) var(--space-4)", maxWidth: "580px" }}
+    <section
+      className="partner-entry__login"
+      aria-label={`Masuk ${role === "EO" ? "Travel Organizer" : "Mitra Destinasi"}`}
     >
-      <header style={{ textAlign: "center", marginBottom: "var(--space-6)" }}>
-        <Badge tone="info">Partner Authentication</Badge>
-        <h1 className="eo-page-title" style={{ marginTop: "var(--space-2)" }}>
-          Masuk ke Portal Partner
-        </h1>
-        <p className="eo-page-subtitle">
-          Pilih peran kemitraan dan kelola operasional wellness terkurasi.
-        </p>
-      </header>
-
-      {/* Quick Demo Access Bar */}
-      <div
-        className="eo-alert eo-alert--info"
-        style={{ marginBottom: "var(--space-4)" }}
+      <button
+        type="button"
+        className="partner-entry__back"
+        onClick={onBack ?? (() => navigate("/partner"))}
       >
-        <strong>Akses Cepat Evaluasi Juri:</strong>
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-2)",
-            flexWrap: "wrap",
-            marginTop: "var(--space-1)",
-          }}
-        >
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={handleDemoApprovedDestination}
-          >
-            Destinasi Approved (Lereng Hijau)
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={handleDemoPendingDestination}
-          >
-            Destinasi Pending (Coban Rondo)
-          </Button>
-          <Button
-            type="button"
-            variant="danger"
-            size="sm"
-            onClick={handleDemoRejectedDestination}
-          >
-            Destinasi Rejected
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => handleDemoApprovedEo("CERTIFIED_GUIDE")}
-          >
-            EO Approved Demo
-          </Button>
-        </div>
-      </div>
-
-      <form
-        className="eo-section"
-        onSubmit={handleLogin}
-        style={{ gap: "var(--space-4)" }}
-      >
-        <div className="eo-form-group">
-          <label htmlFor="partner-role" className="eo-form-label">
-            Tipe Kemitraan
-          </label>
-          <select
-            id="partner-role"
-            className="eo-form-select"
-            value={role}
-            onChange={(e) => {
-              const nextRole = e.target.value as "EO" | "DESTINATION";
-              setRole(nextRole);
-              setEmail(
-                nextRole === "DESTINATION"
-                  ? "destinasi@lerenghijau.id"
-                  : "partner@jedaalam.id",
-              );
-            }}
-          >
-            <option value="DESTINATION">Pengelola Destinasi Lokal</option>
-            <option value="EO">Travel Organizer</option>
-          </select>
-        </div>
-
-        <div className="eo-form-group">
-          <label htmlFor="partner-email" className="eo-form-label">
-            Email Terdaftar
-          </label>
+        ← Kembali pilih peran
+      </button>
+      <span className="partner-entry__eyebrow">Selamat datang kembali</span>
+      <h2>
+        Masuk sebagai {role === "EO" ? "Travel Organizer" : "Mitra Destinasi"}
+      </h2>
+      <p>Masukkan akun mitramu untuk melanjutkan pekerjaan di JedaIn.</p>
+      <form onSubmit={submit} className="partner-entry__form">
+        <label htmlFor="partner-email">Email</label>
+        <input
+          id="partner-email"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="nama@usaha.id"
+          required
+        />
+        <label htmlFor="partner-password">Kata sandi</label>
+        <div className="partner-entry__password">
           <input
-            id="partner-email"
-            type="email"
+            id="partner-password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
             required
-            className="eo-form-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="nama@mitra.id"
           />
-        </div>
-
-        <Button
-          type="submit"
-          variant="primary"
-          size="lg"
-          style={{ marginTop: "var(--space-2)" }}
-        >
-          Masuk ke Portal Partner
-        </Button>
-
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: "var(--font-size-body-sm)",
-            color: "var(--color-text-secondary)",
-          }}
-        >
-          Belum menjadi mitra?{" "}
-          <Link
-            to={
-              role === "DESTINATION"
-                ? "/partner/apply/destination"
-                : "/partner/apply/eo"
+          <button
+            type="button"
+            onClick={() => setShowPassword((value) => !value)}
+            aria-label={
+              showPassword ? "Sembunyikan kata sandi" : "Lihat kata sandi"
             }
-            onClick={() => {
-              if (role === "DESTINATION") {
-                const targetEmail = email.trim() || "mitra.destinasi@jedain.id";
-                const uniquePartnerId =
-                  generateUniqueDestinationPartnerId(targetEmail);
-                partnerSessionStore.setPartner({
-                  id: uniquePartnerId,
-                  email: targetEmail,
-                  name: "Mitra Destinasi Baru",
-                  role: "DESTINATION",
-                  businessName: "Pengelola Kawasan Destinasi",
-                });
-              }
-            }}
-            style={{ color: "var(--color-brand-primary)", fontWeight: 600 }}
           >
-            {role === "DESTINATION"
-              ? "Daftar Verifikasi Destinasi"
-              : "Daftar Pengajuan EO Baru"}
-          </Link>
+            {showPassword ? "Sembunyikan" : "Lihat"}
+          </button>
         </div>
+        {error && (
+          <p className="partner-entry__error" role="alert">
+            {error}
+          </p>
+        )}
+        <button
+          type="submit"
+          className="partner-entry__primary"
+          disabled={submitting}
+        >
+          {submitting ? "Memeriksa akun…" : "Masuk ke ruang kerja"}
+        </button>
       </form>
-    </div>
+      <p className="partner-entry__register">
+        Belum menjadi mitra?{" "}
+        <button type="button" onClick={register}>
+          Ajukan kemitraan
+        </button>
+      </p>
+      {!isSupabaseMode() && (
+        <details className="partner-entry__preview">
+          <summary>Akses akun contoh prototipe</summary>
+          <p>
+            Email:{" "}
+            {role === "EO"
+              ? DEMO_EO_CREDENTIALS.email
+              : DEMO_DESTINATION_CREDENTIALS.email}
+            <br />
+            Kata sandi: {DEMO_EO_CREDENTIALS.password}
+          </p>
+        </details>
+      )}
+    </section>
   );
 }

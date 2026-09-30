@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { packageRepository } from "../../data/packageRepository";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Badge, Button } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
+import { getDataMode } from "../../lib/supabase/config";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { mockInsightStore } from "./mockInsightStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import { getHumanStatusLabel, getStatusBadgeTone } from "./packageHelpers";
+import type { EoPackageRecord } from "./types";
 import "./eo.css";
 
 export function EoPackageDetailScreen() {
@@ -17,11 +20,27 @@ export function EoPackageDetailScreen() {
   const eoId = partner?.id ?? "eo_jeda_alam";
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isApprovingDemo, setIsApprovingDemo] = useState(false);
 
-  // Ownership verification
-  const pkg = packageId
-    ? mockEoPackageStore.getPackageForEo(packageId, eoId)
-    : undefined;
+  // Ownership verification & reactive state
+  const [pkg, setPkg] = useState<EoPackageRecord | undefined>(() =>
+    packageId ? mockEoPackageStore.getPackageForEo(packageId, eoId) : undefined,
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+    if (packageId) {
+      packageRepository.getPackageForEo(packageId, eoId).then((res) => {
+        if (isMounted && res) {
+          setPkg(res);
+        }
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [packageId, eoId]);
 
   if (!pkg) {
     return (
@@ -66,16 +85,35 @@ export function EoPackageDetailScreen() {
       })
     : undefined;
 
-  const handlePublishLive = () => {
+  const handlePublishLive = async () => {
+    setIsPublishing(true);
     setPublishError(null);
     setPublishMessage(null);
-    const res = mockEoPackageStore.publishApprovedPackage(pkg.packageId);
-    if (res.success) {
+    const res = await packageRepository.publishApprovedPackage(pkg.packageId);
+    setIsPublishing(false);
+    if (res.success && res.package) {
+      setPkg(res.package);
       setPublishMessage(
         "Paket berhasil dipublikasikan LIVE ke Marketplace Traveler!",
       );
     } else {
       setPublishError(res.message ?? "Gagal mempublikasikan paket.");
+    }
+  };
+
+  const handleDemoApprove = async () => {
+    setIsApprovingDemo(true);
+    setPublishError(null);
+    setPublishMessage(null);
+    const res = await packageRepository.approveOwnPackageForDemo(pkg.packageId);
+    setIsApprovingDemo(false);
+    if (res.success && res.package) {
+      setPkg(res.package);
+      setPublishMessage(
+        "Paket berhasil disetujui (simulasi demo persetujuan Admin)!",
+      );
+    } else {
+      setPublishError(res.message ?? "Gagal menyetujui paket.");
     }
   };
 
@@ -151,14 +189,29 @@ export function EoPackageDetailScreen() {
 
         {/* State-specific primary header actions */}
         <div className="eo-pkg-detail-header__actions">
+          {pkg.status === "PENDING_ADMIN_REVIEW" &&
+            getDataMode() === "supabase" && (
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleDemoApprove}
+                disabled={isApprovingDemo}
+                data-testid="demo-approve-button"
+              >
+                {isApprovingDemo ? "Memproses..." : "ACC Paket (Demo)"}
+              </Button>
+            )}
+
           {pkg.status === "APPROVED" && (
             <Button
               type="button"
               variant="primary"
               size="md"
               onClick={handlePublishLive}
+              disabled={isPublishing}
             >
-              Publish ke Marketplace
+              {isPublishing ? "Memproses..." : "Publish ke Marketplace"}
             </Button>
           )}
 
@@ -224,6 +277,30 @@ export function EoPackageDetailScreen() {
             tampil di Marketplace hingga kamu memilih "Publish ke Marketplace"
             untuk menjadikannya LIVE.
           </p>
+          {getDataMode() === "supabase" && (
+            <div
+              style={{
+                marginTop: "var(--space-3)",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.25rem",
+                alignItems: "flex-start",
+              }}
+            >
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleDemoApprove}
+                disabled={isApprovingDemo}
+              >
+                {isApprovingDemo ? "Memproses..." : "ACC Paket (Demo)"}
+              </Button>
+              <small style={{ color: "var(--color-stone-600)" }}>
+                Simulasi persetujuan Admin untuk kebutuhan demo.
+              </small>
+            </div>
+          )}
         </section>
       )}
 

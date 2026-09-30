@@ -1,3 +1,4 @@
+import { PartnerEmptyState } from "../../components/ui/PartnerEmptyState";
 import { mockReviewStore } from "../reviews/mockReviewStore";
 import {
   getDestinationReviewTargetRef,
@@ -78,15 +79,9 @@ export function DestinationReviewsScreen() {
         </h2>
 
         {venueReviews.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "var(--space-8)",
-              color: "var(--color-text-muted)",
-            }}
-          >
-            <p>Belum ada ulasan destinasi yang tercatat untuk kawasan Anda.</p>
-          </div>
+          <PartnerEmptyState title="Belum ada ulasan">
+            Belum ada ulasan destinasi yang tercatat untuk kawasan Anda.
+          </PartnerEmptyState>
         ) : (
           <div
             style={{

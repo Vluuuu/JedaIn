@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
+import CelebrateMascot from "../../assets/mascot/celebrate.png";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import { formatRupiah, getBookingPaymentBreakdown } from "../checkout/pricing";
 import { formatSessionDateTimeRange } from "../packageDetail/formatSessionDate";
@@ -88,6 +89,14 @@ export function PaymentResultScreen({
     return (
       <div className="payment-container payment-result-container">
         <div className="payment-result-header">
+          <img
+            className="payment-result-mascot"
+            src={CelebrateMascot}
+            alt=""
+            aria-hidden="true"
+            width="536"
+            height="597"
+          />
           <div className="payment-success-visual" aria-hidden="true">
             <svg
               className="payment-success-check"

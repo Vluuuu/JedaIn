@@ -410,9 +410,7 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
     // 23. Empty summary autofills
     const summaryInput =
       view.querySelector<HTMLTextAreaElement>("#package-summary")!;
-    expect(summaryInput.value).toContain(
-      "Experience untuk traveler yang mencari",
-    );
+    expect(summaryInput.value).toContain("Experience untuk traveler dari");
 
     // 24. Duration autofilled
     const durationSelect =
@@ -496,9 +494,7 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
     const summaryInput =
       view.querySelector<HTMLTextAreaElement>("#package-summary")!;
     expect(titleInput.value.trim().length).toBeGreaterThan(5);
-    expect(summaryInput.value).toContain(
-      "Experience untuk traveler yang mencari",
-    );
+    expect(summaryInput.value).toContain("Experience untuk traveler dari");
 
     const step3 = steps.find((btn) =>
       btn.textContent?.includes("Perjalanan & Itinerary"),

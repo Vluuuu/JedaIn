@@ -1,3 +1,4 @@
+import { destinationRepository } from "../../data/destinationRepository";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { mockDestinationStore } from "../eo/mockDestinationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
@@ -128,10 +129,19 @@ export const mockDestinationPartnerService = {
         input.category === "FACILITY" ? input.facilityLabel?.trim() : undefined,
     };
 
-    mockDestinationStore.updateMediaGallery(context.destination.destinationId, [
-      ...currentGallery,
-      media,
-    ]);
+    const nextGallery = [...currentGallery, media];
+    mockDestinationStore.updateMediaGallery(
+      context.destination.destinationId,
+      nextGallery,
+    );
+    destinationRepository
+      .updateMediaGallery(context.destination.destinationId, nextGallery)
+      .catch((err) => {
+        console.warn(
+          "Async destinationRepository.updateMediaGallery failed:",
+          err,
+        );
+      });
 
     return { success: true, media };
   },
@@ -161,6 +171,14 @@ export const mockDestinationPartnerService = {
       context.destination.destinationId,
       normalized,
     );
+    destinationRepository
+      .updateDescription(context.destination.destinationId, normalized)
+      .catch((err) => {
+        console.warn(
+          "Async destinationRepository.updateDescription failed:",
+          err,
+        );
+      });
     return { success: true };
   },
 
@@ -191,6 +209,17 @@ export const mockDestinationPartnerService = {
       context.destination.destinationId,
       localGuideFeePerPerson,
     );
+    destinationRepository
+      .updateLocalGuideFee(
+        context.destination.destinationId,
+        localGuideFeePerPerson,
+      )
+      .catch((err) => {
+        console.warn(
+          "Async destinationRepository.updateLocalGuideFee failed:",
+          err,
+        );
+      });
     return { success: true };
   },
 
@@ -217,10 +246,21 @@ export const mockDestinationPartnerService = {
       };
     }
 
+    const nextGallery = currentGallery.filter(
+      (media) => media.mediaId !== mediaId,
+    );
     mockDestinationStore.updateMediaGallery(
       context.destination.destinationId,
-      currentGallery.filter((media) => media.mediaId !== mediaId),
+      nextGallery,
     );
+    destinationRepository
+      .updateMediaGallery(context.destination.destinationId, nextGallery)
+      .catch((err) => {
+        console.warn(
+          "Async destinationRepository.updateMediaGallery failed:",
+          err,
+        );
+      });
     return { success: true };
   },
 };

@@ -33,7 +33,15 @@ describe("Recommendation Deterministic Matching Engine Tests", () => {
       },
     ];
     const result = evaluateRecommendations(baseQuiz, draftPackages);
+    expect(result.state).toBe("EMPTY");
     expect(result.topRecommendation).toBeUndefined();
+  });
+
+  it("returns EMPTY with no fabricated recommendation when the catalog has no packages", () => {
+    expect(evaluateRecommendations(baseQuiz, [])).toEqual({
+      state: "EMPTY",
+      alternatives: [],
+    });
   });
 
   it("2. recognizes exact sufficient match", () => {

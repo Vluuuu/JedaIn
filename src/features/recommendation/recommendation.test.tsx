@@ -8,7 +8,10 @@ import { App } from "../../App";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { QuizDraft } from "../quiz/types";
-import { MockRecommendationAdapter } from "./mockAdapter";
+import {
+  defaultRecommendationAdapter,
+  MockRecommendationAdapter,
+} from "./mockAdapter";
 import { MOCK_RECOMMENDATION_PACKAGES } from "./mockPackages";
 import { RecommendationResultScreen } from "./RecommendationResultScreen";
 
@@ -23,6 +26,7 @@ afterEach(async () => {
   await act(() => root?.unmount());
   container?.remove();
   sessionStore.reset();
+  vi.restoreAllMocks();
 });
 
 const matchedQuiz: QuizDraft = {
@@ -187,6 +191,24 @@ describe("RecommendationResultScreen UI States and Interactions", () => {
     expect(adapter.loggedUnmatchedEvents[0].reason).toBe("NO_SUFFICIENT_MATCH");
   });
 
+  it("shows an empty catalog as a normal state and preserves the completed quiz", async () => {
+    sessionStore.setQuizDraft(matchedQuiz);
+    const onLogged = vi.fn();
+    const adapter = new MockRecommendationAdapter({
+      catalog: [],
+      onUnmatchedDemandLogged: onLogged,
+    });
+
+    const view = await renderScreen({ adapter });
+
+    expect(view.textContent).toContain("Belum ada experience tersedia.");
+    expect(view.textContent).toContain("Lanjut ke Home");
+    expect(view.textContent).not.toContain("Rekomendasi belum bisa dimuat.");
+    expect(view.textContent).not.toContain("Sehari Pelan di Lereng Hijau");
+    expect(sessionStore.getQuizDraft()?.current_intent).toBe("NATURE");
+    expect(onLogged).not.toHaveBeenCalled();
+  });
+
   it("24 & 25. renders error state on failure, preserves quiz draft, and recovers on retry", async () => {
     sessionStore.setQuizDraft(matchedQuiz);
     const adapter = new MockRecommendationAdapter({
@@ -268,6 +290,46 @@ describe("Unmatched Demand Idempotency & React StrictMode Simulation", () => {
 });
 
 describe("Recommendation Result Router-Level Navigation", () => {
+  it("allows a completed traveler to reach Home from an empty recommendation", async () => {
+    sessionStore.setUser({
+      id: "usr_empty_catalog",
+      onboardingStatus: "COMPLETED",
+    });
+    sessionStore.setQuizDraft(matchedQuiz);
+    vi.spyOn(
+      defaultRecommendationAdapter,
+      "getRecommendations",
+    ).mockResolvedValue({
+      state: "EMPTY",
+      alternatives: [],
+    });
+
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+
+    await act(() =>
+      root.render(
+        createElement(
+          MemoryRouter,
+          { initialEntries: ["/onboarding/result"] },
+          createElement(App),
+        ),
+      ),
+    );
+
+    const homeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lanjut ke Home"),
+    );
+    expect(homeBtn).toBeDefined();
+
+    await act(async () => {
+      homeBtn?.click();
+    });
+
+    expect(container.querySelector(".traveler-app-shell")).not.toBeNull();
+  });
+
   it("navigates to /packages/:packageId when primary CTA 'Lihat Experience' is clicked", async () => {
     sessionStore.setUser({
       id: "usr_nav_test",

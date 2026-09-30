@@ -11,6 +11,7 @@ import { mockEoPackageStore } from "../eo/mockEoPackageStore";
 import { MockExploreAdapter } from "../explore/mockAdapter";
 import { getDerivedVerifiedDestinations } from "../home/config";
 import { MockHomeAdapter } from "../home/mockAdapter";
+import { MockRecommendationAdapter } from "../recommendation/mockAdapter";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
@@ -64,5 +65,18 @@ describe("Supabase empty demo catalog", () => {
     expect(
       home.verifiedDestinations.map((dest) => dest.destinationName),
     ).toEqual(["Lereng Hijau Batu"]);
+
+    const recommendation =
+      await new MockRecommendationAdapter().getRecommendations({
+        currentStep: 6,
+        current_intent: "NATURE",
+        preferred_activities: ["NATURE_SCENERY"],
+        budget_band: "AROUND_200_300K",
+        duration_preference: "FULL_DAY",
+        departure_area_id: "MALANG",
+        group_type: "SOLO",
+        group_size_band: "ONE",
+      });
+    expect(recommendation).toEqual({ state: "EMPTY", alternatives: [] });
   });
 });

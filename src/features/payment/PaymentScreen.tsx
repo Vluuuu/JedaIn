@@ -1,3 +1,5 @@
+import { TRAVELER_SERVICE_FEE } from "../checkout/pricing";
+import { DepartureSummary } from "../departure/DepartureChoices";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
@@ -321,6 +323,15 @@ export function PaymentScreen({
             </span>
           </div>
 
+          {booking.departureOptionId && (
+            <DepartureSummary
+              departure={{
+                areaLabel: booking.departureAreaLabel ?? "",
+                meetingPointLabel: booking.meetingPointLabel ?? "",
+                departureTimeLabel: booking.departureTimeLabel ?? "",
+              }}
+            />
+          )}
           <div className="payment-fact-row">
             <span className="payment-fact-label">Jumlah peserta</span>
             <span className="payment-fact-value">
@@ -329,14 +340,28 @@ export function PaymentScreen({
           </div>
 
           <div className="payment-fact-row">
-            <span className="payment-fact-label">Subtotal paket</span>
+            <span className="payment-fact-label">
+              Subtotal paket{" "}
+              <small>
+                {formatRupiah(breakdown.unitPrice)} × {booking.participantCount}
+              </small>
+            </span>
             <span className="payment-fact-value">
               {formatRupiah(breakdown.subtotal)}
             </span>
           </div>
 
           <div className="payment-fact-row">
-            <span className="payment-fact-label">Biaya layanan</span>
+            <span className="payment-fact-label">
+              Biaya layanan JedaIn
+              {booking.pricingVersion === "PER_PERSON" && (
+                <small>
+                  {" "}
+                  {formatRupiah(TRAVELER_SERVICE_FEE)} ×{" "}
+                  {booking.participantCount}
+                </small>
+              )}
+            </span>
             <span className="payment-fact-value">
               {formatRupiah(breakdown.serviceFee)}
             </span>

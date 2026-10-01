@@ -1,3 +1,4 @@
+import { minimumDeparturePrice } from "../departure/departureOptions";
 import { useEffect, useState } from "react";
 import { isSupabaseMode } from "../../lib/supabase/config";
 import { useNavigate } from "react-router";
@@ -459,8 +460,11 @@ export function EoPackagesScreen() {
                         </span>
                         <span className="eo-pkg-card__meta-item eo-pkg-card__price">
                           <strong>
-                            Rp
-                            {pkg.pricing.customerPrice.toLocaleString("id-ID")}
+                            Mulai dari Rp
+                            {minimumDeparturePrice(
+                              pkg.departureOptions,
+                              pkg.pricing.customerPrice,
+                            ).toLocaleString("id-ID")}
                           </strong>{" "}
                           / orang
                         </span>

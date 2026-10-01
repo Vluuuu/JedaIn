@@ -2,7 +2,7 @@
 
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { MemoryRouter, Route, Routes } from "react-router";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import {
   afterEach,
   beforeAll,
@@ -72,6 +72,20 @@ function createMockSavedRecord(
   };
 }
 
+function BuilderWithLocation() {
+  const location = useLocation();
+  return createElement(
+    "div",
+    {},
+    createElement(
+      "output",
+      { "data-testid": "builder-location" },
+      location.search,
+    ),
+    createElement(EoPackageBuilderScreen),
+  );
+}
+
 async function renderPackageBuilder(
   initialEntries = ["/partner/eo/packages/new?destinationId=dest_lereng_hijau"],
 ) {
@@ -88,7 +102,7 @@ async function renderPackageBuilder(
           undefined,
           createElement(Route, {
             path: "/partner/eo/packages/new",
-            element: createElement(EoPackageBuilderScreen),
+            element: createElement(BuilderWithLocation),
           }),
           createElement(Route, {
             path: "/partner/eo/packages/:packageId",
@@ -140,6 +154,9 @@ describe("Regression Tests: Package Builder Single-Draft Lifecycle & Serializati
     expect(updatedEl?.getAttribute("data-package-id")).toBe(
       "pkg_authoritative_1",
     );
+    expect(
+      view.querySelector('[data-testid="builder-location"]')?.textContent,
+    ).toContain("draftId=pkg_authoritative_1");
   });
 
   it("Scenario B: second save with field changes reuses pkg_authoritative_1 without creating second package", async () => {

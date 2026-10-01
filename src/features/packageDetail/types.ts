@@ -1,3 +1,4 @@
+import type { DepartureOption } from "../departure/departureOptions";
 import type { PackageRecommendationSource } from "../recommendation/types";
 
 export type EoGuideStatus = "CONCEPT_ONLY" | "CERTIFIED_GUIDE";
@@ -52,6 +53,7 @@ export interface PackageDetailSource {
   excludedItems: string[];
   safetyNotes: string[];
   meetingPointLabel?: string;
+  departureOptions?: DepartureOption[];
   departureTimeLabel?: string;
   outboundTransport?: string;
   returnTransport?: string;

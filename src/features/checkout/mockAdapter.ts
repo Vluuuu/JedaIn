@@ -1,3 +1,8 @@
+import {
+  isValidDepartureOption,
+  legacyDepartureOption,
+  resolveDepartureOption,
+} from "../departure/departureOptions";
 import { prototypeClock } from "../../lib/clock";
 import type { AuthUser } from "../auth/types";
 import { mockContactVerificationStore } from "../contactVerification/mockContactVerificationStore";
@@ -5,6 +10,7 @@ import { demoContactVerificationBypass } from "../demo/demoContactVerificationBy
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
+  syncMarketplaceFromSupabase,
 } from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
 import type {
@@ -84,6 +90,8 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       throw new Error(this.errorMessage);
     }
 
+    if (!this.explicitPackages && !this.explicitDetails)
+      await syncMarketplaceFromSupabase();
     const packages = this.resolvePackages();
     const details = this.resolveDetails();
 
@@ -155,7 +163,11 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
     }
 
     // BLOCKER 1 (from previous patch): EXACT SESSION PRICE ONLY (session.pricePerPerson MUST exist)
-    if (foundSession.pricePerPerson === undefined) {
+    if (
+      foundDetail.departureOptions === undefined &&
+      foundPkg.departureOptions === undefined &&
+      foundSession.pricePerPerson === undefined
+    ) {
       return {
         state: "PRICE_UNAVAILABLE",
         package: foundPkg,
@@ -202,6 +214,8 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       package: foundPkg,
       session: effectiveSessionSnapshot,
       contactRequirement,
+      departureOptions:
+        foundDetail.departureOptions ?? foundPkg.departureOptions,
       cancellationPolicySummary: foundDetail.cancellationPolicySummary,
       activePendingPayment,
     };
@@ -246,6 +260,7 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
     const existingCheck = mockTransactionStore.getIdempotentTransaction(
       input.idempotencyKey,
       {
+        departureOptionId: input.departureOptionId,
         travelerId: input.travelerId,
         sessionId: input.sessionId,
         participantCount: input.participantCount,
@@ -316,6 +331,8 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
+    if (!this.explicitPackages && !this.explicitDetails)
+      await syncMarketplaceFromSupabase();
     const packages = this.resolvePackages();
     const details = this.resolveDetails();
 
@@ -367,7 +384,30 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       };
     }
 
-    const unitPrice = foundSession.pricePerPerson;
+    const options = foundDetail.departureOptions ?? foundPkg.departureOptions;
+    const selectedDeparture = options
+      ? resolveDepartureOption(options, input.departureOptionId)
+      : undefined;
+    if (
+      options &&
+      (!selectedDeparture || !isValidDepartureOption(selectedDeparture))
+    )
+      return {
+        status: "INVALID_DRAFT",
+        message: "Pilih titik keberangkatan yang valid sebelum checkout.",
+      };
+    if (
+      !options &&
+      input.departureOptionId &&
+      input.departureOptionId !== `legacy_${foundPkg.id}`
+    )
+      return {
+        status: "INVALID_DRAFT",
+        message: "Titik keberangkatan tidak tersedia.",
+      };
+    const unitPrice = options
+      ? selectedDeparture?.pricePerPerson
+      : foundSession.pricePerPerson;
     if (unitPrice === undefined) {
       return {
         status: "PRICE_UNAVAILABLE",
@@ -414,6 +454,15 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       sessionId: foundSession.sessionId,
       participantCount: input.participantCount,
       unitPricePerPerson: unitPrice,
+      departureOptionId: input.departureOptionId,
+      departureSnapshot:
+        selectedDeparture ??
+        legacyDepartureOption(
+          foundPkg.id,
+          unitPrice,
+          foundDetail.meetingPointLabel,
+          foundDetail.departureTimeLabel,
+        ),
       capacitySnapshot: foundSession.remainingSlots,
       idempotencyKey: input.idempotencyKey,
     });

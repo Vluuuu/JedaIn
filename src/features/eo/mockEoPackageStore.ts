@@ -1,3 +1,5 @@
+import { isValidDepartureOption } from "../departure/departureOptions";
+import { minimumDeparturePrice } from "../departure/departureOptions";
 import { customPackageImageStore } from "../../lib/assets/packageImages";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
@@ -134,20 +136,39 @@ export function validateEoPackage(
   }
 
   // Step 3: Logistics & Itinerary
-  if (!pkg.meetingPointLabel || !pkg.meetingPointLabel.trim()) {
-    errors.push({
-      step: 3,
-      field: "meetingPointLabel",
-      message: "Lengkapi titik kumpul perjalanan.",
+  if (pkg.departureOptions !== undefined) {
+    if (pkg.departureOptions.length === 0)
+      errors.push({
+        step: 3,
+        field: "departureOptions",
+        message: "Tambahkan minimal 1 titik keberangkatan.",
+      });
+    const ids = new Set<string>();
+    pkg.departureOptions.forEach((option, index) => {
+      if (!isValidDepartureOption(option) || ids.has(option.id))
+        errors.push({
+          step: 3,
+          field: `departureOptions[${index}]`,
+          message: `Titik keberangkatan #${index + 1}: lengkapi area, titik kumpul, waktu kumpul, dan harga per orang lebih dari Rp0 dengan ID unik.`,
+        });
+      ids.add(option.id);
     });
-  }
+  } else {
+    if (!pkg.meetingPointLabel || !pkg.meetingPointLabel.trim()) {
+      errors.push({
+        step: 3,
+        field: "meetingPointLabel",
+        message: "Lengkapi titik kumpul perjalanan.",
+      });
+    }
 
-  if (!pkg.departureTimeLabel || !pkg.departureTimeLabel.trim()) {
-    errors.push({
-      step: 3,
-      field: "departureTimeLabel",
-      message: "Lengkapi waktu kumpul atau keberangkatan.",
-    });
+    if (!pkg.departureTimeLabel || !pkg.departureTimeLabel.trim()) {
+      errors.push({
+        step: 3,
+        field: "departureTimeLabel",
+        message: "Lengkapi waktu kumpul atau keberangkatan.",
+      });
+    }
   }
 
   if (!pkg.outboundTransport || !pkg.outboundTransport.trim()) {
@@ -251,11 +272,16 @@ export function validateEoPackage(
     }
     const exactCustomerPrice =
       authoritativeBaseCost + authoritativeGuideFee + pkg.pricing.eoMargin;
-    if (pkg.pricing.customerPrice !== exactCustomerPrice) {
+    if (
+      pkg.pricing.customerPrice !==
+      minimumDeparturePrice(pkg.departureOptions, exactCustomerPrice)
+    ) {
       errors.push({
         step: 4,
         field: "customerPrice",
-        message: `Harga package harus sama dengan biaya dasar destinasi + tarif pemandu yang digunakan + margin EO (Rp${exactCustomerPrice.toLocaleString("id-ID")}).`,
+        message: pkg.departureOptions
+          ? "Harga mulai dari harus sesuai opsi keberangkatan termurah."
+          : `Harga package harus sama dengan biaya dasar destinasi + tarif pemandu yang digunakan + margin EO (Rp${exactCustomerPrice.toLocaleString("id-ID")}).`,
       });
     }
   }
@@ -586,7 +612,15 @@ export const mockEoPackageStore = {
       effectiveGuideSource === "DESTINATION"
         ? (dest?.localGuideFeePerPerson ?? 0)
         : 0;
-    const customerPrice = baseCost + localGuideFee + margin;
+    const departureOptions =
+      draft.departureOptions ??
+      (existingIndex !== -1
+        ? packages[existingIndex].departureOptions
+        : undefined);
+    const customerPrice = minimumDeparturePrice(
+      departureOptions,
+      baseCost + localGuideFee + margin,
+    );
     const imageUrls =
       draft.imageUrls ??
       (draft.imageUrl
@@ -633,6 +667,12 @@ export const mockEoPackageStore = {
           : existingIndex >= 0
             ? packages[existingIndex].safetyNotes
             : [],
+      departureOptions: departureOptions?.map((option) => ({
+        ...option,
+        areaLabel: option.areaLabel.trim(),
+        meetingPointLabel: option.meetingPointLabel.trim(),
+        departureTimeLabel: option.departureTimeLabel.trim(),
+      })),
       meetingPointLabel:
         draft.meetingPointLabel !== undefined
           ? draft.meetingPointLabel

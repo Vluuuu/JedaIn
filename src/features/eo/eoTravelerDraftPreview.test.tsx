@@ -151,6 +151,17 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
       safetyInput.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
+    await act(() => {
+      const price = view.querySelector<HTMLInputElement>(
+        'input[id^="departure-price-"]',
+      )!;
+      Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value",
+      )?.set?.call(price, "340000");
+      price.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
     // Navigate to Step 5
     const step5Button = Array.from(
       view.querySelectorAll<HTMLButtonElement>(".eo-step-item"),

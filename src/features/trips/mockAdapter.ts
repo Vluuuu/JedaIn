@@ -4,6 +4,7 @@ import { resolveOrganizerReviewRef } from "../identity/identityResolvers";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
+  syncMarketplaceFromSupabase,
 } from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { PackageDetailSource } from "../packageDetail/types";
@@ -67,6 +68,8 @@ export class MockTripsAdapter implements TripsAdapter {
   }
 
   async getMyTrips(): Promise<MyTripsViewModel> {
+    if (!this.explicitPackages && !this.explicitDetails)
+      await syncMarketplaceFromSupabase();
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
@@ -123,6 +126,8 @@ export class MockTripsAdapter implements TripsAdapter {
   }
 
   async getTripDetail(bookingId: string): Promise<TripDetailViewModel | null> {
+    if (!this.explicitPackages && !this.explicitDetails)
+      await syncMarketplaceFromSupabase();
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }

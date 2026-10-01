@@ -1,5 +1,18 @@
 # JedaIn — PRD HOLOGY Competition Prototype
 
+## Keputusan aktif: titik keberangkatan dan biaya Traveler (1 Oktober 2026)
+
+Keputusan user ini menggantikan aturan harga tunggal, fee per booking, dan pendaftaran destinasi mandiri dalam riwayat sebelumnya.
+
+- Tim/Admin JedaIn memverifikasi dan menambahkan destinasi kanonikal. Akun Destinasi tidak dapat membuat destinasi baru atau melakukan aktivasi mandiri. Login, profil, session, kapasitas, dan pemandu destinasi existing tetap tersedia. Eligibility Travel Organizer tetap `ACTIVE` + `guideReady=true`.
+- Satu package memiliki minimal satu opsi keberangkatan valid saat submit: ID stabil, area, titik kumpul, waktu kumpul, dan harga final per orang > Rp0. Travel Organizer menentukan harga setiap opsi di Langkah 3; biaya dasar, pemandu, dan margin di Langkah 4 menjadi referensi economics, tanpa menghitung harga lokasi otomatis. Komisi 10% GMV tetap internal.
+- Harga mulai dari = minimum harga opsi. Traveler memilih opsi + session; session tetap mengatur tanggal/waktu trip dan kapasitas bersama. Pilihan dibawa dalam URL, termasuk verifikasi kontak/pending-payment, dan divalidasi ulang saat checkout. Direct session/checkout menyediakan pilihan jika belum dipilih.
+- Booking menyimpan `departureOptionId`, `departureAreaLabel`, `meetingPointLabel`, `departureTimeLabel`, `unitPricePerPerson`, dan versi pricing. Payment/tiket/booking TO memakai snapshot; edit package atau reload tidak mengubah pesanan lama.
+- Subtotal = harga opsi dipilih × jumlah peserta. Biaya layanan JedaIn = Rp7.500 × jumlah peserta. Total = subtotal + biaya layanan. Tampilkan kedua perkalian secara transparan. Contoh Malang Rp249.000 × 2 + Rp7.500 × 2 = Rp513.000. Booking legacy mempertahankan fee yang disepakati sebelum perubahan ini.
+- Package legacy tanpa array memakai satu opsi kompatibilitas dengan ID deterministik, tanpa mengarang area/titik kumpul. Supabase menyimpan opsi di JSONB package dengan validasi database dan ownership RLS existing. Booking/payment tetap simulasi ledger tab-local existing, bukan backend transaksi produksi; reload pada tab yang sama didukung, antar perangkat tidak.
+
+Requirement terkait: REQ-TRV-07–13, REQ-EO-04/07/08/09/11, REQ-MIT-01/02, REQ-XR-01. Riwayat implementasi di bawah mencatat keputusan pada saat itu dan bukan override atas kontrak aktif ini.
+
 ## Keputusan final Destination dan Travel Organizer (27 September 2026)
 
 Bagian ini menggantikan aturan BASIC/PLUS, batas enam media, dan rumus harga lama yang masih tercatat di riwayat implementasi di bawah.
@@ -11,7 +24,7 @@ Bagian ini menggantikan aturan BASIC/PLUS, batas enam media, dan rumus harga lam
 - Status Destinasi Mitra diringkas menjadi status operasional kompak (`Profil destinasi siap digunakan Travel Organizer`), ringkasan operasional card/grid (Biaya dasar, Pemandu lokal, Kapasitas umum), serta status kecil `Status: Aktif`. Sembilan informasi inti profil (nama, lokasi, deskripsi, aktivitas, fasilitas, catatan operasional, informasi pemandu lokal, biaya dasar, dan kapasitas umum) ditampilkan di balik disclosure checklist jelas (✓/○) tanpa bullet kosong, bukan skor kualitas.
 - Profil Mitra menampilkan Ringkasan 2x2 facts rapi. Mitra dapat menyimpan deskripsi yang di-trim dengan minimum 20 karakter dengan feedback inline, serta menetapkan `localGuideFeePerPerson` dalam currency group input `Rp ... / orang` dengan feedback inline dan tampilan tarif aktif. Nilai tarif pemandu lokal langsung tersinkronisasi dalam same-runtime ke detail, katalog, dan builder Travel Organizer.
 - Foto fasilitas wajib diasosiasikan dengan fasilitas yang terdaftar (`destination.facilities`) melalui `facilityLabel` dan ditampilkan terkelompok per fasilitas pada Profil Mitra dan Travel Organizer Destination Detail. Galeri destinasi tetap terpisah untuk suasana umum tanpa batas jumlah. Per file hanya JPG/PNG/WebP hingga 5 MB. Media bawaan `PROTOTYPE_ILLUSTRATION` tidak dapat dihapus Mitra; media `DESTINATION_SOURCE` dapat dihapus. Sinkronisasi berlaku dalam runtime memori modul tanpa persistensi database produksi.
-- Untuk `guideSource=DESTINATION`, harga package per orang = biaya dasar destinasi + tarif pemandu lokal kanonikal + margin Travel Organizer. Untuk `guideSource=EO`, kontribusi tarif pemandu destinasi = Rp0. Service fee Traveler Rp7.500 per booking tetap item checkout terpisah; komisi platform 10% GMV tidak berubah.
+- Untuk `guideSource=DESTINATION`, referensi biaya per orang = biaya dasar destinasi + tarif pemandu lokal kanonikal + margin Travel Organizer. Untuk `guideSource=EO`, kontribusi tarif pemandu destinasi = Rp0. Service fee Traveler Rp7.500 per orang tetap item checkout terpisah; komisi platform 10% GMV tidak berubah.
 - Travel Organizer dapat memilih beberapa foto galeri destinasi, menggabungkannya dengan beberapa foto milik Travel Organizer, dan memilih cover. `imageUrls` menyimpan koleksi, `imageUrl` menyimpan cover; Traveler menampilkan media package aktual. Fallback crop ilustrasi tunggal hanya untuk fixture lama, dengan penjelasan eksplisit.
 - Demand Insight adalah sinyal preferensi simulasi prototype (bukan validasi pasar aktual atau jaminan penjualan). Tombol `Terapkan ke draft` memberi arahan sekaligus mengisi judul, ringkasan pengalaman, durasi, dan ide itinerary awal ke draft secara terproteksi tanpa menimpa bagian yang telah diedit manual oleh Travel Organizer. Melepas arahan insight tidak membatalkan draft. Tampilan 360° tetap `DEFERRED`.
 
@@ -573,14 +586,14 @@ Status:
 Current competition prototype behavior:
 
 Package unit price:
-Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin.
+Harga final per orang pada opsi keberangkatan yang dipilih. Biaya dasar, pemandu, dan margin adalah referensi economics internal.
 
 Checkout menampilkan:
 
 - unit/package price,
 - participant count,
 - subtotal,
-- fixed traveler service fee Rp7.500 per transaksi pada implementasi prototype saat ini,
+- traveler service fee Rp7.500 per orang pada implementasi prototype saat ini,
 - total.
 
 Total = subtotal + service fee.
@@ -588,7 +601,7 @@ Total = subtotal + service fee.
 Acceptance:
 
 - breakdown konsisten antara Checkout, Payment, Payment Result, dan related trip/payment state,
-- service fee tidak diduplikasi per participant,
+- service fee dikalikan participantCount,
 - corrupted/legacy payment state ditangani deterministik,
 - perubahan monetization commercial model bukan bagian requirement prototype ini.
 
@@ -928,11 +941,7 @@ Partner Entry
 
 ## 11.1 Mitra Alternative / Exception Flow
 
-New destination applicant:
-Partner Entry  
-→ Destination Application  
-→ Application / Verification State  
-→ Approved operational workspace jika lifecycle existing mengizinkan
+Destinasi baru diverifikasi dan ditambahkan oleh tim/Admin JedaIn. Partner Entry menyediakan login bagi Mitra Destinasi existing. URL application lama menampilkan penjelasan kurasi dan tidak memiliki form pengajuan mandiri.
 
 Guard:
 
@@ -945,19 +954,21 @@ Guard:
 
 # 12. Mitra Destinasi Functional Requirements
 
-## REQ-MIT-01 — Entry dan Registration
+## REQ-MIT-01 — Entry Mitra Existing
 
-Calon Mitra harus memiliki jalur application yang tidak looping.
+Mitra yang sudah terdaftar dapat login. Pendaftaran destinasi mandiri ditutup.
 
 Acceptance:
 
-- CTA "Daftar sebagai Destinasi" membawa ke flow yang dapat dilanjutkan,
+- tidak ada CTA daftar destinasi mandiri pada portal/login,
 - user tidak dikembalikan ke gerbang yang sama tanpa next action,
 - demo Mitra existing tetap dapat masuk cepat.
 
 Status: IMPLEMENTED LIVE.
 
-## REQ-MIT-02 — Destination Application
+## REQ-MIT-02 — Destination Application (riwayat, superseded)
+
+Catatan aktif 1 Oktober 2026: jalur pengajuan mandiri berikut tidak lagi tersedia. Data dan akun existing dipertahankan; penambahan destinasi menjadi kewenangan tim/Admin.
 
 Keputusan demo 1 Oktober 2026 (permintaan user): dokumen izin pengelolaan dipilih melalui input unggah file, bukan nama dokumen yang diketik. Lampiran tetap lokal selama sesi browser untuk demo, tanpa unggah file ke Supabase; metadata nama dokumen mengikuti pengajuan yang ada. Applicant dan Admin pada sesi browser yang sama dapat membuka lampiran. Setelah memuat ulang atau berpindah perangkat, UI menjelaskan bahwa file demo tidak tersedia. Dokumen tetap opsional pada prototype ini. Badge dekoratif `Formulir Verifikasi Destinasi`, `Syarat verifikasi`, dan `Pemandu lokal tersedia` di formulir dihapus; identitas pemandu wajib dan validasi pengajuan tetap berlaku.
 
@@ -1270,26 +1281,24 @@ Criticality: MUST.
 
 ## 16.1 Package Price
 
-Current package formula yang dipertahankan di prototype:
+Harga Traveler ditetapkan Travel Organizer per titik keberangkatan. Harga mulai dari adalah minimum harga seluruh opsi valid.
 
-Customer Package Price = Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin
-
-Formula ini adalah harga paket sebelum traveler service fee.
+Referensi biaya per orang = Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin. Referensi ini tetap terlihat pada builder, tetapi tidak menimpa harga opsi yang ditulis Travel Organizer. Traveler service fee dihitung terpisah saat checkout.
 
 ## 16.2 Traveler Checkout Fee
 
-Current prototype checkout menambahkan fixed service fee Rp7.500 per transaksi booking.
+Current prototype checkout menambahkan service fee Rp7.500 per orang.
 
 Current traveler-facing payment breakdown:
 
 Subtotal = Unit Package Price × Participant Count
 
-Total = Subtotal + Rp7.500 Service Fee
+Total = Subtotal + Rp7.500 × participantCount
 
 Acceptance:
 
 - service fee muncul transparan sebelum pembayaran,
-- service fee dikenakan per booking/transaksi, bukan per participant,
+- service fee dikenakan Rp7.500 untuk setiap participant,
 - checkout/payment/result menggunakan breakdown yang sama.
 
 Status: LIVE / VERIFIED.
@@ -1299,7 +1308,7 @@ Status: LIVE / VERIFIED.
 Berdasarkan **Draf PROPOSAL HOLOGY saat ini**, JedaIn memiliki dua sumber pendapatan pada setiap transaksi:
 
 1. **Platform commission sebesar 10% dari GMV**, dan
-2. **Service Fee flat Rp7.500 per transaksi booking**.
+2. **Service Fee Rp7.500 per orang**.
 
 Interpretasi yang harus dipakai agar proposal dan prototype konsisten:
 
@@ -1470,17 +1479,17 @@ Pada EO subdomain, root/login aliases mengarahkan ke EO-oriented entry dan opera
 
 ## Destination Partner
 
-| Route                                 | Purpose                   |
-| ------------------------------------- | ------------------------- |
-| /partner/apply/destination            | Destination application   |
-| /partner/application                  | Shared application status |
-| /partner/destination                  | Overview                  |
-| /partner/destination/profile          | Destination profile       |
-| /partner/destination/verification     | Verification badge/status |
-| /partner/destination/schedule         | EO schedule               |
-| /partner/destination/capacity         | Capacity view             |
-| /partner/destination/reviews          | Destination reviews       |
-| /partner/destination/profile-settings | Settings                  |
+| Route                                 | Purpose                         |
+| ------------------------------------- | ------------------------------- |
+| /partner/apply/destination            | Penjelasan kurasi; form ditutup |
+| /partner/application                  | Shared application status       |
+| /partner/destination                  | Overview                        |
+| /partner/destination/profile          | Destination profile             |
+| /partner/destination/verification     | Verification badge/status       |
+| /partner/destination/schedule         | EO schedule                     |
+| /partner/destination/capacity         | Capacity view                   |
+| /partner/destination/reviews          | Destination reviews             |
+| /partner/destination/profile-settings | Settings                        |
 
 ## Admin
 
@@ -1766,7 +1775,7 @@ Status: RESOLVED FOR PRD SCOPE.
 Draf PROPOSAL saat ini secara eksplisit menggunakan dua sumber pendapatan:
 
 - platform commission 10% dari GMV,
-- Service Fee flat Rp7.500 per booking.
+- Service Fee flat Rp7.500 per orang.
 
 Canonical competition narrative:
 
@@ -1994,7 +2003,7 @@ Business rule impact:
 
 - NONE.
 - Package Price tetap Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin.
-- Traveler Service Fee tetap Rp7.500 / booking.
+- Traveler Service Fee tetap Rp7.500 per orang.
 - Platform Commission tetap 10% GMV dan bukan Traveler line item.
 - Tidak ada perubahan role authority, refund policy, payment simulation boundary, atau cross-role persistence architecture.
 
@@ -2026,7 +2035,7 @@ Business rule impact:
 
 - NONE.
 - Package Price tetap Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin.
-- Traveler Service Fee tetap Rp7.500 / booking dan hanya checkout-level line item.
+- Traveler Service Fee tetap Rp7.500 per orang dan hanya checkout-level line item.
 - Platform Commission tetap 10% GMV dan bukan Traveler line item.
 - Admin tetap package approval authority.
 - APPROVED tetap tidak sama dengan LIVE; publish tetap tindakan EO.
@@ -2234,7 +2243,7 @@ Business / authority impact:
 
 - NONE.
 - Package Price tetap Destination Base Cost + Local Guide Fee (bila pemandu destinasi) + EO Margin.
-- Traveler Service Fee tetap Rp7.500 per booking.
+- Traveler Service Fee tetap Rp7.500 per orang.
 - Platform Commission tetap 10% GMV dan bukan Traveler checkout line item.
 - Tidak ada perubahan payment/refund semantics, F4.1 transaction persistence, F4.2 Session temporal guard, review target separation, Admin approval authority, EO publish authority, atau Mitra read-only authority.
 - Tidak ada production auth/KYC, re-verification workflow, inventory engine, notification system, backend, atau cross-tab persistence baru.

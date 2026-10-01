@@ -3,8 +3,6 @@ import { useNavigate } from "react-router";
 import JedaInLogo from "../../JedaIn_logo_vector.svg";
 import ExploreMascot from "../../assets/mascot/explore.png";
 import PlanMascot from "../../assets/mascot/plan.png";
-import { generateUniqueDestinationPartnerId } from "../destination/destinationContext";
-import { partnerSessionStore } from "./partnerSessionStore";
 import { PartnerLoginScreen } from "./PartnerLoginScreen";
 import "./partnerPortal.css";
 
@@ -19,16 +17,6 @@ export function PartnerPortalLandingScreen() {
       navigate("/partner/apply/eo");
       return;
     }
-    if (partnerSessionStore.get()?.role !== "DESTINATION") {
-      partnerSessionStore.setPartner({
-        id: generateUniqueDestinationPartnerId("mitra.destinasi@jedain.biz.id"),
-        email: "mitra.destinasi@jedain.biz.id",
-        name: "Mitra Destinasi Baru",
-        role: "DESTINATION",
-        businessName: "Pengelola Kawasan Destinasi",
-      });
-    }
-    navigate("/partner/apply/destination");
   };
 
   return (
@@ -58,7 +46,7 @@ export function PartnerPortalLandingScreen() {
             <PartnerLoginScreen
               role={loginRole}
               onBack={() => setLoginRole(null)}
-              onRegister={() => register(loginRole)}
+              onRegister={loginRole === "EO" ? () => register("EO") : undefined}
             />
           ) : (
             <>
@@ -95,8 +83,8 @@ export function PartnerPortalLandingScreen() {
                   </span>
                   <h3>Mitra Destinasi</h3>
                   <p>
-                    Kenalkan ruang alam dan aktivitas lokalmu kepada Travel
-                    Organizer yang ingin menghadirkan pengalaman bermakna.
+                    Kelola informasi operasional destinasi yang telah
+                    diverifikasi dan ditambahkan oleh tim JedaIn.
                   </p>
                   <div className="partner-entry__actions">
                     <button

@@ -152,7 +152,7 @@ describe("PendingPaymentResolutionScreen (T12) Unit & Integration Tests", () => 
 
     expect(container.textContent).toContain("Sehari Pelan di Lereng Hijau");
     expect(container.textContent).toContain("Menunggu Pembayaran");
-    expect(container.textContent).toContain("Rp557.500"); // 2 * 275000 + 7500 service fee
+    expect(container.textContent).toContain("Rp565.000"); // 2 * 275000 + 2 * 7500 service fee
     expect(container.textContent).toContain("WIB");
     expect(container.textContent).toContain("Sisa waktu:");
   });

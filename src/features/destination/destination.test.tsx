@@ -602,9 +602,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const view = await renderComponent(createElement(App), [
         "/partner/apply/destination",
       ]);
-      expect(view.textContent).toContain("Pendaftaran Mitra Destinasi");
+      expect(view.textContent).toContain("Destinasi dikurasi oleh tim JedaIn");
       expect(view.textContent).toContain(
-        "Silakan masuk atau buat akun kemitraan destinasi",
+        "Mitra Destinasi yang sudah terdaftar dapat masuk",
       );
 
       // Direct service submit

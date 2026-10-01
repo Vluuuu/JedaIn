@@ -245,7 +245,7 @@ export function PendingPaymentResolutionScreen({
 
       if (res.success) {
         // Return to intended NEW Checkout route (DO NOT auto-create transaction)
-        navigate(`/checkout/${intendedSessionId}`, {
+        navigate(`/checkout/${intendedSessionId}${location.search}`, {
           replace: true,
           state: isMatchingDraft ? { checkoutDraft } : undefined,
         });
@@ -354,7 +354,7 @@ export function PendingPaymentResolutionScreen({
             variant="primary"
             size="md"
             onClick={() =>
-              navigate(`/checkout/${intendedSessionId}`, {
+              navigate(`/checkout/${intendedSessionId}${location.search}`, {
                 state: isMatchingDraft ? { checkoutDraft } : undefined,
               })
             }
@@ -392,7 +392,7 @@ export function PendingPaymentResolutionScreen({
             variant="primary"
             size="md"
             onClick={() =>
-              navigate(`/checkout/${intendedSessionId}`, {
+              navigate(`/checkout/${intendedSessionId}${location.search}`, {
                 state: isMatchingDraft ? { checkoutDraft } : undefined,
               })
             }
@@ -409,7 +409,7 @@ export function PendingPaymentResolutionScreen({
       {/* 1. Header context & back link */}
       <div className="pending-payment-topbar">
         <Link
-          to={`/checkout/${intendedSessionId}`}
+          to={`/checkout/${intendedSessionId}${location.search}`}
           state={isMatchingDraft ? { checkoutDraft } : undefined}
           className="pending-payment-back-btn"
           aria-label="Kembali ke Checkout"

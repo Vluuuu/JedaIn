@@ -182,7 +182,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
 
     const view = await renderCheckout("ses_sgd_1"); // remainingSlots = 6, unitPrice = 275000
 
-    expect(view.textContent).toContain("1 × Rp300.000");
+    expect(view.textContent).toContain("Rp300.000 × 1");
     expect(view.textContent).toContain("Rp300.000"); // subtotal
 
     const minusBtn = Array.from(view.querySelectorAll("button")).find(
@@ -200,7 +200,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       plusBtn.click();
     });
 
-    expect(view.textContent).toContain("2 × Rp300.000");
+    expect(view.textContent).toContain("Rp300.000 × 2");
     expect(view.textContent).toContain("Rp600.000");
 
     // Check that remainingSlots snapshot is unchanged
@@ -449,7 +449,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     await act(async () => {
       plusBtn.click();
     });
-    expect(view.textContent).toContain("4 × Rp300.000");
+    expect(view.textContent).toContain("Rp300.000 × 4");
 
     // Step 2: Check policy acknowledgement
     const policyCb = view.querySelector<HTMLInputElement>(
@@ -484,7 +484,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
     // - Warning notice visible
     expect(view.textContent).toContain("Slot yang tersedia berubah");
     // - Participant count STILL 4 (not silently changed to 2)
-    expect(view.textContent).toContain("4 × Rp300.000");
+    expect(view.textContent).toContain("Rp300.000 × 4");
     // - CTA disabled because 4 > latest available 2
     expect(ctaBtn.disabled).toBe(true);
 
@@ -499,7 +499,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       minusBtn.click();
     });
 
-    expect(view.textContent).toContain("2 × Rp300.000");
+    expect(view.textContent).toContain("Rp300.000 × 2");
     // CTA re-enabled for 2 participants!
     expect(ctaBtn.disabled).toBe(false);
   });
@@ -1324,7 +1324,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       await act(async () => {
         plusBtn.click();
       });
-      expect(container.textContent).toContain("3 × Rp300.000");
+      expect(container.textContent).toContain("Rp300.000 × 3");
 
       // Check policy
       const policyCheckbox = container.querySelector<HTMLInputElement>(
@@ -1394,7 +1394,7 @@ describe("CheckoutScreen Targeted Transaction-Correctness Tests", () => {
       });
 
       // Verify draft restoration
-      expect(newContainer.textContent).toContain("3 × Rp300.000");
+      expect(newContainer.textContent).toContain("Rp300.000 × 3");
       const restoredPolicyCheckbox =
         newContainer.querySelector<HTMLInputElement>(
           "#cancellation-policy-ack",

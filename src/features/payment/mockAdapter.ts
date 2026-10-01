@@ -2,6 +2,7 @@ import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
+  syncMarketplaceFromSupabase,
 } from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { PackageDetailSource } from "../packageDetail/types";
@@ -49,6 +50,8 @@ export class MockPaymentAdapter implements PaymentAdapter {
   }
 
   async getPayment(bookingId: string): Promise<PaymentViewModel> {
+    if (!this.explicitPackages && !this.explicitDetails)
+      await syncMarketplaceFromSupabase();
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
@@ -210,6 +213,8 @@ export class MockPaymentAdapter implements PaymentAdapter {
   }
 
   async getPaymentResult(bookingId: string): Promise<PaymentResultViewModel> {
+    if (!this.explicitPackages && !this.explicitDetails)
+      await syncMarketplaceFromSupabase();
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }

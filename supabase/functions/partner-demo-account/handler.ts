@@ -60,6 +60,11 @@ export function createPartnerAccountHandler(gateway: AccountGateway) {
       app = await gateway.getApplication(user.id);
       if (!app || app.auth_user_id !== user.id)
         return response(404, { error: "Pengajuan akun ini tidak ditemukan." });
+      if (app.role === "DESTINATION" && app.status !== "APPROVED")
+        return response(409, {
+          error:
+            "Destinasi wajib diverifikasi tim/Admin JedaIn sebelum aktivasi.",
+        });
       if (
         app.status === "REJECTED" ||
         (body.action === "reissue" && app.status !== "APPROVED")

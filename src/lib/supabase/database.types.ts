@@ -1,3 +1,4 @@
+import type { DepartureOption } from "../../features/departure/departureOptions";
 import type {
   DestinationMediaItem,
   DestinationRecord,
@@ -80,6 +81,7 @@ export interface PackageRow {
   included_items: string[] | null;
   excluded_items: string[] | null;
   safety_notes: string[] | null;
+  departure_options?: DepartureOption[] | null;
   meeting_point_label: string | null;
   departure_time_label: string | null;
   outbound_transport: string | null;

@@ -104,24 +104,24 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
       expect(b1.serviceFee).toBe(7500);
 
       const b2 = calculatePaymentBreakdown(400000, 2);
-      expect(b2.serviceFee).toBe(7500);
+      expect(b2.serviceFee).toBe(15000);
     });
 
-    it("2. biaya layanan hanya sekali per transaksi, bukan per peserta", () => {
+    it("2. biaya layanan Rp7.500 per peserta", () => {
       // 1 peserta: 400.000 + 7.500 = 407.500
       const res1 = calculatePaymentBreakdown(400000, 1);
       expect(res1.serviceFee).toBe(7500);
       expect(res1.total).toBe(407500);
 
-      // 2 peserta: 800.000 + 7.500 = 807.500 (bukan 800.000 + 15.000)
+      // 2 peserta: 800.000 + 15.000 = 815.000
       const res2 = calculatePaymentBreakdown(400000, 2);
-      expect(res2.serviceFee).toBe(7500);
-      expect(res2.total).toBe(807500);
+      expect(res2.serviceFee).toBe(15000);
+      expect(res2.total).toBe(815000);
 
-      // 5 peserta: 2.000.000 + 7.500 = 2.007.500 (bukan 2.000.000 + 37.500)
+      // 5 peserta: 2.000.000 + 37.500 = 2.037.500
       const res5 = calculatePaymentBreakdown(400000, 5);
-      expect(res5.serviceFee).toBe(7500);
-      expect(res5.total).toBe(2007500);
+      expect(res5.serviceFee).toBe(37500);
+      expect(res5.total).toBe(2037500);
     });
 
     it("3. subtotal = harga paket × jumlah peserta", () => {
@@ -135,13 +135,13 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
       expect(b5.subtotal).toBe(2000000);
     });
 
-    it("4. total = subtotal + 7500 (minimal test case: 400k x 2 = 800k + 7.5k = 807.5k)", () => {
+    it("4. total = subtotal + 7500 × participantCount", () => {
       const breakdown = calculatePaymentBreakdown(400000, 2);
       expect(breakdown.unitPrice).toBe(400000);
       expect(breakdown.participantCount).toBe(2);
       expect(breakdown.subtotal).toBe(800000);
-      expect(breakdown.serviceFee).toBe(7500);
-      expect(breakdown.total).toBe(807500);
+      expect(breakdown.serviceFee).toBe(15000);
+      expect(breakdown.total).toBe(815000);
 
       // Backward compatible helper
       const bookingRecord: BookingRecord = {
@@ -234,12 +234,12 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
 
       // 2. Booking baru - beberapa peserta (contoh 2 peserta)
       const newBooking2 = calculatePaymentBreakdown(400000, 2);
-      expect(newBooking2.serviceFee).toBe(TRAVELER_SERVICE_FEE);
+      expect(newBooking2.serviceFee).toBe(TRAVELER_SERVICE_FEE * 2);
       expect(newBooking2.subtotal).toBe(
         newBooking2.unitPrice * newBooking2.participantCount,
       );
       expect(newBooking2.total).toBe(
-        newBooking2.subtotal + TRAVELER_SERVICE_FEE,
+        newBooking2.subtotal + TRAVELER_SERVICE_FEE * 2,
       );
       expect(newBooking2.total).toBe(
         newBooking2.subtotal + newBooking2.serviceFee,
@@ -300,7 +300,7 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
   });
 
   describe("Screen-Level Consistency & UI Verification Tests (5-8)", () => {
-    it("5 & 6. Checkout displays package detail, participant count, and exact payment breakdown (Rp807.500)", async () => {
+    it("5 & 6. Checkout displays package detail, participant count, and exact payment breakdown (Rp815.000)", async () => {
       const traveler: AuthUser = {
         id: "usr_traveler_400k",
         name: "Traveler Jeda",
@@ -376,7 +376,7 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
       expect(container.textContent).toContain("Biaya layanan");
       expect(container.textContent).toContain("Rp7.500");
       expect(container.textContent).toContain("Total Pembayaran");
-      expect(container.textContent).toContain("Rp807.500");
+      expect(container.textContent).toContain("Rp815.000");
 
       // No forbidden terminology
       expect(container.textContent).not.toContain("admin fee");
@@ -405,12 +405,12 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
       expect(booking.participantCount).toBe(2);
       expect(booking.unitPricePerPerson).toBe(400000);
       expect(booking.subtotal).toBe(800000);
-      expect(booking.serviceFee).toBe(7500);
-      expect(booking.total).toBe(807500);
-      expect(booking.totalAmount).toBe(807500);
+      expect(booking.serviceFee).toBe(15000);
+      expect(booking.total).toBe(815000);
+      expect(booking.totalAmount).toBe(815000);
     });
 
-    it("7. Checkout dan Payment menampilkan total yang sama (Rp807.500)", async () => {
+    it("7. Checkout dan Payment menampilkan total yang sama (Rp815.000)", async () => {
       const traveler: AuthUser = {
         id: "usr_consistent_user",
         name: "Consistent Traveler",
@@ -476,10 +476,10 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
       expect(container.textContent).toContain("Biaya layanan");
       expect(container.textContent).toContain("Rp7.500");
       expect(container.textContent).toContain("Total Pembayaran");
-      expect(container.textContent).toContain("Rp807.500");
+      expect(container.textContent).toContain("Rp815.000");
     });
 
-    it("8. Payment Result mempertahankan total yang sama (Rp807.500) setelah pembayaran berhasil", async () => {
+    it("8. Payment Result mempertahankan total yang sama (Rp815.000) setelah pembayaran berhasil", async () => {
       const traveler: AuthUser = {
         id: "usr_result_user",
         name: "Result Traveler",
@@ -566,7 +566,7 @@ describe("Traveler Payment Flow & Payment Breakdown Tests", () => {
       expect(container.textContent).toContain("Biaya layanan");
       expect(container.textContent).toContain("Rp7.500");
       expect(container.textContent).toContain("Total Pembayaran");
-      expect(container.textContent).toContain("Rp807.500");
+      expect(container.textContent).toContain("Rp815.000");
     });
 
     it("9. Legacy booking fallback does not leak fee-less nominal in pending-payment handoff, Payment, or Payment Result", async () => {

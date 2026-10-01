@@ -1,3 +1,4 @@
+import type { DepartureOption } from "../departure/departureOptions";
 export type EoApplicationStatus =
   "DRAFT" | "SUBMITTED" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
 
@@ -190,6 +191,7 @@ export interface EoPackageRecord {
   excludedItems: string[];
   safetyNotes: string[];
   meetingPointLabel?: string;
+  departureOptions?: DepartureOption[];
   departureTimeLabel?: string;
   outboundTransport?: string;
   returnTransport?: string;

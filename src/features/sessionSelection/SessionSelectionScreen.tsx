@@ -1,5 +1,10 @@
+import { DepartureChoices } from "../departure/DepartureChoices";
+import {
+  departureSearch,
+  resolveDepartureOption,
+} from "../departure/departureOptions";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
 import { getPackageVisual } from "../../lib/assets/packageImages";
 import { defaultSessionSelectionAdapter } from "./mockAdapter";
@@ -19,6 +24,7 @@ export function SessionSelectionScreen({
 }: SessionSelectionScreenProps) {
   const { packageId } = useParams<{ packageId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isRevalidating, setIsRevalidating] = useState(false);
@@ -88,8 +94,19 @@ export function SessionSelectionScreen({
     }
   };
 
+  const departureOptions = viewModel?.package?.departureOptions;
+  const selectedDeparture = departureOptions
+    ? resolveDepartureOption(departureOptions, searchParams.get("departure"))
+    : undefined;
+
   const handleContinueCheckout = async () => {
-    if (!packageId || !selectedSessionId || isRevalidating) return;
+    if (
+      !packageId ||
+      !selectedSessionId ||
+      isRevalidating ||
+      (departureOptions && !selectedDeparture)
+    )
+      return;
 
     setIsRevalidating(true);
     setValidationNotice(undefined);
@@ -102,7 +119,9 @@ export function SessionSelectionScreen({
 
       if (validation.valid) {
         setIsRevalidating(false);
-        navigate(`/checkout/${selectedSessionId}`);
+        navigate(
+          `/checkout/${selectedSessionId}${departureSearch(selectedDeparture?.id)}`,
+        );
         return;
       }
 
@@ -241,7 +260,7 @@ export function SessionSelectionScreen({
       {/* 1. Topbar & Header Context */}
       <div className="session-selection-topbar">
         <Link
-          to={`/packages/${pkg.id}`}
+          to={`/packages/${pkg.id}${departureSearch(selectedDeparture?.id)}`}
           className="session-selection-back-btn"
           aria-label="Kembali ke Detail Experience"
         >
@@ -289,6 +308,17 @@ export function SessionSelectionScreen({
             </div>
           )}
 
+          {departureOptions && (
+            <DepartureChoices
+              options={departureOptions}
+              selectedId={selectedDeparture?.id}
+              onSelect={(id) =>
+                setSearchParams({ departure: id }, { replace: true })
+              }
+              disabled={isRevalidating}
+            />
+          )}
+
           {/* Schedule Selection Radio Group */}
           {sessions.length > 0 ? (
             <fieldset className="session-selection-fieldset">
@@ -303,7 +333,12 @@ export function SessionSelectionScreen({
                 {sessions.map((session) => (
                   <SessionCard
                     key={session.sessionId}
-                    session={session}
+                    session={{
+                      ...session,
+                      pricePerPerson: departureOptions
+                        ? selectedDeparture?.pricePerPerson
+                        : session.pricePerPerson,
+                    }}
                     isSelected={selectedSessionId === session.sessionId}
                     onSelect={handleSelectSession}
                     disabled={isRevalidating}
@@ -385,9 +420,12 @@ export function SessionSelectionScreen({
             </span>
             <span className="session-selection-sticky-bar__status-text">
               {selectedSession
-                ? selectedSession.pricePerPerson !== undefined
-                  ? `Rp${selectedSession.pricePerPerson.toLocaleString("id-ID")} / orang`
-                  : "Jadwal terpilih"
+                ? departureOptions && !selectedDeparture
+                  ? "Pilih titik keberangkatan"
+                  : (selectedDeparture?.pricePerPerson ??
+                        selectedSession.pricePerPerson) !== undefined
+                    ? `Rp${(selectedDeparture?.pricePerPerson ?? selectedSession.pricePerPerson ?? 0).toLocaleString("id-ID")} / orang`
+                    : "Jadwal terpilih"
                 : "Belum ada jadwal dipilih"}
             </span>
           </div>
@@ -397,7 +435,11 @@ export function SessionSelectionScreen({
             variant="primary"
             size="lg"
             className="session-selection-sticky-bar__cta"
-            disabled={!selectedSessionId || isRevalidating}
+            disabled={
+              !selectedSessionId ||
+              isRevalidating ||
+              Boolean(departureOptions && !selectedDeparture)
+            }
             loading={isRevalidating}
             loadingLabel="Memverifikasi..."
             onClick={handleContinueCheckout}

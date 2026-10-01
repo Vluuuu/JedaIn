@@ -12,11 +12,9 @@ import type {
 import * as clientModule from "../lib/supabase/client";
 import { setDataModeOverride } from "../lib/supabase/config";
 import * as authModule from "../lib/supabase/demoAuth";
-import { destinationRepository } from "./destinationRepository";
 import {
   partnerRegistrationRepository,
   validatePartnerRegistration,
-  GUIDE_PHOTO_BUCKET,
 } from "./partnerRegistrationRepository";
 
 const eo: PartnerRegistrationInput = {
@@ -207,44 +205,23 @@ describe("Supabase partner registration", () => {
       "PENDING_REVIEW",
     );
   });
-  it("persists the actual guide file in private storage and saves its path rather than the preview", async () => {
-    const { client, storage, rpc } = backend(dest);
-    expect((await partnerRegistrationRepository.submit(dest)).success).toBe(
-      true,
-    );
-    expect(client.storage.from).toHaveBeenCalledWith(GUIDE_PHOTO_BUCKET);
-    expect(storage.upload).toHaveBeenCalledOnce();
-    expect(JSON.stringify(rpc.mock.calls)).not.toContain("photoPreview");
-    expect(
-      mockDestinationVerificationStore.getByPartnerId("partner_new")
-        ?.guideIdentity?.fullName,
-    ).toBe("Pemandu Satu");
-  });
   it.each([undefined, "", "081234567891"])(
-    "persists guide registration with optional phone %s and uses experience as readiness evidence",
+    "blocks destination self-registration before authentication or portrait upload (phone %s)",
     async (phone) => {
       const input = {
         ...dest,
         details: {
           ...dest.details,
-          guideReadinessEvidence: "",
           guideIdentity: { ...dest.details.guideIdentity, phone },
         },
       };
-      const { rpc } = backend(input);
-      expect(validatePartnerRegistration(input)).toBeUndefined();
-      expect(await partnerRegistrationRepository.submit(input)).toEqual({
-        success: true,
-      });
-      expect(rpc).toHaveBeenCalledWith(
-        "register_partner_application",
-        expect.objectContaining({
-          p_payload: expect.objectContaining({
-            guideReadinessEvidence: input.details.guideIdentity.experience,
-            guideIdentity: expect.objectContaining({ phone }),
-          }),
-        }),
-      );
+      const { client, storage, rpc } = backend(input);
+      const result = await partnerRegistrationRepository.submit(input);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain("tim/Admin JedaIn");
+      expect(client.auth.signUp).not.toHaveBeenCalled();
+      expect(storage.upload).not.toHaveBeenCalled();
+      expect(rpc).not.toHaveBeenCalled();
     },
   );
   it.each(["fullName", "domicile", "experience"] as const)(
@@ -291,16 +268,14 @@ describe("Supabase partner registration", () => {
       mockDestinationVerificationStore.getByPartnerId("partner_new"),
     ).toBeUndefined();
   });
-  it("cleans up an unattached portrait if application persistence fails", async () => {
+  it("does not create an unattached portrait when destination registration is disabled", async () => {
     const { storage, rpc } = backend(dest);
-    rpc.mockResolvedValueOnce({
-      data: null,
-      error: new Error("save failed"),
-    } as never);
     expect((await partnerRegistrationRepository.submit(dest)).success).toBe(
       false,
     );
-    expect(storage.remove).toHaveBeenCalledOnce();
+    expect(storage.upload).not.toHaveBeenCalled();
+    expect(storage.remove).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
   });
   it("does not report registration success when re-fetching the linked application fails", async () => {
     const { query } = backend(eo);
@@ -315,40 +290,20 @@ describe("Supabase partner registration", () => {
     );
     expect(mockApplicationStore.getBySellerId("partner_new")).toBeUndefined();
   });
-  it("keeps approval failures pending and verifies the persisted approval before unlocking the destination", async () => {
+  it("does not self-approve a pending destination or invoke account issuance", async () => {
     const { client } = backend(dest);
-    await partnerRegistrationRepository.submit(dest);
-    client.functions.invoke.mockResolvedValueOnce({
-      data: null,
-      error: {
-        context: new Response(JSON.stringify({ error: "approval failed" })),
-      },
-    } as never);
+    partnerSessionStore.setPartner({
+      id: "partner_new",
+      role: "DESTINATION",
+      email: "dina@gmail.com",
+      name: "Dina",
+      businessName: "Kebun Baru",
+    });
     await expect(partnerRegistrationRepository.approveDemo()).rejects.toThrow(
-      "approval failed",
+      "tim/Admin",
     );
-    expect(
-      mockDestinationVerificationStore.getByPartnerId("partner_new")?.status,
-    ).toBe("PENDING_REVIEW");
-    const canonical = {
-      ...mockDestinationStore.getAll()[0],
-      destinationId: "dest_new",
-    };
-    vi.spyOn(destinationRepository, "getById").mockResolvedValue(canonical);
-    await partnerRegistrationRepository.approveDemo();
-    expect(partnerSessionStore.get()?.id).toBe("partner_new");
-    expect(
-      mockDestinationVerificationStore.getByPartnerId("partner_new")
-        ?.demoEmailRecipient,
-    ).toBe("dina@gmail.com");
-    expect(mockDestinationStore.getById("dest_new")).toBeDefined();
-    expect(
-      mockDestinationVerificationStore.getByPartnerId("partner_new")
-        ?.accountEmail,
-    ).toBe("new@jedain.biz.id");
-    expect(
-      JSON.stringify(mockDestinationVerificationStore.getAll()),
-    ).not.toContain("Jd!8ServerIssuedPassword2026");
+    expect(client.functions.invoke).not.toHaveBeenCalled();
+    expect(mockDestinationStore.getById("dest_new")).toBeUndefined();
   });
   it("restores the registered applicant after local stores and identity are lost", async () => {
     backend(eo);

@@ -1,3 +1,4 @@
+import { minimumDeparturePrice } from "../features/departure/departureOptions";
 import { mockApplicationStore } from "../features/eo/mockApplicationStore";
 import {
   mockEoPackageStore,
@@ -222,7 +223,12 @@ export const packageRepository = {
         effectiveGuideSource === "DESTINATION"
           ? (dest?.localGuideFeePerPerson ?? 0)
           : 0;
-      const customerPrice = baseCost + localGuideFee + margin;
+      const departureOptions =
+        draft.departureOptions ?? existingRecord?.departureOptions;
+      const customerPrice = minimumDeparturePrice(
+        departureOptions,
+        baseCost + localGuideFee + margin,
+      );
 
       const imageUrls =
         draft.imageUrls ??
@@ -262,6 +268,12 @@ export const packageRepository = {
           draft.safetyNotes !== undefined
             ? draft.safetyNotes
             : existingRecord?.safetyNotes || [],
+        departureOptions: departureOptions?.map((option) => ({
+          ...option,
+          areaLabel: option.areaLabel.trim(),
+          meetingPointLabel: option.meetingPointLabel.trim(),
+          departureTimeLabel: option.departureTimeLabel.trim(),
+        })),
         meetingPointLabel:
           draft.meetingPointLabel !== undefined
             ? draft.meetingPointLabel

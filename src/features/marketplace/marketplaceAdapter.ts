@@ -1,3 +1,4 @@
+import { minimumDeparturePrice } from "../departure/departureOptions";
 import { prototypeClock } from "../../lib/clock";
 import { destinationRepository } from "../../data/destinationRepository";
 import { packageRepository } from "../../data/packageRepository";
@@ -134,7 +135,7 @@ export function buildTravelerPackageFromEo(
   if (eoPkg.status !== "LIVE") return null;
 
   const dest = mockDestinationStore.getById(eoPkg.destinationId);
-  if (!dest || dest.status !== "ACTIVE") return null;
+  if (!dest || dest.status !== "ACTIVE" || !dest.guideReady) return null;
 
   const app = mockApplicationStore.getBySellerId(eoPkg.eoId);
   if (!app || app.status !== "APPROVED") return null;
@@ -144,7 +145,10 @@ export function buildTravelerPackageFromEo(
     : undefined;
 
   const experienceIntents = mapDemandIntentToTraveler(insight?.intent);
-  const departureAreas = mapTargetAreaToDepartureAreas(insight?.targetArea);
+  const departureAreas = mapTargetAreaToDepartureAreas(
+    eoPkg.departureOptions?.map((option) => option.areaLabel).join(" ") ??
+      insight?.targetArea,
+  );
   const activityTags: PreferredActivity[] = [];
 
   const actualRating = deriveActualPackageRating(eoPkg);
@@ -163,7 +167,11 @@ export function buildTravelerPackageFromEo(
       : undefined,
     status: "LIVE",
     verificationLevel: dest.verificationLevel,
-    pricePerPerson: eoPkg.pricing.customerPrice,
+    pricePerPerson: minimumDeparturePrice(
+      eoPkg.departureOptions,
+      eoPkg.pricing.customerPrice,
+    ),
+    departureOptions: eoPkg.departureOptions?.map((option) => ({ ...option })),
     durationType: inferDurationType(eoPkg.durationLabel),
     departureAreas,
     experienceIntents,
@@ -185,7 +193,7 @@ export function buildTravelerPackageDetailFromEo(
   if (eoPkg.status !== "LIVE") return null;
 
   const dest = mockDestinationStore.getById(eoPkg.destinationId);
-  if (!dest || dest.status !== "ACTIVE") return null;
+  if (!dest || dest.status !== "ACTIVE" || !dest.guideReady) return null;
 
   const app = mockApplicationStore.getBySellerId(eoPkg.eoId);
   if (!app || app.status !== "APPROVED") return null;
@@ -223,6 +231,7 @@ export function buildTravelerPackageDetailFromEo(
     includedItems: [...eoPkg.includedItems],
     excludedItems: [...eoPkg.excludedItems],
     safetyNotes: [...eoPkg.safetyNotes],
+    departureOptions: eoPkg.departureOptions?.map((option) => ({ ...option })),
     meetingPointLabel: eoPkg.meetingPointLabel,
     departureTimeLabel: eoPkg.departureTimeLabel,
     outboundTransport: eoPkg.outboundTransport,

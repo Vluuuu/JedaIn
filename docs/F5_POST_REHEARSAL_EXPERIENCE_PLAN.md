@@ -1,8 +1,10 @@
 # JedaIn — F5 Post-Rehearsal Experience Improvement Plan
 
+> Kontrak aktif 1 Oktober 2026: harga Travel Organizer ditetapkan per opsi keberangkatan; biaya dasar + pemandu + margin menjadi referensi internal. Fee Traveler Rp7.500 per orang. Riwayat harga tunggal atau fee per transaksi di bawah sudah superseded oleh PRD_HOLOGY_PROTOTYPE.md.
+
 ## Keputusan final setelah rehearsal (27 September 2026)
 
-OD-03 tarif pemandu destinasi kini **RESOLVED untuk prototype**: Mitra menetapkan `localGuideFeePerPerson` dalam Rp/orang. EO menambahkan tarif itu pada biaya dasar + margin bila memakai pemandu destinasi; dengan pemandu EO kontribusinya Rp0. Service fee Traveler Rp7.500/booking dan komisi 10% GMV tidak berubah. BASIC/PLUS tetap field internal lama dan hilang dari UI/filter. Sembilan informasi profil dapat dibuka sebagai checklist; Mitra dapat mengedit deskripsi, mengunggah foto destinasi/fasilitas tanpa batas jumlah, dan EO dapat memilih banyak foto plus cover. Insight hanya arahan kreatif simulasi yang terlihat. Pernyataan HOLD/rumus lama di bawah mencatat fase sebelum keputusan ini. 360° tetap **DEFERRED**.
+OD-03 tarif pemandu destinasi kini **RESOLVED untuk prototype**: Mitra menetapkan `localGuideFeePerPerson` dalam Rp/orang. EO menambahkan tarif itu pada biaya dasar + margin bila memakai pemandu destinasi; dengan pemandu EO kontribusinya Rp0. Service fee Traveler Rp7.500 per orang dan komisi 10% GMV tidak berubah. BASIC/PLUS tetap field internal lama dan hilang dari UI/filter. Sembilan informasi profil dapat dibuka sebagai checklist; Mitra dapat mengedit deskripsi, mengunggah foto destinasi/fasilitas tanpa batas jumlah, dan EO dapat memilih banyak foto plus cover. Insight hanya arahan kreatif simulasi yang terlihat. Pernyataan HOLD/rumus lama di bawah mencatat fase sebelum keputusan ini. 360° tetap **DEFERRED**.
 
 **Status:** IMPLEMENTED — HARD FEATURE FREEZE / REGRESSION-ONLY  
 **Date:** 27 September 2026  
@@ -202,7 +204,7 @@ Customer Package Price = Destination Base Cost + EO Margin
 Traveler Service Fee:
 
 ```text
-Rp7.500 / booking
+Rp7.500 × jumlah peserta
 ```
 
 Platform Commission:
@@ -801,7 +803,7 @@ Unless an OPEN decision is explicitly resolved, F5 must preserve:
 
 ```text
 Package Price = Destination Base Cost + EO Margin
-Traveler Service Fee = Rp7.500 / booking
+Traveler Service Fee = Rp7.500 × jumlah peserta
 Platform Commission = 10% GMV
 ```
 

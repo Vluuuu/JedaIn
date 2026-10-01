@@ -1,3 +1,4 @@
+import { DepartureSummary } from "../departure/DepartureChoices";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
@@ -459,7 +460,9 @@ export function TripDetailScreen({
           <div>
             <span>Titik kumpul</span>
             <strong>
-              {detail?.meetingPointLabel ??
+              {(booking.departureOptionId
+                ? booking.meetingPointLabel
+                : detail?.meetingPointLabel) ??
                 "Belum dicantumkan pada detail experience."}
             </strong>
           </div>
@@ -526,7 +529,9 @@ export function TripDetailScreen({
 
           {/* 5. Informasi Keberangkatan (Trip Brief) */}
           {(sessionDateLabel ||
-            detail?.meetingPointLabel ||
+            (booking.departureOptionId
+              ? booking.meetingPointLabel
+              : detail?.meetingPointLabel) ||
             pkg?.destinationName ||
             (detail?.accessNotes && detail.accessNotes.length > 0)) && (
             <section
@@ -540,6 +545,15 @@ export function TripDetailScreen({
                 Informasi Keberangkatan
               </h2>
 
+              {booking.departureOptionId && (
+                <DepartureSummary
+                  departure={{
+                    areaLabel: booking.departureAreaLabel ?? "",
+                    meetingPointLabel: booking.meetingPointLabel ?? "",
+                    departureTimeLabel: booking.departureTimeLabel ?? "",
+                  }}
+                />
+              )}
               <div className="trip-detail-brief-grid">
                 {sessionDateLabel && (
                   <div className="trip-detail-brief-card">
@@ -552,13 +566,19 @@ export function TripDetailScreen({
                   </div>
                 )}
 
-                {detail?.meetingPointLabel ? (
+                {(
+                  booking.departureOptionId
+                    ? booking.meetingPointLabel
+                    : detail?.meetingPointLabel
+                ) ? (
                   <div className="trip-detail-brief-card">
                     <span className="trip-detail-brief-label">
                       Titik Kumpul
                     </span>
                     <strong className="trip-detail-brief-val">
-                      {detail.meetingPointLabel}
+                      {booking.departureOptionId
+                        ? booking.meetingPointLabel
+                        : detail?.meetingPointLabel}
                     </strong>
                   </div>
                 ) : (

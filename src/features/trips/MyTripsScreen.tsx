@@ -376,6 +376,17 @@ export function MyTripsScreen({
                   </div>
 
                   <div className="my-trip-card__facts">
+                    {booking.meetingPointLabel && (
+                      <p className="my-trip-card__meta">
+                        {booking.departureAreaLabel
+                          ? `${booking.departureAreaLabel} · `
+                          : ""}
+                        {booking.meetingPointLabel}
+                        {booking.departureTimeLabel
+                          ? ` · ${booking.departureTimeLabel}`
+                          : ""}
+                      </p>
+                    )}
                     {dateRange && (
                       <div className="my-trip-card__fact-item">
                         <span

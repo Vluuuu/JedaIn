@@ -706,9 +706,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "/partner/apply/destination",
       ]);
 
-      expect(view.textContent).toContain("Pengajuan Mitra Destinasi");
+      expect(view.textContent).toContain("Destinasi dikurasi oleh tim JedaIn");
       expect(view.textContent).toContain(
-        "Identitas Pengelola & Dokumen Legalitas",
+        "Mitra Destinasi yang sudah terdaftar",
       );
     });
 

@@ -1,3 +1,10 @@
+import {
+  createDepartureOption,
+  getEoDepartureOptions,
+  minimumDeparturePrice,
+  type DepartureOption,
+} from "../departure/departureOptions";
+import { DepartureOptionsEditor } from "./DepartureOptionsEditor";
 import { useEffect, useRef, useState } from "react";
 import { isSupabaseMode } from "../../lib/supabase/config";
 import { useNavigate, useSearchParams } from "react-router";
@@ -62,7 +69,7 @@ export function EoPackageBuilderScreen() {
 
 function EoPackageBuilderBody() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialInsightId = searchParams.get("insightId");
   const initialDestinationId = searchParams.get("destinationId");
   const draftId = searchParams.get("draftId");
@@ -252,12 +259,14 @@ function EoPackageBuilderBody() {
   const [safetyNotes, setSafetyNotes] = useState<string>(
     initialDraft?.safetyNotes ? initialDraft.safetyNotes.join("\n") : "",
   );
-  const [meetingPointLabel, setMeetingPointLabel] = useState<string>(
-    initialDraft?.meetingPointLabel ?? "",
+  const [departureOptions, setDepartureOptions] = useState<DepartureOption[]>(
+    () =>
+      initialDraft
+        ? getEoDepartureOptions(initialDraft).map((option) => ({ ...option }))
+        : [createDepartureOption()],
   );
-  const [departureTimeLabel, setDepartureTimeLabel] = useState<string>(
-    initialDraft?.departureTimeLabel ?? "",
-  );
+  const meetingPointLabel = departureOptions[0]?.meetingPointLabel ?? "";
+  const departureTimeLabel = departureOptions[0]?.departureTimeLabel ?? "";
   const [outboundTransport, setOutboundTransport] = useState<string>(
     initialDraft?.outboundTransport ?? "",
   );
@@ -407,7 +416,8 @@ function EoPackageBuilderBody() {
     effectiveGuideSource === "DESTINATION"
       ? (selectedDestination?.localGuideFeePerPerson ?? 0)
       : 0;
-  const customerPrice = baseCost + localGuideFee + eoMargin;
+  const economicsReferencePrice = baseCost + localGuideFee + eoMargin;
+  const customerPrice = minimumDeparturePrice(departureOptions);
   const travelerDraftPreview = buildTravelerDraftPreview({
     destination: selectedDestination,
     organizerId: eoId,
@@ -420,6 +430,7 @@ function EoPackageBuilderBody() {
     imageUrls,
     itinerary,
     customerPrice,
+    departureOptions,
     safetyNotes,
     includedItems: includedItemsText,
     excludedItems: excludedItemsText,
@@ -475,6 +486,7 @@ function EoPackageBuilderBody() {
           insightId: selectedInsightId,
           durationLabel,
           itinerary,
+          departureOptions: departureOptions.map((option) => ({ ...option })),
           meetingPointLabel: meetingPointLabel.trim() || undefined,
           departureTimeLabel: departureTimeLabel.trim() || undefined,
           outboundTransport: outboundTransport.trim() || undefined,
@@ -496,8 +508,18 @@ function EoPackageBuilderBody() {
         const res = await packageRepository.saveDraft(draftPayload);
         if (res.success && res.package) {
           const authoritativeId = res.package.packageId;
+          mockEoPackageStore.upsertPackage(res.package);
           packageIdRef.current = authoritativeId;
           setPackageId(authoritativeId);
+          if (!draftId) {
+            setSearchParams(
+              (previous) => {
+                previous.set("draftId", authoritativeId);
+                return previous;
+              },
+              { replace: true },
+            );
+          }
           setValidationErrors([]);
           savedRecord = res.package;
           return;
@@ -1508,43 +1530,10 @@ function EoPackageBuilderBody() {
               destinasi dan kembali.
             </p>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "var(--space-3)",
-              }}
-            >
-              <div className="eo-form-group">
-                <label htmlFor="meeting-point" className="eo-form-label">
-                  Titik Kumpul *
-                </label>
-                <input
-                  id="meeting-point"
-                  type="text"
-                  required
-                  className="eo-form-input"
-                  value={meetingPointLabel}
-                  onChange={(e) => setMeetingPointLabel(e.target.value)}
-                  placeholder="Contoh: Lobby utama Stasiun Malang"
-                />
-              </div>
-
-              <div className="eo-form-group">
-                <label htmlFor="departure-time" className="eo-form-label">
-                  Waktu Kumpul / Keberangkatan *
-                </label>
-                <input
-                  id="departure-time"
-                  type="text"
-                  required
-                  className="eo-form-input"
-                  value={departureTimeLabel}
-                  onChange={(e) => setDepartureTimeLabel(e.target.value)}
-                  placeholder="Contoh: Peserta berkumpul 30 menit sebelum keberangkatan."
-                />
-              </div>
-            </div>
+            <DepartureOptionsEditor
+              options={departureOptions}
+              onChange={setDepartureOptions}
+            />
 
             <div
               style={{
@@ -1822,7 +1811,7 @@ function EoPackageBuilderBody() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Harga package per orang:{" "}
+                Referensi biaya per orang:{" "}
                 <strong>
                   Biaya Dasar Destinasi +{" "}
                   {guideSource === "DESTINATION"
@@ -1994,7 +1983,18 @@ function EoPackageBuilderBody() {
             </div>
 
             <div className="eo-pricing-row eo-pricing-row--total">
-              <span>Harga Traveler (Customer Price):</span>
+              <span>Referensi biaya + margin:</span>
+              <span>
+                Rp{economicsReferencePrice.toLocaleString("id-ID")} / orang
+              </span>
+            </div>
+            <p className="eo-builder-subgroup__desc">
+              Harga final Traveler ditentukan pada tiap titik keberangkatan di
+              Langkah 3. Referensi ini tidak mengubah harga opsi secara
+              otomatis.
+            </p>
+            <div className="eo-pricing-row eo-pricing-row--total">
+              <span>Harga Traveler mulai dari:</span>
               <span>Rp{customerPrice.toLocaleString("id-ID")} / orang</span>
             </div>
           </div>
@@ -2171,6 +2171,20 @@ function EoPackageBuilderBody() {
               >
                 Pengaturan Perjalanan & Titik Kumpul:
               </strong>
+              <div className="eo-departure-list">
+                {departureOptions.map((option) => (
+                  <div key={option.id} className="eo-departure-review">
+                    <strong>{option.areaLabel || "Area belum diisi"}</strong>
+                    <span>
+                      {option.meetingPointLabel || "Titik kumpul belum diisi"} ·{" "}
+                      {option.departureTimeLabel || "Waktu belum diisi"}
+                    </span>
+                    <strong>
+                      Rp{option.pricePerPerson.toLocaleString("id-ID")} / orang
+                    </strong>
+                  </div>
+                ))}
+              </div>
               <div
                 style={{
                   display: "grid",
@@ -2179,18 +2193,6 @@ function EoPackageBuilderBody() {
                   fontSize: "var(--font-size-body-sm)",
                 }}
               >
-                <div>
-                  <span style={{ color: "var(--color-text-muted)" }}>
-                    Titik Kumpul:{" "}
-                  </span>
-                  <strong>{meetingPointLabel || "-"}</strong>
-                </div>
-                <div>
-                  <span style={{ color: "var(--color-text-muted)" }}>
-                    Waktu Kumpul:{" "}
-                  </span>
-                  <strong>{departureTimeLabel || "-"}</strong>
-                </div>
                 {outboundTransport && (
                   <div>
                     <span style={{ color: "var(--color-text-muted)" }}>
@@ -2289,7 +2291,7 @@ function EoPackageBuilderBody() {
             >
               <div>
                 <small style={{ color: "var(--color-text-muted)" }}>
-                  Harga Traveler:
+                  Harga Traveler mulai dari:
                 </small>
                 <div
                   style={{

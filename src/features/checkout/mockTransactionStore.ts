@@ -1,3 +1,4 @@
+import type { DepartureOption } from "../departure/departureOptions";
 import {
   calculatePaymentBreakdown,
   getBookingPaymentBreakdown,
@@ -23,6 +24,7 @@ interface IdempotencyRecord {
     sessionId: string;
     participantCount: number;
     unitPricePerPerson: number;
+    departureOptionId?: string;
   };
   booking: BookingRecord;
   payment: PaymentAttemptRecord;
@@ -35,6 +37,7 @@ interface PersistedIdempotencyEntry {
     sessionId: string;
     participantCount: number;
     unitPricePerPerson: number;
+    departureOptionId?: string;
   };
   bookingId: string;
   paymentAttemptId: string;
@@ -183,6 +186,20 @@ function validateAndNormalizeBooking(data: unknown): BookingRecord | null {
     serviceFee,
     total,
     totalAmount: b.totalAmount,
+    pricingVersion:
+      b.pricingVersion === "PER_PERSON" ? "PER_PERSON" : undefined,
+    departureOptionId:
+      typeof b.departureOptionId === "string" ? b.departureOptionId : undefined,
+    departureAreaLabel:
+      typeof b.departureAreaLabel === "string"
+        ? b.departureAreaLabel
+        : undefined,
+    meetingPointLabel:
+      typeof b.meetingPointLabel === "string" ? b.meetingPointLabel : undefined,
+    departureTimeLabel:
+      typeof b.departureTimeLabel === "string"
+        ? b.departureTimeLabel
+        : undefined,
     status,
     reservedQuantity: b.reservedQuantity,
     bookedQuantity: b.bookedQuantity,
@@ -345,7 +362,9 @@ function validateAndNormalizeTransactions(data: unknown): {
         inp.travelerId !== booking.travelerId ||
         inp.sessionId !== booking.sessionId ||
         inp.participantCount !== booking.participantCount ||
-        inp.unitPricePerPerson !== booking.unitPricePerPerson
+        inp.unitPricePerPerson !== booking.unitPricePerPerson ||
+        (inp.departureOptionId !== undefined &&
+          inp.departureOptionId !== booking.departureOptionId)
       ) {
         continue;
       }
@@ -356,6 +375,10 @@ function validateAndNormalizeTransactions(data: unknown): {
           sessionId: booking.sessionId,
           participantCount: booking.participantCount,
           unitPricePerPerson: booking.unitPricePerPerson,
+          departureOptionId:
+            typeof inp.departureOptionId === "string"
+              ? inp.departureOptionId
+              : undefined,
         },
         booking,
         payment,
@@ -830,6 +853,7 @@ export const mockTransactionStore = {
       sessionId: string;
       participantCount: number;
       unitPricePerPerson: number;
+      departureOptionId?: string;
     },
   ):
     | {
@@ -845,7 +869,8 @@ export const mockTransactionStore = {
         record.input.travelerId === input.travelerId &&
         record.input.sessionId === input.sessionId &&
         record.input.participantCount === input.participantCount &&
-        record.input.unitPricePerPerson === input.unitPricePerPerson;
+        record.input.unitPricePerPerson === input.unitPricePerPerson &&
+        record.input.departureOptionId === input.departureOptionId;
 
       if (!match) {
         return { conflict: true };
@@ -864,6 +889,8 @@ export const mockTransactionStore = {
     sessionId: string;
     participantCount: number;
     unitPricePerPerson: number;
+    departureOptionId?: string;
+    departureSnapshot?: DepartureOption;
     capacitySnapshot: number;
     idempotencyKey: string;
     nowMs?: number;
@@ -886,7 +913,8 @@ export const mockTransactionStore = {
         existing.input.travelerId === input.travelerId &&
         existing.input.sessionId === input.sessionId &&
         existing.input.participantCount === input.participantCount &&
-        existing.input.unitPricePerPerson === input.unitPricePerPerson;
+        existing.input.unitPricePerPerson === input.unitPricePerPerson &&
+        existing.input.departureOptionId === input.departureOptionId;
 
       if (!match) {
         return { success: false, reason: "IDEMPOTENCY_CONFLICT" };
@@ -944,6 +972,11 @@ export const mockTransactionStore = {
       serviceFee: breakdown.serviceFee,
       total: breakdown.total,
       totalAmount: breakdown.total,
+      pricingVersion: "PER_PERSON",
+      departureOptionId: input.departureSnapshot?.id,
+      departureAreaLabel: input.departureSnapshot?.areaLabel,
+      meetingPointLabel: input.departureSnapshot?.meetingPointLabel,
+      departureTimeLabel: input.departureSnapshot?.departureTimeLabel,
       status: "PENDING_PAYMENT",
       reservedQuantity: input.participantCount,
       bookedQuantity: 0,
@@ -967,6 +1000,7 @@ export const mockTransactionStore = {
         sessionId: input.sessionId,
         participantCount: input.participantCount,
         unitPricePerPerson: input.unitPricePerPerson,
+        departureOptionId: input.departureOptionId,
       },
       booking,
       payment,

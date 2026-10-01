@@ -70,12 +70,22 @@ describe("Platform partner account issuance", () => {
     expect(gateway.getApplication).toHaveBeenCalledWith("owner");
     expect(gateway.updateAuth).not.toHaveBeenCalled();
   });
+  it("blocks pending destination approval before any credential write", async () => {
+    const { gateway, handler, request } = setup("DESTINATION");
+    expect((await handler(request())).status).toBe(409);
+    expect(gateway.acquire).not.toHaveBeenCalled();
+    expect(gateway.updateAuth).not.toHaveBeenCalled();
+    expect(gateway.finish).not.toHaveBeenCalled();
+  });
   it.each(["EO", "DESTINATION"] as const)(
     "issues a unique server password and the configured domain for %s after explicit approval",
     async (role) => {
-      const { gateway, handler, request } = setup(role);
+      const { gateway, handler, request } = setup(
+        role,
+        role === "DESTINATION" ? "APPROVED" : "PENDING_REVIEW",
+      );
       const response = await handler(
-        request("approve", {
+        request(role === "DESTINATION" ? "reissue" : "approve", {
           accountEmail: "attacker@other.id",
           password: "chosen",
         }),

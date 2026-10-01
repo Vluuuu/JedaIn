@@ -1,5 +1,17 @@
+import { DepartureChoices } from "../departure/DepartureChoices";
+import {
+  departureSearch,
+  legacyDepartureOption,
+  resolveDepartureOption,
+} from "../departure/departureOptions";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router";
 import PlanMascot from "../../assets/mascot/plan.png";
 import { Button, Skeleton } from "../../components/ui";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
@@ -28,8 +40,10 @@ export function PackageDetailScreen({
 }: PackageDetailScreenProps) {
   const { packageId } = useParams<{ packageId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
+  const [previewDepartureId, setPreviewDepartureId] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [viewModel, setViewModel] = useState<PackageDetailViewModel | null>(
     null,
@@ -169,6 +183,29 @@ export function PackageDetailScreen({
     QUIZ_DURATION_OPTIONS.find((d) => d.value === pkg.durationType)?.label ??
     pkg.durationType;
 
+  const departureOptions = detail.departureOptions ??
+    pkg.departureOptions ?? [
+      legacyDepartureOption(
+        pkg.id,
+        pkg.pricePerPerson,
+        detail.meetingPointLabel,
+        detail.departureTimeLabel,
+      ),
+    ];
+  const selectedDeparture = resolveDepartureOption(
+    departureOptions,
+    preview ? previewDepartureId : searchParams.get("departure"),
+  );
+
+  const hasAuthoredDepartures =
+    detail.departureOptions !== undefined || pkg.departureOptions !== undefined;
+  const meetingPointLabel = hasAuthoredDepartures
+    ? selectedDeparture?.meetingPointLabel
+    : detail.meetingPointLabel;
+  const departureTimeLabel = hasAuthoredDepartures
+    ? selectedDeparture?.departureTimeLabel
+    : detail.departureTimeLabel;
+
   const formattedPrice =
     preview && pkg.pricePerPerson <= 0
       ? "Belum dihitung"
@@ -280,6 +317,22 @@ export function PackageDetailScreen({
             </div>
           </section>
         )}
+
+        <DepartureChoices
+          options={departureOptions}
+          selectedId={selectedDeparture?.id}
+          onSelect={(id) =>
+            preview
+              ? setPreviewDepartureId(id)
+              : setSearchParams(
+                  (previous) => {
+                    previous.set("departure", id);
+                    return previous;
+                  },
+                  { replace: true },
+                )
+          }
+        />
 
         {/* 6. Experience Highlights */}
         {detail.highlights.length > 0 && (
@@ -681,8 +734,8 @@ export function PackageDetailScreen({
           {(!preview ||
             detail.safetyNotes.length > 0 ||
             Boolean(
-              detail.meetingPointLabel ||
-              detail.departureTimeLabel ||
+              meetingPointLabel ||
+              departureTimeLabel ||
               detail.outboundTransport ||
               detail.returnTransport ||
               detail.accessNotes?.length,
@@ -716,8 +769,8 @@ export function PackageDetailScreen({
                 )}
 
                 {/* 10. Travel Logistics & Meeting Point */}
-                {(detail.meetingPointLabel ||
-                  detail.departureTimeLabel ||
+                {(meetingPointLabel ||
+                  departureTimeLabel ||
                   detail.outboundTransport ||
                   detail.returnTransport ||
                   (detail.accessNotes && detail.accessNotes.length > 0)) && (
@@ -732,13 +785,13 @@ export function PackageDetailScreen({
                       Informasi Titik Kumpul & Akses
                     </h2>
                     <div className="package-detail-logistics-grid">
-                      {detail.meetingPointLabel && (
+                      {meetingPointLabel && (
                         <div className="package-detail-logistics-item">
                           <span className="package-detail-logistics-label">
                             Titik Kumpul
                           </span>
                           <strong className="package-detail-logistics-val">
-                            {detail.meetingPointLabel}
+                            {meetingPointLabel}
                           </strong>
                         </div>
                       )}
@@ -750,13 +803,13 @@ export function PackageDetailScreen({
                           {pkg.destinationName}, {pkg.locationLabel}
                         </strong>
                       </div>
-                      {detail.departureTimeLabel && (
+                      {departureTimeLabel && (
                         <div className="package-detail-logistics-item">
                           <span className="package-detail-logistics-label">
                             Waktu Kumpul / Keberangkatan
                           </span>
                           <span className="package-detail-logistics-val">
-                            {detail.departureTimeLabel}
+                            {departureTimeLabel}
                           </span>
                         </div>
                       )}
@@ -906,10 +959,15 @@ export function PackageDetailScreen({
           <div className="package-detail-sticky-bar__container">
             <div className="package-detail-sticky-bar__price-wrap">
               <span className="package-detail-sticky-bar__price-label">
-                Mulai dari
+                {hasAuthoredDepartures && selectedDeparture
+                  ? "Harga pilihanmu"
+                  : "Mulai dari"}
               </span>
               <span className="package-detail-sticky-bar__price">
-                {formattedPrice} / orang
+                {hasAuthoredDepartures && selectedDeparture
+                  ? `Rp${selectedDeparture.pricePerPerson.toLocaleString("id-ID")}`
+                  : formattedPrice}{" "}
+                / orang
               </span>
             </div>
 
@@ -919,8 +977,12 @@ export function PackageDetailScreen({
                 variant="primary"
                 size="lg"
                 className="package-detail-sticky-bar__cta"
-                disabled={!hasOpenSession}
-                onClick={() => navigate(`/packages/${pkg.id}/sessions`)}
+                disabled={!hasOpenSession || !selectedDeparture}
+                onClick={() =>
+                  navigate(
+                    `/packages/${pkg.id}/sessions${departureSearch(selectedDeparture?.id)}`,
+                  )
+                }
               >
                 Pilih Jadwal
               </Button>

@@ -105,4 +105,3 @@ end;
 $$;
 revoke all on function public.approve_partner_application_demo() from public, anon;
 grant execute on function public.approve_partner_application_demo() to authenticated;
-

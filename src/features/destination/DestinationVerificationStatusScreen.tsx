@@ -125,7 +125,10 @@ export function DestinationVerificationStatusScreen() {
       <GuideIdentitySummary guide={app.guideIdentity} />
       {status === "APPROVED" && (
         <section className="eo-section" style={{ gap: "var(--space-4)" }}>
-          <DemoAccountEmailNotice email={app.demoEmailRecipient} />
+          <DemoAccountEmailNotice
+            email={app.demoEmailRecipient}
+            accountEmail={app.accountEmail}
+          />
           <div className="admin-alert admin-alert--success">
             <h2
               style={{

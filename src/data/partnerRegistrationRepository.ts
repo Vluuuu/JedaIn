@@ -8,6 +8,11 @@ import type {
   PartnerApplicationRow,
   PartnerRegistrationInput,
 } from "../features/eo/partnerRegistrationTypes";
+import {
+  generateInternalPassword,
+  partnerAccountCredentialsStore,
+  platformAccountEmail,
+} from "../features/eo/partnerAccountCredentialsStore";
 import type { PartnerUser } from "../features/eo/types";
 import { getSupabaseClient } from "../lib/supabase/client";
 import { getDataMode } from "../lib/supabase/config";
@@ -30,8 +35,7 @@ export function validatePartnerRegistration(
 ): string | undefined {
   const d = input.details;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email.trim()))
-    return "Masukkan email akun yang valid.";
-  if (input.password.length < 8) return "Kata sandi akun minimal 8 karakter.";
+    return "Masukkan email kontak yang valid.";
   if (
     !d.contactPerson.trim() ||
     !d.phone.trim() ||
@@ -98,6 +102,7 @@ async function hydrate(row: PartnerApplicationRow): Promise<PartnerUser> {
       rejectionReason: row.rejection_reason ?? undefined,
       demoEmailRecipient:
         row.email_notification === "SIMULATED" ? row.email : undefined,
+      accountEmail: row.account_email ?? undefined,
       guideCertificateDoc: d.guideCertificateFileName
         ? {
             name: d.guideCertificateFileName,
@@ -115,7 +120,7 @@ async function hydrate(row: PartnerApplicationRow): Promise<PartnerUser> {
     });
     partner = {
       id: row.partner_id,
-      email: row.email,
+      email: row.account_email ?? row.email,
       name: d.contactPerson,
       businessName: d.businessName,
       role: "EO",
@@ -155,10 +160,11 @@ async function hydrate(row: PartnerApplicationRow): Promise<PartnerUser> {
       approvedLevel: row.status === "APPROVED" ? "BASIC" : undefined,
       demoEmailRecipient:
         row.email_notification === "SIMULATED" ? row.email : undefined,
+      accountEmail: row.account_email ?? undefined,
     });
     partner = {
       id: row.partner_id,
-      email: row.email,
+      email: row.account_email ?? row.email,
       name: d.contactPerson,
       businessName: d.managementName,
       role: "DESTINATION",
@@ -249,7 +255,7 @@ export const partnerRegistrationRepository = {
           destinationIdentityId: result.application.destinationIdentityId,
         });
       }
-      mockPasswords.set(email, input.password);
+      partnerAccountCredentialsStore.set(undefined);
       return { success: true };
     }
 
@@ -268,18 +274,22 @@ export const partnerRegistrationRepository = {
         const signedOut = await client.auth.signOut();
         if (signedOut.error) throw signedOut.error;
         partnerSessionStore.logout();
+        partnerAccountCredentialsStore.set(undefined);
+        // Temporary Auth bootstrap stays private. Login credentials are issued
+        // by the server only after the explicit approval action.
+        const temporaryPassword = generateInternalPassword();
         const signup = await client.auth.signUp({
           email,
-          password: input.password,
+          password: temporaryPassword,
         });
         if (!signup.data.session) {
           const login = await client.auth.signInWithPassword({
             email,
-            password: input.password,
+            password: temporaryPassword,
           });
           if (login.error || !login.data.session)
             throw new Error(
-              "Akun belum dapat digunakan. Periksa email konfirmasi atau masuk dengan kata sandi akun yang sudah terdaftar.",
+              "Pengajuan belum dapat dimulai. Jika email sudah terdaftar, lanjutkan status pengajuan pada perangkat awal atau hubungi Admin.",
             );
         }
       }
@@ -290,7 +300,11 @@ export const partnerRegistrationRepository = {
       const existing = await this.loadCurrent();
       if (existing?.role === input.role && existing.status === "PENDING_REVIEW")
         return { success: true };
-      const payload = { ...input.details, email };
+      const payload = {
+        ...input.details,
+        email,
+        accountProvisioning: "PLATFORM",
+      };
       if (input.role === "DESTINATION") {
         const guide = { ...input.details.guideIdentity };
         delete guide.photoPreview;
@@ -385,36 +399,103 @@ export const partnerRegistrationRepository = {
     await this.loadCurrent();
   },
 
-  async approveDemo(): Promise<void> {
+  async approveDemo(reissue = false): Promise<void> {
     const partner = partnerSessionStore.get();
     if (!partner)
       throw new Error("Masuk dengan akun pengajuan terlebih dahulu.");
     if (getDataMode() === "supabase") {
       const client = getSupabaseClient();
       if (!client) throw new Error("Supabase belum dikonfigurasi.");
-      const result = await client.rpc("approve_partner_application_demo");
-      if (result.error) throw new Error(result.error.message);
+      const result = await client.functions.invoke("partner-demo-account", {
+        body: { action: reissue ? "reissue" : "approve" },
+      });
+      if (result.error) {
+        let message = "Penerbitan akun belum berhasil. Coba lagi.";
+        if (result.error.context instanceof Response) {
+          const detail = await result.error.context.json().catch(() => null);
+          if (typeof detail?.error === "string") message = detail.error;
+        }
+        throw new Error(message);
+      }
+      const issued = result.data as {
+        accountEmail?: string;
+        password?: string;
+        authUserId?: string;
+        session?: { access_token: string; refresh_token: string };
+      } | null;
+      if (
+        !issued?.accountEmail?.endsWith("@jedain.biz.id") ||
+        !issued.password ||
+        !issued.authUserId ||
+        !issued.session
+      )
+        throw new Error("Informasi akun belum lengkap. Coba lagi.");
+      const session = await client.auth.setSession(issued.session);
+      if (session.error || session.data.user?.id !== issued.authUserId)
+        throw new Error(
+          "Sesi akun baru belum dapat dipulihkan. Muat ulang status pengajuan.",
+        );
       const row = await this.loadCurrent();
-      if (row?.status !== "APPROVED" || row.partner_id !== partner.id)
+      if (
+        row?.status !== "APPROVED" ||
+        row.partner_id !== partner.id ||
+        row.auth_user_id !== issued.authUserId ||
+        row.account_email !== issued.accountEmail
+      )
         throw new Error("Persetujuan belum terverifikasi. Coba lagi.");
+      partnerAccountCredentialsStore.set({
+        partnerId: partner.id,
+        email: issued.accountEmail,
+        password: issued.password,
+      });
     } else if (partner.role === "EO") {
       const app = mockApplicationStore.getBySellerId(partner.id);
-      if (!app || !mockApplicationStore.approveApplication(app.applicationId))
+      if (
+        !app ||
+        (app.status !== "APPROVED" &&
+          !mockApplicationStore.approveApplication(app.applicationId))
+      )
         throw new Error("Pengajuan tidak sedang menunggu tinjauan.");
+      const email =
+        app.accountEmail ?? platformAccountEmail("EO", app.applicationId);
+      const password = generateInternalPassword();
       mockApplicationStore.upsertFromBackend({
         ...mockApplicationStore.getById(app.applicationId)!,
         demoEmailRecipient: app.email,
+        accountEmail: email,
+      });
+      mockPasswords.set(email, password);
+      partnerSessionStore.setPartner({ ...partner, email });
+      partnerAccountCredentialsStore.set({
+        partnerId: partner.id,
+        email,
+        password,
       });
     } else {
       const app = mockDestinationVerificationStore.getByPartnerId(partner.id);
       if (!app) throw new Error("Pengajuan tidak ditemukan.");
-      const result = mockDestinationVerificationStore.approveApplication(
-        app.applicationId,
-      );
+      const result =
+        app.status === "APPROVED"
+          ? { success: true, message: undefined }
+          : mockDestinationVerificationStore.approveApplication(
+              app.applicationId,
+            );
       if (!result.success) throw new Error(result.message);
+      const email =
+        app.accountEmail ??
+        platformAccountEmail("DESTINATION", app.applicationId);
+      const password = generateInternalPassword();
       mockDestinationVerificationStore.upsertFromBackend({
         ...mockDestinationVerificationStore.getById(app.applicationId)!,
         demoEmailRecipient: app.contactEmail,
+        accountEmail: email,
+      });
+      mockPasswords.set(email, password);
+      partnerSessionStore.setPartner({ ...partner, email });
+      partnerAccountCredentialsStore.set({
+        partnerId: partner.id,
+        email,
+        password,
       });
     }
   },

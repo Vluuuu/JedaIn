@@ -26,10 +26,9 @@ export type DestinationRegistrationDetails = Omit<
 > & { guideIdentity: LocalGuideIdentity };
 
 export type PartnerRegistrationInput =
-  | { role: "EO"; password: string; details: EoRegistrationDetails }
+  | { role: "EO"; details: EoRegistrationDetails }
   | {
       role: "DESTINATION";
-      password: string;
       details: DestinationRegistrationDetails;
       guidePhoto?: File;
     };
@@ -48,4 +47,6 @@ export interface PartnerApplicationRow {
   rejection_reason: string | null;
   approval_mode: "ADMIN" | "DEMO" | null;
   email_notification: "NOT_SENT" | "SIMULATED";
+  account_email: string | null;
+  account_issued_at: string | null;
 }

@@ -180,9 +180,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       });
 
       expect(partnerSessionStore.get()).toBeNull();
-      expect(view.textContent).toContain(
-        "Akun Mitra Destinasi belum terdaftar",
-      );
+      expect(view.textContent).toContain("Email atau kata sandi tidak sesuai.");
     });
 
     it("B. exact registered destination email logs in as the matching application partner", async () => {

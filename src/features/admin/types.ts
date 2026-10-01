@@ -42,6 +42,7 @@ export type DestinationVerificationStatus =
 export interface DestinationVerificationRecord {
   guideIdentity?: import("../eo/partnerRegistrationTypes").LocalGuideIdentity;
   demoEmailRecipient?: string;
+  accountEmail?: string;
   applicationId: string;
   partnerIdentityId: string;
   destinationIdentityId: string;

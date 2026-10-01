@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { partnerRegistrationRepository } from "../../data/partnerRegistrationRepository";
-import { PartnerAccountPasswordField } from "../eo/PartnerAccountPasswordField";
 import type { LocalGuideIdentity } from "../eo/partnerRegistrationTypes";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
@@ -46,7 +45,6 @@ export function DestinationApplicationScreen() {
   );
   const [phone, setPhone] = useState(initialApp?.contactPhone ?? "");
   const [email, setEmail] = useState(initialApp?.contactEmail ?? "");
-  const [password, setPassword] = useState("");
   const [legalDocName, setLegalDocName] = useState(
     initialApp?.legalEntityDocument?.name ?? "",
   );
@@ -93,11 +91,11 @@ export function DestinationApplicationScreen() {
 
   const handleStartRegistration = () => {
     const uniquePartnerId = generateUniqueDestinationPartnerId(
-      "mitra.destinasi@jedain.id",
+      "mitra.destinasi@jedain.biz.id",
     );
     partnerSessionStore.setPartner({
       id: uniquePartnerId,
-      email: "mitra.destinasi@jedain.id",
+      email: "mitra.destinasi@jedain.biz.id",
       name: "Mitra Destinasi Baru",
       role: "DESTINATION",
       businessName: "Pengelola Kawasan Destinasi",
@@ -202,7 +200,6 @@ export function DestinationApplicationScreen() {
 
     const res = await partnerRegistrationRepository.submit({
       role: "DESTINATION",
-      password,
       guidePhoto,
       details: {
         name,
@@ -372,7 +369,7 @@ export function DestinationApplicationScreen() {
 
             <div className="eo-form-group">
               <label htmlFor="dest-email" className="eo-form-label">
-                Email akun (Gmail atau email lainnya) *
+                Email kontak (Gmail atau email lainnya) *
               </label>
               <input
                 id="dest-email"
@@ -385,13 +382,10 @@ export function DestinationApplicationScreen() {
                 placeholder="nama@gmail.com"
               />
               <span className="eo-form-helper">
-                Informasi akun pada demo akan disimulasikan ke alamat ini.
+                Alamat ini untuk kontak pengajuan. Setelah ACC demo, email login
+                @jedain.biz.id dan kata sandi dari JedaIn ditampilkan di layar.
               </span>
             </div>
-            <PartnerAccountPasswordField
-              value={password}
-              onChange={setPassword}
-            />
 
             <div className="eo-form-group">
               <label htmlFor="dest-legal-doc" className="eo-form-label">
@@ -839,7 +833,7 @@ export function DestinationApplicationScreen() {
               6. Tinjau & Submit untuk Verifikasi Admin
             </legend>
             <p>
-              Email akun: <strong>{email || "Belum diisi"}</strong>
+              Email kontak: <strong>{email || "Belum diisi"}</strong>
             </p>
             <GuideIdentitySummary guide={guideIdentity} />
 

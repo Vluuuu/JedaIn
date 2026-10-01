@@ -4,6 +4,7 @@ import { mockDestinationVerificationStore } from "../features/admin/mockDestinat
 import { mockApplicationStore } from "../features/eo/mockApplicationStore";
 import { mockDestinationStore } from "../features/eo/mockDestinationStore";
 import { partnerSessionStore } from "../features/eo/partnerSessionStore";
+import { partnerAccountCredentialsStore } from "../features/eo/partnerAccountCredentialsStore";
 import type {
   PartnerApplicationRow,
   PartnerRegistrationInput,
@@ -20,7 +21,6 @@ import {
 
 const eo: PartnerRegistrationInput = {
   role: "EO",
-  password: "AkunMitra2026!",
   details: {
     businessName: "Travel Baru",
     contactPerson: "Dina",
@@ -36,7 +36,6 @@ const eo: PartnerRegistrationInput = {
 };
 const dest: PartnerRegistrationInput = {
   role: "DESTINATION",
-  password: "AkunMitra2026!",
   guidePhoto: new File(["portrait"], "guide.png", { type: "image/png" }),
   details: {
     name: "Kebun Baru",
@@ -111,6 +110,8 @@ function backend(input: PartnerRegistrationInput) {
           rejection_reason: null,
           approval_mode: null,
           email_notification: "NOT_SENT",
+          account_email: null,
+          account_issued_at: null,
         };
       else if (saved)
         saved = {
@@ -129,15 +130,48 @@ function backend(input: PartnerRegistrationInput) {
         session = null;
         return { error: null };
       }),
-      signUp: vi.fn(async () => {
-        session = { user };
-        return { data: { user, session }, error: null };
-      }),
+      signUp: vi.fn(
+        async (credentials: { email: string; password: string }) => {
+          user.email = credentials.email;
+          session = { user };
+          return { data: { user, session }, error: null };
+        },
+      ),
       signInWithPassword: vi.fn(),
+      setSession: vi.fn(async () => {
+        if (saved?.account_email) user.email = saved.account_email;
+        session = { user };
+        return { data: { session, user }, error: null };
+      }),
     },
     from: vi.fn(() => query),
     rpc,
     storage: { from: vi.fn(() => storage) },
+    functions: {
+      invoke: vi.fn(async () => {
+        if (saved)
+          saved = {
+            ...saved,
+            status: "APPROVED",
+            approval_mode: "DEMO",
+            email_notification: "SIMULATED",
+            account_email: "new@jedain.biz.id",
+            account_issued_at: "2026-10-01T10:01:00Z",
+          };
+        return {
+          data: {
+            accountEmail: "new@jedain.biz.id",
+            password: "Jd!8ServerIssuedPassword2026",
+            authUserId: user.id,
+            session: {
+              access_token: "new_access",
+              refresh_token: "new_refresh",
+            },
+          },
+          error: null,
+        };
+      }),
+    },
   };
   vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue(
     client as unknown as ReturnType<typeof clientModule.getSupabaseClient>,
@@ -161,11 +195,13 @@ describe("Supabase partner registration", () => {
     expect(await partnerRegistrationRepository.submit(eo)).toEqual({
       success: true,
     });
-    expect(client.auth.signUp).toHaveBeenCalledWith({
-      email: "dina@gmail.com",
-      password: eo.password,
-    });
-    expect(JSON.stringify(rpc.mock.calls)).not.toContain(eo.password);
+    const bootstrap = client.auth.signUp.mock.calls[0][0];
+    expect(bootstrap.email).toBe("dina@gmail.com");
+    expect(bootstrap.password.length).toBeGreaterThanOrEqual(24);
+    expect(JSON.stringify(rpc.mock.calls)).not.toContain(bootstrap.password);
+    expect(
+      mockApplicationStore.getBySellerId("partner_new")?.accountEmail,
+    ).toBeUndefined();
     expect(partnerSessionStore.get()?.id).toBe("partner_new");
     expect(mockApplicationStore.getBySellerId("partner_new")?.status).toBe(
       "PENDING_REVIEW",
@@ -280,11 +316,13 @@ describe("Supabase partner registration", () => {
     expect(mockApplicationStore.getBySellerId("partner_new")).toBeUndefined();
   });
   it("keeps approval failures pending and verifies the persisted approval before unlocking the destination", async () => {
-    const { rpc } = backend(dest);
+    const { client } = backend(dest);
     await partnerRegistrationRepository.submit(dest);
-    rpc.mockResolvedValueOnce({
+    client.functions.invoke.mockResolvedValueOnce({
       data: null,
-      error: new Error("approval failed"),
+      error: {
+        context: new Response(JSON.stringify({ error: "approval failed" })),
+      },
     } as never);
     await expect(partnerRegistrationRepository.approveDemo()).rejects.toThrow(
       "approval failed",
@@ -304,6 +342,13 @@ describe("Supabase partner registration", () => {
         ?.demoEmailRecipient,
     ).toBe("dina@gmail.com");
     expect(mockDestinationStore.getById("dest_new")).toBeDefined();
+    expect(
+      mockDestinationVerificationStore.getByPartnerId("partner_new")
+        ?.accountEmail,
+    ).toBe("new@jedain.biz.id");
+    expect(
+      JSON.stringify(mockDestinationVerificationStore.getAll()),
+    ).not.toContain("Jd!8ServerIssuedPassword2026");
   });
   it("restores the registered applicant after local stores and identity are lost", async () => {
     backend(eo);
@@ -315,6 +360,21 @@ describe("Supabase partner registration", () => {
     expect(mockApplicationStore.getBySellerId("partner_new")?.status).toBe(
       "PENDING_REVIEW",
     );
+  });
+  it("does not expose issued credentials if the new session belongs to another account", async () => {
+    const { client } = backend(eo);
+    await partnerRegistrationRepository.submit(eo);
+    client.auth.setSession.mockResolvedValueOnce({
+      data: {
+        session: { user: { id: "other_user", email: "other@jedain.biz.id" } },
+        user: { id: "other_user", email: "other@jedain.biz.id" },
+      },
+      error: null,
+    });
+    await expect(partnerRegistrationRepository.approveDemo()).rejects.toThrow(
+      "Sesi akun baru",
+    );
+    expect(partnerAccountCredentialsStore.get()).toBeUndefined();
   });
   it("requires a named accountable guide and validates the photo before any authentication write", () => {
     const missing = {

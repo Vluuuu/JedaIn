@@ -15,6 +15,7 @@ export interface PartnerUser {
 }
 
 export interface EoApplicationRecord {
+  accountEmail?: string;
   demoEmailRecipient?: string;
   applicationId: string;
   identityId: string;

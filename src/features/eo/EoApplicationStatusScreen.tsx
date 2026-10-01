@@ -96,7 +96,10 @@ export function EoApplicationStatusScreen() {
       {/* APPROVED STATE */}
       {status === "APPROVED" && (
         <section className="eo-section" style={{ gap: "var(--space-5)" }}>
-          <DemoAccountEmailNotice email={eoApp?.demoEmailRecipient} />
+          <DemoAccountEmailNotice
+            email={eoApp?.demoEmailRecipient}
+            accountEmail={eoApp?.accountEmail}
+          />
           <div className="eo-alert eo-alert--success">
             <h2
               style={{

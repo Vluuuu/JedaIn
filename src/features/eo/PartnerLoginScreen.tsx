@@ -49,7 +49,7 @@ export function PartnerLoginScreen({
       partnerSessionStore.get()?.role !== "DESTINATION"
     ) {
       const targetEmail =
-        email.trim().toLowerCase() || "mitra.destinasi@jedain.id";
+        email.trim().toLowerCase() || "mitra.destinasi@jedain.biz.id";
       partnerSessionStore.setPartner({
         id: generateUniqueDestinationPartnerId(targetEmail),
         email: targetEmail,
@@ -89,12 +89,18 @@ export function PartnerLoginScreen({
         partnerSessionStore.setPartner(verified.partnerUser);
         await partnerRegistrationRepository.loadCurrent();
       } else {
+        const isExistingDemo = [
+          DEMO_EO_USER,
+          DEMO_CONCEPT_EO_USER,
+          DEMO_DESTINATION_USER,
+        ].some((user) => user.email.toLowerCase() === normalizedEmail);
         if (
-          password !== DEMO_EO_CREDENTIALS.password &&
-          !partnerRegistrationRepository.matchesMockPassword(
-            normalizedEmail,
-            password,
-          )
+          isExistingDemo
+            ? password !== DEMO_EO_CREDENTIALS.password
+            : !partnerRegistrationRepository.matchesMockPassword(
+                normalizedEmail,
+                password,
+              )
         ) {
           throw new Error("Email atau kata sandi tidak sesuai.");
         }
@@ -104,12 +110,16 @@ export function PartnerLoginScreen({
           );
           const application = mockApplicationStore
             .getAll()
-            .find((item) => item.email.toLowerCase() === normalizedEmail);
+            .find(
+              (item) =>
+                (item.accountEmail ?? item.email).toLowerCase() ===
+                normalizedEmail,
+            );
           if (account) partnerSessionStore.setPartner(account);
           else if (application) {
             partnerSessionStore.setPartner({
               id: application.identityId,
-              email: application.email,
+              email: application.accountEmail ?? application.email,
               name: application.contactPerson,
               role: "EO",
               businessName: application.businessName,
@@ -121,14 +131,19 @@ export function PartnerLoginScreen({
             .getAll()
             .find(
               (item) =>
-                item.contactEmail?.trim().toLowerCase() === normalizedEmail,
+                (item.accountEmail ?? item.contactEmail)
+                  ?.trim()
+                  .toLowerCase() === normalizedEmail,
             );
           if (DEMO_DESTINATION_USER.email.toLowerCase() === normalizedEmail) {
             partnerSessionStore.setPartner(DEMO_DESTINATION_USER);
           } else if (application) {
             partnerSessionStore.setPartner({
               id: application.partnerIdentityId,
-              email: application.contactEmail ?? normalizedEmail,
+              email:
+                application.accountEmail ??
+                application.contactEmail ??
+                normalizedEmail,
               name: application.name,
               role: "DESTINATION",
               businessName: application.managementName ?? application.name,
@@ -192,7 +207,7 @@ export function PartnerLoginScreen({
           autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="nama@usaha.id"
+          placeholder="akun@jedain.biz.id"
           required
         />
         <label htmlFor="partner-password">Kata sandi</label>

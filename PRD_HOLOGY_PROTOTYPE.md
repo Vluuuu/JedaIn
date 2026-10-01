@@ -720,11 +720,13 @@ Status: IMPLEMENTED LIVE.
 
 Form EO baru harus dapat diisi dalam state bersih.
 
+Keputusan demo 1 Oktober 2026 (permintaan user): pengajuan EO dan Mitra Destinasi menyimpan akun Supabase Auth beserta application `PENDING_REVIEW`. Pengguna mengisi email akun dan kata sandi. Tombol eksplisit `Sudah di-ACC (Demo)` boleh menyetujui application milik akun tersebut, dengan label simulasi; tombol ini merupakan pengecualian prototype terhadap proses review Admin manual di bawah. Persetujuan tidak berpindah ke identitas demo lain. Email informasi akun disimulasikan secara jelas dan tidak dikirim sungguhan. Pengajuan destinasi wajib menyertakan nama lengkap, foto, domisili/desa asal, dan pengalaman singkat menjadi pemandu. Nomor HP/WhatsApp pemandu opsional; sertifikasi dan keterangan kesiapan terpisah tidak diwajibkan. Pengalaman dan foto digunakan sebagai bukti kesiapan pemandu lokal. Foto/kontak pemandu tetap pada application privat untuk applicant dan reviewer Admin, bukan katalog Traveler.
+
 Acceptance:
 
 - sample/demo identity tidak menjadi submitted value,
 - lifecycle review existing tetap digunakan,
-- product tidak menciptakan approval otomatis baru.
+- persetujuan operasional memerlukan review Admin atau tombol persetujuan demo eksplisit di atas; submit tidak langsung mengaktifkan akses.
 
 Status: IMPLEMENTED LIVE.
 

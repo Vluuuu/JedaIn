@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 import { getSupabaseClient } from "../../lib/supabase/client";
 import { isSupabaseMode } from "../../lib/supabase/config";
+import { partnerRegistrationRepository } from "../../data/partnerRegistrationRepository";
 import {
   DEMO_DESTINATION_CREDENTIALS,
   DEMO_EO_CREDENTIALS,
@@ -86,8 +87,15 @@ export function PartnerLoginScreen({
           );
         }
         partnerSessionStore.setPartner(verified.partnerUser);
+        await partnerRegistrationRepository.loadCurrent();
       } else {
-        if (password !== DEMO_EO_CREDENTIALS.password) {
+        if (
+          password !== DEMO_EO_CREDENTIALS.password &&
+          !partnerRegistrationRepository.matchesMockPassword(
+            normalizedEmail,
+            password,
+          )
+        ) {
           throw new Error("Email atau kata sandi tidak sesuai.");
         }
         if (role === "EO") {

@@ -128,6 +128,10 @@ describe("P0-03 Clean EO Application Demo State", () => {
       setInput(businessNameInput, "Kembara Jiwa Nusantara");
       setInput(contactPersonInput, "Siti Rahma");
       setInput(emailInput, "siti@kembarajiwa.id");
+      setInput(
+        view.querySelector<HTMLInputElement>("#partner-registration-password")!,
+        "Pendaftaran2026!",
+      );
       setInput(phoneInput, "081299887766");
       setInput(cityInput, "Batu");
       setTextArea(

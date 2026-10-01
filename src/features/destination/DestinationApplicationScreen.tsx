@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { partnerRegistrationRepository } from "../../data/partnerRegistrationRepository";
+import { PartnerAccountPasswordField } from "../eo/PartnerAccountPasswordField";
+import type { LocalGuideIdentity } from "../eo/partnerRegistrationTypes";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
 import { generateUniqueDestinationPartnerId } from "./destinationContext";
-import { mockDestinationPartnerService } from "./mockDestinationPartnerService";
+import { GuideIdentityFields } from "./GuideIdentityFields";
+import { GuideIdentitySummary } from "./GuideIdentitySummary";
 import type { DestinationApplicationStep } from "./types";
 import "./destination.css";
 
@@ -28,58 +32,60 @@ export function DestinationApplicationScreen() {
     isDestinationRole && partner
       ? mockDestinationVerificationStore.getByPartnerId(partner.id)
       : undefined;
+  const initialApp =
+    existingApp?.status === "APPROVED" ? undefined : existingApp;
 
   const [currentStep, setCurrentStep] = useState<DestinationApplicationStep>(1);
 
   // Form Fields initialized from existing application if available, or neutral values
   const [managementName, setManagementName] = useState(
-    existingApp?.managementName ?? partner?.businessName ?? "",
+    initialApp?.managementName ?? "",
   );
   const [contactPerson, setContactPerson] = useState(
-    existingApp?.contactPerson ?? partner?.name ?? "",
+    initialApp?.contactPerson ?? "",
   );
-  const [phone, setPhone] = useState(
-    existingApp?.contactPhone ?? "081234567890",
-  );
-  const [email] = useState(
-    existingApp?.contactEmail ?? partner?.email ?? "destinasi@mitra.id",
-  );
+  const [phone, setPhone] = useState(initialApp?.contactPhone ?? "");
+  const [email, setEmail] = useState(initialApp?.contactEmail ?? "");
+  const [password, setPassword] = useState("");
   const [legalDocName, setLegalDocName] = useState(
-    existingApp?.legalEntityDocument?.name ??
-      "Surat_Izin_Pengelolaan_Kawasan.pdf",
+    initialApp?.legalEntityDocument?.name ?? "",
   );
 
-  const [name, setName] = useState(existingApp?.name ?? "");
+  const [name, setName] = useState(initialApp?.name ?? "");
   const [locationLabel, setLocationLabel] = useState(
-    existingApp?.locationLabel ?? "",
+    initialApp?.locationLabel ?? "",
   );
-  const [city, setCity] = useState(existingApp?.city ?? "");
-  const [province] = useState(existingApp?.province ?? "Jawa Timur");
+  const [city, setCity] = useState(initialApp?.city ?? "");
+  const [province] = useState(initialApp?.province ?? "Jawa Timur");
 
-  const [description, setDescription] = useState(
-    existingApp?.description ?? "",
-  );
+  const [description, setDescription] = useState(initialApp?.description ?? "");
   const [highlightsInput, setHighlightsInput] = useState(
-    existingApp?.highlights?.join("\n") ?? "",
+    initialApp?.highlights?.join("\n") ?? "",
   );
 
   const [capacityPerSession, setCapacityPerSession] = useState<number>(
-    existingApp?.capacityPerSession ?? 20,
+    initialApp?.capacityPerSession ?? 20,
   );
   const [baseCostPerPerson, setBaseCostPerPerson] = useState<number>(
-    existingApp?.baseCostPerPerson ?? 100000,
+    initialApp?.baseCostPerPerson ?? 100000,
   );
   const [baseCostIncludesInput, setBaseCostIncludesInput] = useState(
-    existingApp?.baseCostIncludes?.join("\n") ?? "",
+    initialApp?.baseCostIncludes?.join("\n") ?? "",
   );
   const [baseCostExcludesInput, setBaseCostExcludesInput] = useState(
-    existingApp?.baseCostExcludes?.join("\n") ?? "",
+    initialApp?.baseCostExcludes?.join("\n") ?? "",
   );
 
   const guideReady = true;
-  const [guideReadinessEvidence, setGuideReadinessEvidence] = useState(
-    existingApp?.guideReadinessEvidence ?? "",
+  const [guideIdentity, setGuideIdentity] = useState<LocalGuideIdentity>(
+    initialApp?.guideIdentity ?? {
+      fullName: "",
+      phone: "",
+      domicile: "",
+      experience: "",
+    },
   );
+  const [guidePhoto, setGuidePhoto] = useState<File>();
 
   const [agreedToSop, setAgreedToSop] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -160,7 +166,7 @@ export function DestinationApplicationScreen() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(undefined);
 
@@ -194,32 +200,37 @@ export function DestinationApplicationScreen() {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const res = mockDestinationPartnerService.submitApplication({
-      partnerIdentityId: currentPartner.id,
-      name,
-      locationLabel,
-      province,
-      city,
-      managementName,
-      contactPerson,
-      phone,
-      email,
-      legalEntityDoc: {
-        name: legalDocName,
-        uploadedAt: new Date().toISOString(),
-        status: "ATTACHED",
+    const res = await partnerRegistrationRepository.submit({
+      role: "DESTINATION",
+      password,
+      guidePhoto,
+      details: {
+        name,
+        locationLabel,
+        province,
+        city,
+        managementName,
+        contactPerson,
+        phone,
+        email,
+        legalEntityDoc: {
+          name: legalDocName,
+          uploadedAt: new Date().toISOString(),
+          status: "ATTACHED",
+        },
+        description,
+        highlights: splitHighlights,
+        capacityPerSession,
+        baseCostPerPerson,
+        baseCostIncludes:
+          splitCostIncludes.length > 0 ? splitCostIncludes : undefined,
+        baseCostExcludes:
+          splitCostExcludes.length > 0 ? splitCostExcludes : undefined,
+        guideReady,
+        guideReadinessEvidence: guideIdentity.experience.trim(),
+        guideIdentity,
+        agreedToSop,
       },
-      description,
-      highlights: splitHighlights,
-      capacityPerSession,
-      baseCostPerPerson,
-      baseCostIncludes:
-        splitCostIncludes.length > 0 ? splitCostIncludes : undefined,
-      baseCostExcludes:
-        splitCostExcludes.length > 0 ? splitCostExcludes : undefined,
-      guideReady,
-      guideReadinessEvidence,
-      agreedToSop,
     });
 
     setIsSubmitting(false);
@@ -285,6 +296,7 @@ export function DestinationApplicationScreen() {
         {/* Step 1: Management / Legal */}
         {currentStep === 1 && (
           <fieldset
+            disabled={isSubmitting}
             style={{
               border: "none",
               padding: 0,
@@ -359,6 +371,29 @@ export function DestinationApplicationScreen() {
             </div>
 
             <div className="eo-form-group">
+              <label htmlFor="dest-email" className="eo-form-label">
+                Email akun (Gmail atau email lainnya) *
+              </label>
+              <input
+                id="dest-email"
+                type="email"
+                autoComplete="email"
+                required
+                className="eo-form-input"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="nama@gmail.com"
+              />
+              <span className="eo-form-helper">
+                Informasi akun pada demo akan disimulasikan ke alamat ini.
+              </span>
+            </div>
+            <PartnerAccountPasswordField
+              value={password}
+              onChange={setPassword}
+            />
+
+            <div className="eo-form-group">
               <label htmlFor="dest-legal-doc" className="eo-form-label">
                 Dokumen Izin Pengelolaan Kawasan (Metadata Simulasi)
               </label>
@@ -393,6 +428,7 @@ export function DestinationApplicationScreen() {
         {/* Step 2: Location */}
         {currentStep === 2 && (
           <fieldset
+            disabled={isSubmitting}
             style={{
               border: "none",
               padding: 0,
@@ -496,6 +532,7 @@ export function DestinationApplicationScreen() {
         {/* Step 3: Facilities & Activities */}
         {currentStep === 3 && (
           <fieldset
+            disabled={isSubmitting}
             style={{
               border: "none",
               padding: 0,
@@ -577,6 +614,7 @@ export function DestinationApplicationScreen() {
         {/* Step 4: Capacity & Base Cost */}
         {currentStep === 4 && (
           <fieldset
+            disabled={isSubmitting}
             style={{
               border: "none",
               padding: 0,
@@ -713,6 +751,7 @@ export function DestinationApplicationScreen() {
         {/* Step 5: Guide Readiness */}
         {currentStep === 5 && (
           <fieldset
+            disabled={isSubmitting}
             style={{
               border: "none",
               padding: 0,
@@ -743,20 +782,11 @@ export function DestinationApplicationScreen() {
               </p>
             </div>
 
-            <div className="eo-form-group">
-              <label htmlFor="dest-guide-evidence" className="eo-form-label">
-                Bukti / Keterangan Kesiapan Pemandu *
-              </label>
-              <textarea
-                id="dest-guide-evidence"
-                rows={2}
-                required
-                className="eo-form-textarea"
-                value={guideReadinessEvidence}
-                onChange={(e) => setGuideReadinessEvidence(e.target.value)}
-                placeholder="Ceritakan ketersediaan pemandu lokal di lokasi..."
-              />
-            </div>
+            <GuideIdentityFields
+              value={guideIdentity}
+              onChange={setGuideIdentity}
+              onPhoto={setGuidePhoto}
+            />
 
             <div
               style={{
@@ -788,6 +818,7 @@ export function DestinationApplicationScreen() {
         {/* Step 6: Review & Submit */}
         {currentStep === 6 && (
           <fieldset
+            disabled={isSubmitting}
             style={{
               border: "none",
               padding: 0,
@@ -807,6 +838,10 @@ export function DestinationApplicationScreen() {
             >
               6. Tinjau & Submit untuk Verifikasi Admin
             </legend>
+            <p>
+              Email akun: <strong>{email || "Belum diisi"}</strong>
+            </p>
+            <GuideIdentitySummary guide={guideIdentity} />
 
             <div
               style={{

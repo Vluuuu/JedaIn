@@ -180,6 +180,13 @@ let verificationApps: DestinationVerificationRecord[] =
   INITIAL_DESTINATION_APPLICATIONS.map((a) => cloneVerificationApp(a));
 
 export const mockDestinationVerificationStore = {
+  upsertFromBackend(record: DestinationVerificationRecord): void {
+    const index = verificationApps.findIndex(
+      (app) => app.partnerIdentityId === record.partnerIdentityId,
+    );
+    if (index < 0) verificationApps.push(cloneVerificationApp(record));
+    else verificationApps[index] = cloneVerificationApp(record);
+  },
   reset(): void {
     verificationApps = INITIAL_DESTINATION_APPLICATIONS.map((a) =>
       cloneVerificationApp(a),

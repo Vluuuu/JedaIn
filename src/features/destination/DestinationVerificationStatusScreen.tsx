@@ -1,10 +1,17 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Button, StatusMeta } from "../../components/ui";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { partnerSessionStore } from "../eo/partnerSessionStore";
+import {
+  DemoAccountEmailNotice,
+  PartnerDemoApproval,
+} from "../eo/PartnerDemoApproval";
+import { GuideIdentitySummary } from "./GuideIdentitySummary";
 import "./destination.css";
 
 export function DestinationVerificationStatusScreen() {
+  const [, refresh] = useState(0);
   const navigate = useNavigate();
   const partner = partnerSessionStore.get();
   const app = partner
@@ -12,11 +19,6 @@ export function DestinationVerificationStatusScreen() {
     : undefined;
 
   const handleOpenDashboard = () => {
-    navigate("/partner/destination");
-  };
-
-  const handleSwitchToApprovedDemo = () => {
-    partnerSessionStore.loginAsDemoDestination();
     navigate("/partner/destination");
   };
 
@@ -120,8 +122,10 @@ export function DestinationVerificationStatusScreen() {
       </header>
 
       {/* APPROVED STATE */}
+      <GuideIdentitySummary guide={app.guideIdentity} />
       {status === "APPROVED" && (
         <section className="eo-section" style={{ gap: "var(--space-4)" }}>
+          <DemoAccountEmailNotice email={app.demoEmailRecipient} />
           <div className="admin-alert admin-alert--success">
             <h2
               style={{
@@ -132,8 +136,9 @@ export function DestinationVerificationStatusScreen() {
               Destinasi Anda Disetujui JedaIn
             </h2>
             <p style={{ margin: "0 0 var(--space-2)" }}>
-              Lokasi Anda telah melalui proses verifikasi dan aktif sebagai
-              Mitra Destinasi JedaIn.
+              {app.demoEmailRecipient
+                ? "Pengajuan disetujui melalui simulasi demo dan destinasi Anda aktif sebagai Mitra Destinasi JedaIn."
+                : "Lokasi Anda telah melalui proses verifikasi dan aktif sebagai Mitra Destinasi JedaIn."}
             </p>
           </div>
 
@@ -211,6 +216,9 @@ export function DestinationVerificationStatusScreen() {
       {/* PENDING REVIEW STATE */}
       {status === "PENDING_REVIEW" && (
         <section className="eo-section" style={{ gap: "var(--space-4)" }}>
+          <PartnerDemoApproval
+            onApproved={() => refresh((value) => value + 1)}
+          />
           <div className="admin-alert admin-alert--warning">
             <h2
               style={{
@@ -230,43 +238,6 @@ export function DestinationVerificationStatusScreen() {
               . Tim Kurator Admin JedaIn sedang meninjau kelayakan destinasi,
               fasilitas, SOP, dan bukti kesiapan pemandu lokal.
             </p>
-          </div>
-
-          {/* Quick Demo Switcher for Juror */}
-          <div
-            style={{
-              padding: "var(--space-4)",
-              background: "var(--color-bg-surface-subtle)",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--color-border-default)",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div>
-              <strong style={{ fontSize: "var(--font-size-body-sm)" }}>
-                Simulasi Evaluasi Juri:
-              </strong>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "var(--font-size-caption)",
-                  color: "var(--color-text-secondary)",
-                }}
-              >
-                Masuk sebagai akun destinasi demo terpisah yang sudah
-                terverifikasi (Lereng Hijau Batu).
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleSwitchToApprovedDemo}
-            >
-              Lihat Workspace Destinasi Demo
-            </Button>
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-start" }}>

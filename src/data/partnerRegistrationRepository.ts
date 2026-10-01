@@ -72,13 +72,11 @@ export function validatePartnerRegistration(
     const guide = dest.guideIdentity;
     if (
       !dest.guideReady ||
-      !dest.guideReadinessEvidence.trim() ||
       !guide.fullName.trim() ||
-      !guide.phone.trim() ||
       !guide.domicile.trim() ||
       !guide.experience.trim()
     )
-      return "Lengkapi nama, kontak, domisili, pengalaman, dan keterangan kesiapan pemandu.";
+      return "Lengkapi nama, domisili, dan pengalaman pemandu yang tersedia di destinasi.";
     if (!input.guidePhoto && !guide.photoPath && !guide.photoPreview)
       return "Unggah foto pemandu yang bertanggung jawab.";
     if (input.guidePhoto) return validateGuidePhoto(input.guidePhoto);
@@ -192,6 +190,17 @@ export const partnerRegistrationRepository = {
   ): Promise<{ success: boolean; message?: string }> {
     const validation = validatePartnerRegistration(input);
     if (validation) return { success: false, message: validation };
+    if (input.role === "DESTINATION") {
+      input = {
+        ...input,
+        details: {
+          ...input.details,
+          guideReadinessEvidence:
+            input.details.guideReadinessEvidence.trim() ||
+            input.details.guideIdentity.experience.trim(),
+        },
+      };
+    }
     const email = input.details.email.trim().toLowerCase();
     if (getDataMode() !== "supabase") {
       const prior =

@@ -77,9 +77,6 @@ export function DestinationApplicationScreen() {
   );
 
   const guideReady = true;
-  const [guideReadinessEvidence, setGuideReadinessEvidence] = useState(
-    initialApp?.guideReadinessEvidence ?? "",
-  );
   const [guideIdentity, setGuideIdentity] = useState<LocalGuideIdentity>(
     initialApp?.guideIdentity ?? {
       fullName: "",
@@ -230,7 +227,7 @@ export function DestinationApplicationScreen() {
         baseCostExcludes:
           splitCostExcludes.length > 0 ? splitCostExcludes : undefined,
         guideReady,
-        guideReadinessEvidence,
+        guideReadinessEvidence: guideIdentity.experience.trim(),
         guideIdentity,
         agreedToSop,
       },
@@ -790,20 +787,6 @@ export function DestinationApplicationScreen() {
               onChange={setGuideIdentity}
               onPhoto={setGuidePhoto}
             />
-            <div className="eo-form-group">
-              <label htmlFor="dest-guide-evidence" className="eo-form-label">
-                Bukti / Keterangan Kesiapan Pemandu *
-              </label>
-              <textarea
-                id="dest-guide-evidence"
-                rows={2}
-                required
-                className="eo-form-textarea"
-                value={guideReadinessEvidence}
-                onChange={(e) => setGuideReadinessEvidence(e.target.value)}
-                placeholder="Ceritakan ketersediaan pemandu lokal di lokasi..."
-              />
-            </div>
 
             <div
               style={{

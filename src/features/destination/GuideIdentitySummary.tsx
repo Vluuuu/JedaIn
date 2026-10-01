@@ -15,11 +15,11 @@ export function GuideIdentitySummary({
       <dl>
         <dt>Nama lengkap</dt>
         <dd>{guide.fullName}</dd>
-        <dt>WhatsApp</dt>
-        <dd>{guide.phone}</dd>
-        <dt>Domisili</dt>
+        <dt>HP / WhatsApp</dt>
+        <dd>{guide.phone?.trim() || "Tidak diisi"}</dd>
+        <dt>Domisili / desa asal</dt>
         <dd>{guide.domicile}</dd>
-        <dt>Pengalaman / sertifikasi</dt>
+        <dt>Pengalaman menjadi pemandu</dt>
         <dd>{guide.experience}</dd>
       </dl>
       {guide.photoPreview && (

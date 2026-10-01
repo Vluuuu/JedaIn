@@ -3,7 +3,7 @@ import type { EoApplicationRecord } from "./types";
 
 export interface LocalGuideIdentity {
   fullName: string;
-  phone: string;
+  phone?: string;
   domicile: string;
   experience: string;
   photoPath?: string;

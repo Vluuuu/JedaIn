@@ -184,6 +184,66 @@ describe("Supabase partner registration", () => {
         ?.guideIdentity?.fullName,
     ).toBe("Pemandu Satu");
   });
+  it.each([undefined, "", "081234567891"])(
+    "persists guide registration with optional phone %s and uses experience as readiness evidence",
+    async (phone) => {
+      const input = {
+        ...dest,
+        details: {
+          ...dest.details,
+          guideReadinessEvidence: "",
+          guideIdentity: { ...dest.details.guideIdentity, phone },
+        },
+      };
+      const { rpc } = backend(input);
+      expect(validatePartnerRegistration(input)).toBeUndefined();
+      expect(await partnerRegistrationRepository.submit(input)).toEqual({
+        success: true,
+      });
+      expect(rpc).toHaveBeenCalledWith(
+        "register_partner_application",
+        expect.objectContaining({
+          p_payload: expect.objectContaining({
+            guideReadinessEvidence: input.details.guideIdentity.experience,
+            guideIdentity: expect.objectContaining({ phone }),
+          }),
+        }),
+      );
+    },
+  );
+  it.each(["fullName", "domicile", "experience"] as const)(
+    "rejects a missing guide %s before authentication writes even when phone is supplied",
+    async (field) => {
+      const input = {
+        ...dest,
+        details: {
+          ...dest.details,
+          guideIdentity: { ...dest.details.guideIdentity, [field]: " " },
+        },
+      };
+      const { client, rpc } = backend(input);
+      expect((await partnerRegistrationRepository.submit(input)).success).toBe(
+        false,
+      );
+      expect(client.auth.signUp).not.toHaveBeenCalled();
+      expect(rpc).not.toHaveBeenCalled();
+    },
+  );
+  it("requires a photo even when the other required guide fields are complete", () => {
+    expect(
+      validatePartnerRegistration({
+        ...dest,
+        guidePhoto: undefined,
+        details: {
+          ...dest.details,
+          guideIdentity: {
+            ...dest.details.guideIdentity,
+            photoPreview: undefined,
+          },
+        },
+      }),
+    ).toContain("Unggah foto");
+  });
   it("keeps a failed upload out of the application store and does not call the save RPC", async () => {
     const { storage, rpc } = backend(dest);
     storage.upload.mockResolvedValueOnce({ error: new Error("upload failed") });

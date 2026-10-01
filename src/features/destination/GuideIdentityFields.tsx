@@ -14,9 +14,9 @@ export function GuideIdentityFields({
   const [error, setError] = useState<string>();
   const fields = [
     ["fullName", "Nama lengkap pemandu", "text"],
-    ["phone", "Nomor WhatsApp pemandu", "tel"],
-    ["domicile", "Domisili pemandu", "text"],
-    ["experience", "Pengalaman / sertifikasi pemandu", "text"],
+    ["domicile", "Domisili / desa asal", "text"],
+    ["experience", "Pengalaman menjadi pemandu", "text"],
+    ["phone", "Nomor HP / WhatsApp pemandu", "tel"],
   ] as const;
   return (
     <>
@@ -27,14 +27,19 @@ export function GuideIdentityFields({
       {fields.map(([key, label, type]) => (
         <div className="eo-form-group" key={key}>
           <label htmlFor={`dest-guide-${key}`} className="eo-form-label">
-            {label} *
+            {label} {key === "phone" ? "(opsional)" : "*"}
           </label>
           <input
             id={`dest-guide-${key}`}
             className="eo-form-input"
             type={type}
-            required
-            value={value[key]}
+            required={key !== "phone"}
+            value={value[key] ?? ""}
+            placeholder={
+              key === "experience"
+                ? "2 tahun memandu wisatawan di Lereng Hijau"
+                : undefined
+            }
             onChange={(event) =>
               onChange({ ...value, [key]: event.target.value })
             }

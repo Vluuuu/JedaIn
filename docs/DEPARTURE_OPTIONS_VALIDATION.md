@@ -1,6 +1,6 @@
 # Departure options — implementation and validation
 
-Date: 1 October 2026. Base: latest `main` at `2752a75fba65ae8b602a78283df494f8e40193cf`. Branch: `feat/departure-options-and-traveler-pricing`. PR targets `main`; merging requires the user's explicit approval.
+Date: 2 October 2026 (follow-up to the 1 October delivery). Base: latest `main` at `2752a75fba65ae8b602a78283df494f8e40193cf`. Branch: `feat/departure-options-and-traveler-pricing`. PR [#119](https://github.com/Vluuuu/JedaIn/pull/119) targets `main`; merging requires the user's explicit approval.
 
 ## Active contract and affected files
 
@@ -35,6 +35,8 @@ For browser QA, a new temporary package was saved/reopened, submitted, demo-appr
 
 The security advisor reported the same pre-existing SECURITY DEFINER execution/password-protection notices before and after this migration. No new advisor finding was introduced. Existing remediation references: [anonymous function execution](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), [authenticated function execution](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable), and [password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
 
+Deployed `partner-demo-account` version 6 (`ACTIVE`, `verify_jwt=true`). Its early guard rejects an unapproved Destination before token acquisition or Auth updates. Retrieved the deployed files to verify the guard and preserved the newer server's named Destination-account email/collision handling when aligning repository source. An unauthenticated POST returned 401; OPTIONS returned 200. Deployment did not invoke approval/reissue or create/update any Auth users. Handler regressions cover the Destination guard and existing account naming/collision behavior.
+
 ## Manual browser QA
 
 Verified at desktop 1440 px and Traveler mobile 390 px:
@@ -57,10 +59,20 @@ Verified at desktop 1440 px and Traveler mobile 390 px:
 
 Mobile DOM width checks returned 390 px for viewport and document on detail/session/checkout/payment/ticket. Currency alignment, spacing and selection hierarchy were inspected in screenshots; sticky actions remain accessible above bottom navigation. Screenshots are local QA artifacts outside the repository.
 
+## Follow-up audit and fixes (2 October)
+
+- A session becoming unavailable at checkout and an expired payment now recover to Session Selection with the previous departure ID in the URL.
+- Package Detail subtracts occupied participants in the same shared reservation ledger used by checkout/session selection, and presents FULL when no slots remain.
+- Direct protected-route consent establishes a local guest identity without skipping consent or the mandatory quiz. Checkout without a Traveler identity disables submission and provides a login/guest entry.
+- TO Bookings distinguishes a failed owned-catalog fetch from a successfully empty catalog, with a retry action. Supabase repository regressions exercise both response errors and transport failures.
+- Negative authored prices remain invalid in the editor rather than silently becoming positive. Authored checkout summary labels identify the departure price.
+- Active demo instructions now use authored prices, shared capacity and both participant multiplications; earlier formula/application notes are explicitly historical.
+
+Additional local browser QA started anonymously at a direct checkout route, completed consent and all six quiz steps, then loaded checkout with the same Tamu identity. Two participants and policy acknowledgment survived the contact-demo return; the legacy package's new booking total was Rp600,000 + Rp15,000 = Rp615,000. Payment survived reload and completed through the existing simulator; the ticket retained the booking. Package Detail then showed 4 remaining slots after 2 participants occupied a 6-slot session. Mobile payment width and document width were both 390 px; the expanded ticket also had no horizontal overflow. No Supabase account or production payment was involved.
+
 ## Automated validation and limits
 
-All local gates passed: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test -- --run` (876 tests, 74 files), `npm run build`, and `git diff --check`. The test suite covers all 20 requested areas, including invalid prices/choices, persisted IDs, navigation, fees for 2/4 participants, snapshots, legacy records, Supabase save/reload and error propagation, Destination authority/login compatibility, and package/session lifecycle. Build retains the existing large-chunk advisory; it is successful. PR/CI and preview status are reported with the final commit.
+All local gates passed: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test -- --run` (888 tests, 74 files), `npm run build`, and `git diff --check`. The test suite covers all 20 requested areas, including invalid prices/choices, persisted IDs, navigation, fees for 2/4 participants, snapshots, legacy records, Supabase save/reload and error propagation, Destination authority/login compatibility, and package/session lifecycle, plus the follow-up recovery/guest/capacity/error regressions. Build retains the existing large-chunk advisory; it is successful. PR/CI and preview status are reported with the final commit.
 
 - The current schema has no booking/payment tables. Transactions, reservation ledger and payment/OTP remain the existing prototype simulation in session storage; persistence is limited to the same browser tab, not other devices. No production payment or email infrastructure was introduced.
-- The partner-demo-account Edge Function source has the additional early guard and automated handler tests. That Edge Function was not redeployed; the applied database guard also blocks the previous server path before an unapproved Destination account token can be acquired.
 - Recommendation weights, payment timeout and final cancellation/refund policy remain existing configurable/mock decisions. No additional product decision was invented.

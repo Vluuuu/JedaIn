@@ -181,13 +181,18 @@ export const sessionRepository = {
     }
   },
 
-  async getSessionsByEo(eoId: string): Promise<EoSessionRecord[]> {
+  async getSessionsByEo(
+    eoId: string,
+    options: { throwOnError?: boolean } = {},
+  ): Promise<EoSessionRecord[]> {
     if (!isSupabaseMode()) {
       return [...mockEoPackageStore.getSessionsByEo(eoId)];
     }
 
     const supabase = getSupabaseClient();
     if (!supabase) {
+      if (options.throwOnError)
+        throw new Error("Jadwal paket belum dapat dimuat.");
       return [];
     }
 
@@ -199,11 +204,14 @@ export const sessionRepository = {
         .order("start_at", { ascending: true });
 
       if (error || !data) {
+        if (options.throwOnError)
+          throw new Error("Jadwal paket belum dapat dimuat.");
         return [];
       }
 
       return (data as SessionRow[]).map(mapSessionRowToRecord);
-    } catch {
+    } catch (error) {
+      if (options.throwOnError) throw error;
       return [];
     }
   },

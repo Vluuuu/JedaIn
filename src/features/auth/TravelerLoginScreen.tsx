@@ -4,6 +4,7 @@ import { Button, Dialog } from "../../components/ui";
 import { LOGIN_ATMOSPHERE_VISUAL } from "../../lib/assets/packageImages";
 import { sessionStore } from "../onboarding/sessionStore";
 import { GoogleIcon } from "./GoogleIcon";
+import { createDemoGuestUser } from "./guestUser";
 import { defaultAuthAdapter } from "./mockAdapter";
 import { getAuthRedirectPath } from "./routing";
 import {
@@ -98,14 +99,7 @@ export function TravelerLoginScreen({
     if (isAnyLoading) return;
     setAuthError(undefined);
 
-    const guestUser: AuthUser = {
-      id: `usr_demo_guest_${Date.now()}`,
-      name: "Tamu Jeda",
-      isNewUser: true,
-      onboardingStatus: "NOT_STARTED",
-    };
-
-    handleAuthSuccess(guestUser);
+    handleAuthSuccess(createDemoGuestUser());
   };
 
   const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {

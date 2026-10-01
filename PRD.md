@@ -16,6 +16,8 @@ Requirement terkait: REQ-TRV-07–13, REQ-EO-04/07/08/09/11, REQ-MIT-01/02, REQ-
 
 ## Pembaruan prototype HOLOGY (27 September 2026)
 
+Catatan harga di bagian ini adalah riwayat sebelum 1 Oktober. Formula biaya dasar/pemandu/margin kini menjadi referensi internal; harga jual Traveler mengikuti opsi keberangkatan dalam kontrak aktif di atas.
+
 Untuk implementasi kompetisi, aturan aktif mengikuti `PRD_HOLOGY_PROTOTYPE.md`. Verifikasi destinasi tetap gate Admin dengan pemandu lokal wajib sebelum destinasi `ACTIVE`; BASIC/PLUS di bagian historis dokumen ini hanya kompatibilitas internal dan tidak ditampilkan sebagai tier, filter, atau badge. Mitra mengelola deskripsi, tarif pemandu lokal Rp/orang, foto destinasi, dan foto fasilitas tanpa batas jumlah galeri (JPG/PNG/WebP, maksimal 5 MB per file). EO memilih banyak media dan cover package; Traveler melihat media pilihan itu. Harga package adalah biaya dasar + margin EO, ditambah tarif pemandu lokal hanya bila EO memakai pemandu destinasi. Service fee Rp7.500 per orang tetap di checkout dan komisi 10% GMV tetap. Insight simulasi adalah arahan kreatif yang terlihat, tidak menimpa karya EO. 360° tetap ditunda.
 
 **Nama Produk:** JedaIn

@@ -14,6 +14,7 @@ import type { PackageRow } from "../lib/supabase/database.types";
 import * as authModule from "../lib/supabase/demoAuth";
 import { destinationRepository } from "./destinationRepository";
 import { packageRepository } from "./packageRepository";
+import { sessionRepository } from "./sessionRepository";
 
 beforeEach(() => {
   mockDestinationStore.reset();
@@ -44,6 +45,51 @@ afterEach(() => {
   setSupabaseConfigOverride(null);
   mockEoPackageStore.reset();
   mockDestinationStore.reset();
+});
+
+it("distinguishes an unavailable owned catalog from a successfully empty catalog", async () => {
+  const order = vi.fn().mockResolvedValue({
+    data: null,
+    error: { message: "Catalog unavailable" },
+  });
+  const chain = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    order,
+  };
+  vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue({
+    from: () => chain,
+  } as unknown as SupabaseClient);
+  await expect(
+    packageRepository.getPackagesByEo("eo_jeda_alam", { throwOnError: true }),
+  ).rejects.toThrow("Daftar paket belum dapat dimuat.");
+  await expect(
+    sessionRepository.getSessionsByEo("eo_jeda_alam", { throwOnError: true }),
+  ).rejects.toThrow("Jadwal paket belum dapat dimuat.");
+  order.mockResolvedValue({ data: [], error: null });
+  await expect(
+    packageRepository.getPackagesByEo("eo_jeda_alam", { throwOnError: true }),
+  ).resolves.toEqual([]);
+  await expect(
+    sessionRepository.getSessionsByEo("eo_jeda_alam", { throwOnError: true }),
+  ).resolves.toEqual([]);
+});
+
+it("propagates transport failures for owned booking catalogs when strict reads are requested", async () => {
+  const chain = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockRejectedValue(new Error("Network unavailable")),
+  };
+  vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue({
+    from: () => chain,
+  } as unknown as SupabaseClient);
+  await expect(
+    packageRepository.getPackagesByEo("eo_jeda_alam", { throwOnError: true }),
+  ).rejects.toThrow("Network unavailable");
+  await expect(
+    sessionRepository.getSessionsByEo("eo_jeda_alam", { throwOnError: true }),
+  ).rejects.toThrow("Network unavailable");
 });
 
 it("persists multiple departures through authenticated Supabase save, reload and review submission", async () => {

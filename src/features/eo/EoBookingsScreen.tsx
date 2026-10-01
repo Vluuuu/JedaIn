@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { InlineStatus } from "../../components/ui";
+import { Button, InlineStatus } from "../../components/ui";
 import { PartnerEmptyState } from "../../components/ui/PartnerEmptyState";
 import { packageRepository } from "../../data/packageRepository";
 import { sessionRepository } from "../../data/sessionRepository";
@@ -23,21 +23,29 @@ export function EoBookingsScreen() {
     isSupabaseMode() ? [] : [...mockEoPackageStore.getAllSessions()],
   );
   const [loading, setLoading] = useState(() => isSupabaseMode());
+  const [loadError, setLoadError] = useState(false);
+  const [reload, setReload] = useState(0);
   useEffect(() => {
     let mounted = true;
     Promise.all([
-      packageRepository.getPackagesByEo(eoId),
-      sessionRepository.getSessionsByEo(eoId),
-    ]).then(([ownedPackages, sessions]) => {
-      if (!mounted) return;
-      setPackages(ownedPackages);
-      setAllSessions(sessions);
-      setLoading(false);
-    });
+      packageRepository.getPackagesByEo(eoId, { throwOnError: true }),
+      sessionRepository.getSessionsByEo(eoId, { throwOnError: true }),
+    ])
+      .then(([ownedPackages, sessions]) => {
+        if (!mounted) return;
+        setPackages(ownedPackages);
+        setAllSessions(sessions);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setLoadError(true);
+        setLoading(false);
+      });
     return () => {
       mounted = false;
     };
-  }, [eoId]);
+  }, [eoId, reload]);
   const eoPackageIds = new Set(packages.map((p) => p.packageId));
 
   // Filter bookings from shared transaction store that belong to this EO's packages
@@ -60,6 +68,20 @@ export function EoBookingsScreen() {
       <section className="eo-section" aria-label="Tabel pesanan traveler">
         {loading ? (
           <p role="status">Memuat booking dan jadwal paketmu...</p>
+        ) : loadError ? (
+          <div role="alert">
+            <p>Booking dan jadwal paket belum dapat dimuat. Coba lagi.</p>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setLoadError(false);
+                setLoading(true);
+                setReload((value) => value + 1);
+              }}
+            >
+              Coba lagi
+            </Button>
+          </div>
         ) : eoBookings.length === 0 ? (
           <PartnerEmptyState
             title="Belum ada booking"

@@ -141,15 +141,15 @@ Tanpa perlu mengetik kredensial atau registrasi manual, sistem menyediakan tombo
 4. Di **Package Builder** (`/partner/eo/packages/new`):
    - **Tahap 1 (Destinasi):** Pilih destinasi terverifikasi aktif **Lereng Hijau Batu** (`dest_lereng_hijau`).
    - **Tahap 2 (Sinyal Insight):** Tinjau keselarasan intent dan target area Malang/Surabaya.
-   - **Tahap 3 (Rencana Itinerary):** Periksa susunan aktivitas hening dan catatan keselamatan.
-   - **Tahap 4 (Skema Harga):** Tentukan margin EO (misal Rp150.000, modal otomatis Rp125.000, total harga Rp300.000).
+   - **Tahap 3 (Perjalanan & Keberangkatan):** Periksa susunan aktivitas dan catatan keselamatan. Isi opsi Malang (Alun-Alun Kota Malang, 07.00 WIB, Rp249.000/orang) dan Surabaya (Stasiun Surabaya Gubeng, 05.00 WIB, Rp451.400/orang).
+   - **Tahap 4 (Referensi Economics):** Tinjau biaya dasar, tarif pemandu sesuai sumber, margin EO, serta komisi internal 10% GMV. Harga jual tetap harga tiap opsi yang diisi pada Tahap 3; tampilkan minimum sebagai `Mulai dari Rp249.000`.
    - **Tahap 5 (Tinjau & Submit):** Klik **Ajukan untuk Review Kurator Admin** → Status paket menjadi `PENDING_ADMIN_REVIEW`.
 
 ### Langkah 3: Kurasi & Persetujuan Admin (Admin Approval)
 1. Buka rute `/admin/login` → Klik **Masuk sebagai Admin Demo**.
 2. Masuk ke menu **Kurasi Paket** (`/admin/package-approvals`).
 3. Buka detail pengajuan paket yang baru dibuat.
-4. Periksa checklist standar kurasi (formula harga, destinasi terverifikasi, alur mindful).
+4. Periksa checklist standar kurasi (kelengkapan dan harga positif tiap opsi keberangkatan, destinasi terverifikasi, alur mindful).
 5. Isi catatan audit persetujuan (misal *"Itinerary mindful dan harga transparan lolos kurasi"*).
 6. Klik **Setujui Paket (APPROVED)**.
 7. *Catatan Validasi:* Paket berstatus `APPROVED` dan belum tampil di Marketplace Traveler sebelum EO mempublikasikannya.
@@ -158,17 +158,17 @@ Tanpa perlu mengetik kredensial atau registrasi manual, sistem menyediakan tombo
 1. Kembali ke workspace EO (`/partner/eo/packages`).
 2. Buka detail paket yang telah disetujui → Klik **Publish ke Marketplace** → Status berubah menjadi `LIVE`.
 3. Klik **Atur Jadwal Sesi** (`/partner/eo/packages/:packageId/sessions`).
-4. Buka sesi baru (misal tanggal Sabtu depan, kuota 6 orang, harga Rp275.000) → Sesi dibuka dengan status `OPEN`.
+4. Buka sesi baru (misal tanggal Sabtu depan, kuota 6 orang) → Sesi dibuka dengan status `OPEN`. Semua opsi keberangkatan memakai kapasitas sesi yang sama; harga Traveler mengikuti opsi yang dipilih.
 
 ### Langkah 5: Penemuan & Pemesanan Traveler (Traveler Marketplace & Checkout)
 1. Kembali ke sisi Traveler (`/explore`).
 2. Paket baru dari EO kini tampil secara dinamis di katalog dan hasil pencarian.
 3. Klik paket tersebut untuk membuka **Detail Paket** (`/packages/:packageId`).
-4. Klik **Pilih Jadwal Sesi** (`/packages/:packageId/sessions`) → Pilih sesi yang baru dibuat EO.
+4. Pilih opsi **Surabaya**, lalu klik **Pilih Jadwal Sesi** (`/packages/:packageId/sessions`) → Pilih sesi yang baru dibuat EO. Pilihan keberangkatan tetap tampil.
 5. Di halaman **Checkout** (`/checkout/:sessionId`):
    - Jika nomor HP belum diverifikasi, lakukan verifikasi OTP (Kode demo default: `111111`).
-   - Tinjau jumlah peserta dan breakdown harga.
-   - Traveler-facing total prototype: `subtotal + Service Fee Rp7.500 per orang`.
+   - Tinjau opsi, jumlah peserta, dan kedua perkalian harga. Untuk 2 peserta dari Surabaya: Rp451.400 × 2 = Rp902.800; biaya layanan Rp7.500 × 2 = Rp15.000; total Rp917.800.
+   - Traveler-facing total prototype: `harga opsi × peserta + Rp7.500 × peserta`.
    - Platform commission 10% dari GMV adalah economics platform/EO pada proposal dan **bukan** line item tambahan pada checkout Traveler.
    - Klik **Lanjut ke Pembayaran**.
 6. Di halaman **Pembayaran** (`/payment/:bookingId`):

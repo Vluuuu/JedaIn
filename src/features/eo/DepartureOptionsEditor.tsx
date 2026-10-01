@@ -113,6 +113,10 @@ export function DepartureOptionsEditor({
                     id={`departure-price-${option.id}`}
                     type="text"
                     inputMode="numeric"
+                    aria-invalid={
+                      option.pricePerPerson < 0 ||
+                      !Number.isSafeInteger(option.pricePerPerson)
+                    }
                     className="eo-form-input"
                     value={
                       option.pricePerPerson
@@ -121,9 +125,10 @@ export function DepartureOptionsEditor({
                     }
                     onChange={(e) =>
                       update(option.id, {
-                        pricePerPerson: Number(
-                          e.target.value.replace(/\D/g, ""),
-                        ),
+                        pricePerPerson:
+                          (e.target.value.trimStart().startsWith("-")
+                            ? -1
+                            : 1) * Number(e.target.value.replace(/\D/g, "")),
                       })
                     }
                     placeholder="0"

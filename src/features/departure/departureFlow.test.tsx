@@ -42,6 +42,9 @@ import { partnerSessionStore } from "../eo/partnerSessionStore";
 import { buildTravelerPackageFromEo } from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
 import { PackageDetailScreen } from "../packageDetail/PackageDetailScreen";
+import { MockPackageDetailAdapter } from "../packageDetail/mockAdapter";
+import { PaymentResultScreen } from "../payment/PaymentResultScreen";
+import { MockOnboardingAdapter } from "../onboarding/mockAdapter";
 import { SessionSelectionScreen } from "../sessionSelection/SessionSelectionScreen";
 import { TripDetailScreen } from "../trips/TripDetailScreen";
 import { DepartureChoices } from "./DepartureChoices";
@@ -144,6 +147,129 @@ async function book(optionId = "surabaya", count = 2, key = "departure_key") {
 }
 
 describe("Departure options and per-person Traveler pricing", () => {
+  it("keeps an anonymous direct-onboarding guest coherent after reload without skipping the quiz", async () => {
+    sessionStore.reset();
+    const onboarding = new MockOnboardingAdapter();
+    await onboarding.submitConsent();
+    const user = sessionStore.get().user!;
+    expect(user.id).toMatch(/^usr_demo_guest_/);
+    expect(user.onboardingStatus).toBe("IN_PROGRESS");
+    sessionStore.hydrateFromStorage();
+    expect(sessionStore.get().user).toEqual(user);
+    sessionStore.setOnboardingStatus("COMPLETED");
+    sessionStore.hydrateFromStorage();
+    expect(sessionStore.get().user?.id).toBe(user.id);
+    expect(
+      (await new MockCheckoutAdapter().getCheckout("departure_session"))
+        .traveler?.id,
+    ).toBe(user.id);
+  });
+  it("counts reservations and confirmed bookings in detail, including a full shared departure pool", async () => {
+    await book("surabaya", 2);
+    const adapter = new MockPackageDetailAdapter();
+    const reserved = await adapter.getPackageDetail(pkg.packageId);
+    expect(reserved.detail?.upcomingSessionPreviews[0].remainingSlots).toBe(10);
+    const pending = mockTransactionStore.getBookings()[0];
+    mockTransactionStore.executePaymentSuccess({
+      bookingId: pending.bookingId,
+    });
+    const paid = await adapter.getPackageDetail(pkg.packageId);
+    expect(paid.detail?.upcomingSessionPreviews[0].remainingSlots).toBe(10);
+    await book("malang", 10, "fill-pool");
+    const full = await adapter.getPackageDetail(pkg.packageId);
+    expect(full.hasOpenSession).toBe(false);
+    expect(full.detail?.upcomingSessionPreviews[0]).toMatchObject({
+      status: "FULL",
+      remainingSlots: 0,
+    });
+  });
+  it("disables checkout with no traveler and exposes the supported login/guest entry", async () => {
+    await render(
+      createElement(
+        Routes,
+        {},
+        createElement(Route, {
+          path: "/checkout/:sessionId",
+          element: createElement(CheckoutScreen, {
+            adapter: new MockCheckoutAdapter({ travelerOverride: null }),
+          }),
+        }),
+      ),
+      "/checkout/departure_session?departure=surabaya",
+    );
+    expect(button("Lanjut ke Pembayaran").disabled).toBe(true);
+    expect(view.querySelector('a[href="/login"]')?.textContent).toContain(
+      "Tamu",
+    );
+    expect(mockTransactionStore.getBookings()).toHaveLength(0);
+  });
+  it("preserves the selected departure when checkout recovers from an unavailable session", async () => {
+    const checkout = adapter();
+    vi.spyOn(checkout, "submitCheckout").mockResolvedValue({
+      status: "SESSION_UNAVAILABLE",
+    });
+    await render(
+      createElement(
+        Routes,
+        {},
+        createElement(Route, {
+          path: "/checkout/:sessionId",
+          element: createElement(CheckoutScreen, { adapter: checkout }),
+        }),
+        createElement(Route, {
+          path: "/packages/:packageId/sessions",
+          element: createElement(SessionSelectionScreen),
+        }),
+      ),
+      "/checkout/departure_session?departure=surabaya",
+    );
+    await act(() =>
+      view.querySelector<HTMLInputElement>("#cancellation-policy-ack")!.click(),
+    );
+    await act(() => button("Lanjut ke Pembayaran").click());
+    expect(
+      view.querySelector<HTMLInputElement>('input[value="surabaya"]')?.checked,
+    ).toBe(true);
+  });
+  it("preserves the booked departure when an expired payment returns to session selection", async () => {
+    const result = await book();
+    const booking = mockTransactionStore.getBookingById(result.bookingId!)!;
+    mockTransactionStore.reconcileExpiredPendingPayments(
+      Date.parse(booking.paymentExpiresAt) + 1,
+    );
+    await render(
+      createElement(
+        Routes,
+        {},
+        createElement(Route, {
+          path: "/payment/:bookingId/result",
+          element: createElement(PaymentResultScreen),
+        }),
+        createElement(Route, {
+          path: "/packages/:packageId/sessions",
+          element: createElement(SessionSelectionScreen),
+        }),
+      ),
+      `/payment/${result.bookingId}/result`,
+    );
+    await act(() => button("Pilih Jadwal Lagi").click());
+    expect(
+      view.querySelector<HTMLInputElement>('input[value="surabaya"]')?.checked,
+    ).toBe(true);
+  });
+  it("shows a retryable booking read error instead of a false empty state", async () => {
+    vi.spyOn(packageRepository, "getPackagesByEo")
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue([pkg]);
+    await render(createElement(EoBookingsScreen));
+    expect(view.querySelector('[role="alert"]')?.textContent).toContain(
+      "belum dapat dimuat",
+    );
+    expect(view.textContent).not.toContain("Belum ada booking");
+    await act(() => button("Coba lagi").click());
+    expect(view.querySelector('[role="alert"]')).toBeNull();
+    expect(view.textContent).toContain("Belum ada booking");
+  });
   it.each([1, 2])(
     "allows %i authored options and retains their IDs on repeated draft saves",
     (count) => {
@@ -364,7 +490,7 @@ describe("Departure options and per-person Traveler pricing", () => {
       .mockResolvedValue([pkg]);
     vi.spyOn(sessionRepository, "getSessionsByEo").mockResolvedValue(sessions);
     await render(createElement(EoBookingsScreen));
-    expect(packageRead).toHaveBeenCalledWith(pkg.eoId);
+    expect(packageRead).toHaveBeenCalledWith(pkg.eoId, { throwOnError: true });
     expect(view.textContent).toContain(result.bookingId);
     expect(view.textContent).toContain("Stasiun Surabaya Gubeng");
     expect(view.textContent).toContain("Rp917.800");
@@ -573,6 +699,26 @@ describe("Departure options and per-person Traveler pricing", () => {
     expect(view.querySelectorAll(".eo-departure-card")).toHaveLength(2);
     await act(() => button("Hapus opsi").click());
     expect(view.querySelectorAll(".eo-departure-card")).toHaveLength(1);
+  });
+  it("keeps a negative authored price invalid instead of turning it into a positive price", async () => {
+    await render(createElement(EoPackageBuilderScreen));
+    await act(() =>
+      Array.from(view.querySelectorAll<HTMLButtonElement>(".eo-step-item"))
+        .find((b) => b.textContent?.includes("Perjalanan"))!
+        .click(),
+    );
+    const input = view.querySelector<HTMLInputElement>(
+      'input[id^="departure-price-"]',
+    )!;
+    await act(() => {
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!.call(input, "-249000");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(input.value).toBe("-249.000");
+    expect(input.getAttribute("aria-invalid")).toBe("true");
   });
   it("removes destination registration from partner entry/login and keeps the old URL informative", async () => {
     await render(createElement(App), "/partner");

@@ -1,5 +1,6 @@
 import { TRAVELER_SERVICE_FEE } from "../checkout/pricing";
 import { DepartureSummary } from "../departure/DepartureChoices";
+import { departureSearch } from "../departure/departureOptions";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
@@ -416,7 +417,9 @@ export function PaymentResultScreen({
             size="lg"
             onClick={() =>
               pkgId
-                ? navigate(`/packages/${pkgId}/sessions`)
+                ? navigate(
+                    `/packages/${pkgId}/sessions${departureSearch(booking.departureOptionId)}`,
+                  )
                 : navigate("/explore")
             }
           >

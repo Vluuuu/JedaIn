@@ -210,7 +210,9 @@ export function CheckoutScreen({
 
       if (res.status === "SESSION_UNAVAILABLE") {
         if (viewModel.package) {
-          navigate(`/packages/${viewModel.package.id}/sessions`);
+          navigate(
+            `/packages/${viewModel.package.id}/sessions${departureSearch(selectedDeparture?.id)}`,
+          );
         } else {
           navigate("/explore");
         }
@@ -481,6 +483,7 @@ export function CheckoutScreen({
   // CTA disabled while participantCount > latest selectable max or price is missing
   const isSubmitDisabled =
     isSubmitting ||
+    !traveler ||
     unitPrice === undefined ||
     participantCount > maxSelectableParticipants ||
     viewModel.state === "PRICE_UNAVAILABLE";
@@ -519,6 +522,13 @@ export function CheckoutScreen({
           Tinjau kembali rincian pemesananmu sebelum melanjutkan ke pembayaran.
         </p>
       </header>
+
+      {!traveler && (
+        <div className="checkout-alert" role="status">
+          <p>Masuk atau lanjut sebagai Tamu untuk membuat pesanan.</p>
+          <Link to="/login">Masuk / Lanjut sebagai Tamu</Link>
+        </div>
+      )}
 
       {/* Submit Error / Race Notice */}
       {submitErrorNotice && (

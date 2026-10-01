@@ -48,13 +48,18 @@ export const packageRepository = {
     }
   },
 
-  async getPackagesByEo(eoId: string): Promise<EoPackageRecord[]> {
+  async getPackagesByEo(
+    eoId: string,
+    options: { throwOnError?: boolean } = {},
+  ): Promise<EoPackageRecord[]> {
     if (!isSupabaseMode()) {
       return [...mockEoPackageStore.getPackagesByEo(eoId)];
     }
 
     const supabase = getSupabaseClient();
     if (!supabase) {
+      if (options.throwOnError)
+        throw new Error("Daftar paket belum dapat dimuat.");
       return [];
     }
 
@@ -66,11 +71,14 @@ export const packageRepository = {
         .order("created_at", { ascending: false });
 
       if (error || !data) {
+        if (options.throwOnError)
+          throw new Error("Daftar paket belum dapat dimuat.");
         return [];
       }
 
       return (data as PackageRow[]).map(mapPackageRowToRecord);
-    } catch {
+    } catch (error) {
+      if (options.throwOnError) throw error;
       return [];
     }
   },

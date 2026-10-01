@@ -959,6 +959,8 @@ Status: IMPLEMENTED LIVE.
 
 ## REQ-MIT-02 — Destination Application
 
+Keputusan demo 1 Oktober 2026 (permintaan user): dokumen izin pengelolaan dipilih melalui input unggah file, bukan nama dokumen yang diketik. Lampiran tetap lokal selama sesi browser untuk demo, tanpa unggah file ke Supabase; metadata nama dokumen mengikuti pengajuan yang ada. Applicant dan Admin pada sesi browser yang sama dapat membuka lampiran. Setelah memuat ulang atau berpindah perangkat, UI menjelaskan bahwa file demo tidak tersedia. Dokumen tetap opsional pada prototype ini. Badge dekoratif `Formulir Verifikasi Destinasi`, `Syarat verifikasi`, dan `Pemandu lokal tersedia` di formulir dihapus; identitas pemandu wajib dan validasi pengajuan tetap berlaku.
+
 Application dapat menangkap data prototype yang relevan seperti:
 
 - identity/contact,

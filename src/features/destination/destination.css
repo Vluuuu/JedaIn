@@ -1432,29 +1432,6 @@
   margin-top: var(--space-2);
 }
 
-.dest-guide-requirement {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  background: var(--color-brand-primary-soft);
-  border: 1px solid var(--color-forest-200);
-  border-radius: var(--radius-lg);
-}
-
-.dest-guide-requirement strong {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-body-md);
-}
-
-.dest-guide-requirement p {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-body-sm);
-  line-height: 1.5;
-}
-
 @media (max-width: 48rem) {
   .dest-verification-single__heading {
     flex-direction: column;

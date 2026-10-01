@@ -8,6 +8,7 @@ import {
   PartnerDemoApproval,
 } from "../eo/PartnerDemoApproval";
 import { GuideIdentitySummary } from "./GuideIdentitySummary";
+import { DemoDestinationDocument } from "./DemoDestinationDocument";
 import "./destination.css";
 
 export function DestinationVerificationStatusScreen() {
@@ -132,6 +133,12 @@ export function DestinationVerificationStatusScreen() {
 
       {/* APPROVED STATE */}
       <GuideIdentitySummary guide={app.guideIdentity} />
+      {app.legalEntityDocument?.name && (
+        <DemoDestinationDocument
+          applicationId={app.applicationId}
+          name={app.legalEntityDocument.name}
+        />
+      )}
       {status === "APPROVED" && (
         <section className="eo-section" style={{ gap: "var(--space-4)" }}>
           <DemoAccountEmailNotice

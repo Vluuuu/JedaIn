@@ -11,6 +11,113 @@ import { requireAuthenticatedUser } from "../lib/supabase/demoAuth";
 import { mapDestinationRowToRecord } from "../lib/supabase/mappers";
 
 export const destinationRepository = {
+  async updateDefaultThumbnail(
+    destinationId: string,
+    selectedMedia: DestinationMediaItem,
+  ): Promise<{
+    success: boolean;
+    destination?: DestinationRecord;
+    message?: string;
+  }> {
+    try {
+      const actor = await requireAuthenticatedUser("DESTINATION");
+      if (!actor.success || !actor.partnerUser)
+        return { success: false, message: actor.error ?? "Akses ditolak." };
+      const application = mockDestinationVerificationStore.getByPartnerId(
+        actor.partnerUser.id,
+      );
+      if (
+        application?.status !== "APPROVED" ||
+        application.destinationIdentityId !== destinationId
+      )
+        return {
+          success: false,
+          message: "Destinasi ini bukan milik akun mitra aktif.",
+        };
+      const current = await this.getAuthoritativeById(destinationId);
+      if (!current)
+        return {
+          success: false,
+          message: "Destinasi belum dapat dimuat. Coba lagi.",
+        };
+      const gallery = current.mediaGallery ?? [];
+      const existing = gallery.find(
+        (item) => item.mediaId === selectedMedia.mediaId,
+      );
+      const media = existing ?? selectedMedia;
+      if (media.category === "FACILITY")
+        return {
+          success: false,
+          message: "Pilih foto destinasi untuk thumbnail utama.",
+        };
+      if (!existing) {
+        const match =
+          /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(
+            media.url,
+          );
+        const bytes = match
+          ? (match[2].length * 3) / 4 -
+            (match[2].endsWith("==") ? 2 : match[2].endsWith("=") ? 1 : 0)
+          : 0;
+        if (
+          media.provenance !== "DESTINATION_SOURCE" ||
+          !media.mediaId ||
+          !match ||
+          bytes <= 0 ||
+          bytes > 5 * 1024 * 1024
+        )
+          return {
+            success: false,
+            message: "Unggah foto JPG, PNG, atau WebP maksimal 5 MB.",
+          };
+      }
+      const mediaGallery = [
+        { ...media, category: "DESTINATION" as const },
+        ...gallery.filter((item) => item.mediaId !== media.mediaId),
+      ];
+      let updated: DestinationRecord;
+      if (isSupabaseMode()) {
+        const client = getSupabaseClient();
+        if (!client)
+          return {
+            success: false,
+            message: "Layanan penyimpanan tidak tersedia.",
+          };
+        const { data, error } = await client
+          .from("destinations")
+          .update({
+            image_url: media.url,
+            media_gallery: mediaGallery,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", destinationId)
+          .select()
+          .single();
+        if (error || !data)
+          return {
+            success: false,
+            message: "Thumbnail belum tersimpan. Coba lagi.",
+          };
+        updated = mapDestinationRowToRecord(data as DestinationRow);
+        if (
+          updated.destinationId !== destinationId ||
+          updated.imageUrl !== media.url
+        )
+          return {
+            success: false,
+            message: "Thumbnail tersimpan belum dapat diverifikasi. Coba lagi.",
+          };
+      } else updated = { ...current, imageUrl: media.url, mediaGallery };
+      mockDestinationStore.upsertVerifiedDestination(updated);
+      return { success: true, destination: updated };
+    } catch {
+      return {
+        success: false,
+        message: "Thumbnail belum tersimpan. Coba lagi.",
+      };
+    }
+  },
+
   async updateOperationalSettings(
     destinationId: string,
     capacityPerSession: number,
@@ -347,10 +454,20 @@ export const destinationRepository = {
     }
 
     try {
+      const current = await this.getAuthoritativeById(destinationId);
+      if (!current)
+        return {
+          success: false,
+          message: "Destinasi belum dapat dimuat. Coba lagi.",
+        };
+      const removedThumbnail =
+        current.mediaGallery?.some((media) => media.url === current.imageUrl) &&
+        !mediaGallery.some((media) => media.url === current.imageUrl);
       const { data, error } = await supabase
         .from("destinations")
         .update({
           media_gallery: mediaGallery,
+          ...(removedThumbnail ? { image_url: null } : {}),
           updated_at: new Date().toISOString(),
         })
         .eq("id", destinationId)
@@ -366,7 +483,7 @@ export const destinationRepository = {
       }
 
       const mapped = mapDestinationRowToRecord(data as DestinationRow);
-      mockDestinationStore.updateMediaGallery(destinationId, mediaGallery);
+      mockDestinationStore.upsertVerifiedDestination(mapped);
       return { success: true, destination: mapped };
     } catch (err: unknown) {
       return {

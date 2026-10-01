@@ -1072,6 +1072,8 @@ Status: IMPLEMENTED LIVE.
 
 ## REQ-MIT-07 — Media
 
+Keputusan demo 1 Oktober 2026 (permintaan user): pada Pengaturan Mitra Destinasi, pengelola dapat memilih thumbnail default dari galeri destinasi atau mengunggah JPG/PNG/WebP maksimal 5 MB. Simpan memperbarui `image_url` dan menempatkan foto pilihan di awal galeri kanonikal secara bersamaan, dengan akses hanya untuk pemilik destinasi terverifikasi. Mode Supabase menyimpan data foto melalui kontrak `media_gallery` yang sudah ada; mode mock mengikuti adapter lokal. Ilustrasi bawaan tetap ditandai sebagai ilustrasi prototype. Media paket yang sudah disusun EO tidak diubah otomatis.
+
 Destination profile menampilkan galeri kanonikal yang dapat dikelola Mitra terverifikasi.
 
 Acceptance:
@@ -1086,6 +1088,8 @@ Acceptance:
 Status: IMPLEMENTED PROTOTYPE — galeri lokal/mock tersedia; actual photography belum tersedia.
 
 ## REQ-MIT-08 — Reviews dan Settings
+
+Keputusan demo 1 Oktober 2026 (permintaan user): email operasional/login mitra destinasi menggunakan nama destinasi, misalnya `puncak-budug-asu@jedain.biz.id`. Jika alamat dipakai akun lain, server menambahkan ID pengajuan agar tetap unik. Email EO mengikuti format existing. Akun destinasi lama dengan alamat berbasis UUID dapat diperbarui melalui aksi penerbitan ulang akun demo eksplisit pada status pengajuan; kata sandi turut diterbitkan ulang. Email kontak tetap terpisah dan pengiriman email tetap simulasi. Alamat yang ditampilkan pada Pengaturan berasal dari akun yang benar-benar diterbitkan.
 
 Mitra dapat melihat review yang terkait destinasi dan mengakses setting/profile surface existing.
 

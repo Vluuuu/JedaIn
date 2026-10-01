@@ -11,7 +11,7 @@ import type {
 import {
   generateInternalPassword,
   partnerAccountCredentialsStore,
-  platformAccountEmail,
+  partnerAccountEmailCandidates,
 } from "../features/eo/partnerAccountCredentialsStore";
 import type { PartnerUser } from "../features/eo/types";
 import { getSupabaseClient } from "../lib/supabase/client";
@@ -457,7 +457,8 @@ export const partnerRegistrationRepository = {
       )
         throw new Error("Pengajuan tidak sedang menunggu tinjauan.");
       const email =
-        app.accountEmail ?? platformAccountEmail("EO", app.applicationId);
+        app.accountEmail ??
+        partnerAccountEmailCandidates("EO", app.applicationId)[0];
       const password = generateInternalPassword();
       mockApplicationStore.upsertFromBackend({
         ...mockApplicationStore.getById(app.applicationId)!,
@@ -481,15 +482,35 @@ export const partnerRegistrationRepository = {
               app.applicationId,
             );
       if (!result.success) throw new Error(result.message);
-      const email =
-        app.accountEmail ??
-        platformAccountEmail("DESTINATION", app.applicationId);
+      const candidates = partnerAccountEmailCandidates(
+        "DESTINATION",
+        app.applicationId,
+        app.name,
+        app.accountEmail,
+      );
+      const email = candidates.find(
+        (candidate) =>
+          !mockDestinationVerificationStore
+            .getAll()
+            .some(
+              (other) =>
+                other.applicationId !== app.applicationId &&
+                other.accountEmail === candidate,
+            ) &&
+          !mockApplicationStore
+            .getAll()
+            .some((other) => other.accountEmail === candidate),
+      );
+      if (!email)
+        throw new Error("Alamat akun belum dapat diterbitkan. Coba lagi.");
       const password = generateInternalPassword();
       mockDestinationVerificationStore.upsertFromBackend({
         ...mockDestinationVerificationStore.getById(app.applicationId)!,
         demoEmailRecipient: app.contactEmail,
         accountEmail: email,
       });
+      if (app.accountEmail && app.accountEmail !== email)
+        mockPasswords.delete(app.accountEmail);
       mockPasswords.set(email, password);
       partnerSessionStore.setPartner({ ...partner, email });
       partnerAccountCredentialsStore.set({

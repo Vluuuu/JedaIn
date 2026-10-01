@@ -1629,3 +1629,62 @@
   font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
 }
+.dest-thumbnail__preview,
+.dest-thumbnail__empty {
+  width: 100%;
+  max-width: 28rem;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.dest-thumbnail__empty {
+  display: grid;
+  place-items: center;
+  color: var(--color-text-secondary);
+  background: var(--color-stone-50);
+}
+
+.dest-thumbnail__choices {
+  border: 0;
+  padding: 0;
+  margin: var(--space-3) 0 0;
+  min-width: 0;
+}
+
+.dest-thumbnail__choices legend {
+  padding: 0 0 var(--space-2);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dest-thumbnail__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.dest-thumbnail__option {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  cursor: pointer;
+}
+
+.dest-thumbnail__option img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.dest-thumbnail__option span {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-body-sm);
+}
+
+.dest-thumbnail input[type="file"] {
+  max-width: 100%;
+}

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { Button } from "../../components/ui";
 import { partnerRegistrationRepository } from "../../data/partnerRegistrationRepository";
 import type { LocalGuideIdentity } from "../eo/partnerRegistrationTypes";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
@@ -8,6 +8,10 @@ import { partnerSessionStore } from "../eo/partnerSessionStore";
 import { generateUniqueDestinationPartnerId } from "./destinationContext";
 import { GuideIdentityFields } from "./GuideIdentityFields";
 import { GuideIdentitySummary } from "./GuideIdentitySummary";
+import {
+  demoDestinationDocumentStore,
+  validateDemoDestinationDocument,
+} from "./demoDestinationDocumentStore";
 import type { DestinationApplicationStep } from "./types";
 import "./destination.css";
 
@@ -48,6 +52,13 @@ export function DestinationApplicationScreen() {
   const [legalDocName, setLegalDocName] = useState(
     initialApp?.legalEntityDocument?.name ?? "",
   );
+  const [legalDocFile, setLegalDocFile] = useState<File | undefined>(
+    initialApp
+      ? demoDestinationDocumentStore.get(initialApp.applicationId)?.file
+      : undefined,
+  );
+  const [legalDocError, setLegalDocError] = useState<string>();
+  const legalDocInput = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(initialApp?.name ?? "");
   const [locationLabel, setLocationLabel] = useState(
@@ -152,6 +163,7 @@ export function DestinationApplicationScreen() {
 
   const handleNext = () => {
     setErrorMessage(undefined);
+    if (currentStep === 1 && legalDocError) return;
     if (currentStep < 6) {
       setCurrentStep((prev) => (prev + 1) as DestinationApplicationStep);
     }
@@ -167,6 +179,11 @@ export function DestinationApplicationScreen() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(undefined);
+    if (legalDocError) {
+      setCurrentStep(1);
+      setErrorMessage(legalDocError);
+      return;
+    }
 
     if (!agreedToSop) {
       setErrorMessage(
@@ -210,11 +227,13 @@ export function DestinationApplicationScreen() {
         contactPerson,
         phone,
         email,
-        legalEntityDoc: {
-          name: legalDocName,
-          uploadedAt: new Date().toISOString(),
-          status: "ATTACHED",
-        },
+        legalEntityDoc: legalDocName.trim()
+          ? {
+              name: legalDocName,
+              uploadedAt: new Date().toISOString(),
+              status: "ATTACHED",
+            }
+          : undefined,
         description,
         highlights: splitHighlights,
         capacityPerSession,
@@ -233,6 +252,15 @@ export function DestinationApplicationScreen() {
     setIsSubmitting(false);
 
     if (res.success) {
+      const savedPartner = partnerSessionStore.get();
+      const savedApp = savedPartner
+        ? mockDestinationVerificationStore.getByPartnerId(savedPartner.id)
+        : undefined;
+      if (
+        legalDocFile &&
+        savedApp?.legalEntityDocument?.name === legalDocFile.name
+      )
+        demoDestinationDocumentStore.set(savedApp.applicationId, legalDocFile);
       navigate("/partner/application");
     } else {
       setErrorMessage(
@@ -248,13 +276,7 @@ export function DestinationApplicationScreen() {
     >
       <header className="dest-page-header">
         <div>
-          <Badge tone="info">Formulir Verifikasi Destinasi</Badge>
-          <h1
-            className="dest-page-title"
-            style={{ marginTop: "var(--space-2)" }}
-          >
-            Pengajuan Mitra Destinasi Lokal
-          </h1>
+          <h1 className="dest-page-title">Pengajuan Mitra Destinasi Lokal</h1>
           <p className="dest-page-subtitle">
             Daftarkan lokasi alam atau ruang tenangmu untuk diverifikasi dan
             dijadikan lokasi paket wellness oleh para EO JedaIn.
@@ -389,15 +411,47 @@ export function DestinationApplicationScreen() {
 
             <div className="eo-form-group">
               <label htmlFor="dest-legal-doc" className="eo-form-label">
-                Dokumen Izin Pengelolaan Kawasan (Metadata Simulasi)
+                Dokumen Izin Pengelolaan Kawasan (opsional)
               </label>
               <input
                 id="dest-legal-doc"
-                type="text"
+                ref={legalDocInput}
+                type="file"
                 className="eo-form-input"
-                value={legalDocName}
-                onChange={(e) => setLegalDocName(e.target.value)}
+                accept="application/pdf,image/jpeg,image/png,image/webp"
+                aria-describedby="dest-legal-doc-help"
+                aria-invalid={Boolean(legalDocError)}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+                  const invalid = validateDemoDestinationDocument(file);
+                  setLegalDocError(invalid);
+                  setLegalDocFile(invalid ? undefined : file);
+                  setLegalDocName(invalid ? "" : file.name);
+                  if (invalid) event.target.value = "";
+                }}
               />
+              <span id="dest-legal-doc-help" className="eo-form-helper">
+                PDF, JPG, PNG, atau WebP, maksimal 5 MB. File disimpan lokal
+                untuk demo dan hanya tersedia selama sesi browser ini.
+              </span>
+              {legalDocName && <span>Dokumen dipilih: {legalDocName}</span>}
+              {legalDocError && <p role="alert">{legalDocError}</p>}
+              {(legalDocName || legalDocError) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setLegalDocFile(undefined);
+                    setLegalDocName("");
+                    setLegalDocError(undefined);
+                    if (legalDocInput.current) legalDocInput.current.value = "";
+                  }}
+                >
+                  Hapus pilihan dokumen
+                </Button>
+              )}
             </div>
 
             <div
@@ -766,16 +820,6 @@ export function DestinationApplicationScreen() {
               5. Pemandu Lokal
             </legend>
 
-            <div className="dest-guide-requirement">
-              <Badge tone="info">Syarat verifikasi</Badge>
-              <strong>Pemandu lokal wajib tersedia di destinasi.</strong>
-              <p>
-                JedaIn hanya memverifikasi destinasi yang memiliki pemandu lokal
-                siap mendampingi rute. EO tidak wajib memiliki sertifikasi
-                pemanduan sendiri.
-              </p>
-            </div>
-
             <GuideIdentityFields
               value={guideIdentity}
               onChange={setGuideIdentity}
@@ -835,6 +879,10 @@ export function DestinationApplicationScreen() {
             <p>
               Email kontak: <strong>{email || "Belum diisi"}</strong>
             </p>
+            <p>
+              Dokumen izin pengelolaan:{" "}
+              <strong>{legalDocName || "Belum dilampirkan"}</strong>
+            </p>
             <GuideIdentitySummary guide={guideIdentity} />
 
             <div
@@ -849,10 +897,9 @@ export function DestinationApplicationScreen() {
               }}
             >
               <div>
-                <Badge tone="success">Pemandu lokal tersedia</Badge>
                 <h3
                   style={{
-                    margin: "var(--space-2) 0 var(--space-1)",
+                    margin: "0 0 var(--space-1)",
                     fontSize: "var(--font-size-heading-md)",
                   }}
                 >

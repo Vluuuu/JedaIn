@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { GuideIdentitySummary } from "../destination/GuideIdentitySummary";
+import { DemoDestinationDocument } from "../destination/DemoDestinationDocument";
 import { mockAdminDecisionService } from "./mockAdminDecisionService";
 import { mockDestinationVerificationStore } from "./mockDestinationVerificationStore";
 import "./admin.css";
@@ -227,16 +228,10 @@ export function AdminDestinationVerificationDetailScreen() {
           </div>
 
           <div>
-            <small
-              style={{ color: "var(--color-text-muted)", display: "block" }}
-            >
-              Status Dokumen Legalitas (Metadata):
-            </small>
-            <strong>
-              {destApp.legalEntityDocument
-                ? `📄 ${destApp.legalEntityDocument.name} (${destApp.legalEntityDocument.status})`
-                : "Belum ada metadata dokumen"}
-            </strong>
+            <DemoDestinationDocument
+              applicationId={destApp.applicationId}
+              name={destApp.legalEntityDocument?.name}
+            />
           </div>
 
           <div>

@@ -21,8 +21,8 @@ export function PartnerPortalLandingScreen() {
     }
     if (partnerSessionStore.get()?.role !== "DESTINATION") {
       partnerSessionStore.setPartner({
-        id: generateUniqueDestinationPartnerId("mitra.destinasi@jedain.id"),
-        email: "mitra.destinasi@jedain.id",
+        id: generateUniqueDestinationPartnerId("mitra.destinasi@jedain.biz.id"),
+        email: "mitra.destinasi@jedain.biz.id",
         name: "Mitra Destinasi Baru",
         role: "DESTINATION",
         businessName: "Pengelola Kawasan Destinasi",

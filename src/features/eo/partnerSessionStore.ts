@@ -1,4 +1,5 @@
 import type { PartnerUser } from "./types";
+import { partnerAccountCredentialsStore } from "./partnerAccountCredentialsStore";
 
 export const DEMO_EO_USER: PartnerUser = {
   id: "eo_jeda_alam",
@@ -37,12 +38,15 @@ export const partnerSessionStore = {
   },
 
   setPartner(user: PartnerUser | null): void {
+    if (user?.id !== currentPartner?.id)
+      partnerAccountCredentialsStore.set(undefined);
     currentPartner = user ? { ...user } : null;
   },
 
   loginAsDemoApproved(
     guideStatus: "CERTIFIED_GUIDE" | "CONCEPT_ONLY" = "CERTIFIED_GUIDE",
   ): PartnerUser {
+    partnerAccountCredentialsStore.set(undefined);
     currentPartner =
       guideStatus === "CERTIFIED_GUIDE"
         ? { ...DEMO_EO_USER }
@@ -51,15 +55,18 @@ export const partnerSessionStore = {
   },
 
   loginAsDemoDestination(): PartnerUser {
+    partnerAccountCredentialsStore.set(undefined);
     currentPartner = { ...DEMO_DESTINATION_USER };
     return { ...currentPartner };
   },
 
   logout(): void {
+    partnerAccountCredentialsStore.set(undefined);
     currentPartner = null;
   },
 
   reset(): void {
+    partnerAccountCredentialsStore.set(undefined);
     currentPartner = { ...DEMO_EO_USER };
   },
 };

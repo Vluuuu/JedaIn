@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Button } from "../../components/ui";
 import { partnerRegistrationRepository } from "../../data/partnerRegistrationRepository";
+import { partnerAccountCredentialsStore } from "./partnerAccountCredentialsStore";
+import { partnerSessionStore } from "./partnerSessionStore";
 
 export function PartnerDemoApproval({
   onApproved,
@@ -14,7 +16,8 @@ export function PartnerDemoApproval({
       <strong>Persetujuan untuk demo</strong>
       <p className="eo-form-helper">
         Simulasikan persetujuan Admin pada pengajuan ini untuk melanjutkan ke
-        dashboard mitra.
+        dashboard mitra. Email login @jedain.biz.id dan kata sandi dibuat oleh
+        JedaIn setelah persetujuan.
       </p>
       {error && <p role="alert">{error}</p>}
       <Button
@@ -45,15 +48,84 @@ export function PartnerDemoApproval({
   );
 }
 
-export function DemoAccountEmailNotice({ email }: { email?: string }) {
+export function DemoAccountEmailNotice({
+  email,
+  accountEmail,
+}: {
+  email?: string;
+  accountEmail?: string;
+}) {
+  const current = useSyncExternalStore(
+    partnerAccountCredentialsStore.subscribe,
+    partnerAccountCredentialsStore.get,
+  );
+  const credentials =
+    current?.partnerId === partnerSessionStore.get()?.id ? current : undefined;
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string>();
   if (!email) return null;
   return (
-    <div className="eo-alert eo-alert--success" role="status">
-      <strong>Simulasi email akun</strong>
+    <div className="eo-section" aria-label="Akun mitra dari JedaIn">
+      <h2>Akun mitra dari JedaIn</h2>
+      {(credentials?.email || accountEmail) && (
+        <dl>
+          <dt>Email login</dt>
+          <dd>
+            <code>{credentials?.email ?? accountEmail}</code>
+          </dd>
+          {credentials && (
+            <>
+              <dt>Kata sandi</dt>
+              <dd>
+                <output aria-label="Kata sandi akun dari JedaIn">
+                  <code>{credentials.password}</code>
+                </output>
+              </dd>
+            </>
+          )}
+        </dl>
+      )}
+      <p className="eo-form-helper">
+        Gunakan email login dan kata sandi dari JedaIn untuk masuk ke akun
+        mitra. Simpan kata sandi yang ditampilkan saat penerbitan akun.
+      </p>
+      {!credentials && (
+        <>
+          <p className="eo-form-helper">
+            Kata sandi tidak ditampilkan kembali setelah memuat ulang halaman.
+            Terbitkan ulang jika belum disimpan.
+          </p>
+          {error && <p role="alert">{error}</p>}
+          <Button
+            type="button"
+            variant="secondary"
+            loading={busy}
+            loadingLabel="Menerbitkan akun..."
+            onClick={async () => {
+              setBusy(true);
+              setError(undefined);
+              try {
+                await partnerRegistrationRepository.approveDemo(true);
+              } catch (cause) {
+                setError(
+                  cause instanceof Error
+                    ? cause.message
+                    : "Akun belum dapat diterbitkan. Coba lagi.",
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {accountEmail
+              ? "Terbitkan ulang kata sandi (Demo)"
+              : "Terbitkan akun JedaIn (Demo)"}
+          </Button>
+        </>
+      )}
       <p>
-        Informasi akun sudah dikirim ke <strong>{email}</strong> dalam simulasi
-        demo. Tidak ada email sungguhan yang dikirim. Gunakan email ini dan kata
-        sandi saat pendaftaran untuk masuk kembali.
+        Pengiriman informasi akun ke email kontak <strong>{email}</strong>{" "}
+        disimulasikan pada demo. Tidak ada email sungguhan yang dikirim.
       </p>
     </div>
   );

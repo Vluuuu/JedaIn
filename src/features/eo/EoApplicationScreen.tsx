@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { partnerRegistrationRepository } from "../../data/partnerRegistrationRepository";
-import { PartnerAccountPasswordField } from "./PartnerAccountPasswordField";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import type { EoGuideStatus } from "./types";
@@ -34,7 +33,6 @@ export function EoApplicationScreen() {
   const [phone, setPhone] = useState(
     isExistingDraftOrRejected ? existingApp.phone : "",
   );
-  const [password, setPassword] = useState("");
   const [city, setCity] = useState(
     isExistingDraftOrRejected ? existingApp.city : "",
   );
@@ -79,7 +77,6 @@ export function EoApplicationScreen() {
     setIsSubmitting(true);
     const res = await partnerRegistrationRepository.submit({
       role: "EO",
-      password,
       details: {
         businessName,
         contactPerson,
@@ -221,7 +218,7 @@ export function EoApplicationScreen() {
           >
             <div className="eo-form-group">
               <label htmlFor="eo-email" className="eo-form-label">
-                Email akun (Gmail atau email lainnya) *
+                Email kontak (Gmail atau email lainnya) *
               </label>
               <input
                 id="eo-email"
@@ -253,7 +250,11 @@ export function EoApplicationScreen() {
         </fieldset>
 
         {/* 2. Guide & Operational Experience */}
-        <PartnerAccountPasswordField value={password} onChange={setPassword} />
+        <p className="eo-form-helper">
+          Setelah pengajuan disetujui, JedaIn menerbitkan email login
+          @jedain.biz.id dan kata sandi akun. Pada demo, informasi akun
+          ditampilkan di layar.
+        </p>
         <fieldset
           disabled={isSubmitting}
           style={{

@@ -8,6 +8,7 @@ import { partnerRegistrationRepository } from "../../data/partnerRegistrationRep
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
+import { partnerAccountCredentialsStore } from "./partnerAccountCredentialsStore";
 
 let root: Root;
 let view: HTMLDivElement;
@@ -24,7 +25,6 @@ describe("New applicant demo approval", () => {
   it("keeps the applicant pending until the explicit demo action, then allows their own workspace and shows simulated email", async () => {
     await partnerRegistrationRepository.submit({
       role: "EO",
-      password: "Pendaftaran2026!",
       details: {
         email: "pengajuan@gmail.com",
         businessName: "TO Baru",
@@ -55,6 +55,10 @@ describe("New applicant demo approval", () => {
     expect(mockApplicationStore.getBySellerId(identity)?.status).toBe(
       "PENDING_REVIEW",
     );
+    expect(
+      view.querySelector('[aria-label="Akun mitra dari JedaIn"]'),
+    ).toBeNull();
+    expect(partnerAccountCredentialsStore.get()).toBeUndefined();
     const approval = Array.from(view.querySelectorAll("button")).find(
       (button) => button.textContent?.includes("Sudah di-ACC (Demo)"),
     );
@@ -65,6 +69,40 @@ describe("New applicant demo approval", () => {
     );
     expect(view.textContent).toContain("pengajuan@gmail.com");
     expect(view.textContent).toContain("Tidak ada email sungguhan");
+    const credentials = partnerAccountCredentialsStore.get()!;
+    expect(credentials.email).toMatch(/@jedain\.biz\.id$/);
+    expect(credentials.email).not.toBe("pengajuan@gmail.com");
+    expect(view.textContent).toContain(credentials.password);
+    expect(JSON.stringify(mockApplicationStore.getAll())).not.toContain(
+      credentials.password,
+    );
+    expect(
+      partnerRegistrationRepository.matchesMockPassword(
+        credentials.email,
+        credentials.password,
+      ),
+    ).toBe(true);
+    expect(
+      partnerRegistrationRepository.matchesMockPassword(
+        credentials.email,
+        "JedaInDemo2026!",
+      ),
+    ).toBe(false);
+    await act(() => partnerAccountCredentialsStore.set(undefined));
+    expect(view.textContent).not.toContain(credentials.password);
+    const reissue = Array.from(view.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Terbitkan ulang kata sandi"),
+    );
+    await act(async () => reissue!.click());
+    const renewed = partnerAccountCredentialsStore.get()!;
+    expect(renewed.email).toBe(credentials.email);
+    expect(renewed.password).not.toBe(credentials.password);
+    expect(
+      partnerRegistrationRepository.matchesMockPassword(
+        renewed.email,
+        credentials.password,
+      ),
+    ).toBe(false);
     const dashboard = Array.from(view.querySelectorAll("button")).find(
       (button) => button.textContent?.includes("Buka Operational Dashboard"),
     );

@@ -33,18 +33,22 @@ export function DestinationVerificationStatusScreen() {
         className="dest-container"
         style={{ padding: "var(--space-8) var(--space-4)", maxWidth: "680px" }}
       >
-        <header className="dest-page-header">
+        <header className="dest-page-header dest-verification-header">
           <div>
             <h1 className="dest-page-title">Status Verifikasi Destinasi</h1>
-            <p className="dest-page-subtitle">
-              Akun Mitra:{" "}
-              <strong>{partner?.businessName ?? "Destinasi Baru"}</strong>
-            </p>
-            <p className="dest-verification-status-line">
-              <StatusMeta label="Status pengajuan">
-                Belum ada pengajuan
-              </StatusMeta>
-            </p>
+            <div className="dest-verification-meta">
+              <dl className="dest-verification-place">
+                <dt>Akun Mitra</dt>
+                <dd>
+                  <strong>{partner?.businessName ?? "Destinasi Baru"}</strong>
+                </dd>
+              </dl>
+              <p className="dest-verification-status-line">
+                <StatusMeta label="Status pengajuan">
+                  Belum ada pengajuan
+                </StatusMeta>
+              </p>
+            </div>
           </div>
         </header>
 
@@ -103,21 +107,26 @@ export function DestinationVerificationStatusScreen() {
       className="dest-container"
       style={{ padding: "var(--space-8) var(--space-4)", maxWidth: "680px" }}
     >
-      <header className="dest-page-header">
+      <header className="dest-page-header dest-verification-header">
         <div>
           <h1 className="dest-page-title">Status Verifikasi Destinasi</h1>
-          <p className="dest-page-subtitle">
-            Kawasan: <strong>{app.name}</strong> ({app.locationLabel})
-          </p>
-          <p className="dest-verification-status-line">
-            <StatusMeta label="Status pengajuan">
-              {status === "APPROVED"
-                ? "Disetujui"
-                : status === "REJECTED"
-                  ? "Perlu perbaikan"
-                  : "Menunggu verifikasi Admin"}
-            </StatusMeta>
-          </p>
+          <div className="dest-verification-meta">
+            <dl className="dest-verification-place">
+              <dt>Kawasan</dt>
+              <dd>
+                <strong>{app.name}</strong> <span>({app.locationLabel})</span>
+              </dd>
+            </dl>
+            <p className="dest-verification-status-line">
+              <StatusMeta label="Status pengajuan">
+                {status === "APPROVED"
+                  ? "Disetujui"
+                  : status === "REJECTED"
+                    ? "Perlu perbaikan"
+                    : "Menunggu verifikasi Admin"}
+              </StatusMeta>
+            </p>
+          </div>
         </div>
       </header>
 

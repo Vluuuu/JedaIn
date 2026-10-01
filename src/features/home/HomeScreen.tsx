@@ -404,6 +404,20 @@ export function HomeScreen({ adapter = defaultHomeAdapter }: HomeScreenProps) {
           <div className="home-module-error" role="alert">
             <p>{moduleErrors.popular}</p>
           </div>
+        ) : popularPackages.length === 0 ? (
+          <div className="home-module-empty">
+            <p>
+              Belum ada experience tersedia. Travel Organizer sedang menyiapkan
+              paket pertama.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/explore")}
+            >
+              Cek Explore &rarr;
+            </Button>
+          </div>
         ) : (
           <div
             className="home-cards-scroll-row"

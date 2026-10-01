@@ -254,12 +254,13 @@ export function buildTravelerPackageDetailFromEo(
 export function getCombinedCatalogPackages(
   fallbackPackages: PackageRecommendationSource[] = MOCK_RECOMMENDATION_PACKAGES,
 ): PackageRecommendationSource[] {
+  const catalogFixtures = isSupabaseMode() ? [] : fallbackPackages;
   const eoPackages = mockEoPackageStore.getAllPackages();
   const dynamicPackages: PackageRecommendationSource[] = [];
 
   for (const eoPkg of eoPackages) {
     if (eoPkg.status === "LIVE") {
-      const alreadyInStatic = fallbackPackages.some(
+      const alreadyInStatic = catalogFixtures.some(
         (p) => p.id === eoPkg.packageId,
       );
       if (!alreadyInStatic) {
@@ -271,7 +272,7 @@ export function getCombinedCatalogPackages(
     }
   }
 
-  return [...fallbackPackages, ...dynamicPackages];
+  return [...catalogFixtures, ...dynamicPackages];
 }
 
 /**
@@ -280,7 +281,9 @@ export function getCombinedCatalogPackages(
 export function getCombinedPackageDetails(
   fallbackDetails: Record<string, PackageDetailSource> = MOCK_PACKAGE_DETAILS,
 ): Record<string, PackageDetailSource> {
-  const combined: Record<string, PackageDetailSource> = { ...fallbackDetails };
+  const combined: Record<string, PackageDetailSource> = isSupabaseMode()
+    ? {}
+    : { ...fallbackDetails };
   const eoPackages = mockEoPackageStore.getAllPackages();
   const nowMs = prototypeClock.nowMs();
 
@@ -333,15 +336,8 @@ export async function syncMarketplaceFromSupabase(): Promise<void> {
       sessionRepository.getAllSessions(),
     ]);
 
-    for (const dest of dests) {
-      mockDestinationStore.upsertVerifiedDestination(dest);
-    }
-    for (const pkg of pkgs) {
-      mockEoPackageStore.upsertPackage(pkg);
-    }
-    for (const s of sess) {
-      mockEoPackageStore.upsertSession(s);
-    }
+    mockDestinationStore.replaceFromBackend(dests);
+    mockEoPackageStore.replaceFromBackend(pkgs, sess);
   } catch (err) {
     console.warn("syncMarketplaceFromSupabase failed:", err);
   }

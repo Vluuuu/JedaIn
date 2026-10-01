@@ -27,7 +27,7 @@ export const packageRepository = {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return [...mockEoPackageStore.getAllPackages()];
+      return [];
     }
 
     try {
@@ -37,16 +37,13 @@ export const packageRepository = {
         .order("created_at", { ascending: false });
 
       if (error || !data) {
-        console.warn(
-          "Supabase packages fetch failed, using fallback:",
-          error?.message,
-        );
-        return [...mockEoPackageStore.getAllPackages()];
+        console.warn("Supabase packages fetch failed:", error?.message);
+        return [];
       }
 
       return (data as PackageRow[]).map(mapPackageRowToRecord);
     } catch {
-      return [...mockEoPackageStore.getAllPackages()];
+      return [];
     }
   },
 
@@ -57,7 +54,7 @@ export const packageRepository = {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return [...mockEoPackageStore.getPackagesByEo(eoId)];
+      return [];
     }
 
     try {
@@ -68,12 +65,12 @@ export const packageRepository = {
         .order("created_at", { ascending: false });
 
       if (error || !data) {
-        return [...mockEoPackageStore.getPackagesByEo(eoId)];
+        return [];
       }
 
       return (data as PackageRow[]).map(mapPackageRowToRecord);
     } catch {
-      return [...mockEoPackageStore.getPackagesByEo(eoId)];
+      return [];
     }
   },
 
@@ -86,7 +83,7 @@ export const packageRepository = {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return mockEoPackageStore.getPackageById(packageId);
+      return undefined;
     }
 
     try {
@@ -97,12 +94,12 @@ export const packageRepository = {
         .maybeSingle();
 
       if (error || !data) {
-        return mockEoPackageStore.getPackageById(packageId);
+        return undefined;
       }
 
       return mapPackageRowToRecord(data as PackageRow);
     } catch {
-      return mockEoPackageStore.getPackageById(packageId);
+      return undefined;
     }
   },
 
@@ -116,7 +113,7 @@ export const packageRepository = {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return mockEoPackageStore.getPackageForEo(packageId, eoId);
+      return undefined;
     }
 
     try {
@@ -128,12 +125,12 @@ export const packageRepository = {
         .maybeSingle();
 
       if (error || !data) {
-        return mockEoPackageStore.getPackageForEo(packageId, eoId);
+        return undefined;
       }
 
       return mapPackageRowToRecord(data as PackageRow);
     } catch {
-      return mockEoPackageStore.getPackageForEo(packageId, eoId);
+      return undefined;
     }
   },
 
@@ -209,8 +206,15 @@ export const packageRepository = {
 
       // Authoritative pricing: query live destination from destinationRepository
       const dest = draft.destinationId
-        ? await destinationRepository.getById(draft.destinationId)
+        ? await destinationRepository.getAuthoritativeById(draft.destinationId)
         : undefined;
+
+      if (draft.destinationId && !dest) {
+        return {
+          success: false,
+          message: "Data resmi destinasi live tidak dapat dibaca dari server.",
+        };
+      }
       const baseCost = dest?.baseCostPerPerson ?? 100000;
       const margin = draft.pricing?.eoMargin ?? 150000;
       const effectiveGuideSource = draft.guideSource || "DESTINATION";
@@ -414,9 +418,43 @@ export const packageRepository = {
         app?.guideStatus ??
         authCheck.partnerUser?.guideStatus ??
         "CERTIFIED_GUIDE";
-      const destination = pkg.destinationId
-        ? await destinationRepository.getById(pkg.destinationId)
-        : undefined;
+      if (!pkg.destinationId) {
+        return {
+          success: false,
+          validationResult: {
+            valid: false,
+            errors: [
+              {
+                step: 1,
+                field: "destinationId",
+                message: "Pilih destinasi terverifikasi untuk paket ini.",
+              },
+            ],
+          },
+        };
+      }
+
+      const destination = await destinationRepository.getAuthoritativeById(
+        pkg.destinationId,
+      );
+
+      if (!destination) {
+        return {
+          success: false,
+          validationResult: {
+            valid: false,
+            errors: [
+              {
+                step: 1,
+                field: "destinationId",
+                message:
+                  "Data resmi destinasi live tidak dapat dibaca dari server.",
+              },
+            ],
+          },
+        };
+      }
+
       const validationResult = validateEoPackage(
         pkg,
         authorGuideStatus,

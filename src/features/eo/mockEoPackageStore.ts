@@ -11,14 +11,54 @@ import type {
   EoValidationResult,
 } from "./types";
 
+export function formatSessionTimeWindow(
+  startAt: string,
+  endAt: string,
+): string {
+  const start = new Date(startAt);
+  const end = new Date(endAt);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return `${startAt} - ${endAt}`;
+  }
+
+  const dateStr = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(start);
+
+  const startTimeStr = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .format(start)
+    .replace(":", ".");
+
+  const endTimeStr = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .format(end)
+    .replace(":", ".");
+
+  return `${dateStr}, ${startTimeStr}–${endTimeStr} WIB`;
+}
+
 export function validateEoPackage(
   pkg: Partial<EoPackageRecord>,
   eoGuideStatus: EoGuideStatus,
   authoritativeDestination?: DestinationRecord,
 ): EoValidationResult {
   const errors: EoValidationError[] = [];
-  const destination =
-    authoritativeDestination?.destinationId === pkg.destinationId
+
+  // ponytail: destination fallback uses mockDestinationStore when authoritativeDestination not provided; upgrade to strict repository-only validator when mock mode is retired.
+  const dest =
+    authoritativeDestination !== undefined
       ? authoritativeDestination
       : pkg.destinationId
         ? mockDestinationStore.getById(pkg.destinationId)
@@ -32,14 +72,14 @@ export function validateEoPackage(
       message: "Pilih destinasi terverifikasi untuk paket ini.",
     });
   } else {
-    if (!destination || destination.status !== "ACTIVE") {
+    if (!dest || dest.status !== "ACTIVE") {
       errors.push({
         step: 1,
         field: "destinationId",
         message:
           "Destinasi yang dipilih tidak terdaftar atau belum terverifikasi aktif.",
       });
-    } else if (!destination.guideReady) {
+    } else if (!dest.guideReady) {
       errors.push({
         step: 1,
         field: "destinationId",
@@ -171,7 +211,6 @@ export function validateEoPackage(
   }
 
   // Step 4: Pricing (Authoritative Base Cost and Exact Formula)
-  const dest = destination;
   const authoritativeBaseCost = dest?.baseCostPerPerson ?? 100000;
 
   if (!pkg.pricing) {
@@ -440,6 +479,13 @@ let packages: EoPackageRecord[] = [
 let sessions: EoSessionRecord[] = SEEDED_SESSIONS.map((s) => ({ ...s }));
 
 export const mockEoPackageStore = {
+  replaceFromBackend(
+    packageRecords: EoPackageRecord[],
+    sessionRecords: EoSessionRecord[],
+  ): void {
+    packages = packageRecords.map(clonePackage);
+    sessions = sessionRecords.map((session) => ({ ...session }));
+  },
   reset(): void {
     customPackageImageStore.reset();
     packages = [
@@ -896,6 +942,21 @@ export const mockEoPackageStore = {
       return { success: false, message: "Kapasitas peserta minimal 1 orang." };
     }
 
+    const dest = mockDestinationStore.getById(pkg.destinationId);
+    if (!dest) {
+      return {
+        success: false,
+        message: "Destinasi tidak ditemukan atau belum terdaftar aktif.",
+      };
+    }
+
+    if (input.capacity > dest.capacityPerSession) {
+      return {
+        success: false,
+        message: `Kapasitas sesi maksimal untuk ${dest.name} adalah ${dest.capacityPerSession} orang.`,
+      };
+    }
+
     // Temporal validation (EO-F01)
     const nowMs = input.nowMs ?? Date.now();
     const startMs = Date.parse(input.startAt);
@@ -920,6 +981,36 @@ export const mockEoPackageStore = {
       return {
         success: false,
         message: "Waktu selesai sesi harus setelah waktu mulai.",
+      };
+    }
+
+    // Schedule conflict across all packages & EOs for the same destination
+    // Statuses OPEN, FULL, and CLOSED block the schedule; only CANCELLED frees it.
+    const destinationPkgIds = new Set(
+      packages
+        .filter((p) => p.destinationId === pkg.destinationId)
+        .map((p) => p.packageId),
+    );
+
+    const conflictSession = sessions.find((s) => {
+      if (!destinationPkgIds.has(s.packageId)) return false;
+      if (s.status === "CANCELLED") return false;
+      const existingStartMs = Date.parse(s.startAt);
+      const existingEndMs = Date.parse(s.endAt);
+      if (Number.isNaN(existingStartMs) || Number.isNaN(existingEndMs)) {
+        return false;
+      }
+      // Interval [start, end) overlap: new.start < existing.end && new.end > existing.start
+      return startMs < existingEndMs && endMs > existingStartMs;
+    });
+
+    if (conflictSession) {
+      return {
+        success: false,
+        message: `Destinasi sudah digunakan pada ${formatSessionTimeWindow(
+          conflictSession.startAt,
+          conflictSession.endAt,
+        )}. Pilih waktu lain.`,
       };
     }
 
@@ -967,6 +1058,42 @@ export const mockEoPackageStore = {
       const startMs = Date.parse(s.startAt);
       if (Number.isNaN(startMs) || startMs <= currentNowMs) {
         return false;
+      }
+    }
+
+    // Active session status (OPEN, FULL, CLOSED) must not exceed destination capacity limit
+    if (status !== "CANCELLED") {
+      const pkg = packages.find((p) => p.packageId === s.packageId);
+      if (pkg) {
+        const dest = mockDestinationStore.getById(pkg.destinationId);
+        if (dest && s.capacity > dest.capacityPerSession) {
+          return false;
+        }
+      }
+    }
+
+    // Reopening a CANCELLED session must respect destination schedule conflict
+    if (s.status === "CANCELLED" && status !== "CANCELLED") {
+      const pkg = packages.find((p) => p.packageId === s.packageId);
+      if (pkg) {
+        const destinationPkgIds = new Set(
+          packages
+            .filter((p) => p.destinationId === pkg.destinationId)
+            .map((p) => p.packageId),
+        );
+        const sStartMs = Date.parse(s.startAt);
+        const sEndMs = Date.parse(s.endAt);
+        const hasConflict = sessions.some((other) => {
+          if (other.sessionId === s.sessionId) return false;
+          if (!destinationPkgIds.has(other.packageId)) return false;
+          if (other.status === "CANCELLED") return false;
+          const oStartMs = Date.parse(other.startAt);
+          const oEndMs = Date.parse(other.endAt);
+          return sStartMs < oEndMs && sEndMs > oStartMs;
+        });
+        if (hasConflict) {
+          return false;
+        }
       }
     }
 
@@ -1065,6 +1192,35 @@ export const mockEoPackageStore = {
         success: false,
         message:
           "Waktu sesi dengan peserta terdaftar belum dapat diubah di prototipe.",
+      };
+    }
+    const pkg = packages.find((item) => item.packageId === session.packageId);
+    const dest = pkg && mockDestinationStore.getById(pkg.destinationId);
+    if (!dest || input.capacity > dest.capacityPerSession) {
+      return {
+        success: false,
+        message: dest
+          ? `Kapasitas sesi maksimal untuk ${dest.name} adalah ${dest.capacityPerSession} orang.`
+          : "Destinasi tidak ditemukan atau belum terdaftar aktif.",
+      };
+    }
+    const destinationPackageIds = new Set(
+      packages
+        .filter((item) => item.destinationId === pkg.destinationId)
+        .map((item) => item.packageId),
+    );
+    const conflict = sessions.find(
+      (item) =>
+        item.sessionId !== session.sessionId &&
+        item.status !== "CANCELLED" &&
+        destinationPackageIds.has(item.packageId) &&
+        startMs < Date.parse(item.endAt) &&
+        endMs > Date.parse(item.startAt),
+    );
+    if (conflict) {
+      return {
+        success: false,
+        message: `Destinasi sudah digunakan pada ${formatSessionTimeWindow(conflict.startAt, conflict.endAt)}. Pilih waktu lain.`,
       };
     }
     session.startAt = input.startAt;

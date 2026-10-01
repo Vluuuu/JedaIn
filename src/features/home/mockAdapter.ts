@@ -140,7 +140,7 @@ export class MockHomeAdapter implements HomeAdapter {
       moduleErrors.recommendation = "Gagal memuat rekomendasi personal.";
     } else if (isCompletedQuizDraft(quizDraft)) {
       const recResult = evaluateRecommendations(quizDraft, catalogPackages);
-      if (recResult.topRecommendation) {
+      if (recResult.state !== "EMPTY" && recResult.topRecommendation) {
         personalizedRecommendation = {
           mode: recResult.state,
           item: recResult.topRecommendation,

@@ -37,7 +37,8 @@ export interface PackageRecommendationSource {
   popularityRank?: number | null;
 }
 
-export type RecommendationState = "LOADING" | "MATCHED" | "FALLBACK" | "ERROR";
+export type RecommendationState =
+  "LOADING" | "MATCHED" | "FALLBACK" | "EMPTY" | "ERROR";
 
 export interface RecommendationItem {
   package: PackageRecommendationSource;
@@ -45,7 +46,7 @@ export interface RecommendationItem {
 }
 
 export interface RecommendationResult {
-  state: "MATCHED" | "FALLBACK";
+  state: "MATCHED" | "FALLBACK" | "EMPTY";
   topRecommendation?: RecommendationItem;
   alternatives: RecommendationItem[];
 }

@@ -630,14 +630,14 @@
 }
 
 /* --------------------------------------------------------------------------
-   Error State Card
+   Recommendation Message Card
    -------------------------------------------------------------------------- */
-.recommendation-error-card {
+.recommendation-message-card {
   width: 100%;
   max-width: 28rem;
   padding: 2rem 1.5rem;
   background: rgba(18, 44, 32, 0.8);
-  border: 1px solid rgba(220, 53, 69, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 1.25rem;
   text-align: center;
   display: flex;
@@ -647,18 +647,22 @@
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
 }
 
-.recommendation-error-card__icon {
+.recommendation-message-card--error {
+  border-color: rgba(220, 53, 69, 0.4);
+}
+
+.recommendation-message-card__icon {
   color: #ff858d;
 }
 
-.recommendation-error-card__title {
+.recommendation-message-card__title {
   margin: 0;
   color: #ffffff;
   font-size: 1.1875rem;
   font-weight: 700;
 }
 
-.recommendation-error-card__desc {
+.recommendation-message-card__desc {
   margin: 0;
   color: rgba(255, 255, 255, 0.75);
   font-size: 0.8125rem;

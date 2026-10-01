@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { useNavigate } from "react-router";
 import { destinationRepository } from "../../data/destinationRepository";
 import { Button } from "../../components/ui";
@@ -13,7 +14,7 @@ export function EoDestinationsScreen() {
   // EO catalog contains only active destinations that have passed the unified
   // JedaIn verification, including mandatory local-guide readiness.
   const [destinations, setDestinations] = useState<DestinationRecord[]>(() => [
-    ...mockDestinationStore.getEligibleForEo(),
+    ...(!isSupabaseMode() ? mockDestinationStore.getEligibleForEo() : []),
   ]);
 
   useEffect(() => {

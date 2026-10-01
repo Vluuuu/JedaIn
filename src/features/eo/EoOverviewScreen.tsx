@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import PlanMascot from "../../assets/mascot/plan.png";
 import { packageRepository } from "../../data/packageRepository";
 import { sessionRepository } from "../../data/sessionRepository";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { Button, InlineStatus } from "../../components/ui";
 import type { BookingStatus } from "../checkout/types";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
@@ -40,10 +41,10 @@ export function EoOverviewScreen() {
 
   // EO Packages & derived metrics (reactive state initialized with local cache)
   const [packages, setPackages] = useState<EoPackageRecord[]>(() => [
-    ...mockEoPackageStore.getPackagesByEo(eoId),
+    ...(!isSupabaseMode() ? mockEoPackageStore.getPackagesByEo(eoId) : []),
   ]);
   const [sessions, setSessions] = useState<EoSessionRecord[]>(() => [
-    ...mockEoPackageStore.getSessionsByEo(eoId),
+    ...(!isSupabaseMode() ? mockEoPackageStore.getSessionsByEo(eoId) : []),
   ]);
 
   useEffect(() => {

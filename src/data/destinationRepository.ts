@@ -91,7 +91,7 @@ export const destinationRepository = {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return [...mockDestinationStore.getAll()];
+      return [];
     }
 
     try {
@@ -101,28 +101,29 @@ export const destinationRepository = {
         .order("name", { ascending: true });
 
       if (error || !data) {
-        console.warn(
-          "Supabase destinations fetch failed, using fallback:",
-          error?.message,
-        );
-        return [...mockDestinationStore.getAll()];
+        console.warn("Supabase destinations fetch failed:", error?.message);
+        return [];
       }
 
       return (data as DestinationRow[]).map(mapDestinationRowToRecord);
     } catch (err) {
-      console.warn("Supabase destinations exception, using fallback:", err);
-      return [...mockDestinationStore.getAll()];
+      console.warn("Supabase destinations exception:", err);
+      return [];
     }
   },
 
-  async getById(destinationId: string): Promise<DestinationRecord | undefined> {
+  async getById(
+    destinationId: string,
+    options?: { strict?: boolean },
+  ): Promise<DestinationRecord | undefined> {
     if (!isSupabaseMode()) {
       return mockDestinationStore.getById(destinationId);
     }
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return mockDestinationStore.getById(destinationId);
+      if (options?.strict) return undefined;
+      return undefined;
     }
 
     try {
@@ -133,13 +134,21 @@ export const destinationRepository = {
         .maybeSingle();
 
       if (error || !data) {
-        return mockDestinationStore.getById(destinationId);
+        if (options?.strict) return undefined;
+        return undefined;
       }
 
       return mapDestinationRowToRecord(data as DestinationRow);
     } catch {
-      return mockDestinationStore.getById(destinationId);
+      if (options?.strict) return undefined;
+      return undefined;
     }
+  },
+
+  async getAuthoritativeById(
+    destinationId: string,
+  ): Promise<DestinationRecord | undefined> {
+    return this.getById(destinationId, { strict: true });
   },
 
   async getEligibleForEo(
@@ -151,7 +160,7 @@ export const destinationRepository = {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return [...mockDestinationStore.getEligibleForEo(guideStatus)];
+      return [];
     }
 
     try {
@@ -163,12 +172,12 @@ export const destinationRepository = {
         .order("name", { ascending: true });
 
       if (error || !data) {
-        return [...mockDestinationStore.getEligibleForEo(guideStatus)];
+        return [];
       }
 
       return (data as DestinationRow[]).map(mapDestinationRowToRecord);
     } catch {
-      return [...mockDestinationStore.getEligibleForEo(guideStatus)];
+      return [];
     }
   },
 

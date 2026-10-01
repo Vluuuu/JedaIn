@@ -104,6 +104,44 @@ export function RecommendationResultScreen({
     );
   }
 
+  if (!errorMessage && result?.state === "EMPTY") {
+    return (
+      <div className="recommendation-screen">
+        <div className="recommendation-screen__backdrop" aria-hidden="true">
+          <img
+            src={LOGIN_ATMOSPHERE_VISUAL.svgDataUri}
+            alt=""
+            className="recommendation-screen__backdrop-image"
+            loading="eager"
+            width="1000"
+            height="800"
+          />
+          <div className="recommendation-screen__backdrop-scrim" />
+          <div className="recommendation-screen__backdrop-grain" />
+        </div>
+
+        <div className="recommendation-screen__container">
+          <section className="recommendation-message-card recommendation-message-card--empty">
+            <h1 className="recommendation-message-card__title">
+              Belum ada experience tersedia.
+            </h1>
+            <p className="recommendation-message-card__desc">
+              Jawaban kuismu sudah tersimpan. Kamu tetap bisa masuk ke Home
+              sambil menunggu paket tersedia.
+            </p>
+            <button
+              type="button"
+              className="recommendation-primary-btn"
+              onClick={() => navigate("/home")}
+            >
+              Lanjut ke Home
+            </button>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
   if (errorMessage || !result || !result.topRecommendation) {
     return (
       <div className="recommendation-screen">
@@ -122,8 +160,14 @@ export function RecommendationResultScreen({
         </div>
 
         <div className="recommendation-screen__container">
-          <section className="recommendation-error-card" role="alert">
-            <div className="recommendation-error-card__icon" aria-hidden="true">
+          <section
+            className="recommendation-message-card recommendation-message-card--error"
+            role="alert"
+          >
+            <div
+              className="recommendation-message-card__icon"
+              aria-hidden="true"
+            >
               <svg
                 width="28"
                 height="28"
@@ -137,10 +181,10 @@ export function RecommendationResultScreen({
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
             </div>
-            <h1 className="recommendation-error-card__title">
+            <h1 className="recommendation-message-card__title">
               Rekomendasi belum bisa dimuat.
             </h1>
-            <p className="recommendation-error-card__desc">
+            <p className="recommendation-message-card__desc">
               Jawaban kuismu tetap tersimpan. Coba lagi untuk melihat pilihanmu.
             </p>
             <button

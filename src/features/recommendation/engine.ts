@@ -206,6 +206,10 @@ export function evaluateRecommendations(
   catalog: PackageRecommendationSource[],
 ): RecommendationResult {
   const livePackages = catalog.filter((p) => p.status === "LIVE");
+  if (livePackages.length === 0) {
+    return { state: "EMPTY", alternatives: [] };
+  }
+
   const sufficient = livePackages.filter((p) => isSufficientMatch(quiz, p));
 
   if (sufficient.length > 0) {

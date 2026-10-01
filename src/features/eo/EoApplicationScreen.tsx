@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { partnerRegistrationRepository } from "../../data/partnerRegistrationRepository";
+import { PartnerAccountPasswordField } from "./PartnerAccountPasswordField";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
 import type { EoGuideStatus } from "./types";
@@ -32,6 +34,7 @@ export function EoApplicationScreen() {
   const [phone, setPhone] = useState(
     isExistingDraftOrRejected ? existingApp.phone : "",
   );
+  const [password, setPassword] = useState("");
   const [city, setCity] = useState(
     isExistingDraftOrRejected ? existingApp.city : "",
   );
@@ -62,7 +65,7 @@ export function EoApplicationScreen() {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(undefined);
 
@@ -74,41 +77,32 @@ export function EoApplicationScreen() {
     }
 
     setIsSubmitting(true);
-    const identityId = isExistingDraftOrRejected
-      ? existingApp.identityId
-      : `eo_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-
-    const res = mockApplicationStore.submitApplication({
-      identityId,
-      businessName,
-      contactPerson,
-      phone,
-      email,
-      province,
-      city,
-      experienceDescription,
-      portfolioLink: portfolioLink.trim() || undefined,
-      yearsOfOperation,
-      guideStatus,
-      guideCertificateFileName:
-        guideStatus === "CERTIFIED_GUIDE" && certificateFileName.trim()
-          ? certificateFileName.trim()
-          : undefined,
-      insuranceFileName: insuranceFileName.trim() || undefined,
-      agreedToSop,
+    const res = await partnerRegistrationRepository.submit({
+      role: "EO",
+      password,
+      details: {
+        businessName,
+        contactPerson,
+        phone,
+        email,
+        province,
+        city,
+        experienceDescription,
+        portfolioLink: portfolioLink.trim() || undefined,
+        yearsOfOperation,
+        guideStatus,
+        guideCertificateFileName:
+          guideStatus === "CERTIFIED_GUIDE" && certificateFileName.trim()
+            ? certificateFileName.trim()
+            : undefined,
+        insuranceFileName: insuranceFileName.trim() || undefined,
+        agreedToSop,
+      },
     });
 
     setIsSubmitting(false);
 
-    if (res.success && res.application) {
-      partnerSessionStore.setPartner({
-        id: res.application.identityId,
-        email: res.application.email,
-        name: res.application.contactPerson,
-        role: "EO",
-        businessName: res.application.businessName,
-        guideStatus: res.application.guideStatus,
-      });
+    if (res.success) {
       navigate("/partner/application");
     } else {
       setErrorMessage(
@@ -146,6 +140,7 @@ export function EoApplicationScreen() {
       <form className="eo-section" onSubmit={handleSubmit} noValidate>
         {/* 1. Basic Business Information */}
         <fieldset
+          disabled={isSubmitting}
           style={{
             border: "none",
             padding: 0,
@@ -226,7 +221,7 @@ export function EoApplicationScreen() {
           >
             <div className="eo-form-group">
               <label htmlFor="eo-email" className="eo-form-label">
-                Email Operasional *
+                Email akun (Gmail atau email lainnya) *
               </label>
               <input
                 id="eo-email"
@@ -235,6 +230,8 @@ export function EoApplicationScreen() {
                 className="eo-form-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="nama@gmail.com"
+                autoComplete="email"
               />
             </div>
 
@@ -256,7 +253,9 @@ export function EoApplicationScreen() {
         </fieldset>
 
         {/* 2. Guide & Operational Experience */}
+        <PartnerAccountPasswordField value={password} onChange={setPassword} />
         <fieldset
+          disabled={isSubmitting}
           style={{
             border: "none",
             padding: 0,
@@ -359,6 +358,7 @@ export function EoApplicationScreen() {
 
         {/* 3. Document Readiness (Prototype Metadata) */}
         <fieldset
+          disabled={isSubmitting}
           style={{
             border: "none",
             padding: 0,

@@ -1,11 +1,17 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge, Button } from "../../components/ui";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { partnerSessionStore } from "./partnerSessionStore";
+import {
+  DemoAccountEmailNotice,
+  PartnerDemoApproval,
+} from "./PartnerDemoApproval";
 import "./eo.css";
 
 export function EoApplicationStatusScreen() {
+  const [, refresh] = useState(0);
   const navigate = useNavigate();
   const partner = partnerSessionStore.get();
   const isDestination = partner?.role === "DESTINATION";
@@ -41,16 +47,6 @@ export function EoApplicationStatusScreen() {
     if (isDestination) {
       navigate("/partner/destination");
     } else {
-      navigate("/partner/eo");
-    }
-  };
-
-  const handleSwitchToApprovedDemo = () => {
-    if (isDestination) {
-      partnerSessionStore.loginAsDemoDestination();
-      navigate("/partner/destination");
-    } else {
-      partnerSessionStore.loginAsDemoApproved("CERTIFIED_GUIDE");
       navigate("/partner/eo");
     }
   };
@@ -100,6 +96,7 @@ export function EoApplicationStatusScreen() {
       {/* APPROVED STATE */}
       {status === "APPROVED" && (
         <section className="eo-section" style={{ gap: "var(--space-5)" }}>
+          <DemoAccountEmailNotice email={eoApp?.demoEmailRecipient} />
           <div className="eo-alert eo-alert--success">
             <h2
               style={{
@@ -110,9 +107,10 @@ export function EoApplicationStatusScreen() {
               Selamat! Akun Kemitraan telah Disetujui
             </h2>
             <p style={{ margin: 0 }}>
-              Tim Kurasi JedaIn telah memverifikasi profil dan standar
-              lokasi/pemandu Anda. Anda sekarang dapat mengakses dashboard
-              operasional.
+              {eoApp?.demoEmailRecipient
+                ? "Pengajuan Anda disetujui melalui simulasi demo."
+                : "Tim Kurasi JedaIn telah memverifikasi profil Anda."}{" "}
+              Anda sekarang dapat mengakses dashboard operasional.
             </p>
           </div>
 
@@ -207,6 +205,9 @@ export function EoApplicationStatusScreen() {
       {/* PENDING REVIEW STATE */}
       {status === "PENDING_REVIEW" && (
         <section className="eo-section" style={{ gap: "var(--space-5)" }}>
+          <PartnerDemoApproval
+            onApproved={() => refresh((value) => value + 1)}
+          />
           <div className="eo-alert eo-alert--warning">
             <h2
               style={{
@@ -230,44 +231,6 @@ export function EoApplicationStatusScreen() {
               . Kami memastikan standar keselamatan dan filosofi mindful travel
               sebelum mengaktifkan akses dashboard.
             </p>
-          </div>
-
-          {/* Demonstration Quick Switcher for Juror */}
-          <div
-            style={{
-              padding: "var(--space-4)",
-              background: "var(--color-bg-surface-subtle)",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--color-border-default)",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div>
-              <strong style={{ fontSize: "var(--font-size-body-sm)" }}>
-                Simulasi Evaluasi Juri:
-              </strong>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "var(--font-size-caption)",
-                  color: "var(--color-text-secondary)",
-                }}
-              >
-                Gunakan identitas demo terpisah yang sudah berstatus APPROVED.
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleSwitchToApprovedDemo}
-            >
-              {isDestination
-                ? "Lihat Workspace Destinasi Demo (Approved)"
-                : "Lihat Workspace Travel Organizer Demo (Approved)"}
-            </Button>
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-start" }}>

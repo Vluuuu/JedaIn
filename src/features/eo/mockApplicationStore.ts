@@ -106,6 +106,13 @@ let applications: EoApplicationRecord[] = INITIAL_EO_APPLICATIONS.map((a) => ({
 }));
 
 export const mockApplicationStore = {
+  upsertFromBackend(record: EoApplicationRecord): void {
+    const index = applications.findIndex(
+      (app) => app.identityId === record.identityId,
+    );
+    if (index < 0) applications.push({ ...record });
+    else applications[index] = { ...record };
+  },
   reset(): void {
     applications = INITIAL_EO_APPLICATIONS.map((a) => ({
       ...a,

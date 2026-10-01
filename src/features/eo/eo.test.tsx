@@ -79,7 +79,7 @@ async function renderComponent(
 
 describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
   describe("1. Application & Authorization Lifecycle (A–D)", () => {
-    it("A. PENDING_REVIEW status page cannot self-approve", async () => {
+    it("A. PENDING_REVIEW remains pending until explicit demo approval", async () => {
       partnerSessionStore.setPartner({
         id: "eo_pending_user",
         email: "pending@test.com",
@@ -95,9 +95,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       expect(view.textContent).toContain("Sedang Dalam Proses Kurasi");
       expect(view.textContent).not.toContain("Setujui & Buka Dashboard");
-      expect(view.textContent).toContain(
-        "Lihat Workspace Travel Organizer Demo (Approved)",
-      );
+      expect(view.textContent).toContain("Sudah di-ACC (Demo)");
     });
 
     it("B. separate approved demo identity can open workspace", async () => {

@@ -40,6 +40,8 @@ export type DestinationVerificationStatus =
   "PENDING_REVIEW" | "APPROVED" | "REJECTED";
 
 export interface DestinationVerificationRecord {
+  guideIdentity?: import("../eo/partnerRegistrationTypes").LocalGuideIdentity;
+  demoEmailRecipient?: string;
   applicationId: string;
   partnerIdentityId: string;
   destinationIdentityId: string;

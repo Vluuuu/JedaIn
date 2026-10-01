@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Badge, Button } from "../../components/ui";
+import { GuideIdentitySummary } from "../destination/GuideIdentitySummary";
 import { mockAdminDecisionService } from "./mockAdminDecisionService";
 import { mockDestinationVerificationStore } from "./mockDestinationVerificationStore";
 import "./admin.css";
@@ -264,6 +265,7 @@ export function AdminDestinationVerificationDetailScreen() {
       </section>
 
       {/* Decision Panel for PENDING_REVIEW */}
+      <GuideIdentitySummary guide={destApp.guideIdentity} />
       {isPending ? (
         <section
           className="admin-decision-panel"

@@ -12,6 +12,7 @@ import type {
   EoValidationResult,
   PackageGuideSource,
 } from "../../features/eo/types";
+import type { PartnerApplicationRow } from "../../features/eo/partnerRegistrationTypes";
 
 export type Json =
   | string
@@ -118,6 +119,12 @@ export interface SessionRow {
 export type Database = {
   public: {
     Tables: {
+      partner_applications: {
+        Row: PartnerApplicationRow;
+        Insert: Partial<PartnerApplicationRow>;
+        Update: Partial<PartnerApplicationRow>;
+        Relationships: [];
+      };
       partner_profiles: {
         Row: PartnerProfileRow;
         Insert: Partial<PartnerProfileRow> & { id: string };
@@ -147,7 +154,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      register_partner_application: {
+        Args: { p_role: "EO" | "DESTINATION"; p_payload: Json };
+        Returns: PartnerApplicationRow;
+      };
+      approve_partner_application_demo: {
+        Args: Record<string, never>;
+        Returns: PartnerApplicationRow;
+      };
     };
     Enums: {
       [_ in never]: never;

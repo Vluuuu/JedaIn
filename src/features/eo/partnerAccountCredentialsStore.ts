@@ -33,12 +33,4 @@ export function generateInternalPassword(): string {
   );
 }
 
-export function platformAccountEmail(
-  role: "EO" | "DESTINATION",
-  id: string,
-): string {
-  return `${role === "EO" ? "to" : "destinasi"}-${id
-    .replace(/[^a-z0-9-]/gi, "")
-    .slice(-36)
-    .toLowerCase()}@jedain.biz.id`;
-}
+export { partnerAccountEmailCandidates } from "../../../supabase/functions/partner-demo-account/accountEmail";

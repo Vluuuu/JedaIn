@@ -19,7 +19,7 @@ Deno.serve(
     async getApplication(userId) {
       const result = await admin
         .from("partner_applications")
-        .select("id,auth_user_id,role,status,account_email")
+        .select("id,auth_user_id,role,status,account_email,payload")
         .eq("auth_user_id", userId)
         .maybeSingle();
       if (result.error)
@@ -34,6 +34,17 @@ Deno.serve(
       if (result.error || !result.data)
         throw new Error(
           result.error?.message ?? "Akun sedang diproses. Coba lagi.",
+        );
+      return result.data;
+    },
+    async emailInUse(email, userId) {
+      const result = await admin.rpc("partner_account_email_in_use", {
+        p_email: email,
+        p_actor_id: userId,
+      });
+      if (result.error || typeof result.data !== "boolean")
+        throw new Error(
+          "Ketersediaan alamat akun belum dapat diperiksa. Coba lagi.",
         );
       return result.data;
     },

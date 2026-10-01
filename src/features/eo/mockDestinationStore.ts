@@ -273,8 +273,13 @@ export const mockDestinationStore = {
     );
     if (existingIndex < 0) return undefined;
 
+    const current = destinations[existingIndex];
+    const removedThumbnail =
+      current.mediaGallery?.some((media) => media.url === current.imageUrl) &&
+      !mediaGallery.some((media) => media.url === current.imageUrl);
     destinations[existingIndex] = {
-      ...destinations[existingIndex],
+      ...current,
+      imageUrl: removedThumbnail ? undefined : current.imageUrl,
       mediaGallery: mediaGallery.map((media) => ({ ...media })),
     };
     return cloneDestination(destinations[existingIndex]);

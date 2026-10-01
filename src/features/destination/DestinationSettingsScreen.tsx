@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { destinationRepository } from "../../data/destinationRepository";
 import { Button } from "../../components/ui";
 import { resolveAuthenticatedDestinationContext } from "./destinationContext";
+import { DestinationThumbnailSettings } from "./DestinationThumbnailSettings";
 import "./destination.css";
 
 const HOURS_PREFIX = "Jam operasional: ";
@@ -136,12 +137,17 @@ export function DestinationSettingsScreen() {
         </form>
       </section>
 
+      <DestinationThumbnailSettings
+        key={destination.destinationId}
+        destination={destination}
+      />
+
       <section
         className="partner-settings__section"
         aria-labelledby="destination-profile-title"
       >
         <div>
-          <span className="partner-settings__index">02 / Identitas</span>
+          <span className="partner-settings__index">03 / Identitas</span>
           <h2 id="destination-profile-title">Pengelola & profil</h2>
           <p>
             Informasi utama tempat, galeri, deskripsi, dan tarif pemandu
@@ -166,6 +172,18 @@ export function DestinationSettingsScreen() {
           <div>
             <dt>Email operasional</dt>
             <dd>{partner.email}</dd>
+            {/^destinasi-[0-9a-f-]{36}@jedain\.biz\.id$/.test(
+              context.application.accountEmail ?? "",
+            ) && (
+              <dd>
+                <Link
+                  to="/partner/application"
+                  className="partner-settings__link"
+                >
+                  Perbarui akun demo sesuai nama destinasi ↗
+                </Link>
+              </dd>
+            )}
           </div>
           <div>
             <dt>Destinasi</dt>

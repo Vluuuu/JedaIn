@@ -722,7 +722,11 @@ describe("Departure options and per-person Traveler pricing", () => {
   });
   it("removes destination registration from partner entry/login and keeps the old URL informative", async () => {
     await render(createElement(App), "/partner");
-    await act(() => button("Masuk sebagai Mitra Destinasi").click());
+    expect(view.textContent).not.toContain("Mitra Destinasi");
+    await act(() => root!.unmount());
+    root = undefined;
+    view.remove();
+    await render(createElement(App), "/partner/destination/login");
     expect(view.textContent).not.toContain("Ajukan kemitraan");
     expect(view.textContent).toContain("tim JedaIn");
     await act(() => root!.unmount());

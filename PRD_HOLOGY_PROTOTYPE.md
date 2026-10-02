@@ -1,5 +1,15 @@
 # JedaIn — PRD HOLOGY Competition Prototype
 
+## Klarifikasi aktif Admin dan portal partner (2 Oktober 2026)
+
+- Portal publik `/partner` hanya menampilkan Travel Organizer. Akun Destinasi existing masuk melalui `/partner/destination/login`; pendaftaran destinasi mandiri tetap ditutup.
+- Dashboard Admin membaca daftar TO, paket Live, sesi aktif, dan destinasi dari backend yang sama. Hanya Admin terautentikasi dapat menambahkan destinasi terverifikasi dan siap pemandu. Data kosong/error tidak diganti angka ilustrasi.
+- User mengizinkan satu akun Auth Admin baru untuk akses dashboard. Akun EO dan Destinasi existing dipertahankan. Kredensial Admin tidak dipublikasikan ke aplikasi/repository.
+- Booking baru menyimpan tanggal mulai/selesai sesi bersama snapshot keberangkatan. Riwayat memakai tanggal pesanan, termasuk setelah sesi tidak muncul lagi di katalog sesi mendatang. Detail perjalanan memakai cover dan konten paket yang sama dengan katalog; data operasional pesanan tetap berasal dari snapshot.
+- Input harga/margin memakai format Rupiah utuh. Harga opsi yang belum diisi ditampilkan sebagai “Belum diisi”, dan tetap tidak boleh disubmit sebagai Rp0. Referensi economics tidak mengganti harga opsi otomatis.
+
+Klarifikasi ini menggantikan spesifikasi portal dua pilihan peran dan akses Admin simulasi untuk mode Supabase. Requirement terkait: REQ-TRV-06/07/13, REQ-EO-07/08/09, REQ-MIT-01/02, REQ-XR-01.
+
 ## Keputusan aktif: titik keberangkatan dan biaya Traveler (1 Oktober 2026)
 
 Keputusan user ini menggantikan aturan harga tunggal, fee per booking, dan pendaftaran destinasi mandiri dalam riwayat sebelumnya.

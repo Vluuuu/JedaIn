@@ -7,9 +7,26 @@ import { mockAdminAuditStore } from "./mockAdminAuditStore";
 import { mockComplaintStore } from "./mockComplaintStore";
 import { mockDestinationVerificationStore } from "./mockDestinationVerificationStore";
 import "./admin.css";
+import { isSupabaseMode } from "../../lib/supabase/config";
+import { AdminCatalogPanel } from "./AdminCatalogPanel";
 
 export function AdminOverviewScreen() {
   const navigate = useNavigate();
+
+  if (isSupabaseMode())
+    return (
+      <div className="admin-container">
+        <header className="admin-page-header">
+          <div>
+            <h1 className="admin-page-title">Dashboard Admin</h1>
+            <p className="admin-page-subtitle">
+              Kelola Travel Organizer dan destinasi terverifikasi.
+            </p>
+          </div>
+        </header>
+        <AdminCatalogPanel />
+      </div>
+    );
 
   // 1. EO applications pending
   const eoApplications = mockApplicationStore.getAll();
@@ -66,6 +83,7 @@ export function AdminOverviewScreen() {
 
   return (
     <div className="admin-container">
+      <AdminCatalogPanel />
       <header className="admin-page-header">
         <div>
           <Badge tone="info">Trust & Governance Console</Badge>

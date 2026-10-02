@@ -40,18 +40,20 @@ describe("Batch E1 — Competition Demo Hardening", () => {
   it("uses evidence-safe partner portal copy instead of claiming real demand", async () => {
     await renderPartnerPortal();
 
-    expect(container.textContent).toContain("Rancang perjalanan mindful");
-    expect(container.textContent).toContain("Mitra Destinasi");
+    expect(container.textContent).toContain(
+      "Rancang perjalanan bersama JedaIn.",
+    );
+    expect(container.textContent).not.toContain("Mitra Destinasi");
     expect(container.textContent).not.toContain("permintaan nyata");
   });
 
-  it("shows two partner choices and keeps demo shortcuts off the entry page", async () => {
+  it("shows only TO at the public partner entrance", async () => {
     await renderPartnerPortal();
 
     const text = container.textContent ?? "";
     expect(text).toContain("Travel Organizer");
-    expect(text).toContain("Mitra Destinasi");
-    expect(container.querySelectorAll(".partner-entry__role")).toHaveLength(2);
+    expect(text).not.toContain("Mitra Destinasi");
+    expect(container.querySelectorAll(".partner-entry__role")).toHaveLength(1);
     expect(text).not.toContain("Demo");
     expect(text).not.toContain("Reset Demo State");
   });

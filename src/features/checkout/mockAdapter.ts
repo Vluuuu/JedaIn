@@ -452,6 +452,8 @@ export class MockCheckoutAdapter implements CheckoutAdapter {
       travelerId: input.travelerId,
       packageId: foundPkg.id,
       sessionId: foundSession.sessionId,
+      sessionStartAt: foundSession.startAt,
+      sessionEndAt: foundSession.endAt,
       participantCount: input.participantCount,
       unitPricePerPerson: unitPrice,
       departureOptionId: input.departureOptionId,

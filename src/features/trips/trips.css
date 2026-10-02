@@ -6,6 +6,12 @@
 /* --------------------------------------------------------------------------
    T16 Scoped: My Trips Page Container & Header
    -------------------------------------------------------------------------- */
+.trip-detail-summary {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-md);
+  line-height: var(--line-height-relaxed);
+  margin: var(--space-3) 0 0;
+}
 .my-trips-container {
   width: 100%;
   max-width: 48rem;

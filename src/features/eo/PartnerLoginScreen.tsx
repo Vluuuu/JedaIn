@@ -176,7 +176,7 @@ export function PartnerLoginScreen({
         className="partner-entry__back"
         onClick={onBack ?? (() => navigate("/partner"))}
       >
-        ← Kembali pilih peran
+        ← Kembali ke portal TO
       </button>
       <span className="partner-entry__eyebrow">Selamat datang kembali</span>
       <h2>

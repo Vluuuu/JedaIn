@@ -407,6 +407,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
   font-size: var(--font-size-body-md);
 }
 
@@ -4412,6 +4415,8 @@
 }
 .eo-departure-card {
   min-width: 0;
+  margin: 0;
+  display: flow-root;
   padding: var(--space-4);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
@@ -4420,12 +4425,36 @@
 .eo-departure-card legend {
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-semibold);
-  padding-inline: var(--space-2);
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--space-3);
+  line-height: var(--line-height-normal);
+  overflow-wrap: anywhere;
 }
 .eo-departure-fields {
+  clear: both;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
+}
+.eo-pricing-row > :last-child {
+  font-variant-numeric: tabular-nums;
+}
+.eo-pricing-empty p {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .eo-builder-step-actions {
+    flex-wrap: wrap;
+  }
+  .eo-builder-step-actions .ui-button {
+    max-width: 100%;
+    white-space: normal;
+  }
 }
 .eo-departure-currency {
   display: flex;

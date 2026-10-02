@@ -1,8 +1,10 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import JedaInLogo from "../../JedaIn_logo_vector.svg";
 import PlanMascot from "../../assets/mascot/plan.png";
 import { partnerSessionStore } from "../../features/eo/partnerSessionStore";
+import { adminSessionStore } from "../../features/admin/adminSessionStore";
+import { getSupabaseClient } from "../../lib/supabase/client";
 import { Button } from "../ui";
 import {
   BookingsIcon,
@@ -70,6 +72,8 @@ export function WorkspaceShell({
 }: WorkspaceShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const [logoutError, setLogoutError] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const restoreMenuFocusRef = useRef(false);
@@ -230,7 +234,9 @@ export function WorkspaceShell({
             aria-label={
               partner
                 ? `Identitas ${partner.businessName}`
-                : "Identitas belum terhubung"
+                : surface === "admin"
+                  ? "Ruang kerja Admin JedaIn"
+                  : "Identitas belum terhubung"
             }
           >
             <span aria-hidden="true">{partner?.businessName?.[0] ?? "J"}</span>
@@ -249,6 +255,29 @@ export function WorkspaceShell({
             </div>
           </div>
         </header>
+        {surface === "admin" && (
+          <div className="workspace-admin-account">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                try {
+                  const result = await getSupabaseClient()?.auth.signOut({
+                    scope: "local",
+                  });
+                  if (result?.error) throw result.error;
+                  adminSessionStore.logout();
+                  navigate("/admin/login");
+                } catch {
+                  setLogoutError("Gagal keluar. Coba lagi.");
+                }
+              }}
+            >
+              Keluar dari Admin
+            </Button>
+            {logoutError && <p role="alert">{logoutError}</p>}
+          </div>
+        )}
         <main className="workspace-content">{children ?? <Outlet />}</main>
       </div>
     </div>

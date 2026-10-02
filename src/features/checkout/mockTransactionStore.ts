@@ -200,6 +200,12 @@ function validateAndNormalizeBooking(data: unknown): BookingRecord | null {
       typeof b.departureTimeLabel === "string"
         ? b.departureTimeLabel
         : undefined,
+    sessionStartAt: isValidIsoDate(b.sessionStartAt)
+      ? (b.sessionStartAt as string)
+      : undefined,
+    sessionEndAt: isValidIsoDate(b.sessionEndAt)
+      ? (b.sessionEndAt as string)
+      : undefined,
     status,
     reservedQuantity: b.reservedQuantity,
     bookedQuantity: b.bookedQuantity,
@@ -887,6 +893,8 @@ export const mockTransactionStore = {
     travelerId: string;
     packageId: string;
     sessionId: string;
+    sessionStartAt?: string;
+    sessionEndAt?: string;
     participantCount: number;
     unitPricePerPerson: number;
     departureOptionId?: string;
@@ -966,6 +974,8 @@ export const mockTransactionStore = {
       travelerId: input.travelerId,
       packageId: input.packageId,
       sessionId: input.sessionId,
+      sessionStartAt: input.sessionStartAt,
+      sessionEndAt: input.sessionEndAt,
       participantCount: input.participantCount,
       unitPricePerPerson: input.unitPricePerPerson,
       subtotal: breakdown.subtotal,

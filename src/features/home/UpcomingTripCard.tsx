@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { Badge, Button } from "../../components/ui";
+import { InlineStatus, Button } from "../../components/ui";
 import type { UpcomingTripSummary } from "./types";
 
 export interface UpcomingTripCardProps {
@@ -16,7 +16,7 @@ export function UpcomingTripCard({ summary }: UpcomingTripCardProps) {
     >
       <div className="home-upcoming-card__content">
         <div className="home-upcoming-card__header">
-          <Badge tone="info">Trip Mendatang</Badge>
+          <InlineStatus tone="neutral">Perjalanan berikutnya</InlineStatus>
           <span className="home-upcoming-card__date">
             <svg
               width="14"

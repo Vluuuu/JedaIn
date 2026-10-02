@@ -786,6 +786,8 @@ Pending payment must be visually distinct from paid upcoming trip.
 
 Show operational information relevant to traveler, not internal admin fields.
 
+Active follow-up, 2 October 2026: show authored package cover, summary, itinerary, inclusions/exclusions, transport and preparation notes. The main disclosure starts expanded while remaining collapsible. Booking departure and session dates come from the saved order snapshot; never label a completed booking as an upcoming schedule that has not been announced.
+
 ## Completed Trip + Review
 
 Review CTA appears only for `COMPLETED` booking.

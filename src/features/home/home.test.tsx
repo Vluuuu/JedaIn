@@ -112,7 +112,7 @@ describe("HomeScreen State Matrix & Module Composition", () => {
 
     // No transactional cards
     expect(view.textContent).not.toContain("Menunggu Pembayaran");
-    expect(view.textContent).not.toContain("Trip Mendatang");
+    expect(view.textContent).not.toContain("Perjalanan berikutnya");
   });
 
   it("renders real images for every package, destination and personalized hero", async () => {
@@ -197,7 +197,7 @@ describe("HomeScreen State Matrix & Module Composition", () => {
     expect(view.textContent).toContain("Lanjutkan Pembayaran");
     expect(view.textContent).toContain("Pilihan untukmu");
     expect(view.textContent).toContain("Populer Minggu Ini");
-    expect(view.textContent).not.toContain("Trip Mendatang");
+    expect(view.textContent).not.toContain("Perjalanan berikutnya");
   });
 
   it("3. UPCOMING_TRIP_ONLY: shows upcoming trip card while preserving discovery and recommendation", async () => {
@@ -207,7 +207,7 @@ describe("HomeScreen State Matrix & Module Composition", () => {
     const adapter = new MockHomeAdapter({ upcomingTrip: sampleUpcomingTrip });
     const view = await renderHome({ adapter });
 
-    expect(view.textContent).toContain("Trip Mendatang");
+    expect(view.textContent).toContain("Perjalanan berikutnya");
     expect(view.textContent).toContain("Weekend Nature Reset");
     expect(view.textContent).toContain("Lihat Trip");
     expect(view.textContent).toContain("Pilihan untukmu");
@@ -225,7 +225,7 @@ describe("HomeScreen State Matrix & Module Composition", () => {
     const view = await renderHome({ adapter });
 
     expect(view.textContent).toContain("Menunggu Pembayaran");
-    expect(view.textContent).toContain("Trip Mendatang");
+    expect(view.textContent).toContain("Perjalanan berikutnya");
 
     const paymentIndex = view.innerHTML.indexOf("home-payment-banner");
     const upcomingIndex = view.innerHTML.indexOf("home-upcoming-card");

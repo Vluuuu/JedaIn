@@ -17,7 +17,7 @@ export function DestinationRouteGuard({
   // No session or not a DESTINATION partner -> /partner/login
   if (!partner || partner.role !== "DESTINATION") {
     return createElement(Navigate, {
-      to: "/partner/login",
+      to: "/partner/destination/login",
       state: { from: location.pathname },
       replace: true,
     });

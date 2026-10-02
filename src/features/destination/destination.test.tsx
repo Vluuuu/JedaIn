@@ -1168,7 +1168,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         "/partner/destination",
       ]);
 
-      expect(view.textContent).toContain("Mari tumbuh bersama JedaIn");
+      expect(view.textContent).toContain("Kelola destinasi bersama JedaIn.");
       expect(view.textContent).not.toContain("Jadwal Keberangkatan Mendatang");
     });
 

@@ -1,4 +1,64 @@
 /* JedaIn Admin Trust Loop & Operations Console */
+.admin-catalog,
+.admin-destination-form {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.admin-destination-form label {
+  display: grid;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-medium);
+  min-width: 0;
+}
+.admin-destination-form input,
+.admin-destination-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+.admin-destination-form textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+.admin-destination-form small {
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+}
+.admin-destination-form .admin-verification-confirmation {
+  display: flex;
+  align-items: flex-start;
+}
+.admin-verification-confirmation input {
+  width: auto;
+  margin-top: var(--space-1);
+}
+.admin-destination-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.admin-destination-list li {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+  border-bottom: 1px solid var(--color-border-default);
+}
+.admin-destination-list p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+}
+@media (max-width: 640px) {
+  .admin-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 /* Built with JedaIn Design Tokens: Forest Green, Slate Stone, Muted Alerts */
 
 .admin-container {

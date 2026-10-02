@@ -394,7 +394,7 @@ export async function getBackendAuthStatus(): Promise<BackendAuthStatus> {
  * and that the user is mapped to the requested role.
  */
 export async function requireAuthenticatedUser(
-  requiredRole?: "EO" | "DESTINATION",
+  requiredRole?: "EO" | "DESTINATION" | "ADMIN",
 ): Promise<{
   success: boolean;
   userId?: string;

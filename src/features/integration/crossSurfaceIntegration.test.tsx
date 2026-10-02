@@ -658,7 +658,7 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
             ),
           }),
           createElement(Route, {
-            path: "/partner/login",
+            path: "/partner/destination/login",
             element: createElement("div", null, "Partner Login Page"),
           }),
         ),

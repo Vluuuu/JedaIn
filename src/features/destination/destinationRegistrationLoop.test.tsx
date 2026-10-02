@@ -35,13 +35,15 @@ describe("Destination authority and existing account login", () => {
       root.render(
         createElement(
           MemoryRouter,
-          { initialEntries: ["/partner"] },
+          { initialEntries: ["/partner/destination/login"] },
           createElement(
             Routes,
             undefined,
             createElement(Route, {
-              path: "/partner",
-              element: createElement(PartnerPortalLandingScreen),
+              path: "/partner/destination/login",
+              element: createElement(PartnerPortalLandingScreen, {
+                destinationLogin: true,
+              }),
             }),
             createElement(Route, {
               path: "/partner/apply/destination",
@@ -59,11 +61,7 @@ describe("Destination authority and existing account login", () => {
     const enterDestBtn = buttons.find((b) =>
       b.textContent?.includes("Masuk sebagai Mitra Destinasi"),
     );
-    expect(enterDestBtn).toBeDefined();
-
-    await act(async () => {
-      enterDestBtn!.click();
-    });
+    expect(enterDestBtn).toBeUndefined();
 
     const registerDestBtn = Array.from(
       container.querySelectorAll<HTMLButtonElement>("button"),

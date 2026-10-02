@@ -286,6 +286,15 @@ export function App() {
           <Route index element={<PartnerPortalLandingScreen />} />
         </Route>
         <Route
+          path="partner/destination/login"
+          element={<DistractionFreeShell hideHeader />}
+        >
+          <Route
+            index
+            element={<PartnerPortalLandingScreen destinationLogin />}
+          />
+        </Route>
+        <Route
           path="partner/login"
           element={<Navigate to="/partner" replace />}
         />

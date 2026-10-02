@@ -77,6 +77,8 @@ export type BookingStatus =
   "PENDING_PAYMENT" | "PAID" | "COMPLETED" | "CANCELLED" | "EXPIRED";
 
 export interface BookingRecord {
+  sessionStartAt?: string;
+  sessionEndAt?: string;
   departureOptionId?: string;
   departureAreaLabel?: string;
   meetingPointLabel?: string;

@@ -688,8 +688,8 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         buttons.some(
           (button) => button.textContent === "Masuk sebagai Mitra Destinasi",
         ),
-      ).toBe(true);
-      expect(view.textContent).not.toContain("Daftar sebagai");
+      ).toBe(false);
+      expect(view.textContent).toContain("Daftar sebagai TO");
 
       await act(async () => {
         buttons
@@ -2457,7 +2457,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       const view = await renderComponent(createElement(App), ["/partner/eo"]);
       // On standard hostname in test, PartnerRouteGuard redirects to partner login
-      expect(view.textContent).toContain("Mari tumbuh bersama JedaIn");
+      expect(view.textContent).toContain("Rancang perjalanan bersama JedaIn.");
     });
 
     it("BY. Package Builder Step 2 renders cover image upload dropzone and accepts file input", async () => {

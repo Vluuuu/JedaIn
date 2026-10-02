@@ -1,3 +1,4 @@
+import { RupiahInput } from "../../components/ui/RupiahInput";
 import {
   createDepartureOption,
   getEoDepartureOptions,
@@ -1470,6 +1471,7 @@ function EoPackageBuilderBody() {
           </div>
 
           <div
+            className="eo-builder-step-actions"
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -1770,6 +1772,7 @@ function EoPackageBuilderBody() {
           </div>
 
           <div
+            className="eo-builder-step-actions"
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -1828,17 +1831,13 @@ function EoPackageBuilderBody() {
             <label htmlFor="eo-margin-input" className="eo-form-label">
               Margin Travel Organizer (Rp / Orang) *
             </label>
-            <input
+            <RupiahInput
               id="eo-margin-input"
-              type="number"
               min={0}
-              step={10000}
               required
               className="eo-form-input"
               value={eoMargin}
-              onChange={(e) =>
-                setEoMargin(Math.max(0, Number(e.target.value) || 0))
-              }
+              onChange={setEoMargin}
             />
             <span className="eo-form-helper">
               Mencakup layanan pengalaman, fasilitas pendukung, koordinasi sesi,
@@ -1995,11 +1994,31 @@ function EoPackageBuilderBody() {
             </p>
             <div className="eo-pricing-row eo-pricing-row--total">
               <span>Harga Traveler mulai dari:</span>
-              <span>Rp{customerPrice.toLocaleString("id-ID")} / orang</span>
+              <strong>
+                {customerPrice > 0
+                  ? `Rp${customerPrice.toLocaleString("id-ID")} / orang`
+                  : "Belum diisi"}
+              </strong>
             </div>
+            {customerPrice <= 0 && (
+              <div className="eo-pricing-empty" role="status">
+                <p>
+                  Isi harga per orang pada titik keberangkatan di Langkah 3.
+                </p>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setCurrentStep(3)}
+                >
+                  Isi harga keberangkatan
+                </Button>
+              </div>
+            )}
           </div>
 
           <div
+            className="eo-builder-step-actions"
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -2300,7 +2319,9 @@ function EoPackageBuilderBody() {
                     color: "var(--color-brand-primary)",
                   }}
                 >
-                  Rp{customerPrice.toLocaleString("id-ID")}{" "}
+                  {customerPrice > 0
+                    ? `Rp${customerPrice.toLocaleString("id-ID")}`
+                    : "Belum diisi"}{" "}
                   <span
                     style={{
                       fontSize: "var(--font-size-body-sm)",

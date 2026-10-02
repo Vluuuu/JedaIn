@@ -1,4 +1,5 @@
 import { Button } from "../../components/ui";
+import { RupiahInput } from "../../components/ui/RupiahInput";
 import {
   createDepartureOption,
   type DepartureOption,
@@ -32,7 +33,9 @@ export function DepartureOptionsEditor({
       <div className="eo-departure-list">
         {options.map((option, index) => (
           <fieldset key={option.id} className="eo-departure-card">
-            <legend>Titik keberangkatan {index + 1}</legend>
+            <legend className="eo-departure-legend">
+              <span>Titik keberangkatan {index + 1}</span>
+            </legend>
             <div className="eo-departure-fields">
               <div className="eo-form-group">
                 <label
@@ -109,28 +112,14 @@ export function DepartureOptionsEditor({
                 </label>
                 <div className="eo-departure-currency">
                   <span>Rp</span>
-                  <input
+                  <RupiahInput
                     id={`departure-price-${option.id}`}
-                    type="text"
-                    inputMode="numeric"
-                    aria-invalid={
-                      option.pricePerPerson < 0 ||
-                      !Number.isSafeInteger(option.pricePerPerson)
-                    }
                     className="eo-form-input"
-                    value={
-                      option.pricePerPerson
-                        ? option.pricePerPerson.toLocaleString("id-ID")
-                        : ""
+                    value={option.pricePerPerson}
+                    onChange={(pricePerPerson) =>
+                      update(option.id, { pricePerPerson })
                     }
-                    onChange={(e) =>
-                      update(option.id, {
-                        pricePerPerson:
-                          (e.target.value.trimStart().startsWith("-")
-                            ? -1
-                            : 1) * Number(e.target.value.replace(/\D/g, "")),
-                      })
-                    }
+                    min={1}
                     placeholder="0"
                     required
                   />

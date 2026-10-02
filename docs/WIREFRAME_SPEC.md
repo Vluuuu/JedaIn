@@ -1,5 +1,17 @@
 # JedaIn — Wireframe Specification
 
+## Keputusan aktif: biaya keberangkatan ditambahkan ke harga paket (2 Oktober 2026)
+
+Klarifikasi user ini menggantikan harga opsi final yang diinput manual dan economics sebagai referensi saja pada keputusan 1 Oktober.
+
+- Langkah 3 mengisi biaya keberangkatan/transport per orang untuk setiap titik kumpul, bukan harga final paket. Langkah 4 menetapkan alokasi/margin TO; biaya destinasi dan pemandu yang dipakai tetap dari sumber destinasi kanonikal.
+- Harga paket setiap opsi = biaya dasar destinasi + pemandu destinasi hanya bila dipakai + margin TO + biaya keberangkatan opsi. Harga mulai dari adalah minimum harga akhir yang dihitung. Contoh tanpa pemandu: Rp100.000 + Rp150.000 + Rp110.000 = Rp360.000; opsi Rp175.000 menjadi Rp425.000.
+- Biaya keberangkatan adalah Rupiah utuh >= 0; isian kosong dibedakan dari biaya nol dan wajib dilengkapi sebelum submit. Margin belum berarti keuntungan bersih setelah operasional/komisi. Biaya layanan tetap Rp7.500 per peserta, terpisah saat checkout; kapasitas session tetap bersama.
+- Departure menyimpan biaya authored terpisah dari harga akhir. Draft DRAFT/REJECTED existing mengadopsi angka opsi sebelumnya sebagai biaya keberangkatan sesuai klarifikasi user. Paket disetujui/Live legacy tetap memakai harga final yang disepakati; perubahan material membutuhkan draft dan re-approval. Booking lama tetap memakai snapshot harga/fee saat dipesan, tanpa perhitungan ulang.
+- Backend dan shared domain menghitung ulang harga akhir; reload/save tidak menambahkan komponen dua kali. Traveler/preview hanya melihat harga akhir, bukan margin, komisi, atau biaya internal TO.
+
+Requirement terkait: REQ-TRV-07-13, REQ-EO-07/08/09/11, REQ-XR-01.
+
 ## Keputusan aktif: titik keberangkatan dan biaya Traveler (1 Oktober 2026)
 
 Keputusan user ini menggantikan aturan harga tunggal, fee per booking, dan pendaftaran destinasi mandiri dalam riwayat sebelumnya.

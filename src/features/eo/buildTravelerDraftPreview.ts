@@ -1,5 +1,6 @@
 import {
   minimumDeparturePrice,
+  travelerDepartureOptions,
   type DepartureOption,
 } from "../departure/departureOptions";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
@@ -70,9 +71,7 @@ export function buildTravelerDraftPreview(
       pricePerPerson: input.destination
         ? minimumDeparturePrice(input.departureOptions, input.customerPrice)
         : 0,
-      departureOptions: input.departureOptions?.map((option) => ({
-        ...option,
-      })),
+      departureOptions: travelerDepartureOptions(input.departureOptions),
       durationType,
       departureAreas: [],
       experienceIntents: [],
@@ -91,9 +90,7 @@ export function buildTravelerDraftPreview(
       includedItems: lines(input.includedItems),
       excludedItems: lines(input.excludedItems),
       safetyNotes: lines(input.safetyNotes),
-      departureOptions: input.departureOptions?.map((option) => ({
-        ...option,
-      })),
+      departureOptions: travelerDepartureOptions(input.departureOptions),
       meetingPointLabel: input.meetingPointLabel.trim() || undefined,
       departureTimeLabel: input.departureTimeLabel.trim() || undefined,
       outboundTransport: input.outboundTransport.trim() || undefined,

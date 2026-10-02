@@ -1,4 +1,7 @@
-import { minimumDeparturePrice } from "../features/departure/departureOptions";
+import {
+  minimumDeparturePrice,
+  priceDepartureOptions,
+} from "../features/departure/departureOptions";
 import { mockApplicationStore } from "../features/eo/mockApplicationStore";
 import {
   mockEoPackageStore,
@@ -231,8 +234,10 @@ export const packageRepository = {
         effectiveGuideSource === "DESTINATION"
           ? (dest?.localGuideFeePerPerson ?? 0)
           : 0;
-      const departureOptions =
-        draft.departureOptions ?? existingRecord?.departureOptions;
+      const departureOptions = priceDepartureOptions(
+        draft.departureOptions ?? existingRecord?.departureOptions,
+        baseCost + localGuideFee + margin,
+      );
       const customerPrice = minimumDeparturePrice(
         departureOptions,
         baseCost + localGuideFee + margin,

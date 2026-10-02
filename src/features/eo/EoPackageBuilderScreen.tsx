@@ -3,6 +3,7 @@ import {
   createDepartureOption,
   getEoDepartureOptions,
   minimumDeparturePrice,
+  priceDepartureOptions,
   type DepartureOption,
 } from "../departure/departureOptions";
 import { DepartureOptionsEditor } from "./DepartureOptionsEditor";
@@ -263,7 +264,17 @@ function EoPackageBuilderBody() {
   const [departureOptions, setDepartureOptions] = useState<DepartureOption[]>(
     () =>
       initialDraft
-        ? getEoDepartureOptions(initialDraft).map((option) => ({ ...option }))
+        ? getEoDepartureOptions(initialDraft).map((option) => ({
+            ...option,
+            departureCostPerPerson:
+              option.departureCostPerPerson !== undefined
+                ? option.departureCostPerPerson
+                : initialDraft.departureOptions &&
+                    (initialDraft.status === "DRAFT" ||
+                      initialDraft.status === "REJECTED")
+                  ? option.pricePerPerson
+                  : null,
+          }))
         : [createDepartureOption()],
   );
   const meetingPointLabel = departureOptions[0]?.meetingPointLabel ?? "";
@@ -418,7 +429,11 @@ function EoPackageBuilderBody() {
       ? (selectedDestination?.localGuideFeePerPerson ?? 0)
       : 0;
   const economicsReferencePrice = baseCost + localGuideFee + eoMargin;
-  const customerPrice = minimumDeparturePrice(departureOptions);
+  const pricedDepartureOptions = priceDepartureOptions(
+    departureOptions,
+    economicsReferencePrice,
+  )!;
+  const customerPrice = minimumDeparturePrice(pricedDepartureOptions);
   const travelerDraftPreview = buildTravelerDraftPreview({
     destination: selectedDestination,
     organizerId: eoId,
@@ -431,7 +446,7 @@ function EoPackageBuilderBody() {
     imageUrls,
     itinerary,
     customerPrice,
-    departureOptions,
+    departureOptions: pricedDepartureOptions,
     safetyNotes,
     includedItems: includedItemsText,
     excludedItems: excludedItemsText,
@@ -487,7 +502,9 @@ function EoPackageBuilderBody() {
           insightId: selectedInsightId,
           durationLabel,
           itinerary,
-          departureOptions: departureOptions.map((option) => ({ ...option })),
+          departureOptions: pricedDepartureOptions.map((option) => ({
+            ...option,
+          })),
           meetingPointLabel: meetingPointLabel.trim() || undefined,
           departureTimeLabel: departureTimeLabel.trim() || undefined,
           outboundTransport: outboundTransport.trim() || undefined,
@@ -1814,13 +1831,13 @@ function EoPackageBuilderBody() {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                Referensi biaya per orang:{" "}
+                Harga paket per orang:{" "}
                 <strong>
                   Biaya Dasar Destinasi +{" "}
                   {guideSource === "DESTINATION"
                     ? "Tarif Pemandu Lokal + "
                     : ""}
-                  Margin Travel Organizer
+                  Margin Travel Organizer + Biaya Keberangkatan
                 </strong>
                 . Biaya layanan traveler tetap terpisah saat checkout.
               </p>
@@ -1841,7 +1858,8 @@ function EoPackageBuilderBody() {
             />
             <span className="eo-form-helper">
               Mencakup layanan pengalaman, fasilitas pendukung, koordinasi sesi,
-              dan konsumsi.
+              dan konsumsi. Alokasi ini belum merupakan keuntungan bersih
+              setelah biaya operasional dan komisi platform.
             </span>
           </div>
 
@@ -1982,16 +2000,35 @@ function EoPackageBuilderBody() {
             </div>
 
             <div className="eo-pricing-row eo-pricing-row--total">
-              <span>Referensi biaya + margin:</span>
+              <span>Biaya bersama + margin:</span>
               <span>
                 Rp{economicsReferencePrice.toLocaleString("id-ID")} / orang
               </span>
             </div>
             <p className="eo-builder-subgroup__desc">
-              Harga final Traveler ditentukan pada tiap titik keberangkatan di
-              Langkah 3. Referensi ini tidak mengubah harga opsi secara
-              otomatis.
+              Biaya bersama ditambahkan ke biaya keberangkatan dari Langkah 3.
+              Perubahan margin, destinasi, atau pemandu menghitung ulang harga
+              paket setiap opsi secara otomatis.
             </p>
+            {pricedDepartureOptions.map((option) => (
+              <div key={option.id} className="eo-pricing-row">
+                <span>
+                  {option.areaLabel || "Titik keberangkatan"}
+                  {option.departureCostPerPerson != null && (
+                    <small style={{ display: "block" }}>
+                      Rp{economicsReferencePrice.toLocaleString("id-ID")} +
+                      biaya keberangkatan Rp
+                      {option.departureCostPerPerson.toLocaleString("id-ID")}
+                    </small>
+                  )}
+                </span>
+                <strong>
+                  {option.pricePerPerson > 0
+                    ? `Rp${option.pricePerPerson.toLocaleString("id-ID")} / orang`
+                    : "Biaya keberangkatan belum diisi"}
+                </strong>
+              </div>
+            ))}
             <div className="eo-pricing-row eo-pricing-row--total">
               <span>Harga Traveler mulai dari:</span>
               <strong>
@@ -2002,16 +2039,14 @@ function EoPackageBuilderBody() {
             </div>
             {customerPrice <= 0 && (
               <div className="eo-pricing-empty" role="status">
-                <p>
-                  Isi harga per orang pada titik keberangkatan di Langkah 3.
-                </p>
+                <p>Isi biaya keberangkatan per orang di Langkah 3.</p>
                 <Button
                   type="button"
                   variant="secondary"
                   size="sm"
                   onClick={() => setCurrentStep(3)}
                 >
-                  Isi harga keberangkatan
+                  Isi biaya keberangkatan
                 </Button>
               </div>
             )}
@@ -2191,7 +2226,7 @@ function EoPackageBuilderBody() {
                 Pengaturan Perjalanan & Titik Kumpul:
               </strong>
               <div className="eo-departure-list">
-                {departureOptions.map((option) => (
+                {pricedDepartureOptions.map((option) => (
                   <div key={option.id} className="eo-departure-review">
                     <strong>{option.areaLabel || "Area belum diisi"}</strong>
                     <span>

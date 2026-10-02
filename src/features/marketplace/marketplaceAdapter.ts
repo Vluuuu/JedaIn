@@ -1,4 +1,8 @@
-import { minimumDeparturePrice } from "../departure/departureOptions";
+import {
+  getEoDepartureOptions,
+  minimumDeparturePrice,
+  travelerDepartureOptions,
+} from "../departure/departureOptions";
 import { prototypeClock } from "../../lib/clock";
 import { destinationRepository } from "../../data/destinationRepository";
 import { packageRepository } from "../../data/packageRepository";
@@ -168,10 +172,12 @@ export function buildTravelerPackageFromEo(
     status: "LIVE",
     verificationLevel: dest.verificationLevel,
     pricePerPerson: minimumDeparturePrice(
-      eoPkg.departureOptions,
+      eoPkg.departureOptions ? getEoDepartureOptions(eoPkg) : undefined,
       eoPkg.pricing.customerPrice,
     ),
-    departureOptions: eoPkg.departureOptions?.map((option) => ({ ...option })),
+    departureOptions: eoPkg.departureOptions
+      ? travelerDepartureOptions(getEoDepartureOptions(eoPkg))
+      : undefined,
     durationType: inferDurationType(eoPkg.durationLabel),
     departureAreas,
     experienceIntents,
@@ -231,7 +237,9 @@ export function buildTravelerPackageDetailFromEo(
     includedItems: [...eoPkg.includedItems],
     excludedItems: [...eoPkg.excludedItems],
     safetyNotes: [...eoPkg.safetyNotes],
-    departureOptions: eoPkg.departureOptions?.map((option) => ({ ...option })),
+    departureOptions: eoPkg.departureOptions
+      ? travelerDepartureOptions(getEoDepartureOptions(eoPkg))
+      : undefined,
     meetingPointLabel: eoPkg.meetingPointLabel,
     departureTimeLabel: eoPkg.departureTimeLabel,
     outboundTransport: eoPkg.outboundTransport,

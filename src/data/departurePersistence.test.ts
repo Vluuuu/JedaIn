@@ -92,80 +92,101 @@ it("propagates transport failures for owned booking catalogs when strict reads a
   ).rejects.toThrow("Network unavailable");
 });
 
-it("persists multiple departures through authenticated Supabase save, reload and review submission", async () => {
-  let serverRow: PackageRow | undefined;
-  const upsert = vi.fn((row: PackageRow) => {
-    serverRow = structuredClone(row);
-    return chain;
-  });
-  const chain = {
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    upsert,
-    update: vi.fn((patch: Partial<PackageRow>) => {
-      serverRow = { ...serverRow!, ...patch };
+it.each([false, true])(
+  "persists multiple departures through authenticated Supabase save, reload and review submission (additive costs: %s)",
+  async (additive) => {
+    if (additive)
+      vi.mocked(destinationRepository.getAuthoritativeById).mockResolvedValue({
+        ...mockDestinationStore.getById("dest_lereng_hijau")!,
+        baseCostPerPerson: 100000,
+      });
+    let serverRow: PackageRow | undefined;
+    const upsert = vi.fn((row: PackageRow) => {
+      serverRow = structuredClone(row);
       return chain;
-    }),
-    single: vi.fn(async () => ({
-      data: structuredClone(serverRow),
-      error: null,
-    })),
-    maybeSingle: vi.fn(async () => ({
-      data: structuredClone(serverRow),
-      error: null,
-    })),
-  };
-  vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue({
-    from: () => chain,
-  } as unknown as SupabaseClient);
-  const options = [
-    {
-      id: "malang",
-      areaLabel: "Malang",
-      meetingPointLabel: "Alun-Alun",
-      departureTimeLabel: "07.00 WIB",
-      pricePerPerson: 249000,
-    },
-    {
-      id: "surabaya",
-      areaLabel: "Surabaya",
-      meetingPointLabel: "Gubeng",
-      departureTimeLabel: "05.00 WIB",
-      pricePerPerson: 451400,
-    },
-  ];
-  const saved = await packageRepository.saveDraft({
-    ...SEEDED_LIVE_PACKAGE,
-    packageId: undefined,
-    departureOptions: options,
-  });
-  expect(saved.success).toBe(true);
-  expect(serverRow).toMatchObject({
-    departure_options: options,
-    customer_price: 249000,
-    eo_id: "eo_jeda_alam",
-    status: "DRAFT",
-  });
-  mockEoPackageStore.reset();
-  const reloaded = await packageRepository.getPackageForEo(
-    saved.package!.packageId,
-    "eo_jeda_alam",
-  );
-  expect(reloaded?.departureOptions).toEqual(options);
-  const again = await packageRepository.saveDraft({
-    ...reloaded,
-    title: "Reloaded draft",
-  });
-  expect(again.package?.departureOptions?.map((o) => o.id)).toEqual([
-    "malang",
-    "surabaya",
-  ]);
-  expect(upsert).toHaveBeenCalledTimes(2);
-  expect(
-    (await packageRepository.submitForReview(saved.package!.packageId)).success,
-  ).toBe(true);
-  expect(serverRow?.status).toBe("PENDING_ADMIN_REVIEW");
-});
+    });
+    const chain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      upsert,
+      update: vi.fn((patch: Partial<PackageRow>) => {
+        serverRow = { ...serverRow!, ...patch };
+        return chain;
+      }),
+      single: vi.fn(async () => ({
+        data: structuredClone(serverRow),
+        error: null,
+      })),
+      maybeSingle: vi.fn(async () => ({
+        data: structuredClone(serverRow),
+        error: null,
+      })),
+    };
+    vi.spyOn(clientModule, "getSupabaseClient").mockReturnValue({
+      from: () => chain,
+    } as unknown as SupabaseClient);
+    const options = [
+      {
+        id: "malang",
+        areaLabel: "Malang",
+        meetingPointLabel: "Alun-Alun",
+        departureTimeLabel: "07.00 WIB",
+        pricePerPerson: 249000,
+        ...(additive ? { departureCostPerPerson: 175000 } : {}),
+      },
+      {
+        id: "surabaya",
+        areaLabel: "Surabaya",
+        meetingPointLabel: "Gubeng",
+        departureTimeLabel: "05.00 WIB",
+        pricePerPerson: 451400,
+        ...(additive ? { departureCostPerPerson: 110000 } : {}),
+      },
+    ];
+    const expectedOptions = options.map((option, index) => ({
+      ...option,
+      pricePerPerson: additive
+        ? index === 0
+          ? 425000
+          : 360000
+        : option.pricePerPerson,
+    }));
+    const saved = await packageRepository.saveDraft({
+      ...SEEDED_LIVE_PACKAGE,
+      packageId: undefined,
+      departureOptions: options,
+      guideSource: additive ? "EO" : SEEDED_LIVE_PACKAGE.guideSource,
+    });
+    expect(saved.success).toBe(true);
+    expect(serverRow).toMatchObject({
+      departure_options: expectedOptions,
+      customer_price: additive ? 360000 : 249000,
+      eo_id: "eo_jeda_alam",
+      status: "DRAFT",
+    });
+    mockEoPackageStore.reset();
+    const reloaded = await packageRepository.getPackageForEo(
+      saved.package!.packageId,
+      "eo_jeda_alam",
+    );
+    expect(reloaded?.departureOptions).toEqual(expectedOptions);
+    const again = await packageRepository.saveDraft({
+      ...reloaded,
+      title: "Reloaded draft",
+    });
+    expect(again.package?.departureOptions?.map((o) => o.id)).toEqual([
+      "malang",
+      "surabaya",
+    ]);
+    expect(upsert).toHaveBeenCalledTimes(2);
+    expect(again.package?.departureOptions).toEqual(expectedOptions);
+    expect(
+      (await packageRepository.submitForReview(saved.package!.packageId))
+        .success,
+    ).toBe(true);
+    expect(serverRow?.status).toBe("PENDING_ADMIN_REVIEW");
+  },
+);
 
 it("does not report a saved departure or mutate the mock cache when a Supabase write fails", async () => {
   const chain = {

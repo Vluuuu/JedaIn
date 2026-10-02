@@ -1,5 +1,8 @@
 import { isValidDepartureOption } from "../departure/departureOptions";
-import { minimumDeparturePrice } from "../departure/departureOptions";
+import {
+  minimumDeparturePrice,
+  priceDepartureOptions,
+} from "../departure/departureOptions";
 import { customPackageImageStore } from "../../lib/assets/packageImages";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
@@ -149,7 +152,7 @@ export function validateEoPackage(
         errors.push({
           step: 3,
           field: `departureOptions[${index}]`,
-          message: `Titik keberangkatan #${index + 1}: lengkapi area, titik kumpul, waktu kumpul, dan harga per orang lebih dari Rp0 dengan ID unik.`,
+          message: `Titik keberangkatan #${index + 1}: lengkapi area, titik kumpul, waktu kumpul, dan biaya keberangkatan yang valid dengan ID unik. Harga paket harus lebih dari Rp0.`,
         });
       ids.add(option.id);
     });
@@ -272,9 +275,22 @@ export function validateEoPackage(
     }
     const exactCustomerPrice =
       authoritativeBaseCost + authoritativeGuideFee + pkg.pricing.eoMargin;
+    const pricedOptions = priceDepartureOptions(
+      pkg.departureOptions,
+      exactCustomerPrice,
+    );
+    pkg.departureOptions?.forEach((option, index) => {
+      if (option.pricePerPerson !== pricedOptions?.[index].pricePerPerson)
+        errors.push({
+          step: 4,
+          field: `departureOptions[${index}].pricePerPerson`,
+          message:
+            "Harga paket harus sama dengan biaya destinasi, pemandu yang dipakai, margin TO, dan biaya keberangkatan.",
+        });
+    });
     if (
       pkg.pricing.customerPrice !==
-      minimumDeparturePrice(pkg.departureOptions, exactCustomerPrice)
+      minimumDeparturePrice(pricedOptions, exactCustomerPrice)
     ) {
       errors.push({
         step: 4,
@@ -612,11 +628,13 @@ export const mockEoPackageStore = {
       effectiveGuideSource === "DESTINATION"
         ? (dest?.localGuideFeePerPerson ?? 0)
         : 0;
-    const departureOptions =
+    const departureOptions = priceDepartureOptions(
       draft.departureOptions ??
-      (existingIndex !== -1
-        ? packages[existingIndex].departureOptions
-        : undefined);
+        (existingIndex !== -1
+          ? packages[existingIndex].departureOptions
+          : undefined),
+      baseCost + localGuideFee + margin,
+    );
     const customerPrice = minimumDeparturePrice(
       departureOptions,
       baseCost + localGuideFee + margin,

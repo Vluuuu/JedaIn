@@ -5,6 +5,8 @@ export interface DepartureOption {
   areaLabel: string;
   meetingPointLabel: string;
   departureTimeLabel: string;
+  // Omitted on legacy final-price options; null means an unfinished cost entry.
+  departureCostPerPerson?: number | null;
   pricePerPerson: number;
 }
 
@@ -14,6 +16,7 @@ export function createDepartureOption(): DepartureOption {
     areaLabel: "",
     meetingPointLabel: "",
     departureTimeLabel: "",
+    departureCostPerPerson: null,
     pricePerPerson: 0,
   };
 }
@@ -24,9 +27,37 @@ export function isValidDepartureOption(option: DepartureOption): boolean {
     option.areaLabel?.trim() &&
     option.meetingPointLabel?.trim() &&
     option.departureTimeLabel?.trim() &&
+    (option.departureCostPerPerson === undefined ||
+      (option.departureCostPerPerson !== null &&
+        Number.isSafeInteger(option.departureCostPerPerson) &&
+        option.departureCostPerPerson >= 0)) &&
     Number.isSafeInteger(option.pricePerPerson) &&
     option.pricePerPerson > 0,
   );
+}
+
+export function priceDepartureOptions(
+  options: DepartureOption[] | undefined,
+  sharedPrice: number,
+): DepartureOption[] | undefined {
+  return options?.map((option) => {
+    const cost = option.departureCostPerPerson;
+    if (cost === undefined) return { ...option };
+    const finalPrice = cost === null ? 0 : sharedPrice + cost;
+    return {
+      ...option,
+      pricePerPerson:
+        cost !== null &&
+        Number.isSafeInteger(cost) &&
+        cost >= 0 &&
+        Number.isSafeInteger(sharedPrice) &&
+        sharedPrice >= 0 &&
+        Number.isSafeInteger(finalPrice) &&
+        finalPrice > 0
+          ? finalPrice
+          : 0,
+    };
+  });
 }
 
 export function minimumDeparturePrice(
@@ -59,7 +90,12 @@ export function legacyDepartureOption(
 
 export function getEoDepartureOptions(pkg: EoPackageRecord): DepartureOption[] {
   return (
-    pkg.departureOptions ?? [
+    priceDepartureOptions(
+      pkg.departureOptions,
+      pkg.pricing.destinationBaseCost +
+        pkg.pricing.localGuideFee +
+        pkg.pricing.eoMargin,
+    ) ?? [
       legacyDepartureOption(
         pkg.packageId,
         pkg.pricing.customerPrice,
@@ -67,6 +103,26 @@ export function getEoDepartureOptions(pkg: EoPackageRecord): DepartureOption[] {
         pkg.departureTimeLabel,
       ),
     ]
+  );
+}
+
+export function travelerDepartureOptions(
+  options: DepartureOption[] | undefined,
+): DepartureOption[] | undefined {
+  return options?.map(
+    ({
+      id,
+      areaLabel,
+      meetingPointLabel,
+      departureTimeLabel,
+      pricePerPerson,
+    }) => ({
+      id,
+      areaLabel,
+      meetingPointLabel,
+      departureTimeLabel,
+      pricePerPerson,
+    }),
   );
 }
 

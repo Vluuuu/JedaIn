@@ -1,12 +1,24 @@
 # JedaIn — PRD HOLOGY Competition Prototype
 
+## Keputusan aktif: biaya keberangkatan ditambahkan ke harga paket (2 Oktober 2026)
+
+Klarifikasi user ini menggantikan harga opsi final yang diinput manual dan economics sebagai referensi saja pada keputusan 1 Oktober.
+
+- Langkah 3 mengisi biaya keberangkatan/transport per orang untuk setiap titik kumpul, bukan harga final paket. Langkah 4 menetapkan alokasi/margin TO; biaya destinasi dan pemandu yang dipakai tetap dari sumber destinasi kanonikal.
+- Harga paket setiap opsi = biaya dasar destinasi + pemandu destinasi hanya bila dipakai + margin TO + biaya keberangkatan opsi. Harga mulai dari adalah minimum harga akhir yang dihitung. Contoh tanpa pemandu: Rp100.000 + Rp150.000 + Rp110.000 = Rp360.000; opsi Rp175.000 menjadi Rp425.000.
+- Biaya keberangkatan adalah Rupiah utuh >= 0; isian kosong dibedakan dari biaya nol dan wajib dilengkapi sebelum submit. Margin belum berarti keuntungan bersih setelah operasional/komisi. Biaya layanan tetap Rp7.500 per peserta, terpisah saat checkout; kapasitas session tetap bersama.
+- Departure menyimpan biaya authored terpisah dari harga akhir. Draft DRAFT/REJECTED existing mengadopsi angka opsi sebelumnya sebagai biaya keberangkatan sesuai klarifikasi user. Paket disetujui/Live legacy tetap memakai harga final yang disepakati; perubahan material membutuhkan draft dan re-approval. Booking lama tetap memakai snapshot harga/fee saat dipesan, tanpa perhitungan ulang.
+- Backend dan shared domain menghitung ulang harga akhir; reload/save tidak menambahkan komponen dua kali. Traveler/preview hanya melihat harga akhir, bukan margin, komisi, atau biaya internal TO.
+
+Requirement terkait: REQ-TRV-07-13, REQ-EO-07/08/09/11, REQ-XR-01.
+
 ## Klarifikasi aktif Admin dan portal partner (2 Oktober 2026)
 
 - Portal publik `/partner` hanya menampilkan Travel Organizer. Akun Destinasi existing masuk melalui `/partner/destination/login`; pendaftaran destinasi mandiri tetap ditutup.
 - Dashboard Admin membaca daftar TO, paket Live, sesi aktif, dan destinasi dari backend yang sama. Hanya Admin terautentikasi dapat menambahkan destinasi terverifikasi dan siap pemandu. Data kosong/error tidak diganti angka ilustrasi.
 - User mengizinkan satu akun Auth Admin baru untuk akses dashboard. Akun EO dan Destinasi existing dipertahankan. Kredensial Admin tidak dipublikasikan ke aplikasi/repository.
 - Booking baru menyimpan tanggal mulai/selesai sesi bersama snapshot keberangkatan. Riwayat memakai tanggal pesanan, termasuk setelah sesi tidak muncul lagi di katalog sesi mendatang. Detail perjalanan memakai cover dan konten paket yang sama dengan katalog; data operasional pesanan tetap berasal dari snapshot.
-- Input harga/margin memakai format Rupiah utuh. Harga opsi yang belum diisi ditampilkan sebagai “Belum diisi”, dan tetap tidak boleh disubmit sebagai Rp0. Referensi economics tidak mengganti harga opsi otomatis.
+- Input harga/margin memakai format Rupiah utuh. Harga opsi yang belum diisi ditampilkan sebagai “Belum diisi”, dan tetap tidak boleh disubmit sebagai Rp0. Harga setiap opsi sekarang dihitung otomatis dari biaya bersama dan biaya keberangkatan sesuai klarifikasi aktif di atas.
 
 Klarifikasi ini menggantikan spesifikasi portal dua pilihan peran dan akses Admin simulasi untuk mode Supabase. Requirement terkait: REQ-TRV-06/07/13, REQ-EO-07/08/09, REQ-MIT-01/02, REQ-XR-01.
 

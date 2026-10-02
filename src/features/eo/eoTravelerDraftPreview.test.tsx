@@ -158,7 +158,7 @@ describe("F3.2 — EO Traveler-Facing Draft Preview", () => {
       Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
         "value",
-      )?.set?.call(price, "340000");
+      )?.set?.call(price, "0");
       price.dispatchEvent(new Event("input", { bubbles: true }));
     });
 

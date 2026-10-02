@@ -610,6 +610,13 @@ export function EoPackageDetailScreen() {
               {getEoDepartureOptions(pkg).map((option) => (
                 <div key={option.id} className="eo-departure-review">
                   <strong>{option.areaLabel || "Keberangkatan paket"}</strong>
+                  {option.departureCostPerPerson != null && (
+                    <span>
+                      Biaya keberangkatan Rp
+                      {option.departureCostPerPerson.toLocaleString("id-ID")} /
+                      orang
+                    </span>
+                  )}
                   <strong>
                     Rp{option.pricePerPerson.toLocaleString("id-ID")} / orang
                   </strong>

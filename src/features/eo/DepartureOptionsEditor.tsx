@@ -27,8 +27,9 @@ export function DepartureOptionsEditor({
         Titik Keberangkatan
       </h3>
       <p className="eo-builder-subgroup__desc">
-        Tambahkan satu atau beberapa pilihan keberangkatan. Harga dapat berbeda
-        sesuai titik keberangkatan.
+        Isi biaya perjalanan dari setiap titik kumpul per orang. Harga paket
+        otomatis menambahkan biaya destinasi, pemandu yang dipakai, dan margin
+        TO.
       </p>
       <div className="eo-departure-list">
         {options.map((option, index) => (
@@ -108,23 +109,32 @@ export function DepartureOptionsEditor({
                   className="eo-form-label"
                   htmlFor={`departure-price-${option.id}`}
                 >
-                  Harga per orang *
+                  Biaya keberangkatan per orang *
                 </label>
                 <div className="eo-departure-currency">
                   <span>Rp</span>
                   <RupiahInput
                     id={`departure-price-${option.id}`}
                     className="eo-form-input"
-                    value={option.pricePerPerson}
-                    onChange={(pricePerPerson) =>
-                      update(option.id, { pricePerPerson })
+                    value={option.departureCostPerPerson ?? 0}
+                    showZero={option.departureCostPerPerson != null}
+                    onEmpty={() =>
+                      update(option.id, { departureCostPerPerson: null })
                     }
-                    min={1}
+                    onChange={(departureCostPerPerson) =>
+                      update(option.id, { departureCostPerPerson })
+                    }
+                    min={0}
                     placeholder="0"
                     required
                   />
                   <span>/ orang</span>
                 </div>
+                <span className="eo-form-helper">
+                  Biaya transportasi/perjalanan dari titik kumpul, di luar biaya
+                  destinasi dan margin TO. Isi 0 jika tidak ada biaya
+                  keberangkatan.
+                </span>
               </div>
             </div>
             {options.length > 1 && (

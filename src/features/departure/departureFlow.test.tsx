@@ -51,6 +51,7 @@ import { DepartureChoices } from "./DepartureChoices";
 import {
   getEoDepartureOptions,
   minimumDeparturePrice,
+  priceDepartureOptions,
   type DepartureOption,
 } from "./departureOptions";
 
@@ -84,8 +85,17 @@ const pkg = {
 };
 let root: Root | undefined;
 let view: HTMLDivElement;
-beforeAll(() => Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }));
+beforeAll(() => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
+});
 beforeEach(() => {
+  mockDestinationStore.reset();
   window.sessionStorage.clear();
   mockTransactionStore.reset();
   mockEoPackageStore.reset();
@@ -111,6 +121,7 @@ afterEach(async () => {
   root = undefined;
   view?.remove();
   mockEoPackageStore.reset();
+  mockDestinationStore.reset();
   mockTransactionStore.reset();
   partnerSessionStore.reset();
   sessionStore.reset();
@@ -147,6 +158,128 @@ async function book(optionId = "surabaya", count = 2, key = "departure_key") {
 }
 
 describe("Departure options and per-person Traveler pricing", () => {
+  it("adds each departure cost to base, applicable guide fee and TO margin without double charging", () => {
+    const costs = options.map((option, index) => ({
+      ...option,
+      departureCostPerPerson: index === 0 ? 175000 : 110000,
+    }));
+    const priced = priceDepartureOptions(costs, 100000 + 150000)!;
+    expect(priced.map((option) => option.pricePerPerson)).toEqual([
+      425000, 360000,
+    ]);
+    expect(priceDepartureOptions(priced, 250000)).toEqual(priced);
+    expect(
+      priceDepartureOptions(costs, 275000)!.map(
+        (option) => option.pricePerPerson,
+      ),
+    ).toEqual([450000, 385000]);
+    expect(costs[1].pricePerPerson).toBe(451400);
+    expect(minimumDeparturePrice(priced)).toBe(360000);
+    expect(
+      calculatePaymentBreakdown(priced[1].pricePerPerson, 2),
+    ).toMatchObject({
+      subtotal: 720000,
+      serviceFee: 15000,
+      total: 735000,
+    });
+    expect(priceDepartureOptions(options, 250000)).toEqual(options);
+  });
+  it("distinguishes zero departure cost from an unset, negative or fractional cost", () => {
+    const costOptions = [0, null, -1, 1.5].map((departureCostPerPerson) => ({
+      ...options[0],
+      departureCostPerPerson,
+    }));
+    expect(
+      priceDepartureOptions(costOptions, 250000)!.map((o) => o.pricePerPerson),
+    ).toEqual([250000, 0, 0, 0]);
+  });
+  it("recalculates builder prices when margin changes and renders the same final prices in Traveler preview", async () => {
+    mockDestinationStore.upsertVerifiedDestination({
+      ...mockDestinationStore.getById(pkg.destinationId)!,
+      baseCostPerPerson: 100000,
+    });
+    mockEoPackageStore.upsertPackage({
+      ...pkg,
+      status: "DRAFT",
+      guideSource: "EO",
+      pricing: {
+        destinationBaseCost: 100000,
+        localGuideFee: 0,
+        eoMargin: 150000,
+        customerPrice: 110000,
+      },
+      departureOptions: options.map((o, index) => ({
+        ...o,
+        departureCostPerPerson: index === 0 ? 175000 : 110000,
+      })),
+    });
+    await render(
+      createElement(EoPackageBuilderScreen),
+      `/?draftId=${pkg.packageId}`,
+    );
+    await act(() => button("Skema Harga").click());
+    expect(view.textContent).toContain("Rp425.000 / orang");
+    expect(view.textContent).toContain("Rp360.000 / orang");
+    const margin = view.querySelector<HTMLInputElement>("#eo-margin-input")!;
+    await act(() => {
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!.call(margin, "200000");
+      margin.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(view.textContent).toContain("Rp410.000 / orang");
+    expect(view.textContent).toContain("Rp475.000 / orang");
+    await act(() => button("Tinjau & Submit").click());
+    await act(() => button("Preview sebagai Traveler").click());
+    const dialog = view.querySelector<HTMLDialogElement>("dialog[open]")!;
+    expect(dialog.textContent).toContain("Rp410.000");
+    expect(dialog.textContent).toContain("Rp475.000");
+    expect(dialog.textContent).not.toContain("Margin Travel Organizer");
+  });
+  it("uses the selected computed final price at checkout and retains booked snapshots after margin changes", async () => {
+    const newPkg = {
+      ...pkg,
+      guideSource: "EO" as const,
+      pricing: {
+        destinationBaseCost: 100000,
+        localGuideFee: 0,
+        eoMargin: 150000,
+        customerPrice: 1,
+      },
+      departureOptions: options.map((o, index) => ({
+        ...o,
+        departureCostPerPerson: index === 0 ? 175000 : 110000,
+      })),
+    };
+    mockEoPackageStore.upsertPackage(newPkg);
+    const result = await adapter().submitCheckout({
+      travelerId: traveler.id,
+      sessionId: "departure_session",
+      departureOptionId: "surabaya",
+      participantCount: 2,
+      expectedUnitPricePerPerson: 360000,
+      cancellationPolicyAcknowledged: true,
+      idempotencyKey: "additive_cost_checkout",
+    });
+    expect(result.status).toBe("SUCCESS");
+    const booking = mockTransactionStore.getBookingsByTraveler(traveler.id)[0];
+    expect(booking).toMatchObject({
+      unitPricePerPerson: 360000,
+      totalAmount: 735000,
+    });
+    mockEoPackageStore.upsertPackage({
+      ...newPkg,
+      pricing: { ...newPkg.pricing, eoMargin: 200000 },
+    });
+    expect(
+      mockTransactionStore.getBookingsByTraveler(traveler.id)[0]
+        .unitPricePerPerson,
+    ).toBe(360000);
+    expect(
+      buildTravelerPackageFromEo(newPkg)?.departureOptions?.[0],
+    ).not.toHaveProperty("departureCostPerPerson");
+  });
   it("keeps an anonymous direct-onboarding guest coherent after reload without skipping the quiz", async () => {
     sessionStore.reset();
     const onboarding = new MockOnboardingAdapter();

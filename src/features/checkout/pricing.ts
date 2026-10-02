@@ -15,7 +15,7 @@ export function calculatePaymentBreakdown(
   participantCount: number,
 ): PaymentBreakdown {
   const subtotal = unitPrice * participantCount;
-  const serviceFee = TRAVELER_SERVICE_FEE;
+  const serviceFee = TRAVELER_SERVICE_FEE * participantCount;
   const total = subtotal + serviceFee;
   return {
     unitPrice,
@@ -29,6 +29,7 @@ export function calculatePaymentBreakdown(
 export function getBookingPaymentBreakdown(
   booking: Pick<
     BookingRecord,
+    | "pricingVersion"
     | "unitPricePerPerson"
     | "participantCount"
     | "subtotal"
@@ -37,10 +38,16 @@ export function getBookingPaymentBreakdown(
     | "totalAmount"
   >,
 ): PaymentBreakdown {
-  return calculatePaymentBreakdown(
+  const breakdown = calculatePaymentBreakdown(
     booking.unitPricePerPerson,
     booking.participantCount,
   );
+  // Old bookings retain their agreed fee. Never reprice a paid legacy booking.
+  if (booking.pricingVersion !== "PER_PERSON") {
+    breakdown.serviceFee = TRAVELER_SERVICE_FEE;
+    breakdown.total = breakdown.subtotal + breakdown.serviceFee;
+  }
+  return breakdown;
 }
 
 export function formatRupiah(amount: number): string {

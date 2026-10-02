@@ -57,7 +57,7 @@ export function ContactVerificationScreen({
 
         // Check if already verified
         if (ctx.isAlreadyVerified) {
-          navigate(`/checkout/${sessionId}`, {
+          navigate(`/checkout/${sessionId}${location.search}`, {
             replace: true,
             state: isMatchingDraft ? { checkoutDraft } : undefined,
           });
@@ -77,7 +77,14 @@ export function ContactVerificationScreen({
     return () => {
       isMounted = false;
     };
-  }, [sessionId, adapter, navigate, isMatchingDraft, checkoutDraft]);
+  }, [
+    sessionId,
+    adapter,
+    navigate,
+    isMatchingDraft,
+    checkoutDraft,
+    location.search,
+  ]);
 
   const handleRequestOtp = async (inputPhone: string) => {
     const user = sessionStore.get().user;
@@ -131,7 +138,7 @@ export function ContactVerificationScreen({
         sessionStore.updateUserContact(activeSession.phone);
 
         // Return to SAME Checkout context carrying matching draft if available
-        navigate(`/checkout/${sessionId}`, {
+        navigate(`/checkout/${sessionId}${location.search}`, {
           replace: true,
           state: isMatchingDraft ? { checkoutDraft } : undefined,
         });
@@ -168,7 +175,7 @@ export function ContactVerificationScreen({
     if (!adapter.supportsDemoContactBypass || !user || !sessionId) return;
     demoContactVerificationBypass.register(user.id, sessionId);
     // Preserve current checkout / session context & matching draft without mutating verification records
-    navigate(`/checkout/${sessionId}`, {
+    navigate(`/checkout/${sessionId}${location.search}`, {
       state: isMatchingDraft ? { checkoutDraft } : undefined,
     });
   };
@@ -208,7 +215,7 @@ export function ContactVerificationScreen({
       {/* 1. Header & Back to Checkout */}
       <div className="contact-verification-topbar">
         <Link
-          to={`/checkout/${sessionId}`}
+          to={`/checkout/${sessionId}${location.search}`}
           state={isMatchingDraft ? { checkoutDraft } : undefined}
           className="contact-verification-back-btn"
           aria-label="Kembali ke Checkout"

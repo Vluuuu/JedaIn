@@ -1,23 +1,56 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { InlineStatus } from "../../components/ui";
+import { Button, InlineStatus } from "../../components/ui";
 import { PartnerEmptyState } from "../../components/ui/PartnerEmptyState";
+import { packageRepository } from "../../data/packageRepository";
+import { sessionRepository } from "../../data/sessionRepository";
+import { isSupabaseMode } from "../../lib/supabase/config";
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { partnerSessionStore } from "./partnerSessionStore";
+import type { EoPackageRecord, EoSessionRecord } from "./types";
 import "./eo.css";
 
 export function EoBookingsScreen() {
   const partner = partnerSessionStore.get();
   const eoId = partner?.id ?? "eo_jeda_alam";
 
-  const packages = mockEoPackageStore.getPackagesByEo(eoId);
+  const [packages, setPackages] = useState<EoPackageRecord[]>(() =>
+    isSupabaseMode() ? [] : [...mockEoPackageStore.getPackagesByEo(eoId)],
+  );
+  const [allSessions, setAllSessions] = useState<EoSessionRecord[]>(() =>
+    isSupabaseMode() ? [] : [...mockEoPackageStore.getAllSessions()],
+  );
+  const [loading, setLoading] = useState(() => isSupabaseMode());
+  const [loadError, setLoadError] = useState(false);
+  const [reload, setReload] = useState(0);
+  useEffect(() => {
+    let mounted = true;
+    Promise.all([
+      packageRepository.getPackagesByEo(eoId, { throwOnError: true }),
+      sessionRepository.getSessionsByEo(eoId, { throwOnError: true }),
+    ])
+      .then(([ownedPackages, sessions]) => {
+        if (!mounted) return;
+        setPackages(ownedPackages);
+        setAllSessions(sessions);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setLoadError(true);
+        setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [eoId, reload]);
   const eoPackageIds = new Set(packages.map((p) => p.packageId));
 
   // Filter bookings from shared transaction store that belong to this EO's packages
   const allBookings = mockTransactionStore.getBookings();
   const eoBookings = allBookings.filter((b) => eoPackageIds.has(b.packageId));
-  const allSessions = mockEoPackageStore.getAllSessions();
 
   return (
     <div className="eo-container">
@@ -33,7 +66,23 @@ export function EoBookingsScreen() {
 
       {/* Bookings Table */}
       <section className="eo-section" aria-label="Tabel pesanan traveler">
-        {eoBookings.length === 0 ? (
+        {loading ? (
+          <p role="status">Memuat booking dan jadwal paketmu...</p>
+        ) : loadError ? (
+          <div role="alert">
+            <p>Booking dan jadwal paket belum dapat dimuat. Coba lagi.</p>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setLoadError(false);
+                setLoading(true);
+                setReload((value) => value + 1);
+              }}
+            >
+              Coba lagi
+            </Button>
+          </div>
+        ) : eoBookings.length === 0 ? (
           <PartnerEmptyState
             title="Belum ada booking"
             action={
@@ -50,6 +99,7 @@ export function EoBookingsScreen() {
                   <th>No. Pesanan</th>
                   <th>Paket Experience</th>
                   <th>Jadwal Sesi Trip</th>
+                  <th>Titik Keberangkatan</th>
                   <th>Jumlah Peserta</th>
                   <th>Total Pembayaran</th>
                   <th>Status Transaksi</th>
@@ -99,6 +149,13 @@ export function EoBookingsScreen() {
                         >
                           Sesi: {b.sessionId}
                         </div>
+                      </td>
+                      <td>
+                        <strong>
+                          {b.departureAreaLabel || "Keberangkatan paket"}
+                        </strong>
+                        <div>{b.meetingPointLabel || "Belum dicantumkan"}</div>
+                        <div>{b.departureTimeLabel}</div>
                       </td>
                       <td>
                         <strong>{b.participantCount}</strong> Orang

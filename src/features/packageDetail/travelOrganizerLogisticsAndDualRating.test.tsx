@@ -314,9 +314,9 @@ describe("Travel Organizer Logistics, Dual Rating & Terminology Integration", ()
     expect(view.textContent).toContain(
       "Langkah 3: Perjalanan & Alur Itinerary",
     );
-    expect(view.textContent).toContain("Lengkapi titik kumpul perjalanan.");
+    expect(view.textContent).toContain("Titik keberangkatan #1:");
     expect(view.textContent).toContain(
-      "Lengkapi waktu kumpul atau keberangkatan.",
+      "lengkapi area, titik kumpul, waktu kumpul",
     );
     expect(view.textContent).toContain(
       "Jelaskan transportasi menuju destinasi.",

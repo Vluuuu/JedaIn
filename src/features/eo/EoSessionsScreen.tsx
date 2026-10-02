@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { packageRepository } from "../../data/packageRepository";
 import { sessionRepository } from "../../data/sessionRepository";
+import { destinationRepository } from "../../data/destinationRepository";
 import { isSupabaseMode } from "../../lib/supabase/config";
 import { ArrowLeftIcon } from "../../components/shells/icons";
 import { Button, InlineStatus } from "../../components/ui";
@@ -11,8 +12,9 @@ import type {
   EoPackageRecord,
   EoSessionRecord,
   EoSessionStatus,
+  DestinationRecord,
 } from "./types";
-import { getDestinationVisual } from "../../lib/assets/packageImages";
+import { getPackageVisual } from "../../lib/assets/packageImages";
 import { mockDestinationStore } from "./mockDestinationStore";
 import { mockEoPackageStore } from "./mockEoPackageStore";
 import { partnerSessionStore } from "./partnerSessionStore";
@@ -61,11 +63,18 @@ export function EoSessionsScreen() {
     ...(!isSupabaseMode() ? mockEoPackageStore.getPackagesByEo(eoId) : []),
   ]);
   const [packagesLoaded, setPackagesLoaded] = useState(() => !isSupabaseMode());
+  const [destinations, setDestinations] = useState<
+    readonly DestinationRecord[]
+  >(() => (isSupabaseMode() ? [] : mockDestinationStore.getAll()));
 
   useEffect(() => {
     let isMounted = true;
-    packageRepository.getPackagesByEo(eoId).then((res) => {
+    Promise.all([
+      packageRepository.getPackagesByEo(eoId),
+      destinationRepository.getAll(),
+    ]).then(([res, destinationRecords]) => {
       if (isMounted) {
+        setDestinations(destinationRecords);
         setAllEoPackages(res);
         setPackagesLoaded(true);
       }
@@ -390,12 +399,14 @@ export function EoSessionsScreen() {
             </button>
 
             {allEoPackages.map((pkg) => {
-              const destination = mockDestinationStore.getById(
-                pkg.destinationId,
+              const destination = destinations.find(
+                (destination) =>
+                  destination.destinationId === pkg.destinationId,
               );
-              const visual = getDestinationVisual(
-                destination?.name ?? pkg.title,
-                destination?.imageUrl,
+              const visual = getPackageVisual(
+                pkg.packageId,
+                destination?.name,
+                pkg.imageUrl || pkg.imageUrls?.[0] || destination?.imageUrl,
               );
               const isSelected = effectivePackageId === pkg.packageId;
               const canOpenSession =

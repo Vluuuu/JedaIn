@@ -1,3 +1,7 @@
+import {
+  minimumDeparturePrice,
+  priceDepartureOptions,
+} from "../features/departure/departureOptions";
 import { mockApplicationStore } from "../features/eo/mockApplicationStore";
 import {
   mockEoPackageStore,
@@ -47,13 +51,18 @@ export const packageRepository = {
     }
   },
 
-  async getPackagesByEo(eoId: string): Promise<EoPackageRecord[]> {
+  async getPackagesByEo(
+    eoId: string,
+    options: { throwOnError?: boolean } = {},
+  ): Promise<EoPackageRecord[]> {
     if (!isSupabaseMode()) {
       return [...mockEoPackageStore.getPackagesByEo(eoId)];
     }
 
     const supabase = getSupabaseClient();
     if (!supabase) {
+      if (options.throwOnError)
+        throw new Error("Daftar paket belum dapat dimuat.");
       return [];
     }
 
@@ -65,11 +74,14 @@ export const packageRepository = {
         .order("created_at", { ascending: false });
 
       if (error || !data) {
+        if (options.throwOnError)
+          throw new Error("Daftar paket belum dapat dimuat.");
         return [];
       }
 
       return (data as PackageRow[]).map(mapPackageRowToRecord);
-    } catch {
+    } catch (error) {
+      if (options.throwOnError) throw error;
       return [];
     }
   },
@@ -145,7 +157,7 @@ export const packageRepository = {
         return {
           success: false,
           message:
-            "Akses ditolak: Hanya EO terautentikasi yang dapat mengelola draf paket.",
+            "Akses ditolak: Hanya TO terautentikasi yang dapat mengelola draf paket.",
         };
       }
       return mockEoPackageStore.saveDraft(draft);
@@ -198,7 +210,7 @@ export const packageRepository = {
       const actorDisplayName =
         authCheck.partnerUser?.businessName ||
         app?.businessName ||
-        "EO Partner";
+        "TO Partner";
       const authorGuideStatus: EoGuideStatus =
         app?.guideStatus ??
         authCheck.partnerUser?.guideStatus ??
@@ -222,7 +234,14 @@ export const packageRepository = {
         effectiveGuideSource === "DESTINATION"
           ? (dest?.localGuideFeePerPerson ?? 0)
           : 0;
-      const customerPrice = baseCost + localGuideFee + margin;
+      const departureOptions = priceDepartureOptions(
+        draft.departureOptions ?? existingRecord?.departureOptions,
+        baseCost + localGuideFee + margin,
+      );
+      const customerPrice = minimumDeparturePrice(
+        departureOptions,
+        baseCost + localGuideFee + margin,
+      );
 
       const imageUrls =
         draft.imageUrls ??
@@ -262,6 +281,12 @@ export const packageRepository = {
           draft.safetyNotes !== undefined
             ? draft.safetyNotes
             : existingRecord?.safetyNotes || [],
+        departureOptions: departureOptions?.map((option) => ({
+          ...option,
+          areaLabel: option.areaLabel.trim(),
+          meetingPointLabel: option.meetingPointLabel.trim(),
+          departureTimeLabel: option.departureTimeLabel.trim(),
+        })),
         meetingPointLabel:
           draft.meetingPointLabel !== undefined
             ? draft.meetingPointLabel
@@ -342,7 +367,7 @@ export const packageRepository = {
               step: 1,
               field: "auth",
               message:
-                authCheck.error || "Pengguna belum terautentikasi sebagai EO.",
+                authCheck.error || "Pengguna belum terautentikasi sebagai TO.",
             },
           ],
         },
@@ -381,7 +406,7 @@ export const packageRepository = {
                 step: 1,
                 field: "packageId",
                 message:
-                  "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
+                  "Paket tidak ditemukan atau bukan milik TO terautentikasi.",
               },
             ],
           },
@@ -532,7 +557,7 @@ export const packageRepository = {
         return {
           success: false,
           message:
-            "Akses ditolak: Hanya EO terautentikasi yang dapat melakukan ACC Paket (Demo).",
+            "Akses ditolak: Hanya TO terautentikasi yang dapat melakukan ACC Paket (Demo).",
         };
       }
 
@@ -542,7 +567,7 @@ export const packageRepository = {
         return {
           success: false,
           message:
-            "Akses ditolak: Paket tidak ditemukan atau bukan milik EO ini.",
+            "Akses ditolak: Paket tidak ditemukan atau bukan milik TO ini.",
         };
       }
 
@@ -586,7 +611,7 @@ export const packageRepository = {
       return {
         success: false,
         message:
-          "Akses ditolak: Paket tidak ditemukan atau bukan milik EO ini.",
+          "Akses ditolak: Paket tidak ditemukan atau bukan milik TO ini.",
       };
     }
 
@@ -661,7 +686,7 @@ export const packageRepository = {
     if (!pkg) {
       return {
         success: false,
-        message: "Paket tidak ditemukan atau bukan milik EO ini.",
+        message: "Paket tidak ditemukan atau bukan milik TO ini.",
       };
     }
 

@@ -27,7 +27,7 @@ export const INITIAL_COMPLAINTS: ComplaintRecord[] = [
     status: "CLASSIFIED",
     createdAt: "2026-08-22T14:30:00Z",
     classifiedAt: "2026-08-23T10:00:00Z",
-    internalNote: "Telah dikoordinasikan dengan EO untuk briefing penjemputan.",
+    internalNote: "Telah dikoordinasikan dengan TO untuk briefing penjemputan.",
   },
 ];
 

@@ -1,3 +1,4 @@
+import { DepartureSummary } from "../departure/DepartureChoices";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Button, Skeleton } from "../../components/ui";
@@ -214,6 +215,7 @@ export function TripDetailScreen({
   const visual = getPackageVisual(
     pkg?.id ?? booking.packageId,
     pkg?.destinationName,
+    pkg?.visualAsset,
   );
 
   const handleSimulateTripCompletion = () => {
@@ -278,7 +280,7 @@ export function TripDetailScreen({
         <div className="trip-detail-hero__thumb">
           <img
             src={visual.svgDataUri}
-            alt={`Ilustrasi ${pkg?.title ?? booking.packageId}`}
+            alt={`Cover ${pkg?.title ?? booking.packageId}`}
             width={800}
             height={500}
           />
@@ -306,6 +308,11 @@ export function TripDetailScreen({
           {pkg?.destinationName && (
             <p className="trip-detail-meta">
               {pkg.destinationName} • {pkg.locationLabel}
+            </p>
+          )}
+          {(pkg?.shortSummary || detail?.valueProposition) && (
+            <p className="trip-detail-summary">
+              {pkg?.shortSummary || detail?.valueProposition}
             </p>
           )}
         </div>
@@ -422,7 +429,7 @@ export function TripDetailScreen({
         aria-label="Ringkasan perjalanan utama"
       >
         <div className="trip-detail-journey-pass__heading">
-          <span>Catatan perjalananmu</span>
+          <span>Jadwal & titik kumpul</span>
           <img src={PlanMascot} alt="" aria-hidden="true" />
         </div>
         <div className="trip-detail-journey-pass__date-row">
@@ -438,7 +445,9 @@ export function TripDetailScreen({
           )}
           <div className="trip-detail-journey-pass__date-copy">
             <span>Tanggal perjalanan</span>
-            <strong>{sessionDateLabel ?? "Jadwal belum tersedia"}</strong>
+            <strong>
+              {sessionDateLabel ?? "Jadwal tidak tersimpan pada pesanan ini"}
+            </strong>
           </div>
         </div>
         <div className="trip-detail-journey-pass__meeting">
@@ -459,14 +468,16 @@ export function TripDetailScreen({
           <div>
             <span>Titik kumpul</span>
             <strong>
-              {detail?.meetingPointLabel ??
+              {(booking.departureOptionId
+                ? booking.meetingPointLabel
+                : detail?.meetingPointLabel) ??
                 "Belum dicantumkan pada detail experience."}
             </strong>
           </div>
         </div>
       </section>
 
-      <details className="trip-detail-disclosure">
+      <details className="trip-detail-disclosure" open>
         <summary className="trip-detail-disclosure__summary">
           <span>Lihat Detail Perjalanan</span>
           <span className="trip-detail-disclosure__hint">
@@ -526,7 +537,9 @@ export function TripDetailScreen({
 
           {/* 5. Informasi Keberangkatan (Trip Brief) */}
           {(sessionDateLabel ||
-            detail?.meetingPointLabel ||
+            (booking.departureOptionId
+              ? booking.meetingPointLabel
+              : detail?.meetingPointLabel) ||
             pkg?.destinationName ||
             (detail?.accessNotes && detail.accessNotes.length > 0)) && (
             <section
@@ -540,6 +553,15 @@ export function TripDetailScreen({
                 Informasi Keberangkatan
               </h2>
 
+              {booking.departureOptionId && (
+                <DepartureSummary
+                  departure={{
+                    areaLabel: booking.departureAreaLabel ?? "",
+                    meetingPointLabel: booking.meetingPointLabel ?? "",
+                    departureTimeLabel: booking.departureTimeLabel ?? "",
+                  }}
+                />
+              )}
               <div className="trip-detail-brief-grid">
                 {sessionDateLabel && (
                   <div className="trip-detail-brief-card">
@@ -552,13 +574,19 @@ export function TripDetailScreen({
                   </div>
                 )}
 
-                {detail?.meetingPointLabel ? (
+                {(
+                  booking.departureOptionId
+                    ? booking.meetingPointLabel
+                    : detail?.meetingPointLabel
+                ) ? (
                   <div className="trip-detail-brief-card">
                     <span className="trip-detail-brief-label">
                       Titik Kumpul
                     </span>
                     <strong className="trip-detail-brief-val">
-                      {detail.meetingPointLabel}
+                      {booking.departureOptionId
+                        ? booking.meetingPointLabel
+                        : detail?.meetingPointLabel}
                     </strong>
                   </div>
                 ) : (
@@ -852,6 +880,25 @@ export function TripDetailScreen({
                   </div>
                 )}
               </div>
+            </section>
+          )}
+
+          {(detail?.outboundTransport || detail?.returnTransport) && (
+            <section
+              className="trip-detail-section"
+              aria-label="Transportasi perjalanan"
+            >
+              <h2 className="trip-detail-section__title">Transportasi</h2>
+              {detail.outboundTransport && (
+                <p>
+                  <strong>Berangkat:</strong> {detail.outboundTransport}
+                </p>
+              )}
+              {detail.returnTransport && (
+                <p>
+                  <strong>Pulang:</strong> {detail.returnTransport}
+                </p>
+              )}
             </section>
           )}
 

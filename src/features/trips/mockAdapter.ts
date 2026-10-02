@@ -1,9 +1,13 @@
 import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { mockApplicationStore } from "../eo/mockApplicationStore";
+import { mockEoPackageStore } from "../eo/mockEoPackageStore";
+import type { BookingRecord } from "../checkout/types";
+import type { PackageSessionPreview } from "../packageDetail/types";
 import { resolveOrganizerReviewRef } from "../identity/identityResolvers";
 import {
   getCombinedCatalogPackages,
   getCombinedPackageDetails,
+  syncMarketplaceFromSupabase,
 } from "../marketplace/marketplaceAdapter";
 import { sessionStore } from "../onboarding/sessionStore";
 import type { PackageDetailSource } from "../packageDetail/types";
@@ -53,11 +57,7 @@ export class MockTripsAdapter implements TripsAdapter {
     const details = this.resolveDetails();
     const pkg = packages.find((p) => p.id === booking.packageId);
     const detail = details[booking.packageId];
-    const session =
-      overrideSession ??
-      detail?.upcomingSessionPreviews?.find(
-        (s) => s.sessionId === booking.sessionId,
-      );
+    const session = this.resolveBookedSession(booking, detail, overrideSession);
     return {
       booking,
       package: pkg,
@@ -67,6 +67,8 @@ export class MockTripsAdapter implements TripsAdapter {
   }
 
   async getMyTrips(): Promise<MyTripsViewModel> {
+    if (!this.explicitPackages && !this.explicitDetails)
+      await syncMarketplaceFromSupabase();
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
@@ -122,7 +124,53 @@ export class MockTripsAdapter implements TripsAdapter {
     };
   }
 
+  private resolveBookedSession(
+    booking: BookingRecord,
+    detail?: PackageDetailSource,
+    override?: PackageSessionPreview,
+  ): PackageSessionPreview | undefined {
+    if (
+      booking.sessionStartAt &&
+      booking.sessionEndAt &&
+      Date.parse(booking.sessionEndAt) > Date.parse(booking.sessionStartAt)
+    ) {
+      return {
+        sessionId: booking.sessionId,
+        packageId: booking.packageId,
+        startAt: booking.sessionStartAt,
+        endAt: booking.sessionEndAt,
+        status: booking.status === "COMPLETED" ? "CLOSED" : "OPEN",
+        pricePerPerson: booking.unitPricePerPerson,
+      };
+    }
+    if (override) return override;
+    const history = createDemoTravelerHistory(booking.travelerId);
+    if (
+      booking.bookingId === history.booking.bookingId &&
+      booking.packageId === history.booking.packageId &&
+      booking.sessionId === history.session.sessionId
+    )
+      return history.session;
+    const stored = !this.explicitDetails
+      ? mockEoPackageStore
+          .getAllSessions()
+          .find(
+            (s) =>
+              s.sessionId === booking.sessionId &&
+              s.packageId === booking.packageId,
+          )
+      : undefined;
+    return (
+      stored ??
+      detail?.upcomingSessionPreviews?.find(
+        (s) => s.sessionId === booking.sessionId,
+      )
+    );
+  }
+
   async getTripDetail(bookingId: string): Promise<TripDetailViewModel | null> {
+    if (!this.explicitPackages && !this.explicitDetails)
+      await syncMarketplaceFromSupabase();
     if (this.delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     }
@@ -135,8 +183,8 @@ export class MockTripsAdapter implements TripsAdapter {
     let sessionOverride:
       import("../packageDetail/types").PackageSessionPreview | undefined;
 
-    if (!booking && bookingId === demo.booking.bookingId) {
-      booking = demo.booking;
+    if (bookingId === demo.booking.bookingId) {
+      booking ??= demo.booking;
       sessionOverride = demo.session;
     }
 
@@ -152,11 +200,7 @@ export class MockTripsAdapter implements TripsAdapter {
 
     const pkg = packages.find((p) => p.id === booking.packageId);
     const detail = details[booking.packageId];
-    const session =
-      sessionOverride ??
-      detail?.upcomingSessionPreviews?.find(
-        (s) => s.sessionId === booking.sessionId,
-      );
+    const session = this.resolveBookedSession(booking, detail, sessionOverride);
 
     const hasDestinationReview = mockReviewStore.hasReviewForBookingTarget(
       booking.bookingId,

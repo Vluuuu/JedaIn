@@ -172,12 +172,13 @@ export function MyTripsScreen({
               activePendingTrip.package?.id ??
                 activePendingTrip.booking.packageId,
               activePendingTrip.package?.destinationName,
+              activePendingTrip.package?.visualAsset,
             );
             return (
               <div className="my-trips-pending-card__thumb">
                 <img
                   src={visual.svgDataUri}
-                  alt={`Ilustrasi ${activePendingTrip.package?.title ?? activePendingTrip.booking.packageId}`}
+                  alt={`Cover ${activePendingTrip.package?.title ?? activePendingTrip.booking.packageId}`}
                   width={800}
                   height={500}
                 />
@@ -320,6 +321,7 @@ export function MyTripsScreen({
             const visual = getPackageVisual(
               pkg?.id ?? booking.packageId,
               pkg?.destinationName,
+              pkg?.visualAsset,
             );
 
             const isUpcoming = booking.status === "PAID";
@@ -345,7 +347,7 @@ export function MyTripsScreen({
                 <div className="my-trip-card__thumb">
                   <img
                     src={visual.svgDataUri}
-                    alt={`Ilustrasi ${pkg?.title ?? booking.packageId}`}
+                    alt={`Cover ${pkg?.title ?? booking.packageId}`}
                     width={800}
                     height={500}
                     loading="lazy"
@@ -376,6 +378,17 @@ export function MyTripsScreen({
                   </div>
 
                   <div className="my-trip-card__facts">
+                    {booking.meetingPointLabel && (
+                      <p className="my-trip-card__meta">
+                        {booking.departureAreaLabel
+                          ? `${booking.departureAreaLabel} · `
+                          : ""}
+                        {booking.meetingPointLabel}
+                        {booking.departureTimeLabel
+                          ? ` · ${booking.departureTimeLabel}`
+                          : ""}
+                      </p>
+                    )}
                     {dateRange && (
                       <div className="my-trip-card__fact-item">
                         <span

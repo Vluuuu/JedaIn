@@ -292,7 +292,7 @@ export function EoInsightsScreen() {
               </p>
             </div>
             <div className="eo-demand-creative-brief-note">
-              Insight adalah creative brief dari kebutuhan traveler. EO tetap
+              Insight adalah creative brief dari kebutuhan traveler. TO tetap
               menentukan konsep, itinerary, dan pengalaman akhirnya.
             </div>
           </div>
@@ -384,7 +384,7 @@ export function EoInsightsScreen() {
                   <div className="eo-demand-featured-card__action-row">
                     <p className="eo-demand-featured-card__action-hint">
                       Gunakan insight sebagai arahan. Itinerary tetap disusun
-                      oleh EO.
+                      oleh TO.
                     </p>
                     <Button
                       type="button"

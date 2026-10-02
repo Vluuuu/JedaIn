@@ -1,6 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { partnerSessionStore } from "../../features/eo/partnerSessionStore";
 import type { PartnerUser } from "../../features/eo/types";
+import { getPartnerRoleLabel } from "../../features/identity/partnerLabels";
 import { getSupabaseClient } from "./client";
 import { isSupabaseMode } from "./config";
 import type { PartnerProfileRow } from "./database.types";
@@ -394,7 +395,7 @@ export async function getBackendAuthStatus(): Promise<BackendAuthStatus> {
  * and that the user is mapped to the requested role.
  */
 export async function requireAuthenticatedUser(
-  requiredRole?: "EO" | "DESTINATION",
+  requiredRole?: "EO" | "DESTINATION" | "ADMIN",
 ): Promise<{
   success: boolean;
   userId?: string;
@@ -412,7 +413,7 @@ export async function requireAuthenticatedUser(
     if (requiredRole && actor.role !== requiredRole) {
       return {
         success: false,
-        error: `Akses ditolak: Hanya ${requiredRole} yang dapat melakukan aksi ini.`,
+        error: `Akses ditolak: Hanya ${getPartnerRoleLabel(requiredRole)} yang dapat melakukan aksi ini.`,
       };
     }
     return {
@@ -493,7 +494,7 @@ export async function requireAuthenticatedUser(
       if (requiredRole && candidate.role !== requiredRole) {
         return {
           success: false,
-          error: `Akses ditolak: Peran akun (${candidate.role}) tidak memiliki izin sebagai ${requiredRole}.`,
+          error: `Akses ditolak: Peran akun (${getPartnerRoleLabel(candidate.role)}) tidak memiliki izin sebagai ${getPartnerRoleLabel(requiredRole)}.`,
         };
       }
 
@@ -551,7 +552,7 @@ export async function requireAuthenticatedUser(
   if (requiredRole && pRow.role !== requiredRole) {
     return {
       success: false,
-      error: `Akses ditolak: Peran akun (${pRow.role}) tidak memiliki izin sebagai ${requiredRole}.`,
+      error: `Akses ditolak: Peran akun (${getPartnerRoleLabel(pRow.role)}) tidak memiliki izin sebagai ${getPartnerRoleLabel(requiredRole)}.`,
     };
   }
 

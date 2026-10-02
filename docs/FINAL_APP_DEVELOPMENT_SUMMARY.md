@@ -1,5 +1,7 @@
 # JedaIn — Final App Development Summary (HOLOGY 9.0)
 
+> Riwayat sebelum perubahan 1 Oktober 2026. Kontrak aktif di PRD_HOLOGY_PROTOTYPE.md menggantikan harga tunggal, fee per transaksi, dan pengajuan destinasi mandiri. Fee saat ini Rp7.500 per orang; harga ditulis per opsi keberangkatan.
+
 **Status:** FINAL / FEATURE FREEZE  
 **Date:** 25 September 2026  
 **Final app baseline:** `85e475bcc32a65bea7c14a1050cea295a03748c4`

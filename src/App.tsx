@@ -1,3 +1,4 @@
+import { DestinationAuthorityScreen } from "./features/destination/DestinationAuthorityScreen";
 import { Link, Navigate, Route, Routes } from "react-router";
 import { DataModeNotice } from "./components/ui";
 import { isEoSubdomain } from "./lib/config/subdomain";
@@ -30,7 +31,6 @@ import { TravelerLoginScreen } from "./features/auth";
 import { CheckoutScreen } from "./features/checkout";
 import { ContactVerificationScreen } from "./features/contactVerification";
 import {
-  DestinationApplicationScreen,
   DestinationCapacityScreen,
   DestinationOverviewScreen,
   DestinationProfileScreen,
@@ -286,6 +286,15 @@ export function App() {
           <Route index element={<PartnerPortalLandingScreen />} />
         </Route>
         <Route
+          path="partner/destination/login"
+          element={<DistractionFreeShell hideHeader />}
+        >
+          <Route
+            index
+            element={<PartnerPortalLandingScreen destinationLogin />}
+          />
+        </Route>
+        <Route
           path="partner/login"
           element={<Navigate to="/partner" replace />}
         />
@@ -302,7 +311,7 @@ export function App() {
           path="partner/apply/destination"
           element={<DistractionFreeShell />}
         >
-          <Route index element={<DestinationApplicationScreen />} />
+          <Route index element={<DestinationAuthorityScreen />} />
         </Route>
         <Route path="partner/application" element={<DistractionFreeShell />}>
           <Route index element={<PartnerApplicationStatusScreen />} />

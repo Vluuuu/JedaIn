@@ -1,3 +1,4 @@
+import type { DepartureOption } from "../departure/departureOptions";
 import type {
   BudgetBand,
   CurrentIntent,
@@ -26,6 +27,7 @@ export interface PackageRecommendationSource {
   status: PackageStatus;
   verificationLevel: VerificationLevel;
   pricePerPerson: number;
+  departureOptions?: DepartureOption[];
   durationType: DurationPreference;
   departureAreas: DepartureAreaId[];
   experienceIntents: CurrentIntent[];

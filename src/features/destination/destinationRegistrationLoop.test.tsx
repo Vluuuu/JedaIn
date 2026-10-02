@@ -7,7 +7,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { partnerSessionStore, DEMO_EO_USER } from "../eo/partnerSessionStore";
 import { PartnerPortalLandingScreen } from "../eo/PartnerPortalLandingScreen";
 import { PartnerLoginScreen } from "../eo/PartnerLoginScreen";
-import { DestinationApplicationScreen } from "./DestinationApplicationScreen";
+import { DestinationAuthorityScreen } from "./DestinationAuthorityScreen";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -22,8 +22,8 @@ afterEach(async () => {
   partnerSessionStore.reset();
 });
 
-describe("P0-04 Fix Destination Registration Loop", () => {
-  it("Check 1: Partner Portal -> Daftar Destinasi establishes DESTINATION identity and enters application form without loop", async () => {
+describe("Destination authority and existing account login", () => {
+  it("Partner Portal destination login has no self-registration action", async () => {
     // Start with default EO demo session
     expect(partnerSessionStore.get()?.role).toBe("EO");
 
@@ -35,17 +35,19 @@ describe("P0-04 Fix Destination Registration Loop", () => {
       root.render(
         createElement(
           MemoryRouter,
-          { initialEntries: ["/partner"] },
+          { initialEntries: ["/partner/destination/login"] },
           createElement(
             Routes,
             undefined,
             createElement(Route, {
-              path: "/partner",
-              element: createElement(PartnerPortalLandingScreen),
+              path: "/partner/destination/login",
+              element: createElement(PartnerPortalLandingScreen, {
+                destinationLogin: true,
+              }),
             }),
             createElement(Route, {
               path: "/partner/apply/destination",
-              element: createElement(DestinationApplicationScreen),
+              element: createElement(DestinationAuthorityScreen),
             }),
           ),
         ),
@@ -59,33 +61,19 @@ describe("P0-04 Fix Destination Registration Loop", () => {
     const enterDestBtn = buttons.find((b) =>
       b.textContent?.includes("Masuk sebagai Mitra Destinasi"),
     );
-    expect(enterDestBtn).toBeDefined();
-
-    await act(async () => {
-      enterDestBtn!.click();
-    });
+    expect(enterDestBtn).toBeUndefined();
 
     const registerDestBtn = Array.from(
       container.querySelectorAll<HTMLButtonElement>("button"),
     ).find((b) => b.textContent?.includes("Ajukan kemitraan"));
-    expect(registerDestBtn).toBeDefined();
-
-    await act(async () => {
-      registerDestBtn!.click();
-    });
-
-    // Verify session switched to DESTINATION role
-    expect(partnerSessionStore.get()?.role).toBe("DESTINATION");
-
-    // Verify destination application form rendered (Step 1 is present, NOT the login loop guard)
-    expect(container.textContent).toContain("Pengajuan Mitra Destinasi Lokal");
-    expect(container.textContent).toContain("1. Pengelola & Legalitas");
-    expect(container.textContent).not.toContain(
-      "Silakan masuk atau buat akun kemitraan destinasi terlebih dahulu",
+    expect(registerDestBtn).toBeUndefined();
+    expect(partnerSessionStore.get()?.role).toBe("EO");
+    expect(container.textContent).toContain(
+      "Destinasi diverifikasi dan ditambahkan oleh tim JedaIn.",
     );
   });
 
-  it("Check 1b: Direct entry to /partner/apply/destination with non-destination session offers direct registration without loop", async () => {
+  it("Direct entry to the old registration route explains Admin authority", async () => {
     partnerSessionStore.logout();
     expect(partnerSessionStore.get()).toBeNull();
 
@@ -103,31 +91,21 @@ describe("P0-04 Fix Destination Registration Loop", () => {
             undefined,
             createElement(Route, {
               path: "/partner/apply/destination",
-              element: createElement(DestinationApplicationScreen),
+              element: createElement(DestinationAuthorityScreen),
             }),
           ),
         ),
       );
     });
 
-    // Guard screen is shown with action to start registration directly
-    expect(container.textContent).toContain("Pendaftaran Mitra Destinasi");
-    const startBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Daftar Destinasi Baru"),
+    expect(container.textContent).toContain(
+      "Destinasi dikurasi oleh tim JedaIn",
     );
-    expect(startBtn).toBeDefined();
-
-    await act(async () => {
-      startBtn!.click();
-    });
-
-    // Now application step 1 is displayed immediately
-    expect(partnerSessionStore.get()?.role).toBe("DESTINATION");
-    expect(container.textContent).toContain("Pengajuan Mitra Destinasi Lokal");
-    expect(container.textContent).toContain("1. Pengelola & Legalitas");
+    expect(container.querySelector("form")).toBeNull();
+    expect(partnerSessionStore.get()).toBeNull();
   });
 
-  it("Check 1c: registration from the partner login form establishes a destination identity", async () => {
+  it("Destination login does not create a new partner identity", async () => {
     partnerSessionStore.logout();
 
     container = document.createElement("div");
@@ -148,7 +126,7 @@ describe("P0-04 Fix Destination Registration Loop", () => {
             }),
             createElement(Route, {
               path: "/partner/apply/destination",
-              element: createElement(DestinationApplicationScreen),
+              element: createElement(DestinationAuthorityScreen),
             }),
           ),
         ),
@@ -158,14 +136,9 @@ describe("P0-04 Fix Destination Registration Loop", () => {
     const registerButton = Array.from(
       container.querySelectorAll("button"),
     ).find((button) => button.textContent?.includes("Ajukan kemitraan"));
-    expect(registerButton).toBeDefined();
-
-    await act(async () => {
-      registerButton!.click();
-    });
-
-    expect(partnerSessionStore.get()?.role).toBe("DESTINATION");
-    expect(container.textContent).toContain("Pengajuan Mitra Destinasi Lokal");
+    expect(registerButton).toBeUndefined();
+    expect(partnerSessionStore.get()).toBeNull();
+    expect(container.textContent).toContain("tim JedaIn");
   });
 
   it("Check 2: Existing destination account logs in to destination workspace", async () => {

@@ -15,6 +15,7 @@ import { TripDetailScreen } from "./TripDetailScreen";
 import type { TripsAdapter } from "./types";
 import { MOCK_PACKAGE_DETAILS } from "../packageDetail/mockPackageDetails";
 import { getCombinedPackageDetails } from "../marketplace/marketplaceAdapter";
+import { createDemoTravelerHistory } from "./demoHistory";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -95,6 +96,65 @@ async function renderMyTrips(
 }
 
 describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
+  it("keeps the completed demo schedule after the booking enters the transaction store", async () => {
+    const travelerId = "usr_history_stored";
+    sessionStore.setUser({ id: travelerId, onboardingStatus: "COMPLETED" });
+    const demo = createDemoTravelerHistory(travelerId);
+    mockTransactionStore.addDirectBooking(demo.booking);
+    const adapter = new MockTripsAdapter();
+    expect(
+      (await adapter.getMyTrips()).completedTrips[0].session?.startAt,
+    ).toBe(demo.session.startAt);
+    expect(
+      (await adapter.getTripDetail(demo.booking.bookingId))?.session?.startAt,
+    ).toBe(demo.session.startAt);
+    const { container } = await renderMyTrips({ adapter }, [
+      `/trips/${demo.booking.bookingId}`,
+    ]);
+    expect(container.textContent).not.toContain("Jadwal belum tersedia");
+    expect(container.textContent).toContain("20 Agustus 2026");
+  });
+  it("uses the booking schedule and authored cover when a past session disappears from upcoming previews", async () => {
+    const travelerId = "usr_snapshot_history";
+    sessionStore.setUser({ id: travelerId, onboardingStatus: "COMPLETED" });
+    const demo = createDemoTravelerHistory(travelerId);
+    const booking = {
+      ...demo.booking,
+      bookingId: "bk_custom_history",
+      sessionStartAt: demo.session.startAt,
+      sessionEndAt: demo.session.endAt,
+    };
+    mockTransactionStore.addDirectBooking(booking);
+    const adapter = new MockTripsAdapter({
+      packages: [
+        {
+          ...(await new MockTripsAdapter().getTripDetail(
+            demo.booking.bookingId,
+          ))!.package!,
+          visualAsset: "https://example.com/budug-asu.jpg",
+        },
+      ],
+      details: {
+        ...MOCK_PACKAGE_DETAILS,
+        slow_green_day: {
+          ...MOCK_PACKAGE_DETAILS.slow_green_day,
+          upcomingSessionPreviews: [],
+        },
+      },
+    });
+    const detail = await adapter.getTripDetail(booking.bookingId);
+    expect(detail?.session?.startAt).toBe(booking.sessionStartAt);
+    const { container } = await renderMyTrips({ adapter }, [
+      `/trips/${booking.bookingId}`,
+    ]);
+    expect(
+      container.querySelector(".trip-detail-hero img")?.getAttribute("src"),
+    ).toBe("https://example.com/budug-asu.jpg");
+    expect(
+      container.querySelector<HTMLDetailsElement>(".trip-detail-disclosure")
+        ?.open,
+    ).toBe(true);
+  });
   it("1. My Trips renders Pending Payment banner, Upcoming tab, Completed tab with demo history, and History tab", async () => {
     const traveler: AuthUser = {
       id: "usr_trips_1",
@@ -148,7 +208,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       expect(image?.getAttribute("src")).toBe(
         getPackageVisual("slow_green_day", "Lereng Hijau Batu").svgDataUri,
       );
-      expect(image?.alt).toBe("Ilustrasi Sehari Pelan di Lereng Hijau");
+      expect(image?.alt).toBe("Cover Sehari Pelan di Lereng Hijau");
     }
 
     // Click Lanjutkan Pembayaran navigates to /payment/:bookingId
@@ -194,7 +254,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     expect(image?.getAttribute("src")).toBe(
       getPackageVisual("slow_green_day", "Lereng Hijau Batu").svgDataUri,
     );
-    expect(image?.alt).toBe("Ilustrasi Sehari Pelan di Lereng Hijau");
+    expect(image?.alt).toBe("Cover Sehari Pelan di Lereng Hijau");
   });
 
   it("3. Completed Trip Detail (T18) shows two distinct review cards (Destination & EO/Guide)", async () => {
@@ -251,7 +311,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       "details.trip-detail-disclosure",
     );
     expect(disclosure).not.toBeNull();
-    expect(disclosure?.open).toBe(false);
+    expect(disclosure?.open).toBe(true);
     expect(disclosure?.querySelector("summary")?.textContent).toContain(
       "Lihat Detail Perjalanan",
     );
@@ -289,7 +349,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
     );
     expect(reviews).not.toBeNull();
     expect(disclosure).not.toBeNull();
-    expect(disclosure?.open).toBe(false);
+    expect(disclosure?.open).toBe(true);
     expect(
       Boolean(
         reviews &&
@@ -843,7 +903,7 @@ describe("My Trips & Trip Detail (T16, T17, T18) Tests", () => {
       expect(image?.getAttribute("src")).toBe(
         getPackageVisual("pkg_no_eo_map").svgDataUri,
       );
-      expect(image?.alt).toBe("Ilustrasi pkg_no_eo_map");
+      expect(image?.alt).toBe("Cover pkg_no_eo_map");
     });
 
     it("V6. Non-APPROVED EO application does not expose contact", async () => {

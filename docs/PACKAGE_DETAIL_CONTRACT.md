@@ -1,8 +1,10 @@
 # JedaIn — Traveler Package Detail Contract
 
+> Kontrak aktif 1 Oktober 2026: harga Travel Organizer ditetapkan per opsi keberangkatan; biaya dasar + pemandu + margin menjadi referensi internal. Fee Traveler Rp7.500 per orang. Riwayat harga tunggal atau fee per transaksi di bawah sudah superseded oleh PRD_HOLOGY_PROTOTYPE.md.
+
 ## Keputusan media dan trust aktif (27 September 2026)
 
-Traveler Package Hero tidak menampilkan label BASIC/PLUS. Bila package dinamis punya `visualAssets`, tampilkan cover `visualAsset` dan setiap media pilihan EO yang unik sebagai galeri aktual. Untuk fixture lama dengan satu ilustrasi, beberapa crop boleh ditampilkan hanya dengan penjelasan bahwa itu satu ilustrasi prototype. Harga package sudah mencakup tarif pemandu destinasi saat pemandu tersebut dipilih; service fee Rp7.500/booking ditampilkan terpisah di checkout. Mapping tier dan tes badge pada bagian historis di bawah digantikan keputusan ini; verifikasi tetap gate internal. 360° ditunda.
+Traveler Package Hero tidak menampilkan label BASIC/PLUS. Bila package dinamis punya `visualAssets`, tampilkan cover `visualAsset` dan setiap media pilihan EO yang unik sebagai galeri aktual. Untuk fixture lama dengan satu ilustrasi, beberapa crop boleh ditampilkan hanya dengan penjelasan bahwa itu satu ilustrasi prototype. Harga package sudah mencakup tarif pemandu destinasi saat pemandu tersebut dipilih; service fee Rp7.500 per orang ditampilkan terpisah di checkout. Mapping tier dan tes badge pada bagian historis di bawah digantikan keputusan ini; verifikasi tetap gate internal. 360° ditunda.
 
 **Version:** 1.0  
 **Date:** 31 Agustus 2026  

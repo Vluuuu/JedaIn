@@ -1,3 +1,7 @@
+import {
+  getEoDepartureOptions,
+  minimumDeparturePrice,
+} from "../departure/departureOptions";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { packageRepository } from "../../data/packageRepository";
@@ -405,8 +409,12 @@ export function EoPackageDetailScreen() {
                   orang
                 </strong>
                 <span className="eo-pkg-op-subtext">
-                  Harga traveler: Rp
-                  {pkg.pricing.customerPrice.toLocaleString("id-ID")} / orang
+                  Harga traveler mulai dari: Rp
+                  {minimumDeparturePrice(
+                    pkg.departureOptions,
+                    pkg.pricing.customerPrice,
+                  ).toLocaleString("id-ID")}{" "}
+                  / orang
                 </span>
                 {destination?.baseCostIncludes &&
                   destination.baseCostIncludes.length > 0 && (
@@ -459,19 +467,43 @@ export function EoPackageDetailScreen() {
             >
               Pengaturan Perjalanan & Titik Kumpul
             </h2>
+            {pkg.departureOptions && (
+              <div className="eo-departure-list">
+                {getEoDepartureOptions(pkg).map((option) => (
+                  <div key={option.id} className="eo-departure-review">
+                    <strong>{option.areaLabel || "Keberangkatan paket"}</strong>
+                    <span>
+                      {option.meetingPointLabel ||
+                        "Titik kumpul belum dicantumkan"}
+                    </span>
+                    <span>
+                      {option.departureTimeLabel ||
+                        "Waktu kumpul belum dicantumkan"}
+                    </span>
+                    <strong>
+                      Rp{option.pricePerPerson.toLocaleString("id-ID")} / orang
+                    </strong>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="eo-pkg-op-grid">
-              <div className="eo-pkg-op-item">
-                <span className="eo-pkg-op-label">Titik Kumpul</span>
-                <strong className="eo-pkg-op-value">
-                  {pkg.meetingPointLabel || "Belum diisi"}
-                </strong>
-              </div>
-              <div className="eo-pkg-op-item">
-                <span className="eo-pkg-op-label">Waktu Keberangkatan</span>
-                <strong className="eo-pkg-op-value">
-                  {pkg.departureTimeLabel || "Belum diisi"}
-                </strong>
-              </div>
+              {!pkg.departureOptions && (
+                <>
+                  <div className="eo-pkg-op-item">
+                    <span className="eo-pkg-op-label">Titik Kumpul</span>
+                    <strong className="eo-pkg-op-value">
+                      {pkg.meetingPointLabel || "Belum diisi"}
+                    </strong>
+                  </div>
+                  <div className="eo-pkg-op-item">
+                    <span className="eo-pkg-op-label">Waktu Keberangkatan</span>
+                    <strong className="eo-pkg-op-value">
+                      {pkg.departureTimeLabel || "Belum diisi"}
+                    </strong>
+                  </div>
+                </>
+              )}
               <div className="eo-pkg-op-item">
                 <span className="eo-pkg-op-label">
                   Transportasi Menuju Destinasi
@@ -574,6 +606,23 @@ export function EoPackageDetailScreen() {
           {/* Pricing Breakdown: Humanized terms */}
           <section className="eo-pkg-side-card">
             <h3 className="eo-pkg-side-title">Rincian Harga</h3>
+            <div className="eo-departure-list">
+              {getEoDepartureOptions(pkg).map((option) => (
+                <div key={option.id} className="eo-departure-review">
+                  <strong>{option.areaLabel || "Keberangkatan paket"}</strong>
+                  {option.departureCostPerPerson != null && (
+                    <span>
+                      Biaya keberangkatan Rp
+                      {option.departureCostPerPerson.toLocaleString("id-ID")} /
+                      orang
+                    </span>
+                  )}
+                  <strong>
+                    Rp{option.pricePerPerson.toLocaleString("id-ID")} / orang
+                  </strong>
+                </div>
+              ))}
+            </div>
             <div className="eo-pkg-price-table">
               <div className="eo-pkg-price-row">
                 <span className="eo-pkg-price-label">
@@ -600,9 +649,15 @@ export function EoPackageDetailScreen() {
                 </strong>
               </div>
               <div className="eo-pkg-price-row eo-pkg-price-row--total">
-                <span className="eo-pkg-price-label">Harga traveler</span>
+                <span className="eo-pkg-price-label">
+                  Harga traveler mulai dari
+                </span>
                 <span className="eo-pkg-price-total">
-                  Rp{pkg.pricing.customerPrice.toLocaleString("id-ID")}
+                  Rp
+                  {minimumDeparturePrice(
+                    pkg.departureOptions,
+                    pkg.pricing.customerPrice,
+                  ).toLocaleString("id-ID")}
                   <small> / orang</small>
                 </span>
               </div>

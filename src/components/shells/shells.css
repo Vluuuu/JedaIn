@@ -677,3 +677,11 @@
     transition: none;
   }
 }
+
+.workspace-admin-account {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-inline: var(--space-5);
+}

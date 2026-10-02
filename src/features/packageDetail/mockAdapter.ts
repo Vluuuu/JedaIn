@@ -1,4 +1,5 @@
 import { prototypeClock } from "../../lib/clock";
+import { mockTransactionStore } from "../checkout/mockTransactionStore";
 import { resolveDestinationReviewRef } from "../identity/identityResolvers";
 import {
   getCombinedCatalogPackages,
@@ -94,12 +95,36 @@ export class MockPackageDetailAdapter implements PackageDetailAdapter {
       this.sessionOverrides[packageId] ?? detail.upcomingSessionPreviews ?? [];
 
     // Filter out CANCELLED sessions and past sessions (must not appear in upcoming preview)
-    const validSessions = allSessions.filter(
-      (s) => s.status !== "CANCELLED" && new Date(s.startAt).getTime() > nowMs,
-    );
+    const validSessions = allSessions
+      .map((session) => {
+        const remainingSlots =
+          session.remainingSlots === undefined
+            ? undefined
+            : Math.max(
+                0,
+                session.remainingSlots -
+                  mockTransactionStore.getOccupiedQuantity(session.sessionId),
+              );
+        return {
+          ...session,
+          remainingSlots,
+          status:
+            session.status === "OPEN" && remainingSlots === 0
+              ? ("FULL" as const)
+              : session.status,
+        };
+      })
+      .filter(
+        (s) =>
+          s.status !== "CANCELLED" && new Date(s.startAt).getTime() > nowMs,
+      );
 
     // Check if at least one upcoming session is OPEN
-    const hasOpenSession = validSessions.some((s) => s.status === "OPEN");
+    const hasOpenSession = validSessions.some(
+      (s) =>
+        s.status === "OPEN" &&
+        (s.remainingSlots === undefined || s.remainingSlots > 0),
+    );
 
     // Sort upcoming sessions chronologically
     const sortedSessions = [...validSessions].sort(

@@ -7,9 +7,26 @@ import { mockAdminAuditStore } from "./mockAdminAuditStore";
 import { mockComplaintStore } from "./mockComplaintStore";
 import { mockDestinationVerificationStore } from "./mockDestinationVerificationStore";
 import "./admin.css";
+import { isSupabaseMode } from "../../lib/supabase/config";
+import { AdminCatalogPanel } from "./AdminCatalogPanel";
 
 export function AdminOverviewScreen() {
   const navigate = useNavigate();
+
+  if (isSupabaseMode())
+    return (
+      <div className="admin-container">
+        <header className="admin-page-header">
+          <div>
+            <h1 className="admin-page-title">Dashboard Admin</h1>
+            <p className="admin-page-subtitle">
+              Kelola Travel Organizer dan destinasi terverifikasi.
+            </p>
+          </div>
+        </header>
+        <AdminCatalogPanel />
+      </div>
+    );
 
   // 1. EO applications pending
   const eoApplications = mockApplicationStore.getAll();
@@ -51,7 +68,7 @@ export function AdminOverviewScreen() {
     if (criticalComplaintCount > 0)
       return { path: "/admin/complaints", label: "Periksa Aduan Kritis" };
     if (pendingEoCount > 0)
-      return { path: "/admin/eo-approvals", label: "Tinjau Aplikasi EO" };
+      return { path: "/admin/eo-approvals", label: "Tinjau Aplikasi TO" };
     if (pendingDestCount > 0)
       return {
         path: "/admin/destination-verifications",
@@ -59,13 +76,14 @@ export function AdminOverviewScreen() {
       };
     if (pendingPkgCount > 0)
       return { path: "/admin/package-approvals", label: "Kurasi Paket Baru" };
-    return { path: "/admin/eo-approvals", label: "Buka Antrean EO" };
+    return { path: "/admin/eo-approvals", label: "Buka Antrean TO" };
   };
 
   const primaryTarget = getPrimaryQueueTarget();
 
   return (
     <div className="admin-container">
+      <AdminCatalogPanel />
       <header className="admin-page-header">
         <div>
           <Badge tone="info">Trust & Governance Console</Badge>
@@ -104,7 +122,7 @@ export function AdminOverviewScreen() {
 
         <div className="admin-queues-grid">
           <Link to="/admin/eo-approvals" className="admin-queue-card">
-            <span className="admin-queue-label">Aplikasi EO Menunggu</span>
+            <span className="admin-queue-label">Aplikasi TO Menunggu</span>
             <strong className="admin-queue-value">{pendingEoCount}</strong>
             <span className="admin-queue-desc">
               Pengajuan mitra baru & revisi

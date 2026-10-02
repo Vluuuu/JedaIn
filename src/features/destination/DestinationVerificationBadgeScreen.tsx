@@ -22,7 +22,7 @@ export function DestinationVerificationBadgeScreen() {
         <div>
           <h1 className="dest-page-title">Status Destinasi</h1>
           <p className="dest-page-subtitle">
-            Destinasi Anda telah disetujui dan dapat digunakan EO untuk
+            Destinasi Anda telah disetujui dan dapat digunakan TO untuk
             merancang experience.
           </p>
         </div>
@@ -46,7 +46,7 @@ export function DestinationVerificationBadgeScreen() {
           </div>
 
           <p className="dest-verification-single__description">
-            Destinasi Anda telah disetujui dan dapat digunakan EO untuk
+            Destinasi Anda telah disetujui dan dapat digunakan TO untuk
             merancang experience.
           </p>
         </article>

@@ -635,8 +635,10 @@ describe("P6 — Admin Trust Loop (A01–A13) Tests", () => {
       expect(auditView.textContent).toContain(
         "Log Aktivitas & Jejak Keputusan Admin",
       );
-      expect(auditView.textContent).toContain("APPROVE_EO");
-      expect(auditView.textContent).toContain("APPROVE_PACKAGE");
+      expect(auditView.textContent).toContain("Setujui TO");
+      expect(auditView.textContent).toContain("Setujui paket");
+      expect(auditView.textContent).toContain("Aplikasi TO");
+      expect(auditView.textContent).not.toMatch(/\bEO\b/);
     });
   });
 });

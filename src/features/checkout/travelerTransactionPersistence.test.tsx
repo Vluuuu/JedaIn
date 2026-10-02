@@ -134,6 +134,8 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
       unitPricePerPerson: 275000,
       capacitySnapshot: 6,
       idempotencyKey: "k_persist_hydrate_2",
+      sessionStartAt: "2026-10-10T01:00:00Z",
+      sessionEndAt: "2026-10-10T09:00:00Z",
     });
     expect(tx.success).toBe(true);
     if (!tx.success) return;
@@ -158,6 +160,8 @@ describe("F4.1 — Traveler Transaction Session Persistence (TR-01)", () => {
     expect(restoredBooking?.sessionId).toBe("ses_sgd_1");
     expect(restoredBooking?.participantCount).toBe(2);
     expect(restoredBooking?.reservedQuantity).toBe(2);
+    expect(restoredBooking?.sessionStartAt).toBe("2026-10-10T01:00:00Z");
+    expect(restoredBooking?.sessionEndAt).toBe("2026-10-10T09:00:00Z");
 
     const restoredAttempt =
       mockTransactionStore.getPaymentAttemptForBooking(createdBookingId);

@@ -67,7 +67,7 @@ export function EoProfileScreen() {
             <small
               style={{ color: "var(--color-text-muted)", display: "block" }}
             >
-              Kapabilitas Pemanduan EO:
+              Kapabilitas Pemanduan TO:
             </small>
             <InlineStatus
               tone={
@@ -78,7 +78,7 @@ export function EoProfileScreen() {
             >
               {partner?.guideStatus === "CERTIFIED_GUIDE"
                 ? "Memiliki sertifikasi pemanduan"
-                : "Tidak menggunakan sertifikasi pemanduan EO"}
+                : "Tidak menggunakan sertifikasi pemanduan TO"}
             </InlineStatus>
           </div>
         </div>

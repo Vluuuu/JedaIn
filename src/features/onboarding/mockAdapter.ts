@@ -1,4 +1,5 @@
 import { sessionStore } from "./sessionStore";
+import { createDemoGuestUser } from "../auth/guestUser";
 import type {
   ConsentSubmissionResult,
   OnboardingAdapter,
@@ -52,6 +53,9 @@ export class MockOnboardingAdapter implements OnboardingAdapter {
       updatedAt: new Date().toISOString(),
     };
 
+    // Direct protected routes can enter consent before the login screen.
+    // Establish the same local guest identity; the quiz is still mandatory.
+    if (!sessionStore.get().user) sessionStore.setUser(createDemoGuestUser());
     sessionStore.setOnboardingStatus("IN_PROGRESS");
 
     return {

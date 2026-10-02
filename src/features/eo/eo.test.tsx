@@ -299,7 +299,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
 
       expect(res.success).toBe(false);
-      expect(res.message).toContain("bukan milik EO terautentikasi");
+      expect(res.message).toContain("bukan milik TO terautentikasi");
     });
 
     it("J. authenticated EO B cannot mutate EO A session status", () => {
@@ -644,10 +644,10 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "Simulasi data agregat · 1.020 respons pada seluruh periode prototype. Tidak menampilkan data pribadi traveler.",
       );
       expect(view.textContent).toContain(
-        "Insight adalah creative brief dari kebutuhan traveler. EO tetap menentukan konsep, itinerary, dan pengalaman akhirnya.",
+        "Insight adalah creative brief dari kebutuhan traveler. TO tetap menentukan konsep, itinerary, dan pengalaman akhirnya.",
       );
       expect(view.textContent).toContain(
-        "Gunakan insight sebagai arahan. Itinerary tetap disusun oleh EO.",
+        "Gunakan insight sebagai arahan. Itinerary tetap disusun oleh TO.",
       );
       expect(view.textContent).not.toContain("respons traveler terverifikasi");
       expect(view.textContent).not.toContain("Destinasi cocok");
@@ -688,8 +688,8 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         buttons.some(
           (button) => button.textContent === "Masuk sebagai Mitra Destinasi",
         ),
-      ).toBe(true);
-      expect(view.textContent).not.toContain("Daftar sebagai");
+      ).toBe(false);
+      expect(view.textContent).toContain("Daftar sebagai TO");
 
       await act(async () => {
         buttons
@@ -706,9 +706,9 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "/partner/apply/destination",
       ]);
 
-      expect(view.textContent).toContain("Pengajuan Mitra Destinasi");
+      expect(view.textContent).toContain("Destinasi dikurasi oleh tim JedaIn");
       expect(view.textContent).toContain(
-        "Identitas Pengelola & Dokumen Legalitas",
+        "Mitra Destinasi yang sudah terdaftar",
       );
     });
 
@@ -2392,7 +2392,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
 
       expect(view.textContent).toContain(
-        "Email bisnis atau kata sandi belum terdaftar sebagai EO aktif.",
+        "Email bisnis atau kata sandi belum terdaftar sebagai TO aktif.",
       );
       expect(partnerSessionStore.get()).toBeNull();
 
@@ -2457,7 +2457,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
 
       const view = await renderComponent(createElement(App), ["/partner/eo"]);
       // On standard hostname in test, PartnerRouteGuard redirects to partner login
-      expect(view.textContent).toContain("Mari tumbuh bersama JedaIn");
+      expect(view.textContent).toContain("Rancang perjalanan bersama JedaIn.");
     });
 
     it("BY. Package Builder Step 2 renders cover image upload dropzone and accepts file input", async () => {

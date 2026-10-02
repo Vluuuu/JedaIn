@@ -1,15 +1,19 @@
+import { partnerAccountEmailCandidates } from "./accountEmail.ts";
+
 interface Application {
   id: string;
   auth_user_id: string;
   role: "EO" | "DESTINATION";
   status: "PENDING_REVIEW" | "APPROVED" | "REJECTED";
   account_email: string | null;
+  payload: { name?: string };
 }
 
 export interface AccountGateway {
   getUser(token: string): Promise<{ id: string } | null>;
   getApplication(userId: string): Promise<Application | null>;
   acquire(applicationId: string, userId: string): Promise<string>;
+  emailInUse(email: string, userId: string): Promise<boolean>;
   updateAuth(userId: string, email: string, password: string): Promise<void>;
   finish(
     applicationId: string,
@@ -60,6 +64,11 @@ export function createPartnerAccountHandler(gateway: AccountGateway) {
       app = await gateway.getApplication(user.id);
       if (!app || app.auth_user_id !== user.id)
         return response(404, { error: "Pengajuan akun ini tidak ditemukan." });
+      if (app.role === "DESTINATION" && app.status !== "APPROVED")
+        return response(409, {
+          error:
+            "Destinasi wajib diverifikasi tim/Admin JedaIn sebelum aktivasi.",
+        });
       if (
         app.status === "REJECTED" ||
         (body.action === "reissue" && app.status !== "APPROVED")
@@ -73,7 +82,15 @@ export function createPartnerAccountHandler(gateway: AccountGateway) {
             "Akun sudah diterbitkan. Muat ulang status untuk menerbitkan ulang kata sandi.",
         });
       lease = await gateway.acquire(app.id, user.id);
-      const email = `${app.role === "EO" ? "to" : "destinasi"}-${app.id}@jedain.biz.id`;
+      const candidates = partnerAccountEmailCandidates(
+        app.role,
+        app.id,
+        app.payload.name,
+        app.account_email,
+      );
+      let email = candidates[0];
+      if (candidates[1] && (await gateway.emailInUse(email, user.id)))
+        email = candidates[1];
       const alphabet =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
       const password =
@@ -82,7 +99,20 @@ export function createPartnerAccountHandler(gateway: AccountGateway) {
           crypto.getRandomValues(new Uint8Array(24)),
           (value) => alphabet[value & 63],
         ).join("");
-      await gateway.updateAuth(user.id, email, password);
+      try {
+        await gateway.updateAuth(user.id, email, password);
+      } catch (cause) {
+        // Auth may return an internal error for a duplicate email. Confirm the
+        // collision on the server before retrying a different address.
+        if (
+          email !== candidates[0] ||
+          !candidates[1] ||
+          !(await gateway.emailInUse(email, user.id))
+        )
+          throw cause;
+        email = candidates[1];
+        await gateway.updateAuth(user.id, email, password);
+      }
       await gateway.finish(app.id, user.id, lease, email);
       const session = await gateway.signIn(email, password);
       if (session.userId !== user.id)

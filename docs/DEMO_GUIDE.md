@@ -1,8 +1,22 @@
 # JedaIn — Panduan Demo & Evaluasi Juri (Competition Golden Demo Guide)
 
+## Keputusan aktif: titik keberangkatan dan biaya Traveler (1 Oktober 2026)
+
+Keputusan user ini menggantikan aturan harga tunggal, fee per booking, dan pendaftaran destinasi mandiri dalam riwayat sebelumnya.
+
+- Tim/Admin JedaIn memverifikasi dan menambahkan destinasi kanonikal. Akun Destinasi tidak dapat membuat destinasi baru atau melakukan aktivasi mandiri. Login, profil, session, kapasitas, dan pemandu destinasi existing tetap tersedia. Eligibility Travel Organizer tetap `ACTIVE` + `guideReady=true`.
+- Satu package memiliki minimal satu opsi keberangkatan valid saat submit: ID stabil, area, titik kumpul, waktu kumpul, dan harga final per orang > Rp0. Travel Organizer menentukan harga setiap opsi di Langkah 3; biaya dasar, pemandu, dan margin di Langkah 4 menjadi referensi economics, tanpa menghitung harga lokasi otomatis. Komisi 10% GMV tetap internal.
+- Harga mulai dari = minimum harga opsi. Traveler memilih opsi + session; session tetap mengatur tanggal/waktu trip dan kapasitas bersama. Pilihan dibawa dalam URL, termasuk verifikasi kontak/pending-payment, dan divalidasi ulang saat checkout. Direct session/checkout menyediakan pilihan jika belum dipilih.
+- Booking menyimpan `departureOptionId`, `departureAreaLabel`, `meetingPointLabel`, `departureTimeLabel`, `unitPricePerPerson`, dan versi pricing. Payment/tiket/booking TO memakai snapshot; edit package atau reload tidak mengubah pesanan lama.
+- Subtotal = harga opsi dipilih × jumlah peserta. Biaya layanan JedaIn = Rp7.500 × jumlah peserta. Total = subtotal + biaya layanan. Tampilkan kedua perkalian secara transparan. Contoh Malang Rp249.000 × 2 + Rp7.500 × 2 = Rp513.000. Booking legacy mempertahankan fee yang disepakati sebelum perubahan ini.
+- Package legacy tanpa array memakai satu opsi kompatibilitas dengan ID deterministik, tanpa mengarang area/titik kumpul. Supabase menyimpan opsi di JSONB package dengan validasi database dan ownership RLS existing. Booking/payment tetap simulasi ledger tab-local existing, bukan backend transaksi produksi; reload pada tab yang sama didukung, antar perangkat tidak.
+
+Requirement terkait: REQ-TRV-07–13, REQ-EO-04/07/08/09/11, REQ-MIT-01/02, REQ-XR-01. Riwayat implementasi di bawah mencatat keputusan pada saat itu dan bukan override atas kontrak aktif ini.
+
+
 ## Pembaruan alur demo (27 September 2026)
 
-Tunjukkan terminologi produk resmi: peran penyelenggara menggunakan nama **Travel Organizer** (dengan identifier internal tetap `EO` untuk stabilitas kode). Approval destinasi berfungsi sebagai gate internal Admin dan status Mitra `Aktif`, tanpa badge BASIC/PLUS. Buka `Lihat 9 informasi inti` di Overview Mitra dengan checklist jelas; edit deskripsi, tarif pemandu Rp/orang (misal diubah ke Rp150.000 / orang dengan feedback inline instan dan sinkronisasi same-runtime ke Travel Organizer), serta tambahkan foto destinasi dan foto fasilitas terhubung ke daftar fasilitas (`destination.facilities` yang terkelompok di profil dan Travel Organizer destination detail). Di Package Builder, Travel Organizer mengatur detail perjalanan & logistik end-to-end pada Langkah 3 (Titik Kumpul, Waktu Kumpul/Keberangkatan, Transportasi Menuju Destinasi, Transportasi Kembali, Alur Itinerary, serta Fasilitas Termasuk dan Belum Termasuk), memilih foto galeri dan foto sendiri, serta menetapkan cover. Tombol insight `Terapkan ke draft` memberikan arahan sekaligus mengisi draft awal secara terproteksi tanpa menimpa bagian yang telah diubah manual oleh Travel Organizer. Pada Traveler Package Detail, tunjukkan **Dual Trust Identity**: kartu terpisah untuk Destinasi (verifikasi JedaIn + ulasan destinasi) dan Travel Organizer (status Travel Organizer JedaIn + ulasan pascatrip organizer aktual), serta informasi titik kumpul & perjalanan yang authored oleh Travel Organizer (bukan default universal). Jika Mitra memperbarui tarif pemandu ke Rp150.000 dan Travel Organizer memilih pemandu destinasi, harga package menjadi: Rp125.000 biaya dasar + Rp150.000 pemandu + Rp150.000 margin = Rp425.000 / orang (atau Rp275.000 jika menggunakan pemandu Travel Organizer). Sinkronisasi lintas peran berlaku dalam runtime yang sama (same tab, client-side navigation, no hard reload; tidak ada arsitektur database/backend/persistence production). Service fee Traveler Rp7.500/booking tetap terpisah; komisi 10% GMV tidak berubah. Fitur 360° ditunda.
+Tunjukkan terminologi produk resmi: peran penyelenggara menggunakan nama **Travel Organizer** (dengan identifier internal tetap `EO` untuk stabilitas kode). Approval destinasi berfungsi sebagai gate internal Admin dan status Mitra `Aktif`, tanpa badge BASIC/PLUS. Buka `Lihat 9 informasi inti` di Overview Mitra dengan checklist jelas; edit deskripsi, tarif pemandu Rp/orang (misal diubah ke Rp150.000 / orang dengan feedback inline instan dan sinkronisasi same-runtime ke Travel Organizer), serta tambahkan foto destinasi dan foto fasilitas terhubung ke daftar fasilitas (`destination.facilities` yang terkelompok di profil dan Travel Organizer destination detail). Di Package Builder, Travel Organizer mengatur detail perjalanan & logistik end-to-end pada Langkah 3 (Titik Kumpul, Waktu Kumpul/Keberangkatan, Transportasi Menuju Destinasi, Transportasi Kembali, Alur Itinerary, serta Fasilitas Termasuk dan Belum Termasuk), memilih foto galeri dan foto sendiri, serta menetapkan cover. Tombol insight `Terapkan ke draft` memberikan arahan sekaligus mengisi draft awal secara terproteksi tanpa menimpa bagian yang telah diubah manual oleh Travel Organizer. Pada Traveler Package Detail, tunjukkan **Dual Trust Identity**: kartu terpisah untuk Destinasi (verifikasi JedaIn + ulasan destinasi) dan Travel Organizer (status Travel Organizer JedaIn + ulasan pascatrip organizer aktual), serta informasi titik kumpul & perjalanan yang authored oleh Travel Organizer (bukan default universal). Jika Mitra memperbarui tarif pemandu ke Rp150.000 dan Travel Organizer memilih pemandu destinasi, referensi biaya menjadi: Rp125.000 biaya dasar + Rp150.000 pemandu + Rp150.000 margin = Rp425.000 / orang (atau Rp275.000 jika menggunakan pemandu Travel Organizer). Sinkronisasi lintas peran berlaku dalam runtime yang sama (same tab, client-side navigation, no hard reload; tidak ada arsitektur database/backend/persistence production). Service fee Traveler Rp7.500 per orang tetap terpisah; komisi 10% GMV tidak berubah. Fitur 360° ditunda.
 
 Panduan operasional dan evaluasi penjurian untuk menguji integrasi lintas 4 peran (**Traveler**, **Travel Organizer / EO**, **Admin Tim Kurasi**, dan **Mitra Destinasi**) pada platform JedaIn.
 
@@ -127,15 +141,15 @@ Tanpa perlu mengetik kredensial atau registrasi manual, sistem menyediakan tombo
 4. Di **Package Builder** (`/partner/eo/packages/new`):
    - **Tahap 1 (Destinasi):** Pilih destinasi terverifikasi aktif **Lereng Hijau Batu** (`dest_lereng_hijau`).
    - **Tahap 2 (Sinyal Insight):** Tinjau keselarasan intent dan target area Malang/Surabaya.
-   - **Tahap 3 (Rencana Itinerary):** Periksa susunan aktivitas hening dan catatan keselamatan.
-   - **Tahap 4 (Skema Harga):** Tentukan margin EO (misal Rp150.000, modal otomatis Rp125.000, total harga Rp300.000).
+   - **Tahap 3 (Perjalanan & Keberangkatan):** Periksa susunan aktivitas dan catatan keselamatan. Isi opsi Malang (Alun-Alun Kota Malang, 07.00 WIB, Rp249.000/orang) dan Surabaya (Stasiun Surabaya Gubeng, 05.00 WIB, Rp451.400/orang).
+   - **Tahap 4 (Referensi Economics):** Tinjau biaya dasar, tarif pemandu sesuai sumber, margin EO, serta komisi internal 10% GMV. Harga jual tetap harga tiap opsi yang diisi pada Tahap 3; tampilkan minimum sebagai `Mulai dari Rp249.000`.
    - **Tahap 5 (Tinjau & Submit):** Klik **Ajukan untuk Review Kurator Admin** → Status paket menjadi `PENDING_ADMIN_REVIEW`.
 
 ### Langkah 3: Kurasi & Persetujuan Admin (Admin Approval)
 1. Buka rute `/admin/login` → Klik **Masuk sebagai Admin Demo**.
 2. Masuk ke menu **Kurasi Paket** (`/admin/package-approvals`).
 3. Buka detail pengajuan paket yang baru dibuat.
-4. Periksa checklist standar kurasi (formula harga, destinasi terverifikasi, alur mindful).
+4. Periksa checklist standar kurasi (kelengkapan dan harga positif tiap opsi keberangkatan, destinasi terverifikasi, alur mindful).
 5. Isi catatan audit persetujuan (misal *"Itinerary mindful dan harga transparan lolos kurasi"*).
 6. Klik **Setujui Paket (APPROVED)**.
 7. *Catatan Validasi:* Paket berstatus `APPROVED` dan belum tampil di Marketplace Traveler sebelum EO mempublikasikannya.
@@ -144,17 +158,17 @@ Tanpa perlu mengetik kredensial atau registrasi manual, sistem menyediakan tombo
 1. Kembali ke workspace EO (`/partner/eo/packages`).
 2. Buka detail paket yang telah disetujui → Klik **Publish ke Marketplace** → Status berubah menjadi `LIVE`.
 3. Klik **Atur Jadwal Sesi** (`/partner/eo/packages/:packageId/sessions`).
-4. Buka sesi baru (misal tanggal Sabtu depan, kuota 6 orang, harga Rp275.000) → Sesi dibuka dengan status `OPEN`.
+4. Buka sesi baru (misal tanggal Sabtu depan, kuota 6 orang) → Sesi dibuka dengan status `OPEN`. Semua opsi keberangkatan memakai kapasitas sesi yang sama; harga Traveler mengikuti opsi yang dipilih.
 
 ### Langkah 5: Penemuan & Pemesanan Traveler (Traveler Marketplace & Checkout)
 1. Kembali ke sisi Traveler (`/explore`).
 2. Paket baru dari EO kini tampil secara dinamis di katalog dan hasil pencarian.
 3. Klik paket tersebut untuk membuka **Detail Paket** (`/packages/:packageId`).
-4. Klik **Pilih Jadwal Sesi** (`/packages/:packageId/sessions`) → Pilih sesi yang baru dibuat EO.
+4. Pilih opsi **Surabaya**, lalu klik **Pilih Jadwal Sesi** (`/packages/:packageId/sessions`) → Pilih sesi yang baru dibuat EO. Pilihan keberangkatan tetap tampil.
 5. Di halaman **Checkout** (`/checkout/:sessionId`):
    - Jika nomor HP belum diverifikasi, lakukan verifikasi OTP (Kode demo default: `111111`).
-   - Tinjau jumlah peserta dan breakdown harga.
-   - Traveler-facing total prototype: `subtotal + Service Fee Rp7.500 per booking`.
+   - Tinjau opsi, jumlah peserta, dan kedua perkalian harga. Untuk 2 peserta dari Surabaya: Rp451.400 × 2 = Rp902.800; biaya layanan Rp7.500 × 2 = Rp15.000; total Rp917.800.
+   - Traveler-facing total prototype: `harga opsi × peserta + Rp7.500 × peserta`.
    - Platform commission 10% dari GMV adalah economics platform/EO pada proposal dan **bukan** line item tambahan pada checkout Traveler.
    - Klik **Lanjut ke Pembayaran**.
 6. Di halaman **Pembayaran** (`/payment/:bookingId`):

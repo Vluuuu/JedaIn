@@ -652,7 +652,9 @@ describe("Supabase Backend Guards, Auth Enforcement & Authoritative Pricing", ()
       );
 
       expect(res.success).toBe(false);
-      expect(res.message).toContain("tidak memiliki izin sebagai DESTINATION");
+      expect(res.message).toContain(
+        "tidak memiliki izin sebagai Mitra Destinasi",
+      );
     });
 
     it("ACC Paket (Demo) cannot execute if authenticated user is mapped to DESTINATION instead of EO", async () => {
@@ -692,7 +694,7 @@ describe("Supabase Backend Guards, Auth Enforcement & Authoritative Pricing", ()
         "pkg_pacet_mindful_retreat",
       );
       expect(res.success).toBe(false);
-      expect(res.message).toContain("tidak memiliki izin sebagai EO");
+      expect(res.message).toContain("tidak memiliki izin sebagai TO");
     });
   });
 });

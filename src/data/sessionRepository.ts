@@ -181,13 +181,18 @@ export const sessionRepository = {
     }
   },
 
-  async getSessionsByEo(eoId: string): Promise<EoSessionRecord[]> {
+  async getSessionsByEo(
+    eoId: string,
+    options: { throwOnError?: boolean } = {},
+  ): Promise<EoSessionRecord[]> {
     if (!isSupabaseMode()) {
       return [...mockEoPackageStore.getSessionsByEo(eoId)];
     }
 
     const supabase = getSupabaseClient();
     if (!supabase) {
+      if (options.throwOnError)
+        throw new Error("Jadwal paket belum dapat dimuat.");
       return [];
     }
 
@@ -199,11 +204,14 @@ export const sessionRepository = {
         .order("start_at", { ascending: true });
 
       if (error || !data) {
+        if (options.throwOnError)
+          throw new Error("Jadwal paket belum dapat dimuat.");
         return [];
       }
 
       return (data as SessionRow[]).map(mapSessionRowToRecord);
-    } catch {
+    } catch (error) {
+      if (options.throwOnError) throw error;
       return [];
     }
   },
@@ -268,7 +276,7 @@ export const sessionRepository = {
         return {
           success: false,
           message:
-            "Akses ditolak: Hanya EO terautentikasi yang dapat membuka sesi.",
+            "Akses ditolak: Hanya TO terautentikasi yang dapat membuka sesi.",
         };
       }
 
@@ -277,7 +285,7 @@ export const sessionRepository = {
       if (!app || app.status !== "APPROVED") {
         return {
           success: false,
-          message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+          message: "Akses ditolak: Akun TO belum berstatus APPROVED.",
         };
       }
       return mockEoPackageStore.createSession(input);
@@ -297,7 +305,7 @@ export const sessionRepository = {
     if (!app || app.status !== "APPROVED") {
       return {
         success: false,
-        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+        message: "Akses ditolak: Akun TO belum berstatus APPROVED.",
       };
     }
 
@@ -305,7 +313,7 @@ export const sessionRepository = {
     if (!pkg || pkg.eoId !== actorEoId) {
       return {
         success: false,
-        message: "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
+        message: "Paket tidak ditemukan atau bukan milik TO terautentikasi.",
       };
     }
 
@@ -500,7 +508,7 @@ export const sessionRepository = {
         return {
           success: false,
           message:
-            "Akses ditolak: Hanya EO terautentikasi yang dapat mengubah status sesi.",
+            "Akses ditolak: Hanya TO terautentikasi yang dapat mengubah status sesi.",
         };
       }
 
@@ -703,7 +711,7 @@ export const sessionRepository = {
         return {
           success: false,
           message:
-            "Akses ditolak: Hanya EO terautentikasi yang dapat mengubah catatan operasional sesi.",
+            "Akses ditolak: Hanya TO terautentikasi yang dapat mengubah catatan operasional sesi.",
         };
       }
 
@@ -714,7 +722,7 @@ export const sessionRepository = {
       if (!ok) {
         return {
           success: false,
-          message: "Sesi tidak ditemukan atau bukan milik EO ini.",
+          message: "Sesi tidak ditemukan atau bukan milik TO ini.",
         };
       }
       const found = mockEoPackageStore

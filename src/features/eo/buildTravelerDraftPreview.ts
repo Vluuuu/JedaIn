@@ -1,3 +1,8 @@
+import {
+  minimumDeparturePrice,
+  travelerDepartureOptions,
+  type DepartureOption,
+} from "../departure/departureOptions";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
 import type { PackageDetailViewModel } from "../packageDetail/types";
 import type { DurationPreference } from "../quiz/types";
@@ -19,6 +24,7 @@ interface TravelerDraftInput {
   imageUrls: string[];
   itinerary: EoItineraryItem[];
   customerPrice: number;
+  departureOptions?: DepartureOption[];
   safetyNotes: string;
   includedItems: string;
   excludedItems: string;
@@ -62,7 +68,10 @@ export function buildTravelerDraftPreview(
       visualAssets: media,
       status: "DRAFT",
       verificationLevel: input.destination?.verificationLevel ?? "BASIC",
-      pricePerPerson: input.destination ? input.customerPrice : 0,
+      pricePerPerson: input.destination
+        ? minimumDeparturePrice(input.departureOptions, input.customerPrice)
+        : 0,
+      departureOptions: travelerDepartureOptions(input.departureOptions),
       durationType,
       departureAreas: [],
       experienceIntents: [],
@@ -81,6 +90,7 @@ export function buildTravelerDraftPreview(
       includedItems: lines(input.includedItems),
       excludedItems: lines(input.excludedItems),
       safetyNotes: lines(input.safetyNotes),
+      departureOptions: travelerDepartureOptions(input.departureOptions),
       meetingPointLabel: input.meetingPointLabel.trim() || undefined,
       departureTimeLabel: input.departureTimeLabel.trim() || undefined,
       outboundTransport: input.outboundTransport.trim() || undefined,

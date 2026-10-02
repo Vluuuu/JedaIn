@@ -194,6 +194,11 @@ export const partnerRegistrationRepository = {
   async submit(
     input: PartnerRegistrationInput,
   ): Promise<{ success: boolean; message?: string }> {
+    const authorityError =
+      input.role === "DESTINATION"
+        ? "Destinasi hanya dapat ditambahkan setelah verifikasi tim/Admin JedaIn."
+        : undefined;
+    if (authorityError) return { success: false, message: authorityError };
     const validation = validatePartnerRegistration(input);
     if (validation) return { success: false, message: validation };
     if (input.role === "DESTINATION") {
@@ -403,6 +408,16 @@ export const partnerRegistrationRepository = {
     const partner = partnerSessionStore.get();
     if (!partner)
       throw new Error("Masuk dengan akun pengajuan terlebih dahulu.");
+    if (partner.role === "DESTINATION") {
+      const current =
+        getDataMode() === "supabase"
+          ? await this.loadCurrent()
+          : mockDestinationVerificationStore.getByPartnerId(partner.id);
+      if (current?.status !== "APPROVED")
+        throw new Error(
+          "Destinasi hanya dapat ditambahkan setelah verifikasi tim/Admin JedaIn.",
+        );
+    }
     if (getDataMode() === "supabase") {
       const client = getSupabaseClient();
       if (!client) throw new Error("Supabase belum dikonfigurasi.");

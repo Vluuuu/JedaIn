@@ -740,7 +740,25 @@
   gap: var(--space-3);
 }
 
+.package-detail-departures-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-3);
+}
+
+.package-detail-departure-area {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-body-md);
+  color: var(--color-stone-900);
+}
+
 @media (min-width: 640px) {
+  .package-detail-departures-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .package-detail-logistics-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -765,6 +783,7 @@
 }
 
 .package-detail-logistics-val {
+  overflow-wrap: anywhere;
   font-size: var(--font-size-body-sm);
   color: var(--color-stone-900);
   line-height: 1.45;

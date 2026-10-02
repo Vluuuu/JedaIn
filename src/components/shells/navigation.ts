@@ -42,7 +42,7 @@ export const partnerNavigation = partnerEoNavigation;
 
 export const adminNavigation = [
   { to: "/admin", label: "Overview" },
-  { to: "/admin/eo-approvals", label: "EO Approvals" },
+  { to: "/admin/eo-approvals", label: "TO Approvals" },
   { to: "/admin/destination-verifications", label: "Destination Verification" },
   { to: "/admin/package-approvals", label: "Package Approvals" },
   { to: "/admin/bookings", label: "Bookings / Payments" },

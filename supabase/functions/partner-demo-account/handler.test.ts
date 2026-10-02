@@ -14,9 +14,13 @@ function setup(
       role,
       status,
       account_email:
-        status === "APPROVED" ? `to-${applicationId}@jedain.biz.id` : null,
+        status === "APPROVED"
+          ? `${role === "EO" ? "to" : "destinasi"}-${applicationId}@jedain.biz.id`
+          : null,
+      payload: { name: "Lereng Hijau Batu" },
     })),
     acquire: vi.fn(async () => "lease"),
+    emailInUse: vi.fn(async () => false),
     updateAuth: vi.fn(async () => undefined),
     finish: vi.fn(async () => undefined),
     signIn: vi.fn(async () => ({
@@ -40,6 +44,32 @@ function setup(
 }
 
 describe("Platform partner account issuance", () => {
+  it("preserves an existing named destination account during approved reissuance", async () => {
+    const { gateway, handler, request } = setup("DESTINATION", "APPROVED");
+    const app = await gateway.getApplication();
+    gateway.getApplication.mockResolvedValueOnce({
+      ...app,
+      account_email: "lereng-hijau@jedain.biz.id",
+    });
+    const issued = await (await handler(request("reissue"))).json();
+    expect(issued.accountEmail).toBe("lereng-hijau@jedain.biz.id");
+  });
+  it("retains the server-side email collision fallback from the deployed function", async () => {
+    const { gateway, handler, request } = setup("DESTINATION", "APPROVED");
+    gateway.emailInUse.mockResolvedValueOnce(true);
+    const issued = await (await handler(request("reissue"))).json();
+    expect(issued.accountEmail).toBe(
+      `lereng-hijau-batu-${applicationId}@jedain.biz.id`,
+    );
+    expect(gateway.updateAuth).toHaveBeenCalledTimes(1);
+  });
+  it("retains Auth's confirmed collision retry without retrying unrelated errors", async () => {
+    const { gateway, handler, request } = setup("DESTINATION", "APPROVED");
+    gateway.emailInUse.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    gateway.updateAuth.mockRejectedValueOnce(new Error("Duplicate email"));
+    expect((await handler(request("reissue"))).status).toBe(200);
+    expect(gateway.updateAuth).toHaveBeenCalledTimes(2);
+  });
   it("rejects callers without a verified user before any privileged operation", async () => {
     const { gateway, handler, request } = setup();
     expect(
@@ -63,6 +93,7 @@ describe("Platform partner account issuance", () => {
       role: "EO",
       status: "PENDING_REVIEW",
       account_email: null,
+      payload: { name: "" },
     });
     expect((await handler(request("approve", { applicationId }))).status).toBe(
       404,
@@ -70,12 +101,22 @@ describe("Platform partner account issuance", () => {
     expect(gateway.getApplication).toHaveBeenCalledWith("owner");
     expect(gateway.updateAuth).not.toHaveBeenCalled();
   });
+  it("blocks pending destination approval before any credential write", async () => {
+    const { gateway, handler, request } = setup("DESTINATION");
+    expect((await handler(request())).status).toBe(409);
+    expect(gateway.acquire).not.toHaveBeenCalled();
+    expect(gateway.updateAuth).not.toHaveBeenCalled();
+    expect(gateway.finish).not.toHaveBeenCalled();
+  });
   it.each(["EO", "DESTINATION"] as const)(
     "issues a unique server password and the configured domain for %s after explicit approval",
     async (role) => {
-      const { gateway, handler, request } = setup(role);
+      const { gateway, handler, request } = setup(
+        role,
+        role === "DESTINATION" ? "APPROVED" : "PENDING_REVIEW",
+      );
       const response = await handler(
-        request("approve", {
+        request(role === "DESTINATION" ? "reissue" : "approve", {
           accountEmail: "attacker@other.id",
           password: "chosen",
         }),
@@ -84,7 +125,9 @@ describe("Platform partner account issuance", () => {
       expect(response.headers.get("Cache-Control")).toBe("no-store");
       const issued = await response.json();
       expect(issued.accountEmail).toBe(
-        `${role === "EO" ? "to" : "destinasi"}-${applicationId}@jedain.biz.id`,
+        role === "EO"
+          ? `to-${applicationId}@jedain.biz.id`
+          : "lereng-hijau-batu@jedain.biz.id",
       );
       expect(issued.password.length).toBeGreaterThanOrEqual(24);
       expect(gateway.updateAuth).toHaveBeenCalledWith(

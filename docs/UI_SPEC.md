@@ -1,5 +1,37 @@
 # JedaIn — UI Specification
 
+## Klarifikasi aktif: cover rekomendasi dan titik kumpul Traveler (2 Oktober 2026)
+
+Hasil kuis menggunakan cover package aktual untuk kartu utama dan alternatif, konsisten dengan Home/Explore/Detail Experience. Detail Experience dan Preview Traveler tidak memiliki radio pemilihan titik kumpul; disclosure Persiapan, titik kumpul & akses menampilkan seluruh opsi authored (area, titik kumpul, waktu, harga per orang) secara informatif. CTA Pilih Jadwal menggunakan harga mulai dari dan membuka halaman jadwal tanpa memilihkan opsi. Pemilihan titik kumpul hanya di Pilih Jadwal, lalu tetap dibawa ke checkout/pesanan. Catatan persiapan, transportasi dan akses tetap ditampilkan; paket legacy memakai rincian authored yang tersedia tanpa mengarang lokasi.
+
+Klarifikasi pengguna ini menggantikan pemilihan ganda pada implementasi sebelumnya. Requirement: REQ-TRV-05/06/07/08, REQ-EO-07/08.
+
+## Keputusan aktif: biaya keberangkatan ditambahkan ke harga paket (2 Oktober 2026)
+
+Klarifikasi user ini menggantikan harga opsi final yang diinput manual dan economics sebagai referensi saja pada keputusan 1 Oktober.
+
+- Langkah 3 mengisi biaya keberangkatan/transport per orang untuk setiap titik kumpul, bukan harga final paket. Langkah 4 menetapkan alokasi/margin TO; biaya destinasi dan pemandu yang dipakai tetap dari sumber destinasi kanonikal.
+- Harga paket setiap opsi = biaya dasar destinasi + pemandu destinasi hanya bila dipakai + margin TO + biaya keberangkatan opsi. Harga mulai dari adalah minimum harga akhir yang dihitung. Contoh tanpa pemandu: Rp100.000 + Rp150.000 + Rp110.000 = Rp360.000; opsi Rp175.000 menjadi Rp425.000.
+- Biaya keberangkatan adalah Rupiah utuh >= 0; isian kosong dibedakan dari biaya nol dan wajib dilengkapi sebelum submit. Margin belum berarti keuntungan bersih setelah operasional/komisi. Biaya layanan tetap Rp7.500 per peserta, terpisah saat checkout; kapasitas session tetap bersama.
+- Departure menyimpan biaya authored terpisah dari harga akhir. Draft DRAFT/REJECTED existing mengadopsi angka opsi sebelumnya sebagai biaya keberangkatan sesuai klarifikasi user. Paket disetujui/Live legacy tetap memakai harga final yang disepakati; perubahan material membutuhkan draft dan re-approval. Booking lama tetap memakai snapshot harga/fee saat dipesan, tanpa perhitungan ulang.
+- Backend dan shared domain menghitung ulang harga akhir; reload/save tidak menambahkan komponen dua kali. Traveler/preview hanya melihat harga akhir, bukan margin, komisi, atau biaya internal TO.
+
+Requirement terkait: REQ-TRV-07-13, REQ-EO-07/08/09/11, REQ-XR-01.
+
+## Keputusan aktif: titik keberangkatan dan biaya Traveler (1 Oktober 2026)
+
+Keputusan user ini menggantikan aturan harga tunggal, fee per booking, dan pendaftaran destinasi mandiri dalam riwayat sebelumnya.
+
+- Tim/Admin JedaIn memverifikasi dan menambahkan destinasi kanonikal. Akun Destinasi tidak dapat membuat destinasi baru atau melakukan aktivasi mandiri. Login, profil, session, kapasitas, dan pemandu destinasi existing tetap tersedia. Eligibility Travel Organizer tetap `ACTIVE` + `guideReady=true`.
+- Satu package memiliki minimal satu opsi keberangkatan valid saat submit: ID stabil, area, titik kumpul, waktu kumpul, dan harga final per orang > Rp0. Travel Organizer menentukan harga setiap opsi di Langkah 3; biaya dasar, pemandu, dan margin di Langkah 4 menjadi referensi economics, tanpa menghitung harga lokasi otomatis. Komisi 10% GMV tetap internal.
+- Harga mulai dari = minimum harga opsi. Traveler memilih opsi + session; session tetap mengatur tanggal/waktu trip dan kapasitas bersama. Pilihan dibawa dalam URL, termasuk verifikasi kontak/pending-payment, dan divalidasi ulang saat checkout. Direct session/checkout menyediakan pilihan jika belum dipilih.
+- Booking menyimpan `departureOptionId`, `departureAreaLabel`, `meetingPointLabel`, `departureTimeLabel`, `unitPricePerPerson`, dan versi pricing. Payment/tiket/booking TO memakai snapshot; edit package atau reload tidak mengubah pesanan lama.
+- Subtotal = harga opsi dipilih × jumlah peserta. Biaya layanan JedaIn = Rp7.500 × jumlah peserta. Total = subtotal + biaya layanan. Tampilkan kedua perkalian secara transparan. Contoh Malang Rp249.000 × 2 + Rp7.500 × 2 = Rp513.000. Booking legacy mempertahankan fee yang disepakati sebelum perubahan ini.
+- Package legacy tanpa array memakai satu opsi kompatibilitas dengan ID deterministik, tanpa mengarang area/titik kumpul. Supabase menyimpan opsi di JSONB package dengan validasi database dan ownership RLS existing. Booking/payment tetap simulasi ledger tab-local existing, bukan backend transaksi produksi; reload pada tab yang sama didukung, antar perangkat tidak.
+
+Requirement terkait: REQ-TRV-07–13, REQ-EO-04/07/08/09/11, REQ-MIT-01/02, REQ-XR-01. Riwayat implementasi di bawah mencatat keputusan pada saat itu dan bukan override atas kontrak aktif ini.
+
+
 ## Kontrak UI aktif: final Destination dan Travel Organizer (27 September 2026)
 
 Terminologi antarmuka resmi menggunakan **Travel Organizer** (dengan identifier internal tetap `EO`). Tidak ada badge/filter BASIC/PLUS atau Guide Ready di permukaan produk. Halaman status pengajuan menampilkan `Status pengajuan: Disetujui` dan status `Aktif sebagai Mitra Destinasi JedaIn` tanpa copy teknis lencana/internal rule. Overview Mitra menampilkan Status Destinasi kompak (`Profil destinasi siap digunakan Travel Organizer`), ringkasan operasional card/grid (Biaya dasar, Pemandu lokal, Kapasitas umum), status kecil `Status: Aktif`, serta sembilan informasi inti di balik disclosure checklist jelas (✓/○) tanpa bullet kosong, bukan skor kualitas. Profil Mitra mengizinkan Ringkasan 2x2 facts rapi, edit deskripsi (minimal 20 karakter) dengan feedback inline, tarif pemandu lokal dalam currency group input `Rp ... / orang` dengan feedback inline dan tampilan tarif aktif, upload foto fasilitas yang terhubung ke fasilitas terdaftar (`destination.facilities`) dan terkelompok per fasilitas di profil & Travel Organizer detail, serta upload galeri destinasi tanpa batas jumlah (JPG/PNG/WebP, maksimal 5 MB per file); visual prototype bawaan tidak dapat dihapus. Builder Travel Organizer menampilkan biaya dasar, tarif pemandu kanonikal (tersinkronisasi same-runtime dari update Mitra), formula harga, pengaturan perjalanan & logistik lengkap di Langkah 3 (titik kumpul, waktu kumpul, transportasi menuju destinasi dan kembali yang dikelola Travel Organizer, cakupan termasuk misal transportasi PP, belum termasuk misal transportasi ke titik kumpul awal, catatan keselamatan & akses tanpa default sintetis); memilih banyak media dan satu cover; serta stepper dengan angka hanya pada badge. Tombol insight `Terapkan ke draft` memberi arahan sekaligus mengisi judul, ringkasan, durasi, dan ide itinerary awal ke draft secara editable tanpa menimpa bagian yang telah diedit manual oleh Travel Organizer, dengan tombol `Arahan digunakan ✓` dan opsi unselect tanpa menghapus draft. Traveler Package Hero memakai galeri media pilihan Travel Organizer. Traveler Package Detail menampilkan **Dual Trust Identity** terpisah (Destinasi dengan verifikasi JedaIn + ulasan destinasi, serta Travel Organizer dengan status Travel Organizer JedaIn + ulasan pascatrip organizer aktual) dan rincian titik kumpul/perjalanan yang authored tanpa fallback sintetis. Kontrak tier dan satu foto di bagian lama digantikan oleh keputusan ini. 360° tidak dibuat.
@@ -771,6 +803,8 @@ Pending payment must be visually distinct from paid upcoming trip.
 ## Trip Detail
 
 Show operational information relevant to traveler, not internal admin fields.
+
+Active follow-up, 2 October 2026: show authored package cover, summary, itinerary, inclusions/exclusions, transport and preparation notes. The main disclosure starts expanded while remaining collapsible. Booking departure and session dates come from the saved order snapshot; never label a completed booking as an upcoming schedule that has not been announced.
 
 ## Completed Trip + Review
 

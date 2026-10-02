@@ -279,7 +279,7 @@ export function DestinationApplicationScreen() {
           <h1 className="dest-page-title">Pengajuan Mitra Destinasi Lokal</h1>
           <p className="dest-page-subtitle">
             Daftarkan lokasi alam atau ruang tenangmu untuk diverifikasi dan
-            dijadikan lokasi paket wellness oleh para EO JedaIn.
+            dijadikan lokasi paket wellness oleh para TO JedaIn.
           </p>
         </div>
       </header>

@@ -177,7 +177,7 @@ describe("F5.3 — Demand-Assisted Pricing Reference", () => {
 
     const marginInput =
       view.querySelector<HTMLInputElement>("#eo-margin-input")!;
-    expect(marginInput.value).toBe("150000");
+    expect(marginInput.value).toBe("150.000");
     expect(view.textContent).toContain("Rp300.000 / orang");
 
     const toggle = Array.from(
@@ -190,7 +190,7 @@ describe("F5.3 — Demand-Assisted Pricing Reference", () => {
       toggle.click();
     });
 
-    expect(marginInput.value).toBe("150000");
+    expect(marginInput.value).toBe("150.000");
     expect(view.textContent).toContain("Rp300.000 / orang");
   });
 });

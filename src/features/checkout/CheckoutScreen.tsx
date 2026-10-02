@@ -1,5 +1,19 @@
+import {
+  DepartureChoices,
+  DepartureSummary,
+} from "../departure/DepartureChoices";
+import {
+  departureSearch,
+  resolveDepartureOption,
+} from "../departure/departureOptions";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router";
 import { Badge, Button, Checkbox, Skeleton } from "../../components/ui";
 import { CheckoutSummaryCard } from "./CheckoutSummaryCard";
 import { defaultCheckoutAdapter } from "./mockAdapter";
@@ -25,6 +39,7 @@ export function CheckoutScreen({
 }: CheckoutScreenProps) {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
   const locationDraft = (
@@ -55,7 +70,8 @@ export function CheckoutScreen({
   >();
 
   const loadCheckout = async (sid: string, preserveNotice = false) => {
-    setIsLoading(true);
+    if (preserveNotice) setIsSubmitting(true);
+    else setIsLoading(true);
     if (!preserveNotice) {
       setSubmitErrorNotice(undefined);
     }
@@ -63,8 +79,10 @@ export function CheckoutScreen({
       const res = await adapter.getCheckout(sid);
       setViewModel(res);
       setIsLoading(false);
+      setIsSubmitting(false);
     } catch (err: unknown) {
       setIsLoading(false);
+      setIsSubmitting(false);
       setViewModel({
         state: "ERROR",
         errorMessage:
@@ -101,6 +119,15 @@ export function CheckoutScreen({
     };
   }, [sessionId, adapter]);
 
+  const departureOptions =
+    viewModel?.departureOptions ?? viewModel?.package?.departureOptions;
+  const selectedDeparture = departureOptions
+    ? resolveDepartureOption(
+        departureOptions,
+        searchParams.get("departure") ?? locationDraft?.departureOptionId,
+      )
+    : undefined;
+
   const handleSubmit = async () => {
     if (!sessionId || !viewModel || !viewModel.traveler || isSubmitting) {
       return;
@@ -120,7 +147,9 @@ export function CheckoutScreen({
       return;
     }
 
-    const currentPrice = viewModel.session?.pricePerPerson;
+    const currentPrice = departureOptions
+      ? selectedDeparture?.pricePerPerson
+      : viewModel.session?.pricePerPerson;
     if (currentPrice === undefined) {
       return;
     }
@@ -129,6 +158,7 @@ export function CheckoutScreen({
 
     try {
       const res = await adapter.submitCheckout({
+        departureOptionId: selectedDeparture?.id,
         travelerId: viewModel.traveler.id,
         sessionId,
         participantCount,
@@ -147,32 +177,42 @@ export function CheckoutScreen({
       if (res.status === "CONTACT_VERIFICATION_REQUIRED") {
         const checkoutDraft: CheckoutDraftState = {
           sessionId,
+          departureOptionId: selectedDeparture?.id,
           participantCount,
           policyAcknowledged,
           idempotencyKey,
         };
-        navigate(`/checkout/${sessionId}/contact`, {
-          state: { checkoutDraft },
-        });
+        navigate(
+          `/checkout/${sessionId}/contact${departureSearch(selectedDeparture?.id)}`,
+          {
+            state: { checkoutDraft },
+          },
+        );
         return;
       }
 
       if (res.status === "ACTIVE_PENDING_PAYMENT") {
         const checkoutDraft: CheckoutDraftState = {
           sessionId,
+          departureOptionId: selectedDeparture?.id,
           participantCount,
           policyAcknowledged,
           idempotencyKey,
         };
-        navigate(`/checkout/${sessionId}/pending-payment`, {
-          state: { checkoutDraft },
-        });
+        navigate(
+          `/checkout/${sessionId}/pending-payment${departureSearch(selectedDeparture?.id)}`,
+          {
+            state: { checkoutDraft },
+          },
+        );
         return;
       }
 
       if (res.status === "SESSION_UNAVAILABLE") {
         if (viewModel.package) {
-          navigate(`/packages/${viewModel.package.id}/sessions`);
+          navigate(
+            `/packages/${viewModel.package.id}/sessions${departureSearch(selectedDeparture?.id)}`,
+          );
         } else {
           navigate("/explore");
         }
@@ -432,7 +472,9 @@ export function CheckoutScreen({
   } = viewModel;
 
   const maxSelectableParticipants = session.remainingSlots ?? 99;
-  const unitPrice = session.pricePerPerson; // EXACT SESSION PRICE ONLY
+  const unitPrice = departureOptions
+    ? selectedDeparture?.pricePerPerson
+    : session.pricePerPerson;
   const breakdown = unitPrice
     ? calculatePaymentBreakdown(unitPrice, participantCount)
     : undefined;
@@ -441,6 +483,7 @@ export function CheckoutScreen({
   // CTA disabled while participantCount > latest selectable max or price is missing
   const isSubmitDisabled =
     isSubmitting ||
+    !traveler ||
     unitPrice === undefined ||
     participantCount > maxSelectableParticipants ||
     viewModel.state === "PRICE_UNAVAILABLE";
@@ -450,7 +493,7 @@ export function CheckoutScreen({
       {/* 1. Header context & back link */}
       <div className="checkout-topbar">
         <Link
-          to={`/packages/${pkg.id}/sessions`}
+          to={`/packages/${pkg.id}/sessions${departureSearch(selectedDeparture?.id)}`}
           className="checkout-back-btn"
           aria-label="Kembali ke Pilih Jadwal"
         >
@@ -479,6 +522,13 @@ export function CheckoutScreen({
           Tinjau kembali rincian pemesananmu sebelum melanjutkan ke pembayaran.
         </p>
       </header>
+
+      {!traveler && (
+        <div className="checkout-alert" role="status">
+          <p>Masuk atau lanjut sebagai Tamu untuk membuat pesanan.</p>
+          <Link to="/login">Masuk / Lanjut sebagai Tamu</Link>
+        </div>
+      )}
 
       {/* Submit Error / Race Notice */}
       {submitErrorNotice && (
@@ -509,10 +559,51 @@ export function CheckoutScreen({
         <div className="checkout-main-col">
           {/* Mobile-only Summary presentation for early context confirmation */}
           <div className="checkout-mobile-summary-wrapper">
-            <CheckoutSummaryCard packageData={pkg} sessionData={session} />
+            <CheckoutSummaryCard
+              packageData={pkg}
+              sessionData={{ ...session, pricePerPerson: unitPrice }}
+            />
           </div>
 
           <div className="checkout-surface">
+            {departureOptions && (
+              <>
+                <section
+                  className="checkout-section"
+                  aria-label="Pilihan keberangkatan"
+                >
+                  {selectedDeparture && (
+                    <DepartureSummary departure={selectedDeparture} />
+                  )}
+                  {departureOptions &&
+                    (selectedDeparture ? (
+                      <details>
+                        <summary>Ubah titik keberangkatan</summary>
+                        <DepartureChoices
+                          options={departureOptions}
+                          selectedId={selectedDeparture.id}
+                          onSelect={(id) =>
+                            setSearchParams(
+                              { departure: id },
+                              { replace: true },
+                            )
+                          }
+                          disabled={isSubmitting}
+                        />
+                      </details>
+                    ) : (
+                      <DepartureChoices
+                        options={departureOptions}
+                        onSelect={(id) =>
+                          setSearchParams({ departure: id }, { replace: true })
+                        }
+                        disabled={isSubmitting}
+                      />
+                    ))}
+                </section>
+                <div className="checkout-surface__divider" role="separator" />
+              </>
+            )}
             {/* 2. Participant Quantity */}
             <section className="checkout-section" aria-label="Jumlah peserta">
               <h2 className="checkout-section__title">Jumlah Peserta</h2>
@@ -615,7 +706,10 @@ export function CheckoutScreen({
           <div className="checkout-summary-pane">
             {/* Desktop presentation of Summary Card */}
             <div className="checkout-desktop-summary-wrapper">
-              <CheckoutSummaryCard packageData={pkg} sessionData={session} />
+              <CheckoutSummaryCard
+                packageData={pkg}
+                sessionData={{ ...session, pricePerPerson: unitPrice }}
+              />
             </div>
 
             {/* Price Breakdown Card / Section */}
@@ -641,8 +735,8 @@ export function CheckoutScreen({
                   <div className="checkout-price-row__subtotal-wrap">
                     <span className="checkout-price-label">Subtotal paket</span>
                     <span className="checkout-price-subtext">
-                      {participantCount} ×{" "}
-                      {unitPrice ? formatRupiah(unitPrice) : "Rp-"}
+                      {unitPrice ? formatRupiah(unitPrice) : "Rp-"} ×{" "}
+                      {participantCount}
                     </span>
                   </div>
                   <span className="checkout-price-val">
@@ -650,10 +744,19 @@ export function CheckoutScreen({
                   </span>
                 </div>
                 <div className="checkout-price-row">
-                  <span className="checkout-price-label">Biaya layanan</span>
+                  <div className="checkout-price-row__subtotal-wrap">
+                    <span className="checkout-price-label">
+                      Biaya layanan JedaIn
+                    </span>
+                    <span className="checkout-price-subtext">
+                      {formatRupiah(TRAVELER_SERVICE_FEE)} × {participantCount}
+                    </span>
+                  </div>
                   <span className="checkout-price-val">
                     {formatRupiah(
-                      breakdown ? breakdown.serviceFee : TRAVELER_SERVICE_FEE,
+                      breakdown
+                        ? breakdown.serviceFee
+                        : TRAVELER_SERVICE_FEE * participantCount,
                     )}
                   </span>
                 </div>

@@ -84,7 +84,7 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
       });
 
       expect(res.success).toBe(false);
-      expect(res.message).toContain("Hanya EO terautentikasi");
+      expect(res.message).toContain("Hanya TO terautentikasi");
     });
 
     it("B. DESTINATION partner spoofing EO id cannot saveDraft", () => {
@@ -109,7 +109,7 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
       });
 
       expect(res.success).toBe(false);
-      expect(res.message).toContain("Hanya EO terautentikasi");
+      expect(res.message).toContain("Hanya TO terautentikasi");
     });
 
     it("C. DESTINATION partner spoofing EO id cannot submitForReview", () => {
@@ -126,7 +126,7 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
       expect(res.success).toBe(false);
       expect(res.validationResult.valid).toBe(false);
       expect(res.validationResult.errors[0].message).toContain(
-        "Pengguna belum terautentikasi sebagai EO",
+        "Pengguna belum terautentikasi sebagai TO",
       );
     });
 
@@ -658,7 +658,7 @@ describe("Phase 8 Cross-Surface Integration & Hardening (P8-01 - P8-30)", () => 
             ),
           }),
           createElement(Route, {
-            path: "/partner/login",
+            path: "/partner/destination/login",
             element: createElement("div", null, "Partner Login Page"),
           }),
         ),

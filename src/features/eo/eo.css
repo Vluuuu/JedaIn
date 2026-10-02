@@ -407,6 +407,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
   font-size: var(--font-size-body-md);
 }
 
@@ -4402,5 +4405,92 @@
 @media (max-width: 640px) {
   .eo-builder-subgroup > div[style*="grid-template-columns"] {
     grid-template-columns: 1fr !important;
+  }
+}
+
+.eo-departure-list {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.eo-departure-card {
+  min-width: 0;
+  margin: 0;
+  display: flow-root;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+.eo-departure-card legend {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--space-3);
+  line-height: var(--line-height-normal);
+  overflow-wrap: anywhere;
+}
+.eo-departure-fields {
+  clear: both;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.eo-pricing-row > :last-child {
+  font-variant-numeric: tabular-nums;
+}
+.eo-pricing-empty p {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .eo-builder-step-actions {
+    flex-wrap: wrap;
+  }
+  .eo-builder-step-actions .ui-button {
+    max-width: 100%;
+    white-space: normal;
+  }
+}
+.eo-departure-currency {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding-inline: var(--space-3);
+  gap: var(--space-2);
+}
+.eo-departure-currency .eo-form-input {
+  min-width: 0;
+  border: 0;
+  width: 100%;
+  padding-inline: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.eo-departure-currency > span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
+  white-space: nowrap;
+}
+.eo-departure-currency:focus-within {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+.eo-departure-review {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-default);
+  font-size: var(--font-size-body-sm);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .eo-departure-fields {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

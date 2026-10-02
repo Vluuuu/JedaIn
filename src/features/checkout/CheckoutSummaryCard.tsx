@@ -100,7 +100,9 @@ export function CheckoutSummaryCard({
           </span>
           <div className="checkout-summary-card__fact-content">
             <span className="checkout-summary-card__fact-label">
-              Harga Sesi
+              {packageData.departureOptions
+                ? "Harga keberangkatan"
+                : "Harga Sesi"}
             </span>
             <strong className="checkout-summary-card__fact-value checkout-summary-card__fact-value--price">
               {formattedUnitPrice}

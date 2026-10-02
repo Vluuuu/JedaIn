@@ -1,3 +1,4 @@
+import type { DepartureOption } from "../departure/departureOptions";
 import type { AuthUser } from "../auth/types";
 import type { PackageSessionPreview } from "../packageDetail/types";
 import type { PackageRecommendationSource } from "../recommendation/types";
@@ -35,12 +36,14 @@ export interface CheckoutViewModel {
   package?: PackageRecommendationSource;
   session?: PackageSessionPreview;
   contactRequirement?: CheckoutContactRequirement;
+  departureOptions?: DepartureOption[];
   cancellationPolicySummary?: string;
   activePendingPayment?: PendingPaymentHandoff;
   errorMessage?: string;
 }
 
 export interface CheckoutSubmitInput {
+  departureOptionId?: string;
   travelerId: string;
   sessionId: string;
   participantCount: number;
@@ -74,6 +77,13 @@ export type BookingStatus =
   "PENDING_PAYMENT" | "PAID" | "COMPLETED" | "CANCELLED" | "EXPIRED";
 
 export interface BookingRecord {
+  sessionStartAt?: string;
+  sessionEndAt?: string;
+  departureOptionId?: string;
+  departureAreaLabel?: string;
+  meetingPointLabel?: string;
+  departureTimeLabel?: string;
+  pricingVersion?: "PER_PERSON";
   bookingId: string;
   travelerId: string;
   packageId: string;
@@ -105,6 +115,7 @@ export interface PaymentAttemptRecord {
 }
 
 export interface CheckoutDraftState {
+  departureOptionId?: string;
   sessionId: string;
   participantCount: number;
   policyAcknowledged: boolean;

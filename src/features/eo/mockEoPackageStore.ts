@@ -1,3 +1,8 @@
+import { isValidDepartureOption } from "../departure/departureOptions";
+import {
+  minimumDeparturePrice,
+  priceDepartureOptions,
+} from "../departure/departureOptions";
 import { customPackageImageStore } from "../../lib/assets/packageImages";
 import { mockApplicationStore } from "./mockApplicationStore";
 import { mockDestinationStore } from "./mockDestinationStore";
@@ -97,14 +102,14 @@ export function validateEoPackage(
     errors.push({
       step: 1,
       field: "guideSource",
-      message: "Sumber kepemanduan wajib ditentukan (Destinasi atau EO).",
+      message: "Sumber kepemanduan wajib ditentukan (Destinasi atau TO).",
     });
   } else if (pkg.guideSource === "EO" && eoGuideStatus === "CONCEPT_ONLY") {
     errors.push({
       step: 1,
       field: "guideSource",
       message:
-        "EO dengan status Concept-Only wajib menggunakan pemandu lokal dari destinasi.",
+        "TO dengan status Concept-Only wajib menggunakan pemandu lokal dari destinasi.",
     });
   }
 
@@ -134,20 +139,39 @@ export function validateEoPackage(
   }
 
   // Step 3: Logistics & Itinerary
-  if (!pkg.meetingPointLabel || !pkg.meetingPointLabel.trim()) {
-    errors.push({
-      step: 3,
-      field: "meetingPointLabel",
-      message: "Lengkapi titik kumpul perjalanan.",
+  if (pkg.departureOptions !== undefined) {
+    if (pkg.departureOptions.length === 0)
+      errors.push({
+        step: 3,
+        field: "departureOptions",
+        message: "Tambahkan minimal 1 titik keberangkatan.",
+      });
+    const ids = new Set<string>();
+    pkg.departureOptions.forEach((option, index) => {
+      if (!isValidDepartureOption(option) || ids.has(option.id))
+        errors.push({
+          step: 3,
+          field: `departureOptions[${index}]`,
+          message: `Titik keberangkatan #${index + 1}: lengkapi area, titik kumpul, waktu kumpul, dan biaya keberangkatan yang valid dengan ID unik. Harga paket harus lebih dari Rp0.`,
+        });
+      ids.add(option.id);
     });
-  }
+  } else {
+    if (!pkg.meetingPointLabel || !pkg.meetingPointLabel.trim()) {
+      errors.push({
+        step: 3,
+        field: "meetingPointLabel",
+        message: "Lengkapi titik kumpul perjalanan.",
+      });
+    }
 
-  if (!pkg.departureTimeLabel || !pkg.departureTimeLabel.trim()) {
-    errors.push({
-      step: 3,
-      field: "departureTimeLabel",
-      message: "Lengkapi waktu kumpul atau keberangkatan.",
-    });
+    if (!pkg.departureTimeLabel || !pkg.departureTimeLabel.trim()) {
+      errors.push({
+        step: 3,
+        field: "departureTimeLabel",
+        message: "Lengkapi waktu kumpul atau keberangkatan.",
+      });
+    }
   }
 
   if (!pkg.outboundTransport || !pkg.outboundTransport.trim()) {
@@ -233,7 +257,7 @@ export function validateEoPackage(
       errors.push({
         step: 4,
         field: "eoMargin",
-        message: "Margin EO tidak boleh bernilai negatif.",
+        message: "Margin TO tidak boleh bernilai negatif.",
       });
     }
 
@@ -251,11 +275,29 @@ export function validateEoPackage(
     }
     const exactCustomerPrice =
       authoritativeBaseCost + authoritativeGuideFee + pkg.pricing.eoMargin;
-    if (pkg.pricing.customerPrice !== exactCustomerPrice) {
+    const pricedOptions = priceDepartureOptions(
+      pkg.departureOptions,
+      exactCustomerPrice,
+    );
+    pkg.departureOptions?.forEach((option, index) => {
+      if (option.pricePerPerson !== pricedOptions?.[index].pricePerPerson)
+        errors.push({
+          step: 4,
+          field: `departureOptions[${index}].pricePerPerson`,
+          message:
+            "Harga paket harus sama dengan biaya destinasi, pemandu yang dipakai, margin TO, dan biaya keberangkatan.",
+        });
+    });
+    if (
+      pkg.pricing.customerPrice !==
+      minimumDeparturePrice(pricedOptions, exactCustomerPrice)
+    ) {
       errors.push({
         step: 4,
         field: "customerPrice",
-        message: `Harga package harus sama dengan biaya dasar destinasi + tarif pemandu yang digunakan + margin EO (Rp${exactCustomerPrice.toLocaleString("id-ID")}).`,
+        message: pkg.departureOptions
+          ? "Harga mulai dari harus sesuai opsi keberangkatan termurah."
+          : `Harga package harus sama dengan biaya dasar destinasi + tarif pemandu yang digunakan + margin TO (Rp${exactCustomerPrice.toLocaleString("id-ID")}).`,
       });
     }
   }
@@ -528,7 +570,7 @@ export const mockEoPackageStore = {
       return {
         success: false,
         message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat mengelola draf paket.",
+          "Akses ditolak: Hanya TO terautentikasi yang dapat mengelola draf paket.",
       };
     }
 
@@ -537,12 +579,12 @@ export const mockEoPackageStore = {
     if (!app || app.status !== "APPROVED") {
       return {
         success: false,
-        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+        message: "Akses ditolak: Akun TO belum berstatus APPROVED.",
       };
     }
 
     const actorDisplayName =
-      actor.businessName || app.businessName || "EO Partner";
+      actor.businessName || app.businessName || "TO Partner";
     const authorGuideStatus: EoGuideStatus =
       app.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
 
@@ -586,7 +628,17 @@ export const mockEoPackageStore = {
       effectiveGuideSource === "DESTINATION"
         ? (dest?.localGuideFeePerPerson ?? 0)
         : 0;
-    const customerPrice = baseCost + localGuideFee + margin;
+    const departureOptions = priceDepartureOptions(
+      draft.departureOptions ??
+        (existingIndex !== -1
+          ? packages[existingIndex].departureOptions
+          : undefined),
+      baseCost + localGuideFee + margin,
+    );
+    const customerPrice = minimumDeparturePrice(
+      departureOptions,
+      baseCost + localGuideFee + margin,
+    );
     const imageUrls =
       draft.imageUrls ??
       (draft.imageUrl
@@ -633,6 +685,12 @@ export const mockEoPackageStore = {
           : existingIndex >= 0
             ? packages[existingIndex].safetyNotes
             : [],
+      departureOptions: departureOptions?.map((option) => ({
+        ...option,
+        areaLabel: option.areaLabel.trim(),
+        meetingPointLabel: option.meetingPointLabel.trim(),
+        departureTimeLabel: option.departureTimeLabel.trim(),
+      })),
       meetingPointLabel:
         draft.meetingPointLabel !== undefined
           ? draft.meetingPointLabel
@@ -708,7 +766,7 @@ export const mockEoPackageStore = {
             {
               step: 1,
               field: "auth",
-              message: "Pengguna belum terautentikasi sebagai EO.",
+              message: "Pengguna belum terautentikasi sebagai TO.",
             },
           ],
         },
@@ -726,7 +784,7 @@ export const mockEoPackageStore = {
             {
               step: 1,
               field: "auth",
-              message: "Akun EO belum berstatus APPROVED.",
+              message: "Akun TO belum berstatus APPROVED.",
             },
           ],
         },
@@ -747,7 +805,7 @@ export const mockEoPackageStore = {
               step: 1,
               field: "packageId",
               message:
-                "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
+                "Paket tidak ditemukan atau bukan milik TO terautentikasi.",
             },
           ],
         },
@@ -817,7 +875,7 @@ export const mockEoPackageStore = {
       return {
         success: false,
         message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat mempublikasikan paket.",
+          "Akses ditolak: Hanya TO terautentikasi yang dapat mempublikasikan paket.",
       };
     }
 
@@ -825,7 +883,7 @@ export const mockEoPackageStore = {
     if (!app || app.status !== "APPROVED") {
       return {
         success: false,
-        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+        message: "Akses ditolak: Akun TO belum berstatus APPROVED.",
       };
     }
 
@@ -909,7 +967,7 @@ export const mockEoPackageStore = {
       return {
         success: false,
         message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat membuka sesi.",
+          "Akses ditolak: Hanya TO terautentikasi yang dapat membuka sesi.",
       };
     }
 
@@ -918,7 +976,7 @@ export const mockEoPackageStore = {
     if (!app || app.status !== "APPROVED") {
       return {
         success: false,
-        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+        message: "Akses ditolak: Akun TO belum berstatus APPROVED.",
       };
     }
 
@@ -926,7 +984,7 @@ export const mockEoPackageStore = {
     if (!pkg || pkg.eoId !== actorEoId) {
       return {
         success: false,
-        message: "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
+        message: "Paket tidak ditemukan atau bukan milik TO terautentikasi.",
       };
     }
 

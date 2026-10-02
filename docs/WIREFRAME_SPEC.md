@@ -1,5 +1,31 @@
 # JedaIn — Wireframe Specification
 
+## Keputusan aktif: biaya keberangkatan ditambahkan ke harga paket (2 Oktober 2026)
+
+Klarifikasi user ini menggantikan harga opsi final yang diinput manual dan economics sebagai referensi saja pada keputusan 1 Oktober.
+
+- Langkah 3 mengisi biaya keberangkatan/transport per orang untuk setiap titik kumpul, bukan harga final paket. Langkah 4 menetapkan alokasi/margin TO; biaya destinasi dan pemandu yang dipakai tetap dari sumber destinasi kanonikal.
+- Harga paket setiap opsi = biaya dasar destinasi + pemandu destinasi hanya bila dipakai + margin TO + biaya keberangkatan opsi. Harga mulai dari adalah minimum harga akhir yang dihitung. Contoh tanpa pemandu: Rp100.000 + Rp150.000 + Rp110.000 = Rp360.000; opsi Rp175.000 menjadi Rp425.000.
+- Biaya keberangkatan adalah Rupiah utuh >= 0; isian kosong dibedakan dari biaya nol dan wajib dilengkapi sebelum submit. Margin belum berarti keuntungan bersih setelah operasional/komisi. Biaya layanan tetap Rp7.500 per peserta, terpisah saat checkout; kapasitas session tetap bersama.
+- Departure menyimpan biaya authored terpisah dari harga akhir. Draft DRAFT/REJECTED existing mengadopsi angka opsi sebelumnya sebagai biaya keberangkatan sesuai klarifikasi user. Paket disetujui/Live legacy tetap memakai harga final yang disepakati; perubahan material membutuhkan draft dan re-approval. Booking lama tetap memakai snapshot harga/fee saat dipesan, tanpa perhitungan ulang.
+- Backend dan shared domain menghitung ulang harga akhir; reload/save tidak menambahkan komponen dua kali. Traveler/preview hanya melihat harga akhir, bukan margin, komisi, atau biaya internal TO.
+
+Requirement terkait: REQ-TRV-07-13, REQ-EO-07/08/09/11, REQ-XR-01.
+
+## Keputusan aktif: titik keberangkatan dan biaya Traveler (1 Oktober 2026)
+
+Keputusan user ini menggantikan aturan harga tunggal, fee per booking, dan pendaftaran destinasi mandiri dalam riwayat sebelumnya.
+
+- Tim/Admin JedaIn memverifikasi dan menambahkan destinasi kanonikal. Akun Destinasi tidak dapat membuat destinasi baru atau melakukan aktivasi mandiri. Login, profil, session, kapasitas, dan pemandu destinasi existing tetap tersedia. Eligibility Travel Organizer tetap `ACTIVE` + `guideReady=true`.
+- Satu package memiliki minimal satu opsi keberangkatan valid saat submit: ID stabil, area, titik kumpul, waktu kumpul, dan harga final per orang > Rp0. Travel Organizer menentukan harga setiap opsi di Langkah 3; biaya dasar, pemandu, dan margin di Langkah 4 menjadi referensi economics, tanpa menghitung harga lokasi otomatis. Komisi 10% GMV tetap internal.
+- Harga mulai dari = minimum harga opsi. Traveler memilih opsi + session; session tetap mengatur tanggal/waktu trip dan kapasitas bersama. Pilihan dibawa dalam URL, termasuk verifikasi kontak/pending-payment, dan divalidasi ulang saat checkout. Direct session/checkout menyediakan pilihan jika belum dipilih.
+- Booking menyimpan `departureOptionId`, `departureAreaLabel`, `meetingPointLabel`, `departureTimeLabel`, `unitPricePerPerson`, dan versi pricing. Payment/tiket/booking TO memakai snapshot; edit package atau reload tidak mengubah pesanan lama.
+- Subtotal = harga opsi dipilih × jumlah peserta. Biaya layanan JedaIn = Rp7.500 × jumlah peserta. Total = subtotal + biaya layanan. Tampilkan kedua perkalian secara transparan. Contoh Malang Rp249.000 × 2 + Rp7.500 × 2 = Rp513.000. Booking legacy mempertahankan fee yang disepakati sebelum perubahan ini.
+- Package legacy tanpa array memakai satu opsi kompatibilitas dengan ID deterministik, tanpa mengarang area/titik kumpul. Supabase menyimpan opsi di JSONB package dengan validasi database dan ownership RLS existing. Booking/payment tetap simulasi ledger tab-local existing, bukan backend transaksi produksi; reload pada tab yang sama didukung, antar perangkat tidak.
+
+Requirement terkait: REQ-TRV-07–13, REQ-EO-04/07/08/09/11, REQ-MIT-01/02, REQ-XR-01. Riwayat implementasi di bawah mencatat keputusan pada saat itu dan bukan override atas kontrak aktif ini.
+
+
 ## Wireframe aktif: final Destination dan Travel Organizer (27 September 2026)
 
 Terminologi antarmuka menggunakan **Travel Organizer** (identifier internal `EO`). Overview Mitra: Status Destinasi kompak (`Profil destinasi siap digunakan Travel Organizer`), ringkasan operasional card/grid (Biaya dasar, Pemandu lokal, Kapasitas umum), status kecil `Status: Aktif`, serta `Informasi profil lengkap` dengan disclosure `Lihat 9 informasi inti` berupa checklist rapi tanpa bullet kosong. Profil: Ringkasan 2x2 facts rapi, editor `Tentang Destinasi` dengan feedback inline, `Tarif Pemandu Lokal` dalam currency group input `Rp ... / orang` dengan feedback inline dan tampilan tarif aktif, `Galeri Destinasi`, dan `Foto Fasilitas` yang terhubung ke daftar fasilitas (`destination.facilities`) terkelompok per fasilitas di profil & Travel Organizer detail. Directory/Detail/Builder tidak menampilkan badge atau filter BASIC/PLUS. Builder: badge langkah 1–5 dan label tanpa angka; Step 2 memberi pilihan banyak media destinasi, upload foto Travel Organizer, daftar media terpilih, dan `Jadikan cover`. Step 3 (Perjalanan & Itinerary) memfasilitasi authoring logistik perjalanan lengkap (titik kumpul, waktu kumpul, transportasi menuju destinasi dan kembali yang dikelola Travel Organizer, alur itinerary, fasilitas termasuk misal transportasi PP, belum termasuk misal transportasi ke titik kumpul awal, catatan persiapan & akses tanpa default sintetis). Tombol insight `Terapkan ke draft` memberi arahan sekaligus mengisi judul, ringkasan, durasi, dan ide itinerary awal ke draft secara editable tanpa menimpa bagian yang telah diedit manual oleh Travel Organizer, dengan tombol `Arahan digunakan ✓` dan opsi unselect tanpa membatalkan draft. Step 4 menampilkan biaya dasar + tarif pemandu destinasi kanonikal (tersinkronisasi same-runtime dari update Mitra) + margin Travel Organizer. Traveler Package Detail menampilkan **Dual Trust Identity** terpisah (Destinasi dengan verifikasi JedaIn + ulasan destinasi, serta Travel Organizer dengan status Travel Organizer JedaIn + ulasan pascatrip organizer aktual) dan logistik perjalanan yang authored tanpa fallback sintetis. Traveler Hero menampilkan foto package aktual. Wireframe tier di bawah adalah baseline lama yang digantikan bagian ini. 360° ditunda.

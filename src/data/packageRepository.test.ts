@@ -22,7 +22,7 @@ describe("packageRepository - Ownership, Validation & Lifecycle Guards", () => {
         "pkg_pacet_mindful_retreat",
       );
       expect(res.success).toBe(false);
-      expect(res.message).toContain("Hanya EO terautentikasi");
+      expect(res.message).toContain("Hanya TO terautentikasi");
     });
 
     it("2. rejects approval when package does not belong to current EO", async () => {
@@ -39,7 +39,7 @@ describe("packageRepository - Ownership, Validation & Lifecycle Guards", () => {
         "pkg_pacet_mindful_retreat",
       );
       expect(res.success).toBe(false);
-      expect(res.message).toContain("bukan milik EO ini");
+      expect(res.message).toContain("bukan milik TO ini");
     });
 
     it("3. rejects approval when package is not in PENDING_ADMIN_REVIEW (e.g., DRAFT)", async () => {

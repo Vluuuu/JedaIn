@@ -1,3 +1,4 @@
+import { legacyDepartureOption } from "../departure/departureOptions";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import PlanMascot from "../../assets/mascot/plan.png";
@@ -168,6 +169,24 @@ export function PackageDetailScreen({
     preview?.durationLabel ??
     QUIZ_DURATION_OPTIONS.find((d) => d.value === pkg.durationType)?.label ??
     pkg.durationType;
+
+  const departureOptions = detail.departureOptions ??
+    pkg.departureOptions ?? [
+      legacyDepartureOption(
+        pkg.id,
+        pkg.pricePerPerson,
+        detail.meetingPointLabel,
+        detail.departureTimeLabel,
+      ),
+    ];
+  const hasAuthoredDepartures =
+    detail.departureOptions !== undefined || pkg.departureOptions !== undefined;
+  const logisticsDepartures = departureOptions.filter(
+    (option) =>
+      option.areaLabel?.trim() ||
+      option.meetingPointLabel?.trim() ||
+      option.departureTimeLabel?.trim(),
+  );
 
   const formattedPrice =
     preview && pkg.pricePerPerson <= 0
@@ -681,8 +700,7 @@ export function PackageDetailScreen({
           {(!preview ||
             detail.safetyNotes.length > 0 ||
             Boolean(
-              detail.meetingPointLabel ||
-              detail.departureTimeLabel ||
+              logisticsDepartures.length ||
               detail.outboundTransport ||
               detail.returnTransport ||
               detail.accessNotes?.length,
@@ -716,8 +734,7 @@ export function PackageDetailScreen({
                 )}
 
                 {/* 10. Travel Logistics & Meeting Point */}
-                {(detail.meetingPointLabel ||
-                  detail.departureTimeLabel ||
+                {(logisticsDepartures.length > 0 ||
                   detail.outboundTransport ||
                   detail.returnTransport ||
                   (detail.accessNotes && detail.accessNotes.length > 0)) && (
@@ -731,17 +748,53 @@ export function PackageDetailScreen({
                     >
                       Informasi Titik Kumpul & Akses
                     </h2>
+                    {logisticsDepartures.length > 0 && (
+                      <ul className="package-detail-departures-list">
+                        {logisticsDepartures.map((option) => (
+                          <li
+                            key={option.id}
+                            className="package-detail-logistics-item"
+                          >
+                            {option.areaLabel && (
+                              <h3 className="package-detail-departure-area">
+                                {option.areaLabel}
+                              </h3>
+                            )}
+                            {option.meetingPointLabel && (
+                              <>
+                                <span className="package-detail-logistics-label">
+                                  Titik Kumpul
+                                </span>
+                                <strong className="package-detail-logistics-val">
+                                  {option.meetingPointLabel}
+                                </strong>
+                              </>
+                            )}
+                            {option.departureTimeLabel && (
+                              <>
+                                <span className="package-detail-logistics-label">
+                                  Waktu Kumpul / Keberangkatan
+                                </span>
+                                <span className="package-detail-logistics-val">
+                                  {option.departureTimeLabel}
+                                </span>
+                              </>
+                            )}
+                            {hasAuthoredDepartures &&
+                              option.pricePerPerson > 0 && (
+                                <span className="package-detail-logistics-val">
+                                  Rp
+                                  {option.pricePerPerson.toLocaleString(
+                                    "id-ID",
+                                  )}{" "}
+                                  / orang
+                                </span>
+                              )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     <div className="package-detail-logistics-grid">
-                      {detail.meetingPointLabel && (
-                        <div className="package-detail-logistics-item">
-                          <span className="package-detail-logistics-label">
-                            Titik Kumpul
-                          </span>
-                          <strong className="package-detail-logistics-val">
-                            {detail.meetingPointLabel}
-                          </strong>
-                        </div>
-                      )}
                       <div className="package-detail-logistics-item">
                         <span className="package-detail-logistics-label">
                           Lokasi Kawasan
@@ -750,16 +803,6 @@ export function PackageDetailScreen({
                           {pkg.destinationName}, {pkg.locationLabel}
                         </strong>
                       </div>
-                      {detail.departureTimeLabel && (
-                        <div className="package-detail-logistics-item">
-                          <span className="package-detail-logistics-label">
-                            Waktu Kumpul / Keberangkatan
-                          </span>
-                          <span className="package-detail-logistics-val">
-                            {detail.departureTimeLabel}
-                          </span>
-                        </div>
-                      )}
                       {detail.outboundTransport && (
                         <div className="package-detail-logistics-item">
                           <span className="package-detail-logistics-label">

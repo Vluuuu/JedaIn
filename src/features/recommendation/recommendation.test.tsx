@@ -76,6 +76,47 @@ async function renderScreen(
 }
 
 describe("RecommendationResultScreen UI States and Interactions", () => {
+  it.each([
+    ["matched", matchedQuiz],
+    ["fallback", fallbackQuiz],
+  ] as const)(
+    "uses the authored package covers for %s recommendations and alternatives",
+    async (_, quiz) => {
+      sessionStore.setQuizDraft(quiz);
+      const catalog = MOCK_RECOMMENDATION_PACKAGES.map((pkg) => ({
+        ...pkg,
+        visualAsset: `https://example.com/${pkg.id}-cover.jpg`,
+        visualAssets: [`https://example.com/${pkg.id}-gallery.jpg`],
+      }));
+      const view = await renderScreen({
+        adapter: new MockRecommendationAdapter({ catalog }),
+      });
+      const top = catalog.find(
+        (pkg) =>
+          pkg.title ===
+          view.querySelector(".recommendation-title")?.textContent,
+      )!;
+      const image = view.querySelector<HTMLImageElement>(
+        ".recommendation-hero-visual img",
+      )!;
+      expect(image.getAttribute("src")).toBe(top.visualAsset);
+      expect(image.alt).toBe(`Cover paket ${top.title}`);
+      const alternatives = view.querySelectorAll<HTMLAnchorElement>(
+        ".recommendation-alt-card",
+      );
+      expect(alternatives.length).toBeGreaterThan(0);
+      for (const card of alternatives) {
+        const pkg = catalog.find(
+          (pkg) => card.getAttribute("href") === `/packages/${pkg.id}`,
+        )!;
+        expect(card.querySelector("img")?.getAttribute("src")).toBe(
+          pkg.visualAsset,
+        );
+        expect(card.querySelector("img")?.alt).toBe(`Cover paket ${pkg.title}`);
+      }
+    },
+  );
+
   it("20. renders loading state while fetching recommendations", async () => {
     const adapter = new MockRecommendationAdapter({ delayMs: 1000 });
     const view = await renderScreen({ adapter });

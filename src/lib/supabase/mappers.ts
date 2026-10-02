@@ -116,6 +116,9 @@ export function mapPackageRowToRecord(row: PackageRow): EoPackageRecord {
     includedItems: Array.isArray(row.included_items) ? row.included_items : [],
     excludedItems: Array.isArray(row.excluded_items) ? row.excluded_items : [],
     safetyNotes: Array.isArray(row.safety_notes) ? row.safety_notes : [],
+    departureOptions: Array.isArray(row.departure_options)
+      ? row.departure_options.map((option) => ({ ...option }))
+      : undefined,
     meetingPointLabel: row.meeting_point_label ?? undefined,
     departureTimeLabel: row.departure_time_label ?? undefined,
     outboundTransport: row.outbound_transport ?? undefined,
@@ -169,6 +172,10 @@ export function mapPackageRecordToRow(
   if (record.excludedItems !== undefined)
     row.excluded_items = record.excludedItems;
   if (record.safetyNotes !== undefined) row.safety_notes = record.safetyNotes;
+  if (record.departureOptions !== undefined)
+    row.departure_options = record.departureOptions.map((option) => ({
+      ...option,
+    }));
   if (record.meetingPointLabel !== undefined)
     row.meeting_point_label = record.meetingPointLabel ?? null;
   if (record.departureTimeLabel !== undefined)

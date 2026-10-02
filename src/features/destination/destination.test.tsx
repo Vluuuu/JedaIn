@@ -239,7 +239,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         createElement(DestinationVerificationBadgeScreen),
       );
       expect(badgeView.textContent).toContain(
-        "Destinasi Anda telah disetujui dan dapat digunakan EO untuk merancang experience.",
+        "Destinasi Anda telah disetujui dan dapat digunakan TO untuk merancang experience.",
       );
       expect(badgeView.textContent).not.toContain("Terverifikasi Dasar");
       expect(badgeView.textContent).not.toContain(
@@ -602,9 +602,9 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
       const view = await renderComponent(createElement(App), [
         "/partner/apply/destination",
       ]);
-      expect(view.textContent).toContain("Pendaftaran Mitra Destinasi");
+      expect(view.textContent).toContain("Destinasi dikurasi oleh tim JedaIn");
       expect(view.textContent).toContain(
-        "Silakan masuk atau buat akun kemitraan destinasi",
+        "Mitra Destinasi yang sudah terdaftar dapat masuk",
       );
 
       // Direct service submit
@@ -1168,7 +1168,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         "/partner/destination",
       ]);
 
-      expect(view.textContent).toContain("Mari tumbuh bersama JedaIn");
+      expect(view.textContent).toContain("Kelola destinasi bersama JedaIn.");
       expect(view.textContent).not.toContain("Jadwal Keberangkatan Mendatang");
     });
 

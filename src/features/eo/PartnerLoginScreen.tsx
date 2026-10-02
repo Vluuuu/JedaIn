@@ -9,7 +9,6 @@ import {
   requireAuthenticatedUser,
 } from "../../lib/supabase/demoAuth";
 import { mockDestinationVerificationStore } from "../admin/mockDestinationVerificationStore";
-import { generateUniqueDestinationPartnerId } from "../destination/destinationContext";
 import { mockApplicationStore } from "./mockApplicationStore";
 import {
   DEMO_CONCEPT_EO_USER,
@@ -40,27 +39,12 @@ export function PartnerLoginScreen({
   const [submitting, setSubmitting] = useState(false);
 
   const register = () => {
+    if (role !== "EO") return;
     if (onRegister) {
       onRegister();
       return;
     }
-    if (
-      role === "DESTINATION" &&
-      partnerSessionStore.get()?.role !== "DESTINATION"
-    ) {
-      const targetEmail =
-        email.trim().toLowerCase() || "mitra.destinasi@jedain.biz.id";
-      partnerSessionStore.setPartner({
-        id: generateUniqueDestinationPartnerId(targetEmail),
-        email: targetEmail,
-        name: "Mitra Destinasi Baru",
-        role: "DESTINATION",
-        businessName: "Pengelola Kawasan Destinasi",
-      });
-    }
-    navigate(
-      role === "EO" ? "/partner/apply/eo" : "/partner/apply/destination",
-    );
+    navigate("/partner/apply/eo");
   };
 
   const submit = async (event: FormEvent) => {
@@ -192,7 +176,7 @@ export function PartnerLoginScreen({
         className="partner-entry__back"
         onClick={onBack ?? (() => navigate("/partner"))}
       >
-        ← Kembali pilih peran
+        ← Kembali ke portal TO
       </button>
       <span className="partner-entry__eyebrow">Selamat datang kembali</span>
       <h2>
@@ -243,12 +227,18 @@ export function PartnerLoginScreen({
           {submitting ? "Memeriksa akun…" : "Masuk ke ruang kerja"}
         </button>
       </form>
-      <p className="partner-entry__register">
-        Belum menjadi mitra?{" "}
-        <button type="button" onClick={register}>
-          Ajukan kemitraan
-        </button>
-      </p>
+      {role === "EO" ? (
+        <p className="partner-entry__register">
+          Belum menjadi mitra?{" "}
+          <button type="button" onClick={register}>
+            Ajukan kemitraan
+          </button>
+        </p>
+      ) : (
+        <p className="partner-entry__register">
+          Destinasi diverifikasi dan ditambahkan oleh tim JedaIn.
+        </p>
+      )}
       {!isSupabaseMode() && (
         <details className="partner-entry__preview">
           <summary>Akses akun contoh prototipe</summary>

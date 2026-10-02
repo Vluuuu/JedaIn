@@ -1,5 +1,11 @@
 # JedaIn — UI Specification
 
+## Klarifikasi aktif: cover rekomendasi dan titik kumpul Traveler (2 Oktober 2026)
+
+Hasil kuis menggunakan cover package aktual untuk kartu utama dan alternatif, konsisten dengan Home/Explore/Detail Experience. Detail Experience dan Preview Traveler tidak memiliki radio pemilihan titik kumpul; disclosure Persiapan, titik kumpul & akses menampilkan seluruh opsi authored (area, titik kumpul, waktu, harga per orang) secara informatif. CTA Pilih Jadwal menggunakan harga mulai dari dan membuka halaman jadwal tanpa memilihkan opsi. Pemilihan titik kumpul hanya di Pilih Jadwal, lalu tetap dibawa ke checkout/pesanan. Catatan persiapan, transportasi dan akses tetap ditampilkan; paket legacy memakai rincian authored yang tersedia tanpa mengarang lokasi.
+
+Klarifikasi pengguna ini menggantikan pemilihan ganda pada implementasi sebelumnya. Requirement: REQ-TRV-05/06/07/08, REQ-EO-07/08.
+
 ## Keputusan aktif: biaya keberangkatan ditambahkan ke harga paket (2 Oktober 2026)
 
 Klarifikasi user ini menggantikan harga opsi final yang diinput manual dan economics sebagai referensi saja pada keputusan 1 Oktober.

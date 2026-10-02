@@ -462,7 +462,7 @@ describe("Departure options and per-person Traveler pricing", () => {
       total: 256500 * count,
     });
   });
-  it("keeps the selected Surabaya option through detail, session and checkout navigation", async () => {
+  it("lists all departures in detail and selects once on the session page before checkout", async () => {
     await render(
       createElement(
         Routes,
@@ -480,17 +480,26 @@ describe("Departure options and per-person Traveler pricing", () => {
           element: createElement(CheckoutScreen, { adapter: adapter() }),
         }),
       ),
-      `/packages/${pkg.packageId}`,
+      `/packages/${pkg.packageId}?departure=surabaya`,
     );
+    expect(view.querySelectorAll('input[type="radio"]')).toHaveLength(0);
+    const departures = view.querySelector(".package-detail-departures-list")!;
+    expect(departures.querySelectorAll("li")).toHaveLength(2);
+    expect(departures.textContent).toContain("Alun-Alun Kota Malang");
+    expect(departures.textContent).toContain("Stasiun Surabaya Gubeng");
+    expect(departures.textContent).toContain("07.00 WIB");
+    expect(departures.textContent).toContain("05.00 WIB");
+    expect(
+      view.querySelector(".package-detail-sticky-bar__price-label")
+        ?.textContent,
+    ).toContain("Mulai dari");
+    await act(() => button("Pilih Jadwal").click());
     const radio = view.querySelector<HTMLInputElement>(
       'input[value="surabaya"]',
     )!;
+    expect(radio.checked).toBe(false);
     await act(() => radio.click());
     expect(radio.checked).toBe(true);
-    await act(() => button("Pilih Jadwal").click());
-    expect(
-      view.querySelector<HTMLInputElement>('input[value="surabaya"]')?.checked,
-    ).toBe(true);
     await act(() =>
       view
         .querySelector<HTMLInputElement>('input[name="session-choice"]')!
@@ -738,13 +747,11 @@ describe("Departure options and per-person Traveler pricing", () => {
       }),
       "/partner/eo/packages/new?draftId=existing",
     );
-    expect(view.querySelectorAll('input[type="radio"]')).toHaveLength(2);
-    await act(() =>
-      view.querySelector<HTMLInputElement>('input[value="surabaya"]')!.click(),
-    );
-    expect(
-      view.querySelector<HTMLInputElement>('input[value="surabaya"]')!.checked,
-    ).toBe(true);
+    expect(view.querySelectorAll('input[type="radio"]')).toHaveLength(0);
+    const departures = view.querySelector(".package-detail-departures-list")!;
+    expect(departures.querySelectorAll("li")).toHaveLength(2);
+    expect(departures.textContent).toContain("Alun-Alun Kota Malang");
+    expect(departures.textContent).toContain("Stasiun Surabaya Gubeng");
     expect(view.textContent).not.toContain("Lanjut Checkout");
   });
   it("retains publish/session guards and reserves one shared capacity pool across departures", async () => {

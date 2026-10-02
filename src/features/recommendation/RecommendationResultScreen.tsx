@@ -203,7 +203,11 @@ export function RecommendationResultScreen({
   const { state, topRecommendation, alternatives } = result;
   const isFallback = state === "FALLBACK";
   const topPkg = topRecommendation.package;
-  const topVisual = getPackageVisual(topPkg.id, topPkg.destinationName);
+  const topVisual = getPackageVisual(
+    topPkg.id,
+    topPkg.destinationName,
+    topPkg.visualAsset,
+  );
   const durationLabel =
     QUIZ_DURATION_OPTIONS.find((d) => d.value === topPkg.durationType)?.label ??
     topPkg.durationType;
@@ -269,7 +273,11 @@ export function RecommendationResultScreen({
           <div className="recommendation-hero-visual">
             <img
               src={topVisual.svgDataUri}
-              alt={`Ilustrasi suasana ${topPkg.title}`}
+              alt={
+                topVisual.id.startsWith("custom_")
+                  ? `Cover paket ${topPkg.title}`
+                  : `Ilustrasi suasana ${topPkg.title}`
+              }
               width={800}
               height={500}
               fetchPriority="high"
@@ -412,6 +420,7 @@ export function RecommendationResultScreen({
                 const altVisual = getPackageVisual(
                   altPkg.id,
                   altPkg.destinationName,
+                  altPkg.visualAsset,
                 );
                 const altDuration =
                   QUIZ_DURATION_OPTIONS.find(
@@ -433,7 +442,11 @@ export function RecommendationResultScreen({
                     <div className="recommendation-alt-thumb">
                       <img
                         src={altVisual.svgDataUri}
-                        alt={`Ilustrasi suasana ${altPkg.title}`}
+                        alt={
+                          altVisual.id.startsWith("custom_")
+                            ? `Cover paket ${altPkg.title}`
+                            : `Ilustrasi suasana ${altPkg.title}`
+                        }
                         width={800}
                         height={500}
                         loading="lazy"

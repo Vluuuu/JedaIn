@@ -1,5 +1,13 @@
 # JedaIn — PRD HOLOGY Competition Prototype
 
+## Klarifikasi aktif: cover rekomendasi dan titik kumpul Traveler (2 Oktober 2026)
+
+- Hasil kuis, termasuk rekomendasi utama dan alternatif, memakai cover package yang sama dengan katalog dan Detail Experience. Media package aktual diprioritaskan; fallback ilustrasi fixture tetap jujur bila cover tidak tersedia.
+- Detail Experience tidak meminta pemilihan titik kumpul. Disclosure Persiapan, titik kumpul & akses menampilkan semua opsi authored beserta area, lokasi kumpul, waktu dan harga per orang; pilihan dilakukan sekali di Pilih Jadwal sebelum checkout.
+- Preview Traveler dari Builder memakai daftar informasi yang sama. Catatan persiapan, transportasi, akses, kompatibilitas paket legacy dan snapshot pesanan tetap dipertahankan.
+
+Klarifikasi pengguna ini menggantikan pemilihan opsi di Detail Experience pada implementasi sebelumnya. Requirement terkait: REQ-TRV-05/06/07/08, REQ-EO-07/08.
+
 ## Keputusan aktif: biaya keberangkatan ditambahkan ke harga paket (2 Oktober 2026)
 
 Klarifikasi user ini menggantikan harga opsi final yang diinput manual dan economics sebagai referensi saja pada keputusan 1 Oktober.

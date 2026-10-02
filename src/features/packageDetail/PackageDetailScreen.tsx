@@ -1,17 +1,6 @@
-import { DepartureChoices } from "../departure/DepartureChoices";
-import {
-  departureSearch,
-  legacyDepartureOption,
-  resolveDepartureOption,
-} from "../departure/departureOptions";
+import { legacyDepartureOption } from "../departure/departureOptions";
 import { useEffect, useState } from "react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import PlanMascot from "../../assets/mascot/plan.png";
 import { Button, Skeleton } from "../../components/ui";
 import { QUIZ_DURATION_OPTIONS } from "../quiz/config";
@@ -40,10 +29,8 @@ export function PackageDetailScreen({
 }: PackageDetailScreenProps) {
   const { packageId } = useParams<{ packageId: string }>();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
-  const [previewDepartureId, setPreviewDepartureId] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [viewModel, setViewModel] = useState<PackageDetailViewModel | null>(
     null,
@@ -192,19 +179,14 @@ export function PackageDetailScreen({
         detail.departureTimeLabel,
       ),
     ];
-  const selectedDeparture = resolveDepartureOption(
-    departureOptions,
-    preview ? previewDepartureId : searchParams.get("departure"),
-  );
-
   const hasAuthoredDepartures =
     detail.departureOptions !== undefined || pkg.departureOptions !== undefined;
-  const meetingPointLabel = hasAuthoredDepartures
-    ? selectedDeparture?.meetingPointLabel
-    : detail.meetingPointLabel;
-  const departureTimeLabel = hasAuthoredDepartures
-    ? selectedDeparture?.departureTimeLabel
-    : detail.departureTimeLabel;
+  const logisticsDepartures = departureOptions.filter(
+    (option) =>
+      option.areaLabel?.trim() ||
+      option.meetingPointLabel?.trim() ||
+      option.departureTimeLabel?.trim(),
+  );
 
   const formattedPrice =
     preview && pkg.pricePerPerson <= 0
@@ -317,22 +299,6 @@ export function PackageDetailScreen({
             </div>
           </section>
         )}
-
-        <DepartureChoices
-          options={departureOptions}
-          selectedId={selectedDeparture?.id}
-          onSelect={(id) =>
-            preview
-              ? setPreviewDepartureId(id)
-              : setSearchParams(
-                  (previous) => {
-                    previous.set("departure", id);
-                    return previous;
-                  },
-                  { replace: true },
-                )
-          }
-        />
 
         {/* 6. Experience Highlights */}
         {detail.highlights.length > 0 && (
@@ -734,8 +700,7 @@ export function PackageDetailScreen({
           {(!preview ||
             detail.safetyNotes.length > 0 ||
             Boolean(
-              meetingPointLabel ||
-              departureTimeLabel ||
+              logisticsDepartures.length ||
               detail.outboundTransport ||
               detail.returnTransport ||
               detail.accessNotes?.length,
@@ -769,8 +734,7 @@ export function PackageDetailScreen({
                 )}
 
                 {/* 10. Travel Logistics & Meeting Point */}
-                {(meetingPointLabel ||
-                  departureTimeLabel ||
+                {(logisticsDepartures.length > 0 ||
                   detail.outboundTransport ||
                   detail.returnTransport ||
                   (detail.accessNotes && detail.accessNotes.length > 0)) && (
@@ -784,17 +748,53 @@ export function PackageDetailScreen({
                     >
                       Informasi Titik Kumpul & Akses
                     </h2>
+                    {logisticsDepartures.length > 0 && (
+                      <ul className="package-detail-departures-list">
+                        {logisticsDepartures.map((option) => (
+                          <li
+                            key={option.id}
+                            className="package-detail-logistics-item"
+                          >
+                            {option.areaLabel && (
+                              <h3 className="package-detail-departure-area">
+                                {option.areaLabel}
+                              </h3>
+                            )}
+                            {option.meetingPointLabel && (
+                              <>
+                                <span className="package-detail-logistics-label">
+                                  Titik Kumpul
+                                </span>
+                                <strong className="package-detail-logistics-val">
+                                  {option.meetingPointLabel}
+                                </strong>
+                              </>
+                            )}
+                            {option.departureTimeLabel && (
+                              <>
+                                <span className="package-detail-logistics-label">
+                                  Waktu Kumpul / Keberangkatan
+                                </span>
+                                <span className="package-detail-logistics-val">
+                                  {option.departureTimeLabel}
+                                </span>
+                              </>
+                            )}
+                            {hasAuthoredDepartures &&
+                              option.pricePerPerson > 0 && (
+                                <span className="package-detail-logistics-val">
+                                  Rp
+                                  {option.pricePerPerson.toLocaleString(
+                                    "id-ID",
+                                  )}{" "}
+                                  / orang
+                                </span>
+                              )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     <div className="package-detail-logistics-grid">
-                      {meetingPointLabel && (
-                        <div className="package-detail-logistics-item">
-                          <span className="package-detail-logistics-label">
-                            Titik Kumpul
-                          </span>
-                          <strong className="package-detail-logistics-val">
-                            {meetingPointLabel}
-                          </strong>
-                        </div>
-                      )}
                       <div className="package-detail-logistics-item">
                         <span className="package-detail-logistics-label">
                           Lokasi Kawasan
@@ -803,16 +803,6 @@ export function PackageDetailScreen({
                           {pkg.destinationName}, {pkg.locationLabel}
                         </strong>
                       </div>
-                      {departureTimeLabel && (
-                        <div className="package-detail-logistics-item">
-                          <span className="package-detail-logistics-label">
-                            Waktu Kumpul / Keberangkatan
-                          </span>
-                          <span className="package-detail-logistics-val">
-                            {departureTimeLabel}
-                          </span>
-                        </div>
-                      )}
                       {detail.outboundTransport && (
                         <div className="package-detail-logistics-item">
                           <span className="package-detail-logistics-label">
@@ -959,15 +949,10 @@ export function PackageDetailScreen({
           <div className="package-detail-sticky-bar__container">
             <div className="package-detail-sticky-bar__price-wrap">
               <span className="package-detail-sticky-bar__price-label">
-                {hasAuthoredDepartures && selectedDeparture
-                  ? "Harga pilihanmu"
-                  : "Mulai dari"}
+                Mulai dari
               </span>
               <span className="package-detail-sticky-bar__price">
-                {hasAuthoredDepartures && selectedDeparture
-                  ? `Rp${selectedDeparture.pricePerPerson.toLocaleString("id-ID")}`
-                  : formattedPrice}{" "}
-                / orang
+                {formattedPrice} / orang
               </span>
             </div>
 
@@ -977,12 +962,8 @@ export function PackageDetailScreen({
                 variant="primary"
                 size="lg"
                 className="package-detail-sticky-bar__cta"
-                disabled={!hasOpenSession || !selectedDeparture}
-                onClick={() =>
-                  navigate(
-                    `/packages/${pkg.id}/sessions${departureSearch(selectedDeparture?.id)}`,
-                  )
-                }
+                disabled={!hasOpenSession}
+                onClick={() => navigate(`/packages/${pkg.id}/sessions`)}
               >
                 Pilih Jadwal
               </Button>

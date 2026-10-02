@@ -24,7 +24,7 @@ export function AdminEoApplicationReviewScreen() {
           className="admin-section"
           style={{ textAlign: "center", padding: "var(--space-8)" }}
         >
-          <h2>Aplikasi EO Tidak Ditemukan</h2>
+          <h2>Aplikasi TO Tidak Ditemukan</h2>
           <p style={{ color: "var(--color-text-secondary)" }}>
             Data pengajuan tidak valid atau telah dihapus.
           </p>
@@ -34,7 +34,7 @@ export function AdminEoApplicationReviewScreen() {
             size="md"
             onClick={() => navigate("/admin/eo-approvals")}
           >
-            Kembali ke Antrean EO
+            Kembali ke Antrean TO
           </Button>
         </div>
       </div>
@@ -103,7 +103,7 @@ export function AdminEoApplicationReviewScreen() {
             fontSize: "var(--font-size-body-sm)",
           }}
         >
-          &larr; Kembali ke Antrean EO
+          &larr; Kembali ke Antrean TO
         </Link>
         <Badge
           tone={
@@ -325,7 +325,7 @@ export function AdminEoApplicationReviewScreen() {
                 loading={isProcessing}
                 onClick={handleApprove}
               >
-                Setujui Akun EO
+                Setujui Akun TO
               </Button>
             </div>
 
@@ -362,7 +362,7 @@ export function AdminEoApplicationReviewScreen() {
                 loading={isProcessing}
                 onClick={handleReject}
               >
-                Tolak Aplikasi EO
+                Tolak Aplikasi TO
               </Button>
             </div>
           </div>

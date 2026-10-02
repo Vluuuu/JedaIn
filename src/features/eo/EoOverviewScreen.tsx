@@ -194,7 +194,7 @@ export function EoOverviewScreen() {
       {/* 11. KPI Metric Band: Flat surface, clear large metrics, subtle separators */}
       <section
         className="eo-overview-metric-band"
-        aria-label="Ringkasan operasional EO"
+        aria-label="Ringkasan operasional TO"
       >
         <div className="eo-overview-metric-item">
           <span className="eo-overview-metric-label">Live Packages</span>
@@ -222,7 +222,7 @@ export function EoOverviewScreen() {
             {eoBookings.length}
           </strong>
           <span className="eo-overview-metric-desc">
-            Pesanan pada paket EO ini
+            Pesanan pada paket TO ini
           </span>
         </div>
 

@@ -1,7 +1,27 @@
 import { useState } from "react";
 import { Badge } from "../../components/ui";
 import { mockAdminAuditStore } from "./mockAdminAuditStore";
+import type { AdminActionType, AdminEntityType } from "./types";
 import "./admin.css";
+
+const actionLabels: Record<AdminActionType, string> = {
+  APPROVE_EO: "Setujui TO",
+  REJECT_EO: "Tolak TO",
+  APPROVE_DESTINATION: "Setujui destinasi",
+  REJECT_DESTINATION: "Tolak destinasi",
+  APPROVE_PACKAGE: "Setujui paket",
+  REJECT_PACKAGE: "Tolak paket",
+  CLASSIFY_COMPLAINT: "Klasifikasi aduan",
+  MANUAL_TRUST_ACTION: "Tindakan pengawasan",
+};
+
+const entityLabels: Record<AdminEntityType, string> = {
+  EO_APPLICATION: "Aplikasi TO",
+  DESTINATION_VERIFICATION: "Verifikasi destinasi",
+  PACKAGE_SUBMISSION: "Pengajuan paket",
+  COMPLAINT: "Aduan",
+  TRUST_STATUS: "Status pengawasan",
+};
 
 export function AdminAuditActivityScreen() {
   const [filterAction, setFilterAction] = useState<string>("ALL");
@@ -51,7 +71,9 @@ export function AdminAuditActivityScreen() {
           "MANUAL_TRUST_ACTION",
         ].map((actType) => {
           const label =
-            actType === "ALL" ? "Semua Aksi" : actType.replace(/_/g, " ");
+            actType === "ALL"
+              ? "Semua Aksi"
+              : actionLabels[actType as AdminActionType];
 
           return (
             <button
@@ -136,11 +158,11 @@ export function AdminAuditActivityScreen() {
                               : "neutral"
                         }
                       >
-                        {ev.actionType}
+                        {actionLabels[ev.actionType]}
                       </Badge>
                     </td>
                     <td>
-                      <strong>{ev.entityType}</strong>
+                      <strong>{entityLabels[ev.entityType]}</strong>
                       <div
                         style={{
                           fontSize: "var(--font-size-caption)",

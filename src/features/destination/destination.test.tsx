@@ -239,7 +239,7 @@ describe("P7 — Destination Partner Golden Flow (DP01–DP11) Tests", () => {
         createElement(DestinationVerificationBadgeScreen),
       );
       expect(badgeView.textContent).toContain(
-        "Destinasi Anda telah disetujui dan dapat digunakan EO untuk merancang experience.",
+        "Destinasi Anda telah disetujui dan dapat digunakan TO untuk merancang experience.",
       );
       expect(badgeView.textContent).not.toContain("Terverifikasi Dasar");
       expect(badgeView.textContent).not.toContain(

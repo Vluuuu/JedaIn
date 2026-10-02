@@ -154,7 +154,7 @@ export const packageRepository = {
         return {
           success: false,
           message:
-            "Akses ditolak: Hanya EO terautentikasi yang dapat mengelola draf paket.",
+            "Akses ditolak: Hanya TO terautentikasi yang dapat mengelola draf paket.",
         };
       }
       return mockEoPackageStore.saveDraft(draft);
@@ -207,7 +207,7 @@ export const packageRepository = {
       const actorDisplayName =
         authCheck.partnerUser?.businessName ||
         app?.businessName ||
-        "EO Partner";
+        "TO Partner";
       const authorGuideStatus: EoGuideStatus =
         app?.guideStatus ??
         authCheck.partnerUser?.guideStatus ??
@@ -362,7 +362,7 @@ export const packageRepository = {
               step: 1,
               field: "auth",
               message:
-                authCheck.error || "Pengguna belum terautentikasi sebagai EO.",
+                authCheck.error || "Pengguna belum terautentikasi sebagai TO.",
             },
           ],
         },
@@ -401,7 +401,7 @@ export const packageRepository = {
                 step: 1,
                 field: "packageId",
                 message:
-                  "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
+                  "Paket tidak ditemukan atau bukan milik TO terautentikasi.",
               },
             ],
           },
@@ -552,7 +552,7 @@ export const packageRepository = {
         return {
           success: false,
           message:
-            "Akses ditolak: Hanya EO terautentikasi yang dapat melakukan ACC Paket (Demo).",
+            "Akses ditolak: Hanya TO terautentikasi yang dapat melakukan ACC Paket (Demo).",
         };
       }
 
@@ -562,7 +562,7 @@ export const packageRepository = {
         return {
           success: false,
           message:
-            "Akses ditolak: Paket tidak ditemukan atau bukan milik EO ini.",
+            "Akses ditolak: Paket tidak ditemukan atau bukan milik TO ini.",
         };
       }
 
@@ -606,7 +606,7 @@ export const packageRepository = {
       return {
         success: false,
         message:
-          "Akses ditolak: Paket tidak ditemukan atau bukan milik EO ini.",
+          "Akses ditolak: Paket tidak ditemukan atau bukan milik TO ini.",
       };
     }
 
@@ -681,7 +681,7 @@ export const packageRepository = {
     if (!pkg) {
       return {
         success: false,
-        message: "Paket tidak ditemukan atau bukan milik EO ini.",
+        message: "Paket tidak ditemukan atau bukan milik TO ini.",
       };
     }
 

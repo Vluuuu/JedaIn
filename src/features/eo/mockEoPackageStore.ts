@@ -99,14 +99,14 @@ export function validateEoPackage(
     errors.push({
       step: 1,
       field: "guideSource",
-      message: "Sumber kepemanduan wajib ditentukan (Destinasi atau EO).",
+      message: "Sumber kepemanduan wajib ditentukan (Destinasi atau TO).",
     });
   } else if (pkg.guideSource === "EO" && eoGuideStatus === "CONCEPT_ONLY") {
     errors.push({
       step: 1,
       field: "guideSource",
       message:
-        "EO dengan status Concept-Only wajib menggunakan pemandu lokal dari destinasi.",
+        "TO dengan status Concept-Only wajib menggunakan pemandu lokal dari destinasi.",
     });
   }
 
@@ -254,7 +254,7 @@ export function validateEoPackage(
       errors.push({
         step: 4,
         field: "eoMargin",
-        message: "Margin EO tidak boleh bernilai negatif.",
+        message: "Margin TO tidak boleh bernilai negatif.",
       });
     }
 
@@ -281,7 +281,7 @@ export function validateEoPackage(
         field: "customerPrice",
         message: pkg.departureOptions
           ? "Harga mulai dari harus sesuai opsi keberangkatan termurah."
-          : `Harga package harus sama dengan biaya dasar destinasi + tarif pemandu yang digunakan + margin EO (Rp${exactCustomerPrice.toLocaleString("id-ID")}).`,
+          : `Harga package harus sama dengan biaya dasar destinasi + tarif pemandu yang digunakan + margin TO (Rp${exactCustomerPrice.toLocaleString("id-ID")}).`,
       });
     }
   }
@@ -554,7 +554,7 @@ export const mockEoPackageStore = {
       return {
         success: false,
         message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat mengelola draf paket.",
+          "Akses ditolak: Hanya TO terautentikasi yang dapat mengelola draf paket.",
       };
     }
 
@@ -563,12 +563,12 @@ export const mockEoPackageStore = {
     if (!app || app.status !== "APPROVED") {
       return {
         success: false,
-        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+        message: "Akses ditolak: Akun TO belum berstatus APPROVED.",
       };
     }
 
     const actorDisplayName =
-      actor.businessName || app.businessName || "EO Partner";
+      actor.businessName || app.businessName || "TO Partner";
     const authorGuideStatus: EoGuideStatus =
       app.guideStatus ?? actor.guideStatus ?? "CERTIFIED_GUIDE";
 
@@ -748,7 +748,7 @@ export const mockEoPackageStore = {
             {
               step: 1,
               field: "auth",
-              message: "Pengguna belum terautentikasi sebagai EO.",
+              message: "Pengguna belum terautentikasi sebagai TO.",
             },
           ],
         },
@@ -766,7 +766,7 @@ export const mockEoPackageStore = {
             {
               step: 1,
               field: "auth",
-              message: "Akun EO belum berstatus APPROVED.",
+              message: "Akun TO belum berstatus APPROVED.",
             },
           ],
         },
@@ -787,7 +787,7 @@ export const mockEoPackageStore = {
               step: 1,
               field: "packageId",
               message:
-                "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
+                "Paket tidak ditemukan atau bukan milik TO terautentikasi.",
             },
           ],
         },
@@ -857,7 +857,7 @@ export const mockEoPackageStore = {
       return {
         success: false,
         message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat mempublikasikan paket.",
+          "Akses ditolak: Hanya TO terautentikasi yang dapat mempublikasikan paket.",
       };
     }
 
@@ -865,7 +865,7 @@ export const mockEoPackageStore = {
     if (!app || app.status !== "APPROVED") {
       return {
         success: false,
-        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+        message: "Akses ditolak: Akun TO belum berstatus APPROVED.",
       };
     }
 
@@ -949,7 +949,7 @@ export const mockEoPackageStore = {
       return {
         success: false,
         message:
-          "Akses ditolak: Hanya EO terautentikasi yang dapat membuka sesi.",
+          "Akses ditolak: Hanya TO terautentikasi yang dapat membuka sesi.",
       };
     }
 
@@ -958,7 +958,7 @@ export const mockEoPackageStore = {
     if (!app || app.status !== "APPROVED") {
       return {
         success: false,
-        message: "Akses ditolak: Akun EO belum berstatus APPROVED.",
+        message: "Akses ditolak: Akun TO belum berstatus APPROVED.",
       };
     }
 
@@ -966,7 +966,7 @@ export const mockEoPackageStore = {
     if (!pkg || pkg.eoId !== actorEoId) {
       return {
         success: false,
-        message: "Paket tidak ditemukan atau bukan milik EO terautentikasi.",
+        message: "Paket tidak ditemukan atau bukan milik TO terautentikasi.",
       };
     }
 

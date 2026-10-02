@@ -102,7 +102,7 @@ describe("TravelerLoginScreen UI & Auth Flows", () => {
     // Check footer links
     expect(view.textContent).toContain("Syarat & Ketentuan");
     expect(view.textContent).toContain("Kebijakan Privasi");
-    expect(view.textContent).toContain("Portal Mitra & EO");
+    expect(view.textContent).toContain("Portal Travel Organizer");
   });
 
   it("handles Demo Guest Entry and leads traveler to onboarding consent / preference flow", async () => {

@@ -128,8 +128,16 @@ describe("demoAuth - Prototype Demo Authentication Bridge", () => {
       const checkDest = await requireAuthenticatedUser("DESTINATION");
       expect(checkDest.success).toBe(false);
       expect(checkDest.error).toContain(
-        "Hanya DESTINATION yang dapat melakukan aksi ini",
+        "Hanya Mitra Destinasi yang dapat melakukan aksi ini",
       );
+
+      partnerSessionStore.loginAsDemoDestination();
+      const deniedTo = await requireAuthenticatedUser("EO");
+      expect(deniedTo.success).toBe(false);
+      expect(deniedTo.error).toContain(
+        "Hanya TO yang dapat melakukan aksi ini",
+      );
+      expect(partnerSessionStore.get()?.role).toBe("DESTINATION");
     });
   });
 

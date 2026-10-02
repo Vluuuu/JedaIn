@@ -299,7 +299,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
 
       expect(res.success).toBe(false);
-      expect(res.message).toContain("bukan milik EO terautentikasi");
+      expect(res.message).toContain("bukan milik TO terautentikasi");
     });
 
     it("J. authenticated EO B cannot mutate EO A session status", () => {
@@ -644,10 +644,10 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
         "Simulasi data agregat · 1.020 respons pada seluruh periode prototype. Tidak menampilkan data pribadi traveler.",
       );
       expect(view.textContent).toContain(
-        "Insight adalah creative brief dari kebutuhan traveler. EO tetap menentukan konsep, itinerary, dan pengalaman akhirnya.",
+        "Insight adalah creative brief dari kebutuhan traveler. TO tetap menentukan konsep, itinerary, dan pengalaman akhirnya.",
       );
       expect(view.textContent).toContain(
-        "Gunakan insight sebagai arahan. Itinerary tetap disusun oleh EO.",
+        "Gunakan insight sebagai arahan. Itinerary tetap disusun oleh TO.",
       );
       expect(view.textContent).not.toContain("respons traveler terverifikasi");
       expect(view.textContent).not.toContain("Destinasi cocok");
@@ -2392,7 +2392,7 @@ describe("P5 — EO Golden Flow (EO01–EO18) Hardening Tests", () => {
       });
 
       expect(view.textContent).toContain(
-        "Email bisnis atau kata sandi belum terdaftar sebagai EO aktif.",
+        "Email bisnis atau kata sandi belum terdaftar sebagai TO aktif.",
       );
       expect(partnerSessionStore.get()).toBeNull();
 

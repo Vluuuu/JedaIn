@@ -100,7 +100,7 @@ export function AdminPackageApprovalsScreen() {
               <thead>
                 <tr>
                   <th>Judul Paket</th>
-                  <th>Penyelenggara (EO)</th>
+                  <th>Penyelenggara (TO)</th>
                   <th>Destinasi</th>
                   <th>Harga / Orang</th>
                   <th>Validasi Otomatis</th>

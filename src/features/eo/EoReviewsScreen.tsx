@@ -33,7 +33,7 @@ export function EoReviewsScreen() {
       {/* Summary KPI */}
       <section className="eo-stats-grid">
         <div className="eo-stat-card">
-          <span className="eo-stat-label">Rata-rata Rating EO</span>
+          <span className="eo-stat-label">Rata-rata Rating TO</span>
           <strong
             className="eo-stat-value"
             style={{ color: "var(--color-sand-700)" }}
@@ -58,7 +58,7 @@ export function EoReviewsScreen() {
 
         {eoReviews.length === 0 ? (
           <PartnerEmptyState title="Belum ada ulasan">
-            Belum ada ulasan kepemanduan untuk profil EO Anda.
+            Belum ada ulasan kepemanduan untuk profil TO Anda.
           </PartnerEmptyState>
         ) : (
           <div

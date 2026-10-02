@@ -68,7 +68,7 @@ export function AdminOverviewScreen() {
     if (criticalComplaintCount > 0)
       return { path: "/admin/complaints", label: "Periksa Aduan Kritis" };
     if (pendingEoCount > 0)
-      return { path: "/admin/eo-approvals", label: "Tinjau Aplikasi EO" };
+      return { path: "/admin/eo-approvals", label: "Tinjau Aplikasi TO" };
     if (pendingDestCount > 0)
       return {
         path: "/admin/destination-verifications",
@@ -76,7 +76,7 @@ export function AdminOverviewScreen() {
       };
     if (pendingPkgCount > 0)
       return { path: "/admin/package-approvals", label: "Kurasi Paket Baru" };
-    return { path: "/admin/eo-approvals", label: "Buka Antrean EO" };
+    return { path: "/admin/eo-approvals", label: "Buka Antrean TO" };
   };
 
   const primaryTarget = getPrimaryQueueTarget();
@@ -122,7 +122,7 @@ export function AdminOverviewScreen() {
 
         <div className="admin-queues-grid">
           <Link to="/admin/eo-approvals" className="admin-queue-card">
-            <span className="admin-queue-label">Aplikasi EO Menunggu</span>
+            <span className="admin-queue-label">Aplikasi TO Menunggu</span>
             <strong className="admin-queue-value">{pendingEoCount}</strong>
             <span className="admin-queue-desc">
               Pengajuan mitra baru & revisi

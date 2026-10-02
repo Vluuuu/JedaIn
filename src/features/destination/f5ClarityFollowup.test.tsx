@@ -151,7 +151,7 @@ describe("F5 Follow-up Verification: Mitra Status, Profile, Guide Fee, Facility 
       ),
     ).toBeNull();
     expect(badgeView.textContent).toContain(
-      "Destinasi Anda telah disetujui dan dapat digunakan EO untuk merancang experience.",
+      "Destinasi Anda telah disetujui dan dapat digunakan TO untuk merancang experience.",
     );
   });
 

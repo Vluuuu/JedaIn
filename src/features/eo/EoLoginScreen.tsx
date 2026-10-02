@@ -44,7 +44,7 @@ export function EoLoginScreen() {
       setIsSubmitting(false);
       if (!res.success) {
         setErrorMessage(
-          res.error || "Gagal menghubungkan sesi Supabase untuk EO.",
+          res.error || "Gagal menghubungkan sesi Supabase untuk TO.",
         );
         return;
       }
@@ -75,7 +75,7 @@ export function EoLoginScreen() {
     }
 
     setErrorMessage(
-      "Email bisnis atau kata sandi belum terdaftar sebagai EO aktif.",
+      "Email bisnis atau kata sandi belum terdaftar sebagai TO aktif.",
     );
   };
 
@@ -86,7 +86,7 @@ export function EoLoginScreen() {
       const res = await ensureDemoEoSession();
       if (!res.success) {
         setErrorMessage(
-          res.error || "Gagal menghubungkan sesi demo EO ke Supabase.",
+          res.error || "Gagal menghubungkan sesi demo TO ke Supabase.",
         );
         setIsSubmitting(false);
         return;
@@ -95,7 +95,7 @@ export function EoLoginScreen() {
       navigate("/partner/eo");
     } catch (err: unknown) {
       setErrorMessage(
-        err instanceof Error ? err.message : "Gagal masuk demo EO.",
+        err instanceof Error ? err.message : "Gagal masuk demo TO.",
       );
     } finally {
       setIsSubmitting(false);

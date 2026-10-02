@@ -233,7 +233,7 @@ function EoPackageBuilderBody() {
             order: index + 1,
             title: activity,
             description:
-              "Aktivitas referensi dari Demand Insight. Sesuaikan detail pelaksanaan dengan destinasi dan konsep EO.",
+              "Aktivitas referensi dari Demand Insight. Sesuaikan detail pelaksanaan dengan destinasi dan konsep TO.",
             timeOfDayLabel:
               index === 0 ? "Pagi" : index === 1 ? "Siang" : "Sore",
             durationLabel: "1 jam",

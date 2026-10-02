@@ -30,13 +30,13 @@ export const mockAdminDecisionService = {
     if (!app || app.status !== "PENDING_REVIEW") {
       return {
         success: false,
-        message: "Aplikasi EO tidak dalam status PENDING_REVIEW.",
+        message: "Aplikasi TO tidak dalam status PENDING_REVIEW.",
       };
     }
 
     const ok = mockApplicationStore.approveApplication(applicationId);
     if (!ok) {
-      return { success: false, message: "Gagal menyetujui aplikasi EO." };
+      return { success: false, message: "Gagal menyetujui aplikasi TO." };
     }
 
     mockAdminAuditStore.recordEvent({
@@ -80,7 +80,7 @@ export const mockAdminDecisionService = {
     if (!app || app.status !== "PENDING_REVIEW") {
       return {
         success: false,
-        message: "Aplikasi EO tidak dalam status PENDING_REVIEW.",
+        message: "Aplikasi TO tidak dalam status PENDING_REVIEW.",
       };
     }
 
@@ -89,7 +89,7 @@ export const mockAdminDecisionService = {
       reason.trim(),
     );
     if (!ok) {
-      return { success: false, message: "Gagal menolak aplikasi EO." };
+      return { success: false, message: "Gagal menolak aplikasi TO." };
     }
 
     mockAdminAuditStore.recordEvent({

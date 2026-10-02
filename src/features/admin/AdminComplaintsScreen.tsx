@@ -156,7 +156,7 @@ export function AdminComplaintsScreen() {
               </small>
               <strong>
                 {directComplaint.targetType
-                  ? `${directComplaint.targetType} (${directComplaint.targetRef})`
+                  ? `${directComplaint.targetType === "EO" ? "TO" : directComplaint.targetType} (${directComplaint.targetRef})`
                   : (directComplaint.packageId ?? "—")}
               </strong>
             </div>
@@ -234,7 +234,7 @@ export function AdminComplaintsScreen() {
                 className="eo-form-textarea"
                 value={internalNote}
                 onChange={(e) => setInternalNote(e.target.value)}
-                placeholder="Catatan koordinasi dengan EO / Destinasi..."
+                placeholder="Catatan koordinasi dengan TO / Destinasi..."
               />
             </div>
 
@@ -373,7 +373,9 @@ export function AdminComplaintsScreen() {
                       )}
                     </td>
                     <td>
-                      {c.targetType ? `${c.targetType} (${c.targetRef})` : "—"}
+                      {c.targetType
+                        ? `${c.targetType === "EO" ? "TO" : c.targetType} (${c.targetRef})`
+                        : "—"}
                     </td>
                     <td>
                       <Badge

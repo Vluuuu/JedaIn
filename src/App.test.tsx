@@ -166,7 +166,7 @@ describe("App shell routing", () => {
       const escapedLabel = item.label.replace(/&/g, "&amp;");
       expect(markup).toContain(`>${escapedLabel}</span>`);
     }
-    expect(markup).toContain("EO Approvals");
+    expect(markup).toContain("TO Approvals");
     expect(markup).toContain("Destination Verification");
     expect(markup).toContain("Package Approvals");
     expect(markup).toContain("Bookings / Payments");

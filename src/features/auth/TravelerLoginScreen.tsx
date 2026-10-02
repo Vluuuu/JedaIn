@@ -704,7 +704,7 @@ export function TravelerLoginScreen({
             </button>
           </div>
           <Link to="/partner" className="auth-sub-partner">
-            Portal Mitra &amp; EO &rarr;
+            Portal Travel Organizer &rarr;
           </Link>
         </footer>
       </div>
